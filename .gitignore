@@ -1,0 +1,11 @@
+[Dd]ebug/
+[Rr]elease/
+x64/
+*.sdf
+*.suo
+*.user
+*.opensdf
+*.ipch
+*.csh
+*.fxo
+*.fbm

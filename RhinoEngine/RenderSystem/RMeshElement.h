@@ -1,0 +1,33 @@
+//=============================================================================
+// RMeshElement.h by Shiyang Ao, 2016 All Rights Reserved.
+//
+// 
+//=============================================================================
+#ifndef _RMESHELEMENT_H
+#define _RMESHELEMENT_H
+
+#include <d3d11.h>
+
+class RMeshElement
+{
+protected:
+	ID3D11Buffer*		m_VertexBuffer;
+	ID3D11Buffer*		m_IndexBuffer;
+
+	UINT				m_Stride;
+	UINT				m_VertexCount;
+	UINT				m_IndexCount;
+public:
+	RMeshElement();
+
+	void Release();
+
+	void CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, bool dynamic = false);
+	void CreateIndexBuffer(void* data, UINT indexTypeSize, UINT indexCount, bool dynamic = false);
+
+	void UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount);
+
+	void Draw(D3D11_PRIMITIVE_TOPOLOGY topology);
+};
+
+#endif
