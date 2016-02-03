@@ -14,6 +14,7 @@ struct OUTPUT_VERTEX
 {
 	float4 Color	: COLOR;
 	float4 PosH		: SV_POSITION;
+	float2 UV		: TEXCOORD0;
 };
 
 cbuffer cbPerObject : register(b0)
@@ -37,6 +38,8 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 	lightVec = normalize(lightVec);
 	float i = dot(Input.Normal, lightVec);
 	Out.Color = float4(i, i, i, 1.0f);
+
+	Out.UV = Input.UV;
 
 	return Out;
 }

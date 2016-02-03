@@ -39,13 +39,16 @@ FSGraphicsProjectApp::FSGraphicsProjectApp()
 	: m_ColorPrimitiveIL(nullptr),
 	  m_ColorPixelShader(nullptr), m_ColorVertexShader(nullptr),
 	  m_LightingMeshIL(nullptr),
-	  m_LightingPixelShader(nullptr), m_LightingVertexShader(nullptr)
+	  m_LightingPixelShader(nullptr), m_LightingVertexShader(nullptr),
+	  m_MeshTextureSRV(nullptr), m_SamplerState(nullptr)
 {
 }
 
 
 FSGraphicsProjectApp::~FSGraphicsProjectApp()
 {
+	SAFE_RELEASE(m_SamplerState);
+	SAFE_RELEASE(m_MeshTextureSRV);
 	for (vector<RMeshElement>::iterator iter = m_FbxMeshes.begin(); iter != m_FbxMeshes.end(); iter++)
 	{
 		iter->Release();
@@ -118,6 +121,20 @@ bool FSGraphicsProjectApp::Initialize()
 	RRenderer.D3DDevice()->CreateBuffer(&cbSceneDesc, NULL, &m_cbScene);
 
 	LoadFbxMesh("../Assets/city.fbx");
+	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/cty1.dds", NULL, &m_MeshTextureSRV);
+
+	// Create texture sampler state
+	D3D11_SAMPLER_DESC samplerDesc;
+	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState);
 
 	return true;
 }
@@ -411,6 +428,9 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.D3DImmediateContext()->PSSetShader(m_LightingPixelShader, NULL, 0);
 	RRenderer.D3DImmediateContext()->VSSetShader(m_LightingVertexShader, NULL, 0);
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_LightingMeshIL);
+
+	RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_MeshTextureSRV);
 
 	for (UINT32 i = 0; i < m_FbxMeshes.size(); i++)
 	{
