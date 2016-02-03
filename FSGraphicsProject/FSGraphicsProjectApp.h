@@ -21,6 +21,15 @@ public:
 
 	//void OnResize(int width, int height) {}
 	TCHAR* WindowTitle() { return L"Graphics Application"; }
+
+private:
+	ID3D11InputLayout*			m_ColorPrimitiveIL;
+	RMeshElement				m_StarMesh;
+	ID3D11PixelShader*			m_ColorPixelShader;
+	ID3D11VertexShader*			m_ColorVertexShader;
+
+	ID3D11Buffer*				m_cbPerObject;
+	ID3D11Buffer*				m_cbScene;
 };
 
 #endif

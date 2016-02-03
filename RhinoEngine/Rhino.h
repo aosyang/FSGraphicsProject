@@ -37,6 +37,7 @@ using namespace DirectX;
 
 #include "RenderSystem/RRenderSystem.h"
 #include "RenderSystem/RMeshElement.h"
+#include "RenderSystem/DDSTextureLoader.h"
 
 #include "Core/REngine.h"
 

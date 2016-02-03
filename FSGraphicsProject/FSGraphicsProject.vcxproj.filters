@@ -27,4 +27,8 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Color_VS.hlsl" />
+    <FxCompile Include="Color_PS.hlsl" />
+  </ItemGroup>
 </Project>

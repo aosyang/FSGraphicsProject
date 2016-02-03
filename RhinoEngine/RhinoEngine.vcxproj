@@ -26,6 +26,7 @@
     <ClInclude Include="Core\RSingleton.h" />
     <ClInclude Include="Core\RTimer.h" />
     <ClInclude Include="RenderSystem\d3dUtil.h" />
+    <ClInclude Include="RenderSystem\DDSTextureLoader.h" />
     <ClInclude Include="RenderSystem\RMeshElement.h" />
     <ClInclude Include="RenderSystem\RRenderSystem.h" />
     <ClInclude Include="Rhino.h" />
@@ -35,6 +36,7 @@
     <ClCompile Include="Core\REngine.cpp" />
     <ClCompile Include="Core\RInput.cpp" />
     <ClCompile Include="Core\RTimer.cpp" />
+    <ClCompile Include="RenderSystem\DDSTextureLoader.cpp" />
     <ClCompile Include="RenderSystem\RMeshElement.cpp" />
     <ClCompile Include="RenderSystem\RRenderSystem.cpp" />
   </ItemGroup>

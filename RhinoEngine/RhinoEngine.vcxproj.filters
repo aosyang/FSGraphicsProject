@@ -29,6 +29,9 @@
     <ClInclude Include="RenderSystem\RMeshElement.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="RenderSystem\DDSTextureLoader.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -47,6 +50,9 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="RenderSystem\RMeshElement.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem\DDSTextureLoader.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
   </ItemGroup>
