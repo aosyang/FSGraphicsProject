@@ -32,7 +32,11 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 
 	Out.PosH = mul(worldMatrix, float4(Input.PosL, 1.0f));
 	Out.PosH = mul(viewProjMatrix, Out.PosH);
-	Out.Color = float4(Input.Normal, 1.0f);
+
+	float3 lightVec = float3(1.0f, 1.0f, 1.0f);
+	lightVec = normalize(lightVec);
+	float i = dot(Input.Normal, lightVec);
+	Out.Color = float4(i, i, i, 1.0f);
 
 	return Out;
 }

@@ -13,6 +13,10 @@
 #include "Lighting_PS.csh"
 #include "Lighting_VS.csh"
 
+#include <map>
+#include <algorithm>
+using namespace std;
+
 struct COLOR_VERTEX
 {
 	XMFLOAT4 pos;
@@ -24,6 +28,11 @@ struct MESH_VERTEX
 	XMFLOAT3 pos;
 	XMFLOAT2 uv;
 	XMFLOAT3 normal;
+
+	bool operator<(const MESH_VERTEX& rhs) const
+	{
+		return lexicographical_compare((const float*)this, (const float*)this + 8, (const float*)&rhs, (const float*)&rhs + 8);
+	}
 };
 
 FSGraphicsProjectApp::FSGraphicsProjectApp()
@@ -314,9 +323,31 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 			indexData.push_back(triangle[2]);
 		}
 
+		// Optimize mesh
+		map<MESH_VERTEX, int> meshVertIndexTable;
+		vector<MESH_VERTEX> optimizedVertData;
+		vector<int> optimizedIndexData;
+		int index = 0;
+		for (UINT i = 0; i < indexData.size(); i++)
+		{
+			MESH_VERTEX& v = vertData[indexData[i]];
+			map<MESH_VERTEX, int>::iterator iterResult = meshVertIndexTable.find(v);
+			if (iterResult == meshVertIndexTable.end())
+			{
+				meshVertIndexTable[v] = index;
+				optimizedVertData.push_back(v);
+				optimizedIndexData.push_back(index);
+				index++;
+			}
+			else
+			{
+				optimizedIndexData.push_back(iterResult->second);
+			}
+		}
+
 		RMeshElement meshElem;
-		meshElem.CreateVertexBuffer(vertData.data(), sizeof(MESH_VERTEX), vertData.size());
-		meshElem.CreateIndexBuffer(indexData.data(), sizeof(UINT32), indexData.size());
+		meshElem.CreateVertexBuffer(optimizedVertData.data(), sizeof(MESH_VERTEX), optimizedVertData.size());
+		meshElem.CreateIndexBuffer(optimizedIndexData.data(), sizeof(UINT32), optimizedIndexData.size());
 		m_FbxMeshes.push_back(meshElem);
 	}
 
@@ -340,9 +371,9 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 
 void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 {
-	XMMATRIX viewMatrix = XMMatrixLookAtLH(XMVectorSet(-500.0f, 500.0f, -500.0f, 1.0f), XMVectorZero(), XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
+	XMMATRIX viewMatrix = XMMatrixLookAtLH(XMVectorSet(-800.0f, 800.0f, -800.0f, 1.0f), XMVectorZero(), XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
 	//XMMatrixIdentity();
-	XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(90.0f, RRenderer.AspectRatio(), 0.1f, 1000.0f);
+	XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(90.0f, RRenderer.AspectRatio(), 0.1f, 2000.0f);
 	XMFLOAT4X4 viewProj;
 	XMStoreFloat4x4(&viewProj, viewMatrix * projMatrix);
 
@@ -381,9 +412,9 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.D3DImmediateContext()->VSSetShader(m_LightingVertexShader, NULL, 0);
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_LightingMeshIL);
 
-	for (vector<RMeshElement>::iterator iter = m_FbxMeshes.begin(); iter != m_FbxMeshes.end(); iter++)
+	for (UINT32 i = 0; i < m_FbxMeshes.size(); i++)
 	{
-		iter->Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_FbxMeshes[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
 	RRenderer.Present();
