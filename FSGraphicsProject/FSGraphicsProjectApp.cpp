@@ -388,9 +388,12 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 
 void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 {
-	XMMATRIX viewMatrix = XMMatrixLookAtLH(XMVectorSet(-800.0f, 800.0f, -800.0f, 1.0f), XMVectorZero(), XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
+	float st = sinf(timer.TotalTime() * 0.5f),
+		  ct = cosf(timer.TotalTime() * 0.5f);
+	XMVECTOR look_at = XMVectorSet(0.0f, 200.0f, -750.0f, 1.0f);
+	XMMATRIX viewMatrix = XMMatrixLookAtLH(XMVectorSet(st * 80.0f, 0.0f, ct * 80.0f, 1.0f) + look_at, look_at, XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
 	//XMMatrixIdentity();
-	XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(90.0f, RRenderer.AspectRatio(), 0.1f, 2000.0f);
+	XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(45.0f, RRenderer.AspectRatio(), 0.1f, 2000.0f);
 	XMFLOAT4X4 viewProj;
 	XMStoreFloat4x4(&viewProj, viewMatrix * projMatrix);
 
