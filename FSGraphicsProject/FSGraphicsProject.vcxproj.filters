@@ -30,5 +30,7 @@
   <ItemGroup>
     <FxCompile Include="Color_VS.hlsl" />
     <FxCompile Include="Color_PS.hlsl" />
+    <FxCompile Include="Lighting_VS.hlsl" />
+    <FxCompile Include="Lighting_PS.hlsl" />
   </ItemGroup>
 </Project>

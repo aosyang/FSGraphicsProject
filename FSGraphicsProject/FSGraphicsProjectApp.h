@@ -9,6 +9,9 @@
 
 #include "Rhino.h"
 
+#include <vector>
+using namespace std;
+
 class FSGraphicsProjectApp : public IApp
 {
 public:
@@ -23,13 +26,21 @@ public:
 	TCHAR* WindowTitle() { return L"Graphics Application"; }
 
 private:
+	void LoadFbxMesh(char* filename);
+
 	ID3D11InputLayout*			m_ColorPrimitiveIL;
 	RMeshElement				m_StarMesh;
 	ID3D11PixelShader*			m_ColorPixelShader;
 	ID3D11VertexShader*			m_ColorVertexShader;
 
+	ID3D11InputLayout*			m_LightingMeshIL;
+	ID3D11PixelShader*			m_LightingPixelShader;
+	ID3D11VertexShader*			m_LightingVertexShader;
+
 	ID3D11Buffer*				m_cbPerObject;
 	ID3D11Buffer*				m_cbScene;
+
+	vector<RMeshElement>		m_FbxMeshes;
 };
 
 #endif

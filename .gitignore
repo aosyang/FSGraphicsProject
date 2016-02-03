@@ -1,6 +1,13 @@
-[Dd]ebug/
-[Rr]elease/
-x64/
+/[Dd]ebug/
+/[Rr]elease/
+/x64/
+/FSGraphicsProject/[Dd]ebug/
+/FSGraphicsProject/[Rr]elease/
+/FSGraphicsProject/x64/
+/FSGraphicsProject/*.dll
+/RhinoEngine/[Dd]ebug/
+/RhinoEngine/[Rr]elease/
+/RhinoEngine/x64/
 *.sdf
 *.suo
 *.user
