@@ -24,6 +24,9 @@ FSGraphicsProjectApp::FSGraphicsProjectApp()
 
 FSGraphicsProjectApp::~FSGraphicsProjectApp()
 {
+	SAFE_RELEASE(m_cbPerObject);
+	SAFE_RELEASE(m_cbScene);
+
 	SAFE_RELEASE(m_ColorPixelShader);
 	SAFE_RELEASE(m_ColorVertexShader);
 
