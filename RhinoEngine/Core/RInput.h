@@ -26,6 +26,14 @@ public:
 	bool Initialize();
 	void UpdateKeyStates();
 
+	void LockCursor();
+	void UnlockCursor();
+	void ShowCursor();
+	void HideCursor();
+
+	void GetCursorPos(int& x, int& y);
+	void GetCursorRelPos(int& dx, int& dy);
+
 	RInput_BufferedKeyState GetBufferedKeyState(int keycode);
 	bool IsKeyDown(int keycode);
 
@@ -38,6 +46,12 @@ protected:
 private:
 	bool	m_bKeyDown[MAX_KEY_NUM];
 	bool	m_bKeyDownLastFrame[MAX_KEY_NUM];
+
+	POINT	m_CursorPos;
+	POINT	m_CursorPosLastFrame;
+
+	bool	m_bCursorLocked;
+	POINT	m_CursorLockingPos;
 };
 
 #define RInput RInputSystem::Instance()
