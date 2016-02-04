@@ -40,15 +40,18 @@ FSGraphicsProjectApp::FSGraphicsProjectApp()
 	  m_ColorPixelShader(nullptr), m_ColorVertexShader(nullptr),
 	  m_LightingMeshIL(nullptr),
 	  m_LightingPixelShader(nullptr), m_LightingVertexShader(nullptr),
-	  m_MeshTextureSRV(nullptr), m_SamplerState(nullptr)
+	  m_SamplerState(nullptr)
 {
+	m_MeshTextureSRV[0] = nullptr;
+	m_MeshTextureSRV[1] = nullptr;
 }
 
 
 FSGraphicsProjectApp::~FSGraphicsProjectApp()
 {
 	SAFE_RELEASE(m_SamplerState);
-	SAFE_RELEASE(m_MeshTextureSRV);
+	SAFE_RELEASE(m_MeshTextureSRV[0]);
+	SAFE_RELEASE(m_MeshTextureSRV[1]);
 	for (vector<RMeshElement>::iterator iter = m_FbxMeshes.begin(); iter != m_FbxMeshes.end(); iter++)
 	{
 		iter->Release();
@@ -121,7 +124,8 @@ bool FSGraphicsProjectApp::Initialize()
 	RRenderer.D3DDevice()->CreateBuffer(&cbSceneDesc, NULL, &m_cbScene);
 
 	LoadFbxMesh("../Assets/city.fbx");
-	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/cty1.dds", NULL, &m_MeshTextureSRV);
+	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/cty1.dds", NULL, &m_MeshTextureSRV[0]);
+	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/cty2x.dds", NULL, &m_MeshTextureSRV[1]);
 
 	// Create texture sampler state
 	D3D11_SAMPLER_DESC samplerDesc;
@@ -388,8 +392,8 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 
 void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 {
-	float st = sinf(timer.TotalTime() * 0.5f),
-		  ct = cosf(timer.TotalTime() * 0.5f);
+	float st = sinf(timer.TotalTime() * 0.2f),
+		  ct = cosf(timer.TotalTime() * 0.2f);
 	XMVECTOR look_at = XMVectorSet(0.0f, 200.0f, -750.0f, 1.0f);
 	XMMATRIX viewMatrix = XMMatrixLookAtLH(XMVectorSet(st * 80.0f, 0.0f, ct * 80.0f, 1.0f) + look_at, look_at, XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
 	//XMMatrixIdentity();
@@ -433,10 +437,10 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_LightingMeshIL);
 
 	RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_MeshTextureSRV);
 
 	for (UINT32 i = 0; i < m_FbxMeshes.size(); i++)
 	{
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_MeshTextureSRV[i]);
 		m_FbxMeshes[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
