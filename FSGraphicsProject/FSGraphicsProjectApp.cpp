@@ -204,8 +204,14 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 	lGeomConverter.SplitMeshesPerMaterial(lFbxScene, true);
 
 	// Load meshes
-	for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
+
+	int nodeCount = lFbxScene->GetNodeCount();
+	for (int idxNode = 0; idxNode < nodeCount; idxNode++)
 	{
+		char buf[1024];
+		sprintf_s(buf, sizeof(buf), "Loading FBX node [%d/%d]...\n", idxNode + 1, nodeCount);
+		OutputDebugStringA(buf);
+
 		FbxNode* node = lFbxScene->GetNode(idxNode);
 		FbxMesh* mesh = node->GetMesh();
 
