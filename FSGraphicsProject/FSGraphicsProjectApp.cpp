@@ -140,6 +140,9 @@ bool FSGraphicsProjectApp::Initialize()
 
 	RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState);
 
+	XMStoreFloat4x4(&m_CameraMatrix, XMMatrixIdentity());
+	m_CamPitch = m_CamYaw = 0.0f;
+
 	return true;
 }
 
@@ -392,11 +395,49 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 
 void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 {
-	float st = sinf(timer.TotalTime() * 0.2f),
-		  ct = cosf(timer.TotalTime() * 0.2f);
-	XMVECTOR look_at = XMVectorSet(0.0f, 200.0f, -750.0f, 1.0f);
-	XMMATRIX viewMatrix = XMMatrixLookAtLH(XMVectorSet(st * 80.0f, 0.0f, ct * 80.0f, 1.0f) + look_at, look_at, XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
-	//XMMatrixIdentity();
+	if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Pressed)
+	{
+		RInput.HideCursor();
+		RInput.LockCursor();
+	}
+
+	if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Released)
+	{
+		RInput.ShowCursor();
+		RInput.UnlockCursor();
+	}
+
+	if (RInput.IsKeyDown(VK_LBUTTON))
+	{
+		int dx, dy;
+		RInput.GetCursorRelPos(dx, dy);
+		if (dx || dy)
+		{
+			m_CamYaw += dx;
+			m_CamPitch += dy;
+		}
+	}
+
+	float camSpeed = 100.0f;
+	if (RInput.IsKeyDown(VK_LSHIFT))
+		camSpeed *= 10.0f;
+	XMVECTOR moveVec = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	if (RInput.IsKeyDown('W'))
+		moveVec += XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+	if (RInput.IsKeyDown('S'))
+		moveVec -= XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+	if (RInput.IsKeyDown('A'))
+		moveVec -= XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+	if (RInput.IsKeyDown('D'))
+		moveVec += XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+
+	XMMATRIX cameraMatrix = XMLoadFloat4x4(&m_CameraMatrix);
+	XMVECTOR camPos = cameraMatrix.r[3];
+	cameraMatrix = XMMatrixRotationX(m_CamPitch / 200.0f) * XMMatrixRotationY(m_CamYaw / 200.0f);
+	cameraMatrix.r[3] = camPos + XMVector4Transform(moveVec, cameraMatrix);
+	XMStoreFloat4x4(&m_CameraMatrix, cameraMatrix);
+
+	XMMATRIX viewMatrix = XMMatrixInverse(NULL, cameraMatrix);
 	XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(45.0f, RRenderer.AspectRatio(), 0.1f, 2000.0f);
 	XMFLOAT4X4 viewProj;
 	XMStoreFloat4x4(&viewProj, viewMatrix * projMatrix);

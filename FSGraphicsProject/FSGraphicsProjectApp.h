@@ -28,6 +28,9 @@ public:
 private:
 	void LoadFbxMesh(char* filename);
 
+	XMFLOAT4X4					m_CameraMatrix;
+	float						m_CamPitch, m_CamYaw;
+
 	ID3D11InputLayout*			m_ColorPrimitiveIL;
 	RMeshElement				m_StarMesh;
 	ID3D11PixelShader*			m_ColorPixelShader;
