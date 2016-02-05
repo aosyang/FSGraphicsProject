@@ -79,7 +79,7 @@ void REngine::Run()
 	{
 		MSG msg;
 
-		RInput.UpdateKeyStates();
+		RInput._UpdateKeyStates();
 
 		// Handle win32 window messages
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))

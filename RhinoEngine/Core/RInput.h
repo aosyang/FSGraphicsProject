@@ -21,13 +21,18 @@ enum RInput_BufferedKeyState
 class RInputSystem : public RSingleton<RInputSystem>
 {
 	friend class RSingleton<RInputSystem>;
+	friend class REngine;
 	friend LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 public:
+	// Initialize the input system
 	bool Initialize();
-	void UpdateKeyStates();
 
+	// Freeze cursor position
 	void LockCursor();
+
+	// Unfreeze cursor position
 	void UnlockCursor();
+
 	void ShowCursor();
 	void HideCursor();
 
@@ -40,6 +45,10 @@ public:
 protected:
 	RInputSystem();
 	~RInputSystem();
+
+	// Update input device states
+	//   - Called by REngine once per frame
+	void _UpdateKeyStates();
 
 	void _SetKeyDown(int keycode, bool keydown);
 

@@ -33,20 +33,21 @@ bool RInputSystem::Initialize()
 	return true;
 }
 
-void RInputSystem::UpdateKeyStates()
+void RInputSystem::_UpdateKeyStates()
 {
+	// Update keyboard key states
 	for (int i = 0; i < MAX_KEY_NUM; i++)
 	{
 		m_bKeyDownLastFrame[i] = m_bKeyDown[i];
 	}
 
-	// Update mouse buttons
+	// Update mouse button states
 	for (int i = VK_LBUTTON; i <= VK_MBUTTON; i++)
 	{
 		m_bKeyDown[i] = (GetKeyState(i) & 0x80) != 0;
 	}
 
-	// Update system keys
+	// Update system key states
 	for (int i = VK_LSHIFT; i <= VK_RMENU; i++)
 	{
 		m_bKeyDown[i] = (GetKeyState(i) & 0x80) != 0;
