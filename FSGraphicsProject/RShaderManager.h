@@ -1,3 +1,8 @@
+//=============================================================================
+// RShaderManager.h by Shiyang Ao, 2016 All Rights Reserved.
+//
+// 
+//=============================================================================
 #ifndef _RSHADERMANAGER_H
 #define _RSHADERMANAGER_H
 

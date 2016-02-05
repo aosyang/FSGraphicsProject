@@ -47,4 +47,7 @@
     <FxCompile Include="Skybox_PS.hlsl" />
     <FxCompile Include="Skybox_VS.hlsl" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="FSGraphicsProject.licenseheader" />
+  </ItemGroup>
 </Project>
