@@ -205,7 +205,7 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 	FbxGeometryConverter lGeomConverter(lFbxSdkManager);
 
 	lGeomConverter.Triangulate(lFbxScene, true, true);
-	bool result = lGeomConverter.SplitMeshesPerMaterial(lFbxScene, true);
+	//bool result = lGeomConverter.SplitMeshesPerMaterial(lFbxScene, true);
 
 	// Load meshes
 
@@ -222,7 +222,7 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 		if (!mesh)
 			continue;
 
-		mesh->SplitPoints();
+		//mesh->SplitPoints();
 		sprintf_s(msg_buf, sizeof(msg_buf), "[%s]\n", node->GetName());
 		OutputDebugStringA(msg_buf);
 		
@@ -367,17 +367,23 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 				
 				if (hasPerPolygonVertexNormal)
 				{
-					int idxNormal = idxPoly * 3 + idxVert;
-					if (uvArray->GetReferenceMode() != FbxGeometryElement::eDirect)
-					{
-						idxNormal = normalArray->GetIndexArray().GetAt(idxPoly * 3 + idxVert);
-					}
+					//int idxNormal = idxPoly * 3 + idxVert;
+					//if (uvArray->GetReferenceMode() != FbxGeometryElement::eDirect)
+					//{
+					//	idxNormal = normalArray->GetIndexArray().GetAt(idxPoly * 3 + idxVert);
+					//}
 
-					FbxVector4 normal = normalArray->GetDirectArray().GetAt(idxNormal);
+					//FbxVector4 normal = normalArray->GetDirectArray().GetAt(idxNormal);
+
+					FbxVector4 normal;
+					mesh->GetPolygonVertexNormal(idxPoly, idxVert, normal);
 
 					vertex.normal.x = (float)normal[0];
 					vertex.normal.y = (float)normal[1];
 					vertex.normal.z = (float)normal[2];
+
+					//sprintf_s(msg_buf, "Get normal [%f, %f, %f]\n", vertex.normal.x, vertex.normal.y, vertex.normal.z);
+					//OutputDebugStringA(msg_buf);
 				}
 
 				if (hasPerPolygonVertexUV)
