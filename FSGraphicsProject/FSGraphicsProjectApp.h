@@ -45,6 +45,7 @@ private:
 
 	ID3D11Buffer*				m_cbPerObject;
 	ID3D11Buffer*				m_cbScene;
+	ID3D11Buffer*				m_cbLight;
 
 	vector<RMeshElement>		m_FbxMeshes;
 	ID3D11ShaderResourceView*	m_MeshTextureSRV[3];

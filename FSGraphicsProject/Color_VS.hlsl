@@ -4,7 +4,7 @@
 // 
 //=============================================================================
 
-#include "SharedDefines.h"
+#include "ConstBufferVS.h"
 
 struct INPUT_VERTEX
 {

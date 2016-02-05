@@ -14,7 +14,8 @@
 #include <algorithm>
 using namespace std;
 
-#include "SharedDefines.h"
+#include "ConstBufferPS.h"
+#include "ConstBufferVS.h"
 
 struct COLOR_VERTEX
 {
@@ -59,6 +60,7 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	}
 	m_FbxMeshes.clear();
 
+	SAFE_RELEASE(m_cbLight);
 	SAFE_RELEASE(m_cbPerObject);
 	SAFE_RELEASE(m_cbScene);
 
@@ -125,6 +127,15 @@ bool FSGraphicsProjectApp::Initialize()
 	cbSceneDesc.Usage = D3D11_USAGE_DYNAMIC;
 
 	RRenderer.D3DDevice()->CreateBuffer(&cbSceneDesc, NULL, &m_cbScene);
+
+	D3D11_BUFFER_DESC cbLightDesc;
+	ZeroMemory(&cbLightDesc, sizeof(cbLightDesc));
+	cbLightDesc.ByteWidth = sizeof(SHADER_LIGHT_BUFFER);
+	cbLightDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbLightDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbLightDesc.Usage = D3D11_USAGE_DYNAMIC;
+
+	RRenderer.D3DDevice()->CreateBuffer(&cbLightDesc, NULL, &m_cbLight);
 
 	LoadFbxMesh("../Assets/city.fbx");
 	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/cty1.dds", NULL, &m_MeshTextureSRV[0]);
@@ -504,6 +515,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	XMMATRIX viewMatrix = XMMatrixInverse(NULL, cameraMatrix);
 	XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(45.0f, RRenderer.AspectRatio(), 1.0f, 5000.0f);
 
+	// Update scene constant buffer
 	SHADER_SCENE_BUFFER cbScene;
 
 	XMStoreFloat4x4(&cbScene.viewMatrix, viewMatrix);
@@ -515,6 +527,23 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	RRenderer.D3DImmediateContext()->Map(m_cbScene, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 	memcpy(subres.pData, &cbScene, sizeof(SHADER_SCENE_BUFFER));
 	RRenderer.D3DImmediateContext()->Unmap(m_cbScene, 0);
+
+	// Update light constant buffer
+	SHADER_LIGHT_BUFFER cbLight;
+	ZeroMemory(&cbLight, sizeof(cbLight));
+
+	XMVECTOR dirLightVec = XMVector3Normalize(XMVectorSet(0.25f, 1.0f, 0.5f, 1.0f));
+
+	cbLight.DirectionalLightCount = 2;
+	XMStoreFloat4(&cbLight.DirectionalLight[0].Color, XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
+	XMStoreFloat4(&cbLight.DirectionalLight[0].Direction, dirLightVec);
+	XMStoreFloat4(&cbLight.DirectionalLight[1].Color, XMVectorSet(0.2f, 0.2f, 0.2f, 1.0f));
+	XMStoreFloat4(&cbLight.DirectionalLight[1].Direction, -dirLightVec);
+	//cbLight.PointLightCount = 0;
+	RRenderer.D3DImmediateContext()->Map(m_cbLight, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+	memcpy(subres.pData, &cbLight, sizeof(SHADER_LIGHT_BUFFER));
+	RRenderer.D3DImmediateContext()->Unmap(m_cbLight, 0);
+
 }
 
 void FSGraphicsProjectApp::RenderScene()
@@ -522,6 +551,7 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.Clear();
 
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
+	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, &m_cbLight);
 	RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
 
 	// Set up object world matrix

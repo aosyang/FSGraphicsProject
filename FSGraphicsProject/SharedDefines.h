@@ -30,16 +30,5 @@
 	#define CONSTANT_BUFFER_END }
 #endif
 
-// Shader constant buffers
-CONSTANT_BUFFER_BEGIN(SHADER_OBJECT_BUFFER, b0)
-float4x4	worldMatrix;
-CONSTANT_BUFFER_END
-
-CONSTANT_BUFFER_BEGIN(SHADER_SCENE_BUFFER, b1)
-float4x4	viewMatrix;
-float4x4	projMatrix;
-float4x4	viewProjMatrix;
-float4		cameraPos;
-CONSTANT_BUFFER_END
 
 #endif //SHARED_DEFINES_H
