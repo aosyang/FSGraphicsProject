@@ -43,14 +43,6 @@ private:
 	ID3D11InputLayout*			m_LightingMeshIL;
 	RShader*					m_LightingShader;
 
-	struct SHADER_SCENE_BUFFER
-	{
-		XMFLOAT4X4	viewMatrix;
-		XMFLOAT4X4	projMatrix;
-		XMFLOAT4X4	viewProjMatrix;
-		XMFLOAT4	cameraPos;
-	};
-
 	ID3D11Buffer*				m_cbPerObject;
 	ID3D11Buffer*				m_cbScene;
 

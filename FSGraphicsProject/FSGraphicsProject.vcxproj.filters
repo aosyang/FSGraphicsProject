@@ -38,6 +38,7 @@
     <ClInclude Include="RShaderManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SharedDefines.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Color_VS.hlsl" />

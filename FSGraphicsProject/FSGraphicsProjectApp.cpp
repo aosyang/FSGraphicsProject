@@ -14,6 +14,8 @@
 #include <algorithm>
 using namespace std;
 
+#include "SharedDefines.h"
+
 struct COLOR_VERTEX
 {
 	XMFLOAT4 pos;
@@ -108,7 +110,7 @@ bool FSGraphicsProjectApp::Initialize()
 
 	D3D11_BUFFER_DESC cbPerObjectDesc;
 	ZeroMemory(&cbPerObjectDesc, sizeof(cbPerObjectDesc));
-	cbPerObjectDesc.ByteWidth = sizeof(XMFLOAT4X4);
+	cbPerObjectDesc.ByteWidth = sizeof(SHADER_OBJECT_BUFFER);
 	cbPerObjectDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cbPerObjectDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	cbPerObjectDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -524,12 +526,12 @@ void FSGraphicsProjectApp::RenderScene()
 
 	// Set up object world matrix
 	XMMATRIX worldMatrix = XMMatrixTranslation(0.0f, 0.0f, 2.0f);
-	XMFLOAT4X4 world;
-	XMStoreFloat4x4(&world, worldMatrix);
+	SHADER_OBJECT_BUFFER cbObject;
+	XMStoreFloat4x4(&cbObject.worldMatrix, worldMatrix);
 
 	D3D11_MAPPED_SUBRESOURCE subres;
 	RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-	memcpy(subres.pData, &world, sizeof(world));
+	memcpy(subres.pData, &cbObject, sizeof(cbObject));
 	RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
 
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, &m_cbPerObject);

@@ -177,6 +177,7 @@
     <ClInclude Include="FSGraphicsProjectApp.h" />
     <ClInclude Include="RShaderManager.h" />
     <ClInclude Include="RSkybox.h" />
+    <ClInclude Include="SharedDefines.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Color_PS.hlsl">

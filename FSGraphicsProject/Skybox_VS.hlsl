@@ -3,6 +3,9 @@
 //
 // 
 //=============================================================================
+
+#include "SharedDefines.h"
+
 struct INPUT_VERTEX
 {
 	float3 PosL		: POSITION;
@@ -14,26 +17,16 @@ struct OUTPUT_VERTEX
 	float3 PosW		: TEXCOORD0;
 };
 
-cbuffer cbPerObject : register(b0)
-{
-	float4x4 worldMatrix;
-};
-
-cbuffer cbScene : register(b1)
-{
-	float4x4	viewMatrix;
-	float4x4	projMatrix;
-	float4x4	viewProjMatrix;
-	float4		cameraPos;
-};
-
 OUTPUT_VERTEX main(INPUT_VERTEX Input)
 {
 	OUTPUT_VERTEX Out = (OUTPUT_VERTEX)0;
 
-	Out.PosH = mul(worldMatrix, float4(Input.PosL * 100.0f + cameraPos.xyz, 1.0f));
-	Out.PosH.w = 1.0f;
-	Out.PosH = mul(viewProjMatrix, Out.PosH);
+	float4 pos = (float4)1;
+	pos.xyz = Input.PosL * 100.0f + cameraPos.xyz;
+
+	Out.PosH = mul(pos, worldMatrix);
+	Out.PosH = mul(Out.PosH, viewProjMatrix);
+
 	Out.PosW = Input.PosL.xyz;
 
 	return Out;
