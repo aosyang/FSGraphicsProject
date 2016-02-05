@@ -24,6 +24,8 @@ cbuffer cbPerObject : register(b0)
 
 cbuffer cbScene : register(b1)
 {
+	float4x4 viewMatrix;
+	float4x4 projMatrix;
 	float4x4 viewProjMatrix;
 };
 

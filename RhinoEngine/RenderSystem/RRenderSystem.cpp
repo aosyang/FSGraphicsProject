@@ -216,12 +216,15 @@ void RRenderSystem::ResizeClient(int width, int height)
 	}
 }
 
-void RRenderSystem::Clear(const XMVECTORF32& clearColor, bool clearDepth, float depth, bool clearStencil, UINT8 stencil)
+void RRenderSystem::Clear(bool clearColor, const XMVECTORF32& color, bool clearDepth, float depth, bool clearStencil, UINT8 stencil)
 {
 	assert(m_pD3DImmediateContext);
 
-	m_pD3DImmediateContext->ClearRenderTargetView(m_RenderTargetView,
-		reinterpret_cast<const float*>(&clearColor));
+	if (clearColor)
+	{
+		m_pD3DImmediateContext->ClearRenderTargetView(m_RenderTargetView,
+			reinterpret_cast<const float*>(&color));
+	}
 
 	UINT clearFlag = 0;
 

@@ -8,10 +8,7 @@
 
 #include <fbxsdk.h>
 
-#include "Color_PS.csh"
-#include "Color_VS.csh"
-#include "Lighting_PS.csh"
-#include "Lighting_VS.csh"
+#include "RShaderManager.h"
 
 #include <map>
 #include <algorithm>
@@ -37,9 +34,9 @@ struct MESH_VERTEX
 
 FSGraphicsProjectApp::FSGraphicsProjectApp()
 	: m_ColorPrimitiveIL(nullptr),
-	  m_ColorPixelShader(nullptr), m_ColorVertexShader(nullptr),
+	  m_ColorShader(nullptr),
 	  m_LightingMeshIL(nullptr),
-	  m_LightingPixelShader(nullptr), m_LightingVertexShader(nullptr),
+	  m_LightingShader(nullptr),
 	  m_SamplerState(nullptr)
 {
 	m_MeshTextureSRV[0] = nullptr;
@@ -63,19 +60,24 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_cbPerObject);
 	SAFE_RELEASE(m_cbScene);
 
-	SAFE_RELEASE(m_ColorPixelShader);
-	SAFE_RELEASE(m_ColorVertexShader);
 	SAFE_RELEASE(m_LightingMeshIL);
-
-	SAFE_RELEASE(m_LightingPixelShader);
-	SAFE_RELEASE(m_LightingVertexShader);
 
 	m_StarMesh.Release();
 	SAFE_RELEASE(m_ColorPrimitiveIL);
+
+	m_Skybox.Release();
+
+	RShaderManager::Instance().UnloadAllShaders();
 }
 
 bool FSGraphicsProjectApp::Initialize()
 {
+	// Initialize shaders
+	RShaderManager::Instance().Initialize();
+
+	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
+	m_LightingShader = RShaderManager::Instance().GetShaderResource("Lighting");
+
 	// Create buffer for star mesh
 	COLOR_VERTEX starVertex[12];
 
@@ -102,10 +104,7 @@ bool FSGraphicsProjectApp::Initialize()
 		{ "COLOR",		0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	RRenderer.D3DDevice()->CreateInputLayout(colorVertDesc, 2, Color_VS, sizeof(Color_VS), &m_ColorPrimitiveIL);
-
-	RRenderer.D3DDevice()->CreateVertexShader(Color_VS, sizeof(Color_VS), NULL, &m_ColorVertexShader);
-	RRenderer.D3DDevice()->CreatePixelShader(Color_PS, sizeof(Color_PS), NULL, &m_ColorPixelShader);
+	RRenderer.D3DDevice()->CreateInputLayout(colorVertDesc, 2, m_ColorShader->VS_Bytecode, m_ColorShader->VS_BytecodeSize, &m_ColorPrimitiveIL);
 
 	D3D11_BUFFER_DESC cbPerObjectDesc;
 	ZeroMemory(&cbPerObjectDesc, sizeof(cbPerObjectDesc));
@@ -118,7 +117,7 @@ bool FSGraphicsProjectApp::Initialize()
 
 	D3D11_BUFFER_DESC cbSceneDesc;
 	ZeroMemory(&cbSceneDesc, sizeof(cbSceneDesc));
-	cbSceneDesc.ByteWidth = sizeof(XMFLOAT4X4);
+	cbSceneDesc.ByteWidth = sizeof(SHADER_SCENE_BUFFER);
 	cbSceneDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cbSceneDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	cbSceneDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -142,6 +141,8 @@ bool FSGraphicsProjectApp::Initialize()
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 	RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState);
+
+	m_Skybox.CreateSkybox(L"../Assets/powderpeak.dds");
 
 	XMStoreFloat4x4(&m_CameraMatrix, XMMatrixIdentity());
 	m_CamPitch = m_CamYaw = 0.0f;
@@ -437,10 +438,6 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 	lFbxScene->Destroy();
 	lFbxSdkManager->Destroy();
 
-	// Create mesh shader
-	RRenderer.D3DDevice()->CreatePixelShader(Lighting_PS, sizeof(Lighting_PS), NULL, &m_LightingPixelShader);
-	RRenderer.D3DDevice()->CreateVertexShader(Lighting_VS, sizeof(Lighting_VS), NULL, &m_LightingVertexShader);
-
 	// Create input layout
 	D3D11_INPUT_ELEMENT_DESC objVertDesc[] =
 	{
@@ -449,24 +446,24 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 		{ "NORMAL",			0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	RRenderer.D3DDevice()->CreateInputLayout(objVertDesc, 3, Lighting_VS, sizeof(Lighting_VS), &m_LightingMeshIL);
+	RRenderer.D3DDevice()->CreateInputLayout(objVertDesc, 3, m_LightingShader->VS_Bytecode, m_LightingShader->VS_BytecodeSize, &m_LightingMeshIL);
 }
 
 void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 {
-	if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Pressed)
+	if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Pressed)
 	{
 		RInput.HideCursor();
 		RInput.LockCursor();
 	}
 
-	if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Released)
+	if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Released)
 	{
 		RInput.ShowCursor();
 		RInput.UnlockCursor();
 	}
 
-	if (RInput.IsKeyDown(VK_LBUTTON))
+	if (RInput.IsKeyDown(VK_RBUTTON))
 	{
 		int dx, dy;
 		RInput.GetCursorRelPos(dx, dy);
@@ -497,13 +494,18 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	XMStoreFloat4x4(&m_CameraMatrix, cameraMatrix);
 
 	XMMATRIX viewMatrix = XMMatrixInverse(NULL, cameraMatrix);
-	XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(45.0f, RRenderer.AspectRatio(), 10.f, 5000.0f);
-	XMFLOAT4X4 viewProj;
-	XMStoreFloat4x4(&viewProj, viewMatrix * projMatrix);
+	XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(45.0f, RRenderer.AspectRatio(), 1.0f, 5000.0f);
+
+	SHADER_SCENE_BUFFER cbScene;
+
+	XMStoreFloat4x4(&cbScene.viewMatrix, viewMatrix);
+	XMStoreFloat4x4(&cbScene.projMatrix, viewMatrix);
+	XMStoreFloat4x4(&cbScene.viewProjMatrix, viewMatrix * projMatrix);
+	XMStoreFloat4(&cbScene.cameraPos, cameraMatrix.r[3]);
 
 	D3D11_MAPPED_SUBRESOURCE subres;
 	RRenderer.D3DImmediateContext()->Map(m_cbScene, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-	memcpy(subres.pData, &viewProj, sizeof(viewProj));
+	memcpy(subres.pData, &cbScene, sizeof(SHADER_SCENE_BUFFER));
 	RRenderer.D3DImmediateContext()->Unmap(m_cbScene, 0);
 }
 
@@ -512,6 +514,7 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.Clear();
 
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
+	RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
 
 	// Set up object world matrix
 	XMMATRIX worldMatrix = XMMatrixTranslation(0.0f, 0.0f, 2.0f);
@@ -523,20 +526,23 @@ void FSGraphicsProjectApp::RenderScene()
 	memcpy(subres.pData, &world, sizeof(world));
 	RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
 
-	// Draw star
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, &m_cbPerObject);
-	RRenderer.D3DImmediateContext()->PSSetShader(m_ColorPixelShader, NULL, 0);
-	RRenderer.D3DImmediateContext()->VSSetShader(m_ColorVertexShader, NULL, 0);
+
+	// Draw skybox
+	m_Skybox.Draw();
+
+	// Clear depth buffer for skybox
+	RRenderer.Clear(false, Colors::Black);
+
+	// Draw star
+	m_ColorShader->Bind();
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_ColorPrimitiveIL);
 
 	m_StarMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Draw meshes
-	RRenderer.D3DImmediateContext()->PSSetShader(m_LightingPixelShader, NULL, 0);
-	RRenderer.D3DImmediateContext()->VSSetShader(m_LightingVertexShader, NULL, 0);
+	m_LightingShader->Bind();
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_LightingMeshIL);
-
-	RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
 
 	for (UINT32 i = 0; i < m_FbxMeshes.size(); i++)
 	{

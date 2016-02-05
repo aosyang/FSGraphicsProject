@@ -21,9 +21,21 @@
     <ClCompile Include="FSGraphicsProjectApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RSkybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RShaderManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FSGraphicsProjectApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RSkybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RShaderManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -32,5 +44,7 @@
     <FxCompile Include="Color_PS.hlsl" />
     <FxCompile Include="Lighting_VS.hlsl" />
     <FxCompile Include="Lighting_PS.hlsl" />
+    <FxCompile Include="Skybox_PS.hlsl" />
+    <FxCompile Include="Skybox_VS.hlsl" />
   </ItemGroup>
 </Project>

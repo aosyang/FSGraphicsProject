@@ -8,9 +8,12 @@
 #define _FSGRAPHICSPROJECTAPP_H
 
 #include "Rhino.h"
+#include "RSkybox.h"
 
 #include <vector>
 using namespace std;
+
+struct RShader;
 
 class FSGraphicsProjectApp : public IApp
 {
@@ -31,14 +34,22 @@ private:
 	XMFLOAT4X4					m_CameraMatrix;
 	float						m_CamPitch, m_CamYaw;
 
+	RSkybox						m_Skybox;
+
 	ID3D11InputLayout*			m_ColorPrimitiveIL;
 	RMeshElement				m_StarMesh;
-	ID3D11PixelShader*			m_ColorPixelShader;
-	ID3D11VertexShader*			m_ColorVertexShader;
+	RShader*					m_ColorShader;
 
 	ID3D11InputLayout*			m_LightingMeshIL;
-	ID3D11PixelShader*			m_LightingPixelShader;
-	ID3D11VertexShader*			m_LightingVertexShader;
+	RShader*					m_LightingShader;
+
+	struct SHADER_SCENE_BUFFER
+	{
+		XMFLOAT4X4	viewMatrix;
+		XMFLOAT4X4	projMatrix;
+		XMFLOAT4X4	viewProjMatrix;
+		XMFLOAT4	cameraPos;
+	};
 
 	ID3D11Buffer*				m_cbPerObject;
 	ID3D11Buffer*				m_cbScene;

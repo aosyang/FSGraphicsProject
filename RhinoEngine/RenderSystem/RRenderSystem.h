@@ -21,7 +21,7 @@ public:
 	float AspectRatio() const;
 	void ResizeClient(int width, int height);
 
-	void Clear(const XMVECTORF32& clearColor=Colors::LightSteelBlue, bool clearDepth=true, float depth=1.0f, bool clearStencil=true, UINT8 stencil=0);
+	void Clear(bool clearColor = true, const XMVECTORF32& color = Colors::LightSteelBlue, bool clearDepth = true, float depth = 1.0f, bool clearStencil = true, UINT8 stencil = 0);
 	void Present();
 
 	ID3D11Device*			D3DDevice()						{ return m_pD3DDevice; }
