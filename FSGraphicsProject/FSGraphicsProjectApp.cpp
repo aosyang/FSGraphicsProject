@@ -44,6 +44,7 @@ FSGraphicsProjectApp::FSGraphicsProjectApp()
 {
 	m_MeshTextureSRV[0] = nullptr;
 	m_MeshTextureSRV[1] = nullptr;
+	m_MeshTextureSRV[2] = nullptr;
 }
 
 
@@ -52,6 +53,7 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_SamplerState);
 	SAFE_RELEASE(m_MeshTextureSRV[0]);
 	SAFE_RELEASE(m_MeshTextureSRV[1]);
+	SAFE_RELEASE(m_MeshTextureSRV[2]);
 	for (vector<RMeshElement>::iterator iter = m_FbxMeshes.begin(); iter != m_FbxMeshes.end(); iter++)
 	{
 		iter->Release();
@@ -125,7 +127,8 @@ bool FSGraphicsProjectApp::Initialize()
 
 	LoadFbxMesh("../Assets/city.fbx");
 	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/cty1.dds", NULL, &m_MeshTextureSRV[0]);
-	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/cty2x.dds", NULL, &m_MeshTextureSRV[1]);
+	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/ang1.dds", NULL, &m_MeshTextureSRV[1]);
+	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/cty2x.dds", NULL, &m_MeshTextureSRV[2]);
 
 	// Create texture sampler state
 	D3D11_SAMPLER_DESC samplerDesc;
@@ -201,16 +204,16 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 	FbxGeometryConverter lGeomConverter(lFbxSdkManager);
 
 	lGeomConverter.Triangulate(lFbxScene, true, true);
-	lGeomConverter.SplitMeshesPerMaterial(lFbxScene, true);
+	bool result = lGeomConverter.SplitMeshesPerMaterial(lFbxScene, true);
 
 	// Load meshes
 
 	int nodeCount = lFbxScene->GetNodeCount();
 	for (int idxNode = 0; idxNode < nodeCount; idxNode++)
 	{
-		char buf[1024];
-		sprintf_s(buf, sizeof(buf), "Loading FBX node [%d/%d]...\n", idxNode + 1, nodeCount);
-		OutputDebugStringA(buf);
+		char msg_buf[1024];
+		sprintf_s(msg_buf, sizeof(msg_buf), "Loading FBX node [%d/%d]...\n", idxNode + 1, nodeCount);
+		OutputDebugStringA(msg_buf);
 
 		FbxNode* node = lFbxScene->GetNode(idxNode);
 		FbxMesh* mesh = node->GetMesh();
@@ -219,17 +222,49 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 			continue;
 
 		mesh->SplitPoints();
+		sprintf_s(msg_buf, sizeof(msg_buf), "[%s]\n", node->GetName());
+		OutputDebugStringA(msg_buf);
+		
+		//int matCount = node->GetSrcObjectCount<FbxSurfaceMaterial>();
+		//for (int idxMat = 0; idxMat < matCount; idxMat++)
+		//{
+		//	FbxSurfaceMaterial* material = (FbxSurfaceMaterial*)node->GetSrcObject<FbxSurfaceMaterial>(idxMat);
+
+		//	if (material)
+		//	{
+		//		FbxProperty prop = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
+
+		//		int layerTexCount = prop.GetSrcObjectCount<FbxLayeredTexture>();
+
+		//		for (int idxLayerTex = 0; idxLayerTex < layerTexCount; idxLayerTex++)
+		//		{
+
+		//		}
+		//	}
+		//}
 
 		FbxVector4* controlPointArray;
 		vector<MESH_VERTEX> vertData;
 		vector<int> indexData;
+		vector<MESH_VERTEX> flatVertData;
 
 		controlPointArray = mesh->GetControlPoints();
 		int controlPointCount = mesh->GetControlPointsCount();
 
 		vertData.resize(controlPointCount);
 
+		// Fill vertex data
+		for (int i = 0; i < controlPointCount; i++)
+		{
+			vertData[i].pos.x = (float)controlPointArray[i][0];
+			vertData[i].pos.y = (float)controlPointArray[i][1];
+			vertData[i].pos.z = (float)controlPointArray[i][2];
+		}
+
+		// Fill normal data
 		FbxGeometryElementNormal* normalArray = mesh->GetElementNormal();
+		bool hasPerPolygonVertexNormal = (normalArray->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
+
 		switch (normalArray->GetMappingMode())
 		{
 		case FbxGeometryElement::eByControlPoint:
@@ -308,29 +343,41 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 			}
 		}
 
-		// Fill vertex data
-		for (int i = 0; i < controlPointCount; i++)
-		{
-			vertData[i].pos.x = (float)controlPointArray[i][0];
-			vertData[i].pos.y = (float)controlPointArray[i][1];
-			vertData[i].pos.z = (float)controlPointArray[i][2];
-		}
-
 		// Fill triangle data
 		int polyCount = mesh->GetPolygonCount();
 
 		for (int idxPoly = 0; idxPoly < polyCount; idxPoly++)
 		{
 			// Loop through index buffer
-			int* indexArray = mesh->GetPolygonVertices();
-			int indexSize = mesh->GetPolygonSize(idxPoly);
+			int vertCountPerPoly = mesh->GetPolygonSize(idxPoly);
+
+			assert(vertCountPerPoly == 3);
 
 			// Note: Assume mesh has been triangulated
 			int triangle[3];
 
-			for (int idxVert = 0; idxVert < mesh->GetPolygonSize(idxPoly); idxVert++)
+			for (int idxVert = 0; idxVert < vertCountPerPoly; idxVert++)
 			{
-				triangle[idxVert] = mesh->GetPolygonVertex(idxPoly, idxVert);
+				//triangle[idxVert] = mesh->GetPolygonVertex(idxPoly, idxVert);
+				triangle[idxVert] = idxPoly * 3 + idxVert;
+				int iv = mesh->GetPolygonVertex(idxPoly, idxVert);
+
+				MESH_VERTEX vertex = vertData[iv];
+				
+				if (hasPerPolygonVertexNormal)
+				{
+					int idxNormal = idxPoly * 3 + idxVert;
+					if (uvArray->GetReferenceMode() != FbxGeometryElement::eDirect)
+					{
+						idxNormal = normalArray->GetIndexArray().GetAt(idxPoly * 3 + idxVert);
+					}
+
+					FbxVector4 normal = normalArray->GetDirectArray().GetAt(idxNormal);
+
+					vertex.normal.x = (float)normal[0];
+					vertex.normal.y = (float)normal[1];
+					vertex.normal.z = (float)normal[2];
+				}
 
 				if (hasPerPolygonVertexUV)
 				{
@@ -342,9 +389,11 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 
 					FbxVector2 uv = uvArray->GetDirectArray().GetAt(idxUV);
 
-					vertData[triangle[idxVert]].uv.x = (float)uv[0];
-					vertData[triangle[idxVert]].uv.y = 1.0f - (float)uv[1];
+					vertex.uv.x = (float)uv[0];
+					vertex.uv.y = 1.0f - (float)uv[1];
 				}
+
+				flatVertData.push_back(vertex);
 			}
 
 			// Change triangle clockwise if necessary
@@ -360,7 +409,7 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 		int index = 0;
 		for (UINT i = 0; i < indexData.size(); i++)
 		{
-			MESH_VERTEX& v = vertData[indexData[i]];
+			MESH_VERTEX& v = flatVertData[indexData[i]];
 			map<MESH_VERTEX, int>::iterator iterResult = meshVertIndexTable.find(v);
 			if (iterResult == meshVertIndexTable.end())
 			{
@@ -379,6 +428,10 @@ void FSGraphicsProjectApp::LoadFbxMesh(char* filename)
 		meshElem.CreateVertexBuffer(optimizedVertData.data(), sizeof(MESH_VERTEX), optimizedVertData.size());
 		meshElem.CreateIndexBuffer(optimizedIndexData.data(), sizeof(UINT32), optimizedIndexData.size());
 		m_FbxMeshes.push_back(meshElem);
+
+		sprintf_s(msg_buf, "Mesh loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
+			optimizedVertData.size(), optimizedIndexData.size() / 3, flatVertData.size(), indexData.size() / 3);
+		OutputDebugStringA(msg_buf);
 	}
 
 	lFbxScene->Destroy();
@@ -444,7 +497,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	XMStoreFloat4x4(&m_CameraMatrix, cameraMatrix);
 
 	XMMATRIX viewMatrix = XMMatrixInverse(NULL, cameraMatrix);
-	XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(45.0f, RRenderer.AspectRatio(), 0.1f, 2000.0f);
+	XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(45.0f, RRenderer.AspectRatio(), 10.f, 5000.0f);
 	XMFLOAT4X4 viewProj;
 	XMStoreFloat4x4(&viewProj, viewMatrix * projMatrix);
 
