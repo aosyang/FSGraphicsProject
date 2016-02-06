@@ -259,7 +259,8 @@ bool FSGraphicsProjectApp::Initialize()
 	m_Skybox.CreateSkybox(L"../Assets/powderpeak.dds");
 
 	XMStoreFloat4x4(&m_CameraMatrix, XMMatrixIdentity());
-	m_CamPitch = m_CamYaw = 0.0f;
+	m_CamPitch = 0.0f;
+	m_CamYaw = PI;
 
 	return true;
 }
@@ -589,8 +590,8 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		RInput.GetCursorRelPos(dx, dy);
 		if (dx || dy)
 		{
-			m_CamYaw += dx;
-			m_CamPitch += dy;
+			m_CamYaw += (float)dx / 200.0f;
+			m_CamPitch += (float)dy / 200.0f;
 		}
 	}
 
@@ -619,7 +620,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 	XMMATRIX cameraMatrix = XMLoadFloat4x4(&m_CameraMatrix);
 	XMVECTOR camPos = cameraMatrix.r[3];
-	cameraMatrix = XMMatrixRotationX(m_CamPitch / 200.0f) * XMMatrixRotationY(m_CamYaw / 200.0f);
+	cameraMatrix = XMMatrixRotationX(m_CamPitch) * XMMatrixRotationY(m_CamYaw);
 	cameraMatrix.r[3] = camPos + XMVector4Transform(moveVec, cameraMatrix);
 	XMStoreFloat4x4(&m_CameraMatrix, cameraMatrix);
 

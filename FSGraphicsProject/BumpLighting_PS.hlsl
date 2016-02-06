@@ -19,17 +19,22 @@ struct OUTPUT_VERTEX
 	float3 TangentW	: TANGENT;
 };
 
+float3x3 CalculateTBNSpace(float3 NormalW, float3 TangentW)
+{
+	float3 N = normalize(NormalW);
+	float3 T = normalize(TangentW);
+	float3 B = cross(N, T);
+	T = cross(B, N);
+
+	return float3x3(T, B, N);
+}
+
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 {
 	float4 Diffuse = (float4)0;
 	float4 Specular = (float4)0;
 
-	float3 worldNormal = normalize(Input.NormalW);
-	float3 worldTangent = normalize(Input.TangentW);
-	float3 worldBinormal = cross(worldNormal, worldTangent);
-	worldTangent = cross(worldBinormal, worldNormal);
-
-	float3x3 TBN = float3x3(worldTangent, worldBinormal, worldNormal);
+	float3x3 TBN = CalculateTBNSpace(Input.NormalW, Input.TangentW);
 
 	float3 normal = (Texture[1].Sample(Sampler, Input.UV) * 2.0f - 1.0f).xyz;
 	normal = mul(normal, TBN);
