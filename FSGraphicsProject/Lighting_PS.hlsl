@@ -40,6 +40,20 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 		lightColor.rgb += saturate(intensity * attenuation) * PointLight[ip].Color.rgb * PointLight[ip].Color.w;
 	}
 
+	for (int is = 0; is < SpotlightCount; is++)
+	{
+		float3 lightVec = Spotlight[is].PosAndInnerConeRatio.xyz - Input.PosW;
+		float3 lightDir = normalize(lightVec);
+
+		float surfaceRatio = saturate(dot(-lightDir, Spotlight[is].ConeDirAndOuterConeRatio.xyz));
+		// spotFactor = (surfaceRatio > Spotlight[is].ConeDirAndRatio.w) ? 1.0f : 0.0f;
+
+		float attenuation = 1.0f - saturate((Spotlight[is].PosAndInnerConeRatio.w - surfaceRatio) / (Spotlight[is].PosAndInnerConeRatio.w - Spotlight[is].ConeDirAndOuterConeRatio.w));
+
+		float intensity = dot(normal, lightDir);
+		lightColor.rgb += attenuation * saturate(intensity) * Spotlight[is].Color.rgb * Spotlight[is].Color.w;
+	}
+
 	//lightColor.rgb = saturate(lightColor.rgb);
 	lightColor.a = 1.0f;
 
