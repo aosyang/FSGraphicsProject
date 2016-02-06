@@ -45,6 +45,8 @@ FSGraphicsProjectApp::FSGraphicsProjectApp()
 	m_MeshTextureSRV[0] = nullptr;
 	m_MeshTextureSRV[1] = nullptr;
 	m_MeshTextureSRV[2] = nullptr;
+
+	m_EnableSpotlight = true;
 }
 
 
@@ -60,6 +62,7 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	}
 	m_FbxMeshes.clear();
 
+	SAFE_RELEASE(m_cbMaterial);
 	SAFE_RELEASE(m_cbLight);
 	SAFE_RELEASE(m_cbPerObject);
 	SAFE_RELEASE(m_cbScene);
@@ -136,6 +139,15 @@ bool FSGraphicsProjectApp::Initialize()
 	cbLightDesc.Usage = D3D11_USAGE_DYNAMIC;
 
 	RRenderer.D3DDevice()->CreateBuffer(&cbLightDesc, NULL, &m_cbLight);
+
+	D3D11_BUFFER_DESC cbMaterialDesc;
+	ZeroMemory(&cbMaterialDesc, sizeof(cbMaterialDesc));
+	cbMaterialDesc.ByteWidth = sizeof(SHADER_MATERIAL_BUFFER);
+	cbMaterialDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbMaterialDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbMaterialDesc.Usage = D3D11_USAGE_DYNAMIC;
+
+	RRenderer.D3DDevice()->CreateBuffer(&cbMaterialDesc, NULL, &m_cbMaterial);
 
 	LoadFbxMesh("../Assets/city.fbx");
 	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/cty1.dds", NULL, &m_MeshTextureSRV[0]);
@@ -506,6 +518,10 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	if (RInput.IsKeyDown('D'))
 		moveVec += XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 
+	// Toggle spotlight
+	if (RInput.GetBufferedKeyState('F') == BKS_Pressed)
+		m_EnableSpotlight = !m_EnableSpotlight;
+
 	XMMATRIX cameraMatrix = XMLoadFloat4x4(&m_CameraMatrix);
 	XMVECTOR camPos = cameraMatrix.r[3];
 	cameraMatrix = XMMatrixRotationX(m_CamPitch / 200.0f) * XMMatrixRotationY(m_CamYaw / 200.0f);
@@ -535,7 +551,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	XMVECTOR dirLightVec = XMVector3Normalize(XMVectorSet(0.25f, 1.0f, 0.5f, 1.0f));
 
 	cbLight.DirectionalLightCount = 2;
-	XMStoreFloat4(&cbLight.DirectionalLight[0].Color, XMVectorSet(1.0f, 1.0f, 1.0f, 0.5f));
+	XMStoreFloat4(&cbLight.DirectionalLight[0].Color, XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
 	XMStoreFloat4(&cbLight.DirectionalLight[0].Direction, dirLightVec);
 	XMStoreFloat4(&cbLight.DirectionalLight[1].Color, XMVectorSet(0.2f, 0.2f, 0.2f, 1.0f));
 	XMStoreFloat4(&cbLight.DirectionalLight[1].Direction, -dirLightVec);
@@ -545,16 +561,35 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	XMStoreFloat4(&cbLight.PointLight[0].PosAndRadius, pointLightPosAndRadius);
 	XMStoreFloat4(&cbLight.PointLight[0].Color, XMVectorSet(1.0f, 0.75f, 0.25f, 5.0f));
 
-	cbLight.SpotlightCount = 1;
-	XMVECTOR spotlightPos = XMVectorSet(cameraMatrix.r[3].m128_f32[0], cameraMatrix.r[3].m128_f32[1], cameraMatrix.r[3].m128_f32[2], 0.97f);
-	XMVECTOR spotlightCone = XMVectorSet(cameraMatrix.r[2].m128_f32[0], cameraMatrix.r[2].m128_f32[1], cameraMatrix.r[2].m128_f32[2], 0.9f);
-	XMStoreFloat4(&cbLight.Spotlight[0].PosAndInnerConeRatio, spotlightPos);
-	XMStoreFloat4(&cbLight.Spotlight[0].ConeDirAndOuterConeRatio, spotlightCone);
-	XMStoreFloat4(&cbLight.Spotlight[0].Color, XMVectorSet(0.85f, 0.85f, 1.0f, 1.0f));
+	if (m_EnableSpotlight)
+	{
+		cbLight.SpotlightCount = 1;
+		XMVECTOR spotlightPos = XMVectorSet(cameraMatrix.r[3].m128_f32[0], cameraMatrix.r[3].m128_f32[1], cameraMatrix.r[3].m128_f32[2], 0.97f);
+		XMVECTOR spotlightCone = XMVectorSet(cameraMatrix.r[2].m128_f32[0], cameraMatrix.r[2].m128_f32[1], cameraMatrix.r[2].m128_f32[2], 0.9f);
+		XMStoreFloat4(&cbLight.Spotlight[0].PosAndInnerConeRatio, spotlightPos);
+		XMStoreFloat4(&cbLight.Spotlight[0].ConeDirAndOuterConeRatio, spotlightCone);
+		XMStoreFloat4(&cbLight.Spotlight[0].Color, XMVectorSet(0.85f, 0.85f, 1.0f, 1.0f));
+	}
+	else
+	{
+		cbLight.SpotlightCount = 0;
+	}
+
+	XMStoreFloat4(&cbLight.CameraPos, cameraMatrix.r[3]);
 
 	RRenderer.D3DImmediateContext()->Map(m_cbLight, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 	memcpy(subres.pData, &cbLight, sizeof(SHADER_LIGHT_BUFFER));
 	RRenderer.D3DImmediateContext()->Unmap(m_cbLight, 0);
+
+	// Update material buffer
+	SHADER_MATERIAL_BUFFER cbMaterial;
+	ZeroMemory(&cbMaterial, sizeof(cbMaterial));
+
+	XMStoreFloat4(&cbMaterial.SpecularColorAndPower, XMVectorSet(1.0f, 1.0f, 1.0f, 512.0f));
+
+	RRenderer.D3DImmediateContext()->Map(m_cbMaterial, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+	memcpy(subres.pData, &cbMaterial, sizeof(SHADER_MATERIAL_BUFFER));
+	RRenderer.D3DImmediateContext()->Unmap(m_cbMaterial, 0);
 
 }
 
@@ -564,6 +599,7 @@ void FSGraphicsProjectApp::RenderScene()
 
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
 	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, &m_cbLight);
+	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(1, 1, &m_cbMaterial);
 	RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
 
 	// Set up object world matrix
