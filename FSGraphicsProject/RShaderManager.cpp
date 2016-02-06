@@ -5,14 +5,6 @@
 //=============================================================================
 #include "RShaderManager.h"
 
-#include "Color_PS.csh"
-#include "Color_VS.csh"
-#include "Lighting_PS.csh"
-#include "Lighting_VS.csh"
-#include "Skybox_PS.csh"
-#include "Skybox_VS.csh"
-
-
 void RShader::Bind()
 {
 	RRenderer.D3DImmediateContext()->PSSetShader(PixelShader, NULL, 0);
@@ -29,13 +21,6 @@ RShaderManager::~RShaderManager()
 
 }
 
-void RShaderManager::Initialize()
-{
-	AddShader("Color", Color_PS, sizeof(Color_PS), Color_VS, sizeof(Color_VS));
-	AddShader("Lighting", Lighting_PS, sizeof(Lighting_PS), Lighting_VS, sizeof(Lighting_VS));
-	AddShader("Skybox", Skybox_PS, sizeof(Skybox_PS), Skybox_VS, sizeof(Skybox_VS));
-}
-
 void RShaderManager::UnloadAllShaders()
 {
 	for (map<string, RShader>::iterator iter = m_Shaders.begin();
@@ -46,14 +31,6 @@ void RShaderManager::UnloadAllShaders()
 	}
 
 	m_Shaders.clear();
-}
-
-RShader* RShaderManager::GetShaderResource(const char* shaderName)
-{
-	map<string, RShader>::iterator iter = m_Shaders.find(shaderName);
-	if (iter != m_Shaders.end())
-		return &iter->second;
-	return nullptr;
 }
 
 bool RShaderManager::AddShader(const char* shaderName,
@@ -77,4 +54,12 @@ bool RShaderManager::AddShader(const char* shaderName,
 	m_Shaders[shaderName] = shader;
 
 	return true;
+}
+
+RShader* RShaderManager::GetShaderResource(const char* shaderName)
+{
+	map<string, RShader>::iterator iter = m_Shaders.find(shaderName);
+	if (iter != m_Shaders.end())
+		return &iter->second;
+	return nullptr;
 }

@@ -30,20 +30,19 @@ class RShaderManager : public RSingleton<RShaderManager>
 	friend class RSingleton<RShaderManager>;
 public:
 
-	void Initialize();
 	void UnloadAllShaders();
-
-	RShader* GetShaderResource(const char* shaderName);
-
-private:
-	RShaderManager();
-	~RShaderManager();
 
 	bool AddShader(const char* shaderName,
 				   const void* pixelShaderBytecode,
 				   SIZE_T pixelBytecodeLength,
 				   const void* vertexShaderBytecode,
 				   SIZE_T vertexBytecodeLength);
+
+	RShader* GetShaderResource(const char* shaderName);
+
+private:
+	RShaderManager();
+	~RShaderManager();
 
 	map<string, RShader>	m_Shaders;
 };

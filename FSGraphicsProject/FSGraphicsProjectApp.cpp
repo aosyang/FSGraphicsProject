@@ -17,10 +17,27 @@ using namespace std;
 #include "ConstBufferPS.h"
 #include "ConstBufferVS.h"
 
+#include "Color_PS.csh"
+#include "Color_VS.csh"
+#include "Lighting_PS.csh"
+#include "Lighting_VS.csh"
+#include "Skybox_PS.csh"
+#include "Skybox_VS.csh"
+#include "BumpLighting_PS.csh"
+#include "BumpLighting_VS.csh"
+
 struct COLOR_VERTEX
 {
 	XMFLOAT4 pos;
 	XMFLOAT4 color;
+};
+
+struct BUMP_MESH_VERTEX
+{
+	XMFLOAT3 pos;
+	XMFLOAT2 uv;
+	XMFLOAT3 normal;
+	XMFLOAT3 tangent;
 };
 
 struct MESH_VERTEX
@@ -46,7 +63,9 @@ FSGraphicsProjectApp::FSGraphicsProjectApp()
 	m_MeshTextureSRV[1] = nullptr;
 	m_MeshTextureSRV[2] = nullptr;
 
-	m_EnableSpotlight = true;
+	m_EnableLights[0] = true;
+	m_EnableLights[1] = true;
+	m_EnableLights[2] = true;
 }
 
 
@@ -67,7 +86,12 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_cbPerObject);
 	SAFE_RELEASE(m_cbScene);
 
+	SAFE_RELEASE(m_BumpBaseTextureSRV);
+	SAFE_RELEASE(m_BumpNormalTextureSRV);
+	SAFE_RELEASE(m_BumpLightingIL);
 	SAFE_RELEASE(m_LightingMeshIL);
+
+	m_BumpCubeMesh.Release();
 
 	m_StarMesh.Release();
 	SAFE_RELEASE(m_ColorPrimitiveIL);
@@ -80,10 +104,14 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 bool FSGraphicsProjectApp::Initialize()
 {
 	// Initialize shaders
-	RShaderManager::Instance().Initialize();
+	RShaderManager::Instance().AddShader("Color", Color_PS, sizeof(Color_PS), Color_VS, sizeof(Color_VS));
+	RShaderManager::Instance().AddShader("Lighting", Lighting_PS, sizeof(Lighting_PS), Lighting_VS, sizeof(Lighting_VS));
+	RShaderManager::Instance().AddShader("Skybox", Skybox_PS, sizeof(Skybox_PS), Skybox_VS, sizeof(Skybox_VS));
+	RShaderManager::Instance().AddShader("BumpLighting", BumpLighting_PS, sizeof(BumpLighting_PS), BumpLighting_VS, sizeof(BumpLighting_VS));
 
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 	m_LightingShader = RShaderManager::Instance().GetShaderResource("Lighting");
+	m_BumpLightingShader = RShaderManager::Instance().GetShaderResource("BumpLighting");
 
 	// Create buffer for star mesh
 	COLOR_VERTEX starVertex[12];
@@ -112,6 +140,65 @@ bool FSGraphicsProjectApp::Initialize()
 	};
 
 	RRenderer.D3DDevice()->CreateInputLayout(colorVertDesc, 2, m_ColorShader->VS_Bytecode, m_ColorShader->VS_BytecodeSize, &m_ColorPrimitiveIL);
+
+	// Create buffer for bump cube
+	BUMP_MESH_VERTEX boxVertex[] = 
+	{
+		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3( 1.0f,  1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3( 1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+
+		{ XMFLOAT3( 1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3( 1.0f,  1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3( 1.0f,  1.0f,  1.0f), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3( 1.0f, -1.0f,  1.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
+
+		{ XMFLOAT3( 1.0f, -1.0f,  1.0f), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3( 1.0f,  1.0f,  1.0f), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+
+		{ XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, -1.0f) },
+		{ XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, -1.0f) },
+		{ XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, -1.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, -1.0f) },
+
+		{ XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3( 1.0f,  1.0f,  1.0f), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3( 1.0f,  1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+
+		{ XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3( 1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3( 1.0f, -1.0f,  1.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+	};
+
+	for (UINT32 i = 0; i < sizeof(boxVertex) / sizeof(BUMP_MESH_VERTEX); i++)
+	{
+		XMVECTOR pos = XMLoadFloat3(&boxVertex[i].pos);
+		XMStoreFloat3(&boxVertex[i].pos, pos * 100.0f);
+	}
+
+	UINT32 boxIndex[] =
+	{
+		0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11,
+		12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23,
+	};
+
+	m_BumpCubeMesh.CreateVertexBuffer(boxVertex, sizeof(BUMP_MESH_VERTEX), 24);
+	m_BumpCubeMesh.CreateIndexBuffer(boxIndex, sizeof(UINT32), 36);
+
+	D3D11_INPUT_ELEMENT_DESC bumpVertDesc[] =
+	{
+		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TANGENT",	0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+
+	RRenderer.D3DDevice()->CreateInputLayout(bumpVertDesc, 4, m_BumpLightingShader->VS_Bytecode, m_BumpLightingShader->VS_BytecodeSize, &m_BumpLightingIL);
 
 	D3D11_BUFFER_DESC cbPerObjectDesc;
 	ZeroMemory(&cbPerObjectDesc, sizeof(cbPerObjectDesc));
@@ -153,6 +240,8 @@ bool FSGraphicsProjectApp::Initialize()
 	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/cty1.dds", NULL, &m_MeshTextureSRV[0]);
 	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/ang1.dds", NULL, &m_MeshTextureSRV[1]);
 	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/cty2x.dds", NULL, &m_MeshTextureSRV[2]);
+	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/DiamondPlate.dds", NULL, &m_BumpBaseTextureSRV);
+	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/DiamondPlateNormal.dds", NULL, &m_BumpNormalTextureSRV);
 
 	// Create texture sampler state
 	D3D11_SAMPLER_DESC samplerDesc;
@@ -518,9 +607,15 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	if (RInput.IsKeyDown('D'))
 		moveVec += XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 
-	// Toggle spotlight
+	// Toggle lights
 	if (RInput.GetBufferedKeyState('F') == BKS_Pressed)
-		m_EnableSpotlight = !m_EnableSpotlight;
+		m_EnableLights[2] = !m_EnableLights[2];
+
+	if (RInput.GetBufferedKeyState('1') == BKS_Pressed)
+		m_EnableLights[0] = !m_EnableLights[0];
+
+	if (RInput.GetBufferedKeyState('2') == BKS_Pressed)
+		m_EnableLights[1] = !m_EnableLights[1];
 
 	XMMATRIX cameraMatrix = XMLoadFloat4x4(&m_CameraMatrix);
 	XMVECTOR camPos = cameraMatrix.r[3];
@@ -548,20 +643,26 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	SHADER_LIGHT_BUFFER cbLight;
 	ZeroMemory(&cbLight, sizeof(cbLight));
 
-	XMVECTOR dirLightVec = XMVector3Normalize(XMVectorSet(0.25f, 1.0f, 0.5f, 1.0f));
+	if (m_EnableLights[0])
+	{
+		XMVECTOR dirLightVec = XMVector3Normalize(XMVectorSet(0.25f, 1.0f, 0.5f, 1.0f));
 
-	cbLight.DirectionalLightCount = 2;
-	XMStoreFloat4(&cbLight.DirectionalLight[0].Color, XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
-	XMStoreFloat4(&cbLight.DirectionalLight[0].Direction, dirLightVec);
-	XMStoreFloat4(&cbLight.DirectionalLight[1].Color, XMVectorSet(0.2f, 0.2f, 0.2f, 1.0f));
-	XMStoreFloat4(&cbLight.DirectionalLight[1].Direction, -dirLightVec);
+		cbLight.DirectionalLightCount = 2;
+		XMStoreFloat4(&cbLight.DirectionalLight[0].Color, XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
+		XMStoreFloat4(&cbLight.DirectionalLight[0].Direction, dirLightVec);
+		XMStoreFloat4(&cbLight.DirectionalLight[1].Color, XMVectorSet(0.2f, 0.2f, 0.2f, 1.0f));
+		XMStoreFloat4(&cbLight.DirectionalLight[1].Direction, -dirLightVec);
+	}
 
-	cbLight.PointLightCount = 1;
-	XMVECTOR pointLightPosAndRadius = XMVectorSet(sinf(timer.TotalTime()) * 400.0f, 50.0f, cosf(timer.TotalTime()) * 400.0f, 1000.0f);
-	XMStoreFloat4(&cbLight.PointLight[0].PosAndRadius, pointLightPosAndRadius);
-	XMStoreFloat4(&cbLight.PointLight[0].Color, XMVectorSet(1.0f, 0.75f, 0.25f, 5.0f));
+	if (m_EnableLights[1])
+	{
+		cbLight.PointLightCount = 1;
+		XMVECTOR pointLightPosAndRadius = XMVectorSet(sinf(timer.TotalTime()) * 400.0f, 50.0f, cosf(timer.TotalTime()) * 400.0f, 1000.0f);
+		XMStoreFloat4(&cbLight.PointLight[0].PosAndRadius, pointLightPosAndRadius);
+		XMStoreFloat4(&cbLight.PointLight[0].Color, XMVectorSet(1.0f, 0.75f, 0.75f, 5.0f));
+	}
 
-	if (m_EnableSpotlight)
+	if (m_EnableLights[2])
 	{
 		cbLight.SpotlightCount = 1;
 		XMVECTOR spotlightPos = XMVectorSet(cameraMatrix.r[3].m128_f32[0], cameraMatrix.r[3].m128_f32[1], cameraMatrix.r[3].m128_f32[2], 0.97f);
@@ -569,10 +670,6 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		XMStoreFloat4(&cbLight.Spotlight[0].PosAndInnerConeRatio, spotlightPos);
 		XMStoreFloat4(&cbLight.Spotlight[0].ConeDirAndOuterConeRatio, spotlightCone);
 		XMStoreFloat4(&cbLight.Spotlight[0].Color, XMVectorSet(0.85f, 0.85f, 1.0f, 1.0f));
-	}
-	else
-	{
-		cbLight.SpotlightCount = 0;
 	}
 
 	XMStoreFloat4(&cbLight.CameraPos, cameraMatrix.r[3]);
@@ -635,6 +732,12 @@ void FSGraphicsProjectApp::RenderScene()
 		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_MeshTextureSRV[min(i, 2)]);
 		m_FbxMeshes[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
+
+	m_BumpLightingShader->Bind();
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_BumpBaseTextureSRV);
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_BumpNormalTextureSRV);
+	RRenderer.D3DImmediateContext()->IASetInputLayout(m_BumpLightingIL);
+	m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	RRenderer.Present();
 }

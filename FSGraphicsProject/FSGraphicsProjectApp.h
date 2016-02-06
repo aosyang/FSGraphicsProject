@@ -31,7 +31,7 @@ public:
 private:
 	void LoadFbxMesh(char* filename);
 
-	bool						m_EnableSpotlight;
+	bool						m_EnableLights[3];
 
 	XMFLOAT4X4					m_CameraMatrix;
 	float						m_CamPitch, m_CamYaw;
@@ -41,6 +41,12 @@ private:
 	ID3D11InputLayout*			m_ColorPrimitiveIL;
 	RMeshElement				m_StarMesh;
 	RShader*					m_ColorShader;
+
+	RMeshElement				m_BumpCubeMesh;
+	ID3D11InputLayout*			m_BumpLightingIL;
+	RShader*					m_BumpLightingShader;
+	ID3D11ShaderResourceView*	m_BumpBaseTextureSRV;
+	ID3D11ShaderResourceView*	m_BumpNormalTextureSRV;
 
 	ID3D11InputLayout*			m_LightingMeshIL;
 	RShader*					m_LightingShader;
