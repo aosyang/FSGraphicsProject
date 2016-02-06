@@ -6,7 +6,9 @@
 
 #include "ConstBufferPS.h"
 
-Texture2D Texture[2];
+Texture2D DiffuseTexture	: register(t0);
+Texture2D NormalTexture		: register(t1);
+
 SamplerState Sampler;
 
 struct OUTPUT_VERTEX
@@ -36,7 +38,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 	float3x3 TBN = CalculateTBNSpace(Input.NormalW, Input.TangentW);
 
-	float3 normal = (Texture[1].Sample(Sampler, Input.UV) * 2.0f - 1.0f).xyz;
+	float3 normal = (NormalTexture.Sample(Sampler, Input.UV) * 2.0f - 1.0f).xyz;
 	normal = mul(normal, TBN);
 
 	float3 viewDir = normalize(CameraPos.xyz - Input.PosW);
@@ -96,5 +98,5 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	//Diffuse.rgb = saturate(Diffuse.rgb);
 	Diffuse.a = 1.0f;
 
-	return Diffuse * Texture[0].Sample(Sampler, Input.UV) + Specular;
+	return Diffuse * DiffuseTexture.Sample(Sampler, Input.UV) + Specular;
 }

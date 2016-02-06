@@ -6,7 +6,7 @@
 
 #include "ConstBufferPS.h"
 
-Texture2D DiffuseTexture;
+Texture2D DiffuseTexture	: register(t0);
 SamplerState Sampler;
 
 struct OUTPUT_VERTEX

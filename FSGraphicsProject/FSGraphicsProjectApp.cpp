@@ -592,6 +592,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		{
 			m_CamYaw += (float)dx / 200.0f;
 			m_CamPitch += (float)dy / 200.0f;
+			m_CamPitch = max(-PI/2, min(PI/2, m_CamPitch));
 		}
 	}
 
@@ -648,9 +649,12 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	{
 		XMVECTOR dirLightVec = XMVector3Normalize(XMVectorSet(0.25f, 1.0f, 0.5f, 1.0f));
 
+		float ct = timer.TotalTime();
+		XMVECTOR sunVec = XMVector3Normalize(XMVectorSet(sinf(ct) * 0.25f, 1.0f, cosf(ct) * 0.5f, 1.0f));
+
 		cbLight.DirectionalLightCount = 2;
 		XMStoreFloat4(&cbLight.DirectionalLight[0].Color, XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
-		XMStoreFloat4(&cbLight.DirectionalLight[0].Direction, dirLightVec);
+		XMStoreFloat4(&cbLight.DirectionalLight[0].Direction, sunVec);
 		XMStoreFloat4(&cbLight.DirectionalLight[1].Color, XMVectorSet(0.2f, 0.2f, 0.2f, 1.0f));
 		XMStoreFloat4(&cbLight.DirectionalLight[1].Direction, -dirLightVec);
 	}
@@ -728,9 +732,11 @@ void FSGraphicsProjectApp::RenderScene()
 	m_LightingShader->Bind();
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_LightingMeshIL);
 
+	const int texId[] = { 0, 1, 2, 1 };
+
 	for (UINT32 i = 0; i < m_FbxMeshes.size(); i++)
 	{
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_MeshTextureSRV[min(i, 2)]);
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_MeshTextureSRV[texId[i]]);
 		m_FbxMeshes[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
