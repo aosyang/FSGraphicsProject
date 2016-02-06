@@ -14,13 +14,13 @@
 struct DIRECTIONAL_LIGHT
 {
 	float4	Direction;
-	float4	Color;
+	float4	Color;			// w as color ratio
 };
 
 struct POINT_LIGHT
 {
-	float4	Position;
-	float4	Color;
+	float4	PosAndRadius;	// w as light radius
+	float4	Color;			// w as color ratio
 };
 
 CONSTANT_BUFFER_BEGIN(SHADER_LIGHT_BUFFER, b0)

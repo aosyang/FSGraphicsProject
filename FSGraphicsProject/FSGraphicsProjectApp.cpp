@@ -539,7 +539,13 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	XMStoreFloat4(&cbLight.DirectionalLight[0].Direction, dirLightVec);
 	XMStoreFloat4(&cbLight.DirectionalLight[1].Color, XMVectorSet(0.2f, 0.2f, 0.2f, 1.0f));
 	XMStoreFloat4(&cbLight.DirectionalLight[1].Direction, -dirLightVec);
-	//cbLight.PointLightCount = 0;
+
+	cbLight.PointLightCount = 1;
+	XMVECTOR pointLightPosAndRadius = XMVectorSet(sinf(timer.TotalTime()) * 400.0f, 50.0f, cosf(timer.TotalTime()) * 400.0f, 1000.0f);
+	//XMVECTOR pointLightPosAndRadius = XMVectorSet(cameraMatrix.r[3].m128_f32[0], cameraMatrix.r[3].m128_f32[1], cameraMatrix.r[3].m128_f32[2], 1000.0f);
+	XMStoreFloat4(&cbLight.PointLight[0].PosAndRadius, pointLightPosAndRadius);
+	XMStoreFloat4(&cbLight.PointLight[0].Color, XMVectorSet(1.0f, 0.75f, 0.25f, 5.0f));
+
 	RRenderer.D3DImmediateContext()->Map(m_cbLight, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 	memcpy(subres.pData, &cbLight, sizeof(SHADER_LIGHT_BUFFER));
 	RRenderer.D3DImmediateContext()->Unmap(m_cbLight, 0);
@@ -584,7 +590,7 @@ void FSGraphicsProjectApp::RenderScene()
 
 	for (UINT32 i = 0; i < m_FbxMeshes.size(); i++)
 	{
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_MeshTextureSRV[i]);
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_MeshTextureSRV[min(i, 2)]);
 		m_FbxMeshes[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 

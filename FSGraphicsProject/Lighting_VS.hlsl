@@ -19,14 +19,16 @@ struct OUTPUT_VERTEX
 	float4 PosH		: SV_POSITION;
 	float2 UV		: TEXCOORD0;
 	float3 NormalW	: TEXCOORD1;
+	float3 PosW		: TEXCOORD2;
 };
 
 OUTPUT_VERTEX main(INPUT_VERTEX Input)
 {
 	OUTPUT_VERTEX Out = (OUTPUT_VERTEX)0;
 
-	Out.PosH = mul(float4(Input.PosL, 1.0f), worldMatrix);
-	Out.PosH = mul(Out.PosH, viewProjMatrix);
+	float4 worldPos = mul(float4(Input.PosL, 1.0f), worldMatrix);
+	Out.PosW = worldPos.xyz;
+	Out.PosH = mul(worldPos, viewProjMatrix);
 
 	Out.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	Out.NormalW = mul(Input.Normal, (float3x3)worldMatrix);

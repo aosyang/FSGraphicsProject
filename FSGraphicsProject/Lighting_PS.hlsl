@@ -15,19 +15,32 @@ struct OUTPUT_VERTEX
 	float4 PosH		: SV_POSITION;
 	float2 UV		: TEXCOORD0;
 	float3 NormalW	: TEXCOORD1;
+	float3 PosW		: TEXCOORD2;
 };
 
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 {
 	float4 lightColor = (float4)0;
-	for (int i = 0; i < DirectionalLightCount; i++)
+	float3 normal = normalize(Input.NormalW);
+
+	for (int id = 0; id < DirectionalLightCount; id++)
 	{
-		float3 normal = normalize(Input.NormalW);
-		float intensity = dot(normal, DirectionalLight[i].Direction.xyz);
-		lightColor.rgb += saturate(intensity) * DirectionalLight[i].Color.rgb;
+		float intensity = dot(normal, DirectionalLight[id].Direction.xyz);
+		lightColor.rgb += saturate(intensity) * DirectionalLight[id].Color.rgb * DirectionalLight[id].Color.w;
 	}
 
-	lightColor.rgb = saturate(lightColor.rgb);
+	for (int ip = 0; ip < PointLightCount; ip++)
+	{
+		float3 lightVec = PointLight[ip].PosAndRadius.xyz - Input.PosW;
+		float3 lightDir = normalize(lightVec);
+
+		float attenuation = 1.0f - saturate(length(lightVec) / PointLight[ip].PosAndRadius.w);
+		float intensity = dot(normal, lightDir);
+
+		lightColor.rgb += saturate(intensity * attenuation) * PointLight[ip].Color.rgb * PointLight[ip].Color.w;
+	}
+
+	//lightColor.rgb = saturate(lightColor.rgb);
 	lightColor.a = 1.0f;
 
 	return lightColor * DiffuseTexture.Sample(Sampler, Input.UV);
