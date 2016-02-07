@@ -9,6 +9,7 @@
 
 #include "Rhino.h"
 #include "RSkybox.h"
+#include "RSMeshObject.h"
 
 #include <vector>
 using namespace std;
@@ -29,8 +30,6 @@ public:
 	TCHAR* WindowTitle() { return L"Graphics Application"; }
 
 private:
-	void LoadFbxMesh(char* filename);
-
 	void SetShaderWorldMatrix(const XMMATRIX& world);
 
 	bool						m_EnableLights[3];
@@ -58,9 +57,10 @@ private:
 	ID3D11Buffer*				m_cbLight;
 	ID3D11Buffer*				m_cbMaterial;
 
-	vector<RMeshElement>		m_FbxMeshes;
 	ID3D11ShaderResourceView*	m_MeshTextureSRV[3];
 	ID3D11SamplerState*			m_SamplerState;
+
+	RSMeshObject				m_FbxMesh;
 };
 
 #endif

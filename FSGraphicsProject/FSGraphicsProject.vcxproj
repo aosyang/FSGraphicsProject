@@ -170,15 +170,19 @@
   <ItemGroup>
     <ClCompile Include="FSGraphicsProjectApp.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RSceneObject.cpp" />
     <ClCompile Include="RShaderManager.cpp" />
     <ClCompile Include="RSkybox.cpp" />
+    <ClCompile Include="RSMeshObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConstBufferPS.h" />
     <ClInclude Include="ConstBufferVS.h" />
     <ClInclude Include="FSGraphicsProjectApp.h" />
+    <ClInclude Include="RSceneObject.h" />
     <ClInclude Include="RShaderManager.h" />
     <ClInclude Include="RSkybox.h" />
+    <ClInclude Include="RSMeshObject.h" />
     <ClInclude Include="SharedDefines.h" />
   </ItemGroup>
   <ItemGroup>
