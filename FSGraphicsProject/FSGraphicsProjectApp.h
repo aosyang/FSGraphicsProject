@@ -31,6 +31,8 @@ public:
 private:
 	void LoadFbxMesh(char* filename);
 
+	void SetShaderWorldMatrix(const XMMATRIX& world);
+
 	bool						m_EnableLights[3];
 
 	XMFLOAT4X4					m_CameraMatrix;

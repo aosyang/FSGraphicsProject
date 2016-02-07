@@ -699,22 +699,14 @@ void FSGraphicsProjectApp::RenderScene()
 {
 	RRenderer.Clear();
 
+	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, &m_cbPerObject);
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
 	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, &m_cbLight);
 	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(1, 1, &m_cbMaterial);
 	RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
 
 	// Set up object world matrix
-	XMMATRIX worldMatrix = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-	SHADER_OBJECT_BUFFER cbObject;
-	XMStoreFloat4x4(&cbObject.worldMatrix, worldMatrix);
-
-	D3D11_MAPPED_SUBRESOURCE subres;
-	RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-	memcpy(subres.pData, &cbObject, sizeof(cbObject));
-	RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
-
-	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, &m_cbPerObject);
+	SetShaderWorldMatrix(XMMatrixTranslation(0.0f, 0.0f, 0.0f));
 
 	// Draw skybox
 	m_Skybox.Draw();
@@ -723,12 +715,7 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.Clear(false, Colors::Black);
 
 	// Draw star
-	worldMatrix = XMMatrixTranslation(0.0f, 500.0f, 0.0f);
-	XMStoreFloat4x4(&cbObject.worldMatrix, worldMatrix);
-
-	RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-	memcpy(subres.pData, &cbObject, sizeof(cbObject));
-	RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
+	SetShaderWorldMatrix(XMMatrixTranslation(0.0f, 500.0f, 0.0f));
 
 	m_ColorShader->Bind();
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_ColorPrimitiveIL);
@@ -736,12 +723,7 @@ void FSGraphicsProjectApp::RenderScene()
 	m_StarMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Draw meshes
-	worldMatrix = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-	XMStoreFloat4x4(&cbObject.worldMatrix, worldMatrix);
-
-	RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-	memcpy(subres.pData, &cbObject, sizeof(cbObject));
-	RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
+	SetShaderWorldMatrix(XMMatrixTranslation(0.0f, 0.0f, 0.0f));
 
 	m_LightingShader->Bind();
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_LightingMeshIL);
@@ -755,12 +737,7 @@ void FSGraphicsProjectApp::RenderScene()
 	}
 
 	// Draw bumped cube
-	worldMatrix = XMMatrixTranslation(0.0f, 150.0f, 0.0f);
-	XMStoreFloat4x4(&cbObject.worldMatrix, worldMatrix);
-
-	RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-	memcpy(subres.pData, &cbObject, sizeof(cbObject));
-	RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
+	SetShaderWorldMatrix(XMMatrixTranslation(0.0f, 150.0f, 0.0f));
 
 	m_BumpLightingShader->Bind();
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_BumpBaseTextureSRV);
@@ -769,4 +746,15 @@ void FSGraphicsProjectApp::RenderScene()
 	m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	RRenderer.Present();
+}
+
+void FSGraphicsProjectApp::SetShaderWorldMatrix(const XMMATRIX& world)
+{
+	SHADER_OBJECT_BUFFER cbObject;
+	XMStoreFloat4x4(&cbObject.worldMatrix, world);
+
+	D3D11_MAPPED_SUBRESOURCE subres;
+	RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+	memcpy(subres.pData, &cbObject, sizeof(cbObject));
+	RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
 }
