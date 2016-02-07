@@ -60,5 +60,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="FSGraphicsProject.licenseheader" />
+    <None Include="LightShaderCommon.hlsli" />
   </ItemGroup>
 </Project>
