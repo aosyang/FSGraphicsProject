@@ -21,8 +21,10 @@ float3 CalculateSpecularLight(float3 normal,
 							  float4 lightColor,
 							  float4 specularColor)
 {
-	float3 halfVec = normalize(lightDir + viewDir);
-	float SpecularIntensity = max(pow(saturate(dot(normal, normalize(halfVec))), specularColor.w), 0.0f);
+	//float3 halfVec = normalize(lightDir + viewDir);
+	//float SpecularIntensity = max(pow(saturate(dot(normal, normalize(halfVec))), specularColor.w), 0.0f);
+	float3 lightReflect = normalize(reflect(-lightDir, normal));
+	float SpecularIntensity = max(pow(saturate(dot(viewDir, lightReflect)), specularColor.w), 0.0f);
 	return lightColor.rgb * specularColor.rgb * SpecularIntensity;
 }
 
