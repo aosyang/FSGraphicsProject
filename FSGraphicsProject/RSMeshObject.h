@@ -9,16 +9,10 @@
 #include "Rhino.h"
 #include "RSceneObject.h"
 #include "RShaderManager.h"
+#include "RMesh.h"
 
 #include <vector>
 using namespace std;
-
-struct RMaterial
-{
-	RShader*					Shader;
-	int							TextureNum;
-	ID3D11ShaderResourceView*	Textures[8];
-};
 
 class RSMeshObject : public RSceneObject
 {
@@ -26,7 +20,7 @@ public:
 	RSMeshObject();
 	~RSMeshObject();
 
-	void LoadFbxMesh(const char* filename, ID3D11InputLayout* inputLayout);
+	void SetMesh(RMesh* mesh);
 
 	int GetSubmeshCount() const;
 	void SetMaterial(RMaterial* materials, int materialNum);
@@ -34,9 +28,7 @@ public:
 
 	void Draw();
 private:
-	vector<RMeshElement>	m_MeshElements;
-	ID3D11InputLayout*		m_InputLayout;
-
+	RMesh*					m_Mesh;
 	vector<RMaterial>		m_Materials;
 };
 

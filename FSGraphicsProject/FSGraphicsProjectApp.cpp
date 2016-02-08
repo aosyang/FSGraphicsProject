@@ -7,6 +7,7 @@
 #include "FSGraphicsProjectApp.h"
 
 #include "RShaderManager.h"
+#include "RResourceManager.h"
 
 #include <map>
 #include <algorithm>
@@ -80,6 +81,7 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	m_Skybox.Release();
 
 	RShaderManager::Instance().UnloadAllShaders();
+	RResourceManager::Instance().UnloadAllMeshes();
 }
 
 bool FSGraphicsProjectApp::Initialize()
@@ -227,7 +229,8 @@ bool FSGraphicsProjectApp::Initialize()
 
 	RRenderer.D3DDevice()->CreateInputLayout(objVertDesc, 3, m_LightingShader->VS_Bytecode, m_LightingShader->VS_BytecodeSize, &m_LightingMeshIL);
 
-	m_FbxMesh.LoadFbxMesh("../Assets/city.fbx", m_LightingMeshIL);
+	m_SceneMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx", m_LightingMeshIL);
+	m_FbxMeshObj.SetMesh(m_SceneMesh);
 
 	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/cty1.dds", NULL, &m_MeshTextureSRV[0]);
 	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/ang1.dds", NULL, &m_MeshTextureSRV[1]);
@@ -243,7 +246,7 @@ bool FSGraphicsProjectApp::Initialize()
 		{ m_LightingShader, 1, m_MeshTextureSRV[1] },
 	};
 
-	m_FbxMesh.SetMaterial(meshMaterials, 4);
+	m_FbxMeshObj.SetMaterial(meshMaterials, 4);
 
 	// Create texture sampler state
 	D3D11_SAMPLER_DESC samplerDesc;
@@ -420,8 +423,8 @@ void FSGraphicsProjectApp::RenderScene()
 	m_StarMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Draw meshes
-	SetShaderWorldMatrix(m_FbxMesh.GetNodeTransform());
-	m_FbxMesh.Draw();
+	SetShaderWorldMatrix(m_FbxMeshObj.GetNodeTransform());
+	m_FbxMeshObj.Draw();
 
 	// Draw bumped cube
 	SetShaderWorldMatrix(XMMatrixTranslation(0.0f, 150.0f, 0.0f));
