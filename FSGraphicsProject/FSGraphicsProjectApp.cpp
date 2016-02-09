@@ -19,6 +19,10 @@
 #include "BumpLighting_VS.csh"
 #include "InstancedLighting_PS.csh"
 #include "InstancedLighting_VS.csh"
+#include "Depth_PS.csh"
+#include "Depth_VS.csh"
+#include "InstancedDepth_PS.csh"
+#include "InstancedDepth_VS.csh"
 
 struct COLOR_VERTEX
 {
@@ -90,11 +94,15 @@ bool FSGraphicsProjectApp::Initialize()
 	RShaderManager::Instance().AddShader("Skybox", Skybox_PS, sizeof(Skybox_PS), Skybox_VS, sizeof(Skybox_VS));
 	RShaderManager::Instance().AddShader("BumpLighting", BumpLighting_PS, sizeof(BumpLighting_PS), BumpLighting_VS, sizeof(BumpLighting_VS));
 	RShaderManager::Instance().AddShader("InstancedLighting", InstancedLighting_PS, sizeof(InstancedLighting_PS), InstancedLighting_VS, sizeof(InstancedLighting_VS));
+	RShaderManager::Instance().AddShader("Depth", Depth_PS, sizeof(Depth_PS), Depth_VS, sizeof(Depth_VS));
+	RShaderManager::Instance().AddShader("InstancedDepth", InstancedDepth_PS, sizeof(InstancedDepth_PS), InstancedDepth_VS, sizeof(InstancedDepth_VS));
 
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 	m_LightingShader = RShaderManager::Instance().GetShaderResource("Lighting");
 	m_BumpLightingShader = RShaderManager::Instance().GetShaderResource("BumpLighting");
 	m_InstancedLightingShader = RShaderManager::Instance().GetShaderResource("InstancedLighting");
+	m_DepthShader = RShaderManager::Instance().GetShaderResource("Depth");
+	m_InstancedDepthShader = RShaderManager::Instance().GetShaderResource("InstancedDepth");
 
 	// Create buffer for star mesh
 	COLOR_VERTEX starVertex[12];
@@ -287,6 +295,8 @@ bool FSGraphicsProjectApp::Initialize()
 	m_CamPitch = 0.0f;
 	m_CamYaw = PI;
 
+	m_ShadowMap.Initialize(1024, 1024);
+
 	return true;
 }
 
@@ -352,9 +362,27 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	SHADER_SCENE_BUFFER cbScene;
 
 	XMStoreFloat4x4(&cbScene.viewMatrix, viewMatrix);
-	XMStoreFloat4x4(&cbScene.projMatrix, viewMatrix);
+	XMStoreFloat4x4(&cbScene.projMatrix, projMatrix);
 	XMStoreFloat4x4(&cbScene.viewProjMatrix, viewMatrix * projMatrix);
 	XMStoreFloat4(&cbScene.cameraPos, cameraMatrix.r[3]);
+
+	float ct = timer.TotalTime() * 0.2f;
+	XMVECTOR sunVec = XMVector3Normalize(XMVectorSet(sinf(ct) * 0.5f, 0.25f, cosf(ct) * 0.5f, 1.0f));
+	XMMATRIX shadowViewMatrix = XMMatrixLookAtLH(sunVec * 2000.0f, XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
+
+	m_ShadowMap.SetViewMatrix(shadowViewMatrix);
+	m_ShadowMap.SetOrthogonalProjection(4000.0f, 4000.0f, 0.1f, 4000.0f);
+
+	XMMATRIX shadowTransform(
+		0.5f, 0.0f, 0.0f, 0.0f,
+		0.0f, -0.5f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.0f, 1.0f);
+
+	XMMATRIX shadowViewProjMatrix = m_ShadowMap.GetViewMatrix() * m_ShadowMap.GetProjectionMatrix();
+	XMStoreFloat4x4(&cbScene.shadowViewProjMatrix, shadowViewProjMatrix);
+	shadowViewProjMatrix *= shadowTransform;
+	XMStoreFloat4x4(&cbScene.shadowViewProjBiasedMatrix, shadowViewProjMatrix);
 
 	D3D11_MAPPED_SUBRESOURCE subres;
 	RRenderer.D3DImmediateContext()->Map(m_cbScene, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
@@ -368,9 +396,6 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	if (m_EnableLights[0])
 	{
 		XMVECTOR dirLightVec = XMVector3Normalize(XMVectorSet(0.25f, 1.0f, 0.5f, 1.0f));
-
-		float ct = timer.TotalTime();
-		XMVECTOR sunVec = XMVector3Normalize(XMVectorSet(sinf(ct) * 0.25f, 1.0f, cosf(ct) * 0.5f, 1.0f));
 
 		cbLight.DirectionalLightCount = 2;
 		XMStoreFloat4(&cbLight.DirectionalLight[0].Color, XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
@@ -435,6 +460,9 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 void FSGraphicsProjectApp::RenderScene()
 {
+	//=========================== Shadow Pass ===========================
+	m_ShadowMap.SetupRenderTarget();
+
 	RRenderer.Clear();
 
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, &m_cbPerObject);
@@ -444,8 +472,52 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(1, 1, &m_cbMaterial);
 	RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
 
+	// Draw star
+	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 500.0f, 0.0f));
+
+	m_DepthShader->Bind();
+	RRenderer.D3DImmediateContext()->IASetInputLayout(m_ColorPrimitiveIL);
+
+	m_StarMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// Draw meshes
+
+	// Draw city
+	SetPerObjectConstBuffuer(m_FbxMeshObj.GetNodeTransform());
+	m_FbxMeshObj.DrawWithShader(m_DepthShader);
+
+	// Draw island
+	SetPerObjectConstBuffuer(m_IslandMeshObj.GetNodeTransform());
+	m_IslandMeshObj.DrawWithShader(m_InstancedDepthShader, true, MAX_INSTANCE_COUNT);
+
+	// Draw bumped cube
+	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 150.0f, 0.0f));
+
+	m_DepthShader->Bind();
+	RRenderer.D3DImmediateContext()->IASetInputLayout(m_BumpLightingIL);
+	m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+	//=========================== Normal Pass ===========================
+	RRenderer.SetRenderTarget();
+
+	D3D11_VIEWPORT vp;
+	vp.TopLeftX = 0.0f;
+	vp.TopLeftY = 0.0f;
+	vp.Width = static_cast<float>(RRenderer.GetClientWidth());
+	vp.Height = static_cast<float>(RRenderer.GetClientHeight());
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
+
+	// Set shadow map to pixel shader
+	ID3D11ShaderResourceView* shadowMapSRV[] = { m_ShadowMap.GetRenderTargetSRV() };
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, shadowMapSRV);
+
+	RRenderer.Clear();
+
 	// Set up object world matrix
-	SetShaderWorldMatrix(XMMatrixTranslation(0.0f, 0.0f, 0.0f));
+	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 0.0f, 0.0f));
 
 	// Draw skybox
 	m_Skybox.Draw();
@@ -454,7 +526,7 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.Clear(false, Colors::Black);
 
 	// Draw star
-	SetShaderWorldMatrix(XMMatrixTranslation(0.0f, 500.0f, 0.0f));
+	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 500.0f, 0.0f));
 
 	m_ColorShader->Bind();
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_ColorPrimitiveIL);
@@ -464,15 +536,15 @@ void FSGraphicsProjectApp::RenderScene()
 	// Draw meshes
 
 	// Draw city
-	SetShaderWorldMatrix(m_FbxMeshObj.GetNodeTransform());
+	SetPerObjectConstBuffuer(m_FbxMeshObj.GetNodeTransform());
 	m_FbxMeshObj.Draw();
 
 	// Draw island
-	SetShaderWorldMatrix(m_IslandMeshObj.GetNodeTransform());
+	SetPerObjectConstBuffuer(m_IslandMeshObj.GetNodeTransform());
 	m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
 
 	// Draw bumped cube
-	SetShaderWorldMatrix(XMMatrixTranslation(0.0f, 150.0f, 0.0f));
+	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 150.0f, 0.0f));
 
 	m_BumpLightingShader->Bind();
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_BumpBaseTextureSRV);
@@ -480,10 +552,14 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_BumpLightingIL);
 	m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	ID3D11ShaderResourceView* nullSRV[] = { nullptr };
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, nullSRV);
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, nullSRV);
+
 	RRenderer.Present();
 }
 
-void FSGraphicsProjectApp::SetShaderWorldMatrix(const XMMATRIX& world)
+void FSGraphicsProjectApp::SetPerObjectConstBuffuer(const XMMATRIX& world)
 {
 	SHADER_OBJECT_BUFFER cbObject;
 	XMStoreFloat4x4(&cbObject.worldMatrix, world);

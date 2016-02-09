@@ -30,6 +30,12 @@ public:
 	int	GetClientWidth() const { return m_ClientWidth; }
 	int	GetClientHeight() const { return m_ClientHeight; }
 	const TCHAR* GetAdapterName() const { return m_AdapterName; }
+
+	void SetRenderTarget(ID3D11RenderTargetView* renderTargetView = DefaultRenderTargetView, ID3D11DepthStencilView* depthStencilView = DefaultDepthStencilView);
+
+	static ID3D11RenderTargetView* DefaultRenderTargetView;
+	static ID3D11DepthStencilView* DefaultDepthStencilView;
+
 protected:
 	RRenderSystem();
 	~RRenderSystem();
@@ -48,6 +54,9 @@ protected:
 	ID3D11RenderTargetView*	m_RenderTargetView;
 	ID3D11Texture2D*		m_DepthStencilBuffer;
 	ID3D11DepthStencilView*	m_DepthStencilView;
+
+	ID3D11RenderTargetView*	m_CurrentRenderTargetView;
+	ID3D11DepthStencilView*	m_CurrentDepthStencilView;
 };
 
 #define RRenderer RRenderSystem::Instance()

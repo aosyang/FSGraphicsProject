@@ -7,6 +7,9 @@
 
 #include "RRenderSystem.h"
 
+ID3D11DepthStencilView* RRenderSystem::DefaultDepthStencilView = nullptr;
+ID3D11RenderTargetView* RRenderSystem::DefaultRenderTargetView = nullptr;
+
 RRenderSystem::RRenderSystem()
 	: m_AdapterName(nullptr)
 {
@@ -220,19 +223,22 @@ void RRenderSystem::Clear(bool clearColor, const XMVECTORF32& color, bool clearD
 {
 	assert(m_pD3DImmediateContext);
 
-	if (clearColor)
+	if (m_CurrentRenderTargetView && clearColor)
 	{
-		m_pD3DImmediateContext->ClearRenderTargetView(m_RenderTargetView,
+		m_pD3DImmediateContext->ClearRenderTargetView(m_CurrentRenderTargetView,
 			reinterpret_cast<const float*>(&color));
 	}
 
-	UINT clearFlag = 0;
+	if (m_CurrentDepthStencilView)
+	{
+		UINT clearFlag = 0;
 
-	if (clearDepth) clearFlag |= D3D11_CLEAR_DEPTH;
-	if (clearStencil) clearFlag |= D3D11_CLEAR_STENCIL;
+		if (clearDepth) clearFlag |= D3D11_CLEAR_DEPTH;
+		if (clearStencil) clearFlag |= D3D11_CLEAR_STENCIL;
 
-	m_pD3DImmediateContext->ClearDepthStencilView(m_DepthStencilView,
-		clearFlag, depth, stencil);
+		m_pD3DImmediateContext->ClearDepthStencilView(m_CurrentDepthStencilView,
+			clearFlag, depth, stencil);
+	}
 }
 
 void RRenderSystem::Present()
@@ -242,12 +248,29 @@ void RRenderSystem::Present()
 	HR(m_SwapChain->Present(0, 0));
 }
 
+void RRenderSystem::SetRenderTarget(ID3D11RenderTargetView* renderTargetView, ID3D11DepthStencilView* depthStencilView)
+{
+	m_CurrentRenderTargetView = renderTargetView;
+	m_CurrentDepthStencilView = depthStencilView;
+
+	if (renderTargetView == nullptr)
+	{
+		ID3D11RenderTargetView* nullRTV[] = { nullptr };
+		m_pD3DImmediateContext->OMSetRenderTargets(1, nullRTV, depthStencilView);
+	}
+	else
+		m_pD3DImmediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+}
+
 void RRenderSystem::CreateRenderTargetView()
 {
 	ID3D11Texture2D* backBuffer;
 	m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
 		reinterpret_cast<void**>(&backBuffer));
 	m_pD3DDevice->CreateRenderTargetView(backBuffer, 0, &m_RenderTargetView);
+
+	DefaultRenderTargetView = m_RenderTargetView;
+	m_CurrentRenderTargetView = m_RenderTargetView;
 
 	backBuffer->Release();
 }
@@ -278,6 +301,8 @@ void RRenderSystem::CreateDepthStencilBufferAndView()
 	depthStencilDesc.MiscFlags = 0;
 
 	HR(m_pD3DDevice->CreateTexture2D(&depthStencilDesc, 0, &m_DepthStencilBuffer));
-
 	HR(m_pD3DDevice->CreateDepthStencilView(m_DepthStencilBuffer, 0, &m_DepthStencilView));
+
+	DefaultDepthStencilView = m_DepthStencilView;
+	m_CurrentDepthStencilView = m_DepthStencilView;
 }

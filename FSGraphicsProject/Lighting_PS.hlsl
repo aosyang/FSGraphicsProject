@@ -12,11 +12,12 @@ SamplerState Sampler;
 
 struct OUTPUT_VERTEX
 {
-	float4 Color	: COLOR;
-	float4 PosH		: SV_POSITION;
-	float2 UV		: TEXCOORD0;
-	float3 NormalW	: TEXCOORD1;
-	float3 PosW		: TEXCOORD2;
+	float4 Color		: COLOR;
+	float4 PosH			: SV_POSITION;
+	float2 UV			: TEXCOORD0;
+	float3 NormalW		: TEXCOORD1;
+	float3 PosW			: TEXCOORD2;
+	float4 ShadowPosH	: TEXCOORD3;
 };
 
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET
@@ -26,13 +27,22 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	float3 normal = normalize(Input.NormalW);
 	float3 viewDir = normalize(CameraPos.xyz - Input.PosW);
 
+	Input.ShadowPosH.xyz /= Input.ShadowPosH.w;
+
 	for (int id = 0; id < DirectionalLightCount; id++)
 	{
+		float lit = 1.0f;
+
+		if (id == 0)
+		{
+			lit = (Input.ShadowPosH.z < ShadowDepthTexture.Sample(Sampler, Input.ShadowPosH.xy).r + 0.0001f) ? 1.0f : 0.0f;
+		}
+
 		// Diffuse lighting
-		Diffuse.rgb += CalculateDiffuseLight(normal, DirectionalLight[id].Direction.xyz, DirectionalLight[id].Color);
+		Diffuse.rgb += lit * CalculateDiffuseLight(normal, DirectionalLight[id].Direction.xyz, DirectionalLight[id].Color);
 
 		// Specular lighting
-		Specular.rgb += CalculateSpecularLight(normal, DirectionalLight[id].Direction.xyz, viewDir, DirectionalLight[id].Color, SpecularColorAndPower);
+		Specular.rgb += lit * CalculateSpecularLight(normal, DirectionalLight[id].Direction.xyz, viewDir, DirectionalLight[id].Color, SpecularColorAndPower);
 	}
 
 	for (int ip = 0; ip < PointLightCount; ip++)
@@ -67,4 +77,5 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	Diffuse.a = 1.0f;
 
 	return Diffuse * DiffuseTexture.Sample(Sampler, Input.UV) + Specular;
+	//return Diffuse * ShadowDepthTexture.Sample(Sampler, Input.ShadowPosH.xy).rrra + Specular;
 }

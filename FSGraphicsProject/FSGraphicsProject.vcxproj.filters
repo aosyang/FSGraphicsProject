@@ -24,6 +24,9 @@
     <ClCompile Include="RSkybox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RShadowMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FSGraphicsProjectApp.h">
@@ -41,6 +44,9 @@
     <ClInclude Include="ConstBufferPS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RShadowMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Color_VS.hlsl" />
@@ -53,6 +59,10 @@
     <FxCompile Include="BumpLighting_VS.hlsl" />
     <FxCompile Include="InstancedLighting_VS.hlsl" />
     <FxCompile Include="InstancedLighting_PS.hlsl" />
+    <FxCompile Include="Depth_PS.hlsl" />
+    <FxCompile Include="Depth_VS.hlsl" />
+    <FxCompile Include="InstancedDepth_VS.hlsl" />
+    <FxCompile Include="InstancedDepth_PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FSGraphicsProject.licenseheader" />

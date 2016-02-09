@@ -9,8 +9,7 @@
 
 #include "Rhino.h"
 #include "RSkybox.h"
-
-struct RShader;
+#include "RShadowMap.h"
 
 class FSGraphicsProjectApp : public IApp
 {
@@ -26,7 +25,7 @@ public:
 	TCHAR* WindowTitle() { return L"Graphics Application"; }
 
 private:
-	void SetShaderWorldMatrix(const XMMATRIX& world);
+	void SetPerObjectConstBuffuer(const XMMATRIX& world);
 
 	bool						m_EnableLights[3];
 
@@ -64,6 +63,10 @@ private:
 	ID3D11ShaderResourceView*	m_IslandTextureSRV;
 	RSMeshObject				m_IslandMeshObj;
 	RShader*					m_InstancedLightingShader;
+
+	RShadowMap					m_ShadowMap;
+	RShader*					m_DepthShader;
+	RShader*					m_InstancedDepthShader;
 };
 
 #endif

@@ -21,6 +21,7 @@ public:
 	RMaterial GetMaterial(int index) const;
 
 	void Draw(bool instanced = false, int instanceCount = 0);
+	void DrawWithShader(RShader* shader, bool instanced = false, int instanceCount = 0);
 private:
 	RMesh*					m_Mesh;
 	vector<RMaterial>		m_Materials;

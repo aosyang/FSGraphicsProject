@@ -7,6 +7,8 @@
 #ifndef _LIGHTSHADERCOMMON_HLSLI
 #define _LIGHTSHADERCOMMON_HLSLI
 
+Texture2D ShadowDepthTexture : register(t2);
+
 float3 CalculateDiffuseLight(float3 normal,
 							 float3 lightDir,
 							 float4 lightColor)

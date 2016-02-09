@@ -17,6 +17,8 @@ float4x4	viewMatrix;
 float4x4	projMatrix;
 float4x4	viewProjMatrix;
 float4		cameraPos;
+float4x4	shadowViewProjMatrix;
+float4x4	shadowViewProjBiasedMatrix;
 CONSTANT_BUFFER_END
 
 #define MAX_INSTANCE_COUNT 128
