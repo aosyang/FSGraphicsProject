@@ -95,3 +95,26 @@ void RMeshElement::Draw(D3D11_PRIMITIVE_TOPOLOGY topology)
 		RRenderer.D3DImmediateContext()->Draw(m_VertexCount, 0);
 	}
 }
+
+void RMeshElement::DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology)
+{
+	UINT offset = 0;
+
+	if (m_IndexBuffer)
+	{
+		RRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
+		RRenderer.D3DImmediateContext()->IASetIndexBuffer(m_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+		RRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
+
+		RRenderer.D3DImmediateContext()->DrawIndexedInstanced(m_IndexCount, instanceCount, 0, 0, 0);
+	}
+	else if (m_VertexBuffer)
+	{
+		RRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
+
+		RRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
+
+		RRenderer.D3DImmediateContext()->DrawInstanced(m_VertexCount, instanceCount, 0, 0);
+	}
+}

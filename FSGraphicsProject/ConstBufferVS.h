@@ -19,4 +19,10 @@ float4x4	viewProjMatrix;
 float4		cameraPos;
 CONSTANT_BUFFER_END
 
+#define MAX_INSTANCE_COUNT 128
+
+CONSTANT_BUFFER_BEGIN(SHADER_INSTANCE_BUFFER, b2)
+float4x4	instancedWorldMatrix[MAX_INSTANCE_COUNT];
+CONSTANT_BUFFER_END
+
 #endif

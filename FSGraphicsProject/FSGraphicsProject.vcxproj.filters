@@ -51,6 +51,8 @@
     <FxCompile Include="Skybox_VS.hlsl" />
     <FxCompile Include="BumpLighting_PS.hlsl" />
     <FxCompile Include="BumpLighting_VS.hlsl" />
+    <FxCompile Include="InstancedLighting_VS.hlsl" />
+    <FxCompile Include="InstancedLighting_PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FSGraphicsProject.licenseheader" />

@@ -52,12 +52,18 @@ private:
 	ID3D11Buffer*				m_cbScene;
 	ID3D11Buffer*				m_cbLight;
 	ID3D11Buffer*				m_cbMaterial;
+	ID3D11Buffer*				m_cbInstance;
 
 	ID3D11ShaderResourceView*	m_MeshTextureSRV[3];
 	ID3D11SamplerState*			m_SamplerState;
 
-	RMesh*						m_SceneMesh;
+	RMesh*						m_SceneMeshCity;
 	RSMeshObject				m_FbxMeshObj;
+
+	RMesh*						m_SceneMeshIsland;
+	ID3D11ShaderResourceView*	m_IslandTextureSRV;
+	RSMeshObject				m_IslandMeshObj;
+	RShader*					m_InstancedLightingShader;
 };
 
 #endif

@@ -28,6 +28,7 @@ public:
 	void UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount);
 
 	void Draw(D3D11_PRIMITIVE_TOPOLOGY topology);
+	void DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology);
 };
 
 #endif

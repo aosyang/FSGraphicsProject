@@ -17,6 +17,8 @@
 #include "Skybox_VS.csh"
 #include "BumpLighting_PS.csh"
 #include "BumpLighting_VS.csh"
+#include "InstancedLighting_PS.csh"
+#include "InstancedLighting_VS.csh"
 
 struct COLOR_VERTEX
 {
@@ -51,6 +53,8 @@ FSGraphicsProjectApp::FSGraphicsProjectApp()
 
 FSGraphicsProjectApp::~FSGraphicsProjectApp()
 {
+	SAFE_RELEASE(m_IslandTextureSRV);
+
 	SAFE_RELEASE(m_SamplerState);
 	SAFE_RELEASE(m_MeshTextureSRV[0]);
 	SAFE_RELEASE(m_MeshTextureSRV[1]);
@@ -60,6 +64,7 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_cbLight);
 	SAFE_RELEASE(m_cbPerObject);
 	SAFE_RELEASE(m_cbScene);
+	SAFE_RELEASE(m_cbInstance);
 
 	SAFE_RELEASE(m_BumpBaseTextureSRV);
 	SAFE_RELEASE(m_BumpNormalTextureSRV);
@@ -84,10 +89,12 @@ bool FSGraphicsProjectApp::Initialize()
 	RShaderManager::Instance().AddShader("Lighting", Lighting_PS, sizeof(Lighting_PS), Lighting_VS, sizeof(Lighting_VS));
 	RShaderManager::Instance().AddShader("Skybox", Skybox_PS, sizeof(Skybox_PS), Skybox_VS, sizeof(Skybox_VS));
 	RShaderManager::Instance().AddShader("BumpLighting", BumpLighting_PS, sizeof(BumpLighting_PS), BumpLighting_VS, sizeof(BumpLighting_VS));
+	RShaderManager::Instance().AddShader("InstancedLighting", InstancedLighting_PS, sizeof(InstancedLighting_PS), InstancedLighting_VS, sizeof(InstancedLighting_VS));
 
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 	m_LightingShader = RShaderManager::Instance().GetShaderResource("Lighting");
 	m_BumpLightingShader = RShaderManager::Instance().GetShaderResource("BumpLighting");
+	m_InstancedLightingShader = RShaderManager::Instance().GetShaderResource("InstancedLighting");
 
 	// Create buffer for star mesh
 	COLOR_VERTEX starVertex[12];
@@ -212,6 +219,15 @@ bool FSGraphicsProjectApp::Initialize()
 
 	RRenderer.D3DDevice()->CreateBuffer(&cbMaterialDesc, NULL, &m_cbMaterial);
 
+	D3D11_BUFFER_DESC cbInstanceDesc;
+	ZeroMemory(&cbInstanceDesc, sizeof(cbInstanceDesc));
+	cbInstanceDesc.ByteWidth = sizeof(SHADER_INSTANCE_BUFFER);
+	cbInstanceDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbInstanceDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbInstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
+
+	RRenderer.D3DDevice()->CreateBuffer(&cbInstanceDesc, NULL, &m_cbInstance);
+
 	// Create input layout
 	D3D11_INPUT_ELEMENT_DESC objVertDesc[] =
 	{
@@ -222,8 +238,8 @@ bool FSGraphicsProjectApp::Initialize()
 
 	RRenderer.D3DDevice()->CreateInputLayout(objVertDesc, 3, m_LightingShader->VS_Bytecode, m_LightingShader->VS_BytecodeSize, &m_LightingMeshIL);
 
-	m_SceneMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx", m_LightingMeshIL);
-	m_FbxMeshObj.SetMesh(m_SceneMesh);
+	m_SceneMeshCity = RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx", m_LightingMeshIL);
+	m_FbxMeshObj.SetMesh(m_SceneMeshCity);
 
 	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/cty1.dds", NULL, &m_MeshTextureSRV[0]);
 	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/ang1.dds", NULL, &m_MeshTextureSRV[1]);
@@ -240,6 +256,17 @@ bool FSGraphicsProjectApp::Initialize()
 	};
 
 	m_FbxMeshObj.SetMaterial(meshMaterials, 4);
+
+	m_SceneMeshIsland = RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx", m_LightingMeshIL);
+	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/TR_FloatingIsland02.dds", NULL, &m_IslandTextureSRV);
+	m_IslandMeshObj.SetMesh(m_SceneMeshIsland);
+	m_IslandMeshObj.SetPosition(XMFLOAT3(0.0f, 0.0f, 500.0f));
+
+	RMaterial islandMaterials[] =
+	{
+		{ m_InstancedLightingShader, 1, m_IslandTextureSRV },
+	};
+	m_IslandMeshObj.SetMaterial(islandMaterials, 1);
 
 	// Create texture sampler state
 	D3D11_SAMPLER_DESC samplerDesc;
@@ -386,6 +413,24 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	memcpy(subres.pData, &cbMaterial, sizeof(SHADER_MATERIAL_BUFFER));
 	RRenderer.D3DImmediateContext()->Unmap(m_cbMaterial, 0);
 
+	// Update instance buffer
+	SHADER_INSTANCE_BUFFER cbInstance;
+	ZeroMemory(&cbInstance, sizeof(cbInstance));
+
+	for (int i = 0; i < MAX_INSTANCE_COUNT; i++)
+	{
+		float d = sinf((float)i / MAX_INSTANCE_COUNT * 2 * PI) + 2.0f;
+		float x = sinf((float)i / MAX_INSTANCE_COUNT * 2 * PI) * 1000.0f * d;
+		float y = sinf((float)i / MAX_INSTANCE_COUNT * 2 * PI * 8) * 1000.0f * d;
+		float z = cosf((float)i / MAX_INSTANCE_COUNT * 2 * PI) * 1000.0f * d;
+		XMMATRIX instanceMatrix = XMMatrixTranslation(x, y, z) * XMMatrixRotationY(x + timer.TotalTime() * 0.1f * sinf(d));
+
+		XMStoreFloat4x4(&cbInstance.instancedWorldMatrix[i], instanceMatrix);
+	}
+
+	RRenderer.D3DImmediateContext()->Map(m_cbInstance, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+	memcpy(subres.pData, &cbInstance, sizeof(SHADER_INSTANCE_BUFFER));
+	RRenderer.D3DImmediateContext()->Unmap(m_cbInstance, 0);
 }
 
 void FSGraphicsProjectApp::RenderScene()
@@ -394,6 +439,7 @@ void FSGraphicsProjectApp::RenderScene()
 
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, &m_cbPerObject);
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
+	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(2, 1, &m_cbInstance);
 	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, &m_cbLight);
 	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(1, 1, &m_cbMaterial);
 	RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
@@ -416,8 +462,14 @@ void FSGraphicsProjectApp::RenderScene()
 	m_StarMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Draw meshes
+
+	// Draw city
 	SetShaderWorldMatrix(m_FbxMeshObj.GetNodeTransform());
 	m_FbxMeshObj.Draw();
+
+	// Draw island
+	SetShaderWorldMatrix(m_IslandMeshObj.GetNodeTransform());
+	m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
 
 	// Draw bumped cube
 	SetShaderWorldMatrix(XMMatrixTranslation(0.0f, 150.0f, 0.0f));

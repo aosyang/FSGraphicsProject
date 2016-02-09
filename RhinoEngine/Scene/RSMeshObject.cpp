@@ -46,7 +46,7 @@ RMaterial RSMeshObject::GetMaterial(int index) const
 	return m_Materials[index];
 }
 
-void RSMeshObject::Draw()
+void RSMeshObject::Draw(bool intanced, int instanceCount)
 {
 	if (!m_Mesh)
 		return;
@@ -64,6 +64,9 @@ void RSMeshObject::Draw()
 			}
 		}
 
-		m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		if (intanced)
+			m_Mesh->GetMeshElements()[i].DrawInstanced(instanceCount, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		else
+			m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 }

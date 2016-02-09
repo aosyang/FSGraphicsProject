@@ -20,7 +20,7 @@ public:
 	void SetMaterial(RMaterial* materials, int materialNum);
 	RMaterial GetMaterial(int index) const;
 
-	void Draw();
+	void Draw(bool instanced = false, int instanceCount = 0);
 private:
 	RMesh*					m_Mesh;
 	vector<RMaterial>		m_Materials;
