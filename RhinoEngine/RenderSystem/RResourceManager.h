@@ -6,7 +6,6 @@
 #ifndef _RRESOURCEMANAGER_H
 #define _RRESOURCEMANAGER_H
 
-#include "Rhino.h"
 #include "RMesh.h"
 
 class RResourceManager : public RSingleton<RResourceManager>

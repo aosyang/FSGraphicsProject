@@ -6,12 +6,6 @@
 #ifndef _RSHADERMANAGER_H
 #define _RSHADERMANAGER_H
 
-#include "Rhino.h"
-#include <map>
-#include <string>
-
-using namespace std;
-
 struct RShader
 {
 	ID3D11PixelShader*	PixelShader;

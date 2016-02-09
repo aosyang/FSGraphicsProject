@@ -3,6 +3,8 @@
 //
 // 
 //=============================================================================
+
+#include "Rhino.h"
 #include "RMesh.h"
 
 RMesh::RMesh(const vector<RMeshElement> meshElements, const vector<RMaterial>& materials, ID3D11InputLayout* inputLayout)

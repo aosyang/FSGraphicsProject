@@ -6,13 +6,6 @@
 
 #include "FSGraphicsProjectApp.h"
 
-#include "RShaderManager.h"
-#include "RResourceManager.h"
-
-#include <map>
-#include <algorithm>
-using namespace std;
-
 #include "ConstBufferPS.h"
 #include "ConstBufferVS.h"
 

@@ -3,6 +3,9 @@
 //
 // 
 //=============================================================================
+
+#include "Rhino.h"
+
 #include "RShaderManager.h"
 
 void RShader::Bind()

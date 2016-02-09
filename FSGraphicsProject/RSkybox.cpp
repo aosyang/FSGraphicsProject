@@ -3,9 +3,8 @@
 //
 // 
 //=============================================================================
-#include "RSkybox.h"
 
-#include "RShaderManager.h"
+#include "RSkybox.h"
 
 struct SKYBOX_VERTEX
 {

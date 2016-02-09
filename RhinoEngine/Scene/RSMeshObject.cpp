@@ -3,13 +3,9 @@
 //
 // 
 //=============================================================================
+
+#include "Rhino.h"
 #include "RSMeshObject.h"
-
-#include <fbxsdk.h>
-
-#include <map>
-#include <algorithm>
-using namespace std;
 
 RSMeshObject::RSMeshObject()
 	: RSceneObject()

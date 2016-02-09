@@ -27,9 +27,14 @@
     <ClInclude Include="Core\RTimer.h" />
     <ClInclude Include="RenderSystem\d3dUtil.h" />
     <ClInclude Include="RenderSystem\DDSTextureLoader.h" />
+    <ClInclude Include="RenderSystem\RMesh.h" />
     <ClInclude Include="RenderSystem\RMeshElement.h" />
     <ClInclude Include="RenderSystem\RRenderSystem.h" />
+    <ClInclude Include="RenderSystem\RResourceManager.h" />
+    <ClInclude Include="RenderSystem\RShaderManager.h" />
     <ClInclude Include="Rhino.h" />
+    <ClInclude Include="Scene\RSceneObject.h" />
+    <ClInclude Include="Scene\RSMeshObject.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\MathHelper.cpp" />
@@ -37,8 +42,13 @@
     <ClCompile Include="Core\RInput.cpp" />
     <ClCompile Include="Core\RTimer.cpp" />
     <ClCompile Include="RenderSystem\DDSTextureLoader.cpp" />
+    <ClCompile Include="RenderSystem\RMesh.cpp" />
     <ClCompile Include="RenderSystem\RMeshElement.cpp" />
     <ClCompile Include="RenderSystem\RRenderSystem.cpp" />
+    <ClCompile Include="RenderSystem\RResourceManager.cpp" />
+    <ClCompile Include="RenderSystem\RShaderManager.cpp" />
+    <ClCompile Include="Scene\RSceneObject.cpp" />
+    <ClCompile Include="Scene\RSMeshObject.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{609BE637-9CC8-4ABA-9308-3FCC5D0B43EC}</ProjectGuid>
@@ -89,16 +99,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(IncludePath);C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(IncludePath);C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(IncludePath);C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(IncludePath);C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -107,7 +117,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>Rhino.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;../fbx/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -131,7 +141,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>Rhino.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;../fbx/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -157,7 +167,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>Rhino.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;../fbx/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -185,7 +195,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>Rhino.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;../fbx/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

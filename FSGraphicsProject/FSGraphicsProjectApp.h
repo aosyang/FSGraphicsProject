@@ -9,10 +9,6 @@
 
 #include "Rhino.h"
 #include "RSkybox.h"
-#include "RSMeshObject.h"
-
-#include <vector>
-using namespace std;
 
 struct RShader;
 

@@ -6,13 +6,7 @@
 #ifndef _RSMESHOBJECT_H
 #define _RSMESHOBJECT_H
 
-#include "Rhino.h"
 #include "RSceneObject.h"
-#include "RShaderManager.h"
-#include "RMesh.h"
-
-#include <vector>
-using namespace std;
 
 class RSMeshObject : public RSceneObject
 {

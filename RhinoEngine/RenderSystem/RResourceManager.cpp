@@ -3,6 +3,9 @@
 //
 // 
 //=============================================================================
+
+#include "Rhino.h"
+
 #include "RResourceManager.h"
 
 #include <fbxsdk.h>

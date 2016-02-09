@@ -6,8 +6,6 @@
 #ifndef _RSCENEOBJECT_H
 #define _RSCENEOBJECT_H
 
-#include "Rhino.h"
-
 class RSceneObject
 {
 public:

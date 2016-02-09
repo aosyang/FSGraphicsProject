@@ -6,11 +6,7 @@
 #ifndef _RMESH_H
 #define _RMESH_H
 
-#include "Rhino.h"
 #include "RShaderManager.h"
-
-#include <vector>
-using namespace std;
 
 struct RMaterial
 {

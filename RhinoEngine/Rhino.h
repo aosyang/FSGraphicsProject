@@ -20,6 +20,10 @@
 #include <iomanip>
 
 #include <vector>
+#include <map>
+#include <string>
+
+using namespace std;
 
 // DirectX 3D
 #include <d3d11.h>
@@ -28,6 +32,8 @@
 
 using namespace DirectX;
 
+// FBX SDK
+#include <fbxsdk.h>
 
 // Engine Classes
 #include "Core/RTimer.h"
@@ -38,7 +44,13 @@ using namespace DirectX;
 #include "RenderSystem/RRenderSystem.h"
 #include "RenderSystem/RMeshElement.h"
 #include "RenderSystem/DDSTextureLoader.h"
+#include "RenderSystem/RResourceManager.h"
+#include "RenderSystem/RShaderManager.h"
+#include "RenderSystem/RMesh.h"
 
 #include "Core/REngine.h"
+
+#include "Scene/RSceneObject.h"
+#include "Scene/RSMeshObject.h"
 
 #endif

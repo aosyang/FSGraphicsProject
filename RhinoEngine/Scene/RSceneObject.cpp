@@ -3,6 +3,9 @@
 //
 // 
 //=============================================================================
+
+#include "Rhino.h"
+
 #include "RSceneObject.h"
 
 RSceneObject::RSceneObject()

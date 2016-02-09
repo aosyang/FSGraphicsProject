@@ -32,6 +32,21 @@
     <ClInclude Include="RenderSystem\DDSTextureLoader.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\RSceneObject.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\RSMeshObject.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderSystem\RMesh.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderSystem\RResourceManager.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderSystem\RShaderManager.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -55,6 +70,21 @@
     <ClCompile Include="RenderSystem\DDSTextureLoader.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\RSceneObject.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\RSMeshObject.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem\RMesh.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem\RResourceManager.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem\RShaderManager.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="RenderSystem">
@@ -62,6 +92,9 @@
     </Filter>
     <Filter Include="Core">
       <UniqueIdentifier>{ac872a28-85d0-4ca2-9a1b-167a5b929989}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{0a958409-2fbf-47bd-b9c5-037fa3a873c3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
