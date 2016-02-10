@@ -59,6 +59,7 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 {
 	SAFE_RELEASE(m_IslandTextureSRV);
 
+	SAFE_RELEASE(m_SamplerComparisonState);
 	SAFE_RELEASE(m_SamplerState);
 	SAFE_RELEASE(m_MeshTextureSRV[0]);
 	SAFE_RELEASE(m_MeshTextureSRV[1]);
@@ -289,6 +290,17 @@ bool FSGraphicsProjectApp::Initialize()
 
 	RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState);
 
+	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+	samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerComparisonState);
+
 	m_Skybox.CreateSkybox(L"../Assets/powderpeak.dds");
 
 	XMStoreFloat4x4(&m_CameraMatrix, XMMatrixIdentity());
@@ -471,6 +483,7 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, &m_cbLight);
 	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(1, 1, &m_cbMaterial);
 	RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
+	RRenderer.D3DImmediateContext()->PSSetSamplers(2, 1, &m_SamplerComparisonState);
 
 	// Draw star
 	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 500.0f, 0.0f));

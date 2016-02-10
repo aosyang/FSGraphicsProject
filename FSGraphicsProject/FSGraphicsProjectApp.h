@@ -55,6 +55,7 @@ private:
 
 	ID3D11ShaderResourceView*	m_MeshTextureSRV[3];
 	ID3D11SamplerState*			m_SamplerState;
+	ID3D11SamplerState*			m_SamplerComparisonState;
 
 	RMesh*						m_SceneMeshCity;
 	RSMeshObject				m_FbxMeshObj;

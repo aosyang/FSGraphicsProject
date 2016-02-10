@@ -29,12 +29,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 	for (int id = 0; id < DirectionalLightCount; id++)
 	{
-		float lit = 1.0f;
-
-		if (id == 0)
-		{
-			lit = (Input.ShadowPosH.z < ShadowDepthTexture.Sample(Sampler, Input.ShadowPosH.xy).r + 0.0001f) ? 1.0f : 0.0f;
-		}
+		float lit = (id == 0) ? SampleShadowMap(ShadowDepthTexture, Sampler, Input.ShadowPosH.xyz) : 1.0f;
 
 		// Diffuse lighting
 		Diffuse.rgb += lit * CalculateDiffuseLight(normal, DirectionalLight[id].Direction.xyz, DirectionalLight[id].Color);
