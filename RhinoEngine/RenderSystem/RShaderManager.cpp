@@ -46,13 +46,23 @@ bool RShaderManager::AddShader(const char* shaderName,
 		return false;
 
 	RShader shader;
-	RRenderer.D3DDevice()->CreatePixelShader(pixelShaderBytecode, pixelBytecodeLength, NULL, &shader.PixelShader);
-	RRenderer.D3DDevice()->CreateVertexShader(vertexShaderBytecode, vertexBytecodeLength, NULL, &shader.VertexShader);
 
-	shader.PS_Bytecode = (BYTE*)pixelShaderBytecode;
-	shader.PS_BytecodeSize = pixelBytecodeLength;
-	shader.VS_Bytecode = (BYTE*)vertexShaderBytecode;
-	shader.VS_BytecodeSize = vertexBytecodeLength;
+	shader.PixelShader = nullptr;
+	shader.VertexShader = nullptr;
+
+	if (pixelShaderBytecode && pixelBytecodeLength)
+	{
+		RRenderer.D3DDevice()->CreatePixelShader(pixelShaderBytecode, pixelBytecodeLength, NULL, &shader.PixelShader);
+		shader.PS_Bytecode = (BYTE*)pixelShaderBytecode;
+		shader.PS_BytecodeSize = pixelBytecodeLength;
+	}
+
+	if (vertexShaderBytecode && vertexBytecodeLength)
+	{
+		RRenderer.D3DDevice()->CreateVertexShader(vertexShaderBytecode, vertexBytecodeLength, NULL, &shader.VertexShader);
+		shader.VS_Bytecode = (BYTE*)vertexShaderBytecode;
+		shader.VS_BytecodeSize = vertexBytecodeLength;
+	}
 
 	m_Shaders[shaderName] = shader;
 

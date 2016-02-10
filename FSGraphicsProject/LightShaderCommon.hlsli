@@ -18,6 +18,12 @@ float3 CalculateDiffuseLight(float3 normal,
 	return saturate(DiffuseIntensity) * lightColor.rgb * lightColor.a;
 }
 
+float3 CalculateAmbientLight(float3 normal, float4 highHemisphereColor, float4 lowHemisphereColor)
+{
+	return saturate(dot(normal, float3(0.0f, 1.0f, 0.0f)) / 2.0f + 0.5f) * highHemisphereColor.rgb * highHemisphereColor.w +
+		   saturate(dot(normal, float3(0.0f, -1.0f, 0.0f)) / 2.0f + 0.5f) * lowHemisphereColor.rgb * lowHemisphereColor.w;
+}
+
 float3 CalculateSpecularLight(float3 normal,
 							  float3 lightDir,
 							  float3 viewDir,

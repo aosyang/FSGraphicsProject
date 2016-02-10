@@ -405,15 +405,17 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	SHADER_LIGHT_BUFFER cbLight;
 	ZeroMemory(&cbLight, sizeof(cbLight));
 
+	// Setup ambient color
+	XMStoreFloat4(&cbLight.HighHemisphereAmbientColor, XMVectorSet(0.3f, 0.3f, 0.5f, 0.5f));
+	XMStoreFloat4(&cbLight.LowHemisphereAmbientColor, XMVectorSet(0.2f, 0.2f, 0.2f, 0.5f));
+
 	if (m_EnableLights[0])
 	{
 		XMVECTOR dirLightVec = XMVector3Normalize(XMVectorSet(0.25f, 1.0f, 0.5f, 1.0f));
 
-		cbLight.DirectionalLightCount = 2;
+		cbLight.DirectionalLightCount = 1;
 		XMStoreFloat4(&cbLight.DirectionalLight[0].Color, XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
 		XMStoreFloat4(&cbLight.DirectionalLight[0].Direction, sunVec);
-		XMStoreFloat4(&cbLight.DirectionalLight[1].Color, XMVectorSet(0.2f, 0.2f, 0.2f, 1.0f));
-		XMStoreFloat4(&cbLight.DirectionalLight[1].Direction, -dirLightVec);
 	}
 
 	if (m_EnableLights[1])

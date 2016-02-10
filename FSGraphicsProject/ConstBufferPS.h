@@ -37,6 +37,8 @@ POINT_LIGHT			PointLight[MAX_POINT_LIGHT];
 SPOTLIGHT			Spotlight[MAX_SPOTLIGHT];
 
 float4				CameraPos;
+float4				HighHemisphereAmbientColor;
+float4				LowHemisphereAmbientColor;
 
 // Note: An int type is 16 byte aligned in HLSL and 4 byte aligned in C++
 int					DirectionalLightCount;

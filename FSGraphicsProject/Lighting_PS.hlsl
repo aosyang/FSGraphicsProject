@@ -24,6 +24,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 {
 	float4 Diffuse = (float4)0;
 	float4 Specular = (float4)0;
+	float4 Ambient = (float4)0;
 	float3 normal = normalize(Input.NormalW);
 	float3 viewDir = normalize(CameraPos.xyz - Input.PosW);
 
@@ -71,6 +72,8 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 	Diffuse.a = 1.0f;
 
-	return Diffuse * DiffuseTexture.Sample(Sampler, Input.UV) + Specular;
+	Ambient.rgb = CalculateAmbientLight(normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor);
+
+	return (Ambient + Diffuse) * DiffuseTexture.Sample(Sampler, Input.UV) + Specular;
 	//return Diffuse * ShadowDepthTexture.Sample(Sampler, Input.ShadowPosH.xy).rrra + Specular;
 }

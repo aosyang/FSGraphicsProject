@@ -37,6 +37,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 {
 	float4 Diffuse = (float4)0;
 	float4 Specular = (float4)0;
+	float4 Ambient = (float4)0;
 
 	float3x3 TBN = CalculateTBNSpace(Input.NormalW, Input.TangentW);
 
@@ -87,5 +88,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 	Diffuse.a = 1.0f;
 
-	return Diffuse * DiffuseTexture.Sample(Sampler, Input.UV) + Specular;
+	Ambient.rgb = CalculateAmbientLight(normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor);
+
+	return (Ambient + Diffuse) * DiffuseTexture.Sample(Sampler, Input.UV) + Specular;
 }
