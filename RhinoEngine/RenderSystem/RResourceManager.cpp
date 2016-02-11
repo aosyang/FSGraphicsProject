@@ -30,6 +30,12 @@ void RResourceManager::UnloadAllMeshes()
 		delete m_MeshResources[i];
 	}
 	m_MeshResources.clear();
+
+	for (UINT32 i = 0; i < m_TextureResources.size(); i++)
+	{
+		SAFE_RELEASE(m_TextureResources[i]);
+	}
+	m_TextureResources.clear();
 }
 
 RMesh* RResourceManager::LoadFbxMesh(const char* filename, ID3D11InputLayout* inputLayout)
@@ -334,4 +340,17 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename, ID3D11InputLayout* in
 	m_MeshResources.push_back(pMesh);
 
 	return pMesh;
+}
+
+ID3D11ShaderResourceView* RResourceManager::LoadDDSTexture(const char* filename)
+{
+	ID3D11ShaderResourceView* srv;
+	size_t char_len;
+	wchar_t wszName[1024];
+	mbstowcs_s(&char_len, wszName, 1024, filename, strlen(filename));
+	CreateDDSTextureFromFile(RRenderer.D3DDevice(), wszName, nullptr, &srv);
+
+	m_TextureResources.push_back(srv);
+
+	return srv;
 }

@@ -16,13 +16,14 @@ public:
 	void UnloadAllMeshes();
 
 	RMesh* LoadFbxMesh(const char* filename, ID3D11InputLayout* inputLayout);
-
+	ID3D11ShaderResourceView* LoadDDSTexture(const char* filename);
 
 private:
 	RResourceManager() {}
 	~RResourceManager() {}
 
-	vector<RMesh*>			m_MeshResources;
+	vector<RMesh*>						m_MeshResources;
+	vector<ID3D11ShaderResourceView*>	m_TextureResources;
 };
 
 #endif

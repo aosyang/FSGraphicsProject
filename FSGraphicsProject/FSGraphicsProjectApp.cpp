@@ -57,13 +57,8 @@ FSGraphicsProjectApp::FSGraphicsProjectApp()
 
 FSGraphicsProjectApp::~FSGraphicsProjectApp()
 {
-	SAFE_RELEASE(m_IslandTextureSRV);
-
 	SAFE_RELEASE(m_SamplerComparisonState);
 	SAFE_RELEASE(m_SamplerState);
-	SAFE_RELEASE(m_MeshTextureSRV[0]);
-	SAFE_RELEASE(m_MeshTextureSRV[1]);
-	SAFE_RELEASE(m_MeshTextureSRV[2]);
 
 	SAFE_RELEASE(m_cbMaterial);
 	SAFE_RELEASE(m_cbLight);
@@ -71,8 +66,6 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_cbScene);
 	SAFE_RELEASE(m_cbInstance);
 
-	SAFE_RELEASE(m_BumpBaseTextureSRV);
-	SAFE_RELEASE(m_BumpNormalTextureSRV);
 	SAFE_RELEASE(m_BumpLightingIL);
 	SAFE_RELEASE(m_LightingMeshIL);
 
@@ -250,11 +243,11 @@ bool FSGraphicsProjectApp::Initialize()
 	m_SceneMeshCity = RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx", m_LightingMeshIL);
 	m_FbxMeshObj.SetMesh(m_SceneMeshCity);
 
-	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/cty1.dds", NULL, &m_MeshTextureSRV[0]);
-	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/ang1.dds", NULL, &m_MeshTextureSRV[1]);
-	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/cty2x.dds", NULL, &m_MeshTextureSRV[2]);
-	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/DiamondPlate.dds", NULL, &m_BumpBaseTextureSRV);
-	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/DiamondPlateNormal.dds", NULL, &m_BumpNormalTextureSRV);
+	m_MeshTextureSRV[0] = RResourceManager::Instance().LoadDDSTexture("../Assets/cty1.dds");
+	m_MeshTextureSRV[1] = RResourceManager::Instance().LoadDDSTexture("../Assets/ang1.dds");
+	m_MeshTextureSRV[2] = RResourceManager::Instance().LoadDDSTexture("../Assets/cty2x.dds");
+	m_BumpBaseTextureSRV = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlate.dds");
+	m_BumpNormalTextureSRV = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlateNormal.dds");
 
 	RMaterial meshMaterials[] =
 	{
@@ -267,7 +260,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_FbxMeshObj.SetMaterial(meshMaterials, 4);
 
 	m_SceneMeshIsland = RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx", m_LightingMeshIL);
-	CreateDDSTextureFromFile(RRenderer.D3DDevice(), L"../Assets/TR_FloatingIsland02.dds", NULL, &m_IslandTextureSRV);
+	m_IslandTextureSRV = RResourceManager::Instance().LoadDDSTexture("../Assets/TR_FloatingIsland02.dds");
 	m_IslandMeshObj.SetMesh(m_SceneMeshIsland);
 	m_IslandMeshObj.SetPosition(XMFLOAT3(0.0f, 0.0f, 500.0f));
 
@@ -368,7 +361,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	XMStoreFloat4x4(&m_CameraMatrix, cameraMatrix);
 
 	XMMATRIX viewMatrix = XMMatrixInverse(NULL, cameraMatrix);
-	XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(45.0f, RRenderer.AspectRatio(), 1.0f, 5000.0f);
+	XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(45.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
 
 	// Update scene constant buffer
 	SHADER_SCENE_BUFFER cbScene;
@@ -383,7 +376,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	XMMATRIX shadowViewMatrix = XMMatrixLookAtLH(sunVec * 2000.0f, XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
 
 	m_ShadowMap.SetViewMatrix(shadowViewMatrix);
-	m_ShadowMap.SetOrthogonalProjection(4000.0f, 4000.0f, 0.1f, 4000.0f);
+	m_ShadowMap.SetOrthogonalProjection(5000.0f, 5000.0f, 0.1f, 5000.0f);
 
 	XMMATRIX shadowTransform(
 		0.5f, 0.0f, 0.0f, 0.0f,
