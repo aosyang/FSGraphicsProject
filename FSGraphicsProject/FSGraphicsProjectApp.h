@@ -68,6 +68,12 @@ private:
 	RShadowMap					m_ShadowMap;
 	RShader*					m_DepthShader;
 	RShader*					m_InstancedDepthShader;
+
+	RMeshElement				m_ParticleBuffer;
+	RShader*					m_ParticleShader;
+	ID3D11InputLayout*			m_ParticleIL;
+	XMFLOAT4					m_ParticlePos[1000];
+	XMFLOAT4					m_ParticleColor[1000];
 };
 
 #endif

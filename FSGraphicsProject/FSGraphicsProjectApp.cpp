@@ -23,6 +23,9 @@
 #include "Depth_VS.csh"
 #include "InstancedDepth_PS.csh"
 #include "InstancedDepth_VS.csh"
+#include "Particle_PS.csh"
+#include "Particle_VS.csh"
+#include "Particle_GS.csh"
 
 struct COLOR_VERTEX
 {
@@ -36,6 +39,13 @@ struct BUMP_MESH_VERTEX
 	XMFLOAT2 uv;
 	XMFLOAT3 normal;
 	XMFLOAT3 tangent;
+};
+
+struct PARTICLE_VERTEX
+{
+	XMFLOAT4 pos;
+	XMFLOAT4 color;
+	XMFLOAT3 normal;
 };
 
 FSGraphicsProjectApp::FSGraphicsProjectApp()
@@ -57,6 +67,9 @@ FSGraphicsProjectApp::FSGraphicsProjectApp()
 
 FSGraphicsProjectApp::~FSGraphicsProjectApp()
 {
+	SAFE_RELEASE(m_ParticleIL);
+	m_ParticleBuffer.Release();
+
 	SAFE_RELEASE(m_SamplerComparisonState);
 	SAFE_RELEASE(m_SamplerState);
 
@@ -90,6 +103,7 @@ bool FSGraphicsProjectApp::Initialize()
 	RShaderManager::Instance().AddShader("InstancedLighting", InstancedLighting_PS, sizeof(InstancedLighting_PS), InstancedLighting_VS, sizeof(InstancedLighting_VS));
 	RShaderManager::Instance().AddShader("Depth", Depth_PS, sizeof(Depth_PS), Depth_VS, sizeof(Depth_VS));
 	RShaderManager::Instance().AddShader("InstancedDepth", InstancedDepth_PS, sizeof(InstancedDepth_PS), InstancedDepth_VS, sizeof(InstancedDepth_VS));
+	RShaderManager::Instance().AddShader("Particle", Particle_PS, sizeof(Particle_PS), Particle_VS, sizeof(Particle_VS), Particle_GS, sizeof(Particle_GS));
 
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 	m_LightingShader = RShaderManager::Instance().GetShaderResource("Lighting");
@@ -97,6 +111,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_InstancedLightingShader = RShaderManager::Instance().GetShaderResource("InstancedLighting");
 	m_DepthShader = RShaderManager::Instance().GetShaderResource("Depth");
 	m_InstancedDepthShader = RShaderManager::Instance().GetShaderResource("InstancedDepth");
+	m_ParticleShader = RShaderManager::Instance().GetShaderResource("Particle");
 
 	// Create buffer for star mesh
 	COLOR_VERTEX starVertex[12];
@@ -302,6 +317,31 @@ bool FSGraphicsProjectApp::Initialize()
 
 	m_ShadowMap.Initialize(1024, 1024);
 
+	m_ParticleBuffer.CreateVertexBuffer(nullptr, sizeof(PARTICLE_VERTEX), 1000, true);
+
+	D3D11_INPUT_ELEMENT_DESC particleVertDesc[] =
+	{
+		{ "POSITION",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR",		0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+
+	RRenderer.D3DDevice()->CreateInputLayout(particleVertDesc, 3, m_ParticleShader->VS_Bytecode, m_ParticleShader->VS_BytecodeSize, &m_ParticleIL);
+
+	for (int i = 0; i < 1000; i++)
+	{
+		float x = MathHelper::RandF(-1000.0f, 1000.0f),
+			  y = MathHelper::RandF(-1000.0f, 1000.0f),
+			  z = MathHelper::RandF(-1000.0f, 1000.0f),
+			  w = MathHelper::RandF(10.0f, 50.0f);
+		float r = MathHelper::RandF(),
+			  g = MathHelper::RandF(),
+			  b = MathHelper::RandF();
+		m_ParticlePos[i] = XMFLOAT4(x, y, z, w);
+		m_ParticleColor[i] = XMFLOAT4(r, g, b, 1.0f);
+	}
+
+
 	return true;
 }
 
@@ -463,6 +503,18 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	RRenderer.D3DImmediateContext()->Map(m_cbInstance, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 	memcpy(subres.pData, &cbInstance, sizeof(SHADER_INSTANCE_BUFFER));
 	RRenderer.D3DImmediateContext()->Unmap(m_cbInstance, 0);
+
+	// Create particle vertices
+	PARTICLE_VERTEX particleVerts[1000];
+	XMFLOAT3 particleNormal;
+	XMStoreFloat3(&particleNormal, XMVector3Normalize(-cameraMatrix.r[2]));
+
+	for (int i = 0; i < 1000; i++)
+	{
+		particleVerts[i] = { m_ParticlePos[i], m_ParticleColor[i], particleNormal };
+	}
+
+	m_ParticleBuffer.UpdateDynamicVertexBuffer(particleVerts, sizeof(PARTICLE_VERTEX), 1000);
 }
 
 void FSGraphicsProjectApp::RenderScene()
@@ -479,6 +531,7 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(1, 1, &m_cbMaterial);
 	RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
 	RRenderer.D3DImmediateContext()->PSSetSamplers(2, 1, &m_SamplerComparisonState);
+	RRenderer.D3DImmediateContext()->GSSetConstantBuffers(1, 1, &m_cbScene);
 
 	// Draw star
 	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 500.0f, 0.0f));
@@ -559,6 +612,12 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_BumpNormalTextureSRV);
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_BumpLightingIL);
 	m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// Draw particles
+	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 150.0f, 150.0f));
+	m_ParticleShader->Bind();
+	RRenderer.D3DImmediateContext()->IASetInputLayout(m_ParticleIL);
+	m_ParticleBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 	ID3D11ShaderResourceView* nullSRV[] = { nullptr };
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, nullSRV);

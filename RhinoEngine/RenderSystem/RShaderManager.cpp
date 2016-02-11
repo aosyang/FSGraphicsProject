@@ -12,6 +12,7 @@ void RShader::Bind()
 {
 	RRenderer.D3DImmediateContext()->PSSetShader(PixelShader, NULL, 0);
 	RRenderer.D3DImmediateContext()->VSSetShader(VertexShader, NULL, 0);
+	RRenderer.D3DImmediateContext()->GSSetShader(GeometryShader, NULL, 0);
 }
 
 RShaderManager::RShaderManager()
@@ -29,8 +30,9 @@ void RShaderManager::UnloadAllShaders()
 	for (map<string, RShader>::iterator iter = m_Shaders.begin();
 		 iter != m_Shaders.end(); iter++)
 	{
-		iter->second.PixelShader->Release();
-		iter->second.VertexShader->Release();
+		SAFE_RELEASE(iter->second.PixelShader);
+		SAFE_RELEASE(iter->second.VertexShader);
+		SAFE_RELEASE(iter->second.GeometryShader);
 	}
 
 	m_Shaders.clear();
@@ -40,7 +42,9 @@ bool RShaderManager::AddShader(const char* shaderName,
 							   const void* pixelShaderBytecode,
 							   SIZE_T pixelBytecodeLength,
 							   const void* vertexShaderBytecode,
-							   SIZE_T vertexBytecodeLength)
+							   SIZE_T vertexBytecodeLength,
+							   const void* geometryShaderBytecode,
+							   SIZE_T geometryBytecodeLength)
 {
 	if (m_Shaders.find(shaderName) != m_Shaders.end())
 		return false;
@@ -49,6 +53,7 @@ bool RShaderManager::AddShader(const char* shaderName,
 
 	shader.PixelShader = nullptr;
 	shader.VertexShader = nullptr;
+	shader.GeometryShader = nullptr;
 
 	if (pixelShaderBytecode && pixelBytecodeLength)
 	{
@@ -62,6 +67,13 @@ bool RShaderManager::AddShader(const char* shaderName,
 		RRenderer.D3DDevice()->CreateVertexShader(vertexShaderBytecode, vertexBytecodeLength, NULL, &shader.VertexShader);
 		shader.VS_Bytecode = (BYTE*)vertexShaderBytecode;
 		shader.VS_BytecodeSize = vertexBytecodeLength;
+	}
+
+	if (geometryShaderBytecode && geometryBytecodeLength)
+	{
+		RRenderer.D3DDevice()->CreateGeometryShader(geometryShaderBytecode, geometryBytecodeLength, NULL, &shader.GeometryShader);
+		shader.GS_Bytecode = (BYTE*)geometryShaderBytecode;
+		shader.GS_BytecodeSize = geometryBytecodeLength;
 	}
 
 	m_Shaders[shaderName] = shader;

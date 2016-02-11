@@ -63,6 +63,9 @@
     <FxCompile Include="Depth_VS.hlsl" />
     <FxCompile Include="InstancedDepth_VS.hlsl" />
     <FxCompile Include="InstancedDepth_PS.hlsl" />
+    <FxCompile Include="Particle_VS.hlsl" />
+    <FxCompile Include="Particle_PS.hlsl" />
+    <FxCompile Include="Particle_GS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FSGraphicsProject.licenseheader" />
