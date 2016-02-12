@@ -33,6 +33,7 @@ public:
 	TCHAR* WindowTitle() { return L"Graphics Application"; }
 
 private:
+	void CreateSceneRenderTargetView();
 	void SetPerObjectConstBuffuer(const XMMATRIX& world);
 
 	bool						m_EnableLights[3];
@@ -68,6 +69,10 @@ private:
 	RMesh*						m_SceneMeshCity;
 	RSMeshObject				m_FbxMeshObj;
 
+	RMesh*						m_MeshTachikoma;
+	RSMeshObject				m_TachikomaObj;
+	RShader*					m_RefractionShader;
+
 	RMesh*						m_SceneMeshIsland;
 	ID3D11ShaderResourceView*	m_IslandTextureSRV;
 	RSMeshObject				m_IslandMeshObj;
@@ -84,6 +89,12 @@ private:
 	ID3D11ShaderResourceView*	m_ParticleDiffuseTexture;
 	ID3D11ShaderResourceView*	m_ParticleNormalTexture;
 	ID3D11BlendState*			m_BlendState[2];
+
+	ID3D11Texture2D*			m_RenderTargetBuffer;
+	ID3D11RenderTargetView*		m_RenderTargetView;
+	ID3D11ShaderResourceView*	m_RenderTargetSRV;
+	ID3D11Texture2D*			m_RenderTargetDepthBuffer;
+	ID3D11DepthStencilView*		m_RenderTargetDepthView;
 };
 
 #endif

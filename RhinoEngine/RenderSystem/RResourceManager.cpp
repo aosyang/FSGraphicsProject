@@ -203,13 +203,13 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename, ID3D11InputLayout* in
 		}
 
 		FbxGeometryElementUV* uvArray = mesh->GetElementUV();
-		bool hasPerPolygonVertexUV = (uvArray->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
+		bool hasPerPolygonVertexUV = uvArray ? (uvArray->GetMappingMode() == FbxGeometryElement::eByPolygonVertex) : false;
 
 		FbxStringList uvSetNames;
 		mesh->GetUVSetNames(uvSetNames);
 		const char* uvSetName = uvSetNames.GetCount() > 0 ? uvSetNames[0] : nullptr;
 
-		if (!hasPerPolygonVertexUV)
+		if (uvArray && !hasPerPolygonVertexUV)
 		{
 			switch (uvArray->GetReferenceMode())
 			{
@@ -278,7 +278,7 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename, ID3D11InputLayout* in
 					//OutputDebugStringA(msg_buf);
 				}
 
-				if (hasPerPolygonVertexUV)
+				if (uvArray && hasPerPolygonVertexUV)
 				{
 					int idxUV = idxPoly * 3 + idxVert;
 					if (uvArray->GetReferenceMode() != FbxGeometryElement::eDirect)

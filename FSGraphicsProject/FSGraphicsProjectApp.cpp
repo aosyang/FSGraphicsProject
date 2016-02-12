@@ -26,6 +26,8 @@
 #include "Particle_PS.csh"
 #include "Particle_VS.csh"
 #include "Particle_GS.csh"
+#include "Refraction_PS.csh"
+#include "Refraction_VS.csh"
 
 struct COLOR_VERTEX
 {
@@ -87,6 +89,12 @@ FSGraphicsProjectApp::FSGraphicsProjectApp()
 
 FSGraphicsProjectApp::~FSGraphicsProjectApp()
 {
+	SAFE_RELEASE(m_RenderTargetDepthBuffer);
+	SAFE_RELEASE(m_RenderTargetDepthView);
+	SAFE_RELEASE(m_RenderTargetBuffer);
+	SAFE_RELEASE(m_RenderTargetView);
+	SAFE_RELEASE(m_RenderTargetSRV);
+
 	SAFE_RELEASE(m_BlendState[0]);
 	SAFE_RELEASE(m_BlendState[1]);
 
@@ -118,6 +126,8 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 
 bool FSGraphicsProjectApp::Initialize()
 {
+	CreateSceneRenderTargetView();
+
 	// Initialize shaders
 	RShaderManager::Instance().AddShader("Color", Color_PS, sizeof(Color_PS), Color_VS, sizeof(Color_VS));
 	RShaderManager::Instance().AddShader("Lighting", Lighting_PS, sizeof(Lighting_PS), Lighting_VS, sizeof(Lighting_VS));
@@ -127,6 +137,7 @@ bool FSGraphicsProjectApp::Initialize()
 	RShaderManager::Instance().AddShader("Depth", Depth_PS, sizeof(Depth_PS), Depth_VS, sizeof(Depth_VS));
 	RShaderManager::Instance().AddShader("InstancedDepth", InstancedDepth_PS, sizeof(InstancedDepth_PS), InstancedDepth_VS, sizeof(InstancedDepth_VS));
 	RShaderManager::Instance().AddShader("Particle", Particle_PS, sizeof(Particle_PS), Particle_VS, sizeof(Particle_VS), Particle_GS, sizeof(Particle_GS));
+	RShaderManager::Instance().AddShader("Refraction", Refraction_PS, sizeof(Refraction_PS), Refraction_VS, sizeof(Refraction_VS));
 
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 	m_LightingShader = RShaderManager::Instance().GetShaderResource("Lighting");
@@ -135,6 +146,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_DepthShader = RShaderManager::Instance().GetShaderResource("Depth");
 	m_InstancedDepthShader = RShaderManager::Instance().GetShaderResource("InstancedDepth");
 	m_ParticleShader = RShaderManager::Instance().GetShaderResource("Particle");
+	m_RefractionShader = RShaderManager::Instance().GetShaderResource("Refraction");
 
 	// Create buffer for star mesh
 	COLOR_VERTEX starVertex[12];
@@ -281,13 +293,17 @@ bool FSGraphicsProjectApp::Initialize()
 	m_SceneMeshCity = RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx", m_LightingMeshIL);
 	m_FbxMeshObj.SetMesh(m_SceneMeshCity);
 
+	m_MeshTachikoma = RResourceManager::Instance().LoadFbxMesh("../Assets/tachikoma.fbx", m_LightingMeshIL);
+	m_TachikomaObj.SetMesh(m_MeshTachikoma);
+	m_TachikomaObj.SetPosition(XMFLOAT3(0.0f, 40.0f, 0.0f));
+
 	m_MeshTextureSRV[0] = RResourceManager::Instance().LoadDDSTexture("../Assets/cty1.dds");
 	m_MeshTextureSRV[1] = RResourceManager::Instance().LoadDDSTexture("../Assets/ang1.dds");
 	m_MeshTextureSRV[2] = RResourceManager::Instance().LoadDDSTexture("../Assets/cty2x.dds");
 	m_BumpBaseTextureSRV = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlate.dds");
 	m_BumpNormalTextureSRV = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlateNormal.dds");
 
-	RMaterial meshMaterials[] =
+	RMaterial cityMaterials[] =
 	{
 		{ m_LightingShader, 1, m_MeshTextureSRV[0] },
 		{ m_LightingShader, 1, m_MeshTextureSRV[1] },
@@ -295,7 +311,14 @@ bool FSGraphicsProjectApp::Initialize()
 		{ m_LightingShader, 1, m_MeshTextureSRV[1] },
 	};
 
-	m_FbxMeshObj.SetMaterial(meshMaterials, 4);
+	m_FbxMeshObj.SetMaterial(cityMaterials, 4);
+
+	RMaterial tachikomaMaterials[] =
+	{
+		{ m_RefractionShader, 1, m_RenderTargetSRV },
+	};
+
+	m_TachikomaObj.SetMaterial(tachikomaMaterials, 1);
 
 	m_SceneMeshIsland = RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx", m_LightingMeshIL);
 	m_IslandTextureSRV = RResourceManager::Instance().LoadDDSTexture("../Assets/TR_FloatingIsland02.dds");
@@ -586,15 +609,20 @@ void FSGraphicsProjectApp::RenderScene()
 	m_IslandMeshObj.DrawWithShader(m_InstancedDepthShader, true, MAX_INSTANCE_COUNT);
 
 	// Draw bumped cube
-	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 150.0f, 0.0f));
+	SetPerObjectConstBuffuer(XMMatrixTranslation(-1400.0f, 150.0f, 0.0f));
 
 	m_DepthShader->Bind();
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_BumpLightingIL);
 	m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	// Draw tachikoma
+	SetPerObjectConstBuffuer(m_TachikomaObj.GetNodeTransform());
+	m_TachikomaObj.DrawWithShader(m_DepthShader);
 
-	//=========================== Normal Pass ===========================
-	RRenderer.SetRenderTarget();
+	//=========================== Scene Buffer Pass =====================
+	RRenderer.SetRenderTarget(m_RenderTargetView, m_RenderTargetDepthView);
+
+	RRenderer.Clear();
 
 	D3D11_VIEWPORT vp;
 	vp.TopLeftX = 0.0f;
@@ -605,11 +633,10 @@ void FSGraphicsProjectApp::RenderScene()
 	vp.MaxDepth = 1.0f;
 	RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
 
+
 	// Set shadow map to pixel shader
 	ID3D11ShaderResourceView* shadowMapSRV[] = { m_ShadowMap.GetRenderTargetSRV() };
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, shadowMapSRV);
-
-	RRenderer.Clear();
 
 	// Set up object world matrix
 	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 0.0f, 0.0f));
@@ -639,13 +666,61 @@ void FSGraphicsProjectApp::RenderScene()
 	m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
 
 	// Draw bumped cube
-	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 150.0f, 0.0f));
+	SetPerObjectConstBuffuer(XMMatrixTranslation(-1400.0f, 150.0f, 0.0f));
 
 	m_BumpLightingShader->Bind();
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_BumpBaseTextureSRV);
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_BumpNormalTextureSRV);
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_BumpLightingIL);
 	m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	//=========================== Normal Pass ===========================
+	RRenderer.SetRenderTarget();
+
+	RRenderer.Clear();
+
+	// Set shadow map to pixel shader
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, shadowMapSRV);
+
+	// Set up object world matrix
+	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 0.0f, 0.0f));
+
+	// Draw skybox
+	m_Skybox.Draw();
+
+	// Clear depth buffer for skybox
+	RRenderer.Clear(false, Colors::Black);
+
+	// Draw star
+	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 500.0f, 0.0f));
+
+	m_ColorShader->Bind();
+	RRenderer.D3DImmediateContext()->IASetInputLayout(m_ColorPrimitiveIL);
+
+	m_StarMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// Draw meshes
+
+	// Draw city
+	SetPerObjectConstBuffuer(m_FbxMeshObj.GetNodeTransform());
+	m_FbxMeshObj.Draw();
+
+	// Draw island
+	SetPerObjectConstBuffuer(m_IslandMeshObj.GetNodeTransform());
+	m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
+
+	// Draw bumped cube
+	SetPerObjectConstBuffuer(XMMatrixTranslation(-1400.0f, 150.0f, 0.0f));
+
+	m_BumpLightingShader->Bind();
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_BumpBaseTextureSRV);
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_BumpNormalTextureSRV);
+	RRenderer.D3DImmediateContext()->IASetInputLayout(m_BumpLightingIL);
+	m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// Draw tachikoma
+	SetPerObjectConstBuffuer(m_TachikomaObj.GetNodeTransform());
+	m_TachikomaObj.Draw();
 
 	// Draw particles
 	RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[1], blendFactor, 0xFFFFFFFF);
@@ -661,6 +736,39 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, nullSRV);
 
 	RRenderer.Present();
+}
+
+void FSGraphicsProjectApp::CreateSceneRenderTargetView()
+{
+	D3D11_TEXTURE2D_DESC renderTargetTextureDesc;
+	renderTargetTextureDesc.Width = RRenderer.GetClientWidth();
+	renderTargetTextureDesc.Height = RRenderer.GetClientHeight();
+	renderTargetTextureDesc.MipLevels = 1;
+	renderTargetTextureDesc.ArraySize = 1;
+	renderTargetTextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	renderTargetTextureDesc.SampleDesc.Count = 1;
+	renderTargetTextureDesc.SampleDesc.Quality = 0;
+	renderTargetTextureDesc.Usage = D3D11_USAGE_DEFAULT;
+	renderTargetTextureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	renderTargetTextureDesc.CPUAccessFlags = 0;
+	renderTargetTextureDesc.MiscFlags = 0;
+
+	RRenderer.D3DDevice()->CreateTexture2D(&renderTargetTextureDesc, 0, &m_RenderTargetBuffer);
+	RRenderer.D3DDevice()->CreateRenderTargetView(m_RenderTargetBuffer, 0, &m_RenderTargetView);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC rtsrvDesc;
+	rtsrvDesc.Format = renderTargetTextureDesc.Format;
+	rtsrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	rtsrvDesc.Texture2D.MostDetailedMip = 0;
+	rtsrvDesc.Texture2D.MipLevels = 1;
+
+	RRenderer.D3DDevice()->CreateShaderResourceView(m_RenderTargetBuffer, &rtsrvDesc, &m_RenderTargetSRV);
+
+	renderTargetTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	renderTargetTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+	RRenderer.D3DDevice()->CreateTexture2D(&renderTargetTextureDesc, 0, &m_RenderTargetDepthBuffer);
+	RRenderer.D3DDevice()->CreateDepthStencilView(m_RenderTargetDepthBuffer, 0, &m_RenderTargetDepthView);
 }
 
 void FSGraphicsProjectApp::SetPerObjectConstBuffuer(const XMMATRIX& world)
