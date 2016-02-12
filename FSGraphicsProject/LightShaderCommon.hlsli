@@ -10,11 +10,29 @@
 Texture2D ShadowDepthTexture : register(t2);
 SamplerComparisonState ShadowMapComparisonState : register(s2);
 
+float3x3 CalculateTBNSpace(float3 NormalW, float3 TangentW)
+{
+	float3 N = normalize(NormalW);
+	float3 T = normalize(TangentW);
+	float3 B = cross(N, T);
+	T = cross(B, N);
+
+	return float3x3(T, B, N);
+}
+
 float3 CalculateDiffuseLight(float3 normal,
 							 float3 lightDir,
 							 float4 lightColor)
 {
 	float DiffuseIntensity = dot(normal, lightDir);
+	return saturate(DiffuseIntensity) * lightColor.rgb * lightColor.a;
+}
+
+float3 CalculateHalfLambertDiffuseLight(float3 normal,
+										float3 lightDir,
+										float4 lightColor)
+{
+	float DiffuseIntensity = dot(normal, lightDir) / 2.0f + 0.5f;
 	return saturate(DiffuseIntensity) * lightColor.rgb * lightColor.a;
 }
 

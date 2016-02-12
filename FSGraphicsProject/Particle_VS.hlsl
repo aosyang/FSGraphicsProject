@@ -10,7 +10,6 @@ struct INPUT_VERTEX
 {
 	float4 PosL		: POSITION;
 	float4 Color	: COLOR0;
-	float3 Normal	: NORMAL;
 };
 
 struct OUTPUT_VERTEX

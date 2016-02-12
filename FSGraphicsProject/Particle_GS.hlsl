@@ -16,8 +16,13 @@ struct OUTPUT_VERTEX
 
 struct GSOutput
 {
-	float4 Color	: COLOR;
-	float4 PosH		: SV_POSITION;
+	float4 Color		: COLOR;
+	float2 UV			: TEXCOORD0;
+	float3 PosW			: TEXCOORD1;
+	float4 ShadowPosH	: TEXCOORD2;
+	float3 NormalW		: NORMAL;
+	float3 TangentW		: TANGENT;
+	float4 PosH			: SV_POSITION;
 };
 
 [maxvertexcount(6)]
@@ -33,12 +38,26 @@ void main(
 	offset[2] = float4(mul(float3(0.5f, 0.5f, 0.0f), invView), 0.0f);
 	offset[3] = float4(mul(float3(0.5f, -0.5f, 0.0f), invView), 0.0f);
 
+	float3 normal = mul(float3(0.0f, 0.0f, -1.0f), invView);
+	float3 tangent = mul(float3(1.0f, 0.0f, 0.0f), invView);
+
+	float2 uv[4];
+	uv[0] = float2(0.0f, 1.0f);
+	uv[1] = float2(0.0f, 0.0f);
+	uv[2] = float2(1.0f, 0.0f);
+	uv[3] = float2(1.0f, 1.0f);
+
 	GSOutput Vert[4];
 	[unroll]
 	for (int i = 0; i < 4; i++)
 	{
-		Vert[i].PosH = mul(Input[0].PosW + offset[i] * Input[0].Size, viewProjMatrix);
+		Vert[i].PosW = (Input[0].PosW + offset[i] * Input[0].Size).xyz;
+		Vert[i].PosH = mul(float4(Vert[i].PosW, 1.0f), viewProjMatrix);
+		Vert[i].ShadowPosH = mul(float4(Vert[i].PosW, 1.0f), shadowViewProjBiasedMatrix);
 		Vert[i].Color = Input[0].Color;
+		Vert[i].UV = uv[i] / 2.0f;
+		Vert[i].NormalW = normal;
+		Vert[i].TangentW = tangent;
 	}
 
 	output.Append(Vert[0]);

@@ -23,16 +23,6 @@ struct OUTPUT_VERTEX
 	float4 ShadowPosH	: TEXCOORD3;
 };
 
-float3x3 CalculateTBNSpace(float3 NormalW, float3 TangentW)
-{
-	float3 N = normalize(NormalW);
-	float3 T = normalize(TangentW);
-	float3 B = cross(N, T);
-	T = cross(B, N);
-
-	return float3x3(T, B, N);
-}
-
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 {
 	float4 Diffuse = (float4)0;

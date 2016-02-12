@@ -11,6 +11,14 @@
 #include "RSkybox.h"
 #include "RShadowMap.h"
 
+#define PARTICLE_COUNT 20
+
+struct PARTICLE_VERTEX
+{
+	XMFLOAT4 pos;
+	XMFLOAT4 color;
+};
+
 class FSGraphicsProjectApp : public IApp
 {
 public:
@@ -72,8 +80,10 @@ private:
 	RMeshElement				m_ParticleBuffer;
 	RShader*					m_ParticleShader;
 	ID3D11InputLayout*			m_ParticleIL;
-	XMFLOAT4					m_ParticlePos[1000];
-	XMFLOAT4					m_ParticleColor[1000];
+	PARTICLE_VERTEX				m_ParticleVert[PARTICLE_COUNT];
+	ID3D11ShaderResourceView*	m_ParticleDiffuseTexture;
+	ID3D11ShaderResourceView*	m_ParticleNormalTexture;
+	ID3D11BlendState*			m_BlendState[2];
 };
 
 #endif

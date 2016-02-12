@@ -41,11 +41,31 @@ struct BUMP_MESH_VERTEX
 	XMFLOAT3 tangent;
 };
 
-struct PARTICLE_VERTEX
+struct ParticleDepthComparer
 {
-	XMFLOAT4 pos;
-	XMFLOAT4 color;
-	XMFLOAT3 normal;
+	XMFLOAT3 CamPos, CamDir;
+
+	ParticleDepthComparer(const XMVECTOR& camPos, const XMVECTOR& camDir)
+	{
+		XMStoreFloat3(&CamPos, camPos);
+		XMStoreFloat3(&CamDir, camDir);
+	}
+
+	bool operator()(const PARTICLE_VERTEX &a, const PARTICLE_VERTEX &b)
+	{
+		return dot(minus(a.pos, CamPos), CamDir) > dot(minus(b.pos, CamPos), CamDir);
+	}
+
+	// Helper functions
+	static float dot(const XMFLOAT3& a, const XMFLOAT3& b)
+	{
+		return a.x * b.x + a.y * b.y + a.z * b.z;
+	}
+
+	static XMFLOAT3 minus(const XMFLOAT4& a, const XMFLOAT3 b)
+	{
+		return XMFLOAT3(a.x - b.x, a.y - b.y, a.z - b.z);
+	}
 };
 
 FSGraphicsProjectApp::FSGraphicsProjectApp()
@@ -67,6 +87,9 @@ FSGraphicsProjectApp::FSGraphicsProjectApp()
 
 FSGraphicsProjectApp::~FSGraphicsProjectApp()
 {
+	SAFE_RELEASE(m_BlendState[0]);
+	SAFE_RELEASE(m_BlendState[1]);
+
 	SAFE_RELEASE(m_ParticleIL);
 	m_ParticleBuffer.Release();
 
@@ -317,30 +340,45 @@ bool FSGraphicsProjectApp::Initialize()
 
 	m_ShadowMap.Initialize(1024, 1024);
 
-	m_ParticleBuffer.CreateVertexBuffer(nullptr, sizeof(PARTICLE_VERTEX), 1000, true);
+	m_ParticleBuffer.CreateVertexBuffer(nullptr, sizeof(PARTICLE_VERTEX), PARTICLE_COUNT, true);
 
 	D3D11_INPUT_ELEMENT_DESC particleVertDesc[] =
 	{
 		{ "POSITION",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR",		0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	RRenderer.D3DDevice()->CreateInputLayout(particleVertDesc, 3, m_ParticleShader->VS_Bytecode, m_ParticleShader->VS_BytecodeSize, &m_ParticleIL);
+	RRenderer.D3DDevice()->CreateInputLayout(particleVertDesc, 2, m_ParticleShader->VS_Bytecode, m_ParticleShader->VS_BytecodeSize, &m_ParticleIL);
 
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i < PARTICLE_COUNT; i++)
 	{
 		float x = MathHelper::RandF(-1000.0f, 1000.0f),
 			  y = MathHelper::RandF(-1000.0f, 1000.0f),
 			  z = MathHelper::RandF(-1000.0f, 1000.0f),
-			  w = MathHelper::RandF(10.0f, 50.0f);
+			  w = MathHelper::RandF(500.0f, 750.0f);
 		float r = MathHelper::RandF(),
 			  g = MathHelper::RandF(),
 			  b = MathHelper::RandF();
-		m_ParticlePos[i] = XMFLOAT4(x, y, z, w);
-		m_ParticleColor[i] = XMFLOAT4(r, g, b, 1.0f);
+		m_ParticleVert[i] = { XMFLOAT4(x, y, z, w), XMFLOAT4(r, g, b, 1.0f) };
 	}
 
+	m_ParticleDiffuseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/smoke_diffuse.dds");
+	m_ParticleNormalTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/smoke_normal.dds");
+
+	D3D11_BLEND_DESC blendDesc;
+	ZeroMemory(&blendDesc, sizeof(blendDesc));
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[0]);
+
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[1]);
 
 	return true;
 }
@@ -504,17 +542,10 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	memcpy(subres.pData, &cbInstance, sizeof(SHADER_INSTANCE_BUFFER));
 	RRenderer.D3DImmediateContext()->Unmap(m_cbInstance, 0);
 
-	// Create particle vertices
-	PARTICLE_VERTEX particleVerts[1000];
-	XMFLOAT3 particleNormal;
-	XMStoreFloat3(&particleNormal, XMVector3Normalize(-cameraMatrix.r[2]));
-
-	for (int i = 0; i < 1000; i++)
-	{
-		particleVerts[i] = { m_ParticlePos[i], m_ParticleColor[i], particleNormal };
-	}
-
-	m_ParticleBuffer.UpdateDynamicVertexBuffer(particleVerts, sizeof(PARTICLE_VERTEX), 1000);
+	// Update particle vertices
+	ParticleDepthComparer cmp(cameraMatrix.r[3], cameraMatrix.r[2]);
+	std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
+	m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(PARTICLE_VERTEX), PARTICLE_COUNT);
 }
 
 void FSGraphicsProjectApp::RenderScene()
@@ -523,6 +554,9 @@ void FSGraphicsProjectApp::RenderScene()
 	m_ShadowMap.SetupRenderTarget();
 
 	RRenderer.Clear();
+
+	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
 
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, &m_cbPerObject);
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
@@ -614,7 +648,10 @@ void FSGraphicsProjectApp::RenderScene()
 	m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Draw particles
+	RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[1], blendFactor, 0xFFFFFFFF);
 	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 150.0f, 150.0f));
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_ParticleDiffuseTexture);
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_ParticleNormalTexture);
 	m_ParticleShader->Bind();
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_ParticleIL);
 	m_ParticleBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
