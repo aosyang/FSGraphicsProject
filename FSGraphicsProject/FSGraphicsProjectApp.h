@@ -13,6 +13,13 @@
 
 #define PARTICLE_COUNT 20
 
+enum RenderPass
+{
+	ShadowPass,
+	RefractionScenePass,
+	NormalPass,
+};
+
 struct PARTICLE_VERTEX
 {
 	XMFLOAT4 pos;
@@ -35,6 +42,7 @@ public:
 private:
 	void CreateSceneRenderTargetView();
 	void SetPerObjectConstBuffuer(const XMMATRIX& world);
+	void RenderSinglePass(RenderPass pass);
 
 	bool						m_EnableLights[3];
 

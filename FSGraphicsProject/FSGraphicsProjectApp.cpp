@@ -592,14 +592,6 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 void FSGraphicsProjectApp::RenderScene()
 {
-	//=========================== Shadow Pass ===========================
-	m_ShadowMap.SetupRenderTarget();
-
-	RRenderer.Clear();
-
-	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
-
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, &m_cbPerObject);
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(2, 1, &m_cbInstance);
@@ -610,39 +602,12 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.D3DImmediateContext()->PSSetSamplers(2, 1, &m_SamplerComparisonState);
 	RRenderer.D3DImmediateContext()->GSSetConstantBuffers(1, 1, &m_cbScene);
 
-	// Draw star
-	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 500.0f, 0.0f));
-
-	m_DepthShader->Bind();
-	RRenderer.D3DImmediateContext()->IASetInputLayout(m_ColorPrimitiveIL);
-
-	m_StarMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	// Draw meshes
-
-	// Draw city
-	SetPerObjectConstBuffuer(m_FbxMeshObj.GetNodeTransform());
-	m_FbxMeshObj.DrawWithShader(m_DepthShader);
-
-	// Draw island
-	SetPerObjectConstBuffuer(m_IslandMeshObj.GetNodeTransform());
-	m_IslandMeshObj.DrawWithShader(m_InstancedDepthShader, true, MAX_INSTANCE_COUNT);
-
-	// Draw bumped cube
-	SetPerObjectConstBuffuer(XMMatrixTranslation(-1400.0f, 150.0f, 0.0f));
-
-	m_DepthShader->Bind();
-	RRenderer.D3DImmediateContext()->IASetInputLayout(m_BumpLightingIL);
-	m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	// Draw tachikoma
-	SetPerObjectConstBuffuer(m_TachikomaObj.GetNodeTransform());
-	m_TachikomaObj.DrawWithShader(m_DepthShader);
+	//=========================== Shadow Pass ===========================
+	m_ShadowMap.SetupRenderTarget();
+	RenderSinglePass(ShadowPass);
 
 	//=========================== Scene Buffer Pass =====================
 	RRenderer.SetRenderTarget(m_RenderTargetView, m_RenderTargetDepthView);
-
-	RRenderer.Clear();
 
 	D3D11_VIEWPORT vp;
 	vp.TopLeftX = 0.0f;
@@ -653,107 +618,11 @@ void FSGraphicsProjectApp::RenderScene()
 	vp.MaxDepth = 1.0f;
 	RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
 
-
-	// Set shadow map to pixel shader
-	ID3D11ShaderResourceView* shadowMapSRV[] = { m_ShadowMap.GetRenderTargetDepthSRV() };
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, shadowMapSRV);
-
-	// Set up object world matrix
-	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 0.0f, 0.0f));
-
-	// Draw skybox
-	m_Skybox.Draw();
-
-	// Clear depth buffer for skybox
-	RRenderer.Clear(false, Colors::Black);
-
-	// Draw star
-	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 500.0f, 0.0f));
-
-	m_ColorShader->Bind();
-	RRenderer.D3DImmediateContext()->IASetInputLayout(m_ColorPrimitiveIL);
-
-	m_StarMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	// Draw meshes
-
-	// Draw city
-	SetPerObjectConstBuffuer(m_FbxMeshObj.GetNodeTransform());
-	m_FbxMeshObj.Draw();
-
-	// Draw island
-	SetPerObjectConstBuffuer(m_IslandMeshObj.GetNodeTransform());
-	m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
-
-	// Draw bumped cube
-	SetPerObjectConstBuffuer(XMMatrixTranslation(-1400.0f, 150.0f, 0.0f));
-
-	m_BumpLightingShader->Bind();
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_BumpBaseTextureSRV);
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_BumpNormalTextureSRV);
-	RRenderer.D3DImmediateContext()->IASetInputLayout(m_BumpLightingIL);
-	m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	RenderSinglePass(RefractionScenePass);
 
 	//=========================== Normal Pass ===========================
 	RRenderer.SetRenderTarget();
-
-	RRenderer.Clear();
-
-	// Set shadow map to pixel shader
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, shadowMapSRV);
-
-	// Set up object world matrix
-	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 0.0f, 0.0f));
-
-	// Draw skybox
-	m_Skybox.Draw();
-
-	// Clear depth buffer for skybox
-	RRenderer.Clear(false, Colors::Black);
-
-	// Draw star
-	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 500.0f, 0.0f));
-
-	m_ColorShader->Bind();
-	RRenderer.D3DImmediateContext()->IASetInputLayout(m_ColorPrimitiveIL);
-
-	m_StarMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	// Draw meshes
-
-	// Draw city
-	SetPerObjectConstBuffuer(m_FbxMeshObj.GetNodeTransform());
-	m_FbxMeshObj.Draw();
-
-	// Draw island
-	SetPerObjectConstBuffuer(m_IslandMeshObj.GetNodeTransform());
-	m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
-
-	// Draw bumped cube
-	SetPerObjectConstBuffuer(XMMatrixTranslation(-1400.0f, 150.0f, 0.0f));
-
-	m_BumpLightingShader->Bind();
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_BumpBaseTextureSRV);
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_BumpNormalTextureSRV);
-	RRenderer.D3DImmediateContext()->IASetInputLayout(m_BumpLightingIL);
-	m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	// Draw tachikoma
-	SetPerObjectConstBuffuer(m_TachikomaObj.GetNodeTransform());
-	m_TachikomaObj.Draw();
-
-	// Draw particles
-	RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[1], blendFactor, 0xFFFFFFFF);
-	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 150.0f, 150.0f));
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_ParticleDiffuseTexture);
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_ParticleNormalTexture);
-	m_ParticleShader->Bind();
-	RRenderer.D3DImmediateContext()->IASetInputLayout(m_ParticleIL);
-	m_ParticleBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-	ID3D11ShaderResourceView* nullSRV[] = { nullptr };
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, nullSRV);
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, nullSRV);
+	RenderSinglePass(NormalPass);
 
 	RRenderer.Present();
 }
@@ -800,4 +669,101 @@ void FSGraphicsProjectApp::SetPerObjectConstBuffuer(const XMMATRIX& world)
 	RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 	memcpy(subres.pData, &cbObject, sizeof(cbObject));
 	RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
+}
+
+void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
+{
+	ID3D11ShaderResourceView* shadowMapSRV[] = { m_ShadowMap.GetRenderTargetDepthSRV() };
+	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
+
+	RRenderer.Clear();
+
+	// Set up object world matrix
+	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 0.0f, 0.0f));
+
+	if (pass != ShadowPass)
+	{
+		// Set shadow map to pixel shader
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, shadowMapSRV);
+
+		// Draw skybox
+		m_Skybox.Draw();
+
+		// Clear depth buffer for skybox
+		RRenderer.Clear(false, Colors::Black);
+	}
+
+	// Draw star
+	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 500.0f, 0.0f));
+
+	if (pass == ShadowPass)
+		m_DepthShader->Bind();
+	else
+		m_ColorShader->Bind();
+
+	RRenderer.D3DImmediateContext()->IASetInputLayout(m_ColorPrimitiveIL);
+
+	m_StarMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// Draw meshes
+
+	// Draw city
+	SetPerObjectConstBuffuer(m_FbxMeshObj.GetNodeTransform());
+
+	if (pass == ShadowPass)
+		m_FbxMeshObj.DrawWithShader(m_DepthShader);
+	else
+		m_FbxMeshObj.Draw();
+
+	// Draw islands
+	SetPerObjectConstBuffuer(m_IslandMeshObj.GetNodeTransform());
+
+	if (pass == ShadowPass)
+		m_IslandMeshObj.DrawWithShader(m_InstancedDepthShader, true, MAX_INSTANCE_COUNT);
+	else
+		m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
+
+	// Draw bumped cube
+	SetPerObjectConstBuffuer(XMMatrixTranslation(-1400.0f, 150.0f, 0.0f));
+
+	if (pass == ShadowPass)
+	{
+		m_DepthShader->Bind();
+		m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	}
+	else
+	{
+		m_BumpLightingShader->Bind();
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_BumpBaseTextureSRV);
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_BumpNormalTextureSRV);
+		RRenderer.D3DImmediateContext()->IASetInputLayout(m_BumpLightingIL);
+		m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	}
+
+	// Draw tachikoma
+	SetPerObjectConstBuffuer(m_TachikomaObj.GetNodeTransform());
+
+	if (pass == ShadowPass)
+		m_TachikomaObj.DrawWithShader(m_DepthShader);
+	else if (pass == NormalPass)
+		m_TachikomaObj.Draw();
+
+	if (pass == NormalPass)
+	{
+		// Draw particles
+		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[1], blendFactor, 0xFFFFFFFF);
+		SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 150.0f, 150.0f));
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_ParticleDiffuseTexture);
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_ParticleNormalTexture);
+		m_ParticleShader->Bind();
+		RRenderer.D3DImmediateContext()->IASetInputLayout(m_ParticleIL);
+		m_ParticleBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+	}
+
+	// Unbind all shader resources so we can write into it
+	ID3D11ShaderResourceView* nullSRV[] = { nullptr };
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, nullSRV);
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, nullSRV);
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, nullSRV);
 }
