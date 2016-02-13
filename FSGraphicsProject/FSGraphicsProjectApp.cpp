@@ -104,6 +104,7 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_SamplerComparisonState);
 	SAFE_RELEASE(m_SamplerState);
 
+	SAFE_RELEASE(m_cbScreen);
 	SAFE_RELEASE(m_cbMaterial);
 	SAFE_RELEASE(m_cbLight);
 	SAFE_RELEASE(m_cbPerObject);
@@ -279,6 +280,16 @@ bool FSGraphicsProjectApp::Initialize()
 	cbInstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
 
 	RRenderer.D3DDevice()->CreateBuffer(&cbInstanceDesc, NULL, &m_cbInstance);
+
+	D3D11_BUFFER_DESC cbScreenDesc;
+	ZeroMemory(&cbScreenDesc, sizeof(cbScreenDesc));
+	cbScreenDesc.ByteWidth = sizeof(SHADER_SCREEN_BUFFER);
+	cbScreenDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbScreenDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbScreenDesc.Usage = D3D11_USAGE_DYNAMIC;
+
+	RRenderer.D3DDevice()->CreateBuffer(&cbScreenDesc, NULL, &m_cbScreen);
+
 
 	// Create input layout
 	D3D11_INPUT_ELEMENT_DESC objVertDesc[] =
@@ -565,6 +576,16 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	memcpy(subres.pData, &cbInstance, sizeof(SHADER_INSTANCE_BUFFER));
 	RRenderer.D3DImmediateContext()->Unmap(m_cbInstance, 0);
 
+	// Update screen information
+	SHADER_SCREEN_BUFFER cbScreen;
+	ZeroMemory(&cbScreen, sizeof(cbScreen));
+
+	cbScreen.ScreenSize = XMFLOAT2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());
+
+	RRenderer.D3DImmediateContext()->Map(m_cbScreen, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+	memcpy(subres.pData, &cbScreen, sizeof(SHADER_SCREEN_BUFFER));
+	RRenderer.D3DImmediateContext()->Unmap(m_cbScreen, 0);
+
 	// Update particle vertices
 	ParticleDepthComparer cmp(cameraMatrix.r[3], cameraMatrix.r[2]);
 	std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
@@ -586,6 +607,7 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(2, 1, &m_cbInstance);
 	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, &m_cbLight);
 	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(1, 1, &m_cbMaterial);
+	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(2, 1, &m_cbScreen);
 	RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
 	RRenderer.D3DImmediateContext()->PSSetSamplers(2, 1, &m_SamplerComparisonState);
 	RRenderer.D3DImmediateContext()->GSSetConstantBuffers(1, 1, &m_cbScene);

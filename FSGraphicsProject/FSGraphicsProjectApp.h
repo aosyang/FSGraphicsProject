@@ -61,6 +61,7 @@ private:
 	ID3D11Buffer*				m_cbLight;
 	ID3D11Buffer*				m_cbMaterial;
 	ID3D11Buffer*				m_cbInstance;
+	ID3D11Buffer*				m_cbScreen;
 
 	ID3D11ShaderResourceView*	m_MeshTextureSRV[3];
 	ID3D11SamplerState*			m_SamplerState;
