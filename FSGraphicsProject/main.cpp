@@ -13,8 +13,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	int nCmdShow)
 {
 	REngine Engine;
+	FSGraphicsProjectApp app;
 
-	Engine.BindApp<FSGraphicsProjectApp>();
+	Engine.BindApp(&app);
 
 	if (Engine.Initialize())
 	{

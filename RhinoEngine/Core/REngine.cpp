@@ -52,7 +52,7 @@ bool REngine::Initialize()
 
 void REngine::Shutdown()
 {
-	delete m_Application;
+	//delete m_Application;
 	RRenderer.Shutdown();
 	DestroyRenderWindow();
 	gEngine = nullptr;

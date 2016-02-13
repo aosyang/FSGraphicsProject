@@ -16,8 +16,7 @@ public:
 	bool Initialize();
 
 	// Specify the application for the engine to run
-	template<typename T>
-	inline void BindApp() { SAFE_DELETE(m_Application); m_Application = new T(); }
+	inline void BindApp(IApp* app) { m_Application = app; }
 
 	// Shutdown the engine and destroy all engine components
 	void Shutdown();

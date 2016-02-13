@@ -657,7 +657,7 @@ void FSGraphicsProjectApp::RenderScene()
 
 
 	// Set shadow map to pixel shader
-	ID3D11ShaderResourceView* shadowMapSRV[] = { m_ShadowMap.GetRenderTargetSRV() };
+	ID3D11ShaderResourceView* shadowMapSRV[] = { m_ShadowMap.GetRenderTargetDepthSRV() };
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, shadowMapSRV);
 
 	// Set up object world matrix

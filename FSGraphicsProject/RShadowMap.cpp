@@ -15,6 +15,7 @@ RShadowMap::RShadowMap()
 
 RShadowMap::~RShadowMap()
 {
+	SAFE_RELEASE(m_RenderTargetDepthSRV);
 	SAFE_RELEASE(m_DepthBuffer);
 	SAFE_RELEASE(m_DepthView);
 	SAFE_RELEASE(m_RenderTargetSRV);
@@ -51,21 +52,24 @@ void RShadowMap::Initialize(int width, int height)
 	renderTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	RRenderer.D3DDevice()->CreateTexture2D(&renderTextureDesc, 0, &m_DepthBuffer);
 
-	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
-	dsvDesc.Flags = 0;
-	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	dsvDesc.Texture2D.MipSlice = 0;
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+	depthStencilViewDesc.Flags = 0;
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
 
-	RRenderer.D3DDevice()->CreateDepthStencilView(m_DepthBuffer, &dsvDesc, &m_DepthView);
+	RRenderer.D3DDevice()->CreateDepthStencilView(m_DepthBuffer, &depthStencilViewDesc, &m_DepthView);
 
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = 1;
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+	shaderResourceViewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+	shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
-	RRenderer.D3DDevice()->CreateShaderResourceView(m_DepthBuffer, &srvDesc, &m_RenderTargetSRV);
+	RRenderer.D3DDevice()->CreateShaderResourceView(m_DepthBuffer, &shaderResourceViewDesc, &m_RenderTargetDepthSRV);
+
+	shaderResourceViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	RRenderer.D3DDevice()->CreateShaderResourceView(m_RenderTargetBuffer, &shaderResourceViewDesc, &m_RenderTargetSRV);
 }
 
 void RShadowMap::SetOrthogonalProjection(float viewWidth, float viewHeight, float nearZ, float farZ)
