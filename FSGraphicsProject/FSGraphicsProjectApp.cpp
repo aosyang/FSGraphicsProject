@@ -390,10 +390,8 @@ bool FSGraphicsProjectApp::Initialize()
 			  y = MathHelper::RandF(-1000.0f, 1000.0f),
 			  z = MathHelper::RandF(-1000.0f, 1000.0f),
 			  w = MathHelper::RandF(500.0f, 750.0f);
-		float r = MathHelper::RandF(),
-			  g = MathHelper::RandF(),
-			  b = MathHelper::RandF();
-		m_ParticleVert[i] = { XMFLOAT4(x, y, z, w), XMFLOAT4(r, g, b, 1.0f) };
+		float ic = MathHelper::RandF(0.5f, 1.0f);
+		m_ParticleVert[i] = { XMFLOAT4(x, y, z, w), XMFLOAT4(ic, ic, ic, 1.0f) };
 	}
 
 	m_ParticleDiffuseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/smoke_diffuse.dds");
