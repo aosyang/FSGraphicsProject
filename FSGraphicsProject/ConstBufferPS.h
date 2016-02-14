@@ -26,8 +26,9 @@ struct POINT_LIGHT
 
 struct SPOTLIGHT
 {
-	float4	PosAndInnerConeRatio;		// w as inner cone ratio
-	float4	ConeDirAndOuterConeRatio;	// w as outer cone ratio
+	float4	PosAndRadius;				// w as light radius
+	float4	Direction;
+	float4	ConeRatio;					// x, y as inner/outer cone ratio
 	float4	Color;						// w as color intensity
 };
 

@@ -63,11 +63,13 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 	for (int is = 0; is < SpotlightCount; is++)
 	{
-		float3 lightVec = Spotlight[is].PosAndInnerConeRatio.xyz - Input.PosW;
+		float3 lightVec = Spotlight[is].PosAndRadius.xyz - Input.PosW;
 		float3 lightDir = normalize(lightVec);
 
-		float surfaceRatio = saturate(dot(-lightDir, Spotlight[is].ConeDirAndOuterConeRatio.xyz));
-		float attenuation = 1.0f - saturate((Spotlight[is].PosAndInnerConeRatio.w - surfaceRatio) / (Spotlight[is].PosAndInnerConeRatio.w - Spotlight[is].ConeDirAndOuterConeRatio.w));
+		float surfaceRatio = saturate(dot(-lightDir, Spotlight[is].Direction.xyz));
+		float radiusAtt = 1.0f - saturate(length(lightVec) / Spotlight[is].PosAndRadius.w);
+		float coneAtt = 1.0f - saturate((Spotlight[is].ConeRatio.x - surfaceRatio) / (Spotlight[is].ConeRatio.x - Spotlight[is].ConeRatio.y));
+		float attenuation = radiusAtt * coneAtt;
 
 		// Diffuse lighting
 		Diffuse.rgb += attenuation * CalculateDiffuseLight(normal, lightDir, Spotlight[is].Color);

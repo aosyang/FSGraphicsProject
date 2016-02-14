@@ -590,10 +590,12 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	if (m_EnableLights[2])
 	{
 		cbLight.SpotlightCount = 1;
-		XMVECTOR spotlightPos = XMVectorSet(cameraMatrix.r[3].m128_f32[0], cameraMatrix.r[3].m128_f32[1], cameraMatrix.r[3].m128_f32[2], 0.97f);
-		XMVECTOR spotlightCone = XMVectorSet(cameraMatrix.r[2].m128_f32[0], cameraMatrix.r[2].m128_f32[1], cameraMatrix.r[2].m128_f32[2], 0.9f);
-		XMStoreFloat4(&cbLight.Spotlight[0].PosAndInnerConeRatio, spotlightPos);
-		XMStoreFloat4(&cbLight.Spotlight[0].ConeDirAndOuterConeRatio, spotlightCone);
+		XMVECTOR spotlightPos = XMVectorSet(cameraMatrix.r[3].m128_f32[0], cameraMatrix.r[3].m128_f32[1], cameraMatrix.r[3].m128_f32[2], 2000.0f);
+		XMVECTOR spotlightDir = XMVectorSet(cameraMatrix.r[2].m128_f32[0], cameraMatrix.r[2].m128_f32[1], cameraMatrix.r[2].m128_f32[2], 1.0f);
+		XMVECTOR spotlightRatio = XMVectorSet(0.97f, 0.9f, 0.0f, 0.0f);
+		XMStoreFloat4(&cbLight.Spotlight[0].PosAndRadius, spotlightPos);
+		XMStoreFloat4(&cbLight.Spotlight[0].Direction, spotlightDir);
+		XMStoreFloat4(&cbLight.Spotlight[0].ConeRatio, spotlightRatio);
 		XMStoreFloat4(&cbLight.Spotlight[0].Color, XMVectorSet(0.85f, 0.85f, 1.0f, 1.0f));
 	}
 
