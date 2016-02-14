@@ -68,6 +68,8 @@
     <FxCompile Include="Particle_GS.hlsl" />
     <FxCompile Include="Refraction_VS.hlsl" />
     <FxCompile Include="Refraction_PS.hlsl" />
+    <FxCompile Include="AmbientOcclusion_PS.hlsl" />
+    <FxCompile Include="AmbientOcclusion_VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FSGraphicsProject.licenseheader" />

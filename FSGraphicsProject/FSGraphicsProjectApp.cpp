@@ -28,6 +28,8 @@
 #include "Particle_GS.csh"
 #include "Refraction_PS.csh"
 #include "Refraction_VS.csh"
+#include "AmbientOcclusion_PS.csh"
+#include "AmbientOcclusion_VS.csh"
 
 struct COLOR_VERTEX
 {
@@ -139,7 +141,8 @@ bool FSGraphicsProjectApp::Initialize()
 	RShaderManager::Instance().AddShader("InstancedDepth", InstancedDepth_PS, sizeof(InstancedDepth_PS), InstancedDepth_VS, sizeof(InstancedDepth_VS));
 	RShaderManager::Instance().AddShader("Particle", Particle_PS, sizeof(Particle_PS), Particle_VS, sizeof(Particle_VS), Particle_GS, sizeof(Particle_GS));
 	RShaderManager::Instance().AddShader("Refraction", Refraction_PS, sizeof(Refraction_PS), Refraction_VS, sizeof(Refraction_VS));
-
+	RShaderManager::Instance().AddShader("AmbientOcclusion", AmbientOcclusion_PS, sizeof(AmbientOcclusion_PS), AmbientOcclusion_VS, sizeof(AmbientOcclusion_VS));
+	
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 	m_LightingShader = RShaderManager::Instance().GetShaderResource("Lighting");
 	m_BumpLightingShader = RShaderManager::Instance().GetShaderResource("BumpLighting");
@@ -148,6 +151,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_InstancedDepthShader = RShaderManager::Instance().GetShaderResource("InstancedDepth");
 	m_ParticleShader = RShaderManager::Instance().GetShaderResource("Particle");
 	m_RefractionShader = RShaderManager::Instance().GetShaderResource("Refraction");
+	m_AOShader = RShaderManager::Instance().GetShaderResource("AmbientOcclusion");
 
 	// Create buffer for star mesh
 	COLOR_VERTEX starVertex[12];
@@ -330,6 +334,19 @@ bool FSGraphicsProjectApp::Initialize()
 	};
 
 	m_TachikomaObj.SetMaterial(tachikomaMaterials, 1);
+
+
+	m_AOSceneMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/AO_Scene.fbx", m_LightingMeshIL);
+	m_AOSceneObj.SetMesh(m_AOSceneMesh);
+	m_AOTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/AO_Scene.dds");
+
+	RMaterial aoMat[] =
+	{
+		{ m_AOShader, 1, m_AOTexture },
+	};
+
+	m_AOSceneObj.SetMaterial(aoMat, 1);
+	m_AOSceneObj.SetPosition(XMFLOAT3(-500.0f, 0.0f, 500.0f));
 
 	m_SceneMeshIsland = RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx", m_LightingMeshIL);
 	m_IslandTextureSRV = RResourceManager::Instance().LoadDDSTexture("../Assets/TR_FloatingIsland02.dds");
@@ -723,6 +740,14 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		m_IslandMeshObj.DrawWithShader(m_InstancedDepthShader, true, MAX_INSTANCE_COUNT);
 	else
 		m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
+
+	// Draw AO scene
+	SetPerObjectConstBuffuer(m_AOSceneObj.GetNodeTransform());
+
+	if (pass == ShadowPass)
+		m_AOSceneObj.DrawWithShader(m_DepthShader);
+	else
+		m_AOSceneObj.Draw();
 
 	// Draw bumped cube
 	SetPerObjectConstBuffuer(XMMatrixTranslation(-1400.0f, 150.0f, 0.0f));

@@ -82,6 +82,11 @@ private:
 	RSMeshObject				m_TachikomaObj;
 	RShader*					m_RefractionShader;
 
+	RMesh*						m_AOSceneMesh;
+	RSMeshObject				m_AOSceneObj;
+	RShader*					m_AOShader;
+	ID3D11ShaderResourceView*	m_AOTexture;
+
 	RMesh*						m_SceneMeshIsland;
 	ID3D11ShaderResourceView*	m_IslandTextureSRV;
 	RSMeshObject				m_IslandMeshObj;
