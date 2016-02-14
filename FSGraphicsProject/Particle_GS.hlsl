@@ -32,6 +32,18 @@ void main(
 )
 {
 	float3x3 invView = transpose((float3x3)viewMatrix);
+
+	float3 right = normalize(float3(invView._m00, invView._m01, invView._m02));
+	float3 forward = normalize(Input[0].PosW.xyz - cameraPos.xyz);
+	float3 up = normalize(cross(forward, right));
+
+	//float3 up = float3(0, 1, 0);
+	//float3 forward = normalize(Input[0].PosW.xyz - cameraPos.xyz);
+	//float3 right = normalize(cross(up, forward));
+	//up = normalize(cross(forward, right));
+
+	invView = float3x3(right, up, forward);
+
 	float4 offset[4];
 	offset[0] = float4(mul(float3(-0.5f, -0.5f, 0.0f), invView), 0.0f);
 	offset[1] = float4(mul(float3(-0.5f, 0.5f, 0.0f), invView), 0.0f);

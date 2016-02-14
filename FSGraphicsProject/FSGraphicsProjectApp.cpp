@@ -47,28 +47,37 @@ struct BUMP_MESH_VERTEX
 
 struct ParticleDepthComparer
 {
-	XMFLOAT3 CamPos, CamDir;
+	XMFLOAT4 CamPos, CamDir;
 
 	ParticleDepthComparer(const XMVECTOR& camPos, const XMVECTOR& camDir)
 	{
-		XMStoreFloat3(&CamPos, camPos);
-		XMStoreFloat3(&CamDir, camDir);
+		XMStoreFloat4(&CamPos, camPos);
+		XMStoreFloat4(&CamDir, camDir);
 	}
 
 	bool operator()(const PARTICLE_VERTEX &a, const PARTICLE_VERTEX &b)
 	{
-		return dot(minus(a.pos, CamPos), CamDir) > dot(minus(b.pos, CamPos), CamDir);
+		//return dot(minus(a.pos, CamPos), CamDir) > dot(minus(b.pos, CamPos), CamDir);
+		return sqrDist(a.pos, CamPos) > sqrDist(b.pos, CamPos);
 	}
 
 	// Helper functions
-	static float dot(const XMFLOAT3& a, const XMFLOAT3& b)
+	static float dot(const XMFLOAT4& a, const XMFLOAT4& b)
 	{
 		return a.x * b.x + a.y * b.y + a.z * b.z;
 	}
 
-	static XMFLOAT3 minus(const XMFLOAT4& a, const XMFLOAT3 b)
+	static XMFLOAT4 minus(const XMFLOAT4& a, const XMFLOAT4 b)
 	{
-		return XMFLOAT3(a.x - b.x, a.y - b.y, a.z - b.z);
+		return XMFLOAT4(a.x - b.x, a.y - b.y, a.z - b.z, 1.0f);
+	}
+
+	static float sqrDist(const XMFLOAT4& a, const XMFLOAT4 b)
+	{
+		float dx = b.x - a.x,
+			  dy = b.y - a.y,
+			  dz = b.z - a.z;
+		return dx * dx + dy * dy + dz * dz;
 	}
 };
 
@@ -96,6 +105,9 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_RenderTargetBuffer);
 	SAFE_RELEASE(m_RenderTargetView);
 	SAFE_RELEASE(m_RenderTargetSRV);
+
+	SAFE_RELEASE(m_DepthState[0]);
+	SAFE_RELEASE(m_DepthState[1]);
 
 	SAFE_RELEASE(m_BlendState[0]);
 	SAFE_RELEASE(m_BlendState[1]);
@@ -403,9 +415,9 @@ bool FSGraphicsProjectApp::Initialize()
 
 	for (int i = 0; i < PARTICLE_COUNT; i++)
 	{
-		float x = MathHelper::RandF(-1000.0f, 1000.0f),
-			  y = MathHelper::RandF(-1000.0f, 1000.0f),
-			  z = MathHelper::RandF(-1000.0f, 1000.0f),
+		float x = MathHelper::RandF(-2000.0f, 1000.0f),
+			  y = MathHelper::RandF(1000.0f, 1200.0f),
+			  z = MathHelper::RandF(-2000.0f, 1000.0f),
 			  w = MathHelper::RandF(500.0f, 750.0f);
 		float ic = MathHelper::RandF(0.5f, 1.0f);
 		m_ParticleVert[i] = { XMFLOAT4(x, y, z, w), XMFLOAT4(ic, ic, ic, 1.0f) };
@@ -428,6 +440,35 @@ bool FSGraphicsProjectApp::Initialize()
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[1]);
+
+	D3D11_DEPTH_STENCIL_DESC depthDesc;
+
+	// Depth test parameters
+	depthDesc.DepthEnable = true;
+	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	// Stencil test parameters
+	depthDesc.StencilEnable = false;
+	depthDesc.StencilReadMask = 0xFF;
+	depthDesc.StencilWriteMask = 0xFF;
+
+	// Stencil operations if pixel is front-facing
+	depthDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Stencil operations if pixel is back-facing
+	depthDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	RRenderer.D3DDevice()->CreateDepthStencilState(&depthDesc, &m_DepthState[0]);
+
+	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	RRenderer.D3DDevice()->CreateDepthStencilState(&depthDesc, &m_DepthState[1]);
 
 	return true;
 }
@@ -774,16 +815,21 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	else if (pass == NormalPass)
 		m_TachikomaObj.Draw();
 
-	if (pass == NormalPass)
+	if (pass != ShadowPass)
 	{
 		// Draw particles
 		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[1], blendFactor, 0xFFFFFFFF);
+		RRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[1], 0);
+
 		SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 150.0f, 150.0f));
 		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_ParticleDiffuseTexture);
 		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_ParticleNormalTexture);
 		m_ParticleShader->Bind();
 		RRenderer.D3DImmediateContext()->IASetInputLayout(m_ParticleIL);
 		m_ParticleBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+		// Restore depth writing
+		RRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[0], 0);
 	}
 
 	// Unbind all shader resources so we can write into it

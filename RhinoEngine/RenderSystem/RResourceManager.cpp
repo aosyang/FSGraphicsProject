@@ -19,7 +19,7 @@ struct MESH_VERTEX
 
 	bool operator<(const MESH_VERTEX& rhs) const
 	{
-		return lexicographical_compare((const float*)this, (const float*)this + 8, (const float*)&rhs, (const float*)&rhs + 8);
+		return lexicographical_compare((const float*)this, (const float*)this + sizeof(MESH_VERTEX) / 4, (const float*)&rhs, (const float*)&rhs + sizeof(MESH_VERTEX) / 4);
 	}
 };
 

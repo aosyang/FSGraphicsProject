@@ -11,7 +11,7 @@
 #include "RSkybox.h"
 #include "RShadowMap.h"
 
-#define PARTICLE_COUNT 20
+#define PARTICLE_COUNT 200
 
 enum RenderPass
 {
@@ -103,6 +103,7 @@ private:
 	ID3D11ShaderResourceView*	m_ParticleDiffuseTexture;
 	ID3D11ShaderResourceView*	m_ParticleNormalTexture;
 	ID3D11BlendState*			m_BlendState[2];
+	ID3D11DepthStencilState*	m_DepthState[2];
 
 	ID3D11Texture2D*			m_RenderTargetBuffer;
 	ID3D11RenderTargetView*		m_RenderTargetView;
