@@ -42,6 +42,10 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename, ID3D11InputLayout* in
 {
 	vector<RMeshElement> meshElements;
 
+	char msg_buf[1024];
+	sprintf_s(msg_buf, sizeof(msg_buf), "Loading mesh [%s]...\n", filename);
+	OutputDebugStringA(msg_buf);
+
 	// Create the FBX SDK manager
 	FbxManager* lFbxSdkManager = FbxManager::Create();
 
@@ -104,7 +108,6 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename, ID3D11InputLayout* in
 	int nodeCount = lFbxScene->GetNodeCount();
 	for (int idxNode = 0; idxNode < nodeCount; idxNode++)
 	{
-		char msg_buf[1024];
 		sprintf_s(msg_buf, sizeof(msg_buf), "Loading FBX node [%d/%d]...\n", idxNode + 1, nodeCount);
 		OutputDebugStringA(msg_buf);
 
@@ -302,6 +305,8 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename, ID3D11InputLayout* in
 		}
 
 		// Optimize mesh
+		sprintf_s(msg_buf, "Optimizing mesh...\n");
+		OutputDebugStringA(msg_buf);
 		map<MESH_VERTEX, int> meshVertIndexTable;
 		vector<MESH_VERTEX> optimizedVertData;
 		vector<int> optimizedIndexData;
@@ -348,6 +353,11 @@ ID3D11ShaderResourceView* RResourceManager::LoadDDSTexture(const char* filename)
 	size_t char_len;
 	wchar_t wszName[1024];
 	mbstowcs_s(&char_len, wszName, 1024, filename, strlen(filename));
+
+	char msg_buf[1024];
+	sprintf_s(msg_buf, sizeof(msg_buf), "Loading texture [%s]...\n", filename);
+	OutputDebugStringA(msg_buf);
+
 	CreateDDSTextureFromFile(RRenderer.D3DDevice(), wszName, nullptr, &srv);
 
 	m_TextureResources.push_back(srv);
