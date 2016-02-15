@@ -6,9 +6,6 @@
 
 #include "FSGraphicsProjectApp.h"
 
-#include "ConstBufferPS.h"
-#include "ConstBufferVS.h"
-
 #include "Color_PS.csh"
 #include "Color_VS.csh"
 #include "Lighting_PS.csh"
@@ -111,6 +108,7 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 
 	SAFE_RELEASE(m_BlendState[0]);
 	SAFE_RELEASE(m_BlendState[1]);
+	SAFE_RELEASE(m_BlendState[2]);
 
 	SAFE_RELEASE(m_ParticleIL);
 	m_ParticleBuffer.Release();
@@ -442,6 +440,9 @@ bool FSGraphicsProjectApp::Initialize()
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[1]);
 
+	blendDesc.AlphaToCoverageEnable = true;
+	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[2]);
+
 	D3D11_DEPTH_STENCIL_DESC depthDesc;
 
 	// Depth test parameters
@@ -583,7 +584,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	if (m_EnableLights[1])
 	{
 		cbLight.PointLightCount = 1;
-		XMVECTOR pointLightPosAndRadius = XMVectorSet(sinf(timer.TotalTime()) * 400.0f, 50.0f, cosf(timer.TotalTime()) * 400.0f, 1000.0f);
+		XMVECTOR pointLightPosAndRadius = XMVectorSet(sinf(timer.TotalTime()) * 400.0f, 700.0f, cosf(timer.TotalTime()) * 400.0f, 1000.0f);
 		XMStoreFloat4(&cbLight.PointLight[0].PosAndRadius, pointLightPosAndRadius);
 		XMStoreFloat4(&cbLight.PointLight[0].Color, XMVectorSet(1.0f, 0.75f, 0.75f, 5.0f));
 	}
@@ -605,16 +606,6 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	RRenderer.D3DImmediateContext()->Map(m_cbLight, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 	memcpy(subres.pData, &cbLight, sizeof(SHADER_LIGHT_BUFFER));
 	RRenderer.D3DImmediateContext()->Unmap(m_cbLight, 0);
-
-	// Update material buffer
-	SHADER_MATERIAL_BUFFER cbMaterial;
-	ZeroMemory(&cbMaterial, sizeof(cbMaterial));
-
-	XMStoreFloat4(&cbMaterial.SpecularColorAndPower, XMVectorSet(1.0f, 1.0f, 1.0f, 512.0f));
-
-	RRenderer.D3DImmediateContext()->Map(m_cbMaterial, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-	memcpy(subres.pData, &cbMaterial, sizeof(SHADER_MATERIAL_BUFFER));
-	RRenderer.D3DImmediateContext()->Unmap(m_cbMaterial, 0);
 
 	// Update instance buffer
 	SHADER_INSTANCE_BUFFER cbInstance;
@@ -736,6 +727,18 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 {
 	ID3D11ShaderResourceView* shadowMapSRV[] = { m_ShadowMap.GetRenderTargetDepthSRV() };
 	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+	float timeNow = REngine::GetTimer().TotalTime();
+	float loadingFadeInTime = 1.0f;
+
+	// Update material buffer
+	SHADER_MATERIAL_BUFFER cbMaterial;
+	ZeroMemory(&cbMaterial, sizeof(cbMaterial));
+
+	XMStoreFloat4(&cbMaterial.SpecularColorAndPower, XMVectorSet(1.0f, 1.0f, 1.0f, 512.0f));
+	cbMaterial.GlobalOpacity = 1.0f;
+	SetMaterialConstBuffer(&cbMaterial);
+
 	RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
 
 	RRenderer.Clear();
@@ -775,7 +778,21 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	if (pass == ShadowPass)
 		m_FbxMeshObj.DrawWithShader(m_DepthShader);
 	else
-		m_FbxMeshObj.Draw();
+	{
+		float opacity = (timeNow - m_FbxMeshObj.GetResourceTimestamp()) / loadingFadeInTime;
+		if (opacity >= 0.0f && opacity <= 1.0f)
+		{
+			cbMaterial.GlobalOpacity = opacity;
+			SetMaterialConstBuffer(&cbMaterial);
+			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[2], blendFactor, 0xFFFFFFFF);
+			m_FbxMeshObj.Draw();
+		}
+		else
+		{
+			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
+			m_FbxMeshObj.Draw();
+		}
+	}
 
 	// Draw islands
 	SetPerObjectConstBuffuer(m_IslandMeshObj.GetNodeTransform());
@@ -783,7 +800,21 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	if (pass == ShadowPass)
 		m_IslandMeshObj.DrawWithShader(m_InstancedDepthShader, true, MAX_INSTANCE_COUNT);
 	else
-		m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
+	{
+		float opacity = (timeNow - m_IslandMeshObj.GetResourceTimestamp()) / loadingFadeInTime;
+		if (opacity >= 0.0f && opacity <= 1.0f)
+		{
+			cbMaterial.GlobalOpacity = opacity;
+			SetMaterialConstBuffer(&cbMaterial);
+			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[2], blendFactor, 0xFFFFFFFF);
+			m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
+		}
+		else
+		{
+			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
+			m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
+		}
+	}
 
 	// Draw AO scene
 	SetPerObjectConstBuffuer(m_AOSceneObj.GetNodeTransform());
@@ -791,7 +822,21 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	if (pass == ShadowPass)
 		m_AOSceneObj.DrawWithShader(m_DepthShader);
 	else
-		m_AOSceneObj.Draw();
+	{
+		float opacity = (timeNow - m_AOSceneObj.GetResourceTimestamp()) / loadingFadeInTime;
+		if (opacity >= 0.0f && opacity <= 1.0f)
+		{
+			cbMaterial.GlobalOpacity = opacity;
+			SetMaterialConstBuffer(&cbMaterial);
+			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[2], blendFactor, 0xFFFFFFFF);
+			m_AOSceneObj.Draw();
+		}
+		else
+		{
+			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
+			m_AOSceneObj.Draw();
+		}
+	}
 
 	// Draw bumped cube
 	SetPerObjectConstBuffuer(XMMatrixTranslation(-1400.0f, 150.0f, 0.0f));
@@ -803,6 +848,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	}
 	else
 	{
+		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
 		m_BumpLightingShader->Bind();
 		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_BumpBaseTextureSRV);
 		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_BumpNormalTextureSRV);
@@ -816,7 +862,21 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	if (pass == ShadowPass)
 		m_TachikomaObj.DrawWithShader(m_DepthShader);
 	else if (pass == NormalPass)
-		m_TachikomaObj.Draw();
+	{
+		float opacity = (timeNow - m_TachikomaObj.GetResourceTimestamp()) / loadingFadeInTime;
+		if (opacity >= 0.0f && opacity <= 1.0f)
+		{
+			cbMaterial.GlobalOpacity = opacity;
+			SetMaterialConstBuffer(&cbMaterial);
+			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[2], blendFactor, 0xFFFFFFFF);
+			m_TachikomaObj.Draw();
+		}
+		else
+		{
+			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
+			m_TachikomaObj.Draw();
+		}
+	}
 
 	if (pass != ShadowPass)
 	{
@@ -840,4 +900,12 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, nullSRV);
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, nullSRV);
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, nullSRV);
+}
+
+void FSGraphicsProjectApp::SetMaterialConstBuffer(SHADER_MATERIAL_BUFFER* buffer)
+{
+	D3D11_MAPPED_SUBRESOURCE subres;
+	RRenderer.D3DImmediateContext()->Map(m_cbMaterial, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+	memcpy(subres.pData, buffer, sizeof(SHADER_MATERIAL_BUFFER));
+	RRenderer.D3DImmediateContext()->Unmap(m_cbMaterial, 0);
 }

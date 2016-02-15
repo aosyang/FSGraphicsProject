@@ -25,16 +25,18 @@ public:
 	void Run();
 
 	void ResizeApp(int width, int height);
+
+	static RTimer& GetTimer() { return m_Timer; }
 private:
 	bool CreateRenderWindow(int width, int height, bool fullscreen=false, int bpp=32);
 	void DestroyRenderWindow();
 	void CalculateFrameStats();
 
-	HINSTANCE	m_hInst;
-	HWND		m_hWnd;
-	bool		m_bFullScreen;
-	IApp*		m_Application;
-	RTimer		m_Timer;
+	HINSTANCE			m_hInst;
+	HWND				m_hWnd;
+	bool				m_bFullScreen;
+	IApp*				m_Application;
+	static RTimer		m_Timer;
 };
 
 #endif

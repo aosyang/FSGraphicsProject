@@ -9,11 +9,13 @@
 
 RMesh::RMesh(ID3D11InputLayout* inputLayout)
 {
+	m_LoadingFinishTime = 0.0f;
 	m_InputLayout = inputLayout;
 }
 
 RMesh::RMesh(const vector<RMeshElement> meshElements, const vector<RMaterial>& materials, ID3D11InputLayout* inputLayout)
 {
+	m_LoadingFinishTime = 0.0f;
 	m_MeshElements = meshElements;
 	m_Materials = materials;
 	m_InputLayout = inputLayout;
@@ -21,6 +23,8 @@ RMesh::RMesh(const vector<RMeshElement> meshElements, const vector<RMaterial>& m
 
 RMesh::RMesh(RMeshElement* meshElements, int numElement, RMaterial* materials, int numMaterial, ID3D11InputLayout* inputLayout)
 {
+	m_LoadingFinishTime = 0.0f;
+
 	assert(meshElements && numElement);
 	m_MeshElements.assign(meshElements, meshElements + numElement);
 
@@ -78,4 +82,14 @@ void RMesh::SetMeshElements(RMeshElement* meshElements, int numElement)
 	// TODO: use mutex
 	assert(meshElements && numElement);
 	m_MeshElements.assign(meshElements, meshElements + numElement);
+}
+
+void RMesh::SetResourceTimestamp(float time)
+{
+	m_LoadingFinishTime = time;
+}
+
+float RMesh::GetResourceTimestamp()
+{
+	return m_LoadingFinishTime;
 }

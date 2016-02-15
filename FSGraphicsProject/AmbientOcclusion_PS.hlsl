@@ -76,5 +76,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 	Ambient.rgb = CalculateAmbientLight(normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor);
 
-	return AmbientOcclusionTexture.Sample(Sampler, Input.UV) + Ambient + Diffuse + Specular;
+	float4 Final = AmbientOcclusionTexture.Sample(Sampler, Input.UV) + Ambient + Diffuse + Specular;
+	Final.a *= GlobalOpacity;
+	return Final;
 }

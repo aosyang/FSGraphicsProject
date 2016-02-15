@@ -11,6 +11,9 @@
 #include "RSkybox.h"
 #include "RShadowMap.h"
 
+#include "ConstBufferPS.h"
+#include "ConstBufferVS.h"
+
 #define PARTICLE_COUNT 200
 
 enum RenderPass
@@ -43,6 +46,7 @@ private:
 	void CreateSceneRenderTargetView();
 	void SetPerObjectConstBuffuer(const XMMATRIX& world);
 	void RenderSinglePass(RenderPass pass);
+	void SetMaterialConstBuffer(SHADER_MATERIAL_BUFFER* buffer);
 
 	bool						m_EnableLights[3];
 
@@ -102,7 +106,7 @@ private:
 	PARTICLE_VERTEX				m_ParticleVert[PARTICLE_COUNT];
 	ID3D11ShaderResourceView*	m_ParticleDiffuseTexture;
 	ID3D11ShaderResourceView*	m_ParticleNormalTexture;
-	ID3D11BlendState*			m_BlendState[2];
+	ID3D11BlendState*			m_BlendState[3];
 	ID3D11DepthStencilState*	m_DepthState[2];
 
 	ID3D11Texture2D*			m_RenderTargetBuffer;

@@ -32,12 +32,14 @@ public:
 	vector<RMeshElement>& GetMeshElements();
 
 	void SetMeshElements(RMeshElement* meshElements, int numElement);
-
+	void SetResourceTimestamp(float time);
+	float GetResourceTimestamp();
 private:
 	vector<RMeshElement>	m_MeshElements;
 	ID3D11InputLayout*		m_InputLayout;
 
 	vector<RMaterial>		m_Materials;
+	float					m_LoadingFinishTime;
 };
 
 #endif

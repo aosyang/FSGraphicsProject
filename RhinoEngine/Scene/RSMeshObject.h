@@ -22,6 +22,8 @@ public:
 
 	void Draw(bool instanced = false, int instanceCount = 0);
 	void DrawWithShader(RShader* shader, bool instanced = false, int instanceCount = 0);
+
+	float GetResourceTimestamp();
 private:
 	RMesh*					m_Mesh;
 	vector<RMaterial>		m_Materials;

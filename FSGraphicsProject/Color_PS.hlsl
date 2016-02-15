@@ -4,6 +4,8 @@
 // 
 //=============================================================================
 
+#include "ConstBufferPS.h"
+
 struct OUTPUT_VERTEX
 {
 	float4 Color : COLOR;
@@ -11,5 +13,7 @@ struct OUTPUT_VERTEX
 
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 {
-	return Input.Color;
+	float4 Final = Input.Color;
+	Final.a *= GlobalOpacity;
+	return Final;
 }

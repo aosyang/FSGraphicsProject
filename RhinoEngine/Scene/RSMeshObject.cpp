@@ -88,3 +88,11 @@ void RSMeshObject::DrawWithShader(RShader* shader, bool instanced, int instanceC
 			m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 }
+
+float RSMeshObject::GetResourceTimestamp()
+{
+	if (m_Mesh)
+		return m_Mesh->GetResourceTimestamp();
+
+	return 0.0f;
+}

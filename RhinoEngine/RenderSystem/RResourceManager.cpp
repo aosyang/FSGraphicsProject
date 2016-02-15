@@ -412,6 +412,7 @@ void LoadFbxMeshData(LoaderThreadTask* task)
 	lFbxSdkManager->Destroy();
 
 	task->Resource->SetMeshElements(meshElements.data(), meshElements.size());
+	task->Resource->SetResourceTimestamp(REngine::GetTimer().TotalTime());
 }
 
 ID3D11ShaderResourceView* RResourceManager::LoadDDSTexture(const char* filename)

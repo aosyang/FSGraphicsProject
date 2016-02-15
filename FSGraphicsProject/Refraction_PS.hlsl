@@ -69,5 +69,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	Ambient.rgb = CalculateAmbientLight(normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor);
 	Ambient.a = 1.0f;
 
-	return lerp(distortion, Ambient, ambientRim)* color + Specular;
+	float4 Final = lerp(distortion, Ambient, ambientRim)* color + Specular;
+	Final.a *= GlobalOpacity;
+	return Final;
 }

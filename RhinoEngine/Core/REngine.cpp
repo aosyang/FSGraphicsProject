@@ -10,6 +10,7 @@
 REngine* gEngine = nullptr;
 
 static TCHAR szWindowClass[] = _T("rhinoapp");
+RTimer REngine::m_Timer;
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
