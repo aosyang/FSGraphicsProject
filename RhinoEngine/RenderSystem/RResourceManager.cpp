@@ -23,6 +23,56 @@ struct MESH_VERTEX
 	}
 };
 
+void LoadFbxMeshData(LoaderThreadTask* task);
+
+void ResourceLoaderThread(LoaderThreadData* data)
+{
+	while (1)
+	{
+		LoaderThreadTask task;
+
+		{
+			unique_lock<mutex> uniqueLock(*data->TaskQueueMutex);
+			data->TaskQueueCondition->wait(uniqueLock, [&]{ return data->TaskQueue->size() != 0 || *data->ShouldQuitThread; });
+
+			if (*data->ShouldQuitThread)
+				break;
+
+			task = data->TaskQueue->front();
+			data->TaskQueue->pop();
+		}
+
+		// Load resource in this task
+		LoadFbxMeshData(&task);
+	}
+}
+
+void RResourceManager::Initialize()
+{
+	// Create resource loader thread
+	m_ShouldQuitLoaderThread = false;
+
+	m_LoaderThreadData.TaskQueue = &m_LoaderThreadTaskQueue;
+	m_LoaderThreadData.TaskQueueMutex = &m_TaskQueueMutex;
+	m_LoaderThreadData.TaskQueueCondition = &m_TaskQueueCondition;
+	m_LoaderThreadData.ShouldQuitThread = &m_ShouldQuitLoaderThread;
+
+	thread t(ResourceLoaderThread, &m_LoaderThreadData);
+	t.detach();
+}
+
+void RResourceManager::Destroy()
+{
+	// terminate loader thread
+	{
+		unique_lock<mutex> uniqueLock(m_TaskQueueMutex);
+		m_ShouldQuitLoaderThread = true;
+	}
+	m_TaskQueueCondition.notify_all();
+
+	UnloadAllMeshes();
+}
+
 void RResourceManager::UnloadAllMeshes()
 {
 	for (UINT32 i = 0; i < m_MeshResources.size(); i++)
@@ -40,10 +90,30 @@ void RResourceManager::UnloadAllMeshes()
 
 RMesh* RResourceManager::LoadFbxMesh(const char* filename, ID3D11InputLayout* inputLayout)
 {
+	RMesh* pMesh = new RMesh(inputLayout);
+	m_MeshResources.push_back(pMesh);
+
+	LoaderThreadTask task;
+	task.Filename = string(filename);
+	task.Resource = pMesh;
+
+	// Upload task to working queue
+	m_TaskQueueMutex.lock();
+	m_LoaderThreadTaskQueue.push(task);
+	m_TaskQueueMutex.unlock();
+
+	// Notify loader thread to start working
+	m_TaskQueueCondition.notify_all();
+
+	return pMesh;
+}
+
+void LoadFbxMeshData(LoaderThreadTask* task)
+{
 	vector<RMeshElement> meshElements;
 
 	char msg_buf[1024];
-	sprintf_s(msg_buf, sizeof(msg_buf), "Loading mesh [%s]...\n", filename);
+	sprintf_s(msg_buf, sizeof(msg_buf), "Loading mesh [%s]...\n", task->Filename.data());
 	OutputDebugStringA(msg_buf);
 
 	// Create the FBX SDK manager
@@ -72,14 +142,14 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename, ID3D11InputLayout* in
 	// In this case, we are assuming the file is in the same directory as the executable.
 
 	// Initialize the importer.
-	bool lImportStatus = lImporter->Initialize(filename, -1, lFbxSdkManager->GetIOSettings());
+	bool lImportStatus = lImporter->Initialize(task->Filename.data(), -1, lFbxSdkManager->GetIOSettings());
 
 	if (!lImportStatus) {
 		printf("Call to FbxImporter::Initialize() failed.\n");
 		printf("Error returned: %s\n\n", lImporter->GetStatus().GetErrorString());
 
 		lFbxSdkManager->Destroy();
-		return NULL;
+		return;
 	}
 
 	// File format version numbers to be populated.
@@ -341,10 +411,7 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename, ID3D11InputLayout* in
 	lFbxScene->Destroy();
 	lFbxSdkManager->Destroy();
 
-	RMesh* pMesh = new RMesh(meshElements.data(), meshElements.size(), NULL, 0, inputLayout);
-	m_MeshResources.push_back(pMesh);
-
-	return pMesh;
+	task->Resource->SetMeshElements(meshElements.data(), meshElements.size());
 }
 
 ID3D11ShaderResourceView* RResourceManager::LoadDDSTexture(const char* filename)

@@ -136,11 +136,12 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	m_Skybox.Release();
 
 	RShaderManager::Instance().UnloadAllShaders();
-	RResourceManager::Instance().UnloadAllMeshes();
+	RResourceManager::Instance().Destroy();
 }
 
 bool FSGraphicsProjectApp::Initialize()
 {
+	RResourceManager::Instance().Initialize();
 	CreateSceneRenderTargetView();
 
 	// Initialize shaders

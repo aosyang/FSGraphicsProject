@@ -7,6 +7,11 @@
 #include "Rhino.h"
 #include "RMesh.h"
 
+RMesh::RMesh(ID3D11InputLayout* inputLayout)
+{
+	m_InputLayout = inputLayout;
+}
+
 RMesh::RMesh(const vector<RMeshElement> meshElements, const vector<RMaterial>& materials, ID3D11InputLayout* inputLayout)
 {
 	m_MeshElements = meshElements;
@@ -66,4 +71,11 @@ ID3D11InputLayout* RMesh::GetInputLayout() const
 vector<RMeshElement>& RMesh::GetMeshElements()
 {
 	return m_MeshElements;
+}
+
+void RMesh::SetMeshElements(RMeshElement* meshElements, int numElement)
+{
+	// TODO: use mutex
+	assert(meshElements && numElement);
+	m_MeshElements.assign(meshElements, meshElements + numElement);
 }

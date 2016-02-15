@@ -47,6 +47,9 @@
     <ClInclude Include="RenderSystem\RShaderManager.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="IResource.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -96,5 +99,8 @@
     <Filter Include="Scene">
       <UniqueIdentifier>{0a958409-2fbf-47bd-b9c5-037fa3a873c3}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RhinoEngine.licenseheader" />
   </ItemGroup>
 </Project>

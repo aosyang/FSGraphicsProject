@@ -19,8 +19,13 @@
 #include <fstream>
 #include <iomanip>
 
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+
 #include <vector>
 #include <map>
+#include <queue>
 #include <string>
 #include <algorithm>
 

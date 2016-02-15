@@ -25,6 +25,7 @@
     <ClInclude Include="Core\RInput.h" />
     <ClInclude Include="Core\RSingleton.h" />
     <ClInclude Include="Core\RTimer.h" />
+    <ClInclude Include="IResource.h" />
     <ClInclude Include="RenderSystem\d3dUtil.h" />
     <ClInclude Include="RenderSystem\DDSTextureLoader.h" />
     <ClInclude Include="RenderSystem\RMesh.h" />
@@ -49,6 +50,9 @@
     <ClCompile Include="RenderSystem\RShaderManager.cpp" />
     <ClCompile Include="Scene\RSceneObject.cpp" />
     <ClCompile Include="Scene\RSMeshObject.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RhinoEngine.licenseheader" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{609BE637-9CC8-4ABA-9308-3FCC5D0B43EC}</ProjectGuid>
