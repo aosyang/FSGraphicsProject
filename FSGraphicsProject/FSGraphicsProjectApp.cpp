@@ -418,9 +418,10 @@ bool FSGraphicsProjectApp::Initialize()
 	{
 		{ "POSITION",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR",		0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD",	0, DXGI_FORMAT_R32_FLOAT,			0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	RRenderer.D3DDevice()->CreateInputLayout(particleVertDesc, 2, m_ParticleShader->VS_Bytecode, m_ParticleShader->VS_BytecodeSize, &m_ParticleIL);
+	RRenderer.D3DDevice()->CreateInputLayout(particleVertDesc, 3, m_ParticleShader->VS_Bytecode, m_ParticleShader->VS_BytecodeSize, &m_ParticleIL);
 
 	for (int i = 0; i < PARTICLE_COUNT; i++)
 	{
@@ -429,7 +430,7 @@ bool FSGraphicsProjectApp::Initialize()
 			  z = MathHelper::RandF(-2000.0f, 1000.0f),
 			  w = MathHelper::RandF(500.0f, 750.0f);
 		float ic = MathHelper::RandF(0.5f, 1.0f);
-		m_ParticleVert[i] = { XMFLOAT4(x, y, z, w), XMFLOAT4(ic, ic, ic, 1.0f) };
+		m_ParticleVert[i] = { XMFLOAT4(x, y, z, w), XMFLOAT4(ic, ic, ic, 1.0f), MathHelper::RandF(0.0f, PI * 2) };
 	}
 
 	m_ParticleDiffuseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/smoke_diffuse.dds");

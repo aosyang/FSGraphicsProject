@@ -27,6 +27,7 @@ struct PARTICLE_VERTEX
 {
 	XMFLOAT4 pos;
 	XMFLOAT4 color;
+	float	 rot;
 };
 
 class FSGraphicsProjectApp : public IApp

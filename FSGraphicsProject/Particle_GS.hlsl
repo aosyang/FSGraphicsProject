@@ -11,7 +11,7 @@ struct OUTPUT_VERTEX
 	float4 Color	: COLOR;
 	float4 PosH		: SV_POSITION;
 	float4 PosW		: POSITION;
-	float Size		: TEXCOORD0;
+	float2 SizeRot	: TEXCOORD0;
 };
 
 struct GSOutput
@@ -33,16 +33,21 @@ void main(
 {
 	float3x3 invView = transpose((float3x3)viewMatrix);
 
-	float3 right = normalize(float3(invView._m00, invView._m01, invView._m02));
-	float3 forward = normalize(Input[0].PosW.xyz - cameraPos.xyz);
-	float3 up = normalize(cross(forward, right));
-
-	//float3 up = float3(0, 1, 0);
+	//float3 right = normalize(float3(invView._m00, invView._m01, invView._m02));
 	//float3 forward = normalize(Input[0].PosW.xyz - cameraPos.xyz);
-	//float3 right = normalize(cross(up, forward));
-	//up = normalize(cross(forward, right));
+	//float3 up = normalize(cross(forward, right));
 
-	invView = float3x3(right, up, forward);
+	float3 up = float3(0, 1, 0);
+	float3 forward = normalize(Input[0].PosW.xyz - cameraPos.xyz);
+	float3 right = normalize(cross(up, forward));
+	up = normalize(cross(forward, right));
+
+	float theta = Input[0].SizeRot.y;
+	float3x3 rot = float3x3(cos(theta), -sin(theta), 0,
+							sin(theta), cos(theta), 0,
+							0, 0, 1);
+
+	invView = mul(rot, float3x3(right, up, forward));
 
 	float4 offset[4];
 	offset[0] = float4(mul(float3(-0.5f, -0.5f, 0.0f), invView), 0.0f);
@@ -63,11 +68,11 @@ void main(
 	[unroll]
 	for (int i = 0; i < 4; i++)
 	{
-		Vert[i].PosW = (Input[0].PosW + offset[i] * Input[0].Size).xyz;
+		Vert[i].PosW = (Input[0].PosW + offset[i] * Input[0].SizeRot.x).xyz;
 		Vert[i].PosH = mul(float4(Vert[i].PosW, 1.0f), viewProjMatrix);
 		Vert[i].ShadowPosH = mul(float4(Vert[i].PosW, 1.0f), shadowViewProjBiasedMatrix);
 		Vert[i].Color = Input[0].Color;
-		Vert[i].UV = uv[i] / 2.0f;
+		Vert[i].UV = uv[i] / 2.0f + 0.5f;
 		Vert[i].NormalW = normal;
 		Vert[i].TangentW = tangent;
 	}
