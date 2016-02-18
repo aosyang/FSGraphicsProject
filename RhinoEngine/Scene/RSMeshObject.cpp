@@ -55,9 +55,14 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 
 	for (UINT32 i = 0; i < m_Mesh->GetMeshElements().size(); i++)
 	{
-		if (m_Materials[i].Shader)
+		RShader* shader = nullptr;
+
+		if (i < m_Materials.size())
+			shader = m_Materials[i].Shader;
+
+		if (shader)
 		{
-			m_Materials[i].Shader->Bind();
+			shader->Bind();
 			for (int t = 0; t < m_Materials[i].TextureNum; t++)
 			{
 				RRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, &m_Materials[i].Textures[t]);

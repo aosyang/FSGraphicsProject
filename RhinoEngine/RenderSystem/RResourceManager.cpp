@@ -14,8 +14,9 @@
 struct MESH_VERTEX
 {
 	XMFLOAT3 pos;
-	XMFLOAT2 uv;
+	XMFLOAT2 uv0;
 	XMFLOAT3 normal;
+	XMFLOAT2 uv1;
 
 	bool operator<(const MESH_VERTEX& rhs) const
 	{
@@ -275,37 +276,47 @@ void LoadFbxMeshData(LoaderThreadTask* task)
 			break;
 		}
 
-		FbxGeometryElementUV* uvArray = mesh->GetElementUV();
-		bool hasPerPolygonVertexUV = uvArray ? (uvArray->GetMappingMode() == FbxGeometryElement::eByPolygonVertex) : false;
-
-		FbxStringList uvSetNames;
-		mesh->GetUVSetNames(uvSetNames);
-		const char* uvSetName = uvSetNames.GetCount() > 0 ? uvSetNames[0] : nullptr;
-
-		if (uvArray && !hasPerPolygonVertexUV)
+		FbxGeometryElementUV* uvArray[2] =
 		{
-			switch (uvArray->GetReferenceMode())
+			mesh->GetElementUV(0),
+			mesh->GetElementUV(1),
+		};
+
+		bool hasPerPolygonVertexUV[2];
+		
+		for (int uvLayer = 0; uvLayer < 2; uvLayer++)
+		{
+			hasPerPolygonVertexUV[uvLayer] = uvArray[uvLayer] ? (uvArray[uvLayer]->GetMappingMode() == FbxGeometryElement::eByPolygonVertex) : false;
+
+			if (uvArray[uvLayer] && !hasPerPolygonVertexUV)
 			{
-			case FbxGeometryElement::eDirect:
-				for (int i = 0; i < controlPointCount; i++)
+				switch (uvArray[uvLayer]->GetReferenceMode())
 				{
-					FbxVector2 uv = uvArray->GetDirectArray().GetAt(i);
+				case FbxGeometryElement::eDirect:
+					for (int i = 0; i < controlPointCount; i++)
+					{
+						XMFLOAT2& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
+							
+						FbxVector2 uv = uvArray[i]->GetDirectArray().GetAt(i);
 
-					vertData[i].uv.x = (float)uv[0];
-					vertData[i].uv.y = 1.0f - (float)uv[1];
+						vertUV.x = (float)uv[0];
+						vertUV.y = 1.0f - (float)uv[1];
+					}
+					break;
+
+				case FbxGeometryElement::eIndexToDirect:
+					for (int i = 0; i < controlPointCount; i++)
+					{
+						XMFLOAT2& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
+						
+						int index = uvArray[uvLayer]->GetIndexArray().GetAt(i);
+						FbxVector2 uv = uvArray[uvLayer]->GetDirectArray().GetAt(index);
+
+						vertUV.x = (float)uv[0];
+						vertUV.y = 1.0f - (float)uv[1];
+					}
+					break;
 				}
-				break;
-
-			case FbxGeometryElement::eIndexToDirect:
-				for (int i = 0; i < controlPointCount; i++)
-				{
-					int index = uvArray->GetIndexArray().GetAt(i);
-					FbxVector2 uv = uvArray->GetDirectArray().GetAt(index);
-
-					vertData[i].uv.x = (float)uv[0];
-					vertData[i].uv.y = 1.0f - (float)uv[1];
-				}
-				break;
 			}
 		}
 
@@ -351,18 +362,23 @@ void LoadFbxMeshData(LoaderThreadTask* task)
 					//OutputDebugStringA(msg_buf);
 				}
 
-				if (uvArray && hasPerPolygonVertexUV)
+				for (int uvLayer = 0; uvLayer < 2; uvLayer++)
 				{
-					int idxUV = idxPoly * 3 + idxVert;
-					if (uvArray->GetReferenceMode() != FbxGeometryElement::eDirect)
+					if (uvArray[uvLayer] && hasPerPolygonVertexUV[uvLayer])
 					{
-						idxUV = uvArray->GetIndexArray().GetAt(idxPoly * 3 + idxVert);
+						int idxUV = idxPoly * 3 + idxVert;
+						if (uvArray[uvLayer]->GetReferenceMode() != FbxGeometryElement::eDirect)
+						{
+							idxUV = uvArray[uvLayer]->GetIndexArray().GetAt(idxPoly * 3 + idxVert);
+						}
+
+						FbxVector2 uv = uvArray[uvLayer]->GetDirectArray().GetAt(idxUV);
+
+						XMFLOAT2& vertUV = uvLayer == 0 ? vertex.uv0 : vertex.uv1;
+
+						vertUV.x = (float)uv[0];
+						vertUV.y = 1.0f - (float)uv[1];
 					}
-
-					FbxVector2 uv = uvArray->GetDirectArray().GetAt(idxUV);
-
-					vertex.uv.x = (float)uv[0];
-					vertex.uv.y = 1.0f - (float)uv[1];
 				}
 
 				flatVertData.push_back(vertex);

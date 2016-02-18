@@ -312,9 +312,10 @@ bool FSGraphicsProjectApp::Initialize()
 		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD",	1, DXGI_FORMAT_R32G32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	RRenderer.D3DDevice()->CreateInputLayout(objVertDesc, 3, m_LightingShader->VS_Bytecode, m_LightingShader->VS_BytecodeSize, &m_LightingMeshIL);
+	RRenderer.D3DDevice()->CreateInputLayout(objVertDesc, 4, m_AOShader->VS_Bytecode, m_AOShader->VS_BytecodeSize, &m_LightingMeshIL);
 
 	m_SceneMeshCity = RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx", m_LightingMeshIL);
 	m_FbxMeshObj.SetMesh(m_SceneMeshCity);
@@ -329,12 +330,20 @@ bool FSGraphicsProjectApp::Initialize()
 	m_BumpBaseTextureSRV = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlate.dds");
 	m_BumpNormalTextureSRV = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlateNormal.dds");
 
+	ID3D11ShaderResourceView* meshAOTextureSRV[] =
+	{
+		RResourceManager::Instance().LoadDDSTexture("../Assets/lowBuildingsAO.dds"),
+		RResourceManager::Instance().LoadDDSTexture("../Assets/groundAO.dds"),
+		RResourceManager::Instance().LoadDDSTexture("../Assets/tallBuildingsAO.dds"),
+		RResourceManager::Instance().LoadDDSTexture("../Assets/StreetAO.dds"),
+	};
+
 	RMaterial cityMaterials[] =
 	{
-		{ m_LightingShader, 1, m_MeshTextureSRV[0] },
-		{ m_LightingShader, 1, m_MeshTextureSRV[1] },
-		{ m_LightingShader, 1, m_MeshTextureSRV[2] },
-		{ m_LightingShader, 1, m_MeshTextureSRV[1] },
+		{ m_AOShader, 2, m_MeshTextureSRV[0], meshAOTextureSRV[0] },
+		{ m_AOShader, 2, m_MeshTextureSRV[1], meshAOTextureSRV[1] },
+		{ m_AOShader, 2, m_MeshTextureSRV[2], meshAOTextureSRV[2] },
+		{ m_AOShader, 2, m_MeshTextureSRV[1], meshAOTextureSRV[3] },
 	};
 
 	m_FbxMeshObj.SetMaterial(cityMaterials, 4);
@@ -350,10 +359,11 @@ bool FSGraphicsProjectApp::Initialize()
 	m_AOSceneMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/AO_Scene.fbx", m_LightingMeshIL);
 	m_AOSceneObj.SetMesh(m_AOSceneMesh);
 	m_AOTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/AO_Scene.dds");
+	ID3D11ShaderResourceView* greyTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/Grey.dds");
 
 	RMaterial aoMat[] =
 	{
-		{ m_AOShader, 1, m_AOTexture },
+		{ m_AOShader, 2, greyTexture, m_AOTexture },
 	};
 
 	m_AOSceneObj.SetMaterial(aoMat, 1);
@@ -396,9 +406,9 @@ bool FSGraphicsProjectApp::Initialize()
 
 	m_Skybox.CreateSkybox(L"../Assets/powderpeak.dds");
 
-	XMStoreFloat4x4(&m_CameraMatrix, XMMatrixIdentity());
-	m_CamPitch = 0.0f;
-	m_CamYaw = PI;
+	XMStoreFloat4x4(&m_CameraMatrix, XMMatrixTranslation(407.023712f, 339.007507f, 876.396484f));
+	m_CamPitch = 0.0900001600f;
+	m_CamYaw = 3.88659930f;
 
 	m_ShadowMap.Initialize(1024, 1024);
 
@@ -569,7 +579,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbLight, sizeof(cbLight));
 
 	// Setup ambient color
-	XMStoreFloat4(&cbLight.HighHemisphereAmbientColor, XMVectorSet(0.3f, 0.3f, 0.5f, 0.5f));
+	XMStoreFloat4(&cbLight.HighHemisphereAmbientColor, XMVectorSet(0.75f, 0.75f, 0.75f, 1.0f));
 	XMStoreFloat4(&cbLight.LowHemisphereAmbientColor, XMVectorSet(0.2f, 0.2f, 0.2f, 0.5f));
 
 	if (m_EnableLights[0])

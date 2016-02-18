@@ -7,17 +7,19 @@
 #include "ConstBufferPS.h"
 #include "LightShaderCommon.hlsli"
 
-Texture2D AmbientOcclusionTexture	: register(t0);
+Texture2D DiffuseTexture	: register(t0);
+Texture2D AmbientOcclusionTexture	: register(t1);
 SamplerState Sampler;
 
 struct OUTPUT_VERTEX
 {
 	float4 Color		: COLOR;
 	float4 PosH			: SV_POSITION;
-	float2 UV			: TEXCOORD0;
-	float3 NormalW		: TEXCOORD1;
+	float2 UV0			: TEXCOORD0;
+	float2 UV1			: TEXCOORD1;
 	float3 PosW			: TEXCOORD2;
 	float4 ShadowPosH	: TEXCOORD3;
+	float3 NormalW		: NORMAL;
 };
 
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET
@@ -75,9 +77,9 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	Diffuse.a = 1.0f;
 
 	Ambient.rgb = CalculateAmbientLight(normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor) *
-				  AmbientOcclusionTexture.Sample(Sampler, Input.UV);
+				  AmbientOcclusionTexture.Sample(Sampler, Input.UV1).rgb;
 
-	float4 Final = Ambient + Diffuse + Specular;
+	float4 Final = (Ambient + Diffuse) * DiffuseTexture.Sample(Sampler, Input.UV0) + Specular;
 	Final.a *= GlobalOpacity;
 	return Final;
 }
