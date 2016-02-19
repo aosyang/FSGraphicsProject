@@ -50,6 +50,12 @@
     <ClInclude Include="IResource.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="Core\RVector.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\RMatrix.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -87,6 +93,9 @@
     </ClCompile>
     <ClCompile Include="RenderSystem\RShaderManager.cpp">
       <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\RMatrix.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -38,6 +38,9 @@ using namespace std;
 
 using namespace DirectX;
 
+#include "Core/RVector.h"
+#include "Core/RMatrix.h"
+
 // FBX SDK
 #include <fbxsdk.h>
 

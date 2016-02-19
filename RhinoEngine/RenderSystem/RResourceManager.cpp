@@ -13,10 +13,10 @@
 
 struct MESH_VERTEX
 {
-	XMFLOAT3 pos;
-	XMFLOAT2 uv0;
-	XMFLOAT3 normal;
-	XMFLOAT2 uv1;
+	RVec3 pos;
+	RVec2 uv0;
+	RVec3 normal;
+	RVec2 uv1;
 
 	bool operator<(const MESH_VERTEX& rhs) const
 	{
@@ -295,7 +295,7 @@ void LoadFbxMeshData(LoaderThreadTask* task)
 				case FbxGeometryElement::eDirect:
 					for (int i = 0; i < controlPointCount; i++)
 					{
-						XMFLOAT2& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
+						RVec2& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
 							
 						FbxVector2 uv = uvArray[i]->GetDirectArray().GetAt(i);
 
@@ -307,7 +307,7 @@ void LoadFbxMeshData(LoaderThreadTask* task)
 				case FbxGeometryElement::eIndexToDirect:
 					for (int i = 0; i < controlPointCount; i++)
 					{
-						XMFLOAT2& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
+						RVec2& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
 						
 						int index = uvArray[uvLayer]->GetIndexArray().GetAt(i);
 						FbxVector2 uv = uvArray[uvLayer]->GetDirectArray().GetAt(index);
@@ -374,7 +374,7 @@ void LoadFbxMeshData(LoaderThreadTask* task)
 
 						FbxVector2 uv = uvArray[uvLayer]->GetDirectArray().GetAt(idxUV);
 
-						XMFLOAT2& vertUV = uvLayer == 0 ? vertex.uv0 : vertex.uv1;
+						RVec2& vertUV = uvLayer == 0 ? vertex.uv0 : vertex.uv1;
 
 						vertUV.x = (float)uv[0];
 						vertUV.y = 1.0f - (float)uv[1];
