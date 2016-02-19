@@ -34,8 +34,7 @@ public:
 	RMatrix4& operator=(const RMatrix4& rhs);
 
 	RMatrix4 operator*(const RMatrix4& rhs);
-
-	void SetIdentity();
+	RMatrix4& operator*=(const RMatrix4& rhs);
 
 	// Fast inverse a camera matrix
 	RMatrix4 GetViewMatrix() const;
@@ -43,6 +42,9 @@ public:
 	RVec3 GetForward() const;
 	RVec3 GetUp() const;
 	RVec3 GetRight() const;
+
+	RVec4 GetRow(int index);
+	void SetRow(int index, const RVec4& row);
 
 	void TranslateLocal(const RVec3& vec);
 	void TranslateLocal(float x, float y, float z);
@@ -52,6 +54,10 @@ public:
 	RVec3 GetTranslation() const;
 	void GetTranslation(float& x, float& y, float& z) const;
 
+	// Identity matrix variable
+	static RMatrix4 IDENTITY;
+
+	// Rotation matrix
 	static RMatrix4 CreateXAxisRotation(float degree);
 	static RMatrix4 CreateYAxisRotation(float degree);
 	static RMatrix4 CreateZAxisRotation(float degree);
@@ -62,7 +68,9 @@ public:
 	static RMatrix4 CreateScale(const RVec3& scale);
 	static RMatrix4 CreateScale(float sx, float sy, float sz);
 
-	static RMatrix4 CreatePerspectiveProjection(float fov, float aspect, float zNear, float zFar);
+	static RMatrix4 CreatePerspectiveProjectionLH(float fov, float aspect, float zNear, float zFar);
+	static RMatrix4 CreateOrthographicProjectionLH(float viewWidth, float viewHeight, float zNear, float zFar);
+	static RMatrix4 CreateLookAtViewLH(const RVec3& eye, const RVec3& lookAt, const RVec3& up);
 };
 
 RVec4 operator*(const RVec4& v, const RMatrix4& m);

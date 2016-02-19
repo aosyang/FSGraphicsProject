@@ -10,7 +10,7 @@
 
 RSceneObject::RSceneObject()
 {
-	XMStoreFloat4x4(&m_NodeTransform, XMMatrixIdentity());
+	m_NodeTransform = RMatrix4::IDENTITY;
 }
 
 RSceneObject::~RSceneObject()
@@ -18,16 +18,14 @@ RSceneObject::~RSceneObject()
 
 }
 
-XMMATRIX RSceneObject::GetNodeTransform() const
+const RMatrix4& RSceneObject::GetNodeTransform() const
 {
-	return XMLoadFloat4x4(&m_NodeTransform);
+	return m_NodeTransform;
 }
 
-void RSceneObject::SetPosition(const XMFLOAT3& pos)
+void RSceneObject::SetPosition(const RVec3& pos)
 {
-	m_NodeTransform._41 = pos.x;
-	m_NodeTransform._42 = pos.y;
-	m_NodeTransform._43 = pos.z;
+	m_NodeTransform.SetTranslation(pos);
 }
 
 void RSceneObject::Draw()

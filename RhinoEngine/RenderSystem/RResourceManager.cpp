@@ -442,7 +442,7 @@ ID3D11ShaderResourceView* RResourceManager::LoadDDSTexture(const char* filename)
 	sprintf_s(msg_buf, sizeof(msg_buf), "Loading texture [%s]...\n", filename);
 	OutputDebugStringA(msg_buf);
 
-	CreateDDSTextureFromFile(RRenderer.D3DDevice(), wszName, nullptr, &srv);
+	DirectX::CreateDDSTextureFromFile(RRenderer.D3DDevice(), wszName, nullptr, &srv);
 
 	m_TextureResources.push_back(srv);
 

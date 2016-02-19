@@ -8,7 +8,7 @@
 
 struct SKYBOX_VERTEX
 {
-	XMFLOAT3 pos;
+	RVec3 pos;
 };
 
 RSkybox::RSkybox()
@@ -20,20 +20,20 @@ RSkybox::RSkybox()
 void RSkybox::CreateSkybox(const wchar_t* skyTextureName)
 {
 	// Load skybox texture
-	CreateDDSTextureFromFile(RRenderer.D3DDevice(), skyTextureName, NULL, &m_SkyboxTexture);
+	DirectX::CreateDDSTextureFromFile(RRenderer.D3DDevice(), skyTextureName, NULL, &m_SkyboxTexture);
 
 	// Create skybox buffer
 	SKYBOX_VERTEX skyboxVertex[] = 
 	{
-		{ XMFLOAT3(-0.5f, -0.5f, -0.5f) },
-		{ XMFLOAT3(-0.5f,  0.5f, -0.5f) },
-		{ XMFLOAT3( 0.5f,  0.5f, -0.5f) },
-		{ XMFLOAT3( 0.5f, -0.5f, -0.5f) },
+		{ RVec3(-0.5f, -0.5f, -0.5f) },
+		{ RVec3(-0.5f,  0.5f, -0.5f) },
+		{ RVec3( 0.5f,  0.5f, -0.5f) },
+		{ RVec3( 0.5f, -0.5f, -0.5f) },
 
-		{ XMFLOAT3(-0.5f, -0.5f,  0.5f) },
-		{ XMFLOAT3(-0.5f,  0.5f,  0.5f) },
-		{ XMFLOAT3( 0.5f,  0.5f,  0.5f) },
-		{ XMFLOAT3( 0.5f, -0.5f,  0.5f) },
+		{ RVec3(-0.5f, -0.5f,  0.5f) },
+		{ RVec3(-0.5f,  0.5f,  0.5f) },
+		{ RVec3( 0.5f,  0.5f,  0.5f) },
+		{ RVec3( 0.5f, -0.5f,  0.5f) },
 	};
 
 	UINT32 skyboxIndex[] =

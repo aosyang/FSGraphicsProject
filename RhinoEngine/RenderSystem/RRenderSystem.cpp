@@ -219,7 +219,7 @@ void RRenderSystem::ResizeClient(int width, int height)
 	}
 }
 
-void RRenderSystem::Clear(bool clearColor, const XMVECTORF32& color, bool clearDepth, float depth, bool clearStencil, UINT8 stencil)
+void RRenderSystem::Clear(bool clearColor, const RColor& color, bool clearDepth, float depth, bool clearStencil, UINT8 stencil)
 {
 	assert(m_pD3DImmediateContext);
 

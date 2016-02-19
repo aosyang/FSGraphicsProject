@@ -145,6 +145,19 @@ public:
 		}
 	}
 
+	RVec3 GetNormalizedVec3() const
+	{
+		float mag = Magnitude();
+		RVec3 n;
+		if (!FLT_EQUAL_ZERO(mag))
+		{
+			n.x = x / mag;
+			n.y = y / mag;
+			n.z = z / mag;
+		}
+		return n;
+	}
+
 	// Dot product
 	float Dot(const RVec3& rhs) const
 	{
@@ -168,6 +181,9 @@ class RVec4
 public:
 	float x, y, z, w;
 
+	RVec4()
+	{}
+
 	RVec4(float _x, float _y, float _z, float _w = 1.0f)
 		: x(_x), y(_y), z(_z), w(_w)
 	{}
@@ -188,6 +204,11 @@ public:
 	{
 		x = rhs.x; y = rhs.y; z = rhs.z; w = rhs.w;
 		return *this;
+	}
+
+	RVec3 ToVec3() const
+	{
+		return RVec3(x, y, z);
 	}
 };
 

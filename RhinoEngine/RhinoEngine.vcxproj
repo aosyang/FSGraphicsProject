@@ -21,15 +21,16 @@
   <ItemGroup>
     <ClInclude Include="Core\IApp.h" />
     <ClInclude Include="Core\MathHelper.h" />
+    <ClInclude Include="Core\RColor.h" />
     <ClInclude Include="Core\REngine.h" />
     <ClInclude Include="Core\RInput.h" />
     <ClInclude Include="Core\RMatrix.h" />
     <ClInclude Include="Core\RSingleton.h" />
     <ClInclude Include="Core\RTimer.h" />
     <ClInclude Include="Core\RVector.h" />
-    <ClInclude Include="IResource.h" />
     <ClInclude Include="RenderSystem\d3dUtil.h" />
     <ClInclude Include="RenderSystem\DDSTextureLoader.h" />
+    <ClInclude Include="RenderSystem\IResource.h" />
     <ClInclude Include="RenderSystem\RMesh.h" />
     <ClInclude Include="RenderSystem\RMeshElement.h" />
     <ClInclude Include="RenderSystem\RRenderSystem.h" />

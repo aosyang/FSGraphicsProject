@@ -30,46 +30,41 @@
 
 struct COLOR_VERTEX
 {
-	XMFLOAT4 pos;
-	XMFLOAT4 color;
+	RVec4 pos;
+	RVec4 color;
 };
 
 struct BUMP_MESH_VERTEX
 {
-	XMFLOAT3 pos;
-	XMFLOAT2 uv;
-	XMFLOAT3 normal;
-	XMFLOAT3 tangent;
+	RVec3 pos;
+	RVec2 uv;
+	RVec3 normal;
+	RVec3 tangent;
 };
 
 struct ParticleDepthComparer
 {
-	XMFLOAT4 CamPos, CamDir;
+	RVec4 CamPos, CamDir;
 
-	ParticleDepthComparer(const XMVECTOR& camPos, const XMVECTOR& camDir)
+	ParticleDepthComparer(const RVec4& camPos, const RVec4& camDir)
 	{
-		XMStoreFloat4(&CamPos, camPos);
-		XMStoreFloat4(&CamDir, camDir);
+		CamPos = camPos;
+		CamDir = camDir;
 	}
 
 	bool operator()(const PARTICLE_VERTEX &a, const PARTICLE_VERTEX &b)
 	{
-		//return dot(minus(a.pos, CamPos), CamDir) > dot(minus(b.pos, CamPos), CamDir);
+		//return dot(a.pos - CamPos, CamDir) > dot(b.pos - CamPos, CamDir);
 		return sqrDist(a.pos, CamPos) > sqrDist(b.pos, CamPos);
 	}
 
 	// Helper functions
-	static float dot(const XMFLOAT4& a, const XMFLOAT4& b)
+	static float dot(const RVec4& a, const RVec4& b)
 	{
 		return a.x * b.x + a.y * b.y + a.z * b.z;
 	}
 
-	static XMFLOAT4 minus(const XMFLOAT4& a, const XMFLOAT4 b)
-	{
-		return XMFLOAT4(a.x - b.x, a.y - b.y, a.z - b.z, 1.0f);
-	}
-
-	static float sqrDist(const XMFLOAT4& a, const XMFLOAT4 b)
+	static float sqrDist(const RVec4& a, const RVec4 b)
 	{
 		float dx = b.x - a.x,
 			  dy = b.y - a.y,
@@ -170,12 +165,12 @@ bool FSGraphicsProjectApp::Initialize()
 	for (int i = 0; i < 10; i++)
 	{
 		float r = (i % 2 == 0) ? 100.0f : 50.0f;
-		starVertex[i] = { XMFLOAT4(sinf(DEG_TO_RAD(i * 36)) * r, cosf(DEG_TO_RAD(i * 36)) * r, 0.0f, 1.0f),
-			XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) };
+		starVertex[i] = { RVec4(sinf(DEG_TO_RAD(i * 36)) * r, cosf(DEG_TO_RAD(i * 36)) * r, 0.0f, 1.0f),
+			RVec4(1.0f, 0.0f, 0.0f, 1.0f) };
 	}
 
-	starVertex[10] = { XMFLOAT4(0.0f, 0.0f, -20.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) };
-	starVertex[11] = { XMFLOAT4(0.0f, 0.0f, 20.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) };
+	starVertex[10] = { RVec4(0.0f, 0.0f, -20.0f, 1.0f), RVec4(1.0f, 1.0f, 0.0f, 1.0f) };
+	starVertex[11] = { RVec4(0.0f, 0.0f, 20.0f, 1.0f), RVec4(1.0f, 1.0f, 0.0f, 1.0f) };
 
 	UINT32 starIndex[] = {
 		0, 1, 10, 1, 2, 10, 2, 3, 10, 3, 4, 10, 4, 5, 10, 5, 6, 10, 6, 7, 10, 7, 8, 10, 8, 9, 10, 9, 0, 10,
@@ -195,41 +190,40 @@ bool FSGraphicsProjectApp::Initialize()
 	// Create buffer for bump cube
 	BUMP_MESH_VERTEX boxVertex[] = 
 	{
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3( 1.0f,  1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3( 1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f, -1.0f, -1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f,  1.0f, -1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f,  1.0f, -1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f, -1.0f, -1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
 
-		{ XMFLOAT3( 1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3( 1.0f,  1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3( 1.0f,  1.0f,  1.0f), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3( 1.0f, -1.0f,  1.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
+		{ RVec3( 1.0f, -1.0f, -1.0f), RVec2(0.0f, 1.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
+		{ RVec3( 1.0f,  1.0f, -1.0f), RVec2(0.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
+		{ RVec3( 1.0f,  1.0f,  1.0f), RVec2(1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
+		{ RVec3( 1.0f, -1.0f,  1.0f), RVec2(1.0f, 1.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
 
-		{ XMFLOAT3( 1.0f, -1.0f,  1.0f), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3( 1.0f,  1.0f,  1.0f), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f, -1.0f,  1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f,  1.0f,  1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f,  1.0f,  1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f, -1.0f,  1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
 
-		{ XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, -1.0f) },
-		{ XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, -1.0f) },
-		{ XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, -1.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, -1.0f) },
+		{ RVec3(-1.0f, -1.0f,  1.0f), RVec2(0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(1.0f, 0.0f, -1.0f) },
+		{ RVec3(-1.0f,  1.0f,  1.0f), RVec2(0.0f, 0.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(1.0f, 0.0f, -1.0f) },
+		{ RVec3(-1.0f,  1.0f, -1.0f), RVec2(1.0f, 0.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(1.0f, 0.0f, -1.0f) },
+		{ RVec3(-1.0f, -1.0f, -1.0f), RVec2(1.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(1.0f, 0.0f, -1.0f) },
 
-		{ XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3( 1.0f,  1.0f,  1.0f), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3( 1.0f,  1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f,  1.0f, -1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f,  1.0f,  1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f,  1.0f,  1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f,  1.0f, -1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
 
-		{ XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3( 1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3( 1.0f, -1.0f,  1.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f, -1.0f,  1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f, -1.0f, -1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f, -1.0f, -1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f, -1.0f,  1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
 	};
 
 	for (UINT32 i = 0; i < sizeof(boxVertex) / sizeof(BUMP_MESH_VERTEX); i++)
 	{
-		XMVECTOR pos = XMLoadFloat3(&boxVertex[i].pos);
-		XMStoreFloat3(&boxVertex[i].pos, pos * 100.0f);
+		boxVertex[i].pos *= 100.0f;
 	}
 
 	UINT32 boxIndex[] =
@@ -322,7 +316,7 @@ bool FSGraphicsProjectApp::Initialize()
 
 	m_MeshTachikoma = RResourceManager::Instance().LoadFbxMesh("../Assets/tachikoma.fbx", m_LightingMeshIL);
 	m_TachikomaObj.SetMesh(m_MeshTachikoma);
-	m_TachikomaObj.SetPosition(XMFLOAT3(0.0f, 40.0f, 0.0f));
+	m_TachikomaObj.SetPosition(RVec3(0.0f, 40.0f, 0.0f));
 
 	m_MeshTextureSRV[0] = RResourceManager::Instance().LoadDDSTexture("../Assets/cty1.dds");
 	m_MeshTextureSRV[1] = RResourceManager::Instance().LoadDDSTexture("../Assets/ang1.dds");
@@ -367,12 +361,12 @@ bool FSGraphicsProjectApp::Initialize()
 	};
 
 	m_AOSceneObj.SetMaterial(aoMat, 1);
-	m_AOSceneObj.SetPosition(XMFLOAT3(-500.0f, 0.0f, 500.0f));
+	m_AOSceneObj.SetPosition(RVec3(-500.0f, 0.0f, 500.0f));
 
 	m_SceneMeshIsland = RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx", m_LightingMeshIL);
 	m_IslandTextureSRV = RResourceManager::Instance().LoadDDSTexture("../Assets/TR_FloatingIsland02.dds");
 	m_IslandMeshObj.SetMesh(m_SceneMeshIsland);
-	m_IslandMeshObj.SetPosition(XMFLOAT3(0.0f, 0.0f, 500.0f));
+	m_IslandMeshObj.SetPosition(RVec3(0.0f, 0.0f, 500.0f));
 
 	RMaterial islandMaterials[] =
 	{
@@ -406,9 +400,9 @@ bool FSGraphicsProjectApp::Initialize()
 
 	m_Skybox.CreateSkybox(L"../Assets/powderpeak.dds");
 
-	XMStoreFloat4x4(&m_CameraMatrix, XMMatrixTranslation(407.023712f, 339.007507f, 876.396484f));
+	m_CameraMatrix = RMatrix4::CreateTranslation(407.023712f, 339.007507f, 876.396484f);
 	m_CamPitch = 0.0900001600f;
-	m_CamYaw = 3.88659930f;
+	m_CamYaw = 2.36159968f;
 
 	m_ShadowMap.Initialize(1024, 1024);
 
@@ -430,7 +424,7 @@ bool FSGraphicsProjectApp::Initialize()
 			  z = MathHelper::RandF(-2000.0f, 1000.0f),
 			  w = MathHelper::RandF(500.0f, 750.0f);
 		float ic = MathHelper::RandF(0.5f, 1.0f);
-		m_ParticleVert[i] = { XMFLOAT4(x, y, z, w), XMFLOAT4(ic, ic, ic, 1.0f), MathHelper::RandF(0.0f, PI * 2) };
+		m_ParticleVert[i] = { RVec4(x, y, z, w), RVec4(ic, ic, ic, 1.0f), MathHelper::RandF(0.0f, PI * 2) };
 	}
 
 	m_ParticleDiffuseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/smoke_diffuse.dds");
@@ -506,8 +500,8 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		RInput.GetCursorRelPos(dx, dy);
 		if (dx || dy)
 		{
-			m_CamYaw += (float)dx / 200.0f;
-			m_CamPitch += (float)dy / 200.0f;
+			m_CamYaw -= (float)dx / 200.0f;
+			m_CamPitch -= (float)dy / 200.0f;
 			m_CamPitch = max(-PI/2, min(PI/2, m_CamPitch));
 		}
 	}
@@ -515,15 +509,15 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	float camSpeed = 100.0f;
 	if (RInput.IsKeyDown(VK_LSHIFT))
 		camSpeed *= 10.0f;
-	XMVECTOR moveVec = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	RVec3 moveVec(0.0f, 0.0f, 0.0f);
 	if (RInput.IsKeyDown('W'))
-		moveVec += XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+		moveVec += RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
 	if (RInput.IsKeyDown('S'))
-		moveVec -= XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+		moveVec -= RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
 	if (RInput.IsKeyDown('A'))
-		moveVec -= XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+		moveVec -= RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 	if (RInput.IsKeyDown('D'))
-		moveVec += XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+		moveVec += RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 
 	// Toggle lights
 	if (RInput.GetBufferedKeyState('F') == BKS_Pressed)
@@ -535,40 +529,38 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	if (RInput.GetBufferedKeyState('2') == BKS_Pressed)
 		m_EnableLights[1] = !m_EnableLights[1];
 
-	XMMATRIX cameraMatrix = XMLoadFloat4x4(&m_CameraMatrix);
-	XMVECTOR camPos = cameraMatrix.r[3];
-	cameraMatrix = XMMatrixRotationX(m_CamPitch) * XMMatrixRotationY(m_CamYaw);
-	cameraMatrix.r[3] = camPos + XMVector4Transform(moveVec, cameraMatrix);
-	XMStoreFloat4x4(&m_CameraMatrix, cameraMatrix);
+	RVec3 camPos = m_CameraMatrix.GetTranslation();
+	m_CameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
+	m_CameraMatrix.SetTranslation(camPos + (RVec4(moveVec, 1.0f) * m_CameraMatrix).ToVec3());
 
-	XMMATRIX viewMatrix = XMMatrixInverse(NULL, cameraMatrix);
-	XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(45.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
+	RMatrix4 viewMatrix = m_CameraMatrix.GetViewMatrix();
+	RMatrix4 projMatrix = RMatrix4::CreatePerspectiveProjectionLH(45.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
 
 	// Update scene constant buffer
 	SHADER_SCENE_BUFFER cbScene;
 
-	XMStoreFloat4x4(&cbScene.viewMatrix, viewMatrix);
-	XMStoreFloat4x4(&cbScene.projMatrix, projMatrix);
-	XMStoreFloat4x4(&cbScene.viewProjMatrix, viewMatrix * projMatrix);
-	XMStoreFloat4(&cbScene.cameraPos, cameraMatrix.r[3]);
+	cbScene.viewMatrix = viewMatrix;
+	cbScene.projMatrix = projMatrix;
+	cbScene.viewProjMatrix = viewMatrix * projMatrix;
+	cbScene.cameraPos = m_CameraMatrix.GetRow(3);
 
 	float ct = timer.TotalTime() * 0.2f;
-	XMVECTOR sunVec = XMVector3Normalize(XMVectorSet(sinf(ct) * 0.5f, 0.25f, cosf(ct) * 0.5f, 1.0f));
-	XMMATRIX shadowViewMatrix = XMMatrixLookAtLH(sunVec * 2000.0f, XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
+	RVec3 sunVec = RVec3(sinf(ct) * 0.5f, 0.25f, cosf(ct) * 0.5f).GetNormalizedVec3();
+	RMatrix4 shadowViewMatrix = RMatrix4::CreateLookAtViewLH(sunVec * 2000.0f, RVec3(0.0f, 0.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f));
 
 	m_ShadowMap.SetViewMatrix(shadowViewMatrix);
 	m_ShadowMap.SetOrthogonalProjection(5000.0f, 5000.0f, 0.1f, 5000.0f);
 
-	XMMATRIX shadowTransform(
+	RMatrix4 shadowTransform(
 		0.5f, 0.0f, 0.0f, 0.0f,
 		0.0f, -0.5f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.5f, 0.5f, 0.0f, 1.0f);
 
-	XMMATRIX shadowViewProjMatrix = m_ShadowMap.GetViewMatrix() * m_ShadowMap.GetProjectionMatrix();
-	XMStoreFloat4x4(&cbScene.shadowViewProjMatrix, shadowViewProjMatrix);
+	RMatrix4 shadowViewProjMatrix = m_ShadowMap.GetViewMatrix() * m_ShadowMap.GetProjectionMatrix();
+	cbScene.shadowViewProjMatrix = shadowViewProjMatrix;
 	shadowViewProjMatrix *= shadowTransform;
-	XMStoreFloat4x4(&cbScene.shadowViewProjBiasedMatrix, shadowViewProjMatrix);
+	cbScene.shadowViewProjBiasedMatrix = shadowViewProjMatrix;
 
 	D3D11_MAPPED_SUBRESOURCE subres;
 	RRenderer.D3DImmediateContext()->Map(m_cbScene, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
@@ -580,39 +572,39 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbLight, sizeof(cbLight));
 
 	// Setup ambient color
-	XMStoreFloat4(&cbLight.HighHemisphereAmbientColor, XMVectorSet(0.75f, 0.75f, 0.75f, 1.0f));
-	XMStoreFloat4(&cbLight.LowHemisphereAmbientColor, XMVectorSet(0.2f, 0.2f, 0.2f, 0.5f));
+	cbLight.HighHemisphereAmbientColor = RVec4(0.75f, 0.75f, 0.75f, 1.0f);
+	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 0.5f);
 
 	if (m_EnableLights[0])
 	{
-		XMVECTOR dirLightVec = XMVector3Normalize(XMVectorSet(0.25f, 1.0f, 0.5f, 1.0f));
+		RVec4 dirLightVec = RVec4(RVec3(0.25f, 1.0f, 0.5f).GetNormalizedVec3(), 1.0f);
 
 		cbLight.DirectionalLightCount = 1;
-		XMStoreFloat4(&cbLight.DirectionalLight[0].Color, XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
-		XMStoreFloat4(&cbLight.DirectionalLight[0].Direction, sunVec);
+		cbLight.DirectionalLight[0].Color = RVec4(1.0f, 1.0f, 1.0f, 1.0f);
+		cbLight.DirectionalLight[0].Direction = sunVec;
 	}
 
 	if (m_EnableLights[1])
 	{
 		cbLight.PointLightCount = 1;
-		XMVECTOR pointLightPosAndRadius = XMVectorSet(sinf(timer.TotalTime()) * 400.0f, 700.0f, cosf(timer.TotalTime()) * 400.0f, 1000.0f);
-		XMStoreFloat4(&cbLight.PointLight[0].PosAndRadius, pointLightPosAndRadius);
-		XMStoreFloat4(&cbLight.PointLight[0].Color, XMVectorSet(1.0f, 0.75f, 0.75f, 5.0f));
+		RVec4 pointLightPosAndRadius = RVec4(sinf(timer.TotalTime()) * 400.0f, 700.0f, cosf(timer.TotalTime()) * 400.0f, 1000.0f);
+		cbLight.PointLight[0].PosAndRadius = pointLightPosAndRadius;
+		cbLight.PointLight[0].Color = RVec4(1.0f, 0.75f, 0.75f, 5.0f);
 	}
 
 	if (m_EnableLights[2])
 	{
 		cbLight.SpotlightCount = 1;
-		XMVECTOR spotlightPos = XMVectorSet(cameraMatrix.r[3].m128_f32[0], cameraMatrix.r[3].m128_f32[1], cameraMatrix.r[3].m128_f32[2], 2000.0f);
-		XMVECTOR spotlightDir = XMVectorSet(cameraMatrix.r[2].m128_f32[0], cameraMatrix.r[2].m128_f32[1], cameraMatrix.r[2].m128_f32[2], 1.0f);
-		XMVECTOR spotlightRatio = XMVectorSet(0.97f, 0.9f, 0.0f, 0.0f);
-		XMStoreFloat4(&cbLight.Spotlight[0].PosAndRadius, spotlightPos);
-		XMStoreFloat4(&cbLight.Spotlight[0].Direction, spotlightDir);
-		XMStoreFloat4(&cbLight.Spotlight[0].ConeRatio, spotlightRatio);
-		XMStoreFloat4(&cbLight.Spotlight[0].Color, XMVectorSet(0.85f, 0.85f, 1.0f, 1.0f));
+		RVec4 spotlightPos = RVec4(m_CameraMatrix.GetTranslation(), 2000.0f);
+		RVec4 spotlightDir = RVec4(m_CameraMatrix.GetRow(2).ToVec3(), 1.0f);
+		RVec4 spotlightRatio = RVec4(0.97f, 0.9f, 0.0f, 0.0f);
+		cbLight.Spotlight[0].PosAndRadius = spotlightPos;
+		cbLight.Spotlight[0].Direction = spotlightDir;
+		cbLight.Spotlight[0].ConeRatio = spotlightRatio;
+		cbLight.Spotlight[0].Color = RVec4(0.85f, 0.85f, 1.0f, 1.0f);
 	}
 
-	XMStoreFloat4(&cbLight.CameraPos, cameraMatrix.r[3]);
+	cbLight.CameraPos = m_CameraMatrix.GetRow(3);
 
 	RRenderer.D3DImmediateContext()->Map(m_cbLight, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 	memcpy(subres.pData, &cbLight, sizeof(SHADER_LIGHT_BUFFER));
@@ -628,9 +620,9 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		float x = sinf((float)i / MAX_INSTANCE_COUNT * 2 * PI) * 1000.0f * d;
 		float y = sinf((float)i / MAX_INSTANCE_COUNT * 2 * PI * 8) * 1000.0f * d;
 		float z = cosf((float)i / MAX_INSTANCE_COUNT * 2 * PI) * 1000.0f * d;
-		XMMATRIX instanceMatrix = XMMatrixTranslation(x, y, z) * XMMatrixRotationY(x + timer.TotalTime() * 0.1f * sinf(d));
+		RMatrix4 instanceMatrix = RMatrix4::CreateTranslation(x, y, z) * RMatrix4::CreateYAxisRotation((x + timer.TotalTime() * 0.1f * sinf(d)) * 180 / PI);
 
-		XMStoreFloat4x4(&cbInstance.instancedWorldMatrix[i], instanceMatrix);
+		cbInstance.instancedWorldMatrix[i] = instanceMatrix;
 	}
 
 	RRenderer.D3DImmediateContext()->Map(m_cbInstance, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
@@ -641,14 +633,14 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	SHADER_SCREEN_BUFFER cbScreen;
 	ZeroMemory(&cbScreen, sizeof(cbScreen));
 
-	cbScreen.ScreenSize = XMFLOAT2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());
+	cbScreen.ScreenSize = RVec2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());
 
 	RRenderer.D3DImmediateContext()->Map(m_cbScreen, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 	memcpy(subres.pData, &cbScreen, sizeof(SHADER_SCREEN_BUFFER));
 	RRenderer.D3DImmediateContext()->Unmap(m_cbScreen, 0);
 
 	// Update particle vertices
-	ParticleDepthComparer cmp(cameraMatrix.r[3], cameraMatrix.r[2]);
+	ParticleDepthComparer cmp(m_CameraMatrix.GetRow(3), m_CameraMatrix.GetRow(3));
 	std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
 	m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(PARTICLE_VERTEX), PARTICLE_COUNT);
 }
@@ -723,10 +715,10 @@ void FSGraphicsProjectApp::CreateSceneRenderTargetView()
 	RRenderer.D3DDevice()->CreateDepthStencilView(m_RenderTargetDepthBuffer, 0, &m_RenderTargetDepthView);
 }
 
-void FSGraphicsProjectApp::SetPerObjectConstBuffuer(const XMMATRIX& world)
+void FSGraphicsProjectApp::SetPerObjectConstBuffuer(const RMatrix4& world)
 {
 	SHADER_OBJECT_BUFFER cbObject;
-	XMStoreFloat4x4(&cbObject.worldMatrix, world);
+	cbObject.worldMatrix = world;
 
 	D3D11_MAPPED_SUBRESOURCE subres;
 	RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
@@ -746,7 +738,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	SHADER_MATERIAL_BUFFER cbMaterial;
 	ZeroMemory(&cbMaterial, sizeof(cbMaterial));
 
-	XMStoreFloat4(&cbMaterial.SpecularColorAndPower, XMVectorSet(1.0f, 1.0f, 1.0f, 512.0f));
+	cbMaterial.SpecularColorAndPower = RVec4(1.0f, 1.0f, 1.0f, 512.0f);
 	cbMaterial.GlobalOpacity = 1.0f;
 	SetMaterialConstBuffer(&cbMaterial);
 
@@ -755,7 +747,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	RRenderer.Clear();
 
 	// Set up object world matrix
-	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 0.0f, 0.0f));
+	SetPerObjectConstBuffuer(RMatrix4::IDENTITY);
 
 	if (pass != ShadowPass)
 	{
@@ -766,11 +758,11 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		m_Skybox.Draw();
 
 		// Clear depth buffer for skybox
-		RRenderer.Clear(false, Colors::Black);
+		RRenderer.Clear(false, RColor(0, 0, 0));
 	}
 
 	// Draw star
-	SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 500.0f, 0.0f));
+	SetPerObjectConstBuffuer(RMatrix4::CreateTranslation(0.0f, 500.0f, 0.0f));
 
 	if (pass == ShadowPass)
 		m_DepthShader->Bind();
@@ -850,7 +842,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	}
 
 	// Draw bumped cube
-	SetPerObjectConstBuffuer(XMMatrixTranslation(-1400.0f, 150.0f, 0.0f));
+	SetPerObjectConstBuffuer(RMatrix4::CreateTranslation(-1400.0f, 150.0f, 0.0f));
 
 	if (pass == ShadowPass)
 	{
@@ -895,7 +887,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[1], blendFactor, 0xFFFFFFFF);
 		RRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[1], 0);
 
-		SetPerObjectConstBuffuer(XMMatrixTranslation(0.0f, 150.0f, 150.0f));
+		SetPerObjectConstBuffuer(RMatrix4::CreateTranslation(0.0f, 150.0f, 150.0f));
 		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_ParticleDiffuseTexture);
 		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_ParticleNormalTexture);
 		m_ParticleShader->Bind();

@@ -7,6 +7,8 @@
 #include "Rhino.h"
 #include "RMatrix.h"
 
+RMatrix4 RMatrix4::IDENTITY = RMatrix4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+
 RMatrix4::RMatrix4()
 {
 }
@@ -63,13 +65,10 @@ RMatrix4& RMatrix4::operator=(const RMatrix4& rhs)
 	return *this;
 }
 
-void RMatrix4::SetIdentity()
+RMatrix4& RMatrix4::operator*=(const RMatrix4& rhs)
 {
-	m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0f;
-	m[0][1] = m[0][2] = m[0][3] = 0.0f;
-	m[1][0] = m[1][2] = m[1][3] = 0.0f;
-	m[2][0] = m[2][1] = m[2][3] = 0.0f;
-	m[3][0] = m[3][1] = m[3][2] = 0.0f;
+	*this = *this * rhs;
+	return *this;
 }
 
 RMatrix4 RMatrix4::GetViewMatrix() const
@@ -105,6 +104,19 @@ RVec3 RMatrix4::GetUp() const
 RVec3 RMatrix4::GetRight() const
 {
 	return RVec3(m[0][0], m[0][1], m[0][2]);
+}
+
+RVec4 RMatrix4::GetRow(int index)
+{
+	return RVec4(m[index]);
+}
+
+void RMatrix4::SetRow(int index, const RVec4& row)
+{
+	m[index][0] = row.x;
+	m[index][1] = row.y;
+	m[index][2] = row.z;
+	m[index][3] = row.w;
 }
 
 void RMatrix4::TranslateLocal(const RVec3& vec)
@@ -149,8 +161,7 @@ void RMatrix4::GetTranslation(float& x, float& y, float& z) const
 
 RMatrix4 RMatrix4::CreateXAxisRotation(float degree)
 {
-	RMatrix4 mat;
-	mat.SetIdentity();
+	RMatrix4 mat = RMatrix4::IDENTITY;
 	mat.m[1][1] = cosf(DEG_TO_RAD(degree));
 	mat.m[1][2] = -sinf(DEG_TO_RAD(degree));
 	mat.m[2][1] = sinf(DEG_TO_RAD(degree));
@@ -161,8 +172,7 @@ RMatrix4 RMatrix4::CreateXAxisRotation(float degree)
 
 RMatrix4 RMatrix4::CreateYAxisRotation(float degree)
 {
-	RMatrix4 mat;
-	mat.SetIdentity();
+	RMatrix4 mat = RMatrix4::IDENTITY;
 	mat.m[0][0] = cosf(DEG_TO_RAD(degree));
 	mat.m[0][2] = sinf(DEG_TO_RAD(degree));
 	mat.m[2][0] = -sinf(DEG_TO_RAD(degree));
@@ -173,8 +183,7 @@ RMatrix4 RMatrix4::CreateYAxisRotation(float degree)
 
 RMatrix4 RMatrix4::CreateZAxisRotation(float degree)
 {
-	RMatrix4 mat;
-	mat.SetIdentity();
+	RMatrix4 mat = RMatrix4::IDENTITY;
 	mat.m[0][0] = cosf(DEG_TO_RAD(degree));
 	mat.m[0][1] = -sinf(DEG_TO_RAD(degree));
 	mat.m[1][0] = sinf(DEG_TO_RAD(degree));
@@ -190,8 +199,7 @@ RMatrix4 RMatrix4::CreateTranslation(const RVec3& vec)
 
 RMatrix4 RMatrix4::CreateTranslation(float x, float y, float z)
 {
-	RMatrix4 mat;
-	mat.SetIdentity();
+	RMatrix4 mat = RMatrix4::IDENTITY;
 	mat.m[3][0] = x;
 	mat.m[3][1] = y;
 	mat.m[3][2] = z;
@@ -206,8 +214,7 @@ RMatrix4 RMatrix4::CreateScale(const RVec3& scale)
 
 RMatrix4 RMatrix4::CreateScale(float sx, float sy, float sz)
 {
-	RMatrix4 mat;
-	mat.SetIdentity();
+	RMatrix4 mat = RMatrix4::IDENTITY;
 	mat.m[0][0] = sx;
 	mat.m[1][1] = sy;
 	mat.m[2][2] = sz;
@@ -215,14 +222,36 @@ RMatrix4 RMatrix4::CreateScale(float sx, float sy, float sz)
 	return mat;
 }
 
-RMatrix4 RMatrix4::CreatePerspectiveProjection(float fov, float aspect, float zNear, float zFar)
+RMatrix4 RMatrix4::CreatePerspectiveProjectionLH(float fov, float aspect, float zNear, float zFar)
 {
-	float y_scale = 1.0f / tanf(0.5f * DEG_TO_RAD(fov));
+	float y_scale = 1.0f / tanf(DEG_TO_RAD(fov));
 
 	return RMatrix4(y_scale,	0.0f,				0.0f,								0.0f,
 					0.0f,		y_scale * aspect,	0.0f,								0.0f,
 					0.0f,		0.0f,				zFar / (zFar - zNear),				1.0f,
 					0.0f,		0.0f,				-(zFar * zNear) / (zFar - zNear),	0.0f);
+}
+
+RMatrix4 RMatrix4::CreateOrthographicProjectionLH(float viewWidth, float viewHeight, float zNear, float zFar)
+{
+	float fRange = 1.0f / (zFar - zNear);
+
+	return RMatrix4(2.0f / viewWidth,	0.0f,				0.0f,				0.0f,
+					0.0f,				2.0f / viewHeight,	0.0f,				0.0f,
+					0.0f,				0.0f,				fRange,				0.0f,
+					0.0f,				0.0f,				-fRange * zNear,	1.0f);
+}
+
+RMatrix4 RMatrix4::CreateLookAtViewLH(const RVec3& eye, const RVec3& lookAt, const RVec3& up)
+{
+	RVec3 zaxis = (lookAt - eye).GetNormalizedVec3();
+	RVec3 xaxis = up.Cross(zaxis).GetNormalizedVec3();
+	RVec3 yaxis = zaxis.Cross(xaxis);
+
+	return RMatrix4(xaxis.x,			yaxis.x,			zaxis.x,			0,
+					xaxis.y,			yaxis.y,			zaxis.y,			0,
+					xaxis.z,			yaxis.z,			zaxis.z,			0,
+					-xaxis.Dot(eye),	-yaxis.Dot(eye),	-zaxis.Dot(eye),	1);
 }
 
 RVec4 operator*(const RVec4& v, const RMatrix4& m)

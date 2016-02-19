@@ -9,8 +9,8 @@ RShadowMap::RShadowMap()
 	: m_RenderTargetBuffer(nullptr), m_RenderTargetView(nullptr), m_RenderTargetSRV(nullptr),
 	  m_DepthBuffer(nullptr), m_DepthView(nullptr)
 {
-	XMStoreFloat4x4(&m_ViewMatrix, XMMatrixIdentity());
-	XMStoreFloat4x4(&m_ProjMatrix, XMMatrixIdentity());
+	m_ViewMatrix = RMatrix4::IDENTITY;
+	m_ProjMatrix = RMatrix4::IDENTITY;
 }
 
 RShadowMap::~RShadowMap()
@@ -74,7 +74,7 @@ void RShadowMap::Initialize(int width, int height)
 
 void RShadowMap::SetOrthogonalProjection(float viewWidth, float viewHeight, float nearZ, float farZ)
 {
-	XMStoreFloat4x4(&m_ProjMatrix, XMMatrixOrthographicLH(viewWidth, viewHeight, nearZ, farZ));
+	m_ProjMatrix = RMatrix4::CreateOrthographicProjectionLH(viewWidth, viewHeight, nearZ, farZ);
 }
 
 void RShadowMap::SetupRenderTarget()

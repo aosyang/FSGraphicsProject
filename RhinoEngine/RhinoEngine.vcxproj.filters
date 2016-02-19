@@ -47,14 +47,17 @@
     <ClInclude Include="RenderSystem\RShaderManager.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
-    <ClInclude Include="IResource.h">
-      <Filter>RenderSystem</Filter>
-    </ClInclude>
     <ClInclude Include="Core\RVector.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\RMatrix.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\RColor.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderSystem\IResource.h">
+      <Filter>RenderSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

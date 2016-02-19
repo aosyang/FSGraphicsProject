@@ -12,14 +12,14 @@ public:
 	RSceneObject();
 	virtual ~RSceneObject();
 
-	XMMATRIX GetNodeTransform() const;
+	const RMatrix4& GetNodeTransform() const;
 
-	void SetPosition(const XMFLOAT3& pos);
+	void SetPosition(const RVec3& pos);
 
 	virtual void Draw();
 
 private:
-	XMFLOAT4X4	m_NodeTransform;
+	RMatrix4	m_NodeTransform;
 };
 
 #endif

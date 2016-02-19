@@ -25,8 +25,8 @@ enum RenderPass
 
 struct PARTICLE_VERTEX
 {
-	XMFLOAT4 pos;
-	XMFLOAT4 color;
+	RVec4 pos;
+	RVec4 color;
 	float	 rot;
 };
 
@@ -45,13 +45,13 @@ public:
 
 private:
 	void CreateSceneRenderTargetView();
-	void SetPerObjectConstBuffuer(const XMMATRIX& world);
+	void SetPerObjectConstBuffuer(const RMatrix4& world);
 	void RenderSinglePass(RenderPass pass);
 	void SetMaterialConstBuffer(SHADER_MATERIAL_BUFFER* buffer);
 
 	bool						m_EnableLights[3];
 
-	XMFLOAT4X4					m_CameraMatrix;
+	RMatrix4					m_CameraMatrix;
 	float						m_CamPitch, m_CamYaw;
 
 	RSkybox						m_Skybox;

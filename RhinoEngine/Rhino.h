@@ -33,13 +33,12 @@ using namespace std;
 
 // DirectX 3D
 #include <d3d11.h>
-#include <DirectXMath.h>
 #include "RenderSystem/d3dUtil.h"
-
-using namespace DirectX;
 
 #include "Core/RVector.h"
 #include "Core/RMatrix.h"
+
+#include "Core/RColor.h"
 
 // FBX SDK
 #include <fbxsdk.h>

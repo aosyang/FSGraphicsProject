@@ -4,12 +4,12 @@
 
 #ifdef __cplusplus
 	#pragma once
-	#include <DirectXMath.h>
+	#include "Rhino.h"
 	typedef unsigned int		uint;
-	typedef DirectX::XMFLOAT2	float2;
-	typedef DirectX::XMFLOAT3	float3;
-	typedef DirectX::XMFLOAT4	float4;
-	typedef DirectX::XMFLOAT4X4	float4x4;
+	typedef RVec2				float2;
+	typedef RVec3				float3;
+	typedef RVec4				float4;
+	typedef RMatrix4			float4x4;
 	// lets us ensure constant buffers and their variables are 16byte aligned to HLSL 4-float registers
 	#define _regAlign __declspec(align(16))
 	// allows us to attach semantics to HLSL variables without bugging C++
