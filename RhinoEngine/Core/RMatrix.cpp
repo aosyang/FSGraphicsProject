@@ -163,8 +163,8 @@ RMatrix4 RMatrix4::CreateXAxisRotation(float degree)
 {
 	RMatrix4 mat = RMatrix4::IDENTITY;
 	mat.m[1][1] = cosf(DEG_TO_RAD(degree));
-	mat.m[1][2] = -sinf(DEG_TO_RAD(degree));
-	mat.m[2][1] = sinf(DEG_TO_RAD(degree));
+	mat.m[1][2] = sinf(DEG_TO_RAD(degree));
+	mat.m[2][1] = -sinf(DEG_TO_RAD(degree));
 	mat.m[2][2] = cosf(DEG_TO_RAD(degree));
 
 	return mat;
@@ -174,8 +174,8 @@ RMatrix4 RMatrix4::CreateYAxisRotation(float degree)
 {
 	RMatrix4 mat = RMatrix4::IDENTITY;
 	mat.m[0][0] = cosf(DEG_TO_RAD(degree));
-	mat.m[0][2] = sinf(DEG_TO_RAD(degree));
-	mat.m[2][0] = -sinf(DEG_TO_RAD(degree));
+	mat.m[0][2] = -sinf(DEG_TO_RAD(degree));
+	mat.m[2][0] = sinf(DEG_TO_RAD(degree));
 	mat.m[2][2] = cosf(DEG_TO_RAD(degree));
 
 	return mat;
@@ -185,8 +185,8 @@ RMatrix4 RMatrix4::CreateZAxisRotation(float degree)
 {
 	RMatrix4 mat = RMatrix4::IDENTITY;
 	mat.m[0][0] = cosf(DEG_TO_RAD(degree));
-	mat.m[0][1] = -sinf(DEG_TO_RAD(degree));
-	mat.m[1][0] = sinf(DEG_TO_RAD(degree));
+	mat.m[0][1] = sinf(DEG_TO_RAD(degree));
+	mat.m[1][0] = -sinf(DEG_TO_RAD(degree));
 	mat.m[1][1] = cosf(DEG_TO_RAD(degree));
 
 	return mat;
@@ -224,7 +224,7 @@ RMatrix4 RMatrix4::CreateScale(float sx, float sy, float sz)
 
 RMatrix4 RMatrix4::CreatePerspectiveProjectionLH(float fov, float aspect, float zNear, float zFar)
 {
-	float y_scale = 1.0f / tanf(DEG_TO_RAD(fov));
+	float y_scale = 1.0f / tanf(0.5f * DEG_TO_RAD(fov));
 
 	return RMatrix4(y_scale,	0.0f,				0.0f,								0.0f,
 					0.0f,		y_scale * aspect,	0.0f,								0.0f,

@@ -402,7 +402,7 @@ bool FSGraphicsProjectApp::Initialize()
 
 	m_CameraMatrix = RMatrix4::CreateTranslation(407.023712f, 339.007507f, 876.396484f);
 	m_CamPitch = 0.0900001600f;
-	m_CamYaw = 2.36159968f;
+	m_CamYaw = 3.88659930f;
 
 	m_ShadowMap.Initialize(1024, 1024);
 
@@ -500,8 +500,8 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		RInput.GetCursorRelPos(dx, dy);
 		if (dx || dy)
 		{
-			m_CamYaw -= (float)dx / 200.0f;
-			m_CamPitch -= (float)dy / 200.0f;
+			m_CamYaw += (float)dx / 200.0f;
+			m_CamPitch += (float)dy / 200.0f;
 			m_CamPitch = max(-PI/2, min(PI/2, m_CamPitch));
 		}
 	}
@@ -534,7 +534,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	m_CameraMatrix.SetTranslation(camPos + (RVec4(moveVec, 1.0f) * m_CameraMatrix).ToVec3());
 
 	RMatrix4 viewMatrix = m_CameraMatrix.GetViewMatrix();
-	RMatrix4 projMatrix = RMatrix4::CreatePerspectiveProjectionLH(45.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
+	RMatrix4 projMatrix = RMatrix4::CreatePerspectiveProjectionLH(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
 
 	// Update scene constant buffer
 	SHADER_SCENE_BUFFER cbScene;
