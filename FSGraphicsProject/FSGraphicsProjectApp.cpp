@@ -306,10 +306,11 @@ bool FSGraphicsProjectApp::Initialize()
 		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TANGENT",	0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD",	1, DXGI_FORMAT_R32G32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	RRenderer.D3DDevice()->CreateInputLayout(objVertDesc, 4, m_AOShader->VS_Bytecode, m_AOShader->VS_BytecodeSize, &m_LightingMeshIL);
+	RRenderer.D3DDevice()->CreateInputLayout(objVertDesc, 5, m_AOShader->VS_Bytecode, m_AOShader->VS_BytecodeSize, &m_LightingMeshIL);
 
 	m_SceneMeshCity = RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx", m_LightingMeshIL);
 	m_FbxMeshObj.SetMesh(m_SceneMeshCity);
@@ -362,6 +363,21 @@ bool FSGraphicsProjectApp::Initialize()
 
 	m_AOSceneObj.SetMaterial(aoMat, 1);
 	m_AOSceneObj.SetPosition(RVec3(-500.0f, 0.0f, 500.0f));
+
+	ID3D11ShaderResourceView* charTexSRV[] =
+	{
+		RResourceManager::Instance().LoadDDSTexture("../Assets/Body_Diffuse_01.DDS"),
+		RResourceManager::Instance().LoadDDSTexture("../Assets/Body_Normal_01.DDS"),
+	};
+
+	RMaterial charMat[] =
+	{
+		{ m_BumpLightingShader, 2, charTexSRV[0], charTexSRV[1] },
+	};
+
+	m_CharacterObj.SetMesh(RResourceManager::Instance().LoadFbxMesh("../Assets/SpeedballPlayer.fbx", m_LightingMeshIL));
+	m_CharacterObj.SetMaterial(charMat, 1);
+	m_CharacterObj.SetTransform(RMatrix4::CreateXAxisRotation(-90.0f) * RMatrix4::CreateTranslation(-1100.0f, 40.0f, 0.0f));
 
 	m_SceneMeshIsland = RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx", m_LightingMeshIL);
 	m_IslandTextureSRV = RResourceManager::Instance().LoadDDSTexture("../Assets/TR_FloatingIsland02.dds");
@@ -857,6 +873,28 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_BumpNormalTextureSRV);
 		RRenderer.D3DImmediateContext()->IASetInputLayout(m_BumpLightingIL);
 		m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	}
+
+	// Draw character
+	SetPerObjectConstBuffuer(m_CharacterObj.GetNodeTransform());
+	
+	if (pass == ShadowPass)
+		m_CharacterObj.DrawWithShader(m_DepthShader);
+	else
+	{
+		float opacity = (timeNow - m_CharacterObj.GetResourceTimestamp()) / loadingFadeInTime;
+		if (opacity >= 0.0f && opacity <= 1.0f)
+		{
+			cbMaterial.GlobalOpacity = opacity;
+			SetMaterialConstBuffer(&cbMaterial);
+			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[2], blendFactor, 0xFFFFFFFF);
+			m_CharacterObj.Draw();
+		}
+		else
+		{
+			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
+			m_CharacterObj.Draw();
+		}
 	}
 
 	// Draw tachikoma

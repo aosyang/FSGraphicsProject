@@ -23,6 +23,11 @@ const RMatrix4& RSceneObject::GetNodeTransform() const
 	return m_NodeTransform;
 }
 
+void RSceneObject::SetTransform(const RMatrix4& transform)
+{
+	m_NodeTransform = transform;
+}
+
 void RSceneObject::SetPosition(const RVec3& pos)
 {
 	m_NodeTransform.SetTranslation(pos);

@@ -87,6 +87,8 @@ private:
 	RSMeshObject				m_TachikomaObj;
 	RShader*					m_RefractionShader;
 
+	RSMeshObject				m_CharacterObj;
+
 	RMesh*						m_AOSceneMesh;
 	RSMeshObject				m_AOSceneObj;
 	RShader*					m_AOShader;

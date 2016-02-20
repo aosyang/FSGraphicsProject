@@ -14,6 +14,7 @@ public:
 
 	const RMatrix4& GetNodeTransform() const;
 
+	void SetTransform(const RMatrix4& transform);
 	void SetPosition(const RVec3& pos);
 
 	virtual void Draw();

@@ -16,6 +16,7 @@ struct MESH_VERTEX
 	RVec3 pos;
 	RVec2 uv0;
 	RVec3 normal;
+	RVec3 tangent;
 	RVec2 uv1;
 
 	bool operator<(const MESH_VERTEX& rhs) const
@@ -276,6 +277,39 @@ void LoadFbxMeshData(LoaderThreadTask* task)
 			break;
 		}
 
+		// Tangent
+		FbxGeometryElementTangent* tangentArray = mesh->GetElementTangent();
+		bool hasPerPolygonVertexTangent = (tangentArray && tangentArray->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
+
+		if (tangentArray && !hasPerPolygonVertexTangent)
+		{
+			switch (tangentArray->GetReferenceMode())
+			{
+			case FbxGeometryElement::eDirect:
+				for (int i = 0; i < controlPointCount; i++)
+				{
+					FbxVector4 tangent = tangentArray->GetDirectArray().GetAt(i);
+
+					vertData[i].tangent.x = (float)tangent[0];
+					vertData[i].tangent.y = (float)tangent[1];
+					vertData[i].tangent.z = (float)tangent[2];
+				}
+				break;
+
+			case FbxGeometryElement::eIndexToDirect:
+				for (int i = 0; i < controlPointCount; i++)
+				{
+					int index = tangentArray->GetIndexArray().GetAt(i);
+					FbxVector4 tangent = tangentArray->GetDirectArray().GetAt(index);
+
+					vertData[i].tangent.x = (float)tangent[0];
+					vertData[i].tangent.y = (float)tangent[1];
+					vertData[i].tangent.z = (float)tangent[2];
+				}
+				break;
+			}
+		}
+
 		FbxGeometryElementUV* uvArray[2] =
 		{
 			mesh->GetElementUV(0),
@@ -343,23 +377,38 @@ void LoadFbxMeshData(LoaderThreadTask* task)
 				
 				if (hasPerPolygonVertexNormal)
 				{
-					//int idxNormal = idxPoly * 3 + idxVert;
-					//if (uvArray->GetReferenceMode() != FbxGeometryElement::eDirect)
-					//{
-					//	idxNormal = normalArray->GetIndexArray().GetAt(idxPoly * 3 + idxVert);
-					//}
-
-					//FbxVector4 normal = normalArray->GetDirectArray().GetAt(idxNormal);
-
 					FbxVector4 normal;
 					mesh->GetPolygonVertexNormal(idxPoly, idxVert, normal);
 
 					vertex.normal.x = (float)normal[0];
 					vertex.normal.y = (float)normal[1];
 					vertex.normal.z = (float)normal[2];
+				}
 
-					//sprintf_s(msg_buf, "Get normal [%f, %f, %f]\n", vertex.normal.x, vertex.normal.y, vertex.normal.z);
-					//OutputDebugStringA(msg_buf);
+				if (hasPerPolygonVertexTangent)
+				{
+					switch (tangentArray->GetReferenceMode())
+					{
+					case FbxGeometryElement::eDirect:
+					{
+						FbxVector4 tangent = tangentArray->GetDirectArray().GetAt(idxPoly * 3 + idxVert);
+
+						vertex.tangent.x = (float)tangent[0];
+						vertex.tangent.y = (float)tangent[1];
+						vertex.tangent.z = (float)tangent[2];
+					}
+					break;
+					case FbxGeometryElement::eIndexToDirect:
+					{
+						int index = tangentArray->GetIndexArray().GetAt(idxPoly * 3 + idxVert);
+						FbxVector4 tangent = tangentArray->GetDirectArray().GetAt(index);
+
+						vertex.tangent.x = (float)tangent[0];
+						vertex.tangent.y = (float)tangent[1];
+						vertex.tangent.z = (float)tangent[2];
+					}
+					break;
+					}
 				}
 
 				for (int uvLayer = 0; uvLayer < 2; uvLayer++)
