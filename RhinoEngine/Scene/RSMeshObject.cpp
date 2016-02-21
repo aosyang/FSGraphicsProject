@@ -65,7 +65,11 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 			shader->Bind();
 			for (int t = 0; t < m_Materials[i].TextureNum; t++)
 			{
-				RRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, &m_Materials[i].Textures[t]);
+				ID3D11ShaderResourceView* const srv[] =
+				{
+					m_Materials[i].Textures[t]->GetSRV(),
+				};
+				RRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, srv);
 			}
 		}
 

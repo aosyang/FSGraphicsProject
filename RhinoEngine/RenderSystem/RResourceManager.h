@@ -6,12 +6,10 @@
 #ifndef _RRESOURCEMANAGER_H
 #define _RRESOURCEMANAGER_H
 
-#include "RMesh.h"
-
 struct LoaderThreadTask
 {
-	string	Filename;
-	RMesh*	Resource;
+	string			Filename;
+	RBaseResource*	Resource;
 };
 
 struct LoaderThreadData
@@ -28,17 +26,22 @@ class RResourceManager : public RSingleton<RResourceManager>
 public:
 	void Initialize();
 	void Destroy();
-	void UnloadAllMeshes();
+	void UnloadAllResources();
 
 	RMesh* LoadFbxMesh(const char* filename, ID3D11InputLayout* inputLayout);
-	ID3D11ShaderResourceView* LoadDDSTexture(const char* filename);
+	RTexture* LoadDDSTexture(const char* filename);
+
+	// Wrap a d3d11 srv and get a pointer to texture
+	RTexture* WrapSRV(ID3D11ShaderResourceView* srv);
 
 private:
 	RResourceManager() {}
 	~RResourceManager() {}
 
 	vector<RMesh*>						m_MeshResources;
-	vector<ID3D11ShaderResourceView*>	m_TextureResources;
+	vector<RTexture*>					m_TextureResources;
+	map<ID3D11ShaderResourceView*, RTexture*>
+										m_WrapperTextureResources;
 
 	bool								m_ShouldQuitLoaderThread;
 	mutex								m_TaskQueueMutex;

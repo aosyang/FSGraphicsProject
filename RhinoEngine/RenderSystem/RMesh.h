@@ -13,10 +13,10 @@ struct RMaterial
 {
 	RShader*					Shader;
 	int							TextureNum;
-	ID3D11ShaderResourceView*	Textures[8];
+	RTexture*					Textures[8];
 };
 
-class RMesh : public IResource
+class RMesh : public RBaseResource
 {
 public:
 	RMesh(ID3D11InputLayout* inputLayout);

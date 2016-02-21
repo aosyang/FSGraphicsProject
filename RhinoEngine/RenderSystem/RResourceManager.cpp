@@ -8,8 +8,6 @@
 
 #include "RResourceManager.h"
 
-#include <fbxsdk.h>
-
 
 struct MESH_VERTEX
 {
@@ -26,6 +24,7 @@ struct MESH_VERTEX
 };
 
 void LoadFbxMeshData(LoaderThreadTask* task);
+void LoadDDSTextureData(LoaderThreadTask* task);
 
 void ResourceLoaderThread(LoaderThreadData* data)
 {
@@ -45,7 +44,16 @@ void ResourceLoaderThread(LoaderThreadData* data)
 		}
 
 		// Load resource in this task
-		LoadFbxMeshData(&task);
+		switch (task.Resource->GetResourceType())
+		{
+		case RT_Mesh:
+			LoadFbxMeshData(&task);
+			break;
+
+		case RT_Texture:
+			LoadDDSTextureData(&task);
+			break;
+		}
 	}
 }
 
@@ -72,10 +80,10 @@ void RResourceManager::Destroy()
 	}
 	m_TaskQueueCondition.notify_all();
 
-	UnloadAllMeshes();
+	UnloadAllResources();
 }
 
-void RResourceManager::UnloadAllMeshes()
+void RResourceManager::UnloadAllResources()
 {
 	for (UINT32 i = 0; i < m_MeshResources.size(); i++)
 	{
@@ -85,9 +93,18 @@ void RResourceManager::UnloadAllMeshes()
 
 	for (UINT32 i = 0; i < m_TextureResources.size(); i++)
 	{
-		SAFE_RELEASE(m_TextureResources[i]);
+		delete m_TextureResources[i];
 	}
 	m_TextureResources.clear();
+
+	map<ID3D11ShaderResourceView*, RTexture*>::iterator iter;
+	for (iter = m_WrapperTextureResources.begin(); iter != m_WrapperTextureResources.end(); iter++)
+	{
+		// Delete wrapper textures without releasing shader resource view
+		iter->second->SetSRV(nullptr);
+		delete iter->second;
+	}
+	m_WrapperTextureResources.clear();
 }
 
 RMesh* RResourceManager::LoadFbxMesh(const char* filename, ID3D11InputLayout* inputLayout)
@@ -193,24 +210,6 @@ void LoadFbxMeshData(LoaderThreadTask* task)
 		sprintf_s(msg_buf, sizeof(msg_buf), "[%s]\n", node->GetName());
 		OutputDebugStringA(msg_buf);
 		
-		//int matCount = node->GetSrcObjectCount<FbxSurfaceMaterial>();
-		//for (int idxMat = 0; idxMat < matCount; idxMat++)
-		//{
-		//	FbxSurfaceMaterial* material = (FbxSurfaceMaterial*)node->GetSrcObject<FbxSurfaceMaterial>(idxMat);
-
-		//	if (material)
-		//	{
-		//		FbxProperty prop = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
-
-		//		int layerTexCount = prop.GetSrcObjectCount<FbxLayeredTexture>();
-
-		//		for (int idxLayerTex = 0; idxLayerTex < layerTexCount; idxLayerTex++)
-		//		{
-
-		//		}
-		//	}
-		//}
-
 		FbxVector4* controlPointArray;
 		vector<MESH_VERTEX> vertData;
 		vector<int> indexData;
@@ -439,6 +438,49 @@ void LoadFbxMeshData(LoaderThreadTask* task)
 			indexData.push_back(triangle[2]);
 		}
 
+		//// Load textures
+		//int matCount = node->GetSrcObjectCount<FbxSurfaceMaterial>();
+
+		//for (int idxMat = 0; idxMat < matCount; idxMat++)
+		//{
+		//	FbxSurfaceMaterial* material = (FbxSurfaceMaterial*)node->GetSrcObject<FbxSurfaceMaterial>(idxMat);
+
+		//	const char* texType[] =
+		//	{
+		//		FbxSurfaceMaterial::sDiffuse,
+		//		FbxSurfaceMaterial::sSpecular,
+		//		FbxSurfaceMaterial::sNormalMap,
+		//	};
+
+		//	for (int idxTexProp = 0; idxTexProp < 3; idxTexProp++)
+		//	{
+		//		FbxProperty prop = material->FindProperty(texType[idxTexProp]);
+		//		int layeredTexCount = prop.GetSrcObjectCount<FbxLayeredTexture>();
+
+		//		for (int idxLayeredTex = 0; idxLayeredTex < layeredTexCount; idxLayeredTex++)
+		//		{
+		//			FbxLayeredTexture* layeredTex = FbxCast<FbxLayeredTexture>(prop.GetSrcObject<FbxLayeredTexture>(idxLayeredTex));
+		//			int texCount = layeredTex->GetSrcObjectCount<FbxTexture>();
+
+		//			for (int idxTex = 0; idxTex < texCount; idxTex++)
+		//			{
+		//				FbxFileTexture* texture = FbxCast<FbxFileTexture>(layeredTex->GetSrcObject<FbxTexture>(idxTex));
+		//			}
+		//		}
+
+		//		if (layeredTexCount == 0)
+		//		{
+		//			int texCount = prop.GetSrcObjectCount<FbxTexture>();
+
+		//			for (int idxTex = 0; idxTex < texCount; idxTex++)
+		//			{
+		//				FbxFileTexture* texture = FbxCast<FbxFileTexture>(prop.GetSrcObject<FbxTexture>(idxTex));
+		//			}
+		//		}
+		//	}
+		//}
+
+
 		// Optimize mesh
 		sprintf_s(msg_buf, "Optimizing mesh...\n");
 		OutputDebugStringA(msg_buf);
@@ -476,24 +518,53 @@ void LoadFbxMeshData(LoaderThreadTask* task)
 	lFbxScene->Destroy();
 	lFbxSdkManager->Destroy();
 
-	task->Resource->SetMeshElements(meshElements.data(), meshElements.size());
-	task->Resource->SetResourceTimestamp(REngine::GetTimer().TotalTime());
+	static_cast<RMesh*>(task->Resource)->SetMeshElements(meshElements.data(), meshElements.size());
+	static_cast<RMesh*>(task->Resource)->SetResourceTimestamp(REngine::GetTimer().TotalTime());
 }
 
-ID3D11ShaderResourceView* RResourceManager::LoadDDSTexture(const char* filename)
+RTexture* RResourceManager::LoadDDSTexture(const char* filename)
+{
+	RTexture* pTexture = new RTexture();
+	m_TextureResources.push_back(pTexture);
+
+	LoaderThreadTask task;
+	task.Filename = string(filename);
+	task.Resource = pTexture;
+
+	// Upload task to working queue
+	m_TaskQueueMutex.lock();
+	m_LoaderThreadTaskQueue.push(task);
+	m_TaskQueueMutex.unlock();
+
+	// Notify loader thread to start working
+	m_TaskQueueCondition.notify_all();
+
+	return pTexture;
+}
+
+void LoadDDSTextureData(LoaderThreadTask* task)
 {
 	ID3D11ShaderResourceView* srv;
 	size_t char_len;
 	wchar_t wszName[1024];
-	mbstowcs_s(&char_len, wszName, 1024, filename, strlen(filename));
+	mbstowcs_s(&char_len, wszName, 1024, task->Filename.data(), task->Filename.size());
 
 	char msg_buf[1024];
-	sprintf_s(msg_buf, sizeof(msg_buf), "Loading texture [%s]...\n", filename);
+	sprintf_s(msg_buf, sizeof(msg_buf), "Loading texture [%s]...\n", task->Filename.data());
 	OutputDebugStringA(msg_buf);
 
 	DirectX::CreateDDSTextureFromFile(RRenderer.D3DDevice(), wszName, nullptr, &srv);
 
-	m_TextureResources.push_back(srv);
-
-	return srv;
+	static_cast<RTexture*>(task->Resource)->SetSRV(srv);
 }
+
+RTexture* RResourceManager::WrapSRV(ID3D11ShaderResourceView* srv)
+{
+	if (m_WrapperTextureResources.find(srv) != m_WrapperTextureResources.end())
+		return m_WrapperTextureResources[srv];
+
+	RTexture* tex = new RTexture(srv);
+	m_WrapperTextureResources[srv] = tex;
+	return tex;
+}
+

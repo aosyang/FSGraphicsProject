@@ -43,6 +43,10 @@ using namespace std;
 // FBX SDK
 #include <fbxsdk.h>
 
+class RMesh;
+class RTexture;
+class RBaseResource;
+
 // Engine Classes
 #include "Core/RTimer.h"
 #include "Core/RInput.h"
@@ -55,6 +59,7 @@ using namespace std;
 #include "RenderSystem/RResourceManager.h"
 #include "RenderSystem/RShaderManager.h"
 #include "RenderSystem/RMesh.h"
+#include "RenderSystem/RTexture.h"
 
 #include "Core/REngine.h"
 

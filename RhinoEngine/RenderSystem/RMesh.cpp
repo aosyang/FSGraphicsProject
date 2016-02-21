@@ -8,23 +8,22 @@
 #include "RMesh.h"
 
 RMesh::RMesh(ID3D11InputLayout* inputLayout)
+	: RBaseResource(RT_Mesh)
 {
 	m_LoadingFinishTime = 0.0f;
 	m_InputLayout = inputLayout;
 }
 
 RMesh::RMesh(const vector<RMeshElement> meshElements, const vector<RMaterial>& materials, ID3D11InputLayout* inputLayout)
+	: RMesh(inputLayout)
 {
-	m_LoadingFinishTime = 0.0f;
 	m_MeshElements = meshElements;
 	m_Materials = materials;
-	m_InputLayout = inputLayout;
 }
 
 RMesh::RMesh(RMeshElement* meshElements, int numElement, RMaterial* materials, int numMaterial, ID3D11InputLayout* inputLayout)
+	: RMesh(inputLayout)
 {
-	m_LoadingFinishTime = 0.0f;
-
 	assert(meshElements && numElement);
 	m_MeshElements.assign(meshElements, meshElements + numElement);
 
@@ -39,8 +38,6 @@ RMesh::RMesh(RMeshElement* meshElements, int numElement, RMaterial* materials, i
 			m_Materials.push_back(emptyMaterial);
 		}
 	}
-
-	m_InputLayout = inputLayout;
 }
 
 RMesh::~RMesh()

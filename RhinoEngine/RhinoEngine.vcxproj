@@ -36,6 +36,7 @@
     <ClInclude Include="RenderSystem\RRenderSystem.h" />
     <ClInclude Include="RenderSystem\RResourceManager.h" />
     <ClInclude Include="RenderSystem\RShaderManager.h" />
+    <ClInclude Include="RenderSystem\RTexture.h" />
     <ClInclude Include="Rhino.h" />
     <ClInclude Include="Scene\RSceneObject.h" />
     <ClInclude Include="Scene\RSMeshObject.h" />
@@ -52,6 +53,7 @@
     <ClCompile Include="RenderSystem\RRenderSystem.cpp" />
     <ClCompile Include="RenderSystem\RResourceManager.cpp" />
     <ClCompile Include="RenderSystem\RShaderManager.cpp" />
+    <ClCompile Include="RenderSystem\RTexture.cpp" />
     <ClCompile Include="Scene\RSceneObject.cpp" />
     <ClCompile Include="Scene\RSMeshObject.cpp" />
   </ItemGroup>

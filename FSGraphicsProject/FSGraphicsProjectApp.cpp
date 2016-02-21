@@ -80,9 +80,9 @@ FSGraphicsProjectApp::FSGraphicsProjectApp()
 	  m_LightingShader(nullptr),
 	  m_SamplerState(nullptr)
 {
-	m_MeshTextureSRV[0] = nullptr;
-	m_MeshTextureSRV[1] = nullptr;
-	m_MeshTextureSRV[2] = nullptr;
+	m_MeshTexture[0] = nullptr;
+	m_MeshTexture[1] = nullptr;
+	m_MeshTexture[2] = nullptr;
 
 	m_EnableLights[0] = true;
 	m_EnableLights[1] = true;
@@ -312,6 +312,12 @@ bool FSGraphicsProjectApp::Initialize()
 
 	RRenderer.D3DDevice()->CreateInputLayout(objVertDesc, 5, m_AOShader->VS_Bytecode, m_AOShader->VS_BytecodeSize, &m_LightingMeshIL);
 
+	m_MeshTexture[0] = RResourceManager::Instance().LoadDDSTexture("../Assets/cty1.dds");
+	m_MeshTexture[1] = RResourceManager::Instance().LoadDDSTexture("../Assets/ang1.dds");
+	m_MeshTexture[2] = RResourceManager::Instance().LoadDDSTexture("../Assets/cty2x.dds");
+	m_BumpBaseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlate.dds");
+	m_BumpNormalTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlateNormal.dds");
+
 	m_SceneMeshCity = RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx", m_LightingMeshIL);
 	m_FbxMeshObj.SetMesh(m_SceneMeshCity);
 
@@ -319,13 +325,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_TachikomaObj.SetMesh(m_MeshTachikoma);
 	m_TachikomaObj.SetPosition(RVec3(0.0f, 40.0f, 0.0f));
 
-	m_MeshTextureSRV[0] = RResourceManager::Instance().LoadDDSTexture("../Assets/cty1.dds");
-	m_MeshTextureSRV[1] = RResourceManager::Instance().LoadDDSTexture("../Assets/ang1.dds");
-	m_MeshTextureSRV[2] = RResourceManager::Instance().LoadDDSTexture("../Assets/cty2x.dds");
-	m_BumpBaseTextureSRV = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlate.dds");
-	m_BumpNormalTextureSRV = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlateNormal.dds");
-
-	ID3D11ShaderResourceView* meshAOTextureSRV[] =
+	RTexture* meshAOTextureSRV[] =
 	{
 		RResourceManager::Instance().LoadDDSTexture("../Assets/lowBuildingsAO.dds"),
 		RResourceManager::Instance().LoadDDSTexture("../Assets/groundAO.dds"),
@@ -335,17 +335,17 @@ bool FSGraphicsProjectApp::Initialize()
 
 	RMaterial cityMaterials[] =
 	{
-		{ m_AOShader, 2, m_MeshTextureSRV[0], meshAOTextureSRV[0] },
-		{ m_AOShader, 2, m_MeshTextureSRV[1], meshAOTextureSRV[1] },
-		{ m_AOShader, 2, m_MeshTextureSRV[2], meshAOTextureSRV[2] },
-		{ m_AOShader, 2, m_MeshTextureSRV[1], meshAOTextureSRV[3] },
+		{ m_AOShader, 2, m_MeshTexture[0], meshAOTextureSRV[0] },
+		{ m_AOShader, 2, m_MeshTexture[1], meshAOTextureSRV[1] },
+		{ m_AOShader, 2, m_MeshTexture[2], meshAOTextureSRV[2] },
+		{ m_AOShader, 2, m_MeshTexture[1], meshAOTextureSRV[3] },
 	};
 
 	m_FbxMeshObj.SetMaterial(cityMaterials, 4);
 
 	RMaterial tachikomaMaterials[] =
 	{
-		{ m_RefractionShader, 1, m_RenderTargetSRV },
+		{ m_RefractionShader, 1, RResourceManager::Instance().WrapSRV(m_RenderTargetSRV) },
 	};
 
 	m_TachikomaObj.SetMaterial(tachikomaMaterials, 1);
@@ -354,7 +354,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_AOSceneMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/AO_Scene.fbx", m_LightingMeshIL);
 	m_AOSceneObj.SetMesh(m_AOSceneMesh);
 	m_AOTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/AO_Scene.dds");
-	ID3D11ShaderResourceView* greyTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/Grey.dds");
+	RTexture* greyTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/Grey.dds");
 
 	RMaterial aoMat[] =
 	{
@@ -364,7 +364,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_AOSceneObj.SetMaterial(aoMat, 1);
 	m_AOSceneObj.SetPosition(RVec3(-500.0f, 0.0f, 500.0f));
 
-	ID3D11ShaderResourceView* charTexSRV[] =
+	RTexture* charTexSRV[] =
 	{
 		RResourceManager::Instance().LoadDDSTexture("../Assets/Body_Diffuse_01.DDS"),
 		RResourceManager::Instance().LoadDDSTexture("../Assets/Body_Normal_01.DDS"),
@@ -380,13 +380,13 @@ bool FSGraphicsProjectApp::Initialize()
 	m_CharacterObj.SetTransform(RMatrix4::CreateXAxisRotation(-90.0f) * RMatrix4::CreateTranslation(-1100.0f, 40.0f, 0.0f));
 
 	m_SceneMeshIsland = RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx", m_LightingMeshIL);
-	m_IslandTextureSRV = RResourceManager::Instance().LoadDDSTexture("../Assets/TR_FloatingIsland02.dds");
+	m_IslandTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/TR_FloatingIsland02.dds");
 	m_IslandMeshObj.SetMesh(m_SceneMeshIsland);
 	m_IslandMeshObj.SetPosition(RVec3(0.0f, 0.0f, 500.0f));
 
 	RMaterial islandMaterials[] =
 	{
-		{ m_InstancedLightingShader, 1, m_IslandTextureSRV },
+		{ m_InstancedLightingShader, 1, m_IslandTexture },
 	};
 	m_IslandMeshObj.SetMaterial(islandMaterials, 1);
 
@@ -869,8 +869,8 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	{
 		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
 		m_BumpLightingShader->Bind();
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_BumpBaseTextureSRV);
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_BumpNormalTextureSRV);
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_BumpBaseTexture->GetPtrSRV());
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, m_BumpNormalTexture->GetPtrSRV());
 		RRenderer.D3DImmediateContext()->IASetInputLayout(m_BumpLightingIL);
 		m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
@@ -926,8 +926,8 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		RRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[1], 0);
 
 		SetPerObjectConstBuffuer(RMatrix4::CreateTranslation(0.0f, 150.0f, 150.0f));
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_ParticleDiffuseTexture);
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_ParticleNormalTexture);
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_ParticleDiffuseTexture->GetPtrSRV());
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, m_ParticleNormalTexture->GetPtrSRV());
 		m_ParticleShader->Bind();
 		RRenderer.D3DImmediateContext()->IASetInputLayout(m_ParticleIL);
 		m_ParticleBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);

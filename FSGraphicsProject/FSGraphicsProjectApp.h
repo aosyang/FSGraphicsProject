@@ -63,8 +63,8 @@ private:
 	RMeshElement				m_BumpCubeMesh;
 	ID3D11InputLayout*			m_BumpLightingIL;
 	RShader*					m_BumpLightingShader;
-	ID3D11ShaderResourceView*	m_BumpBaseTextureSRV;
-	ID3D11ShaderResourceView*	m_BumpNormalTextureSRV;
+	RTexture*					m_BumpBaseTexture;
+	RTexture*					m_BumpNormalTexture;
 
 	ID3D11InputLayout*			m_LightingMeshIL;
 	RShader*					m_LightingShader;
@@ -76,7 +76,7 @@ private:
 	ID3D11Buffer*				m_cbInstance;
 	ID3D11Buffer*				m_cbScreen;
 
-	ID3D11ShaderResourceView*	m_MeshTextureSRV[3];
+	RTexture*					m_MeshTexture[3];
 	ID3D11SamplerState*			m_SamplerState;
 	ID3D11SamplerState*			m_SamplerComparisonState;
 
@@ -92,10 +92,10 @@ private:
 	RMesh*						m_AOSceneMesh;
 	RSMeshObject				m_AOSceneObj;
 	RShader*					m_AOShader;
-	ID3D11ShaderResourceView*	m_AOTexture;
+	RTexture*					m_AOTexture;
 
 	RMesh*						m_SceneMeshIsland;
-	ID3D11ShaderResourceView*	m_IslandTextureSRV;
+	RTexture*					m_IslandTexture;
 	RSMeshObject				m_IslandMeshObj;
 	RShader*					m_InstancedLightingShader;
 
@@ -107,8 +107,8 @@ private:
 	RShader*					m_ParticleShader;
 	ID3D11InputLayout*			m_ParticleIL;
 	PARTICLE_VERTEX				m_ParticleVert[PARTICLE_COUNT];
-	ID3D11ShaderResourceView*	m_ParticleDiffuseTexture;
-	ID3D11ShaderResourceView*	m_ParticleNormalTexture;
+	RTexture*					m_ParticleDiffuseTexture;
+	RTexture*					m_ParticleNormalTexture;
 	ID3D11BlendState*			m_BlendState[3];
 	ID3D11DepthStencilState*	m_DepthState[2];
 

@@ -59,6 +59,9 @@
     <ClInclude Include="RenderSystem\IResource.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="RenderSystem\RTexture.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -99,6 +102,9 @@
     </ClCompile>
     <ClCompile Include="Core\RMatrix.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem\RTexture.cpp">
+      <Filter>RenderSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
