@@ -515,6 +515,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 			materials.push_back(meshMaterial);
 		}
 
+		if (matCount == 0)
+			materials.push_back(RMaterial{ 0 });
 
 		// Optimize mesh
 		sprintf_s(msg_buf, "Optimizing mesh...\n");
