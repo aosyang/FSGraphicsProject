@@ -8,7 +8,7 @@
 #include "RSMeshObject.h"
 
 RSMeshObject::RSMeshObject()
-	: RSceneObject(), m_Mesh(nullptr), m_Shader(nullptr)
+	: RSceneObject(), m_Mesh(nullptr), m_OverridingShader(nullptr)
 {
 
 }
@@ -48,7 +48,7 @@ RMaterial RSMeshObject::GetMaterial(int index) const
 
 void RSMeshObject::SetOverridingShader(RShader* shader)
 {
-	m_Shader = shader;
+	m_OverridingShader = shader;
 }
 
 void RSMeshObject::Draw(bool instanced, int instanceCount)
@@ -62,8 +62,8 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 	{
 		RShader* shader = nullptr;
 
-		if (m_Shader)
-			shader = m_Shader;
+		if (m_OverridingShader)
+			shader = m_OverridingShader;
 		else if (i < m_Materials.size())
 			shader = m_Materials[i].Shader;
 
@@ -72,7 +72,7 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 			shader->Bind();
 
 			// Hack: for shaders bound separately, consider textures loaded from mesh
-			if (m_Shader)
+			if (m_OverridingShader)
 			{
 				for (int t = 0; t < m_Mesh->GetMaterial(i).TextureNum; t++)
 				{

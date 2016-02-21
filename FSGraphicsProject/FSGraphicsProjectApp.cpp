@@ -365,7 +365,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_AOSceneObj.SetPosition(RVec3(-500.0f, 0.0f, 500.0f));
 
 	m_CharacterObj.SetMesh(RResourceManager::Instance().LoadFbxMesh("../Assets/SpeedballPlayer.fbx", m_LightingMeshIL));
-	m_CharacterObj.SetShader(m_BumpLightingShader);
+	m_CharacterObj.SetOverridingShader(m_BumpLightingShader);
 	m_CharacterObj.SetTransform(RMatrix4::CreateXAxisRotation(-90.0f) * RMatrix4::CreateTranslation(-1100.0f, 40.0f, 0.0f));
 
 	m_SceneMeshIsland = RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx", m_LightingMeshIL);
