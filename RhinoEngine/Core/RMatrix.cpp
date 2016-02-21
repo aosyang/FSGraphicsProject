@@ -226,10 +226,10 @@ RMatrix4 RMatrix4::CreatePerspectiveProjectionLH(float fov, float aspect, float 
 {
 	float y_scale = 1.0f / tanf(0.5f * DEG_TO_RAD(fov));
 
-	return RMatrix4(y_scale,	0.0f,				0.0f,								0.0f,
-					0.0f,		y_scale * aspect,	0.0f,								0.0f,
-					0.0f,		0.0f,				zFar / (zFar - zNear),				1.0f,
-					0.0f,		0.0f,				-(zFar * zNear) / (zFar - zNear),	0.0f);
+	return RMatrix4(y_scale / aspect,	0.0f,		0.0f,								0.0f,
+					0.0f,				y_scale,	0.0f,								0.0f,
+					0.0f,				0.0f,		zFar / (zFar - zNear),				1.0f,
+					0.0f,				0.0f,		-(zFar * zNear) / (zFar - zNear),	0.0f);
 }
 
 RMatrix4 RMatrix4::CreateOrthographicProjectionLH(float viewWidth, float viewHeight, float zNear, float zFar)
