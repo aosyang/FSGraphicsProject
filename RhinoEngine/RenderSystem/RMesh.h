@@ -19,9 +19,9 @@ struct RMaterial
 class RMesh : public RBaseResource
 {
 public:
-	RMesh(ID3D11InputLayout* inputLayout);
-	RMesh(const vector<RMeshElement> meshElements, const vector<RMaterial>& materials, ID3D11InputLayout* inputLayout);
-	RMesh(RMeshElement* meshElements, int numElement, RMaterial* materials, int numMaterial, ID3D11InputLayout* inputLayout);
+	RMesh(string path, ID3D11InputLayout* inputLayout);
+	RMesh(string path, const vector<RMeshElement> meshElements, const vector<RMaterial>& materials, ID3D11InputLayout* inputLayout);
+	RMesh(string path, RMeshElement* meshElements, int numElement, RMaterial* materials, int numMaterial, ID3D11InputLayout* inputLayout);
 	~RMesh();
 
 	RMaterial GetMaterial(int index) const;
@@ -32,6 +32,7 @@ public:
 	vector<RMeshElement>& GetMeshElements();
 
 	void SetMeshElements(RMeshElement* meshElements, int numElement);
+	void SetMaterials(RMaterial* materials, int numMaterial);
 	void SetResourceTimestamp(float time);
 	float GetResourceTimestamp();
 private:

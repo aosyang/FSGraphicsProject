@@ -8,7 +8,7 @@
 #include "RSMeshObject.h"
 
 RSMeshObject::RSMeshObject()
-	: RSceneObject()
+	: RSceneObject(), m_Mesh(nullptr), m_Shader(nullptr)
 {
 
 }
@@ -46,6 +46,11 @@ RMaterial RSMeshObject::GetMaterial(int index) const
 	return m_Materials[index];
 }
 
+void RSMeshObject::SetOverridingShader(RShader* shader)
+{
+	m_Shader = shader;
+}
+
 void RSMeshObject::Draw(bool instanced, int instanceCount)
 {
 	if (!m_Mesh)
@@ -57,19 +62,29 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 	{
 		RShader* shader = nullptr;
 
-		if (i < m_Materials.size())
+		if (m_Shader)
+			shader = m_Shader;
+		else if (i < m_Materials.size())
 			shader = m_Materials[i].Shader;
 
 		if (shader)
 		{
 			shader->Bind();
-			for (int t = 0; t < m_Materials[i].TextureNum; t++)
+
+			// Hack: for shaders bound separately, consider textures loaded from mesh
+			if (m_Shader)
 			{
-				ID3D11ShaderResourceView* const srv[] =
+				for (int t = 0; t < m_Mesh->GetMaterial(i).TextureNum; t++)
 				{
-					m_Materials[i].Textures[t]->GetSRV(),
-				};
-				RRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, srv);
+					RRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, m_Mesh->GetMaterial(i).Textures[t]->GetPtrSRV());
+				}
+			}
+			else
+			{
+				for (int t = 0; t < m_Materials[i].TextureNum; t++)
+				{
+					RRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, m_Materials[i].Textures[t]->GetPtrSRV());
+				}
 			}
 		}
 

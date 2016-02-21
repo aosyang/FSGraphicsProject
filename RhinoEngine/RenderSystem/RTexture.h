@@ -10,8 +10,8 @@
 class RTexture : public RBaseResource
 {
 public:
-	RTexture();
-	RTexture(ID3D11ShaderResourceView* srv);
+	RTexture(string path);
+	RTexture(string path, ID3D11ShaderResourceView* srv);
 	~RTexture();
 
 	ID3D11ShaderResourceView* GetSRV() { return m_SRV; }

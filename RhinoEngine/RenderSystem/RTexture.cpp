@@ -8,13 +8,13 @@
 
 #include "RTexture.h"
 
-RTexture::RTexture()
-	: RBaseResource(RT_Texture), m_SRV(nullptr)
+RTexture::RTexture(string path)
+	: RBaseResource(RT_Texture, path), m_SRV(nullptr)
 {
 }
 
-RTexture::RTexture(ID3D11ShaderResourceView* srv)
-	: RBaseResource(RT_Texture), m_SRV(srv)
+RTexture::RTexture(string path, ID3D11ShaderResourceView* srv)
+	: RBaseResource(RT_Texture, path), m_SRV(srv)
 {
 }
 

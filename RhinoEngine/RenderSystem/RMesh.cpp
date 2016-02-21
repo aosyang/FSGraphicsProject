@@ -7,22 +7,22 @@
 #include "Rhino.h"
 #include "RMesh.h"
 
-RMesh::RMesh(ID3D11InputLayout* inputLayout)
-	: RBaseResource(RT_Mesh)
+RMesh::RMesh(string path, ID3D11InputLayout* inputLayout)
+	: RBaseResource(RT_Mesh, path)
 {
 	m_LoadingFinishTime = 0.0f;
 	m_InputLayout = inputLayout;
 }
 
-RMesh::RMesh(const vector<RMeshElement> meshElements, const vector<RMaterial>& materials, ID3D11InputLayout* inputLayout)
-	: RMesh(inputLayout)
+RMesh::RMesh(string path, const vector<RMeshElement> meshElements, const vector<RMaterial>& materials, ID3D11InputLayout* inputLayout)
+	: RMesh(path, inputLayout)
 {
 	m_MeshElements = meshElements;
 	m_Materials = materials;
 }
 
-RMesh::RMesh(RMeshElement* meshElements, int numElement, RMaterial* materials, int numMaterial, ID3D11InputLayout* inputLayout)
-	: RMesh(inputLayout)
+RMesh::RMesh(string path, RMeshElement* meshElements, int numElement, RMaterial* materials, int numMaterial, ID3D11InputLayout* inputLayout)
+	: RMesh(path, inputLayout)
 {
 	assert(meshElements && numElement);
 	m_MeshElements.assign(meshElements, meshElements + numElement);
@@ -79,6 +79,12 @@ void RMesh::SetMeshElements(RMeshElement* meshElements, int numElement)
 	// TODO: use mutex
 	assert(meshElements && numElement);
 	m_MeshElements.assign(meshElements, meshElements + numElement);
+}
+
+void RMesh::SetMaterials(RMaterial* materials, int numMaterial)
+{
+	assert(materials && numMaterial);
+	m_Materials.assign(materials, materials + numMaterial);
 }
 
 void RMesh::SetResourceTimestamp(float time)

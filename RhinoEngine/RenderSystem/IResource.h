@@ -19,16 +19,19 @@ enum ResourceType
 
 class RBaseResource
 {
+	friend class RResourceManager;
 public:
-	RBaseResource(ResourceType type) : m_State(RS_Empty), m_Type(type) {}
+	RBaseResource(ResourceType type, string path) : m_State(RS_Empty), m_Type(type), m_ResourcePath(path) {}
 	virtual ~RBaseResource() = 0 {}
 
 	ResourceState GetResourceState() const { return m_State; }
 	ResourceType GetResourceType() const { return m_Type; }
+	string GetPath() const { return m_ResourcePath; }
 
 	// Multi-threading loading complete callback
 	//virtual void OnLoaded() = 0;
 protected:
 	ResourceState		m_State;
 	ResourceType		m_Type;
+	string				m_ResourcePath;
 };

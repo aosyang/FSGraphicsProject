@@ -8,7 +8,6 @@
 
 #include "RResourceManager.h"
 
-
 struct MESH_VERTEX
 {
 	RVec3 pos;
@@ -22,9 +21,6 @@ struct MESH_VERTEX
 		return lexicographical_compare((const float*)this, (const float*)this + sizeof(MESH_VERTEX) / 4, (const float*)&rhs, (const float*)&rhs + sizeof(MESH_VERTEX) / 4);
 	}
 };
-
-void LoadFbxMeshData(LoaderThreadTask* task);
-void LoadDDSTextureData(LoaderThreadTask* task);
 
 void ResourceLoaderThread(LoaderThreadData* data)
 {
@@ -47,11 +43,15 @@ void ResourceLoaderThread(LoaderThreadData* data)
 		switch (task.Resource->GetResourceType())
 		{
 		case RT_Mesh:
-			LoadFbxMeshData(&task);
+			RResourceManager::ThreadLoadFbxMeshData(&task);
 			break;
 
 		case RT_Texture:
-			LoadDDSTextureData(&task);
+			RTexture* pTexture = RResourceManager::Instance().FindTexture(task.Filename.data());
+			if (!pTexture || pTexture->GetResourceState() == RS_EnqueuedForLoading)
+			{
+				RResourceManager::ThreadLoadDDSTextureData(&task);
+			}
 			break;
 		}
 	}
@@ -109,7 +109,8 @@ void RResourceManager::UnloadAllResources()
 
 RMesh* RResourceManager::LoadFbxMesh(const char* filename, ID3D11InputLayout* inputLayout)
 {
-	RMesh* pMesh = new RMesh(inputLayout);
+	RMesh* pMesh = new RMesh(GetResourcePath(filename), inputLayout);
+	pMesh->m_State = RS_EnqueuedForLoading;
 	m_MeshResources.push_back(pMesh);
 
 	LoaderThreadTask task;
@@ -127,9 +128,10 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename, ID3D11InputLayout* in
 	return pMesh;
 }
 
-void LoadFbxMeshData(LoaderThreadTask* task)
+void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 {
 	vector<RMeshElement> meshElements;
+	vector<RMaterial> materials;
 
 	char msg_buf[1024];
 	sprintf_s(msg_buf, sizeof(msg_buf), "Loading mesh [%s]...\n", task->Filename.data());
@@ -438,48 +440,80 @@ void LoadFbxMeshData(LoaderThreadTask* task)
 			indexData.push_back(triangle[2]);
 		}
 
-		//// Load textures
-		//int matCount = node->GetSrcObjectCount<FbxSurfaceMaterial>();
+		// Load textures
+		RMaterial meshMaterial = { 0 };
+		int matCount = node->GetSrcObjectCount<FbxSurfaceMaterial>();
 
-		//for (int idxMat = 0; idxMat < matCount; idxMat++)
-		//{
-		//	FbxSurfaceMaterial* material = (FbxSurfaceMaterial*)node->GetSrcObject<FbxSurfaceMaterial>(idxMat);
+		for (int idxMat = 0; idxMat < matCount; idxMat++)
+		{
+			FbxSurfaceMaterial* material = (FbxSurfaceMaterial*)node->GetSrcObject<FbxSurfaceMaterial>(idxMat);
 
-		//	const char* texType[] =
-		//	{
-		//		FbxSurfaceMaterial::sDiffuse,
-		//		FbxSurfaceMaterial::sSpecular,
-		//		FbxSurfaceMaterial::sNormalMap,
-		//	};
+			const char* texType[] =
+			{
+				FbxSurfaceMaterial::sDiffuse,
+				FbxSurfaceMaterial::sNormalMap,
+				FbxSurfaceMaterial::sSpecular,
+			};
 
-		//	for (int idxTexProp = 0; idxTexProp < 3; idxTexProp++)
-		//	{
-		//		FbxProperty prop = material->FindProperty(texType[idxTexProp]);
-		//		int layeredTexCount = prop.GetSrcObjectCount<FbxLayeredTexture>();
+			for (int idxTexProp = 0; idxTexProp < 3; idxTexProp++)
+			{
+				FbxProperty prop = material->FindProperty(texType[idxTexProp]);
+				int layeredTexCount = prop.GetSrcObjectCount<FbxLayeredTexture>();
+				string textureName;
 
-		//		for (int idxLayeredTex = 0; idxLayeredTex < layeredTexCount; idxLayeredTex++)
-		//		{
-		//			FbxLayeredTexture* layeredTex = FbxCast<FbxLayeredTexture>(prop.GetSrcObject<FbxLayeredTexture>(idxLayeredTex));
-		//			int texCount = layeredTex->GetSrcObjectCount<FbxTexture>();
+				for (int idxLayeredTex = 0; idxLayeredTex < layeredTexCount; idxLayeredTex++)
+				{
+					FbxLayeredTexture* layeredTex = FbxCast<FbxLayeredTexture>(prop.GetSrcObject<FbxLayeredTexture>(idxLayeredTex));
+					int texCount = layeredTex->GetSrcObjectCount<FbxTexture>();
 
-		//			for (int idxTex = 0; idxTex < texCount; idxTex++)
-		//			{
-		//				FbxFileTexture* texture = FbxCast<FbxFileTexture>(layeredTex->GetSrcObject<FbxTexture>(idxTex));
-		//			}
-		//		}
+					for (int idxTex = 0; idxTex < texCount; idxTex++)
+					{
+						FbxFileTexture* texture = FbxCast<FbxFileTexture>(layeredTex->GetSrcObject<FbxTexture>(idxTex));
+						textureName = texture->GetFileName();
+					}
+				}
 
-		//		if (layeredTexCount == 0)
-		//		{
-		//			int texCount = prop.GetSrcObjectCount<FbxTexture>();
+				if (layeredTexCount == 0)
+				{
+					int texCount = prop.GetSrcObjectCount<FbxTexture>();
 
-		//			for (int idxTex = 0; idxTex < texCount; idxTex++)
-		//			{
-		//				FbxFileTexture* texture = FbxCast<FbxFileTexture>(prop.GetSrcObject<FbxTexture>(idxTex));
-		//			}
-		//		}
-		//	}
-		//}
+					for (int idxTex = 0; idxTex < texCount; idxTex++)
+					{
+						FbxFileTexture* texture = FbxCast<FbxFileTexture>(prop.GetSrcObject<FbxTexture>(idxTex));
+						textureName = texture->GetFileName();
+					}
+				}
 
+				if (textureName.length() != 0)
+				{
+					string ddsFilename = textureName;
+					size_t pos = textureName.find_last_of("/\\");
+					if (pos != string::npos)
+					{
+						ddsFilename = textureName.substr(pos + 1);
+					}
+
+					pos = ddsFilename.find_last_of(".");
+					if (pos != string::npos)
+					{
+						ddsFilename = ddsFilename.substr(0, pos);
+					}
+
+					ddsFilename += ".dds";
+
+					RTexture* texture = RResourceManager::Instance().FindTexture(ddsFilename.data());
+
+					if (!texture)
+					{
+						texture = RResourceManager::Instance().LoadDDSTexture(RResourceManager::GetResourcePath(ddsFilename).data(), RLM_Immediate);
+						meshMaterial.Textures[meshMaterial.TextureNum] = texture;
+						meshMaterial.TextureNum++;
+					}
+				}
+			}
+		}
+
+		materials.push_back(meshMaterial);
 
 		// Optimize mesh
 		sprintf_s(msg_buf, "Optimizing mesh...\n");
@@ -519,30 +553,44 @@ void LoadFbxMeshData(LoaderThreadTask* task)
 	lFbxSdkManager->Destroy();
 
 	static_cast<RMesh*>(task->Resource)->SetMeshElements(meshElements.data(), meshElements.size());
+	static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), materials.size());
 	static_cast<RMesh*>(task->Resource)->SetResourceTimestamp(REngine::GetTimer().TotalTime());
+	task->Resource->m_State = RS_Loaded;
 }
 
-RTexture* RResourceManager::LoadDDSTexture(const char* filename)
+RTexture* RResourceManager::LoadDDSTexture(const char* filename, ResourceLoadingMode mode)
 {
-	RTexture* pTexture = new RTexture();
+	RTexture* pTexture = FindTexture(filename);
+	if (pTexture)
+		return pTexture;
+
+	pTexture = new RTexture(GetResourcePath(filename));
+	pTexture->m_State = RS_EnqueuedForLoading;
 	m_TextureResources.push_back(pTexture);
 
 	LoaderThreadTask task;
 	task.Filename = string(filename);
 	task.Resource = pTexture;
 
-	// Upload task to working queue
-	m_TaskQueueMutex.lock();
-	m_LoaderThreadTaskQueue.push(task);
-	m_TaskQueueMutex.unlock();
+	if (mode == RLM_Immediate)
+	{
+		ThreadLoadDDSTextureData(&task);
+	}
+	else // mode == RLM_Threaded
+	{
+		// Upload task to working queue
+		m_TaskQueueMutex.lock();
+		m_LoaderThreadTaskQueue.push(task);
+		m_TaskQueueMutex.unlock();
 
-	// Notify loader thread to start working
-	m_TaskQueueCondition.notify_all();
+		// Notify loader thread to start working
+		m_TaskQueueCondition.notify_all();
+	}
 
 	return pTexture;
 }
 
-void LoadDDSTextureData(LoaderThreadTask* task)
+void RResourceManager::ThreadLoadDDSTextureData(LoaderThreadTask* task)
 {
 	ID3D11ShaderResourceView* srv;
 	size_t char_len;
@@ -556,6 +604,69 @@ void LoadDDSTextureData(LoaderThreadTask* task)
 	DirectX::CreateDDSTextureFromFile(RRenderer.D3DDevice(), wszName, nullptr, &srv);
 
 	static_cast<RTexture*>(task->Resource)->SetSRV(srv);
+	task->Resource->m_State = RS_Loaded;
+}
+
+// case-insensitive string comparison
+int strcasecmp(const char* str1, const char* str2)
+{
+	int n = 0;
+	while (str1[n] != 0 && str2[n] != 0)
+	{
+		char lower_ch1 = tolower(str1[n]);
+		char lower_ch2 = tolower(str2[n]);
+		if (lower_ch1 != lower_ch2)
+			return lower_ch1 < lower_ch2 ? -1 : 1;
+		n++;
+	}
+
+	if (str1[n] == 0 && str2[n] == 0)
+		return 0;
+	else if (str1[n] == 0)
+		return -1;
+	else
+		return 1;
+}
+
+RTexture* RResourceManager::FindTexture(const char* resourcePath)
+{
+	for (vector<RTexture*>::iterator iter = m_TextureResources.begin(); iter != m_TextureResources.end(); iter++)
+	{
+		if (strcasecmp((*iter)->GetPath().data(), resourcePath) == 0)
+		{
+			return *iter;
+		}
+	}
+
+	return nullptr;
+}
+
+string RResourceManager::GetAssetsBasePath()
+{
+	return string("../Assets/");
+}
+
+string RResourceManager::GetResourcePath(const string& path)
+{
+	char currentPath[MAX_PATH];
+	GetCurrentDirectoryA(MAX_PATH, currentPath);
+
+	string targetPath = string(currentPath) + "\\" + GetAssetsBasePath() + path;
+
+	char fullTargetPath[MAX_PATH];
+	char** parts = { nullptr };
+	GetFullPathNameA(targetPath.data(), MAX_PATH, fullTargetPath, parts);
+
+	char relPath[MAX_PATH];
+	PathRelativePathToA(relPath, currentPath, FILE_ATTRIBUTE_DIRECTORY, fullTargetPath, FILE_ATTRIBUTE_NORMAL);
+
+	for (size_t i = 0; i < strlen(relPath); i++)
+	{
+		if (relPath[i] == '\\')
+			relPath[i] = '/';
+	}
+
+	return relPath;
 }
 
 RTexture* RResourceManager::WrapSRV(ID3D11ShaderResourceView* srv)
@@ -563,7 +674,8 @@ RTexture* RResourceManager::WrapSRV(ID3D11ShaderResourceView* srv)
 	if (m_WrapperTextureResources.find(srv) != m_WrapperTextureResources.end())
 		return m_WrapperTextureResources[srv];
 
-	RTexture* tex = new RTexture(srv);
+	RTexture* tex = new RTexture("[Internal]", srv);
+	tex->m_State = RS_Loaded;
 	m_WrapperTextureResources[srv] = tex;
 	return tex;
 }

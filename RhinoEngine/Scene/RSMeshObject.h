@@ -19,6 +19,7 @@ public:
 	int GetSubmeshCount() const;
 	void SetMaterial(RMaterial* materials, int materialNum);
 	RMaterial GetMaterial(int index) const;
+	void SetOverridingShader(RShader* shader);
 
 	void Draw(bool instanced = false, int instanceCount = 0);
 	void DrawWithShader(RShader* shader, bool instanced = false, int instanceCount = 0);
@@ -27,6 +28,7 @@ public:
 private:
 	RMesh*					m_Mesh;
 	vector<RMaterial>		m_Materials;
+	RShader*				m_OverridingShader;
 };
 
 #endif

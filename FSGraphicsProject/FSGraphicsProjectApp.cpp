@@ -364,19 +364,8 @@ bool FSGraphicsProjectApp::Initialize()
 	m_AOSceneObj.SetMaterial(aoMat, 1);
 	m_AOSceneObj.SetPosition(RVec3(-500.0f, 0.0f, 500.0f));
 
-	RTexture* charTexSRV[] =
-	{
-		RResourceManager::Instance().LoadDDSTexture("../Assets/Body_Diffuse_01.DDS"),
-		RResourceManager::Instance().LoadDDSTexture("../Assets/Body_Normal_01.DDS"),
-	};
-
-	RMaterial charMat[] =
-	{
-		{ m_BumpLightingShader, 2, charTexSRV[0], charTexSRV[1] },
-	};
-
 	m_CharacterObj.SetMesh(RResourceManager::Instance().LoadFbxMesh("../Assets/SpeedballPlayer.fbx", m_LightingMeshIL));
-	m_CharacterObj.SetMaterial(charMat, 1);
+	m_CharacterObj.SetShader(m_BumpLightingShader);
 	m_CharacterObj.SetTransform(RMatrix4::CreateXAxisRotation(-90.0f) * RMatrix4::CreateTranslation(-1100.0f, 40.0f, 0.0f));
 
 	m_SceneMeshIsland = RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx", m_LightingMeshIL);

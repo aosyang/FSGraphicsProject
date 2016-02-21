@@ -7,6 +7,8 @@
 #define _RHINO_H
 
 #include <Windows.h>
+#include <Shlwapi.h>
+#pragma comment(lib, "Shlwapi.lib")
 
 #include <cmath>
 #include <assert.h>
