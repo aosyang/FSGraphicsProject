@@ -441,11 +441,11 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		}
 
 		// Load textures
-		RMaterial meshMaterial = { 0 };
 		int matCount = node->GetSrcObjectCount<FbxSurfaceMaterial>();
 
 		for (int idxMat = 0; idxMat < matCount; idxMat++)
 		{
+			RMaterial meshMaterial = { 0 };
 			FbxSurfaceMaterial* material = (FbxSurfaceMaterial*)node->GetSrcObject<FbxSurfaceMaterial>(idxMat);
 
 			const char* texType[] =
@@ -511,9 +511,10 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					}
 				}
 			}
+
+			materials.push_back(meshMaterial);
 		}
 
-		materials.push_back(meshMaterial);
 
 		// Optimize mesh
 		sprintf_s(msg_buf, "Optimizing mesh...\n");
@@ -601,7 +602,12 @@ void RResourceManager::ThreadLoadDDSTextureData(LoaderThreadTask* task)
 	sprintf_s(msg_buf, sizeof(msg_buf), "Loading texture [%s]...\n", task->Filename.data());
 	OutputDebugStringA(msg_buf);
 
-	DirectX::CreateDDSTextureFromFile(RRenderer.D3DDevice(), wszName, nullptr, &srv);
+	HRESULT hr = DirectX::CreateDDSTextureFromFile(RRenderer.D3DDevice(), wszName, nullptr, &srv);
+	if (FAILED(hr))
+	{
+		sprintf_s(msg_buf, sizeof(msg_buf), "*** Failed to load texture [%s] ***\n", task->Filename.data());
+		OutputDebugStringA(msg_buf);
+	}
 
 	static_cast<RTexture*>(task->Resource)->SetSRV(srv);
 	task->Resource->m_State = RS_Loaded;
