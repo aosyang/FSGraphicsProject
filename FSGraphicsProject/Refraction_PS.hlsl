@@ -63,7 +63,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	}
 
 	float2 uvOffset = float2(Input.NormalH.x / ScreenSize.x, Input.NormalH.y / ScreenSize.y) * 64.0f;
-	float4 distortion = ScreenTexture.Sample(Sampler, Input.UV.xy / Input.UV.w * 0.5f + 0.5f + uvOffset);
+	float4 distortion = ScreenTexture.Sample(Sampler, Input.UV.xy / Input.UV.z * 0.5f + 0.5f + uvOffset);
 	float4 color = float4(0.75f, 1.0f, 0.8f, 1.0f);
 	float ambientRim = 1.0f - saturate(dot(Input.NormalH, float3(0, 0, -1)));
 	Ambient.rgb = CalculateAmbientLight(normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor);
