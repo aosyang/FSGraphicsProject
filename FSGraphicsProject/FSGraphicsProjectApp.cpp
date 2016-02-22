@@ -644,7 +644,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	RRenderer.D3DImmediateContext()->Unmap(m_cbScreen, 0);
 
 	// Update particle vertices
-	ParticleDepthComparer cmp(m_CameraMatrix.GetRow(3), m_CameraMatrix.GetRow(3));
+	ParticleDepthComparer cmp(m_CameraMatrix.GetRow(3), m_CameraMatrix.GetRow(2));
 	std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
 	m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(PARTICLE_VERTEX), PARTICLE_COUNT);
 }
@@ -706,6 +706,10 @@ void FSGraphicsProjectApp::RenderScene()
 			RRenderer.D3DImmediateContext()->Map(m_cbLight, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 			memcpy(subres.pData, &cbLight, sizeof(SHADER_LIGHT_BUFFER));
 			RRenderer.D3DImmediateContext()->Unmap(m_cbLight, 0);
+
+			ParticleDepthComparer cmp(m_SunVec, -m_SunVec);
+			std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
+			m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(PARTICLE_VERTEX), PARTICLE_COUNT);
 		}
 
 		RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
