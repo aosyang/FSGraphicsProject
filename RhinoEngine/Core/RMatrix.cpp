@@ -106,7 +106,7 @@ RVec3 RMatrix4::GetRight() const
 	return RVec3(m[0][0], m[0][1], m[0][2]);
 }
 
-RVec4 RMatrix4::GetRow(int index)
+RVec4 RMatrix4::GetRow(int index) const
 {
 	return RVec4(m[index]);
 }

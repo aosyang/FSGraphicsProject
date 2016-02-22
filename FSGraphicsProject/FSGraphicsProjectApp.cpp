@@ -73,6 +73,31 @@ struct ParticleDepthComparer
 	}
 };
 
+struct ObjectDepthComparer
+{
+	RVec3 CamPos;
+
+	ObjectDepthComparer(const RVec4& camPos)
+	{
+		CamPos = camPos.ToVec3();
+	}
+
+	bool operator()(const RSMeshObject &a, const RSMeshObject &b)
+	{
+		return sqrDist(a.GetPosition(), CamPos) > sqrDist(b.GetPosition(), CamPos);
+	}
+
+	// Helper functions
+	static float sqrDist(const RVec3& a, const RVec3 b)
+	{
+		float dx = b.x - a.x,
+			dy = b.y - a.y,
+			dz = b.z - a.z;
+		return dx * dx + dy * dy + dz * dz;
+	}
+};
+
+
 FSGraphicsProjectApp::FSGraphicsProjectApp()
 	: m_ColorPrimitiveIL(nullptr),
 	  m_ColorShader(nullptr),
@@ -368,6 +393,22 @@ bool FSGraphicsProjectApp::Initialize()
 	m_CharacterObj.SetOverridingShader(m_BumpLightingShader);
 	m_CharacterObj.SetTransform(RMatrix4::CreateXAxisRotation(-90.0f) * RMatrix4::CreateTranslation(-1100.0f, 40.0f, 0.0f));
 
+	RMesh* sphereMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.fbx", m_LightingMeshIL);
+
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			for (int k = 0; k < 5; k++)
+			{
+				m_TransparentMesh[(i * 5 + j) * 5 + k].SetMesh(sphereMesh);
+				m_TransparentMesh[(i * 5 + j) * 5 + k].SetOverridingShader(m_LightingShader);
+				m_TransparentMesh[(i * 5 + j) * 5 + k].SetTransform(RMatrix4::CreateTranslation(-1100.0f + i * 100, 500.0f + j * 100, 100.0f + k * 100));
+			}
+		}
+	}
+
+
 	m_SceneMeshIsland = RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx", m_LightingMeshIL);
 	m_IslandTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/TR_FloatingIsland02.dds");
 	m_IslandMeshObj.SetMesh(m_SceneMeshIsland);
@@ -647,6 +688,9 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	ParticleDepthComparer cmp(m_CameraMatrix.GetRow(3), m_CameraMatrix.GetRow(2));
 	std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
 	m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(PARTICLE_VERTEX), PARTICLE_COUNT);
+
+	ObjectDepthComparer objCmp(m_CameraMatrix.GetRow(3));
+	std::sort(m_TransparentMesh, m_TransparentMesh + 125, objCmp);
 }
 
 void FSGraphicsProjectApp::RenderScene()
@@ -923,6 +967,28 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		{
 			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
 			m_CharacterObj.Draw();
+		}
+	}
+
+	// Draw transparent spheres
+	for (int i = 0; i < 125; i++)
+	{
+		SetPerObjectConstBuffuer(m_TransparentMesh[i].GetNodeTransform());
+
+		float opacity = (timeNow - m_TransparentMesh[i].GetResourceTimestamp()) / loadingFadeInTime;
+		if (opacity >= 0.0f && opacity <= 1.0f)
+		{
+			cbMaterial.GlobalOpacity = opacity * 0.25f;
+			SetMaterialConstBuffer(&cbMaterial);
+			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[2], blendFactor, 0xFFFFFFFF);
+			m_TransparentMesh[i].Draw();
+		}
+		else
+		{
+			cbMaterial.GlobalOpacity = 0.25f;
+			SetMaterialConstBuffer(&cbMaterial);
+			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[1], blendFactor, 0xFFFFFFFF);
+			m_TransparentMesh[i].Draw();
 		}
 	}
 

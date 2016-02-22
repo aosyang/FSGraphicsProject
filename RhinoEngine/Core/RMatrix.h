@@ -43,7 +43,7 @@ public:
 	RVec3 GetUp() const;
 	RVec3 GetRight() const;
 
-	RVec4 GetRow(int index);
+	RVec4 GetRow(int index) const;
 	void SetRow(int index, const RVec4& row);
 
 	void TranslateLocal(const RVec3& vec);

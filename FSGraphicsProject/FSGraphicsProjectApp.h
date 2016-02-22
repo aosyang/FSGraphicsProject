@@ -103,6 +103,8 @@ private:
 	RShader*					m_DepthShader;
 	RShader*					m_InstancedDepthShader;
 
+	RSMeshObject				m_TransparentMesh[125];
+
 	RMeshElement				m_ParticleBuffer;
 	RShader*					m_ParticleShader;
 	ID3D11InputLayout*			m_ParticleIL;

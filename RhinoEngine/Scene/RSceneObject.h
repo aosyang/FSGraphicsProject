@@ -16,6 +16,7 @@ public:
 
 	void SetTransform(const RMatrix4& transform);
 	void SetPosition(const RVec3& pos);
+	RVec3 GetPosition() const;
 
 	virtual void Draw();
 
