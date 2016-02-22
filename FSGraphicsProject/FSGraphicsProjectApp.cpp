@@ -550,8 +550,8 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	cbScene.cameraPos = m_CameraMatrix.GetRow(3);
 
 	float ct = timer.TotalTime() * 0.2f;
-	RVec3 sunVec = RVec3(sinf(ct) * 0.5f, 0.25f, cosf(ct) * 0.5f).GetNormalizedVec3();
-	RMatrix4 shadowViewMatrix = RMatrix4::CreateLookAtViewLH(sunVec * 2000.0f, RVec3(0.0f, 0.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f));
+	m_SunVec = RVec3(sinf(ct) * 0.5f, 0.25f, cosf(ct) * 0.5f).GetNormalizedVec3() * 2000.0f;
+	RMatrix4 shadowViewMatrix = RMatrix4::CreateLookAtViewLH(m_SunVec, RVec3(0.0f, 0.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f));
 
 	m_ShadowMap.SetViewMatrix(shadowViewMatrix);
 	m_ShadowMap.SetOrthogonalProjection(5000.0f, 5000.0f, 0.1f, 5000.0f);
@@ -573,7 +573,6 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	RRenderer.D3DImmediateContext()->Unmap(m_cbScene, 0);
 
 	// Update light constant buffer
-	SHADER_LIGHT_BUFFER cbLight;
 	ZeroMemory(&cbLight, sizeof(cbLight));
 
 	// Setup ambient color
@@ -586,7 +585,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 		cbLight.DirectionalLightCount = 1;
 		cbLight.DirectionalLight[0].Color = RVec4(1.0f, 1.0f, 1.0f, 1.0f);
-		cbLight.DirectionalLight[0].Direction = sunVec;
+		cbLight.DirectionalLight[0].Direction = RVec4(m_SunVec.GetNormalizedVec3(), 1.0f);
 	}
 
 	if (m_EnableLights[1])
@@ -652,6 +651,14 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 void FSGraphicsProjectApp::RenderScene()
 {
+	float width = static_cast<float>(RRenderer.GetClientWidth());
+	float height = static_cast<float>(RRenderer.GetClientHeight());
+	D3D11_VIEWPORT vp[2] =
+	{
+		{ 0.0f, 0.0f, width, height, 0.0f, 1.0f },
+		{ 0.0f, 0.0f, 300, 300, 0.0f, 1.0f },
+	};
+
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, &m_cbPerObject);
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(2, 1, &m_cbInstance);
@@ -664,25 +671,56 @@ void FSGraphicsProjectApp::RenderScene()
 
 	//=========================== Shadow Pass ===========================
 	m_ShadowMap.SetupRenderTarget();
+	RRenderer.Clear();
 	RenderSinglePass(ShadowPass);
 
 	//=========================== Scene Buffer Pass =====================
 	RRenderer.SetRenderTarget(m_RenderTargetView, m_RenderTargetDepthView);
 
-	D3D11_VIEWPORT vp;
-	vp.TopLeftX = 0.0f;
-	vp.TopLeftY = 0.0f;
-	vp.Width = static_cast<float>(RRenderer.GetClientWidth());
-	vp.Height = static_cast<float>(RRenderer.GetClientHeight());
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
-
+	RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp[0]);
+	RRenderer.Clear();
 	RenderSinglePass(RefractionScenePass);
 
 	//=========================== Normal Pass ===========================
 	RRenderer.SetRenderTarget();
-	RenderSinglePass(NormalPass);
+
+	for (int i = 0; i < 2; i++)
+	{
+		if (i == 1)
+		{
+			RMatrix4 viewMatrix = m_ShadowMap.GetViewMatrix();
+			RMatrix4 projMatrix = m_ShadowMap.GetProjectionMatrix();
+
+			cbScene.viewMatrix = viewMatrix;
+			cbScene.projMatrix = projMatrix;
+			cbScene.viewProjMatrix = viewMatrix * projMatrix;
+			cbScene.cameraPos = m_SunVec;
+
+			D3D11_MAPPED_SUBRESOURCE subres;
+			RRenderer.D3DImmediateContext()->Map(m_cbScene, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+			memcpy(subres.pData, &cbScene, sizeof(SHADER_SCENE_BUFFER));
+			RRenderer.D3DImmediateContext()->Unmap(m_cbScene, 0);
+	
+			cbLight.CameraPos = m_SunVec;
+
+			RRenderer.D3DImmediateContext()->Map(m_cbLight, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+			memcpy(subres.pData, &cbLight, sizeof(SHADER_LIGHT_BUFFER));
+			RRenderer.D3DImmediateContext()->Unmap(m_cbLight, 0);
+		}
+
+		RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
+		RRenderer.D3DImmediateContext()->GSSetConstantBuffers(1, 1, &m_cbScene);
+		RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, &m_cbLight);
+
+		RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp[i]);
+
+		if (i == 0)
+			RRenderer.Clear();
+		else
+			RRenderer.Clear(false, RColor(0.0f, 0.0f, 0.0f));
+
+		RenderSinglePass(NormalPass);
+	}
 
 	RRenderer.Present();
 }
@@ -748,8 +786,6 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	SetMaterialConstBuffer(&cbMaterial);
 
 	RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
-
-	RRenderer.Clear();
 
 	// Set up object world matrix
 	SetPerObjectConstBuffuer(RMatrix4::IDENTITY);

@@ -27,7 +27,7 @@ struct PARTICLE_VERTEX
 {
 	RVec4 pos;
 	RVec4 color;
-	float	 rot;
+	float rot;
 };
 
 class FSGraphicsProjectApp : public IApp
@@ -117,6 +117,10 @@ private:
 	ID3D11ShaderResourceView*	m_RenderTargetSRV;
 	ID3D11Texture2D*			m_RenderTargetDepthBuffer;
 	ID3D11DepthStencilView*		m_RenderTargetDepthView;
+
+	SHADER_SCENE_BUFFER			cbScene;
+	RVec3						m_SunVec;
+	SHADER_LIGHT_BUFFER			cbLight;
 };
 
 #endif
