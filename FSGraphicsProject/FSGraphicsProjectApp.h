@@ -10,6 +10,7 @@
 #include "Rhino.h"
 #include "RSkybox.h"
 #include "RShadowMap.h"
+#include "RPostProcessor.h"
 
 #include "ConstBufferPS.h"
 #include "ConstBufferVS.h"
@@ -119,6 +120,9 @@ private:
 	ID3D11ShaderResourceView*	m_RenderTargetSRV;
 	ID3D11Texture2D*			m_RenderTargetDepthBuffer;
 	ID3D11DepthStencilView*		m_RenderTargetDepthView;
+
+	RPostProcessor				m_PostProcessor;
+	bool						m_EnablePostProcessor;
 
 	SHADER_SCENE_BUFFER			cbScene;
 	RVec3						m_SunVec;

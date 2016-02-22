@@ -152,6 +152,7 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_ColorPrimitiveIL);
 
 	m_Skybox.Release();
+	m_PostProcessor.Release();
 
 	RShaderManager::Instance().UnloadAllShaders();
 	RResourceManager::Instance().Destroy();
@@ -183,6 +184,8 @@ bool FSGraphicsProjectApp::Initialize()
 	m_ParticleShader = RShaderManager::Instance().GetShaderResource("Particle");
 	m_RefractionShader = RShaderManager::Instance().GetShaderResource("Refraction");
 	m_AOShader = RShaderManager::Instance().GetShaderResource("AmbientOcclusion");
+
+	m_PostProcessor.Initialize();
 
 	// Create buffer for star mesh
 	COLOR_VERTEX starVertex[12];
@@ -523,6 +526,8 @@ bool FSGraphicsProjectApp::Initialize()
 	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 	RRenderer.D3DDevice()->CreateDepthStencilState(&depthDesc, &m_DepthState[1]);
 
+	m_EnablePostProcessor = true;
+
 	return true;
 }
 
@@ -574,6 +579,9 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 	if (RInput.GetBufferedKeyState('2') == BKS_Pressed)
 		m_EnableLights[1] = !m_EnableLights[1];
+
+	if (RInput.GetBufferedKeyState('G') == BKS_Pressed)
+		m_EnablePostProcessor = !m_EnablePostProcessor;
 
 	RVec3 camPos = m_CameraMatrix.GetTranslation();
 	m_CameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
@@ -726,11 +734,23 @@ void FSGraphicsProjectApp::RenderScene()
 	RenderSinglePass(RefractionScenePass);
 
 	//=========================== Normal Pass ===========================
-	RRenderer.SetRenderTarget();
 
+	// 0 : Screen pass
+	// 1 : Viewport pass
 	for (int i = 0; i < 2; i++)
 	{
-		if (i == 1)
+		if (i == 0)
+		{
+			if (m_EnablePostProcessor)
+			{
+				m_PostProcessor.SetupRenderTarget();
+			}
+			else
+			{
+				RRenderer.SetRenderTarget();
+			}
+		}
+		else
 		{
 			RMatrix4 viewMatrix = m_ShadowMap.GetViewMatrix();
 			RMatrix4 projMatrix = m_ShadowMap.GetProjectionMatrix();
@@ -751,14 +771,16 @@ void FSGraphicsProjectApp::RenderScene()
 			memcpy(subres.pData, &cbLight, sizeof(SHADER_LIGHT_BUFFER));
 			RRenderer.D3DImmediateContext()->Unmap(m_cbLight, 0);
 
+			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
+			RRenderer.D3DImmediateContext()->GSSetConstantBuffers(1, 1, &m_cbScene);
+			RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, &m_cbLight);
+
 			ParticleDepthComparer cmp(m_SunVec, -m_SunVec);
 			std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
 			m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(PARTICLE_VERTEX), PARTICLE_COUNT);
+	
+			RRenderer.SetRenderTarget();
 		}
-
-		RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
-		RRenderer.D3DImmediateContext()->GSSetConstantBuffers(1, 1, &m_cbScene);
-		RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, &m_cbLight);
 
 		RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp[i]);
 
@@ -768,6 +790,14 @@ void FSGraphicsProjectApp::RenderScene()
 			RRenderer.Clear(false, RColor(0.0f, 0.0f, 0.0f));
 
 		RenderSinglePass(NormalPass);
+
+		if (i == 0 && m_EnablePostProcessor)
+		{
+			RRenderer.SetRenderTarget();
+			RRenderer.Clear();
+
+			m_PostProcessor.Draw(PPE_GammaCorrection);
+		}
 	}
 
 	RRenderer.Present();
