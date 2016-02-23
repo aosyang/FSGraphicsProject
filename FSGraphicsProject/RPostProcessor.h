@@ -11,8 +11,10 @@
 
 enum PostProcessingEffect
 {
-	PPE_None,
 	PPE_GammaCorrection,
+	PPE_ColorEdgeDetection,
+
+	PPE_COUNT,
 };
 
 class RPostProcessor
@@ -28,7 +30,7 @@ public:
 
 private:
 	ID3D11VertexShader*			m_PPVertexShader;
-	ID3D11PixelShader*			m_PPPixelShader;
+	ID3D11PixelShader*			m_PPPixelShader[PPE_COUNT];
 
 	ID3D11InputLayout*			m_InputLayout;
 	RMeshElement				m_ScreenQuad;

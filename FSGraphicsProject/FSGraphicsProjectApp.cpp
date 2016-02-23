@@ -526,7 +526,7 @@ bool FSGraphicsProjectApp::Initialize()
 	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 	RRenderer.D3DDevice()->CreateDepthStencilState(&depthDesc, &m_DepthState[1]);
 
-	m_EnablePostProcessor = true;
+	m_EnablePostProcessor = false;
 
 	return true;
 }
@@ -796,7 +796,7 @@ void FSGraphicsProjectApp::RenderScene()
 			RRenderer.SetRenderTarget();
 			RRenderer.Clear();
 
-			m_PostProcessor.Draw(PPE_GammaCorrection);
+			m_PostProcessor.Draw(PPE_ColorEdgeDetection);
 		}
 	}
 

@@ -8,6 +8,7 @@
 
 #include "PostProcessor_VS.csh"
 #include "PostProcessor_GammaCorrection.csh"
+#include "PostProcessor_ColorEdgeDetection.csh"
 
 struct PP_QUAD
 {
@@ -23,7 +24,8 @@ void RPostProcessor::Initialize()
 {
 	// Create vertex shader for post processing
 	RRenderer.D3DDevice()->CreateVertexShader(PostProcessor_VS, sizeof(PostProcessor_VS), 0, &m_PPVertexShader);
-	RRenderer.D3DDevice()->CreatePixelShader(PostProcessor_GammaCorrection, sizeof(PostProcessor_GammaCorrection), 0, &m_PPPixelShader);
+	RRenderer.D3DDevice()->CreatePixelShader(PostProcessor_GammaCorrection, sizeof(PostProcessor_GammaCorrection), 0, &m_PPPixelShader[PPE_GammaCorrection]);
+	RRenderer.D3DDevice()->CreatePixelShader(PostProcessor_ColorEdgeDetection, sizeof(PostProcessor_ColorEdgeDetection), 0, &m_PPPixelShader[PPE_ColorEdgeDetection]);
 
 	// Create vertex declaration for screen quad
 	D3D11_INPUT_ELEMENT_DESC vsDesc[] = 
@@ -88,7 +90,10 @@ void RPostProcessor::Release()
 	SAFE_RELEASE(m_RTView);
 	SAFE_RELEASE(m_RTSRV);
 	SAFE_RELEASE(m_InputLayout);
-	SAFE_RELEASE(m_PPPixelShader);
+	for (int i = 0; i < PPE_COUNT; i++)
+	{
+		SAFE_RELEASE(m_PPPixelShader[i]);
+	}
 	SAFE_RELEASE(m_PPVertexShader);
 }
 
@@ -102,7 +107,7 @@ void RPostProcessor::SetupRenderTarget()
 
 void RPostProcessor::Draw(PostProcessingEffect effect)
 {
-	RRenderer.D3DImmediateContext()->PSSetShader(m_PPPixelShader, nullptr, 0);
+	RRenderer.D3DImmediateContext()->PSSetShader(m_PPPixelShader[effect], nullptr, 0);
 	RRenderer.D3DImmediateContext()->VSSetShader(m_PPVertexShader, nullptr, 0);
 	RRenderer.D3DImmediateContext()->GSSetShader(nullptr, nullptr, 0);
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_RTSRV);

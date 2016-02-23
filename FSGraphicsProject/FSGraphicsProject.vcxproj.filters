@@ -78,6 +78,7 @@
     <FxCompile Include="AmbientOcclusion_VS.hlsl" />
     <FxCompile Include="PostProcessor_VS.hlsl" />
     <FxCompile Include="PostProcessor_GammaCorrection.hlsl" />
+    <FxCompile Include="PostProcessor_ColorEdgeDetection.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FSGraphicsProject.licenseheader" />
