@@ -55,7 +55,7 @@ void RPostProcessor::Initialize()
 	renderTargetTextureDesc.Height = RRenderer.GetClientHeight();
 	renderTargetTextureDesc.MipLevels = 1;
 	renderTargetTextureDesc.ArraySize = 1;
-	renderTargetTextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	renderTargetTextureDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	renderTargetTextureDesc.SampleDesc.Count = 1;
 	renderTargetTextureDesc.SampleDesc.Quality = 0;
 	renderTargetTextureDesc.Usage = D3D11_USAGE_DEFAULT;

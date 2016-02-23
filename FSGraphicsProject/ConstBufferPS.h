@@ -54,6 +54,17 @@ CONSTANT_BUFFER_END
 
 CONSTANT_BUFFER_BEGIN(SHADER_SCREEN_BUFFER, b2)
 float2				ScreenSize;
+bool				UseGammaCorrection;
 CONSTANT_BUFFER_END
+
+#ifndef __cplusplus
+float4 MakeLinearColorFromGammaSpace(float4 color)
+{
+	if (UseGammaCorrection)
+		return float4(pow(color.rgb, 2.2f), color.a);
+	else
+		return color;
+}
+#endif
 
 #endif

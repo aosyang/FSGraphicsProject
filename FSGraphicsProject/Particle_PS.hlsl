@@ -70,6 +70,6 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 	Ambient.rgb = CalculateAmbientLight(normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor);
 
-	return Input.Color * (Ambient + Diffuse) * DiffuseTexture.Sample(Sampler, Input.UV);
+	return Input.Color * (Ambient + Diffuse) * MakeLinearColorFromGammaSpace(DiffuseTexture.Sample(Sampler, Input.UV));
 	//return float4(Ambient.xyz, 1.0f);
 }

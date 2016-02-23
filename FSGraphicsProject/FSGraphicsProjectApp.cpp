@@ -625,7 +625,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbLight, sizeof(cbLight));
 
 	// Setup ambient color
-	cbLight.HighHemisphereAmbientColor = RVec4(0.75f, 0.75f, 0.75f, 1.0f);
+	cbLight.HighHemisphereAmbientColor = RVec4(0.75f, 0.75f, 0.75f, 0.5f);
 	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 0.5f);
 
 	if (m_EnableLights[0])
@@ -687,6 +687,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbScreen, sizeof(cbScreen));
 
 	cbScreen.ScreenSize = RVec2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());
+	cbScreen.UseGammaCorrection = m_EnablePostProcessor;
 
 	RRenderer.D3DImmediateContext()->Map(m_cbScreen, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 	memcpy(subres.pData, &cbScreen, sizeof(SHADER_SCREEN_BUFFER));
@@ -796,7 +797,7 @@ void FSGraphicsProjectApp::RenderScene()
 			RRenderer.SetRenderTarget();
 			RRenderer.Clear();
 
-			m_PostProcessor.Draw(PPE_ColorEdgeDetection);
+			m_PostProcessor.Draw(PPE_GammaCorrection);
 		}
 	}
 
