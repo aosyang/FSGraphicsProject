@@ -122,7 +122,7 @@ private:
 	ID3D11DepthStencilView*		m_RenderTargetDepthView;
 
 	RPostProcessor				m_PostProcessor;
-	bool						m_EnablePostProcessor;
+	int							m_EnabledPostProcessor;
 
 	SHADER_SCENE_BUFFER			cbScene;
 	RVec3						m_SunVec;

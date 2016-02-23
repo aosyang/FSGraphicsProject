@@ -526,7 +526,7 @@ bool FSGraphicsProjectApp::Initialize()
 	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 	RRenderer.D3DDevice()->CreateDepthStencilState(&depthDesc, &m_DepthState[1]);
 
-	m_EnablePostProcessor = false;
+	m_EnabledPostProcessor = 0;
 
 	return true;
 }
@@ -580,8 +580,14 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	if (RInput.GetBufferedKeyState('2') == BKS_Pressed)
 		m_EnableLights[1] = !m_EnableLights[1];
 
-	if (RInput.GetBufferedKeyState('G') == BKS_Pressed)
-		m_EnablePostProcessor = !m_EnablePostProcessor;
+	if (RInput.GetBufferedKeyState('4') == BKS_Pressed)
+		m_EnabledPostProcessor = 1;
+
+	if (RInput.GetBufferedKeyState('5') == BKS_Pressed)
+		m_EnabledPostProcessor = 2;
+
+	if (RInput.GetBufferedKeyState('6') == BKS_Pressed)
+		m_EnabledPostProcessor = 0;
 
 	RVec3 camPos = m_CameraMatrix.GetTranslation();
 	m_CameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
@@ -625,8 +631,8 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbLight, sizeof(cbLight));
 
 	// Setup ambient color
-	cbLight.HighHemisphereAmbientColor = RVec4(0.75f, 0.75f, 0.75f, 0.5f);
-	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 0.5f);
+	cbLight.HighHemisphereAmbientColor = RVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 1.0f);
 
 	if (m_EnableLights[0])
 	{
@@ -687,7 +693,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbScreen, sizeof(cbScreen));
 
 	cbScreen.ScreenSize = RVec2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());
-	cbScreen.UseGammaCorrection = m_EnablePostProcessor;
+	cbScreen.UseGammaCorrection = (m_EnabledPostProcessor == 1);
 
 	RRenderer.D3DImmediateContext()->Map(m_cbScreen, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 	memcpy(subres.pData, &cbScreen, sizeof(SHADER_SCREEN_BUFFER));
@@ -742,7 +748,7 @@ void FSGraphicsProjectApp::RenderScene()
 	{
 		if (i == 0)
 		{
-			if (m_EnablePostProcessor)
+			if (m_EnabledPostProcessor)
 			{
 				m_PostProcessor.SetupRenderTarget();
 			}
@@ -792,12 +798,12 @@ void FSGraphicsProjectApp::RenderScene()
 
 		RenderSinglePass(NormalPass);
 
-		if (i == 0 && m_EnablePostProcessor)
+		if (i == 0 && m_EnabledPostProcessor)
 		{
 			RRenderer.SetRenderTarget();
 			RRenderer.Clear();
 
-			m_PostProcessor.Draw(PPE_GammaCorrection);
+			m_PostProcessor.Draw(m_EnabledPostProcessor == 1 ? PPE_GammaCorrection : PPE_ColorEdgeDetection);
 		}
 	}
 
