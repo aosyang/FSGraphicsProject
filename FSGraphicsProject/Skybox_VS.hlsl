@@ -14,7 +14,7 @@ struct INPUT_VERTEX
 struct OUTPUT_VERTEX
 {
 	float4 PosH		: SV_POSITION;
-	float3 PosW		: TEXCOORD0;
+	float3 PosL		: TEXCOORD0;
 };
 
 OUTPUT_VERTEX main(INPUT_VERTEX Input)
@@ -27,7 +27,7 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 	Out.PosH = mul(pos, worldMatrix);
 	Out.PosH = mul(Out.PosH, viewProjMatrix);
 
-	Out.PosW = Input.PosL.xyz;
+	Out.PosL = Input.PosL.xyz;
 
 	return Out;
 }

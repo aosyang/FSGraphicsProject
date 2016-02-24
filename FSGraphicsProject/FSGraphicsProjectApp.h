@@ -41,7 +41,7 @@ public:
 	void UpdateScene(const RTimer& timer);
 	void RenderScene();
 
-	//void OnResize(int width, int height) {}
+	void OnResize(int width, int height);
 	TCHAR* WindowTitle() { return L"Graphics Application"; }
 
 private:

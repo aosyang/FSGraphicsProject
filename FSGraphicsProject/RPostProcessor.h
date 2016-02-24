@@ -24,11 +24,14 @@ public:
 
 	void Initialize();
 	void Release();
+	void RecreateLostResources();
 
 	void SetupRenderTarget();
 	void Draw(PostProcessingEffect effect);
 
 private:
+	void CreateRenderTargetResources();
+
 	ID3D11VertexShader*			m_PPVertexShader;
 	ID3D11PixelShader*			m_PPPixelShader[PPE_COUNT];
 

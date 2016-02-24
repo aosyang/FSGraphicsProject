@@ -12,10 +12,10 @@ SamplerState Sampler;
 struct OUTPUT_VERTEX
 {
 	float4 PosH		: SV_POSITION;
-	float3 PosW		: TEXCOORD0;
+	float3 PosL		: TEXCOORD0;
 };
 
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 {
-	return MakeLinearColorFromGammaSpace(SkyTexture.Sample(Sampler, normalize(Input.PosW)));
+	return MakeLinearColorFromGammaSpace(SkyTexture.Sample(Sampler, normalize(Input.PosL)));
 }

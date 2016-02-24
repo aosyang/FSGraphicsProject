@@ -16,6 +16,9 @@ struct PP_QUAD
 };
 
 RPostProcessor::RPostProcessor()
+	: m_RTBuffer(nullptr), m_RTDepthBuffer(nullptr),
+	  m_RTView(nullptr), m_RTSRV(nullptr),
+	  m_RTDepthStencilView(nullptr)
 {
 	
 }
@@ -49,6 +52,60 @@ void RPostProcessor::Initialize()
 	};
 	m_ScreenQuad.CreateVertexBuffer(quad, sizeof(PP_QUAD), 6);
 
+	CreateRenderTargetResources();
+}
+
+void RPostProcessor::Release()
+{
+	m_ScreenQuad.Release();
+	SAFE_RELEASE(m_RTDepthBuffer);
+	SAFE_RELEASE(m_RTDepthStencilView);
+	SAFE_RELEASE(m_RTBuffer);
+	SAFE_RELEASE(m_RTView);
+	SAFE_RELEASE(m_RTSRV);
+	SAFE_RELEASE(m_InputLayout);
+	for (int i = 0; i < PPE_COUNT; i++)
+	{
+		SAFE_RELEASE(m_PPPixelShader[i]);
+	}
+	SAFE_RELEASE(m_PPVertexShader);
+}
+
+void RPostProcessor::RecreateLostResources()
+{
+	if (m_RTView)
+	{
+		SAFE_RELEASE(m_RTDepthBuffer);
+		SAFE_RELEASE(m_RTDepthStencilView);
+		SAFE_RELEASE(m_RTBuffer);
+		SAFE_RELEASE(m_RTView);
+		SAFE_RELEASE(m_RTSRV);
+
+		CreateRenderTargetResources();
+	}
+}
+
+void RPostProcessor::SetupRenderTarget()
+{
+	RRenderer.SetRenderTarget(m_RTView, m_RTDepthStencilView);
+	
+	D3D11_VIEWPORT vp = { 0.0f, 0.0f, (FLOAT)RRenderer.GetClientWidth(), (FLOAT)RRenderer.GetClientHeight(), 0.0f, 1.0f };
+	RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
+}
+
+void RPostProcessor::Draw(PostProcessingEffect effect)
+{
+	RRenderer.D3DImmediateContext()->PSSetShader(m_PPPixelShader[effect], nullptr, 0);
+	RRenderer.D3DImmediateContext()->VSSetShader(m_PPVertexShader, nullptr, 0);
+	RRenderer.D3DImmediateContext()->GSSetShader(nullptr, nullptr, 0);
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_RTSRV);
+
+	RRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
+	m_ScreenQuad.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+void RPostProcessor::CreateRenderTargetResources()
+{
 	// Create render target
 	D3D11_TEXTURE2D_DESC renderTargetTextureDesc;
 	renderTargetTextureDesc.Width = RRenderer.GetClientWidth();
@@ -79,39 +136,4 @@ void RPostProcessor::Initialize()
 
 	RRenderer.D3DDevice()->CreateTexture2D(&renderTargetTextureDesc, 0, &m_RTDepthBuffer);
 	RRenderer.D3DDevice()->CreateDepthStencilView(m_RTDepthBuffer, 0, &m_RTDepthStencilView);
-}
-
-void RPostProcessor::Release()
-{
-	m_ScreenQuad.Release();
-	SAFE_RELEASE(m_RTDepthBuffer);
-	SAFE_RELEASE(m_RTDepthStencilView);
-	SAFE_RELEASE(m_RTBuffer);
-	SAFE_RELEASE(m_RTView);
-	SAFE_RELEASE(m_RTSRV);
-	SAFE_RELEASE(m_InputLayout);
-	for (int i = 0; i < PPE_COUNT; i++)
-	{
-		SAFE_RELEASE(m_PPPixelShader[i]);
-	}
-	SAFE_RELEASE(m_PPVertexShader);
-}
-
-void RPostProcessor::SetupRenderTarget()
-{
-	RRenderer.SetRenderTarget(m_RTView, m_RTDepthStencilView);
-	
-	D3D11_VIEWPORT vp = { 0.0f, 0.0f, (FLOAT)RRenderer.GetClientWidth(), (FLOAT)RRenderer.GetClientHeight(), 0.0f, 1.0f };
-	RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
-}
-
-void RPostProcessor::Draw(PostProcessingEffect effect)
-{
-	RRenderer.D3DImmediateContext()->PSSetShader(m_PPPixelShader[effect], nullptr, 0);
-	RRenderer.D3DImmediateContext()->VSSetShader(m_PPVertexShader, nullptr, 0);
-	RRenderer.D3DImmediateContext()->GSSetShader(nullptr, nullptr, 0);
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_RTSRV);
-
-	RRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
-	m_ScreenQuad.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

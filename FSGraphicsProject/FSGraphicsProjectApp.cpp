@@ -103,7 +103,8 @@ FSGraphicsProjectApp::FSGraphicsProjectApp()
 	  m_ColorShader(nullptr),
 	  m_LightingMeshIL(nullptr),
 	  m_LightingShader(nullptr),
-	  m_SamplerState(nullptr)
+	  m_SamplerState(nullptr),
+	  m_RenderTargetView(nullptr)
 {
 	m_MeshTexture[0] = nullptr;
 	m_MeshTexture[1] = nullptr;
@@ -812,6 +813,29 @@ void FSGraphicsProjectApp::RenderScene()
 	}
 
 	RRenderer.Present();
+}
+
+void FSGraphicsProjectApp::OnResize(int width, int height)
+{
+	m_PostProcessor.RecreateLostResources();
+
+	if (m_RenderTargetView)
+	{
+		SAFE_RELEASE(m_RenderTargetBuffer);
+		SAFE_RELEASE(m_RenderTargetView);
+		SAFE_RELEASE(m_RenderTargetSRV);
+		SAFE_RELEASE(m_RenderTargetDepthBuffer);
+		SAFE_RELEASE(m_RenderTargetDepthView);
+
+		CreateSceneRenderTargetView();
+
+		RMaterial tachikomaMaterials[] =
+		{
+			{ m_RefractionShader, 1, RResourceManager::Instance().WrapSRV(m_RenderTargetSRV) },
+		};
+
+		m_TachikomaObj.SetMaterial(tachikomaMaterials, 1);
+	}
 }
 
 void FSGraphicsProjectApp::CreateSceneRenderTargetView()
