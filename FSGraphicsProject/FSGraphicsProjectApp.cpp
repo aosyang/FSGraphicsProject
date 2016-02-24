@@ -827,6 +827,8 @@ void FSGraphicsProjectApp::OnResize(int width, int height)
 		SAFE_RELEASE(m_RenderTargetDepthBuffer);
 		SAFE_RELEASE(m_RenderTargetDepthView);
 
+		RResourceManager::Instance().UnloadSRVWrappers();
+
 		CreateSceneRenderTargetView();
 
 		RMaterial tachikomaMaterials[] =

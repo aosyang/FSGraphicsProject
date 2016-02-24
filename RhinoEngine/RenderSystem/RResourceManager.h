@@ -34,6 +34,7 @@ public:
 	void Initialize();
 	void Destroy();
 	void UnloadAllResources();
+	void UnloadSRVWrappers();
 
 	RMesh* LoadFbxMesh(const char* filename, ID3D11InputLayout* inputLayout);
 	RTexture* LoadDDSTexture(const char* filename, ResourceLoadingMode mode = RLM_Threaded);

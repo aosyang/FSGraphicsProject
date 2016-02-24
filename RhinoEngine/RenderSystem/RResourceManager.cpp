@@ -97,6 +97,11 @@ void RResourceManager::UnloadAllResources()
 	}
 	m_TextureResources.clear();
 
+	UnloadSRVWrappers();
+}
+
+void RResourceManager::UnloadSRVWrappers()
+{
 	map<ID3D11ShaderResourceView*, RTexture*>::iterator iter;
 	for (iter = m_WrapperTextureResources.begin(); iter != m_WrapperTextureResources.end(); iter++)
 	{
