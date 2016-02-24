@@ -74,7 +74,7 @@ private:
 	ID3D11Buffer*				m_cbScene;
 	ID3D11Buffer*				m_cbLight;
 	ID3D11Buffer*				m_cbMaterial;
-	ID3D11Buffer*				m_cbInstance;
+	ID3D11Buffer*				m_cbInstance[2];
 	ID3D11Buffer*				m_cbScreen;
 
 	RTexture*					m_MeshTexture[3];
@@ -104,7 +104,7 @@ private:
 	RShader*					m_DepthShader;
 	RShader*					m_InstancedDepthShader;
 
-	RSMeshObject				m_TransparentMesh[125];
+	RSMeshObject				m_TransparentMesh;
 
 	RMeshElement				m_ParticleBuffer;
 	RShader*					m_ParticleShader;
@@ -124,9 +124,10 @@ private:
 	RPostProcessor				m_PostProcessor;
 	int							m_EnabledPostProcessor;
 
-	SHADER_SCENE_BUFFER			cbScene;
 	RVec3						m_SunVec;
+	SHADER_SCENE_BUFFER			cbScene;
 	SHADER_LIGHT_BUFFER			cbLight;
+	SHADER_INSTANCE_BUFFER		cbInstance[2];
 };
 
 #endif

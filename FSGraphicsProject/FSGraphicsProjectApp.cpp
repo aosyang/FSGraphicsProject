@@ -82,9 +82,9 @@ struct ObjectDepthComparer
 		CamPos = camPos.ToVec3();
 	}
 
-	bool operator()(const RSMeshObject &a, const RSMeshObject &b)
+	bool operator()(const RMatrix4 &a, const RMatrix4 &b)
 	{
-		return sqrDist(a.GetPosition(), CamPos) > sqrDist(b.GetPosition(), CamPos);
+		return sqrDist(a.GetTranslation(), CamPos) > sqrDist(b.GetTranslation(), CamPos);
 	}
 
 	// Helper functions
@@ -141,7 +141,8 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_cbLight);
 	SAFE_RELEASE(m_cbPerObject);
 	SAFE_RELEASE(m_cbScene);
-	SAFE_RELEASE(m_cbInstance);
+	SAFE_RELEASE(m_cbInstance[0]);
+	SAFE_RELEASE(m_cbInstance[1]);
 
 	SAFE_RELEASE(m_BumpLightingIL);
 	SAFE_RELEASE(m_LightingMeshIL);
@@ -316,7 +317,8 @@ bool FSGraphicsProjectApp::Initialize()
 	cbInstanceDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	cbInstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
 
-	RRenderer.D3DDevice()->CreateBuffer(&cbInstanceDesc, NULL, &m_cbInstance);
+	RRenderer.D3DDevice()->CreateBuffer(&cbInstanceDesc, NULL, &m_cbInstance[0]);
+	RRenderer.D3DDevice()->CreateBuffer(&cbInstanceDesc, NULL, &m_cbInstance[1]);
 
 	D3D11_BUFFER_DESC cbScreenDesc;
 	ZeroMemory(&cbScreenDesc, sizeof(cbScreenDesc));
@@ -398,19 +400,19 @@ bool FSGraphicsProjectApp::Initialize()
 
 	RMesh* sphereMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.fbx", m_LightingMeshIL);
 
+	m_TransparentMesh.SetMesh(sphereMesh);
+	m_TransparentMesh.SetOverridingShader(m_InstancedLightingShader);
+
 	for (int i = 0; i < 5; i++)
 	{
 		for (int j = 0; j < 5; j++)
 		{
 			for (int k = 0; k < 5; k++)
 			{
-				m_TransparentMesh[(i * 5 + j) * 5 + k].SetMesh(sphereMesh);
-				m_TransparentMesh[(i * 5 + j) * 5 + k].SetOverridingShader(m_LightingShader);
-				m_TransparentMesh[(i * 5 + j) * 5 + k].SetTransform(RMatrix4::CreateTranslation(-1100.0f + i * 100, 500.0f + j * 100, 100.0f + k * 100));
+				cbInstance[1].instancedWorldMatrix[(i * 5 + j) * 5 + k] = RMatrix4::CreateTranslation(-1100.0f + i * 100, 500.0f + j * 100, 100.0f + k * 100);
 			}
 		}
 	}
-
 
 	m_SceneMeshIsland = RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx", m_LightingMeshIL);
 	m_IslandTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/TR_FloatingIsland02.dds");
@@ -553,7 +555,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		{
 			m_CamYaw += (float)dx / 200.0f;
 			m_CamPitch += (float)dy / 200.0f;
-			m_CamPitch = max(-PI/2, min(PI/2, m_CamPitch));
+			m_CamPitch = max(-PI / 2, min(PI / 2, m_CamPitch));
 		}
 	}
 
@@ -670,8 +672,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	RRenderer.D3DImmediateContext()->Unmap(m_cbLight, 0);
 
 	// Update instance buffer
-	SHADER_INSTANCE_BUFFER cbInstance;
-	ZeroMemory(&cbInstance, sizeof(cbInstance));
+	ZeroMemory(&cbInstance[0], sizeof(cbInstance[0]));
 
 	for (int i = 0; i < MAX_INSTANCE_COUNT; i++)
 	{
@@ -681,12 +682,12 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		float z = cosf((float)i / MAX_INSTANCE_COUNT * 2 * PI) * 1000.0f * d;
 		RMatrix4 instanceMatrix = RMatrix4::CreateTranslation(x, y, z) * RMatrix4::CreateYAxisRotation((x + timer.TotalTime() * 0.1f * sinf(d)) * 180 / PI);
 
-		cbInstance.instancedWorldMatrix[i] = instanceMatrix;
+		cbInstance[0].instancedWorldMatrix[i] = instanceMatrix;
 	}
 
-	RRenderer.D3DImmediateContext()->Map(m_cbInstance, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-	memcpy(subres.pData, &cbInstance, sizeof(SHADER_INSTANCE_BUFFER));
-	RRenderer.D3DImmediateContext()->Unmap(m_cbInstance, 0);
+	RRenderer.D3DImmediateContext()->Map(m_cbInstance[0], 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+	memcpy(subres.pData, &cbInstance[0], sizeof(SHADER_INSTANCE_BUFFER));
+	RRenderer.D3DImmediateContext()->Unmap(m_cbInstance[0], 0);
 
 	// Update screen information
 	SHADER_SCREEN_BUFFER cbScreen;
@@ -705,7 +706,11 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(PARTICLE_VERTEX), PARTICLE_COUNT);
 
 	ObjectDepthComparer objCmp(m_CameraMatrix.GetRow(3));
-	std::sort(m_TransparentMesh, m_TransparentMesh + 125, objCmp);
+	std::sort(cbInstance[1].instancedWorldMatrix, cbInstance[1].instancedWorldMatrix + 125, objCmp);
+
+	RRenderer.D3DImmediateContext()->Map(m_cbInstance[1], 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+	memcpy(subres.pData, &cbInstance[1], sizeof(SHADER_INSTANCE_BUFFER));
+	RRenderer.D3DImmediateContext()->Unmap(m_cbInstance[1], 0);
 }
 
 void FSGraphicsProjectApp::RenderScene()
@@ -720,7 +725,6 @@ void FSGraphicsProjectApp::RenderScene()
 
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, &m_cbPerObject);
 	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
-	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(2, 1, &m_cbInstance);
 	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, &m_cbLight);
 	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(1, 1, &m_cbMaterial);
 	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(2, 1, &m_cbScreen);
@@ -925,6 +929,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 
 	// Draw islands
 	SetPerObjectConstBuffuer(m_IslandMeshObj.GetNodeTransform());
+	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(2, 1, &m_cbInstance[0]);
 
 	if (pass == ShadowPass)
 		m_IslandMeshObj.DrawWithShader(m_InstancedDepthShader, true, MAX_INSTANCE_COUNT);
@@ -1008,24 +1013,26 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	}
 
 	// Draw transparent spheres
-	for (int i = 0; i < 125; i++)
+	if (pass != ShadowPass)
 	{
-		SetPerObjectConstBuffuer(m_TransparentMesh[i].GetNodeTransform());
+		RRenderer.D3DImmediateContext()->VSSetConstantBuffers(2, 1, &m_cbInstance[1]);
 
-		float opacity = (timeNow - m_TransparentMesh[i].GetResourceTimestamp()) / loadingFadeInTime;
+		SetPerObjectConstBuffuer(m_TransparentMesh.GetNodeTransform());
+
+		float opacity = (timeNow - m_TransparentMesh.GetResourceTimestamp()) / loadingFadeInTime;
 		if (opacity >= 0.0f && opacity <= 1.0f)
 		{
 			cbMaterial.GlobalOpacity = opacity * 0.25f;
 			SetMaterialConstBuffer(&cbMaterial);
 			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[2], blendFactor, 0xFFFFFFFF);
-			m_TransparentMesh[i].Draw();
+			m_TransparentMesh.Draw(true, 125);
 		}
 		else
 		{
 			cbMaterial.GlobalOpacity = 0.25f;
 			SetMaterialConstBuffer(&cbMaterial);
 			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[1], blendFactor, 0xFFFFFFFF);
-			m_TransparentMesh[i].Draw();
+			m_TransparentMesh.Draw(true, 125);
 		}
 	}
 
