@@ -29,6 +29,7 @@ struct PARTICLE_VERTEX
 	RVec4 pos;
 	RVec4 color;
 	float rot;
+	RVec4 uvScaleOffset;
 };
 
 class FSGraphicsProjectApp : public IApp

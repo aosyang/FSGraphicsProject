@@ -8,10 +8,11 @@
 
 struct OUTPUT_VERTEX
 {
-	float4 Color	: COLOR;
-	float4 PosH		: SV_POSITION;
-	float4 PosW		: POSITION;
-	float2 SizeRot	: TEXCOORD0;
+	float4 Color			: COLOR;
+	float4 PosH				: SV_POSITION;
+	float4 PosW				: POSITION;
+	float2 SizeRot			: TEXCOORD0;
+	float4 UVScaleOffset	: TEXCOORD1;
 };
 
 struct GSOutput
@@ -72,7 +73,7 @@ void main(
 		Vert[i].PosH = mul(float4(Vert[i].PosW, 1.0f), viewProjMatrix);
 		Vert[i].ShadowPosH = mul(float4(Vert[i].PosW, 1.0f), shadowViewProjBiasedMatrix);
 		Vert[i].Color = Input[0].Color;
-		Vert[i].UV = uv[i] / 2.0f + 0.5f;
+		Vert[i].UV = uv[i] * Input[0].UVScaleOffset.xy + Input[0].UVScaleOffset.zw;
 		Vert[i].NormalW = normal;
 		Vert[i].TangentW = tangent;
 	}
