@@ -13,7 +13,7 @@ struct OUTPUT_VERTEX
 
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 {
-	float4 Final = Input.Color;
+	float4 Final = MakeLinearColorFromGammaSpace(Input.Color);
 	Final.a *= GlobalOpacity;
 	return Final;
 }
