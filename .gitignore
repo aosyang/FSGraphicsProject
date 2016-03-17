@@ -1,6 +1,8 @@
 /[Dd]ebug/
 /[Rr]elease/
 /x64/
+/EngineManagedWrapper/[Dd]ebug/
+/EngineManagedWrapper/[Rr]elease/
 /FSGraphicsProject/[Dd]ebug/
 /FSGraphicsProject/[Rr]elease/
 /FSGraphicsProject/x64/
@@ -8,6 +10,8 @@
 /RhinoEngine/[Dd]ebug/
 /RhinoEngine/[Rr]elease/
 /RhinoEngine/x64/
+/RhinoLevelEditor/bin/
+/RhinoLevelEditor/obj/
 *.sdf
 *.suo
 *.user
