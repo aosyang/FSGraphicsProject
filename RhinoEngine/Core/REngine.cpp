@@ -19,7 +19,10 @@ REngine::REngine()
 	m_hInst = NULL;
 	m_hWnd = NULL;
 	m_bFullScreen = false;
+	m_UseEngineRenderWindow = false;
 	m_Application = NULL;
+
+	SetProcessDPIAware();
 }
 
 
@@ -29,15 +32,21 @@ REngine::~REngine()
 
 bool REngine::Initialize()
 {
-	gEngine = this;
-
-	SetProcessDPIAware();
-
 	int width = 1024,
 		height = 768;
 
 	if (!CreateRenderWindow(width, height))
 		return false;
+
+	return Initialize(m_hWnd, width, height);
+}
+
+bool REngine::Initialize(HWND hWnd, int width, int height)
+{
+	gEngine = this;
+
+	if (!m_hWnd)
+		m_hWnd = hWnd;
 
 	if (!RInput.Initialize())
 		return false;
@@ -55,7 +64,10 @@ void REngine::Shutdown()
 {
 	//delete m_Application;
 	RRenderer.Shutdown();
-	DestroyRenderWindow();
+
+	if (m_UseEngineRenderWindow)
+		DestroyRenderWindow();
+
 	gEngine = nullptr;
 }
 
@@ -98,10 +110,7 @@ void REngine::Run()
 			}
 		}
 
-		m_Timer.Tick();
-
-		m_Application->UpdateScene(m_Timer);
-		m_Application->RenderScene();
+		RunOneFrame();
 
 		CalculateFrameStats();
 
@@ -111,8 +120,17 @@ void REngine::Run()
 	}
 }
 
-void REngine::ResizeApp(int width, int height)
+void REngine::RunOneFrame()
 {
+	m_Timer.Tick();
+
+	m_Application->UpdateScene(m_Timer);
+	m_Application->RenderScene();
+}
+
+void REngine::ResizeClientWindow(int width, int height)
+{
+	RRenderer.ResizeClient(width, height);
 	m_Application->OnResize(width, height);
 }
 
@@ -205,6 +223,8 @@ bool REngine::CreateRenderWindow(int width, int height, bool fullscreen, int bpp
 	SetForegroundWindow(m_hWnd);
 	SetFocus(m_hWnd);
 
+	m_UseEngineRenderWindow = true;
+
 	return true;
 }
 
@@ -262,8 +282,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_SIZE:
-		RRenderer.ResizeClient(LOWORD(lParam), HIWORD(lParam));
-		if (gEngine) gEngine->ResizeApp(LOWORD(lParam), HIWORD(lParam));
+		if (gEngine) gEngine->ResizeClientWindow(LOWORD(lParam), HIWORD(lParam));
 		break;
 
 	case WM_KEYDOWN:

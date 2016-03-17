@@ -6,6 +6,12 @@
 #ifndef _RRESOURCEMANAGER_H
 #define _RRESOURCEMANAGER_H
 
+namespace std
+{
+	class mutex;
+	class condition_variable;
+}
+
 struct LoaderThreadTask
 {
 	string			Filename;
@@ -60,8 +66,6 @@ private:
 										m_WrapperTextureResources;
 
 	bool								m_ShouldQuitLoaderThread;
-	mutex								m_TaskQueueMutex;
-	condition_variable					m_TaskQueueCondition;
 	queue<LoaderThreadTask>				m_LoaderThreadTaskQueue;
 	LoaderThreadData					m_LoaderThreadData;
 };

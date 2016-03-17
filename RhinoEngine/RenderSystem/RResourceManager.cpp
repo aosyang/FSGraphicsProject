@@ -8,6 +8,16 @@
 
 #include "RResourceManager.h"
 
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+
+// FBX SDK
+#include <fbxsdk.h>
+
+static mutex								m_TaskQueueMutex;
+static condition_variable					m_TaskQueueCondition;
+
 struct MESH_VERTEX
 {
 	RVec3 pos;

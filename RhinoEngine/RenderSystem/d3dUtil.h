@@ -8,10 +8,17 @@
 
 #if defined(DEBUG) || defined(_DEBUG)
 	#ifndef HR
-	#define HR(x)												\
-	{															\
-		HRESULT hr = (x);										\
-		assert(SUCCEEDED(hr));									\
+	#define HR(x)											\
+	{														\
+		HRESULT hr = (x);									\
+		if (!SUCCEEDED(hr)) {								\
+			_com_error err(hr);								\
+			LPCTSTR errMsg = err.ErrorMessage();			\
+			OutputDebugString(errMsg);						\
+			OutputDebugString(L"\n");						\
+			MessageBox(0, errMsg, 0, MB_ICONERROR);			\
+		}													\
+		assert(SUCCEEDED(hr));								\
 	}
 	#endif
 #else

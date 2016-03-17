@@ -15,6 +15,8 @@ public:
 	// Initialize all engine components
 	bool Initialize();
 
+	bool Initialize(HWND hWnd, int width, int height);
+
 	// Specify the application for the engine to run
 	inline void BindApp(IApp* app) { m_Application = app; }
 
@@ -24,7 +26,9 @@ public:
 	// Engine main loop
 	void Run();
 
-	void ResizeApp(int width, int height);
+	void RunOneFrame();
+
+	void ResizeClientWindow(int width, int height);
 
 	static RTimer& GetTimer() { return m_Timer; }
 private:
@@ -35,6 +39,7 @@ private:
 	HINSTANCE			m_hInst;
 	HWND				m_hWnd;
 	bool				m_bFullScreen;
+	bool				m_UseEngineRenderWindow;
 	IApp*				m_Application;
 	static RTimer		m_Timer;
 };

@@ -21,10 +21,6 @@
 #include <fstream>
 #include <iomanip>
 
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-
 #include <vector>
 #include <map>
 #include <queue>
@@ -41,9 +37,6 @@ using namespace std;
 #include "Core/RMatrix.h"
 
 #include "Core/RColor.h"
-
-// FBX SDK
-#include <fbxsdk.h>
 
 class RMesh;
 class RTexture;

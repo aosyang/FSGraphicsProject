@@ -6,6 +6,7 @@
 #include "Rhino.h"
 
 #include "RRenderSystem.h"
+#include <comdef.h>
 
 ID3D11DepthStencilView* RRenderSystem::DefaultDepthStencilView = nullptr;
 ID3D11RenderTargetView* RRenderSystem::DefaultRenderTargetView = nullptr;
@@ -103,7 +104,7 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 
 	if (featureLevel != D3D_FEATURE_LEVEL_11_0)
 	{
-		MessageBox(0, L"Direct3D Feature Level 11 unsupported.", 0, 0);
+		MessageBox(0, L"Direct3D Feature Level 11 unsupported.", 0, MB_ICONERROR);
 		return false;
 	}
 
