@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using EngineManagedWrapper;
-using System.Timers;
+using System.IO;
 
 namespace RhinoLevelEditor
 {
@@ -19,29 +19,44 @@ namespace RhinoLevelEditor
         public EngineCanvas()
         {
             InitializeComponent();
+        }
 
-            Application.Idle += HandleApplicationIdle;
+        public void Initialize()
+        {
+            if (!DesignMode)
+            {
+                Application.Idle += HandleApplicationIdle;
 
-            Engine = new RhinoEngineWrapper();
-            Engine.Initialize(Handle);
+                Engine = new RhinoEngineWrapper();
+                Engine.Initialize(Handle);
+            }
         }
 
         void HandleApplicationIdle(object sender, EventArgs e)
         {
-            Engine.RunOneFrame();
+            if (!DesignMode)
+            {
+                Engine.RunOneFrame();
+            }
         }
 
         public void Shutdown()
         {
-            Application.Idle -= HandleApplicationIdle;
-            Engine.Shutdown();
+            if (!DesignMode)
+            {
+                Application.Idle -= HandleApplicationIdle;
+                Engine.Shutdown();
+            }
         }
 
         private void EngineCanvas_Resize(object sender, EventArgs e)
         {
-            Control control = (Control)sender;
-            if (Engine != null)
-                Engine.Resize(control.Width, control.Height);
+            if (!DesignMode)
+            {
+                Control control = (Control)sender;
+                if (Engine != null)
+                    Engine.Resize(control.Width, control.Height);
+            }
         }
     }
 }
