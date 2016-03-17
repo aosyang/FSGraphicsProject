@@ -21,8 +21,6 @@ REngine::REngine()
 	m_bFullScreen = false;
 	m_UseEngineRenderWindow = false;
 	m_Application = NULL;
-
-	SetProcessDPIAware();
 }
 
 
@@ -34,6 +32,8 @@ bool REngine::Initialize()
 {
 	int width = 1024,
 		height = 768;
+
+	SetProcessDPIAware();
 
 	if (!CreateRenderWindow(width, height))
 		return false;
@@ -120,8 +120,13 @@ void REngine::Run()
 	}
 }
 
-void REngine::RunOneFrame()
+void REngine::RunOneFrame(bool update_input)
 {
+	if (update_input)
+	{
+		RInput._UpdateKeyStates();
+	}
+
 	m_Timer.Tick();
 
 	m_Application->UpdateScene(m_Timer);

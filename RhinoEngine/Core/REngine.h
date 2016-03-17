@@ -26,13 +26,13 @@ public:
 	// Engine main loop
 	void Run();
 
-	void RunOneFrame();
+	void RunOneFrame(bool update_input = false);
 
 	void ResizeClientWindow(int width, int height);
 
 	static RTimer& GetTimer() { return m_Timer; }
 private:
-	bool CreateRenderWindow(int width, int height, bool fullscreen=false, int bpp=32);
+	bool CreateRenderWindow(int width, int height, bool fullscreen = false, int bpp = 32);
 	void DestroyRenderWindow();
 	void CalculateFrameStats();
 

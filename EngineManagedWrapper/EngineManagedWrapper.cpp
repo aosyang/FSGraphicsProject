@@ -25,7 +25,7 @@ namespace EngineManagedWrapper
 		ID3D11Buffer*				m_cbPerObject;
 		ID3D11Buffer*				m_cbScene;
 		ID3D11SamplerState*			m_SamplerState;
-
+		float						m_CamYaw, m_CamPitch;
 	public:
 		~EditorApp()
 		{
@@ -77,12 +77,51 @@ namespace EngineManagedWrapper
 
 			RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState);
 
+			m_CamYaw = m_CamPitch = 0.0f;
+
 			return true;
 		}
 
 		void UpdateScene(const RTimer& timer)
 		{
-			RMatrix4 cameraMatrix = RMatrix4::CreateXAxisRotation(0.0f) * RMatrix4::CreateYAxisRotation(0.0f);
+			if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Pressed)
+			{
+				//RInput.HideCursor();
+				RInput.LockCursor();
+			}
+
+			if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Released)
+			{
+				//RInput.ShowCursor();
+				RInput.UnlockCursor();
+			}
+
+			if (RInput.IsKeyDown(VK_RBUTTON))
+			{
+				int dx, dy;
+				RInput.GetCursorRelPos(dx, dy);
+				if (dx || dy)
+				{
+					m_CamYaw += (float)dx / 200.0f;
+					m_CamPitch += (float)dy / 200.0f;
+					m_CamPitch = max(-PI / 2, min(PI / 2, m_CamPitch));
+				}
+			}
+
+			float camSpeed = 100.0f;
+			if (RInput.IsKeyDown(VK_LSHIFT))
+				camSpeed *= 10.0f;
+			RVec3 moveVec(0.0f, 0.0f, 0.0f);
+			if (RInput.IsKeyDown('W'))
+				moveVec += RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
+			if (RInput.IsKeyDown('S'))
+				moveVec -= RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
+			if (RInput.IsKeyDown('A'))
+				moveVec -= RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+			if (RInput.IsKeyDown('D'))
+				moveVec += RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+
+			RMatrix4 cameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
 			cameraMatrix.SetTranslation(RVec3(0.0f, 0.0f, 0.0f));
 
 			RMatrix4 viewMatrix = cameraMatrix.GetViewMatrix();
@@ -154,7 +193,7 @@ namespace EngineManagedWrapper
 	void RhinoEngineWrapper::RunOneFrame()
 	{
 		if (m_IsInitialized)
-			m_Engine->RunOneFrame();
+			m_Engine->RunOneFrame(true);
 	}
 
 	void RhinoEngineWrapper::Shutdown()
