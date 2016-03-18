@@ -27,8 +27,8 @@ bool RInputSystem::Initialize()
 
 	m_bCursorLocked = false;
 
-	::GetCursorPos(&m_CursorPosLastFrame);
-	::GetCursorPos(&m_CursorPos);
+	::GetPhysicalCursorPos(&m_CursorPosLastFrame);
+	::GetPhysicalCursorPos(&m_CursorPos);
 
 	return true;
 }
@@ -54,11 +54,11 @@ void RInputSystem::_UpdateKeyStates()
 	}
 
 	m_CursorPosLastFrame = m_CursorPos;
-	::GetCursorPos(&m_CursorPos);
+	::GetPhysicalCursorPos(&m_CursorPos);
 
 	if (m_bCursorLocked)
 	{
-		::SetCursorPos(m_CursorLockingPos.x, m_CursorLockingPos.y);
+		::SetPhysicalCursorPos(m_CursorLockingPos.x, m_CursorLockingPos.y);
 		m_CursorPosLastFrame = m_CursorLockingPos;
 	}
 }
@@ -67,7 +67,7 @@ void RInputSystem::LockCursor()
 {
 	if (!m_bCursorLocked)
 	{
-		::GetCursorPos(&m_CursorLockingPos);
+		::GetPhysicalCursorPos(&m_CursorLockingPos);
 
 		m_bCursorLocked = true;
 	}

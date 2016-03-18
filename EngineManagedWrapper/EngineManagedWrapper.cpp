@@ -86,13 +86,13 @@ namespace EngineManagedWrapper
 		{
 			if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Pressed)
 			{
-				//RInput.HideCursor();
+				RInput.HideCursor();
 				RInput.LockCursor();
 			}
 
 			if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Released)
 			{
-				//RInput.ShowCursor();
+				RInput.ShowCursor();
 				RInput.UnlockCursor();
 			}
 

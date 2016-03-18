@@ -21,6 +21,8 @@ REngine::REngine()
 	m_bFullScreen = false;
 	m_UseEngineRenderWindow = false;
 	m_Application = NULL;
+
+	SetProcessDPIAware();
 }
 
 
@@ -32,8 +34,6 @@ bool REngine::Initialize()
 {
 	int width = 1024,
 		height = 768;
-
-	SetProcessDPIAware();
 
 	if (!CreateRenderWindow(width, height))
 		return false;
