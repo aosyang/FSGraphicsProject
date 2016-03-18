@@ -53,5 +53,14 @@ namespace RhinoLevelEditor
                 engineCanvas1.RhinoEngine.OnKeyUp(e.KeyValue);
             }
         }
+
+        private void listMesh_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            int index = this.listMesh.IndexFromPoint(e.Location);
+            if (index != System.Windows.Forms.ListBox.NoMatches)
+            {
+                engineCanvas1.RhinoEngine.UpdatePreviewMesh(listMesh.Items[index].ToString());
+            }
+        }
     }
 }

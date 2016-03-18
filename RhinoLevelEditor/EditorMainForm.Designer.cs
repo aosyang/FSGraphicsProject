@@ -84,6 +84,7 @@
             this.listMesh.Name = "listMesh";
             this.listMesh.Size = new System.Drawing.Size(220, 524);
             this.listMesh.TabIndex = 1;
+            this.listMesh.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listMesh_MouseDoubleClick);
             // 
             // engineCanvas1
             // 
