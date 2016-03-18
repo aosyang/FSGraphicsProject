@@ -61,7 +61,7 @@ namespace EngineManagedWrapper
 
 			RShaderManager::Instance().AddShader("Skybox", Skybox_PS, sizeof(Skybox_PS), Skybox_VS, sizeof(Skybox_VS));
 
-			m_Skybox.CreateSkybox(L"../../../Assets/powderpeak.dds");
+			m_Skybox.CreateSkybox(L"../Assets/powderpeak.dds");
 
 
 			// Create texture sampler state
