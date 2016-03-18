@@ -46,6 +46,8 @@ public:
 	RTexture* LoadDDSTexture(const char* filename, ResourceLoadingMode mode = RLM_Threaded);
 
 	RTexture* FindTexture(const char* resourcePath);
+	RMesh* FindMesh(const char* resourcePath);
+	const vector<RMesh*>& GetMeshResources() const;
 
 	static string GetAssetsBasePath();
 	static string GetResourcePath(const string& path);

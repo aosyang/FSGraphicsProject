@@ -67,5 +67,7 @@
   <ItemGroup>
     <FxCompile Include="Skybox_PS.hlsl" />
     <FxCompile Include="Skybox_VS.hlsl" />
+    <FxCompile Include="Default_PS.hlsl" />
+    <FxCompile Include="Default_VS.hlsl" />
   </ItemGroup>
 </Project>

@@ -3,17 +3,19 @@
 #pragma once
 
 using namespace System;
+using namespace System::Collections::Generic;
 
 class REngine;
-class IApp;
 
 namespace EngineManagedWrapper {
+
+	class EditorApp;
 
 	public ref class RhinoEngineWrapper
 	{
 	private:
 		REngine*	m_Engine;
-		IApp*		m_Application;
+		EditorApp*	m_Application;
 		bool		m_IsInitialized;
 
 	public:
@@ -22,11 +24,13 @@ namespace EngineManagedWrapper {
 		!RhinoEngineWrapper();
 
 		bool Initialize(IntPtr hWnd);
-
 		void RunOneFrame();
-
 		void Shutdown();
-
 		void Resize(int width, int height);
+
+		List<String^>^ GetMeshNameList();
+		void UpdatePreviewMesh(String^ path);
+		void OnKeyDown(int keycode);
+		void OnKeyUp(int keycode);
 	};
 }

@@ -664,6 +664,24 @@ RTexture* RResourceManager::FindTexture(const char* resourcePath)
 	return nullptr;
 }
 
+RMesh* RResourceManager::FindMesh(const char* resourcePath)
+{
+	for (vector<RMesh*>::iterator iter = m_MeshResources.begin(); iter != m_MeshResources.end(); iter++)
+	{
+		if (strcasecmp((*iter)->GetPath().data(), resourcePath) == 0)
+		{
+			return *iter;
+		}
+	}
+
+	return nullptr;
+}
+
+const vector<RMesh*>& RResourceManager::GetMeshResources() const
+{
+	return m_MeshResources;
+}
+
 string RResourceManager::GetAssetsBasePath()
 {
 	return string("../Assets/");

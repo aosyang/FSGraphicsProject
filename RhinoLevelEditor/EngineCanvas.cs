@@ -15,6 +15,10 @@ namespace RhinoLevelEditor
     public partial class EngineCanvas : UserControl
     {
         RhinoEngineWrapper Engine;
+        public RhinoEngineWrapper RhinoEngine
+        {
+            get { return Engine; }
+        }
 
         public EngineCanvas()
         {

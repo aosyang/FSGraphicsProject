@@ -8,6 +8,8 @@
 
 #include "Skybox_PS.csh"
 #include "Skybox_VS.csh"
+#include "Default_PS.csh"
+#include "Default_VS.csh"
 
 #include "ConstBufferPS.h"
 #include "ConstBufferVS.h"
@@ -15,6 +17,8 @@
 #pragma comment(lib, "User32.lib")
 
 #include <direct.h>
+
+using namespace System::Runtime::InteropServices;
 
 namespace EngineManagedWrapper
 {
@@ -26,6 +30,11 @@ namespace EngineManagedWrapper
 		ID3D11Buffer*				m_cbScene;
 		ID3D11SamplerState*			m_SamplerState;
 		float						m_CamYaw, m_CamPitch;
+		RSMeshObject				m_MeshObject;
+		ID3D11InputLayout*			m_MeshInputLayout;
+		RShader*					m_DefaultShader;
+		RMatrix4					m_CameraMatrix;
+
 	public:
 		~EditorApp()
 		{
@@ -33,6 +42,7 @@ namespace EngineManagedWrapper
 			SAFE_RELEASE(m_cbPerObject);
 			SAFE_RELEASE(m_cbScene);
 			SAFE_RELEASE(m_SamplerState);
+			SAFE_RELEASE(m_MeshInputLayout);
 
 			RShaderManager::Instance().UnloadAllShaders();
 			RResourceManager::Instance().Destroy();
@@ -40,6 +50,8 @@ namespace EngineManagedWrapper
 
 		bool Initialize()
 		{
+			RResourceManager::Instance().Initialize();
+
 			D3D11_BUFFER_DESC cbPerObjectDesc;
 			ZeroMemory(&cbPerObjectDesc, sizeof(cbPerObjectDesc));
 			cbPerObjectDesc.ByteWidth = sizeof(SHADER_OBJECT_BUFFER);
@@ -58,11 +70,32 @@ namespace EngineManagedWrapper
 
 			RRenderer.D3DDevice()->CreateBuffer(&cbSceneDesc, NULL, &m_cbScene);
 
-
 			RShaderManager::Instance().AddShader("Skybox", Skybox_PS, sizeof(Skybox_PS), Skybox_VS, sizeof(Skybox_VS));
+			RShaderManager::Instance().AddShader("Default", Default_PS, sizeof(Default_PS), Default_VS, sizeof(Default_VS));
+
+			m_DefaultShader = RShaderManager::Instance().GetShaderResource("Default");
+
+			// Create input layout
+			D3D11_INPUT_ELEMENT_DESC objVertDesc[] =
+			{
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			};
+
+			RRenderer.D3DDevice()->CreateInputLayout(objVertDesc, 5, m_DefaultShader->VS_Bytecode, m_DefaultShader->VS_BytecodeSize, &m_MeshInputLayout);
+
 
 			m_Skybox.CreateSkybox(L"../Assets/powderpeak.dds");
 
+			RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.fbx", m_MeshInputLayout);
+			RResourceManager::Instance().LoadFbxMesh("../Assets/SpeedballPlayer.fbx", m_MeshInputLayout);
+			RResourceManager::Instance().LoadFbxMesh("../Assets/AO_Scene.fbx", m_MeshInputLayout);
+			RResourceManager::Instance().LoadFbxMesh("../Assets/tachikoma.fbx", m_MeshInputLayout);
+			RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx", m_MeshInputLayout);
+			RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx", m_MeshInputLayout);
 
 			// Create texture sampler state
 			D3D11_SAMPLER_DESC samplerDesc;
@@ -78,6 +111,7 @@ namespace EngineManagedWrapper
 			RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState);
 
 			m_CamYaw = m_CamPitch = 0.0f;
+			m_CameraMatrix = RMatrix4::IDENTITY;
 
 			return true;
 		}
@@ -121,10 +155,11 @@ namespace EngineManagedWrapper
 			if (RInput.IsKeyDown('D'))
 				moveVec += RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 
-			RMatrix4 cameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
-			cameraMatrix.SetTranslation(RVec3(0.0f, 0.0f, 0.0f));
+			RVec3 camPos = m_CameraMatrix.GetTranslation();
+			m_CameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
+			m_CameraMatrix.SetTranslation(camPos + (RVec4(moveVec, 1.0f) * m_CameraMatrix).ToVec3());
 
-			RMatrix4 viewMatrix = cameraMatrix.GetViewMatrix();
+			RMatrix4 viewMatrix = m_CameraMatrix.GetViewMatrix();
 			RMatrix4 projMatrix = RMatrix4::CreatePerspectiveProjectionLH(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
 
 			// Update scene constant buffer
@@ -133,7 +168,7 @@ namespace EngineManagedWrapper
 			cbScene.viewMatrix = viewMatrix;
 			cbScene.projMatrix = projMatrix;
 			cbScene.viewProjMatrix = viewMatrix * projMatrix;
-			cbScene.cameraPos = cameraMatrix.GetRow(3);
+			cbScene.cameraPos = m_CameraMatrix.GetRow(3);
 
 			D3D11_MAPPED_SUBRESOURCE subres;
 			RRenderer.D3DImmediateContext()->Map(m_cbScene, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
@@ -157,7 +192,18 @@ namespace EngineManagedWrapper
 		{
 			RRenderer.Clear();
 			m_Skybox.Draw();
+
+			RRenderer.Clear(false);
+			m_MeshObject.Draw();
+
 			RRenderer.Present();
+		}
+
+		void PreviewMesh(const char* path)
+		{
+			RMesh* mesh = RResourceManager::Instance().FindMesh(path);
+			m_MeshObject.SetMesh(mesh);
+			m_MeshObject.SetOverridingShader(m_DefaultShader);
 		}
 	};
 
@@ -211,5 +257,34 @@ namespace EngineManagedWrapper
 	{
 		if (m_IsInitialized)
 			m_Engine->ResizeClientWindow(width, height);
+	}
+
+	List<String^>^ RhinoEngineWrapper::GetMeshNameList()
+	{
+		List<String^>^ list = gcnew List<String^>();
+
+		const vector<RMesh*>& meshList = RResourceManager::Instance().GetMeshResources();
+		for (vector<RMesh*>::const_iterator iter = meshList.begin(); iter != meshList.end(); iter++)
+		{
+			list->Add(gcnew String((*iter)->GetPath().data()));
+		}
+
+		return list;
+	}
+
+	void RhinoEngineWrapper::UpdatePreviewMesh(String^ path)
+	{
+		IntPtr pNativeStr = Marshal::StringToHGlobalAnsi(path);
+		m_Application->PreviewMesh(static_cast<const char*>(pNativeStr.ToPointer()));
+	}
+
+	void RhinoEngineWrapper::OnKeyDown(int keycode)
+	{
+		RInput._SetKeyDown(keycode, true);
+	}
+
+	void RhinoEngineWrapper::OnKeyUp(int keycode)
+	{
+		RInput._SetKeyDown(keycode, false);
 	}
 }

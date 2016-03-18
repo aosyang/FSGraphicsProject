@@ -42,6 +42,8 @@ public:
 	RInput_BufferedKeyState GetBufferedKeyState(int keycode);
 	bool IsKeyDown(int keycode);
 
+	void _SetKeyDown(int keycode, bool keydown);
+
 protected:
 	RInputSystem();
 	~RInputSystem();
@@ -49,8 +51,6 @@ protected:
 	// Update input device states
 	//   - Called by REngine once per frame
 	void _UpdateKeyStates();
-
-	void _SetKeyDown(int keycode, bool keydown);
 
 private:
 	bool	m_bKeyDown[MAX_KEY_NUM];
