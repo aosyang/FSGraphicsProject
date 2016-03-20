@@ -6,7 +6,8 @@
 #ifndef _RRAY_H
 #define _RRAY_H
 
-#include "Core\RVector.h"
+#include "RVector.h"
+#include "RAabb.h"
 
 class RRay
 {
@@ -18,6 +19,9 @@ public:
 	RRay();
 	RRay(const RVec3& _origin, const RVec3& _dir, float _dist);
 	RRay(const RVec3& _start, const RVec3& _end);
+
+	RRay Transform(const RMatrix4& mat) const;
+	bool TestAabbIntersection(const RAabb& aabb) const;
 };
 
 #endif

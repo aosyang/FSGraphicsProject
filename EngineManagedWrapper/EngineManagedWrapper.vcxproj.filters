@@ -36,9 +36,6 @@
     <ClInclude Include="RSkybox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RRay.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EngineManagedWrapper.cpp">
@@ -51,9 +48,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RSkybox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RRay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -75,6 +69,8 @@
     <FxCompile Include="Skybox_VS.hlsl" />
     <FxCompile Include="Default_PS.hlsl" />
     <FxCompile Include="Default_VS.hlsl" />
+    <FxCompile Include="Color_PS.hlsl" />
+    <FxCompile Include="Color_VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="EngineManagedWrapper.licenseheader" />

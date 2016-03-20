@@ -51,6 +51,13 @@ void RSMeshObject::SetOverridingShader(RShader* shader)
 	m_OverridingShader = shader;
 }
 
+const RAabb& RSMeshObject::GetAabb() const
+{
+	if (m_Mesh)
+		return m_Mesh->GetAabb();
+	return RAabb::Default;
+}
+
 void RSMeshObject::Draw(bool instanced, int instanceCount)
 {
 	if (!m_Mesh)

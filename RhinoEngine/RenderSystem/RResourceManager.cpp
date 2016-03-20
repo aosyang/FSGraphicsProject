@@ -147,6 +147,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 {
 	vector<RMeshElement> meshElements;
 	vector<RMaterial> materials;
+	RAabb aabb;
 
 	char msg_buf[1024];
 	sprintf_s(msg_buf, sizeof(msg_buf), "Loading mesh [%s]...\n", task->Filename.data());
@@ -243,6 +244,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 			vertData[i].pos.x = (float)controlPointArray[i][0];
 			vertData[i].pos.y = (float)controlPointArray[i][1];
 			vertData[i].pos.z = (float)controlPointArray[i][2];
+
+			aabb.Expand(vertData[i].pos);
 		}
 
 		// Fill normal data
@@ -572,6 +575,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 	static_cast<RMesh*>(task->Resource)->SetMeshElements(meshElements.data(), meshElements.size());
 	static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), materials.size());
+	static_cast<RMesh*>(task->Resource)->SetAabb(aabb);
 	static_cast<RMesh*>(task->Resource)->SetResourceTimestamp(REngine::GetTimer().TotalTime());
 	task->Resource->m_State = RS_Loaded;
 }

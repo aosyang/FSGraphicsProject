@@ -33,6 +33,10 @@ public:
 
 	void SetMeshElements(RMeshElement* meshElements, int numElement);
 	void SetMaterials(RMaterial* materials, int numMaterial);
+
+	void SetAabb(const RAabb& aabb);
+	const RAabb& GetAabb() const;
+
 	void SetResourceTimestamp(float time);
 	float GetResourceTimestamp();
 private:
@@ -40,6 +44,7 @@ private:
 	ID3D11InputLayout*		m_InputLayout;
 
 	vector<RMaterial>		m_Materials;
+	RAabb					m_Aabb;
 	float					m_LoadingFinishTime;
 };
 

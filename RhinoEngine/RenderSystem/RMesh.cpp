@@ -87,6 +87,16 @@ void RMesh::SetMaterials(RMaterial* materials, int numMaterial)
 	m_Materials.assign(materials, materials + numMaterial);
 }
 
+void RMesh::SetAabb(const RAabb& aabb)
+{
+	m_Aabb = aabb;
+}
+
+const RAabb& RMesh::GetAabb() const
+{
+	return m_Aabb;
+}
+
 void RMesh::SetResourceTimestamp(float time)
 {
 	m_LoadingFinishTime = time;

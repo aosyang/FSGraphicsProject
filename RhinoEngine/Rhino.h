@@ -37,6 +37,8 @@ using namespace std;
 #include "Core/RMatrix.h"
 
 #include "Core/RColor.h"
+#include "Core/RAabb.h"
+#include "Core/RRay.h"
 
 class RMesh;
 class RTexture;

@@ -5,12 +5,13 @@
 
 #include "EngineManagedWrapper.h"
 #include "RSkybox.h"
-#include "RRay.h"
 
 #include "Skybox_PS.csh"
 #include "Skybox_VS.csh"
 #include "Default_PS.csh"
 #include "Default_VS.csh"
+#include "Color_PS.csh"
+#include "Color_VS.csh"
 
 #include "ConstBufferPS.h"
 #include "ConstBufferVS.h"
@@ -41,6 +42,19 @@ namespace EngineManagedWrapper
 		RVec3						m_MeshPos;
 		float						m_CamFov;
 
+		struct PRIMITIVE_VERTEX
+		{
+			RVec4 pos;
+			RVec4 color;
+		};
+
+		RShader*					m_ColorShader;
+		vector<PRIMITIVE_VERTEX>	m_PrimitiveList;
+		RMeshElement				m_PrimitiveMeshBuffer;
+		ID3D11InputLayout*			m_PrimitiveInputLayout;
+
+		bool						m_DrawBoundingBox;
+
 	public:
 		~EditorApp()
 		{
@@ -49,6 +63,8 @@ namespace EngineManagedWrapper
 			SAFE_RELEASE(m_cbScene);
 			SAFE_RELEASE(m_SamplerState);
 			SAFE_RELEASE(m_MeshInputLayout);
+			SAFE_RELEASE(m_PrimitiveInputLayout);
+			m_PrimitiveMeshBuffer.Release();
 
 			RShaderManager::Instance().UnloadAllShaders();
 			RResourceManager::Instance().Destroy();
@@ -78,8 +94,10 @@ namespace EngineManagedWrapper
 
 			RShaderManager::Instance().AddShader("Skybox", Skybox_PS, sizeof(Skybox_PS), Skybox_VS, sizeof(Skybox_VS));
 			RShaderManager::Instance().AddShader("Default", Default_PS, sizeof(Default_PS), Default_VS, sizeof(Default_VS));
+			RShaderManager::Instance().AddShader("Color", Color_PS, sizeof(Color_PS), Color_VS, sizeof(Color_VS));
 
 			m_DefaultShader = RShaderManager::Instance().GetShaderResource("Default");
+			m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 
 			// Create input layout
 			D3D11_INPUT_ELEMENT_DESC objVertDesc[] =
@@ -93,6 +111,15 @@ namespace EngineManagedWrapper
 
 			RRenderer.D3DDevice()->CreateInputLayout(objVertDesc, 5, m_DefaultShader->VS_Bytecode, m_DefaultShader->VS_BytecodeSize, &m_MeshInputLayout);
 
+
+			D3D11_INPUT_ELEMENT_DESC primitiveVertDesc[] =
+			{
+				{ "POSITION",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "COLOR",		0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			};
+
+			RRenderer.D3DDevice()->CreateInputLayout(primitiveVertDesc, 2, m_ColorShader->VS_Bytecode, m_ColorShader->VS_BytecodeSize, &m_PrimitiveInputLayout);
+			m_PrimitiveMeshBuffer.CreateVertexBuffer(nullptr, sizeof(PRIMITIVE_VERTEX), 65536, true);
 
 			m_Skybox.CreateSkybox(L"../Assets/powderpeak.dds");
 
@@ -120,12 +147,15 @@ namespace EngineManagedWrapper
 			m_CamYaw = m_CamPitch = 0.0f;
 			m_CameraMatrix = RMatrix4::IDENTITY;
 			m_MeshPos = RVec3::Zero();
+			m_DrawBoundingBox = false;
 
 			return true;
 		}
 
 		void UpdateScene(const RTimer& timer)
 		{
+			m_PrimitiveList.clear();
+
 			if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Pressed)
 			{
 				RInput.HideCursor();
@@ -176,6 +206,37 @@ namespace EngineManagedWrapper
 
 			m_InvViewProjMatrix = viewProjMatrix.Inverse();
 
+			const RAabb& aabb = m_MeshObject.GetAabb();
+			RVec3 cornerPoints[] = 
+			{
+				RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMin.z),
+				RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMax.z),
+				RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMax.z),
+				RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMin.z),
+
+				RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMin.z),
+				RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMax.z),
+				RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMax.z),
+				RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMin.z),
+			};
+
+			int wiredCubeIdx[] =
+			{
+				0, 1, 1, 2, 2, 3, 3, 0,
+				4, 5, 5, 6, 6, 7, 7, 4,
+				0, 4, 1, 5, 2, 6, 3, 7,
+			};
+
+			for (int i = 0; i < 24; i++)
+			{
+				PRIMITIVE_VERTEX v =
+				{
+					RVec4(cornerPoints[wiredCubeIdx[i]]),
+					RVec4(0.0f, 1.0f, 0.0f),
+				};
+				m_PrimitiveList.push_back(v);
+			}
+
 			// Update scene constant buffer
 			SHADER_SCENE_BUFFER cbScene;
 
@@ -188,6 +249,8 @@ namespace EngineManagedWrapper
 			RRenderer.D3DImmediateContext()->Map(m_cbScene, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 			memcpy(subres.pData, &cbScene, sizeof(SHADER_SCENE_BUFFER));
 			RRenderer.D3DImmediateContext()->Unmap(m_cbScene, 0);
+
+			m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(m_PrimitiveList.data(), sizeof(PRIMITIVE_VERTEX), m_PrimitiveList.size());
 
 			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, &m_cbPerObject);
 			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
@@ -220,6 +283,19 @@ namespace EngineManagedWrapper
 
 			m_MeshObject.Draw();
 
+			if (m_PrimitiveList.size() && m_DrawBoundingBox)
+			{
+				cbObject.worldMatrix = RMatrix4::IDENTITY;
+
+				RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+				memcpy(subres.pData, &cbObject, sizeof(cbObject));
+				RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
+
+				m_ColorShader->Bind();
+				RRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);
+				m_PrimitiveMeshBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+			}
+
 			RRenderer.Present();
 		}
 
@@ -232,27 +308,13 @@ namespace EngineManagedWrapper
 
 		void ScreenToCameraRay(float x, float y)
 		{
-			//RVec3 viewCorners[] =
-			//{
-			//	(RVec4(-10.0f,  10.0f, 10.0f, 10.0f) * m_InvViewProjMatrix).ToVec3(),
-			//	(RVec4( 10.0f,  10.0f, 10.0f, 10.0f) * m_InvViewProjMatrix).ToVec3(),
-			//	(RVec4(-10.0f, -10.0f, 10.0f, 10.0f) * m_InvViewProjMatrix).ToVec3(),
-			//	(RVec4( 10.0f, -10.0f, 10.0f, 10.0f) * m_InvViewProjMatrix).ToVec3(),
-			//};
-
-			//RVec3 farPointTop = RVec3::Lerp(viewCorners[0], viewCorners[1], x);
-			//RVec3 farPointBottom = RVec3::Lerp(viewCorners[2], viewCorners[3], x);
-
-			//RVec3 farPoint = RVec3::Lerp(farPointTop, farPointBottom, y);
-
 			RVec3 farPoint = RVec3(2.0f * x - 1.0f, -2.0f * y + 1.0f, 1.0f);
 			RVec4 farPointVec4 = RVec4(farPoint) * m_InvViewProjMatrix;
 			RVec3 farPointWorld = (farPointVec4 / farPointVec4.w).ToVec3();
 			RVec3 camPos = m_CameraMatrix.GetTranslation();
 
 			RRay ray(camPos, farPointWorld);
-
-			m_MeshPos = farPointWorld;
+			m_DrawBoundingBox = ray.TestAabbIntersection(m_MeshObject.GetAabb());
 		}
 	};
 #pragma managed

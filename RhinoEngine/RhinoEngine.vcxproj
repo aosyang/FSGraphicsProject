@@ -21,10 +21,12 @@
   <ItemGroup>
     <ClInclude Include="Core\IApp.h" />
     <ClInclude Include="Core\MathHelper.h" />
+    <ClInclude Include="Core\RAabb.h" />
     <ClInclude Include="Core\RColor.h" />
     <ClInclude Include="Core\REngine.h" />
     <ClInclude Include="Core\RInput.h" />
     <ClInclude Include="Core\RMatrix.h" />
+    <ClInclude Include="Core\RRay.h" />
     <ClInclude Include="Core\RSingleton.h" />
     <ClInclude Include="Core\RTimer.h" />
     <ClInclude Include="Core\RVector.h" />
@@ -43,9 +45,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\MathHelper.cpp" />
+    <ClCompile Include="Core\RAabb.cpp" />
     <ClCompile Include="Core\REngine.cpp" />
     <ClCompile Include="Core\RInput.cpp" />
     <ClCompile Include="Core\RMatrix.cpp" />
+    <ClCompile Include="Core\RRay.cpp" />
     <ClCompile Include="Core\RTimer.cpp" />
     <ClCompile Include="RenderSystem\DDSTextureLoader.cpp" />
     <ClCompile Include="RenderSystem\RMesh.cpp" />
