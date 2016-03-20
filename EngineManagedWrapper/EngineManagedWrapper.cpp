@@ -5,6 +5,7 @@
 
 #include "EngineManagedWrapper.h"
 #include "RSkybox.h"
+#include "RRay.h"
 
 #include "Skybox_PS.csh"
 #include "Skybox_VS.csh"
@@ -22,6 +23,7 @@ using namespace System::Runtime::InteropServices;
 
 namespace EngineManagedWrapper
 {
+#pragma unmanaged
 	class EditorApp : public IApp
 	{
 	private:
@@ -34,6 +36,10 @@ namespace EngineManagedWrapper
 		ID3D11InputLayout*			m_MeshInputLayout;
 		RShader*					m_DefaultShader;
 		RMatrix4					m_CameraMatrix;
+		RMatrix4					m_InvViewProjMatrix;
+		float						m_CameraX, m_CameraY;
+		RVec3						m_MeshPos;
+		float						m_CamFov;
 
 	public:
 		~EditorApp()
@@ -110,8 +116,10 @@ namespace EngineManagedWrapper
 
 			RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState);
 
+			m_CamFov = 65.0f;
 			m_CamYaw = m_CamPitch = 0.0f;
 			m_CameraMatrix = RMatrix4::IDENTITY;
+			m_MeshPos = RVec3::Zero();
 
 			return true;
 		}
@@ -130,6 +138,8 @@ namespace EngineManagedWrapper
 				RInput.UnlockCursor();
 			}
 
+			RVec3 moveVec(0.0f, 0.0f, 0.0f);
+
 			if (RInput.IsKeyDown(VK_RBUTTON))
 			{
 				int dx, dy;
@@ -140,48 +150,44 @@ namespace EngineManagedWrapper
 					m_CamPitch += (float)dy / 200.0f;
 					m_CamPitch = max(-PI / 2, min(PI / 2, m_CamPitch));
 				}
-			}
 
-			float camSpeed = 100.0f;
-			if (RInput.IsKeyDown(VK_LSHIFT))
-				camSpeed *= 10.0f;
-			RVec3 moveVec(0.0f, 0.0f, 0.0f);
-			if (RInput.IsKeyDown('W'))
-				moveVec += RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
-			if (RInput.IsKeyDown('S'))
-				moveVec -= RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
-			if (RInput.IsKeyDown('A'))
-				moveVec -= RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
-			if (RInput.IsKeyDown('D'))
-				moveVec += RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+
+				float camSpeed = 100.0f;
+				if (RInput.IsKeyDown(VK_LSHIFT))
+					camSpeed *= 10.0f;
+
+				if (RInput.IsKeyDown('W'))
+					moveVec += RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
+				if (RInput.IsKeyDown('S'))
+					moveVec -= RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
+				if (RInput.IsKeyDown('A'))
+					moveVec -= RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+				if (RInput.IsKeyDown('D'))
+					moveVec += RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+			}
 
 			RVec3 camPos = m_CameraMatrix.GetTranslation();
 			m_CameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
 			m_CameraMatrix.SetTranslation(camPos + (RVec4(moveVec, 1.0f) * m_CameraMatrix).ToVec3());
 
 			RMatrix4 viewMatrix = m_CameraMatrix.GetViewMatrix();
-			RMatrix4 projMatrix = RMatrix4::CreatePerspectiveProjectionLH(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
+			RMatrix4 projMatrix = RMatrix4::CreatePerspectiveProjectionLH(m_CamFov, RRenderer.AspectRatio(), 1.0f, 10000.0f);
+			RMatrix4 viewProjMatrix = viewMatrix * projMatrix;
+
+			m_InvViewProjMatrix = viewProjMatrix.Inverse();
 
 			// Update scene constant buffer
 			SHADER_SCENE_BUFFER cbScene;
 
 			cbScene.viewMatrix = viewMatrix;
 			cbScene.projMatrix = projMatrix;
-			cbScene.viewProjMatrix = viewMatrix * projMatrix;
+			cbScene.viewProjMatrix = viewProjMatrix;
 			cbScene.cameraPos = m_CameraMatrix.GetRow(3);
 
 			D3D11_MAPPED_SUBRESOURCE subres;
 			RRenderer.D3DImmediateContext()->Map(m_cbScene, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 			memcpy(subres.pData, &cbScene, sizeof(SHADER_SCENE_BUFFER));
 			RRenderer.D3DImmediateContext()->Unmap(m_cbScene, 0);
-
-			// Update object constant buffer
-			SHADER_OBJECT_BUFFER cbObject;
-			cbObject.worldMatrix = RMatrix4::IDENTITY;
-
-			RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-			memcpy(subres.pData, &cbObject, sizeof(cbObject));
-			RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
 
 			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, &m_cbPerObject);
 			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
@@ -191,9 +197,27 @@ namespace EngineManagedWrapper
 		void RenderScene()
 		{
 			RRenderer.Clear();
+
+			// Update object constant buffer
+			SHADER_OBJECT_BUFFER cbObject;
+			cbObject.worldMatrix = RMatrix4::IDENTITY;
+
+			D3D11_MAPPED_SUBRESOURCE subres;
+			RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+			memcpy(subres.pData, &cbObject, sizeof(cbObject));
+			RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
+
 			m_Skybox.Draw();
 
 			RRenderer.Clear(false);
+
+			// Update object constant buffer
+			cbObject.worldMatrix = RMatrix4::CreateTranslation(m_MeshPos);
+
+			RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+			memcpy(subres.pData, &cbObject, sizeof(cbObject));
+			RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
+
 			m_MeshObject.Draw();
 
 			RRenderer.Present();
@@ -205,7 +229,33 @@ namespace EngineManagedWrapper
 			m_MeshObject.SetMesh(mesh);
 			m_MeshObject.SetOverridingShader(m_DefaultShader);
 		}
+
+		void ScreenToCameraRay(float x, float y)
+		{
+			//RVec3 viewCorners[] =
+			//{
+			//	(RVec4(-10.0f,  10.0f, 10.0f, 10.0f) * m_InvViewProjMatrix).ToVec3(),
+			//	(RVec4( 10.0f,  10.0f, 10.0f, 10.0f) * m_InvViewProjMatrix).ToVec3(),
+			//	(RVec4(-10.0f, -10.0f, 10.0f, 10.0f) * m_InvViewProjMatrix).ToVec3(),
+			//	(RVec4( 10.0f, -10.0f, 10.0f, 10.0f) * m_InvViewProjMatrix).ToVec3(),
+			//};
+
+			//RVec3 farPointTop = RVec3::Lerp(viewCorners[0], viewCorners[1], x);
+			//RVec3 farPointBottom = RVec3::Lerp(viewCorners[2], viewCorners[3], x);
+
+			//RVec3 farPoint = RVec3::Lerp(farPointTop, farPointBottom, y);
+
+			RVec3 farPoint = RVec3(2.0f * x - 1.0f, -2.0f * y + 1.0f, 1.0f);
+			RVec4 farPointVec4 = RVec4(farPoint) * m_InvViewProjMatrix;
+			RVec3 farPointWorld = (farPointVec4 / farPointVec4.w).ToVec3();
+			RVec3 camPos = m_CameraMatrix.GetTranslation();
+
+			RRay ray(camPos, farPointWorld);
+
+			m_MeshPos = farPointWorld;
+		}
 	};
+#pragma managed
 
 	RhinoEngineWrapper::RhinoEngineWrapper()
 	{
@@ -286,5 +336,10 @@ namespace EngineManagedWrapper
 	void RhinoEngineWrapper::OnKeyUp(int keycode)
 	{
 		RInput._SetKeyDown(keycode, false);
+	}
+
+	void RhinoEngineWrapper::ScreenToCameraRay(float x, float y)
+	{
+		m_Application->ScreenToCameraRay(x, y);
 	}
 }

@@ -84,6 +84,7 @@
     <ClInclude Include="ConstBufferVS.h" />
     <ClInclude Include="EngineManagedWrapper.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="RRay.h" />
     <ClInclude Include="RSkybox.h" />
     <ClInclude Include="SharedDefines.h" />
     <ClInclude Include="Stdafx.h" />
@@ -91,6 +92,7 @@
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="EngineManagedWrapper.cpp" />
+    <ClCompile Include="RRay.cpp" />
     <ClCompile Include="RSkybox.cpp" />
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -164,6 +166,9 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="EngineManagedWrapper.licenseheader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -28,6 +28,7 @@ namespace RhinoLevelEditor
         private void engineCanvas1_Load(object sender, EventArgs e)
         {
             engineCanvas1.Initialize();
+            engineCanvas1.SetLogLabel(ref toolStripStatusLabel1);
             listMesh.DataSource = engineCanvas1.RhinoEngine.GetMeshNameList();
         }
 
@@ -60,6 +61,17 @@ namespace RhinoLevelEditor
             if (index != System.Windows.Forms.ListBox.NoMatches)
             {
                 engineCanvas1.RhinoEngine.UpdatePreviewMesh(listMesh.Items[index].ToString());
+            }
+        }
+
+        private void engineCanvas1_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == System.Windows.Forms.MouseButtons.Left)
+            {
+                EngineCanvas canvas = (EngineCanvas)sender;
+                float x = (float)e.X / canvas.Width, y = (float)e.Y / canvas.Height;
+                toolStripStatusLabel1.Text = x + " " + y;
+                engineCanvas1.RhinoEngine.ScreenToCameraRay(x, y);
             }
         }
     }

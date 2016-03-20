@@ -26,6 +26,8 @@ namespace MathHelper
 
 	template<typename T>
 	const T& Min(const T& a, const T& b) { return (a < b) ? a : b; }
+
+	inline float Lerp(float a, float b, float t) { return a + (b - a) * t; }
 }
 
 #endif

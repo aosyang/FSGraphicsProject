@@ -20,6 +20,8 @@ namespace RhinoLevelEditor
             get { return Engine; }
         }
 
+        ToolStripStatusLabel LogLabel;
+
         public EngineCanvas()
         {
             InitializeComponent();
@@ -34,6 +36,11 @@ namespace RhinoLevelEditor
                 Engine = new RhinoEngineWrapper();
                 Engine.Initialize(Handle);
             }
+        }
+
+        public void SetLogLabel(ref ToolStripStatusLabel logLabel)
+        {
+            LogLabel = logLabel;
         }
 
         void HandleApplicationIdle(object sender, EventArgs e)

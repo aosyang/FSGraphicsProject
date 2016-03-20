@@ -159,6 +159,55 @@ void RMatrix4::GetTranslation(float& x, float& y, float& z) const
 	z = m[3][2];
 }
 
+// Calculate the determinant of a 3x3 matrix
+float Matrix_Determinant(float e_11,float e_12,float e_13,
+						 float e_21,float e_22,float e_23,
+						 float e_31,float e_32,float e_33)
+{
+	return e_11 * e_22 * e_33 + e_12 * e_23 * e_31 + e_13 * e_21 * e_32 -
+		   e_11 * e_23 * e_32 - e_12 * e_21 * e_33 - e_13 * e_22 * e_31;
+}
+
+// Calculate the determinal of a RMatrix4
+float Matrix_Determinant(const RMatrix4& m)
+{
+	return m._m11 * Matrix_Determinant(m._m22, m._m23, m._m24, m._m32, m._m33, m._m34, m._m42, m._m43, m._m44) -
+		   m._m12 * Matrix_Determinant(m._m21, m._m23, m._m24, m._m31, m._m33, m._m34, m._m41, m._m43, m._m44) +
+		   m._m13 * Matrix_Determinant(m._m21, m._m22, m._m24, m._m31, m._m32, m._m34, m._m41, m._m42, m._m44) -
+		   m._m14 * Matrix_Determinant(m._m21, m._m22, m._m23, m._m31, m._m32, m._m33, m._m41, m._m42, m._m43);
+}
+
+
+RMatrix4 RMatrix4::Inverse() const
+{
+	float det = Matrix_Determinant(*this);
+	if (FLT_EQUAL_ZERO(det))
+		return *this;
+
+	RMatrix4 r;
+	float inv_det = 1.0f / det;
+
+	r._m11 =  Matrix_Determinant(_m22, _m23, _m24, _m32, _m33, _m34, _m42, _m43, _m44) * inv_det;
+	r._m12 = -Matrix_Determinant(_m12, _m13, _m14, _m32, _m33, _m34, _m42, _m43, _m44) * inv_det;
+	r._m13 =  Matrix_Determinant(_m12, _m13, _m14, _m22, _m23, _m24, _m42, _m43, _m44) * inv_det;
+	r._m14 = -Matrix_Determinant(_m12, _m13, _m14, _m22, _m23, _m24, _m32, _m33, _m34) * inv_det;
+	r._m21 = -Matrix_Determinant(_m21, _m23, _m24, _m31, _m33, _m34, _m41, _m43, _m44) * inv_det;
+	r._m22 =  Matrix_Determinant(_m11, _m13, _m14, _m31, _m33, _m34, _m41, _m43, _m44) * inv_det;
+	r._m23 = -Matrix_Determinant(_m11, _m13, _m14, _m21, _m23, _m24, _m41, _m43, _m44) * inv_det;
+	r._m24 =  Matrix_Determinant(_m11, _m13, _m14, _m21, _m23, _m24, _m31, _m33, _m34) * inv_det;
+	r._m31 =  Matrix_Determinant(_m21, _m22, _m24, _m31, _m32, _m34, _m41, _m42, _m44) * inv_det;
+	r._m32 = -Matrix_Determinant(_m11, _m12, _m14, _m31, _m32, _m34, _m41, _m42, _m44) * inv_det;
+	r._m33 =  Matrix_Determinant(_m11, _m12, _m14, _m21, _m22, _m24, _m41, _m42, _m44) * inv_det;
+	r._m34 = -Matrix_Determinant(_m11, _m12, _m14, _m21, _m22, _m24, _m31, _m32, _m34) * inv_det;
+	r._m41 = -Matrix_Determinant(_m21, _m22, _m23, _m31, _m32, _m33, _m41, _m42, _m43) * inv_det;
+	r._m42 =  Matrix_Determinant(_m11, _m12, _m13, _m31, _m32, _m33, _m41, _m42, _m43) * inv_det;
+	r._m43 = -Matrix_Determinant(_m11, _m12, _m13, _m21, _m22, _m23, _m41, _m42, _m43) * inv_det;
+	r._m44 =  Matrix_Determinant(_m11, _m12, _m13, _m21, _m22, _m23, _m31, _m32, _m33) * inv_det;
+
+	return r;
+}
+
+
 RMatrix4 RMatrix4::CreateXAxisRotation(float degree)
 {
 	RMatrix4 mat = RMatrix4::IDENTITY;

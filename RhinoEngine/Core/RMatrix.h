@@ -54,6 +54,8 @@ public:
 	RVec3 GetTranslation() const;
 	void GetTranslation(float& x, float& y, float& z) const;
 
+	RMatrix4 Inverse() const;
+
 	// Identity matrix variable
 	static RMatrix4 IDENTITY;
 
