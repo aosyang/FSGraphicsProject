@@ -74,5 +74,10 @@ namespace RhinoLevelEditor
                 engineCanvas1.RhinoEngine.ScreenToCameraRay(x, y);
             }
         }
+
+        private void deleteSelectionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            engineCanvas1.RhinoEngine.DeleteSelection();
+        }
     }
 }

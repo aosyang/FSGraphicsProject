@@ -33,5 +33,6 @@ namespace EngineManagedWrapper {
 		void OnKeyDown(int keycode);
 		void OnKeyUp(int keycode);
 		void ScreenToCameraRay(float x, float y);
+		void DeleteSelection();
 	};
 }

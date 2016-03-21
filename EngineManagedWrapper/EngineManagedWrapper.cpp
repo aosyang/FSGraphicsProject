@@ -33,7 +33,10 @@ namespace EngineManagedWrapper
 		ID3D11Buffer*				m_cbScene;
 		ID3D11SamplerState*			m_SamplerState;
 		float						m_CamYaw, m_CamPitch;
-		RSMeshObject				m_MeshObject;
+		
+		vector<RSMeshObject*>		m_MeshObjects;
+		RSMeshObject*				m_SelectedObject;
+
 		ID3D11InputLayout*			m_MeshInputLayout;
 		RShader*					m_DefaultShader;
 		RMatrix4					m_CameraMatrix;
@@ -52,8 +55,6 @@ namespace EngineManagedWrapper
 		vector<PRIMITIVE_VERTEX>	m_PrimitiveList;
 		RMeshElement				m_PrimitiveMeshBuffer;
 		ID3D11InputLayout*			m_PrimitiveInputLayout;
-
-		bool						m_DrawBoundingBox;
 
 	public:
 		~EditorApp()
@@ -147,7 +148,7 @@ namespace EngineManagedWrapper
 			m_CamYaw = m_CamPitch = 0.0f;
 			m_CameraMatrix = RMatrix4::IDENTITY;
 			m_MeshPos = RVec3::Zero();
-			m_DrawBoundingBox = false;
+			m_SelectedObject = nullptr;
 
 			return true;
 		}
@@ -206,35 +207,38 @@ namespace EngineManagedWrapper
 
 			m_InvViewProjMatrix = viewProjMatrix.Inverse();
 
-			const RAabb& aabb = m_MeshObject.GetAabb();
-			RVec3 cornerPoints[] = 
+			if (m_SelectedObject)
 			{
-				RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMin.z),
-				RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMax.z),
-				RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMax.z),
-				RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMin.z),
-
-				RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMin.z),
-				RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMax.z),
-				RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMax.z),
-				RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMin.z),
-			};
-
-			int wiredCubeIdx[] =
-			{
-				0, 1, 1, 2, 2, 3, 3, 0,
-				4, 5, 5, 6, 6, 7, 7, 4,
-				0, 4, 1, 5, 2, 6, 3, 7,
-			};
-
-			for (int i = 0; i < 24; i++)
-			{
-				PRIMITIVE_VERTEX v =
+				const RAabb& aabb = m_SelectedObject->GetAabb();
+				RVec3 cornerPoints[] =
 				{
-					RVec4(cornerPoints[wiredCubeIdx[i]]),
-					RVec4(0.0f, 1.0f, 0.0f),
+					RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMin.z),
+					RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMax.z),
+					RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMax.z),
+					RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMin.z),
+
+					RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMin.z),
+					RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMax.z),
+					RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMax.z),
+					RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMin.z),
 				};
-				m_PrimitiveList.push_back(v);
+
+				int wiredCubeIdx[] =
+				{
+					0, 1, 1, 2, 2, 3, 3, 0,
+					4, 5, 5, 6, 6, 7, 7, 4,
+					0, 4, 1, 5, 2, 6, 3, 7,
+				};
+
+				for (int i = 0; i < 24; i++)
+				{
+					PRIMITIVE_VERTEX v =
+					{
+						RVec4(cornerPoints[wiredCubeIdx[i]]),
+						RVec4(0.0f, 1.0f, 0.0f),
+					};
+					m_PrimitiveList.push_back(v);
+				}
 			}
 
 			// Update scene constant buffer
@@ -275,15 +279,24 @@ namespace EngineManagedWrapper
 			RRenderer.Clear(false);
 
 			// Update object constant buffer
-			cbObject.worldMatrix = RMatrix4::CreateTranslation(m_MeshPos);
+			for (vector<RSMeshObject*>::iterator iter = m_MeshObjects.begin(); iter != m_MeshObjects.end(); iter++)
+			{
+				cbObject.worldMatrix = (*iter)->GetNodeTransform();
+
+				RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+				memcpy(subres.pData, &cbObject, sizeof(cbObject));
+				RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
+
+				(*iter)->Draw();
+			}
+
+			cbObject.worldMatrix = RMatrix4::IDENTITY;
 
 			RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 			memcpy(subres.pData, &cbObject, sizeof(cbObject));
 			RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
 
-			m_MeshObject.Draw();
-
-			if (m_PrimitiveList.size() && m_DrawBoundingBox)
+			if (m_PrimitiveList.size())
 			{
 				cbObject.worldMatrix = RMatrix4::IDENTITY;
 
@@ -299,11 +312,13 @@ namespace EngineManagedWrapper
 			RRenderer.Present();
 		}
 
-		void PreviewMesh(const char* path)
+		void AddMeshObjectToScene(const char* path)
 		{
+			RSMeshObject* meshObj = new RSMeshObject();
 			RMesh* mesh = RResourceManager::Instance().FindMesh(path);
-			m_MeshObject.SetMesh(mesh);
-			m_MeshObject.SetOverridingShader(m_DefaultShader);
+			meshObj->SetMesh(mesh);
+			meshObj->SetOverridingShader(m_DefaultShader);
+			m_MeshObjects.push_back(meshObj);
 		}
 
 		void ScreenToCameraRay(float x, float y)
@@ -314,7 +329,26 @@ namespace EngineManagedWrapper
 			RVec3 camPos = m_CameraMatrix.GetTranslation();
 
 			RRay ray(camPos, farPointWorld);
-			m_DrawBoundingBox = ray.TestAabbIntersection(m_MeshObject.GetAabb());
+			m_SelectedObject = nullptr;
+
+			for (vector<RSMeshObject*>::iterator iter = m_MeshObjects.begin(); iter != m_MeshObjects.end(); iter++)
+			{
+				if (ray.TestAabbIntersection((*iter)->GetAabb()))
+				{
+					m_SelectedObject = *iter;
+				}
+			}
+		}
+
+		void DeleteSelection()
+		{
+			if (m_SelectedObject)
+			{
+				vector<RSMeshObject*>::iterator iter = std::find(m_MeshObjects.begin(), m_MeshObjects.end(), m_SelectedObject);
+				m_MeshObjects.erase(iter);
+				delete m_SelectedObject;
+				m_SelectedObject = nullptr;
+			}
 		}
 	};
 #pragma managed
@@ -387,7 +421,7 @@ namespace EngineManagedWrapper
 	void RhinoEngineWrapper::UpdatePreviewMesh(String^ path)
 	{
 		IntPtr pNativeStr = Marshal::StringToHGlobalAnsi(path);
-		m_Application->PreviewMesh(static_cast<const char*>(pNativeStr.ToPointer()));
+		m_Application->AddMeshObjectToScene(static_cast<const char*>(pNativeStr.ToPointer()));
 	}
 
 	void RhinoEngineWrapper::OnKeyDown(int keycode)
@@ -403,5 +437,10 @@ namespace EngineManagedWrapper
 	void RhinoEngineWrapper::ScreenToCameraRay(float x, float y)
 	{
 		m_Application->ScreenToCameraRay(x, y);
+	}
+
+	void RhinoEngineWrapper::DeleteSelection()
+	{
+		m_Application->DeleteSelection();
 	}
 }
