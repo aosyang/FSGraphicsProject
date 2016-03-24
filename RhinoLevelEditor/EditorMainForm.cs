@@ -71,7 +71,7 @@ namespace RhinoLevelEditor
                 EngineCanvas canvas = (EngineCanvas)sender;
                 float x = (float)e.X / canvas.Width, y = (float)e.Y / canvas.Height;
                 toolStripStatusLabel1.Text = x + " " + y;
-                engineCanvas1.RhinoEngine.ScreenToCameraRay(x, y);
+                engineCanvas1.RhinoEngine.RunScreenToCameraRayPicking(x, y);
             }
         }
 

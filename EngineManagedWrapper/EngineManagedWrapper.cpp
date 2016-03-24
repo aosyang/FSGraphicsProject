@@ -16,6 +16,8 @@
 #include "ConstBufferPS.h"
 #include "ConstBufferVS.h"
 
+#include "EditorAxis.h"
+
 #pragma comment(lib, "User32.lib")
 
 #include <direct.h>
@@ -47,14 +49,28 @@ namespace EngineManagedWrapper
 
 		struct PRIMITIVE_VERTEX
 		{
-			RVec4 pos;
-			RVec4 color;
+			RVec4	pos;
+			RColor	color;
 		};
 
 		RShader*					m_ColorShader;
 		vector<PRIMITIVE_VERTEX>	m_PrimitiveList;
 		RMeshElement				m_PrimitiveMeshBuffer;
 		ID3D11InputLayout*			m_PrimitiveInputLayout;
+
+		EditorAxis					m_EditorAxis;
+		int							m_MouseDownX, m_MouseDownY;
+		RMatrix4					m_AxisMatrix;
+
+		enum MouseControlMode
+		{
+			MCM_NONE,
+			MCM_MOVE_X,
+			MCM_MOVE_Y,
+			MCM_MOVE_Z,
+		};
+
+		MouseControlMode			m_MouseControlMode;
 
 	public:
 		~EditorApp()
@@ -66,6 +82,8 @@ namespace EngineManagedWrapper
 			SAFE_RELEASE(m_MeshInputLayout);
 			SAFE_RELEASE(m_PrimitiveInputLayout);
 			m_PrimitiveMeshBuffer.Release();
+
+			m_EditorAxis.Release();
 
 			RShaderManager::Instance().UnloadAllShaders();
 			RResourceManager::Instance().Destroy();
@@ -120,6 +138,9 @@ namespace EngineManagedWrapper
 			};
 
 			RRenderer.D3DDevice()->CreateInputLayout(primitiveVertDesc, 2, m_ColorShader->VS_Bytecode, m_ColorShader->VS_BytecodeSize, &m_PrimitiveInputLayout);
+
+			//m_XAxisMeshBuffer.
+
 			m_PrimitiveMeshBuffer.CreateVertexBuffer(nullptr, sizeof(PRIMITIVE_VERTEX), 65536, true);
 
 			m_Skybox.CreateSkybox(L"../Assets/powderpeak.dds");
@@ -149,6 +170,9 @@ namespace EngineManagedWrapper
 			m_CameraMatrix = RMatrix4::IDENTITY;
 			m_MeshPos = RVec3::Zero();
 			m_SelectedObject = nullptr;
+			m_MouseControlMode = MCM_NONE;
+
+			m_EditorAxis.Create();
 
 			return true;
 		}
@@ -167,6 +191,29 @@ namespace EngineManagedWrapper
 			{
 				RInput.ShowCursor();
 				RInput.UnlockCursor();
+			}
+
+			//if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Released)
+			//{
+			//	m_MouseControlMode = MCM_NONE;
+			//}
+
+			if (m_MouseControlMode != MCM_NONE)
+			{
+				if (m_SelectedObject)
+				{
+					int mdx, mdy;
+					RInput.GetCursorRelPos(mdx, mdy);
+
+					RVec3 pos = m_SelectedObject->GetPosition();
+					if (m_MouseControlMode == MCM_MOVE_X)
+						pos.x += mdx;
+					else if (m_MouseControlMode == MCM_MOVE_Y)
+						pos.y += -mdy;
+					else if (m_MouseControlMode == MCM_MOVE_Z)
+						pos.z += mdx;
+					m_SelectedObject->SetPosition(pos);
+				}
 			}
 
 			RVec3 moveVec(0.0f, 0.0f, 0.0f);
@@ -235,7 +282,7 @@ namespace EngineManagedWrapper
 					PRIMITIVE_VERTEX v =
 					{
 						RVec4(cornerPoints[wiredCubeIdx[i]]),
-						RVec4(0.0f, 1.0f, 0.0f),
+						RColor(0.0f, 1.0f, 0.0f),
 					};
 					m_PrimitiveList.push_back(v);
 				}
@@ -298,7 +345,10 @@ namespace EngineManagedWrapper
 
 			if (m_PrimitiveList.size())
 			{
-				cbObject.worldMatrix = RMatrix4::IDENTITY;
+				if (m_SelectedObject)
+					cbObject.worldMatrix = m_SelectedObject->GetNodeTransform();
+				else
+					cbObject.worldMatrix = RMatrix4::IDENTITY;
 
 				RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 				memcpy(subres.pData, &cbObject, sizeof(cbObject));
@@ -307,6 +357,27 @@ namespace EngineManagedWrapper
 				m_ColorShader->Bind();
 				RRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);
 				m_PrimitiveMeshBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+			}
+
+			RRenderer.Clear(false);
+
+			// Draw axises
+			if (m_SelectedObject)
+			{
+				m_ColorShader->Bind();
+
+				RVec3 cam_pos = m_CameraMatrix.GetTranslation();
+				RVec3 axis_pos = cam_pos + (m_SelectedObject->GetPosition() - cam_pos).GetNormalizedVec3() * 50.0f;
+				
+				m_AxisMatrix = RMatrix4::CreateTranslation(axis_pos);
+				cbObject.worldMatrix = m_AxisMatrix;
+
+				RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+				memcpy(subres.pData, &cbObject, sizeof(cbObject));
+				RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
+
+				RRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);
+				m_EditorAxis.Draw();
 			}
 
 			RRenderer.Present();
@@ -321,7 +392,7 @@ namespace EngineManagedWrapper
 			m_MeshObjects.push_back(meshObj);
 		}
 
-		void ScreenToCameraRay(float x, float y)
+		void RunScreenToCameraRayPicking(float x, float y)
 		{
 			RVec3 farPoint = RVec3(2.0f * x - 1.0f, -2.0f * y + 1.0f, 1.0f);
 			RVec4 farPointVec4 = RVec4(farPoint) * m_InvViewProjMatrix;
@@ -329,14 +400,45 @@ namespace EngineManagedWrapper
 			RVec3 camPos = m_CameraMatrix.GetTranslation();
 
 			RRay ray(camPos, farPointWorld);
-			m_SelectedObject = nullptr;
+			RRay axis_ray = ray;
 
-			for (vector<RSMeshObject*>::iterator iter = m_MeshObjects.begin(); iter != m_MeshObjects.end(); iter++)
+			if (m_SelectedObject)
 			{
-				if (ray.TestAabbIntersection((*iter)->GetAabb()))
+				axis_ray = ray.Transform(m_AxisMatrix.GetViewMatrix());
+			}
+
+			m_MouseControlMode = MCM_NONE;
+
+			if (m_SelectedObject && axis_ray.TestAabbIntersection(m_EditorAxis.GetAabb(AXIS_X)))
+			{
+				m_MouseControlMode = MCM_MOVE_X;
+			}
+			else if (m_SelectedObject && axis_ray.TestAabbIntersection(m_EditorAxis.GetAabb(AXIS_Y)))
+			{
+				m_MouseControlMode = MCM_MOVE_Y;
+			}
+			else if (m_SelectedObject && axis_ray.TestAabbIntersection(m_EditorAxis.GetAabb(AXIS_Z)))
+			{
+				m_MouseControlMode = MCM_MOVE_Z;
+			}
+			else
+			{
+				m_SelectedObject = nullptr;
+
+				for (vector<RSMeshObject*>::iterator iter = m_MeshObjects.begin(); iter != m_MeshObjects.end(); iter++)
 				{
-					m_SelectedObject = *iter;
+					RRay local_ray = ray.Transform((*iter)->GetNodeTransform().GetViewMatrix());
+
+					if (local_ray.TestAabbIntersection((*iter)->GetAabb()))
+					{
+						m_SelectedObject = *iter;
+					}
 				}
+			}
+
+			if (m_MouseControlMode != MCM_NONE)
+			{
+				RInput.GetCursorPos(m_MouseDownX, m_MouseDownY);
 			}
 		}
 
@@ -434,9 +536,9 @@ namespace EngineManagedWrapper
 		RInput._SetKeyDown(keycode, false);
 	}
 
-	void RhinoEngineWrapper::ScreenToCameraRay(float x, float y)
+	void RhinoEngineWrapper::RunScreenToCameraRayPicking(float x, float y)
 	{
-		m_Application->ScreenToCameraRay(x, y);
+		m_Application->RunScreenToCameraRayPicking(x, y);
 	}
 
 	void RhinoEngineWrapper::DeleteSelection()

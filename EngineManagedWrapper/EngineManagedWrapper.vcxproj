@@ -82,6 +82,7 @@
   <ItemGroup>
     <ClInclude Include="ConstBufferPS.h" />
     <ClInclude Include="ConstBufferVS.h" />
+    <ClInclude Include="EditorAxis.h" />
     <ClInclude Include="EngineManagedWrapper.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RSkybox.h" />
@@ -90,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="EditorAxis.cpp" />
     <ClCompile Include="EngineManagedWrapper.cpp" />
     <ClCompile Include="RSkybox.cpp" />
     <ClCompile Include="Stdafx.cpp">

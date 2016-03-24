@@ -32,7 +32,7 @@ namespace EngineManagedWrapper {
 		void UpdatePreviewMesh(String^ path);
 		void OnKeyDown(int keycode);
 		void OnKeyUp(int keycode);
-		void ScreenToCameraRay(float x, float y);
+		void RunScreenToCameraRayPicking(float x, float y);
 		void DeleteSelection();
 	};
 }
