@@ -29,6 +29,7 @@ public:
 	void RunOneFrame(bool update_input = false);
 
 	void ResizeClientWindow(int width, int height);
+	RECT GetWindowRectInfo() const;
 
 	static RTimer& GetTimer() { return m_Timer; }
 private:

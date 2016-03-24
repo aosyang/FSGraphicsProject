@@ -24,6 +24,8 @@
 
 using namespace System::Runtime::InteropServices;
 
+extern REngine* gEngine;
+
 namespace EngineManagedWrapper
 {
 #pragma unmanaged
@@ -193,10 +195,22 @@ namespace EngineManagedWrapper
 				RInput.UnlockCursor();
 			}
 
-			//if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Released)
-			//{
-			//	m_MouseControlMode = MCM_NONE;
-			//}
+			if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Pressed)
+			{
+				RECT rect = gEngine->GetWindowRectInfo();
+				int cur_x, cur_y;
+
+				RInput.GetCursorPos(cur_x, cur_y);
+				float fx = float(cur_x - rect.left) / float(rect.right - rect.left),
+					  fy = float(cur_y - rect.top) / float(rect.bottom - rect.top);
+
+				RunScreenToCameraRayPicking(fx, fy);
+			}
+
+			if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Released)
+			{
+				m_MouseControlMode = MCM_NONE;
+			}
 
 			if (m_MouseControlMode != MCM_NONE)
 			{
@@ -205,13 +219,26 @@ namespace EngineManagedWrapper
 					int mdx, mdy;
 					RInput.GetCursorRelPos(mdx, mdy);
 
+					RVec3 obj_forward = m_SelectedObject->GetNodeTransform().GetForward();
+					RVec3 obj_up = m_SelectedObject->GetNodeTransform().GetUp();
+					RVec3 obj_right = m_SelectedObject->GetNodeTransform().GetRight();
+
+					RVec3 cam_right = m_CameraMatrix.GetRight();
+					RVec3 cam_up = m_CameraMatrix.GetUp();
+
 					RVec3 pos = m_SelectedObject->GetPosition();
 					if (m_MouseControlMode == MCM_MOVE_X)
-						pos.x += mdx;
+					{
+						pos.x += obj_right.Dot(cam_right) * mdx - obj_right.Dot(cam_up) * mdy;
+					}
 					else if (m_MouseControlMode == MCM_MOVE_Y)
-						pos.y += -mdy;
+					{
+						pos.y += obj_up.Dot(cam_right) * mdx - obj_up.Dot(cam_up) * mdy;
+					}
 					else if (m_MouseControlMode == MCM_MOVE_Z)
-						pos.z += mdx;
+					{
+						pos.z += obj_forward.Dot(cam_right) * mdx - obj_forward.Dot(cam_up) * mdy;
+					}
 					m_SelectedObject->SetPosition(pos);
 				}
 			}
@@ -367,7 +394,10 @@ namespace EngineManagedWrapper
 				m_ColorShader->Bind();
 
 				RVec3 cam_pos = m_CameraMatrix.GetTranslation();
-				RVec3 axis_pos = cam_pos + (m_SelectedObject->GetPosition() - cam_pos).GetNormalizedVec3() * 50.0f;
+				RVec3 obj_pos = m_SelectedObject->GetPosition();
+				float dist = (cam_pos - obj_pos).Magnitude();
+				dist = max(50.0f, min(100.0f, dist));
+				RVec3 axis_pos = cam_pos + (m_SelectedObject->GetPosition() - cam_pos).GetNormalizedVec3() * dist;
 				
 				m_AxisMatrix = RMatrix4::CreateTranslation(axis_pos);
 				cbObject.worldMatrix = m_AxisMatrix;
@@ -538,7 +568,7 @@ namespace EngineManagedWrapper
 
 	void RhinoEngineWrapper::RunScreenToCameraRayPicking(float x, float y)
 	{
-		m_Application->RunScreenToCameraRayPicking(x, y);
+		//m_Application->RunScreenToCameraRayPicking(x, y);
 	}
 
 	void RhinoEngineWrapper::DeleteSelection()

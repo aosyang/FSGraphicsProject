@@ -139,6 +139,14 @@ void REngine::ResizeClientWindow(int width, int height)
 	m_Application->OnResize(width, height);
 }
 
+RECT REngine::GetWindowRectInfo() const
+{
+	RECT rect;
+	GetWindowRect(m_hWnd, &rect);
+
+	return rect;
+}
+
 bool REngine::CreateRenderWindow(int width, int height, bool fullscreen, int bpp)
 {
 	m_hInst = GetModuleHandle(NULL);

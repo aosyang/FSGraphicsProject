@@ -93,7 +93,7 @@ RMatrix4 RMatrix4::GetViewMatrix() const
 
 RVec3 RMatrix4::GetForward() const
 {
-	return -RVec3(m[2][0], m[2][1], m[2][2]);
+	return RVec3(m[2][0], m[2][1], m[2][2]);
 }
 
 RVec3 RMatrix4::GetUp() const
