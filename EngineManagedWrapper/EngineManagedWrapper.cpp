@@ -41,19 +41,12 @@ namespace EngineManagedWrapper
 		vector<RSMeshObject*>		m_MeshObjects;
 		RSMeshObject*				m_SelectedObject;
 
-		ID3D11InputLayout*			m_MeshInputLayout;
 		RShader*					m_DefaultShader;
 		RMatrix4					m_CameraMatrix;
 		RMatrix4					m_InvViewProjMatrix;
 		float						m_CameraX, m_CameraY;
 		RVec3						m_MeshPos;
 		float						m_CamFov;
-
-		struct PRIMITIVE_VERTEX
-		{
-			RVec4	pos;
-			RColor	color;
-		};
 
 		RShader*					m_ColorShader;
 		vector<PRIMITIVE_VERTEX>	m_PrimitiveList;
@@ -81,8 +74,6 @@ namespace EngineManagedWrapper
 			SAFE_RELEASE(m_cbPerObject);
 			SAFE_RELEASE(m_cbScene);
 			SAFE_RELEASE(m_SamplerState);
-			SAFE_RELEASE(m_MeshInputLayout);
-			SAFE_RELEASE(m_PrimitiveInputLayout);
 			m_PrimitiveMeshBuffer.Release();
 
 			m_EditorAxis.Release();
@@ -120,39 +111,17 @@ namespace EngineManagedWrapper
 			m_DefaultShader = RShaderManager::Instance().GetShaderResource("Default");
 			m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 
-			// Create input layout
-			D3D11_INPUT_ELEMENT_DESC objVertDesc[] =
-			{
-				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			};
-
-			RRenderer.D3DDevice()->CreateInputLayout(objVertDesc, 5, m_DefaultShader->VS_Bytecode, m_DefaultShader->VS_BytecodeSize, &m_MeshInputLayout);
-
-
-			D3D11_INPUT_ELEMENT_DESC primitiveVertDesc[] =
-			{
-				{ "POSITION",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "COLOR",		0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			};
-
-			RRenderer.D3DDevice()->CreateInputLayout(primitiveVertDesc, 2, m_ColorShader->VS_Bytecode, m_ColorShader->VS_BytecodeSize, &m_PrimitiveInputLayout);
-
-			//m_XAxisMeshBuffer.
-
+			m_PrimitiveInputLayout = RRenderer.GetInputLayout(PRIMITIVE_VERTEX::GetTypeName());
 			m_PrimitiveMeshBuffer.CreateVertexBuffer(nullptr, sizeof(PRIMITIVE_VERTEX), 65536, true);
 
 			m_Skybox.CreateSkybox(L"../Assets/powderpeak.dds");
 
-			RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.fbx", m_MeshInputLayout);
-			RResourceManager::Instance().LoadFbxMesh("../Assets/SpeedballPlayer.fbx", m_MeshInputLayout);
-			RResourceManager::Instance().LoadFbxMesh("../Assets/AO_Scene.fbx", m_MeshInputLayout);
-			RResourceManager::Instance().LoadFbxMesh("../Assets/tachikoma.fbx", m_MeshInputLayout);
-			RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx", m_MeshInputLayout);
-			RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx", m_MeshInputLayout);
+			RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.fbx");
+			RResourceManager::Instance().LoadFbxMesh("../Assets/SpeedballPlayer.fbx");
+			RResourceManager::Instance().LoadFbxMesh("../Assets/AO_Scene.fbx");
+			RResourceManager::Instance().LoadFbxMesh("../Assets/tachikoma.fbx");
+			RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx");
+			RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx");
 
 			// Create texture sampler state
 			D3D11_SAMPLER_DESC samplerDesc;

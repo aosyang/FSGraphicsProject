@@ -101,7 +101,6 @@ struct ObjectDepthComparer
 FSGraphicsProjectApp::FSGraphicsProjectApp()
 	: m_ColorPrimitiveIL(nullptr),
 	  m_ColorShader(nullptr),
-	  m_LightingMeshIL(nullptr),
 	  m_LightingShader(nullptr),
 	  m_SamplerState(nullptr),
 	  m_RenderTargetView(nullptr)
@@ -146,7 +145,6 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_cbInstance[1]);
 
 	SAFE_RELEASE(m_BumpLightingIL);
-	SAFE_RELEASE(m_LightingMeshIL);
 
 	m_BumpCubeMesh.Release();
 
@@ -330,29 +328,16 @@ bool FSGraphicsProjectApp::Initialize()
 
 	RRenderer.D3DDevice()->CreateBuffer(&cbScreenDesc, NULL, &m_cbScreen);
 
-
-	// Create input layout
-	D3D11_INPUT_ELEMENT_DESC objVertDesc[] =
-	{
-		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TANGENT",	0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD",	1, DXGI_FORMAT_R32G32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-	RRenderer.D3DDevice()->CreateInputLayout(objVertDesc, 5, m_AOShader->VS_Bytecode, m_AOShader->VS_BytecodeSize, &m_LightingMeshIL);
-
 	m_MeshTexture[0] = RResourceManager::Instance().LoadDDSTexture("../Assets/cty1.dds");
 	m_MeshTexture[1] = RResourceManager::Instance().LoadDDSTexture("../Assets/ang1.dds");
 	m_MeshTexture[2] = RResourceManager::Instance().LoadDDSTexture("../Assets/cty2x.dds");
 	m_BumpBaseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlate.dds");
 	m_BumpNormalTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlateNormal.dds");
 
-	m_SceneMeshCity = RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx", m_LightingMeshIL);
+	m_SceneMeshCity = RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx");
 	m_FbxMeshObj.SetMesh(m_SceneMeshCity);
 
-	m_MeshTachikoma = RResourceManager::Instance().LoadFbxMesh("../Assets/tachikoma.fbx", m_LightingMeshIL);
+	m_MeshTachikoma = RResourceManager::Instance().LoadFbxMesh("../Assets/tachikoma.fbx");
 	m_TachikomaObj.SetMesh(m_MeshTachikoma);
 	m_TachikomaObj.SetPosition(RVec3(0.0f, 40.0f, 0.0f));
 
@@ -382,7 +367,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_TachikomaObj.SetMaterial(tachikomaMaterials, 1);
 
 
-	m_AOSceneMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/AO_Scene.fbx", m_LightingMeshIL);
+	m_AOSceneMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/AO_Scene.fbx");
 	m_AOSceneObj.SetMesh(m_AOSceneMesh);
 	m_AOTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/AO_Scene.dds");
 	RTexture* greyTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/Grey.dds");
@@ -395,11 +380,11 @@ bool FSGraphicsProjectApp::Initialize()
 	m_AOSceneObj.SetMaterial(aoMat, 1);
 	m_AOSceneObj.SetPosition(RVec3(-500.0f, 0.0f, 500.0f));
 
-	m_CharacterObj.SetMesh(RResourceManager::Instance().LoadFbxMesh("../Assets/SpeedballPlayer.fbx", m_LightingMeshIL));
+	m_CharacterObj.SetMesh(RResourceManager::Instance().LoadFbxMesh("../Assets/SpeedballPlayer.fbx"));
 	m_CharacterObj.SetOverridingShader(m_BumpLightingShader);
 	m_CharacterObj.SetTransform(RMatrix4::CreateXAxisRotation(-90.0f) * RMatrix4::CreateTranslation(-1100.0f, 40.0f, 0.0f));
 
-	RMesh* sphereMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.fbx", m_LightingMeshIL);
+	RMesh* sphereMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.fbx");
 
 	m_TransparentMesh.SetMesh(sphereMesh);
 	m_TransparentMesh.SetOverridingShader(m_InstancedLightingShader);
@@ -415,7 +400,7 @@ bool FSGraphicsProjectApp::Initialize()
 		}
 	}
 
-	m_SceneMeshIsland = RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx", m_LightingMeshIL);
+	m_SceneMeshIsland = RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx");
 	m_IslandTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/TR_FloatingIsland02.dds");
 	m_IslandMeshObj.SetMesh(m_SceneMeshIsland);
 	m_IslandMeshObj.SetPosition(RVec3(0.0f, 0.0f, 500.0f));

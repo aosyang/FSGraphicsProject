@@ -1,4 +1,4 @@
-﻿extensions: .cs .cpp .h
+﻿extensions: .cs .cpp .h .hlsl
 //=============================================================================
 // %FileName% by Shiyang Ao, %CurrentYear% All Rights Reserved.
 //

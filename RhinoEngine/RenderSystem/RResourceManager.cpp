@@ -18,20 +18,6 @@
 static mutex								m_TaskQueueMutex;
 static condition_variable					m_TaskQueueCondition;
 
-struct MESH_VERTEX
-{
-	RVec3 pos;
-	RVec2 uv0;
-	RVec3 normal;
-	RVec3 tangent;
-	RVec2 uv1;
-
-	bool operator<(const MESH_VERTEX& rhs) const
-	{
-		return lexicographical_compare((const float*)this, (const float*)this + sizeof(MESH_VERTEX) / 4, (const float*)&rhs, (const float*)&rhs + sizeof(MESH_VERTEX) / 4);
-	}
-};
-
 void ResourceLoaderThread(LoaderThreadData* data)
 {
 	while (1)
@@ -122,9 +108,9 @@ void RResourceManager::UnloadSRVWrappers()
 	m_WrapperTextureResources.clear();
 }
 
-RMesh* RResourceManager::LoadFbxMesh(const char* filename, ID3D11InputLayout* inputLayout)
+RMesh* RResourceManager::LoadFbxMesh(const char* filename)
 {
-	RMesh* pMesh = new RMesh(GetResourcePath(filename), inputLayout);
+	RMesh* pMesh = new RMesh(GetResourcePath(filename));
 	pMesh->m_State = RS_EnqueuedForLoading;
 	m_MeshResources.push_back(pMesh);
 
@@ -573,6 +559,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	lFbxScene->Destroy();
 	lFbxSdkManager->Destroy();
 
+	static_cast<RMesh*>(task->Resource)->SetInputLayout(RRenderer.GetInputLayout(MESH_VERTEX::GetTypeName()));
 	static_cast<RMesh*>(task->Resource)->SetMeshElements(meshElements.data(), meshElements.size());
 	static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), materials.size());
 	static_cast<RMesh*>(task->Resource)->SetAabb(aabb);

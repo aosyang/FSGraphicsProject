@@ -50,6 +50,7 @@ class RBaseResource;
 #include "Core/IApp.h"
 #include "Core/MathHelper.h"
 
+#include "RenderSystem/RVertexDeclaration.h"
 #include "RenderSystem/RRenderSystem.h"
 #include "RenderSystem/RMeshElement.h"
 #include "RenderSystem/DDSTextureLoader.h"

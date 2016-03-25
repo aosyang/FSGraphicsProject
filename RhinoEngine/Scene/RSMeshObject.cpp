@@ -60,7 +60,7 @@ const RAabb& RSMeshObject::GetAabb() const
 
 void RSMeshObject::Draw(bool instanced, int instanceCount)
 {
-	if (!m_Mesh)
+	if (!m_Mesh || !m_Mesh->IsResourceReady())
 		return;
 
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_Mesh->GetInputLayout());
@@ -104,7 +104,7 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 
 void RSMeshObject::DrawWithShader(RShader* shader, bool instanced, int instanceCount)
 {
-	if (!m_Mesh || !shader)
+	if (!m_Mesh || !m_Mesh->IsResourceReady() || !shader)
 		return;
 
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_Mesh->GetInputLayout());

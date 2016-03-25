@@ -27,6 +27,7 @@ public:
 	ResourceState GetResourceState() const { return m_State; }
 	ResourceType GetResourceType() const { return m_Type; }
 	string GetPath() const { return m_ResourcePath; }
+	bool IsResourceReady() const { return m_State == RS_Loaded; }
 
 	// Multi-threading loading complete callback
 	//virtual void OnLoaded() = 0;

@@ -68,6 +68,9 @@
     <ClInclude Include="Core\RRay.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="RenderSystem\RVertexDeclaration.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -118,6 +121,9 @@
     <ClCompile Include="Core\RRay.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="RenderSystem\RVertexDeclaration.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="RenderSystem">
@@ -129,8 +135,19 @@
     <Filter Include="Scene">
       <UniqueIdentifier>{0a958409-2fbf-47bd-b9c5-037fa3a873c3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="HLSL">
+      <UniqueIdentifier>{9b99e0c2-1d7d-45be-9967-cfc356feae03}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="RhinoEngine.licenseheader" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="HLSL\RMeshVertexSignature.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\RPrimitiveVertexSignature.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

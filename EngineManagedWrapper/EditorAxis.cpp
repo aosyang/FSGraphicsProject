@@ -8,12 +8,6 @@
 #include "Rhino.h"
 #include "EditorAxis.h"
 
-struct PRIMITIVE_VERTEX
-{
-	RVec4	pos;
-	RColor	color;
-};
-
 EditorAxis::EditorAxis()
 {
 }

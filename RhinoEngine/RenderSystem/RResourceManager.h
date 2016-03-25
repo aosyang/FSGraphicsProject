@@ -42,7 +42,7 @@ public:
 	void UnloadAllResources();
 	void UnloadSRVWrappers();
 
-	RMesh* LoadFbxMesh(const char* filename, ID3D11InputLayout* inputLayout);
+	RMesh* LoadFbxMesh(const char* filename);
 	RTexture* LoadDDSTexture(const char* filename, ResourceLoadingMode mode = RLM_Threaded);
 
 	RTexture* FindTexture(const char* resourcePath);

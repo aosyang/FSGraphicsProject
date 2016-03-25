@@ -68,7 +68,6 @@ private:
 	RTexture*					m_BumpBaseTexture;
 	RTexture*					m_BumpNormalTexture;
 
-	ID3D11InputLayout*			m_LightingMeshIL;
 	RShader*					m_LightingShader;
 
 	ID3D11Buffer*				m_cbPerObject;

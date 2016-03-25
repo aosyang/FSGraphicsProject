@@ -7,22 +7,22 @@
 #include "Rhino.h"
 #include "RMesh.h"
 
-RMesh::RMesh(string path, ID3D11InputLayout* inputLayout)
-	: RBaseResource(RT_Mesh, path)
+RMesh::RMesh(string path)
+	: RBaseResource(RT_Mesh, path),
+	  m_InputLayout(nullptr)
 {
 	m_LoadingFinishTime = 0.0f;
-	m_InputLayout = inputLayout;
 }
 
-RMesh::RMesh(string path, const vector<RMeshElement> meshElements, const vector<RMaterial>& materials, ID3D11InputLayout* inputLayout)
-	: RMesh(path, inputLayout)
+RMesh::RMesh(string path, const vector<RMeshElement> meshElements, const vector<RMaterial>& materials)
+	: RMesh(path)
 {
 	m_MeshElements = meshElements;
 	m_Materials = materials;
 }
 
-RMesh::RMesh(string path, RMeshElement* meshElements, int numElement, RMaterial* materials, int numMaterial, ID3D11InputLayout* inputLayout)
-	: RMesh(path, inputLayout)
+RMesh::RMesh(string path, RMeshElement* meshElements, int numElement, RMaterial* materials, int numMaterial)
+	: RMesh(path)
 {
 	assert(meshElements && numElement);
 	m_MeshElements.assign(meshElements, meshElements + numElement);
@@ -62,6 +62,11 @@ vector<RMaterial>& RMesh::GetMaterials()
 int RMesh::GetSubmeshCount() const
 {
 	return (int)m_MeshElements.size();
+}
+
+void RMesh::SetInputLayout(ID3D11InputLayout* inputLayout)
+{
+	m_InputLayout = inputLayout;
 }
 
 ID3D11InputLayout* RMesh::GetInputLayout() const

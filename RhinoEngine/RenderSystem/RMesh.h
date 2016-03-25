@@ -19,15 +19,16 @@ struct RMaterial
 class RMesh : public RBaseResource
 {
 public:
-	RMesh(string path, ID3D11InputLayout* inputLayout);
-	RMesh(string path, const vector<RMeshElement> meshElements, const vector<RMaterial>& materials, ID3D11InputLayout* inputLayout);
-	RMesh(string path, RMeshElement* meshElements, int numElement, RMaterial* materials, int numMaterial, ID3D11InputLayout* inputLayout);
+	RMesh(string path);
+	RMesh(string path, const vector<RMeshElement> meshElements, const vector<RMaterial>& materials);
+	RMesh(string path, RMeshElement* meshElements, int numElement, RMaterial* materials, int numMaterial);
 	~RMesh();
 
 	RMaterial GetMaterial(int index) const;
 	vector<RMaterial>& GetMaterials();
 	int GetSubmeshCount() const;
 
+	void SetInputLayout(ID3D11InputLayout* inputLayout);
 	ID3D11InputLayout* GetInputLayout() const;
 	vector<RMeshElement>& GetMeshElements();
 
