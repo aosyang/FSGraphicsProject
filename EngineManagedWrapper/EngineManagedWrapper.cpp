@@ -156,28 +156,64 @@ namespace EngineManagedWrapper
 		{
 			m_PrimitiveList.clear();
 
-			if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Pressed)
+			RVec3 moveVec(0.0f, 0.0f, 0.0f);
+
+			RECT rwRect = gEngine->GetWindowRectInfo();
+			int mx, my;
+			RInput.GetCursorPos(mx, my);
+
+			if (mx >= rwRect.left && mx <= rwRect.right &&
+				my >= rwRect.top && my <= rwRect.bottom)
 			{
-				RInput.HideCursor();
-				RInput.LockCursor();
+				if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Pressed)
+				{
+					RInput.HideCursor();
+					RInput.LockCursor();
+				}
+
+				if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Pressed)
+				{
+					RECT rect = gEngine->GetWindowRectInfo();
+					int cur_x, cur_y;
+
+					RInput.GetCursorPos(cur_x, cur_y);
+					float fx = float(cur_x - rect.left) / float(rect.right - rect.left),
+						fy = float(cur_y - rect.top) / float(rect.bottom - rect.top);
+
+					RunScreenToCameraRayPicking(fx, fy);
+				}
+
+				if (RInput.IsKeyDown(VK_RBUTTON))
+				{
+					int dx, dy;
+					RInput.GetCursorRelPos(dx, dy);
+					if (dx || dy)
+					{
+						m_CamYaw += (float)dx / 200.0f;
+						m_CamPitch += (float)dy / 200.0f;
+						m_CamPitch = max(-PI / 2, min(PI / 2, m_CamPitch));
+					}
+
+
+					float camSpeed = 100.0f;
+					if (RInput.IsKeyDown(VK_LSHIFT))
+						camSpeed *= 10.0f;
+
+					if (RInput.IsKeyDown('W'))
+						moveVec += RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
+					if (RInput.IsKeyDown('S'))
+						moveVec -= RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
+					if (RInput.IsKeyDown('A'))
+						moveVec -= RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+					if (RInput.IsKeyDown('D'))
+						moveVec += RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+				}
 			}
 
 			if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Released)
 			{
 				RInput.ShowCursor();
 				RInput.UnlockCursor();
-			}
-
-			if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Pressed)
-			{
-				RECT rect = gEngine->GetWindowRectInfo();
-				int cur_x, cur_y;
-
-				RInput.GetCursorPos(cur_x, cur_y);
-				float fx = float(cur_x - rect.left) / float(rect.right - rect.left),
-					  fy = float(cur_y - rect.top) / float(rect.bottom - rect.top);
-
-				RunScreenToCameraRayPicking(fx, fy);
 			}
 
 			if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Released)
@@ -214,34 +250,6 @@ namespace EngineManagedWrapper
 					}
 					m_SelectedObject->SetPosition(pos);
 				}
-			}
-
-			RVec3 moveVec(0.0f, 0.0f, 0.0f);
-
-			if (RInput.IsKeyDown(VK_RBUTTON))
-			{
-				int dx, dy;
-				RInput.GetCursorRelPos(dx, dy);
-				if (dx || dy)
-				{
-					m_CamYaw += (float)dx / 200.0f;
-					m_CamPitch += (float)dy / 200.0f;
-					m_CamPitch = max(-PI / 2, min(PI / 2, m_CamPitch));
-				}
-
-
-				float camSpeed = 100.0f;
-				if (RInput.IsKeyDown(VK_LSHIFT))
-					camSpeed *= 10.0f;
-
-				if (RInput.IsKeyDown('W'))
-					moveVec += RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
-				if (RInput.IsKeyDown('S'))
-					moveVec -= RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
-				if (RInput.IsKeyDown('A'))
-					moveVec -= RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
-				if (RInput.IsKeyDown('D'))
-					moveVec += RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 			}
 
 			RVec3 camPos = m_CameraMatrix.GetTranslation();
