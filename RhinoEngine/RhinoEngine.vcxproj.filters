@@ -71,6 +71,9 @@
     <ClInclude Include="RenderSystem\RVertexDeclaration.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\RSkybox.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -124,6 +127,9 @@
     <ClCompile Include="RenderSystem\RVertexDeclaration.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\RSkybox.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="RenderSystem">
@@ -147,6 +153,9 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="HLSL\RPrimitiveVertexSignature.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\RSkyboxVertexSignature.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

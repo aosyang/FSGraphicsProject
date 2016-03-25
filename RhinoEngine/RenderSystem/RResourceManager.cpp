@@ -84,7 +84,22 @@ void RResourceManager::LoadAllResources()
 	WIN32_FIND_DATAA FindFileData;
 	HANDLE hFind;
 
-	string resFindingPath = GetAssetsBasePath() + "*.fbx";
+	// Load dds textures
+	string resFindingPath = GetAssetsBasePath() + "*.dds";
+	hFind = FindFirstFileA(resFindingPath.data(), &FindFileData);
+
+	do
+	{
+		if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+		{
+			string resName = GetAssetsBasePath() + FindFileData.cFileName;
+			LoadDDSTexture(resName.data());
+		}
+
+	} while (FindNextFileA(hFind, &FindFileData) != 0);
+
+	// Load fbx meshes
+	resFindingPath = GetAssetsBasePath() + "*.fbx";
 	hFind = FindFirstFileA(resFindingPath.data(), &FindFileData);
 
 	do
@@ -529,9 +544,10 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					if (!texture)
 					{
 						texture = RResourceManager::Instance().LoadDDSTexture(RResourceManager::GetResourcePath(ddsFilename).data(), RLM_Immediate);
-						meshMaterial.Textures[meshMaterial.TextureNum] = texture;
-						meshMaterial.TextureNum++;
 					}
+
+					meshMaterial.Textures[meshMaterial.TextureNum] = texture;
+					meshMaterial.TextureNum++;
 				}
 			}
 

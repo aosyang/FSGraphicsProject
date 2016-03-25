@@ -4,7 +4,6 @@
 #include "Rhino.h"
 
 #include "EngineManagedWrapper.h"
-#include "RSkybox.h"
 
 #include "Skybox_PS.csh"
 #include "Skybox_VS.csh"
@@ -114,8 +113,6 @@ namespace EngineManagedWrapper
 			m_PrimitiveInputLayout = RRenderer.GetInputLayout(PRIMITIVE_VERTEX::GetTypeName());
 			m_PrimitiveMeshBuffer.CreateVertexBuffer(nullptr, sizeof(PRIMITIVE_VERTEX), 65536, true);
 
-			m_Skybox.CreateSkybox(L"../Assets/powderpeak.dds");
-
 #if 1
 			RResourceManager::Instance().LoadAllResources();
 #else
@@ -126,6 +123,8 @@ namespace EngineManagedWrapper
 			RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx");
 			RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx");
 #endif
+
+			m_Skybox.CreateSkybox("../Assets/powderpeak.dds");
 
 			// Create texture sampler state
 			D3D11_SAMPLER_DESC samplerDesc;

@@ -28,12 +28,6 @@
 #include "AmbientOcclusion_PS.csh"
 #include "AmbientOcclusion_VS.csh"
 
-struct COLOR_VERTEX
-{
-	RVec4 pos;
-	RVec4 color;
-};
-
 struct BUMP_MESH_VERTEX
 {
 	RVec3 pos;
@@ -149,7 +143,6 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	m_BumpCubeMesh.Release();
 
 	m_StarMesh.Release();
-	SAFE_RELEASE(m_ColorPrimitiveIL);
 
 	m_Skybox.Release();
 	m_PostProcessor.Release();
@@ -188,32 +181,26 @@ bool FSGraphicsProjectApp::Initialize()
 	m_PostProcessor.Initialize();
 
 	// Create buffer for star mesh
-	COLOR_VERTEX starVertex[12];
+	PRIMITIVE_VERTEX starVertex[12];
 
 	for (int i = 0; i < 10; i++)
 	{
 		float r = (i % 2 == 0) ? 100.0f : 50.0f;
 		starVertex[i] = { RVec4(sinf(DEG_TO_RAD(i * 36)) * r, cosf(DEG_TO_RAD(i * 36)) * r, 0.0f, 1.0f),
-			RVec4(1.0f, 0.0f, 0.0f, 1.0f) };
+						  RColor(1.0f, 0.0f, 0.0f, 1.0f) };
 	}
 
-	starVertex[10] = { RVec4(0.0f, 0.0f, -20.0f, 1.0f), RVec4(1.0f, 1.0f, 0.0f, 1.0f) };
-	starVertex[11] = { RVec4(0.0f, 0.0f, 20.0f, 1.0f), RVec4(1.0f, 1.0f, 0.0f, 1.0f) };
+	starVertex[10] = { RVec4(0.0f, 0.0f, -20.0f, 1.0f), RColor(1.0f, 1.0f, 0.0f, 1.0f) };
+	starVertex[11] = { RVec4(0.0f, 0.0f, 20.0f, 1.0f), RColor(1.0f, 1.0f, 0.0f, 1.0f) };
 
 	UINT32 starIndex[] = {
 		0, 1, 10, 1, 2, 10, 2, 3, 10, 3, 4, 10, 4, 5, 10, 5, 6, 10, 6, 7, 10, 7, 8, 10, 8, 9, 10, 9, 0, 10,
 		1, 0, 11, 2, 1, 11, 3, 2, 11, 4, 3, 11, 5, 4, 11, 6, 5, 11, 7, 6, 11, 8, 7, 11, 9, 8, 11, 0, 9, 11, };
 
-	m_StarMesh.CreateVertexBuffer(starVertex, sizeof(COLOR_VERTEX), 12);
+	m_StarMesh.CreateVertexBuffer(starVertex, sizeof(PRIMITIVE_VERTEX), 12);
 	m_StarMesh.CreateIndexBuffer(starIndex, sizeof(UINT32), sizeof(starIndex) / sizeof(UINT32));
 
-	D3D11_INPUT_ELEMENT_DESC colorVertDesc[] =
-	{
-		{ "POSITION",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR",		0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-	RRenderer.D3DDevice()->CreateInputLayout(colorVertDesc, 2, m_ColorShader->VS_Bytecode, m_ColorShader->VS_BytecodeSize, &m_ColorPrimitiveIL);
+	m_ColorPrimitiveIL = RRenderer.GetInputLayout(PRIMITIVE_VERTEX::GetTypeName());
 
 	// Create buffer for bump cube
 	BUMP_MESH_VERTEX boxVertex[] = 
@@ -333,6 +320,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_MeshTexture[2] = RResourceManager::Instance().LoadDDSTexture("../Assets/cty2x.dds");
 	m_BumpBaseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlate.dds");
 	m_BumpNormalTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlateNormal.dds");
+	RResourceManager::Instance().LoadDDSTexture("../Assets/powderpeak.dds");
 
 	m_SceneMeshCity = RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx");
 	m_FbxMeshObj.SetMesh(m_SceneMeshCity);
@@ -435,7 +423,7 @@ bool FSGraphicsProjectApp::Initialize()
 
 	RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerComparisonState);
 
-	m_Skybox.CreateSkybox(L"../Assets/powderpeak.dds");
+	m_Skybox.CreateSkybox("../Assets/powderpeak.dds");
 
 	m_CameraMatrix = RMatrix4::CreateTranslation(407.023712f, 339.007507f, 876.396484f);
 	m_CamPitch = 0.0900001600f;

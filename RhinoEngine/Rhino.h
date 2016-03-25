@@ -63,5 +63,6 @@ class RBaseResource;
 
 #include "Scene/RSceneObject.h"
 #include "Scene/RSMeshObject.h"
+#include "Scene/RSkybox.h"
 
 #endif

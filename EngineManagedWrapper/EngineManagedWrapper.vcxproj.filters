@@ -33,9 +33,6 @@
     <ClInclude Include="SharedDefines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RSkybox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="EditorAxis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -48,9 +45,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RSkybox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="EditorAxis.cpp">

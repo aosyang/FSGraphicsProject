@@ -4,12 +4,9 @@
 // 
 //=============================================================================
 
-#include "RSkybox.h"
+#include "Rhino.h"
 
-struct SKYBOX_VERTEX
-{
-	RVec3 pos;
-};
+#include "RSkybox.h"
 
 RSkybox::RSkybox()
 	: m_SkyboxTexture(nullptr), m_SkyboxIL(nullptr)
@@ -17,10 +14,15 @@ RSkybox::RSkybox()
 
 }
 
-void RSkybox::CreateSkybox(const wchar_t* skyTextureName)
+void RSkybox::CreateSkybox(const char* skyTextureName)
 {
 	// Load skybox texture
-	DirectX::CreateDDSTextureFromFile(RRenderer.D3DDevice(), skyTextureName, NULL, &m_SkyboxTexture);
+	CreateSkybox(RResourceManager::Instance().FindTexture(skyTextureName));
+}
+
+void RSkybox::CreateSkybox(RTexture* skyTexture)
+{
+	m_SkyboxTexture = skyTexture;
 
 	// Create skybox buffer
 	SKYBOX_VERTEX skyboxVertex[] = 
@@ -51,26 +53,26 @@ void RSkybox::CreateSkybox(const wchar_t* skyTextureName)
 
 	m_SkyboxShader = RShaderManager::Instance().GetShaderResource("Skybox");
 
-	// Create input layout
-	D3D11_INPUT_ELEMENT_DESC vertDesc[] =
+	if (!m_SkyboxShader)
 	{
-		{ "POSITION",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
+		OutputDebugStringA("*** WARNING: Unable to find shader \'Skybox\', skybox will not be rendered properly.\n");
+	}
 
-	RRenderer.D3DDevice()->CreateInputLayout(vertDesc, 1, m_SkyboxShader->VS_Bytecode, m_SkyboxShader->VS_BytecodeSize, &m_SkyboxIL);
+	m_SkyboxIL = RRenderer.GetInputLayout(SKYBOX_VERTEX::GetTypeName());
 }
 
 void RSkybox::Release()
 {
 	m_SkyboxMesh.Release();
-	SAFE_RELEASE(m_SkyboxTexture);
-	SAFE_RELEASE(m_SkyboxIL);
 }
 
 void RSkybox::Draw()
 {
-	RRenderer.D3DImmediateContext()->IASetInputLayout(m_SkyboxIL);
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_SkyboxTexture);
-	m_SkyboxShader->Bind();
-	m_SkyboxMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	if (m_SkyboxShader && m_SkyboxTexture)
+	{
+		RRenderer.D3DImmediateContext()->IASetInputLayout(m_SkyboxIL);
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_SkyboxTexture->GetPtrSRV());
+		m_SkyboxShader->Bind();
+		m_SkyboxMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	}
 }

@@ -172,7 +172,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RPostProcessor.cpp" />
     <ClCompile Include="RShadowMap.cpp" />
-    <ClCompile Include="RSkybox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConstBufferPS.h" />
@@ -180,7 +179,6 @@
     <ClInclude Include="FSGraphicsProjectApp.h" />
     <ClInclude Include="RPostProcessor.h" />
     <ClInclude Include="RShadowMap.h" />
-    <ClInclude Include="RSkybox.h" />
     <ClInclude Include="SharedDefines.h" />
   </ItemGroup>
   <ItemGroup>

@@ -21,9 +21,6 @@
     <ClCompile Include="FSGraphicsProjectApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RSkybox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RShadowMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -33,9 +30,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FSGraphicsProjectApp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RSkybox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SharedDefines.h">

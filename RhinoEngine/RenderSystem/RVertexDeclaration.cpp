@@ -9,6 +9,7 @@
 
 #include "RMeshVertexSignature.csh"
 #include "RPrimitiveVertexSignature.csh"
+#include "RSkyboxVertexSignature.csh"
 
 RVertexDeclaration::RVertexDeclaration()
 {
@@ -23,6 +24,7 @@ void RVertexDeclaration::Initialize()
 {
 	ID3D11InputLayout* pInputLayout;
 
+	// Mesh vertex
 	D3D11_INPUT_ELEMENT_DESC meshVertDesc[] =
 	{
 		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -36,6 +38,7 @@ void RVertexDeclaration::Initialize()
 	m_InputLayouts.insert(make_pair(MESH_VERTEX::GetTypeName(), pInputLayout));
 
 
+	// Color primitive vertex
 	D3D11_INPUT_ELEMENT_DESC primitiveVertDesc[] =
 	{
 		{ "POSITION",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -44,6 +47,17 @@ void RVertexDeclaration::Initialize()
 
 	RRenderer.D3DDevice()->CreateInputLayout(primitiveVertDesc, 2, RPrimitiveVertexSignature, sizeof(RPrimitiveVertexSignature), &pInputLayout);
 	m_InputLayouts.insert(make_pair(PRIMITIVE_VERTEX::GetTypeName(), pInputLayout));
+
+
+	// Skybox vertex
+	D3D11_INPUT_ELEMENT_DESC skyboxVertDesc[] =
+	{
+		{ "POSITION",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+
+	RRenderer.D3DDevice()->CreateInputLayout(skyboxVertDesc, 1, RSkyboxVertexSignature, sizeof(RSkyboxVertexSignature), &pInputLayout);
+	m_InputLayouts.insert(make_pair(SKYBOX_VERTEX::GetTypeName(), pInputLayout));
+
 }
 
 void RVertexDeclaration::Release()
