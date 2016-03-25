@@ -453,7 +453,7 @@ namespace EngineManagedWrapper
 			}
 			else
 			{
-				m_SelectedObject = nullptr;
+				vector<RSMeshObject*> rayPickingList;
 
 				for (vector<RSMeshObject*>::iterator iter = m_MeshObjects.begin(); iter != m_MeshObjects.end(); iter++)
 				{
@@ -461,7 +461,27 @@ namespace EngineManagedWrapper
 
 					if (local_ray.TestAabbIntersection((*iter)->GetAabb()))
 					{
+						rayPickingList.push_back(*iter);
+					}
+				}
+
+				if (!rayPickingList.size())
+				{
+					m_SelectedObject = nullptr;
+				}
+				else
+				{
+					vector<RSMeshObject*>::iterator iter = find(rayPickingList.begin(), rayPickingList.end(), m_SelectedObject);
+					if (iter != rayPickingList.end())
+					{
+						iter++;
+						if (iter == rayPickingList.end())
+							iter = rayPickingList.begin();
 						m_SelectedObject = *iter;
+					}
+					else
+					{
+						m_SelectedObject = rayPickingList[0];
 					}
 				}
 			}
