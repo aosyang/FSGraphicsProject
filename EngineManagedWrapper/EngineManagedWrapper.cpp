@@ -116,12 +116,16 @@ namespace EngineManagedWrapper
 
 			m_Skybox.CreateSkybox(L"../Assets/powderpeak.dds");
 
+#if 1
+			RResourceManager::Instance().LoadAllResources();
+#else
 			RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.fbx");
 			RResourceManager::Instance().LoadFbxMesh("../Assets/SpeedballPlayer.fbx");
 			RResourceManager::Instance().LoadFbxMesh("../Assets/AO_Scene.fbx");
 			RResourceManager::Instance().LoadFbxMesh("../Assets/tachikoma.fbx");
 			RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx");
 			RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx");
+#endif
 
 			// Create texture sampler state
 			D3D11_SAMPLER_DESC samplerDesc;

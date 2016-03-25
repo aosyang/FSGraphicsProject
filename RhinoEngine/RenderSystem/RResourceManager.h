@@ -39,6 +39,8 @@ class RResourceManager : public RSingleton<RResourceManager>
 public:
 	void Initialize();
 	void Destroy();
+
+	void LoadAllResources();
 	void UnloadAllResources();
 	void UnloadSRVWrappers();
 

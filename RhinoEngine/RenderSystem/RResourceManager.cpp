@@ -79,6 +79,25 @@ void RResourceManager::Destroy()
 	UnloadAllResources();
 }
 
+void RResourceManager::LoadAllResources()
+{
+	WIN32_FIND_DATAA FindFileData;
+	HANDLE hFind;
+
+	string resFindingPath = GetAssetsBasePath() + "*.fbx";
+	hFind = FindFirstFileA(resFindingPath.data(), &FindFileData);
+
+	do
+	{
+		if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+		{
+			string resName = GetAssetsBasePath() + FindFileData.cFileName;
+			LoadFbxMesh(resName.data());
+		}
+
+	} while (FindNextFileA(hFind, &FindFileData) != 0);
+}
+
 void RResourceManager::UnloadAllResources()
 {
 	for (UINT32 i = 0; i < m_MeshResources.size(); i++)
