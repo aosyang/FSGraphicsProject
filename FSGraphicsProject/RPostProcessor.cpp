@@ -6,7 +6,6 @@
 
 #include "RPostProcessor.h"
 
-#include "PostProcessor_VS.csh"
 #include "PostProcessor_GammaCorrection.csh"
 #include "PostProcessor_ColorEdgeDetection.csh"
 
@@ -26,17 +25,12 @@ RPostProcessor::RPostProcessor()
 void RPostProcessor::Initialize()
 {
 	// Create vertex shader for post processing
-	RRenderer.D3DDevice()->CreateVertexShader(PostProcessor_VS, sizeof(PostProcessor_VS), 0, &m_PPVertexShader);
+	m_PPVertexShader = RShaderManager::Instance().GetShaderResource("PostProcessor")->VertexShader;
 	RRenderer.D3DDevice()->CreatePixelShader(PostProcessor_GammaCorrection, sizeof(PostProcessor_GammaCorrection), 0, &m_PPPixelShader[PPE_GammaCorrection]);
 	RRenderer.D3DDevice()->CreatePixelShader(PostProcessor_ColorEdgeDetection, sizeof(PostProcessor_ColorEdgeDetection), 0, &m_PPPixelShader[PPE_ColorEdgeDetection]);
 
-	// Create vertex declaration for screen quad
-	D3D11_INPUT_ELEMENT_DESC vsDesc[] = 
-	{
-		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-	RRenderer.D3DDevice()->CreateInputLayout(vsDesc, 1, PostProcessor_VS, sizeof(PostProcessor_VS), &m_InputLayout);
+	// Find vertex declaration for screen quad
+	m_InputLayout = RRenderer.GetInputLayout(RVertex::SKYBOX_VERTEX::GetTypeName());
 
 	// Create vertex buffer for screen quad
 
@@ -63,12 +57,10 @@ void RPostProcessor::Release()
 	SAFE_RELEASE(m_RTBuffer);
 	SAFE_RELEASE(m_RTView);
 	SAFE_RELEASE(m_RTSRV);
-	SAFE_RELEASE(m_InputLayout);
 	for (int i = 0; i < PPE_COUNT; i++)
 	{
 		SAFE_RELEASE(m_PPPixelShader[i]);
 	}
-	SAFE_RELEASE(m_PPVertexShader);
 }
 
 void RPostProcessor::RecreateLostResources()

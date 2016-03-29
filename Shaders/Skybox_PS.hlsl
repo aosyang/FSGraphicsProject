@@ -17,5 +17,5 @@ struct OUTPUT_VERTEX
 
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 {
-	return SkyTexture.Sample(Sampler, normalize(Input.PosL));
+	return MakeLinearColorFromGammaSpace(SkyTexture.Sample(Sampler, normalize(Input.PosL)));
 }

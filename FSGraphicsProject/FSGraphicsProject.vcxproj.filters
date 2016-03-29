@@ -32,50 +32,27 @@
     <ClInclude Include="FSGraphicsProjectApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SharedDefines.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ConstBufferVS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ConstBufferPS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RShadowMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RPostProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Color_VS.hlsl" />
-    <FxCompile Include="Color_PS.hlsl" />
-    <FxCompile Include="Lighting_VS.hlsl" />
-    <FxCompile Include="Lighting_PS.hlsl" />
-    <FxCompile Include="Skybox_PS.hlsl" />
-    <FxCompile Include="Skybox_VS.hlsl" />
-    <FxCompile Include="BumpLighting_PS.hlsl" />
-    <FxCompile Include="BumpLighting_VS.hlsl" />
-    <FxCompile Include="InstancedLighting_VS.hlsl" />
-    <FxCompile Include="InstancedLighting_PS.hlsl" />
-    <FxCompile Include="Depth_PS.hlsl" />
-    <FxCompile Include="Depth_VS.hlsl" />
-    <FxCompile Include="InstancedDepth_VS.hlsl" />
-    <FxCompile Include="InstancedDepth_PS.hlsl" />
-    <FxCompile Include="Particle_VS.hlsl" />
-    <FxCompile Include="Particle_PS.hlsl" />
-    <FxCompile Include="Particle_GS.hlsl" />
-    <FxCompile Include="Refraction_VS.hlsl" />
-    <FxCompile Include="Refraction_PS.hlsl" />
-    <FxCompile Include="AmbientOcclusion_PS.hlsl" />
-    <FxCompile Include="AmbientOcclusion_VS.hlsl" />
-    <FxCompile Include="PostProcessor_VS.hlsl" />
-    <FxCompile Include="PostProcessor_GammaCorrection.hlsl" />
-    <FxCompile Include="PostProcessor_ColorEdgeDetection.hlsl" />
+    <ClInclude Include="..\Shaders\ConstBufferPS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shaders\ConstBufferVS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shaders\SharedDefines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="FSGraphicsProject.licenseheader" />
-    <None Include="LightShaderCommon.hlsli" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="PostProcessor_GammaCorrection.hlsl" />
+    <FxCompile Include="PostProcessor_ColorEdgeDetection.hlsl" />
   </ItemGroup>
 </Project>

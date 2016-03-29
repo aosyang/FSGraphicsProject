@@ -11,8 +11,8 @@
 #include "RShadowMap.h"
 #include "RPostProcessor.h"
 
-#include "ConstBufferPS.h"
-#include "ConstBufferVS.h"
+#include "../Shaders/ConstBufferPS.h"
+#include "../Shaders/ConstBufferVS.h"
 
 #define PARTICLE_COUNT 200
 

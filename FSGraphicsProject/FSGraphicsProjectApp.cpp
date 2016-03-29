@@ -6,28 +6,6 @@
 
 #include "FSGraphicsProjectApp.h"
 
-#include "Color_PS.csh"
-#include "Color_VS.csh"
-#include "Lighting_PS.csh"
-#include "Lighting_VS.csh"
-#include "Skybox_PS.csh"
-#include "Skybox_VS.csh"
-#include "BumpLighting_PS.csh"
-#include "BumpLighting_VS.csh"
-#include "InstancedLighting_PS.csh"
-#include "InstancedLighting_VS.csh"
-#include "Depth_PS.csh"
-#include "Depth_VS.csh"
-#include "InstancedDepth_PS.csh"
-#include "InstancedDepth_VS.csh"
-#include "Particle_PS.csh"
-#include "Particle_VS.csh"
-#include "Particle_GS.csh"
-#include "Refraction_PS.csh"
-#include "Refraction_VS.csh"
-#include "AmbientOcclusion_PS.csh"
-#include "AmbientOcclusion_VS.csh"
-
 
 struct ParticleDepthComparer
 {
@@ -147,7 +125,7 @@ bool FSGraphicsProjectApp::Initialize()
 	CreateSceneRenderTargetView();
 
 	// Initialize shaders
-	RShaderManager::Instance().LoadShaders(".");
+	RShaderManager::Instance().LoadShaders("../Shaders");
 	
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 	m_LightingShader = RShaderManager::Instance().GetShaderResource("Lighting");

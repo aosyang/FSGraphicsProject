@@ -4,7 +4,7 @@
 // 
 //=============================================================================
 
-#include "ConstBufferPS.h"
+#include "../Shaders/ConstBufferPS.h"
 
 Texture2D ScreenTexture : register(t0);
 
