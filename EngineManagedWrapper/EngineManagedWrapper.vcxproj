@@ -80,12 +80,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ConstBufferPS.h" />
-    <ClInclude Include="ConstBufferVS.h" />
+    <ClInclude Include="..\Shaders\ConstBufferPS.h" />
+    <ClInclude Include="..\Shaders\ConstBufferVS.h" />
+    <ClInclude Include="..\Shaders\SharedDefines.h" />
     <ClInclude Include="EditorAxis.h" />
     <ClInclude Include="EngineManagedWrapper.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="SharedDefines.h" />
     <ClInclude Include="Stdafx.h" />
   </ItemGroup>
   <ItemGroup>

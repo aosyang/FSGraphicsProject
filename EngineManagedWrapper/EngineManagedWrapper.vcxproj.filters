@@ -24,16 +24,16 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ConstBufferPS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ConstBufferVS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SharedDefines.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="EditorAxis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shaders\ConstBufferPS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shaders\ConstBufferVS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shaders\SharedDefines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
