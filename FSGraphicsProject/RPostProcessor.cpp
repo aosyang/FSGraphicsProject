@@ -11,7 +11,7 @@
 
 struct PP_QUAD
 {
-	RVec4 pos;
+	RVec3 pos;
 };
 
 RPostProcessor::RPostProcessor()
@@ -36,13 +36,13 @@ void RPostProcessor::Initialize()
 
 	PP_QUAD quad[] =
 	{
-		RVec4(-1.0f, -1.0f, 1.0f),
-		RVec4(-1.0f,  1.0f, 1.0f),
-		RVec4( 1.0f,  1.0f, 1.0f),
+		RVec3(-1.0f, -1.0f, 1.0f),
+		RVec3(-1.0f,  1.0f, 1.0f),
+		RVec3( 1.0f,  1.0f, 1.0f),
 
-		RVec4(-1.0f, -1.0f, 1.0f),
-		RVec4( 1.0f,  1.0f, 1.0f),
-		RVec4( 1.0f, -1.0f, 1.0f),
+		RVec3(-1.0f, -1.0f, 1.0f),
+		RVec3( 1.0f,  1.0f, 1.0f),
+		RVec3( 1.0f, -1.0f, 1.0f),
 	};
 	m_ScreenQuad.CreateVertexBuffer(quad, sizeof(PP_QUAD), 6);
 

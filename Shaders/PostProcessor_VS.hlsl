@@ -6,7 +6,7 @@
 
 struct INPUT_VERTEX
 {
-	float4 PosL		: POSITION;
+	float3 PosL		: POSITION;
 };
 
 struct OUTPUT_VERTEX
