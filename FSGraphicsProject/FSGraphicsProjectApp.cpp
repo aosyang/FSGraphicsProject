@@ -28,13 +28,6 @@
 #include "AmbientOcclusion_PS.csh"
 #include "AmbientOcclusion_VS.csh"
 
-struct BUMP_MESH_VERTEX
-{
-	RVec3 pos;
-	RVec2 uv;
-	RVec3 normal;
-	RVec3 tangent;
-};
 
 struct ParticleDepthComparer
 {
@@ -46,7 +39,7 @@ struct ParticleDepthComparer
 		CamDir = camDir;
 	}
 
-	bool operator()(const PARTICLE_VERTEX &a, const PARTICLE_VERTEX &b)
+	bool operator()(const RVertex::PARTICLE_VERTEX &a, const RVertex::PARTICLE_VERTEX &b)
 	{
 		//return dot(a.pos - CamPos, CamDir) > dot(b.pos - CamPos, CamDir);
 		return sqrDist(a.pos, CamPos) > sqrDist(b.pos, CamPos);
@@ -124,7 +117,6 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_BlendState[1]);
 	SAFE_RELEASE(m_BlendState[2]);
 
-	SAFE_RELEASE(m_ParticleIL);
 	m_ParticleBuffer.Release();
 
 	SAFE_RELEASE(m_SamplerComparisonState);
@@ -137,8 +129,6 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_cbScene);
 	SAFE_RELEASE(m_cbInstance[0]);
 	SAFE_RELEASE(m_cbInstance[1]);
-
-	SAFE_RELEASE(m_BumpLightingIL);
 
 	m_BumpCubeMesh.Release();
 
@@ -157,16 +147,7 @@ bool FSGraphicsProjectApp::Initialize()
 	CreateSceneRenderTargetView();
 
 	// Initialize shaders
-	RShaderManager::Instance().AddShader("Color", Color_PS, sizeof(Color_PS), Color_VS, sizeof(Color_VS));
-	RShaderManager::Instance().AddShader("Lighting", Lighting_PS, sizeof(Lighting_PS), Lighting_VS, sizeof(Lighting_VS));
-	RShaderManager::Instance().AddShader("Skybox", Skybox_PS, sizeof(Skybox_PS), Skybox_VS, sizeof(Skybox_VS));
-	RShaderManager::Instance().AddShader("BumpLighting", BumpLighting_PS, sizeof(BumpLighting_PS), BumpLighting_VS, sizeof(BumpLighting_VS));
-	RShaderManager::Instance().AddShader("InstancedLighting", InstancedLighting_PS, sizeof(InstancedLighting_PS), InstancedLighting_VS, sizeof(InstancedLighting_VS));
-	RShaderManager::Instance().AddShader("Depth", Depth_PS, sizeof(Depth_PS), Depth_VS, sizeof(Depth_VS));
-	RShaderManager::Instance().AddShader("InstancedDepth", InstancedDepth_PS, sizeof(InstancedDepth_PS), InstancedDepth_VS, sizeof(InstancedDepth_VS));
-	RShaderManager::Instance().AddShader("Particle", Particle_PS, sizeof(Particle_PS), Particle_VS, sizeof(Particle_VS), Particle_GS, sizeof(Particle_GS));
-	RShaderManager::Instance().AddShader("Refraction", Refraction_PS, sizeof(Refraction_PS), Refraction_VS, sizeof(Refraction_VS));
-	RShaderManager::Instance().AddShader("AmbientOcclusion", AmbientOcclusion_PS, sizeof(AmbientOcclusion_PS), AmbientOcclusion_VS, sizeof(AmbientOcclusion_VS));
+	RShaderManager::Instance().LoadShaders(".");
 	
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 	m_LightingShader = RShaderManager::Instance().GetShaderResource("Lighting");
@@ -181,7 +162,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_PostProcessor.Initialize();
 
 	// Create buffer for star mesh
-	PRIMITIVE_VERTEX starVertex[12];
+	RVertex::PRIMITIVE_VERTEX starVertex[12];
 
 	for (int i = 0; i < 10; i++)
 	{
@@ -197,13 +178,13 @@ bool FSGraphicsProjectApp::Initialize()
 		0, 1, 10, 1, 2, 10, 2, 3, 10, 3, 4, 10, 4, 5, 10, 5, 6, 10, 6, 7, 10, 7, 8, 10, 8, 9, 10, 9, 0, 10,
 		1, 0, 11, 2, 1, 11, 3, 2, 11, 4, 3, 11, 5, 4, 11, 6, 5, 11, 7, 6, 11, 8, 7, 11, 9, 8, 11, 0, 9, 11, };
 
-	m_StarMesh.CreateVertexBuffer(starVertex, sizeof(PRIMITIVE_VERTEX), 12);
+	m_StarMesh.CreateVertexBuffer(starVertex, sizeof(RVertex::PRIMITIVE_VERTEX), 12);
 	m_StarMesh.CreateIndexBuffer(starIndex, sizeof(UINT32), sizeof(starIndex) / sizeof(UINT32));
 
-	m_ColorPrimitiveIL = RRenderer.GetInputLayout(PRIMITIVE_VERTEX::GetTypeName());
+	m_ColorPrimitiveIL = RRenderer.GetInputLayout(RVertex::PRIMITIVE_VERTEX::GetTypeName());
 
 	// Create buffer for bump cube
-	BUMP_MESH_VERTEX boxVertex[] = 
+	RVertex::MESH_VERTEX boxVertex[] = 
 	{
 		{ RVec3(-1.0f, -1.0f, -1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
 		{ RVec3(-1.0f,  1.0f, -1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
@@ -236,7 +217,7 @@ bool FSGraphicsProjectApp::Initialize()
 		{ RVec3( 1.0f, -1.0f,  1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
 	};
 
-	for (UINT32 i = 0; i < sizeof(boxVertex) / sizeof(BUMP_MESH_VERTEX); i++)
+	for (UINT32 i = 0; i < sizeof(boxVertex) / sizeof(RVertex::MESH_VERTEX); i++)
 	{
 		boxVertex[i].pos *= 100.0f;
 	}
@@ -247,18 +228,10 @@ bool FSGraphicsProjectApp::Initialize()
 		12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23,
 	};
 
-	m_BumpCubeMesh.CreateVertexBuffer(boxVertex, sizeof(BUMP_MESH_VERTEX), 24);
+	m_BumpCubeMesh.CreateVertexBuffer(boxVertex, sizeof(RVertex::MESH_VERTEX), 24);
 	m_BumpCubeMesh.CreateIndexBuffer(boxIndex, sizeof(UINT32), 36);
 
-	D3D11_INPUT_ELEMENT_DESC bumpVertDesc[] =
-	{
-		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TANGENT",	0, DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-	RRenderer.D3DDevice()->CreateInputLayout(bumpVertDesc, 4, m_BumpLightingShader->VS_Bytecode, m_BumpLightingShader->VS_BytecodeSize, &m_BumpLightingIL);
+	m_BumpLightingIL = RRenderer.GetInputLayout(RVertex::MESH_VERTEX::GetTypeName());
 
 	D3D11_BUFFER_DESC cbPerObjectDesc;
 	ZeroMemory(&cbPerObjectDesc, sizeof(cbPerObjectDesc));
@@ -431,17 +404,9 @@ bool FSGraphicsProjectApp::Initialize()
 
 	m_ShadowMap.Initialize(1024, 1024);
 
-	m_ParticleBuffer.CreateVertexBuffer(nullptr, sizeof(PARTICLE_VERTEX), PARTICLE_COUNT, true);
+	m_ParticleBuffer.CreateVertexBuffer(nullptr, sizeof(RVertex::PARTICLE_VERTEX), PARTICLE_COUNT, true);
 
-	D3D11_INPUT_ELEMENT_DESC particleVertDesc[] =
-	{
-		{ "POSITION",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR",		0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD",	0, DXGI_FORMAT_R32_FLOAT,			0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD",	1, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-	RRenderer.D3DDevice()->CreateInputLayout(particleVertDesc, 4, m_ParticleShader->VS_Bytecode, m_ParticleShader->VS_BytecodeSize, &m_ParticleIL);
+	m_ParticleIL = RRenderer.GetInputLayout(RVertex::PARTICLE_VERTEX::GetTypeName());
 
 	for (int i = 0; i < PARTICLE_COUNT; i++)
 	{
@@ -680,7 +645,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	// Update particle vertices
 	ParticleDepthComparer cmp(m_CameraMatrix.GetRow(3), m_CameraMatrix.GetRow(2));
 	std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
-	m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(PARTICLE_VERTEX), PARTICLE_COUNT);
+	m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(RVertex::PARTICLE_VERTEX), PARTICLE_COUNT);
 
 	ObjectDepthComparer objCmp(m_CameraMatrix.GetRow(3));
 	std::sort(cbInstance[1].instancedWorldMatrix, cbInstance[1].instancedWorldMatrix + 125, objCmp);
@@ -765,7 +730,7 @@ void FSGraphicsProjectApp::RenderScene()
 
 			ParticleDepthComparer cmp(m_SunVec, -m_SunVec);
 			std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
-			m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(PARTICLE_VERTEX), PARTICLE_COUNT);
+			m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(RVertex::PARTICLE_VERTEX), PARTICLE_COUNT);
 	
 			RRenderer.SetRenderTarget();
 		}

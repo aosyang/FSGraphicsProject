@@ -158,5 +158,8 @@
     <FxCompile Include="HLSL\RSkyboxVertexSignature.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="HLSL\RParticleVertexSignature.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

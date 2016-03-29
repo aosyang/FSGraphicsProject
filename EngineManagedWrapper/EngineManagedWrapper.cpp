@@ -48,7 +48,8 @@ namespace EngineManagedWrapper
 		float						m_CamFov;
 
 		RShader*					m_ColorShader;
-		vector<PRIMITIVE_VERTEX>	m_PrimitiveList;
+		vector<RVertex::PRIMITIVE_VERTEX>
+									m_PrimitiveList;
 		RMeshElement				m_PrimitiveMeshBuffer;
 		ID3D11InputLayout*			m_PrimitiveInputLayout;
 
@@ -103,15 +104,13 @@ namespace EngineManagedWrapper
 
 			RRenderer.D3DDevice()->CreateBuffer(&cbSceneDesc, NULL, &m_cbScene);
 
-			RShaderManager::Instance().AddShader("Skybox", Skybox_PS, sizeof(Skybox_PS), Skybox_VS, sizeof(Skybox_VS));
-			RShaderManager::Instance().AddShader("Default", Default_PS, sizeof(Default_PS), Default_VS, sizeof(Default_VS));
-			RShaderManager::Instance().AddShader("Color", Color_PS, sizeof(Color_PS), Color_VS, sizeof(Color_VS));
+			RShaderManager::Instance().LoadShaders("../EngineManagedWrapper");
 
 			m_DefaultShader = RShaderManager::Instance().GetShaderResource("Default");
 			m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 
-			m_PrimitiveInputLayout = RRenderer.GetInputLayout(PRIMITIVE_VERTEX::GetTypeName());
-			m_PrimitiveMeshBuffer.CreateVertexBuffer(nullptr, sizeof(PRIMITIVE_VERTEX), 65536, true);
+			m_PrimitiveInputLayout = RRenderer.GetInputLayout(RVertex::PRIMITIVE_VERTEX::GetTypeName());
+			m_PrimitiveMeshBuffer.CreateVertexBuffer(nullptr, sizeof(RVertex::PRIMITIVE_VERTEX), 65536, true);
 
 #if 1
 			RResourceManager::Instance().LoadAllResources();
@@ -286,7 +285,7 @@ namespace EngineManagedWrapper
 
 				for (int i = 0; i < 24; i++)
 				{
-					PRIMITIVE_VERTEX v =
+					RVertex::PRIMITIVE_VERTEX v =
 					{
 						RVec4(cornerPoints[wiredCubeIdx[i]]),
 						RColor(0.0f, 1.0f, 0.0f),
@@ -308,7 +307,7 @@ namespace EngineManagedWrapper
 			memcpy(subres.pData, &cbScene, sizeof(SHADER_SCENE_BUFFER));
 			RRenderer.D3DImmediateContext()->Unmap(m_cbScene, 0);
 
-			m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(m_PrimitiveList.data(), sizeof(PRIMITIVE_VERTEX), m_PrimitiveList.size());
+			m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(m_PrimitiveList.data(), sizeof(RVertex::PRIMITIVE_VERTEX), m_PrimitiveList.size());
 
 			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, &m_cbPerObject);
 			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);

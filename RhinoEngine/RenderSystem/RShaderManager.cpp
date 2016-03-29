@@ -25,6 +25,103 @@ RShaderManager::~RShaderManager()
 
 }
 
+void RShaderManager::LoadShaders(const char* path)
+{
+	// Set working directory to shader folder for compiling
+	char pWorkingPath[1024];
+	GetCurrentDirectoryA(1024, pWorkingPath);
+	SetCurrentDirectoryA(path);
+
+	WIN32_FIND_DATAA FindFileData;
+	HANDLE hFind;
+
+	// Load shader
+	string resFindingPath = "*.hlsl";
+	hFind = FindFirstFileA(resFindingPath.data(), &FindFileData);
+
+	if (hFind != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+			{
+				string filename(FindFileData.cFileName);
+				string fileFullPath = filename;
+				ID3DBlob* pShaderCode = nullptr;
+				ID3DBlob* pErrorMsg = nullptr;
+
+				// Get actual shader name
+				string shaderName = filename.substr(0, filename.length() - 8);
+
+				if (m_Shaders.find(shaderName) == m_Shaders.end())
+				{
+					m_Shaders[shaderName] = RShader();
+				}
+
+				// Read shader text from .hlsl
+				ifstream fin;
+				fin.open(fileFullPath, ios_base::binary);
+
+				if (!fin.is_open())
+					continue;
+
+				fin.seekg(0, ios_base::end);
+				int fileSize = (int)fin.tellg();
+				char* pBuffer = new char[fileSize];
+
+				fin.seekg(0);
+				fin.read(pBuffer, fileSize);
+
+				// Detect shader type by file name suffix
+				if (filename.find("_VS.hlsl") != string::npos)
+				{
+					if (SUCCEEDED(D3DCompile(pBuffer, fileSize, NULL, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", 0, 0, &pShaderCode, &pErrorMsg)))
+					{
+						RRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader);
+					}
+					else
+					{
+						OutputDebugStringA((char*)pErrorMsg->GetBufferPointer());
+						OutputDebugStringA("\n");
+					}
+				}
+				else if (filename.find("_PS.hlsl") != string::npos)
+				{
+					if (SUCCEEDED(D3DCompile(pBuffer, fileSize, NULL, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_4_0", 0, 0, &pShaderCode, &pErrorMsg)))
+					{
+						RRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].PixelShader);
+					}
+					else
+					{
+						OutputDebugStringA((char*)pErrorMsg->GetBufferPointer());
+						OutputDebugStringA("\n");
+					}
+				}
+				else if (filename.find("_GS.hlsl") != string::npos)
+				{
+					if (SUCCEEDED(D3DCompile(pBuffer, fileSize, NULL, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "gs_4_0", 0, 0, &pShaderCode, &pErrorMsg)))
+					{
+						RRenderer.D3DDevice()->CreateGeometryShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].GeometryShader);
+					}
+					else
+					{
+						OutputDebugStringA((char*)pErrorMsg->GetBufferPointer());
+						OutputDebugStringA("\n");
+					}
+				}
+
+				delete[] pBuffer;
+				SAFE_RELEASE(pShaderCode);
+				SAFE_RELEASE(pErrorMsg);
+			}
+
+		} while (FindNextFileA(hFind, &FindFileData) != 0);
+	}
+
+	// Restore working directory
+	SetCurrentDirectoryA(pWorkingPath);
+}
+
 void RShaderManager::UnloadAllShaders()
 {
 	for (map<string, RShader>::iterator iter = m_Shaders.begin();

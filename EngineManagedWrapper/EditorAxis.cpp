@@ -16,7 +16,7 @@ void EditorAxis::Create()
 {
 	for (int n = 0; n < 3; n++)
 	{
-		PRIMITIVE_VERTEX axisVerts[] =
+		RVertex::PRIMITIVE_VERTEX axisVerts[] =
 		{
 			{ RVec4(-0.5f, -0.5f, -0.5f, 1.0f), RColor(1.0f, 0.0f, 0.0f) },
 			{ RVec4(-0.5f,  0.5f, -0.5f, 1.0f), RColor(1.0f, 0.0f, 0.0f) },
@@ -67,7 +67,7 @@ void EditorAxis::Create()
 			0, 7, 4, 0, 3, 7,
 		};
 
-		m_AxisMeshBuffer[n].CreateVertexBuffer(axisVerts, sizeof(PRIMITIVE_VERTEX), sizeof(axisVerts) / sizeof(PRIMITIVE_VERTEX));
+		m_AxisMeshBuffer[n].CreateVertexBuffer(axisVerts, sizeof(RVertex::PRIMITIVE_VERTEX), sizeof(axisVerts) / sizeof(RVertex::PRIMITIVE_VERTEX));
 		m_AxisMeshBuffer[n].CreateIndexBuffer(axisIndices, sizeof(UINT), sizeof(axisIndices) / sizeof(UINT));
 
 		for (int i = 0; i < 8; i++)

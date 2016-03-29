@@ -27,6 +27,7 @@ class RShaderManager : public RSingleton<RShaderManager>
 	friend class RSingleton<RShaderManager>;
 public:
 
+	void LoadShaders(const char* path);
 	void UnloadAllShaders();
 
 	bool AddShader(const char* shaderName,

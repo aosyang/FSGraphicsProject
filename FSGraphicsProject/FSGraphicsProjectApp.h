@@ -23,14 +23,6 @@ enum RenderPass
 	NormalPass,
 };
 
-struct PARTICLE_VERTEX
-{
-	RVec4 pos;
-	RVec4 color;
-	float rot;
-	RVec4 uvScaleOffset;
-};
-
 class FSGraphicsProjectApp : public IApp
 {
 public:
@@ -108,7 +100,7 @@ private:
 	RMeshElement				m_ParticleBuffer;
 	RShader*					m_ParticleShader;
 	ID3D11InputLayout*			m_ParticleIL;
-	PARTICLE_VERTEX				m_ParticleVert[PARTICLE_COUNT];
+	RVertex::PARTICLE_VERTEX	m_ParticleVert[PARTICLE_COUNT];
 	RTexture*					m_ParticleDiffuseTexture;
 	RTexture*					m_ParticleNormalTexture;
 	ID3D11BlendState*			m_BlendState[3];

@@ -25,7 +25,7 @@ void RSkybox::CreateSkybox(RTexture* skyTexture)
 	m_SkyboxTexture = skyTexture;
 
 	// Create skybox buffer
-	SKYBOX_VERTEX skyboxVertex[] = 
+	RVertex::SKYBOX_VERTEX skyboxVertex[] = 
 	{
 		{ RVec3(-0.5f, -0.5f, -0.5f) },
 		{ RVec3(-0.5f,  0.5f, -0.5f) },
@@ -48,7 +48,7 @@ void RSkybox::CreateSkybox(RTexture* skyTexture)
 		0, 4, 7, 0, 7, 3,
 	};
 
-	m_SkyboxMesh.CreateVertexBuffer(skyboxVertex, sizeof(SKYBOX_VERTEX), sizeof(skyboxVertex) / sizeof(SKYBOX_VERTEX));
+	m_SkyboxMesh.CreateVertexBuffer(skyboxVertex, sizeof(RVertex::SKYBOX_VERTEX), sizeof(skyboxVertex) / sizeof(RVertex::SKYBOX_VERTEX));
 	m_SkyboxMesh.CreateIndexBuffer(skyboxIndex, sizeof(UINT32), sizeof(skyboxIndex) / sizeof(UINT32));
 
 	m_SkyboxShader = RShaderManager::Instance().GetShaderResource("Skybox");
@@ -58,7 +58,7 @@ void RSkybox::CreateSkybox(RTexture* skyTexture)
 		OutputDebugStringA("*** WARNING: Unable to find shader \'Skybox\', skybox will not be rendered properly.\n");
 	}
 
-	m_SkyboxIL = RRenderer.GetInputLayout(SKYBOX_VERTEX::GetTypeName());
+	m_SkyboxIL = RRenderer.GetInputLayout(RVertex::SKYBOX_VERTEX::GetTypeName());
 }
 
 void RSkybox::Release()

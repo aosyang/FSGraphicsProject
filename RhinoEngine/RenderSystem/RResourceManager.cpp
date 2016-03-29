@@ -249,9 +249,9 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		OutputDebugStringA(msg_buf);
 		
 		FbxVector4* controlPointArray;
-		vector<MESH_VERTEX> vertData;
+		vector<RVertex::MESH_VERTEX> vertData;
 		vector<int> indexData;
-		vector<MESH_VERTEX> flatVertData;
+		vector<RVertex::MESH_VERTEX> flatVertData;
 
 		controlPointArray = mesh->GetControlPoints();
 		int controlPointCount = mesh->GetControlPointsCount();
@@ -412,7 +412,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 				triangle[idxVert] = idxPoly * 3 + idxVert;
 				int iv = mesh->GetPolygonVertex(idxPoly, idxVert);
 
-				MESH_VERTEX vertex = vertData[iv];
+				RVertex::MESH_VERTEX vertex = vertData[iv];
 				
 				if (hasPerPolygonVertexNormal)
 				{
@@ -560,14 +560,14 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		// Optimize mesh
 		sprintf_s(msg_buf, "Optimizing mesh...\n");
 		OutputDebugStringA(msg_buf);
-		map<MESH_VERTEX, int> meshVertIndexTable;
-		vector<MESH_VERTEX> optimizedVertData;
+		map<RVertex::MESH_VERTEX, int> meshVertIndexTable;
+		vector<RVertex::MESH_VERTEX> optimizedVertData;
 		vector<int> optimizedIndexData;
 		int index = 0;
 		for (UINT i = 0; i < indexData.size(); i++)
 		{
-			MESH_VERTEX& v = flatVertData[indexData[i]];
-			map<MESH_VERTEX, int>::iterator iterResult = meshVertIndexTable.find(v);
+			RVertex::MESH_VERTEX& v = flatVertData[indexData[i]];
+			map<RVertex::MESH_VERTEX, int>::iterator iterResult = meshVertIndexTable.find(v);
 			if (iterResult == meshVertIndexTable.end())
 			{
 				meshVertIndexTable[v] = index;
@@ -582,7 +582,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		}
 
 		RMeshElement meshElem;
-		meshElem.CreateVertexBuffer(optimizedVertData.data(), sizeof(MESH_VERTEX), optimizedVertData.size());
+		meshElem.CreateVertexBuffer(optimizedVertData.data(), sizeof(RVertex::MESH_VERTEX), optimizedVertData.size());
 		meshElem.CreateIndexBuffer(optimizedIndexData.data(), sizeof(UINT32), optimizedIndexData.size());
 		meshElements.push_back(meshElem);
 
@@ -594,7 +594,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	lFbxScene->Destroy();
 	lFbxSdkManager->Destroy();
 
-	static_cast<RMesh*>(task->Resource)->SetInputLayout(RRenderer.GetInputLayout(MESH_VERTEX::GetTypeName()));
+	static_cast<RMesh*>(task->Resource)->SetInputLayout(RRenderer.GetInputLayout(RVertex::MESH_VERTEX::GetTypeName()));
 	static_cast<RMesh*>(task->Resource)->SetMeshElements(meshElements.data(), meshElements.size());
 	static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), materials.size());
 	static_cast<RMesh*>(task->Resource)->SetAabb(aabb);
