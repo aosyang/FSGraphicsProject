@@ -65,14 +65,6 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Skybox_PS.hlsl" />
-    <FxCompile Include="Skybox_VS.hlsl" />
-    <FxCompile Include="Default_PS.hlsl" />
-    <FxCompile Include="Default_VS.hlsl" />
-    <FxCompile Include="Color_PS.hlsl" />
-    <FxCompile Include="Color_VS.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="EngineManagedWrapper.licenseheader" />
   </ItemGroup>
 </Project>

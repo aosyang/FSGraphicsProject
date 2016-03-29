@@ -5,15 +5,8 @@
 
 #include "EngineManagedWrapper.h"
 
-#include "Skybox_PS.csh"
-#include "Skybox_VS.csh"
-#include "Default_PS.csh"
-#include "Default_VS.csh"
-#include "Color_PS.csh"
-#include "Color_VS.csh"
-
-#include "ConstBufferPS.h"
-#include "ConstBufferVS.h"
+#include "../Shaders/ConstBufferPS.h"
+#include "../Shaders/ConstBufferVS.h"
 
 #include "EditorAxis.h"
 
@@ -104,7 +97,7 @@ namespace EngineManagedWrapper
 
 			RRenderer.D3DDevice()->CreateBuffer(&cbSceneDesc, NULL, &m_cbScene);
 
-			RShaderManager::Instance().LoadShaders("../EngineManagedWrapper");
+			RShaderManager::Instance().LoadShaders("../Shaders");
 
 			m_DefaultShader = RShaderManager::Instance().GetShaderResource("Default");
 			m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
