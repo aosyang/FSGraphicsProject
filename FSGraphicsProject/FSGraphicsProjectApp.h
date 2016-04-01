@@ -8,7 +8,6 @@
 #define _FSGRAPHICSPROJECTAPP_H
 
 #include "Rhino.h"
-#include "RShadowMap.h"
 #include "RPostProcessor.h"
 
 #include "../Shaders/ConstBufferPS.h"

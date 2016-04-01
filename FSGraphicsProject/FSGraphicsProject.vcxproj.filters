@@ -21,18 +21,12 @@
     <ClCompile Include="FSGraphicsProjectApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RShadowMap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RPostProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FSGraphicsProjectApp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RShadowMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RPostProcessor.h">

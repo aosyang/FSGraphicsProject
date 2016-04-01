@@ -171,7 +171,6 @@
     <ClCompile Include="FSGraphicsProjectApp.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RPostProcessor.cpp" />
-    <ClCompile Include="RShadowMap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Shaders\ConstBufferPS.h" />
@@ -179,7 +178,6 @@
     <ClInclude Include="..\Shaders\SharedDefines.h" />
     <ClInclude Include="FSGraphicsProjectApp.h" />
     <ClInclude Include="RPostProcessor.h" />
-    <ClInclude Include="RShadowMap.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FSGraphicsProject.licenseheader" />

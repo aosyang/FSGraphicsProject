@@ -3,8 +3,8 @@
 //
 // 
 //=============================================================================
-
-#include "Rhino.h"
+#ifndef _RSHADOWMAP_H
+#define _RSHADOWMAP_H
 
 class RShadowMap
 {
@@ -38,3 +38,5 @@ private:
 
 	int							m_Width, m_Height;
 };
+
+#endif

@@ -3,6 +3,8 @@
 //
 // 
 //=============================================================================
+#include "Rhino.h"
+
 #include "RShadowMap.h"
 
 RShadowMap::RShadowMap()

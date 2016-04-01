@@ -60,6 +60,7 @@ class RBaseResource;
 #include "RenderSystem/RShaderManager.h"
 #include "RenderSystem/RMesh.h"
 #include "RenderSystem/RTexture.h"
+#include "RenderSystem/RShadowMap.h"
 
 #include "Core/REngine.h"
 

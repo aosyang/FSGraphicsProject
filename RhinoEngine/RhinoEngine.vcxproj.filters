@@ -74,6 +74,9 @@
     <ClInclude Include="Scene\RSkybox.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="RenderSystem\RShadowMap.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -129,6 +132,9 @@
     </ClCompile>
     <ClCompile Include="Scene\RSkybox.cpp">
       <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem\RShadowMap.cpp">
+      <Filter>RenderSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
