@@ -594,6 +594,43 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	lFbxScene->Destroy();
 	lFbxSdkManager->Destroy();
 
+	// Load material from file
+	string mtlFilename = task->Filename.substr(0, task->Filename.length() - 3) + "rmtl";
+	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
+	if (doc->LoadFile(mtlFilename.c_str()) == tinyxml2::XML_SUCCESS)
+	{
+		materials.clear();
+
+		tinyxml2::XMLElement* root = doc->RootElement();
+		tinyxml2::XMLElement* elem = root->FirstChildElement("MeshElement");
+		while (elem)
+		{
+			const char* shaderName = elem->Attribute("Shader");
+			RMaterial material = { nullptr, 0 };
+			material.Shader = RShaderManager::Instance().GetShaderResource(shaderName);
+
+			tinyxml2::XMLElement* elem_tex = elem->FirstChildElement();
+			while (elem_tex)
+			{
+				const char* textureName = elem_tex->GetText();
+
+				RTexture* texture = RResourceManager::Instance().FindTexture(textureName);
+
+				if (!texture)
+				{
+					texture = RResourceManager::Instance().LoadDDSTexture(RResourceManager::GetResourcePath(textureName).data(), RLM_Immediate);
+				}
+
+				material.Textures[material.TextureNum++] = texture;
+				elem_tex = elem_tex->NextSiblingElement();
+			}
+
+			materials.push_back(material);
+			elem = elem->NextSiblingElement();
+		}
+	}
+	delete doc;
+
 	static_cast<RMesh*>(task->Resource)->SetInputLayout(RRenderer.GetInputLayout(RVertex::MESH_VERTEX::GetTypeName()));
 	static_cast<RMesh*>(task->Resource)->SetMeshElements(meshElements.data(), meshElements.size());
 	static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), materials.size());

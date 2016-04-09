@@ -80,6 +80,9 @@
     <ClInclude Include="RenderSystem\RShaderConstantBuffer.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="tinyxml2\tinyxml2.h">
+      <Filter>tinyxml2</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -139,6 +142,9 @@
     <ClCompile Include="RenderSystem\RShadowMap.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
+    <ClCompile Include="tinyxml2\tinyxml2.cpp">
+      <Filter>tinyxml2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="RenderSystem">
@@ -152,6 +158,9 @@
     </Filter>
     <Filter Include="HLSL">
       <UniqueIdentifier>{9b99e0c2-1d7d-45be-9967-cfc356feae03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tinyxml2">
+      <UniqueIdentifier>{d7042b42-536a-46b9-a83e-eb98c7265624}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -35,6 +35,8 @@ using namespace std;
 #include "RenderSystem/d3dUtil.h"
 #pragma comment(lib, "d3dcompiler.lib")
 
+#include "tinyxml2/tinyxml2.h"
+
 #include "Core/RVector.h"
 #include "Core/RMatrix.h"
 

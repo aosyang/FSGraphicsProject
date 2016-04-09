@@ -8,7 +8,7 @@
 #include "RSMeshObject.h"
 
 RSMeshObject::RSMeshObject()
-	: RSceneObject(), m_Mesh(nullptr), m_OverridingShader(nullptr)
+	: RSceneObject(), m_Mesh(nullptr), m_OverridingShader(nullptr), m_bNeedUpdateMaterial(true)
 {
 
 }
@@ -21,7 +21,11 @@ RSMeshObject::~RSMeshObject()
 void RSMeshObject::SetMesh(RMesh* mesh)
 {
 	m_Mesh = mesh;
-	m_Materials = mesh->GetMaterials();
+	if (mesh->IsResourceReady())
+	{
+		m_Materials = mesh->GetMaterials();
+		m_bNeedUpdateMaterial = false;
+	}
 }
 
 int RSMeshObject::GetSubmeshCount() const
@@ -39,11 +43,55 @@ void RSMeshObject::SetMaterial(RMaterial* materials, int materialNum)
 	{
 		m_Materials.push_back(materials[i]);
 	}
+
+	m_bNeedUpdateMaterial = false;
 }
 
 RMaterial RSMeshObject::GetMaterial(int index) const
 {
 	return m_Materials[index];
+}
+
+void RSMeshObject::SaveMaterialsToFile()
+{
+	if (!m_Mesh)
+		return;
+
+	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
+	tinyxml2::XMLElement* elem_mat = doc->NewElement("Material");
+	elem_mat->SetAttribute("Mesh", m_Mesh->GetPath().c_str());
+
+	for (unsigned int i = 0; i < m_Materials.size(); i++)
+	{
+		tinyxml2::XMLElement* elem_submesh = doc->NewElement("MeshElement");
+
+		RMaterial& material = m_Materials[i];
+		string shaderName = material.Shader->GetName();
+
+		elem_submesh->SetAttribute("Shader", shaderName.c_str());
+		for (int t = 0; t < material.TextureNum; t++)
+		{
+			string texturePath = "";
+
+			if (material.Textures[t])
+				texturePath = material.Textures[t]->GetPath();
+
+			tinyxml2::XMLElement* elem_texture = doc->NewElement("Texture");
+			elem_texture->SetAttribute("Slot", t);
+			elem_texture->SetText(texturePath.c_str());
+			elem_submesh->InsertEndChild(elem_texture);
+		}
+		elem_mat->InsertEndChild(elem_submesh);
+	}
+	doc->InsertEndChild(elem_mat);
+
+	string filepath = m_Mesh->GetPath();
+	filepath = filepath.substr(0, filepath.length() - 3);
+	filepath += "rmtl";
+
+	doc->SaveFile(filepath.c_str());
+
+	delete doc;
 }
 
 void RSMeshObject::SetOverridingShader(RShader* shader)
@@ -62,6 +110,12 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 {
 	if (!m_Mesh || !m_Mesh->IsResourceReady())
 		return;
+
+	if (m_bNeedUpdateMaterial)
+	{
+		m_Materials = m_Mesh->GetMaterials();
+		m_bNeedUpdateMaterial = false;
+	}
 
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_Mesh->GetInputLayout());
 
@@ -90,7 +144,8 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 			{
 				for (int t = 0; t < m_Materials[i].TextureNum; t++)
 				{
-					RRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, m_Materials[i].Textures[t]->GetPtrSRV());
+					RTexture* texture = m_Materials[i].Textures[t];
+					RRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, texture ? texture->GetPtrSRV() : nullptr);
 				}
 			}
 		}

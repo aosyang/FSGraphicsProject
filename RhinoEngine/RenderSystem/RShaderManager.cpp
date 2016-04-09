@@ -8,11 +8,23 @@
 
 #include "RShaderManager.h"
 
+bool RShader::operator==(const RShader& rhs) const
+{
+	return PixelShader == rhs.PixelShader &&
+		VertexShader == rhs.VertexShader &&
+		GeometryShader == rhs.GeometryShader;
+}
+
 void RShader::Bind()
 {
 	RRenderer.D3DImmediateContext()->PSSetShader(PixelShader, NULL, 0);
 	RRenderer.D3DImmediateContext()->VSSetShader(VertexShader, NULL, 0);
 	RRenderer.D3DImmediateContext()->GSSetShader(GeometryShader, NULL, 0);
+}
+
+string RShader::GetName() const
+{
+	return RShaderManager::Instance().GetShaderName(this);
 }
 
 RShaderManager::RShaderManager()
@@ -178,4 +190,18 @@ RShader* RShaderManager::GetShaderResource(const char* shaderName)
 	if (iter != m_Shaders.end())
 		return &iter->second;
 	return nullptr;
+}
+
+string RShaderManager::GetShaderName(const RShader* shader) const
+{
+	map<string, RShader>::const_iterator iter = m_Shaders.begin();
+	for (; iter != m_Shaders.end(); iter++)
+	{
+		if (iter->second == *shader)
+		{
+			return iter->first;
+		}
+	}
+
+	return "";
 }

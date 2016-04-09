@@ -46,6 +46,7 @@
     <ClInclude Include="Scene\RSceneObject.h" />
     <ClInclude Include="Scene\RSkybox.h" />
     <ClInclude Include="Scene\RSMeshObject.h" />
+    <ClInclude Include="tinyxml2\tinyxml2.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\MathHelper.cpp" />
@@ -67,6 +68,7 @@
     <ClCompile Include="Scene\RSceneObject.cpp" />
     <ClCompile Include="Scene\RSkybox.cpp" />
     <ClCompile Include="Scene\RSMeshObject.cpp" />
+    <ClCompile Include="tinyxml2\tinyxml2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="RhinoEngine.licenseheader" />

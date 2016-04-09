@@ -233,24 +233,6 @@ bool FSGraphicsProjectApp::Initialize()
 	m_TachikomaObj.SetMesh(m_MeshTachikoma);
 	m_TachikomaObj.SetPosition(RVec3(0.0f, 40.0f, 0.0f));
 
-	RTexture* meshAOTextureSRV[] =
-	{
-		RResourceManager::Instance().LoadDDSTexture("../Assets/lowBuildingsAO.dds"),
-		RResourceManager::Instance().LoadDDSTexture("../Assets/groundAO.dds"),
-		RResourceManager::Instance().LoadDDSTexture("../Assets/tallBuildingsAO.dds"),
-		RResourceManager::Instance().LoadDDSTexture("../Assets/StreetAO.dds"),
-	};
-
-	RMaterial cityMaterials[] =
-	{
-		{ m_AOShader, 2, m_MeshTexture[0], meshAOTextureSRV[0] },
-		{ m_AOShader, 2, m_MeshTexture[1], meshAOTextureSRV[1] },
-		{ m_AOShader, 2, m_MeshTexture[2], meshAOTextureSRV[2] },
-		{ m_AOShader, 2, m_MeshTexture[1], meshAOTextureSRV[3] },
-	};
-
-	m_FbxMeshObj.SetMaterial(cityMaterials, 4);
-
 	RMaterial tachikomaMaterials[] =
 	{
 		{ m_RefractionShader, 1, RResourceManager::Instance().WrapSRV(m_RenderTargetSRV) },

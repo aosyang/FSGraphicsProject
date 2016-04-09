@@ -27,7 +27,9 @@ namespace EngineManagedWrapper
 		RSkybox						m_Skybox;
 		RShaderConstantBuffer<SHADER_OBJECT_BUFFER>			m_cbPerObject;
 		RShaderConstantBuffer<SHADER_SCENE_BUFFER>			m_cbScene;
+		RShaderConstantBuffer<SHADER_LIGHT_BUFFER>			m_cbLight;
 		ID3D11SamplerState*			m_SamplerState;
+		ID3D11SamplerState*			m_SamplerComparisonState;
 		float						m_CamYaw, m_CamPitch;
 		
 		vector<RSMeshObject*>		m_MeshObjects;
@@ -66,7 +68,10 @@ namespace EngineManagedWrapper
 			m_Skybox.Release();
 			m_cbPerObject.Release();
 			m_cbScene.Release();
+			m_cbLight.Release();
+
 			SAFE_RELEASE(m_SamplerState);
+			SAFE_RELEASE(m_SamplerComparisonState);
 			m_PrimitiveMeshBuffer.Release();
 
 			m_EditorAxis.Release();
@@ -81,6 +86,7 @@ namespace EngineManagedWrapper
 
 			m_cbPerObject.Initialize();
 			m_cbScene.Initialize();
+			m_cbLight.Initialize();
 
 			RShaderManager::Instance().LoadShaders("../Shaders");
 
@@ -115,6 +121,18 @@ namespace EngineManagedWrapper
 			samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 			RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState);
+
+			ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+			samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.MaxAnisotropy = 1;
+			samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+			samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+			RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerComparisonState);
+
 
 			m_CamFov = 65.0f;
 			m_CamYaw = m_CamPitch = 0.0f;
@@ -282,11 +300,24 @@ namespace EngineManagedWrapper
 
 			m_cbScene.UpdateContent(&cbScene);
 
+			// Update light constant buffer
+			SHADER_LIGHT_BUFFER cbLight;
+			ZeroMemory(&cbLight, sizeof(cbLight));
+
+			// Setup ambient color
+			cbLight.HighHemisphereAmbientColor = RVec4(1.0f, 1.0f, 1.0f, 1.0f);
+			cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 1.0f);
+
+			m_cbLight.UpdateContent(&cbLight);
+
 			m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(m_PrimitiveList.data(), sizeof(RVertex::PRIMITIVE_VERTEX), m_PrimitiveList.size());
 
 			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, m_cbPerObject.GetDeviceBuffer());
 			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, m_cbScene.GetDeviceBuffer());
+			RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, m_cbLight.GetDeviceBuffer());
+
 			RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
+			RRenderer.D3DImmediateContext()->PSSetSamplers(2, 1, &m_SamplerComparisonState);
 		}
 
 		void RenderScene()
@@ -361,7 +392,7 @@ namespace EngineManagedWrapper
 			RSMeshObject* meshObj = new RSMeshObject();
 			RMesh* mesh = RResourceManager::Instance().FindMesh(path);
 			meshObj->SetMesh(mesh);
-			meshObj->SetOverridingShader(m_DefaultShader);
+			//meshObj->SetOverridingShader(m_DefaultShader);
 			m_MeshObjects.push_back(meshObj);
 		}
 

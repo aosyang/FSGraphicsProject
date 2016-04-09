@@ -12,7 +12,10 @@ struct RShader
 	ID3D11VertexShader*		VertexShader;
 	ID3D11GeometryShader*	GeometryShader;
 
+	bool operator==(const RShader& rhs) const;
+
 	void Bind();
+	string GetName() const;
 };
 
 class RShaderManager : public RSingleton<RShaderManager>
@@ -32,6 +35,7 @@ public:
 				   SIZE_T geometryBytecodeLength = 0);
 
 	RShader* GetShaderResource(const char* shaderName);
+	string GetShaderName(const RShader* shader) const;
 
 private:
 	RShaderManager();
