@@ -68,7 +68,12 @@
     <ClCompile Include="Scene\RSceneObject.cpp" />
     <ClCompile Include="Scene\RSkybox.cpp" />
     <ClCompile Include="Scene\RSMeshObject.cpp" />
-    <ClCompile Include="tinyxml2\tinyxml2.cpp" />
+    <ClCompile Include="tinyxml2\tinyxml2.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="RhinoEngine.licenseheader" />
