@@ -12,13 +12,6 @@ struct RShader
 	ID3D11VertexShader*		VertexShader;
 	ID3D11GeometryShader*	GeometryShader;
 
-	BYTE*					PS_Bytecode;
-	UINT32					PS_BytecodeSize;
-	BYTE*					VS_Bytecode;
-	UINT32					VS_BytecodeSize;
-	BYTE*					GS_Bytecode;
-	UINT32					GS_BytecodeSize;
-
 	void Bind();
 };
 
