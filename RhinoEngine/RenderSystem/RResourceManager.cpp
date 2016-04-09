@@ -722,6 +722,7 @@ int strcasecmp(const char* str1, const char* str2)
 
 RTexture* RResourceManager::FindTexture(const char* resourcePath)
 {
+	// TODO: Mutex needed here
 	for (vector<RTexture*>::iterator iter = m_TextureResources.begin(); iter != m_TextureResources.end(); iter++)
 	{
 		if (strcasecmp((*iter)->GetPath().data(), resourcePath) == 0)

@@ -84,42 +84,39 @@ void RShaderManager::LoadShaders(const char* path)
 				fin.seekg(0);
 				fin.read(pBuffer, fileSize);
 
+				int shaderCompileFlag = 0;
+#if defined(DEBUG) || defined(_DEBUG)
+				shaderCompileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+				HRESULT hr = 0;
+
 				// Detect shader type by file name suffix
 				if (filename.find("_VS.hlsl") != string::npos)
 				{
-					if (SUCCEEDED(D3DCompile(pBuffer, fileSize, NULL, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", 0, 0, &pShaderCode, &pErrorMsg)))
+					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 					{
 						RRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader);
-					}
-					else
-					{
-						OutputDebugStringA((char*)pErrorMsg->GetBufferPointer());
-						OutputDebugStringA("\n");
 					}
 				}
 				else if (filename.find("_PS.hlsl") != string::npos)
 				{
-					if (SUCCEEDED(D3DCompile(pBuffer, fileSize, NULL, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_4_0", 0, 0, &pShaderCode, &pErrorMsg)))
+					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 					{
 						RRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].PixelShader);
-					}
-					else
-					{
-						OutputDebugStringA((char*)pErrorMsg->GetBufferPointer());
-						OutputDebugStringA("\n");
 					}
 				}
 				else if (filename.find("_GS.hlsl") != string::npos)
 				{
-					if (SUCCEEDED(D3DCompile(pBuffer, fileSize, NULL, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "gs_4_0", 0, 0, &pShaderCode, &pErrorMsg)))
+					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "gs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 					{
 						RRenderer.D3DDevice()->CreateGeometryShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].GeometryShader);
 					}
-					else
-					{
-						OutputDebugStringA((char*)pErrorMsg->GetBufferPointer());
-						OutputDebugStringA("\n");
-					}
+				}
+
+				if (FAILED(hr))
+				{
+					OutputDebugStringA((char*)pErrorMsg->GetBufferPointer());
+					OutputDebugStringA("\n");
 				}
 
 				delete[] pBuffer;
