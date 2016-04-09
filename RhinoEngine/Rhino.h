@@ -58,6 +58,7 @@ class RBaseResource;
 #include "RenderSystem/DDSTextureLoader.h"
 #include "RenderSystem/RResourceManager.h"
 #include "RenderSystem/RShaderManager.h"
+#include "RenderSystem/RShaderConstantBuffer.h"
 #include "RenderSystem/RMesh.h"
 #include "RenderSystem/RTexture.h"
 #include "RenderSystem/RShadowMap.h"

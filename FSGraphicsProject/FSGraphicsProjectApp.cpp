@@ -100,13 +100,13 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_SamplerComparisonState);
 	SAFE_RELEASE(m_SamplerState);
 
-	SAFE_RELEASE(m_cbScreen);
-	SAFE_RELEASE(m_cbMaterial);
-	SAFE_RELEASE(m_cbLight);
-	SAFE_RELEASE(m_cbPerObject);
-	SAFE_RELEASE(m_cbScene);
-	SAFE_RELEASE(m_cbInstance[0]);
-	SAFE_RELEASE(m_cbInstance[1]);
+	m_cbScreen.Release();
+	m_cbMaterial.Release();
+	m_cbLight.Release();
+	m_cbPerObject.Release();
+	m_cbScene.Release();
+	m_cbInstance[0].Release();
+	m_cbInstance[1].Release();
 
 	m_BumpCubeMesh.Release();
 
@@ -211,60 +211,13 @@ bool FSGraphicsProjectApp::Initialize()
 
 	m_BumpLightingIL = RRenderer.GetInputLayout(RVertex::MESH_VERTEX::GetTypeName());
 
-	D3D11_BUFFER_DESC cbPerObjectDesc;
-	ZeroMemory(&cbPerObjectDesc, sizeof(cbPerObjectDesc));
-	cbPerObjectDesc.ByteWidth = sizeof(SHADER_OBJECT_BUFFER);
-	cbPerObjectDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbPerObjectDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbPerObjectDesc.Usage = D3D11_USAGE_DYNAMIC;
-
-	RRenderer.D3DDevice()->CreateBuffer(&cbPerObjectDesc, NULL, &m_cbPerObject);
-
-	D3D11_BUFFER_DESC cbSceneDesc;
-	ZeroMemory(&cbSceneDesc, sizeof(cbSceneDesc));
-	cbSceneDesc.ByteWidth = sizeof(SHADER_SCENE_BUFFER);
-	cbSceneDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbSceneDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbSceneDesc.Usage = D3D11_USAGE_DYNAMIC;
-
-	RRenderer.D3DDevice()->CreateBuffer(&cbSceneDesc, NULL, &m_cbScene);
-
-	D3D11_BUFFER_DESC cbLightDesc;
-	ZeroMemory(&cbLightDesc, sizeof(cbLightDesc));
-	cbLightDesc.ByteWidth = sizeof(SHADER_LIGHT_BUFFER);
-	cbLightDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbLightDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbLightDesc.Usage = D3D11_USAGE_DYNAMIC;
-
-	RRenderer.D3DDevice()->CreateBuffer(&cbLightDesc, NULL, &m_cbLight);
-
-	D3D11_BUFFER_DESC cbMaterialDesc;
-	ZeroMemory(&cbMaterialDesc, sizeof(cbMaterialDesc));
-	cbMaterialDesc.ByteWidth = sizeof(SHADER_MATERIAL_BUFFER);
-	cbMaterialDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbMaterialDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbMaterialDesc.Usage = D3D11_USAGE_DYNAMIC;
-
-	RRenderer.D3DDevice()->CreateBuffer(&cbMaterialDesc, NULL, &m_cbMaterial);
-
-	D3D11_BUFFER_DESC cbInstanceDesc;
-	ZeroMemory(&cbInstanceDesc, sizeof(cbInstanceDesc));
-	cbInstanceDesc.ByteWidth = sizeof(SHADER_INSTANCE_BUFFER);
-	cbInstanceDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbInstanceDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbInstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
-
-	RRenderer.D3DDevice()->CreateBuffer(&cbInstanceDesc, NULL, &m_cbInstance[0]);
-	RRenderer.D3DDevice()->CreateBuffer(&cbInstanceDesc, NULL, &m_cbInstance[1]);
-
-	D3D11_BUFFER_DESC cbScreenDesc;
-	ZeroMemory(&cbScreenDesc, sizeof(cbScreenDesc));
-	cbScreenDesc.ByteWidth = sizeof(SHADER_SCREEN_BUFFER);
-	cbScreenDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbScreenDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbScreenDesc.Usage = D3D11_USAGE_DYNAMIC;
-
-	RRenderer.D3DDevice()->CreateBuffer(&cbScreenDesc, NULL, &m_cbScreen);
+	m_cbPerObject.Initialize();
+	m_cbScene.Initialize();
+	m_cbLight.Initialize();
+	m_cbMaterial.Initialize();
+	m_cbInstance[0].Initialize();
+	m_cbInstance[1].Initialize();
+	m_cbScreen.Initialize();
 
 	m_MeshTexture[0] = RResourceManager::Instance().LoadDDSTexture("../Assets/cty1.dds");
 	m_MeshTexture[1] = RResourceManager::Instance().LoadDDSTexture("../Assets/ang1.dds");
@@ -544,10 +497,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	shadowViewProjMatrix *= shadowTransform;
 	cbScene.shadowViewProjBiasedMatrix = shadowViewProjMatrix;
 
-	D3D11_MAPPED_SUBRESOURCE subres;
-	RRenderer.D3DImmediateContext()->Map(m_cbScene, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-	memcpy(subres.pData, &cbScene, sizeof(SHADER_SCENE_BUFFER));
-	RRenderer.D3DImmediateContext()->Unmap(m_cbScene, 0);
+	m_cbScene.UpdateContent(&cbScene);
 
 	// Update light constant buffer
 	ZeroMemory(&cbLight, sizeof(cbLight));
@@ -587,9 +537,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 	cbLight.CameraPos = m_CameraMatrix.GetRow(3);
 
-	RRenderer.D3DImmediateContext()->Map(m_cbLight, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-	memcpy(subres.pData, &cbLight, sizeof(SHADER_LIGHT_BUFFER));
-	RRenderer.D3DImmediateContext()->Unmap(m_cbLight, 0);
+	m_cbLight.UpdateContent(&cbLight);
 
 	// Update instance buffer
 	ZeroMemory(&cbInstance[0], sizeof(cbInstance[0]));
@@ -605,9 +553,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		cbInstance[0].instancedWorldMatrix[i] = instanceMatrix;
 	}
 
-	RRenderer.D3DImmediateContext()->Map(m_cbInstance[0], 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-	memcpy(subres.pData, &cbInstance[0], sizeof(SHADER_INSTANCE_BUFFER));
-	RRenderer.D3DImmediateContext()->Unmap(m_cbInstance[0], 0);
+	m_cbInstance[0].UpdateContent(&cbInstance[0]);
 
 	// Update screen information
 	SHADER_SCREEN_BUFFER cbScreen;
@@ -616,9 +562,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	cbScreen.ScreenSize = RVec2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());
 	cbScreen.UseGammaCorrection = (m_EnabledPostProcessor == 1);
 
-	RRenderer.D3DImmediateContext()->Map(m_cbScreen, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-	memcpy(subres.pData, &cbScreen, sizeof(SHADER_SCREEN_BUFFER));
-	RRenderer.D3DImmediateContext()->Unmap(m_cbScreen, 0);
+	m_cbScreen.UpdateContent(&cbScreen);
 
 	// Update particle vertices
 	ParticleDepthComparer cmp(m_CameraMatrix.GetRow(3), m_CameraMatrix.GetRow(2));
@@ -628,9 +572,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	ObjectDepthComparer objCmp(m_CameraMatrix.GetRow(3));
 	std::sort(cbInstance[1].instancedWorldMatrix, cbInstance[1].instancedWorldMatrix + 125, objCmp);
 
-	RRenderer.D3DImmediateContext()->Map(m_cbInstance[1], 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-	memcpy(subres.pData, &cbInstance[1], sizeof(SHADER_INSTANCE_BUFFER));
-	RRenderer.D3DImmediateContext()->Unmap(m_cbInstance[1], 0);
+	m_cbInstance[1].UpdateContent(&cbInstance[1]);
 }
 
 void FSGraphicsProjectApp::RenderScene()
@@ -643,14 +585,14 @@ void FSGraphicsProjectApp::RenderScene()
 		{ 0.0f, 0.0f, 300, 300, 0.0f, 1.0f },
 	};
 
-	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, &m_cbPerObject);
-	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
-	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, &m_cbLight);
-	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(1, 1, &m_cbMaterial);
-	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(2, 1, &m_cbScreen);
+	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, m_cbPerObject.GetDeviceBuffer());
+	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, m_cbScene.GetDeviceBuffer());
+	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, m_cbLight.GetDeviceBuffer());
+	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(1, 1, m_cbMaterial.GetDeviceBuffer());
+	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(2, 1, m_cbScreen.GetDeviceBuffer());
 	RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
 	RRenderer.D3DImmediateContext()->PSSetSamplers(2, 1, &m_SamplerComparisonState);
-	RRenderer.D3DImmediateContext()->GSSetConstantBuffers(1, 1, &m_cbScene);
+	RRenderer.D3DImmediateContext()->GSSetConstantBuffers(1, 1, m_cbScene.GetDeviceBuffer());
 
 	//=========================== Shadow Pass ===========================
 	m_ShadowMap.SetupRenderTarget();
@@ -691,20 +633,15 @@ void FSGraphicsProjectApp::RenderScene()
 			cbScene.viewProjMatrix = viewMatrix * projMatrix;
 			cbScene.cameraPos = m_SunVec;
 
-			D3D11_MAPPED_SUBRESOURCE subres;
-			RRenderer.D3DImmediateContext()->Map(m_cbScene, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-			memcpy(subres.pData, &cbScene, sizeof(SHADER_SCENE_BUFFER));
-			RRenderer.D3DImmediateContext()->Unmap(m_cbScene, 0);
+			m_cbScene.UpdateContent(&cbScene);
 	
 			cbLight.CameraPos = m_SunVec;
 
-			RRenderer.D3DImmediateContext()->Map(m_cbLight, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-			memcpy(subres.pData, &cbLight, sizeof(SHADER_LIGHT_BUFFER));
-			RRenderer.D3DImmediateContext()->Unmap(m_cbLight, 0);
+			m_cbLight.UpdateContent(&cbLight);
 
-			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
-			RRenderer.D3DImmediateContext()->GSSetConstantBuffers(1, 1, &m_cbScene);
-			RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, &m_cbLight);
+			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, m_cbScene.GetDeviceBuffer());
+			RRenderer.D3DImmediateContext()->GSSetConstantBuffers(1, 1, m_cbScene.GetDeviceBuffer());
+			RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, m_cbLight.GetDeviceBuffer());
 
 			ParticleDepthComparer cmp(m_SunVec, -m_SunVec);
 			std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
@@ -797,10 +734,7 @@ void FSGraphicsProjectApp::SetPerObjectConstBuffuer(const RMatrix4& world)
 	SHADER_OBJECT_BUFFER cbObject;
 	cbObject.worldMatrix = world;
 
-	D3D11_MAPPED_SUBRESOURCE subres;
-	RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-	memcpy(subres.pData, &cbObject, sizeof(cbObject));
-	RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
+	m_cbPerObject.UpdateContent(&cbObject);
 }
 
 void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
@@ -874,7 +808,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 
 	// Draw islands
 	SetPerObjectConstBuffuer(m_IslandMeshObj.GetNodeTransform());
-	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(2, 1, &m_cbInstance[0]);
+	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(2, 1, m_cbInstance[0].GetDeviceBuffer());
 
 	if (pass == ShadowPass)
 		m_IslandMeshObj.DrawWithShader(m_InstancedDepthShader, true, MAX_INSTANCE_COUNT);
@@ -960,7 +894,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	// Draw transparent spheres
 	if (pass != ShadowPass)
 	{
-		RRenderer.D3DImmediateContext()->VSSetConstantBuffers(2, 1, &m_cbInstance[1]);
+		RRenderer.D3DImmediateContext()->VSSetConstantBuffers(2, 1, m_cbInstance[1].GetDeviceBuffer());
 
 		SetPerObjectConstBuffuer(m_TransparentMesh.GetNodeTransform());
 
@@ -1029,8 +963,5 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 
 void FSGraphicsProjectApp::SetMaterialConstBuffer(SHADER_MATERIAL_BUFFER* buffer)
 {
-	D3D11_MAPPED_SUBRESOURCE subres;
-	RRenderer.D3DImmediateContext()->Map(m_cbMaterial, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-	memcpy(subres.pData, buffer, sizeof(SHADER_MATERIAL_BUFFER));
-	RRenderer.D3DImmediateContext()->Unmap(m_cbMaterial, 0);
+	m_cbMaterial.UpdateContent(buffer);
 }

@@ -37,6 +37,7 @@
     <ClInclude Include="RenderSystem\RMeshElement.h" />
     <ClInclude Include="RenderSystem\RRenderSystem.h" />
     <ClInclude Include="RenderSystem\RResourceManager.h" />
+    <ClInclude Include="RenderSystem\RShaderConstantBuffer.h" />
     <ClInclude Include="RenderSystem\RShaderManager.h" />
     <ClInclude Include="RenderSystem\RShadowMap.h" />
     <ClInclude Include="RenderSystem\RTexture.h" />

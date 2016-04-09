@@ -60,12 +60,12 @@ private:
 
 	RShader*					m_LightingShader;
 
-	ID3D11Buffer*				m_cbPerObject;
-	ID3D11Buffer*				m_cbScene;
-	ID3D11Buffer*				m_cbLight;
-	ID3D11Buffer*				m_cbMaterial;
-	ID3D11Buffer*				m_cbInstance[2];
-	ID3D11Buffer*				m_cbScreen;
+	RShaderConstantBuffer<SHADER_OBJECT_BUFFER>			m_cbPerObject;
+	RShaderConstantBuffer<SHADER_SCENE_BUFFER>			m_cbScene;
+	RShaderConstantBuffer<SHADER_LIGHT_BUFFER>			m_cbLight;
+	RShaderConstantBuffer<SHADER_MATERIAL_BUFFER>		m_cbMaterial;
+	RShaderConstantBuffer<SHADER_INSTANCE_BUFFER>		m_cbInstance[2];
+	RShaderConstantBuffer<SHADER_SCREEN_BUFFER>			m_cbScreen;
 
 	RTexture*					m_MeshTexture[3];
 	ID3D11SamplerState*			m_SamplerState;

@@ -77,6 +77,9 @@
     <ClInclude Include="RenderSystem\RShadowMap.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="RenderSystem\RShaderConstantBuffer.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
