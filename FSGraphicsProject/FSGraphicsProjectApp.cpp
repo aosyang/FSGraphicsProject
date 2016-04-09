@@ -547,14 +547,13 @@ void FSGraphicsProjectApp::RenderScene()
 		{ 0.0f, 0.0f, 300, 300, 0.0f, 1.0f },
 	};
 
-	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, m_cbPerObject.GetDeviceBuffer());
-	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, m_cbScene.GetDeviceBuffer());
-	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, m_cbLight.GetDeviceBuffer());
-	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(1, 1, m_cbMaterial.GetDeviceBuffer());
-	RRenderer.D3DImmediateContext()->PSSetConstantBuffers(2, 1, m_cbScreen.GetDeviceBuffer());
+	m_cbPerObject.ApplyToShaders();
+	m_cbScene.ApplyToShaders();
+	m_cbLight.ApplyToShaders();
+	m_cbMaterial.ApplyToShaders();
+	m_cbScreen.ApplyToShaders();
 	RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
 	RRenderer.D3DImmediateContext()->PSSetSamplers(2, 1, &m_SamplerComparisonState);
-	RRenderer.D3DImmediateContext()->GSSetConstantBuffers(1, 1, m_cbScene.GetDeviceBuffer());
 
 	//=========================== Shadow Pass ===========================
 	m_ShadowMap.SetupRenderTarget();
@@ -601,9 +600,8 @@ void FSGraphicsProjectApp::RenderScene()
 
 			m_cbLight.UpdateContent(&cbLight);
 
-			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, m_cbScene.GetDeviceBuffer());
-			RRenderer.D3DImmediateContext()->GSSetConstantBuffers(1, 1, m_cbScene.GetDeviceBuffer());
-			RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, m_cbLight.GetDeviceBuffer());
+			m_cbScene.ApplyToShaders();
+			m_cbLight.ApplyToShaders();
 
 			ParticleDepthComparer cmp(m_SunVec, -m_SunVec);
 			std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
@@ -770,7 +768,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 
 	// Draw islands
 	SetPerObjectConstBuffuer(m_IslandMeshObj.GetNodeTransform());
-	RRenderer.D3DImmediateContext()->VSSetConstantBuffers(2, 1, m_cbInstance[0].GetDeviceBuffer());
+	m_cbInstance[0].ApplyToShaders();
 
 	if (pass == ShadowPass)
 		m_IslandMeshObj.DrawWithShader(m_InstancedDepthShader, true, MAX_INSTANCE_COUNT);
@@ -856,7 +854,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	// Draw transparent spheres
 	if (pass != ShadowPass)
 	{
-		RRenderer.D3DImmediateContext()->VSSetConstantBuffers(2, 1, m_cbInstance[1].GetDeviceBuffer());
+		m_cbInstance[1].ApplyToShaders();
 
 		SetPerObjectConstBuffuer(m_TransparentMesh.GetNodeTransform());
 

@@ -25,9 +25,9 @@ namespace EngineManagedWrapper
 	{
 	private:
 		RSkybox						m_Skybox;
-		RShaderConstantBuffer<SHADER_OBJECT_BUFFER>			m_cbPerObject;
-		RShaderConstantBuffer<SHADER_SCENE_BUFFER>			m_cbScene;
-		RShaderConstantBuffer<SHADER_LIGHT_BUFFER>			m_cbLight;
+		RShaderConstantBuffer<SHADER_OBJECT_BUFFER,		CBST_VS, 0>				m_cbPerObject;
+		RShaderConstantBuffer<SHADER_SCENE_BUFFER,		CBST_VS|CBST_GS, 1>		m_cbScene;
+		RShaderConstantBuffer<SHADER_LIGHT_BUFFER,		CBST_PS, 0>				m_cbLight;
 		ID3D11SamplerState*			m_SamplerState;
 		ID3D11SamplerState*			m_SamplerComparisonState;
 		float						m_CamYaw, m_CamPitch;
@@ -312,9 +312,9 @@ namespace EngineManagedWrapper
 
 			m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(m_PrimitiveList.data(), sizeof(RVertex::PRIMITIVE_VERTEX), m_PrimitiveList.size());
 
-			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, m_cbPerObject.GetDeviceBuffer());
-			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, m_cbScene.GetDeviceBuffer());
-			RRenderer.D3DImmediateContext()->PSSetConstantBuffers(0, 1, m_cbLight.GetDeviceBuffer());
+			m_cbPerObject.ApplyToShaders();
+			m_cbScene.ApplyToShaders();
+			m_cbLight.ApplyToShaders();
 
 			RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
 			RRenderer.D3DImmediateContext()->PSSetSamplers(2, 1, &m_SamplerComparisonState);

@@ -7,7 +7,14 @@
 #ifndef _RSHADERCONSTANTBUFFER_H
 #define _RSHADERCONSTANTBUFFER_H
 
-template <typename T>
+enum EConstantBufferShaderType
+{
+	CBST_VS	= 1 << 0,
+	CBST_PS	= 1 << 1,
+	CBST_GS	= 1 << 2,
+};
+
+template <typename T, int SHADER_TYPE, int SLOT>
 class RShaderConstantBuffer
 {
 public:
@@ -40,7 +47,16 @@ public:
 		RRenderer.D3DImmediateContext()->Unmap(m_ConstBuffer, 0);
 	}
 
-	ID3D11Buffer* const* GetDeviceBuffer() const { return &m_ConstBuffer; }
+	// Send constant buffer data to shaders
+	void ApplyToShaders()
+	{
+		if (SHADER_TYPE & CBST_VS)
+			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(SLOT, 1, &m_ConstBuffer);
+		if (SHADER_TYPE & CBST_PS)
+			RRenderer.D3DImmediateContext()->PSSetConstantBuffers(SLOT, 1, &m_ConstBuffer);
+		if (SHADER_TYPE & CBST_GS)
+			RRenderer.D3DImmediateContext()->GSSetConstantBuffers(SLOT, 1, &m_ConstBuffer);
+	}
 
 private:
 	ID3D11Buffer*		m_ConstBuffer;
