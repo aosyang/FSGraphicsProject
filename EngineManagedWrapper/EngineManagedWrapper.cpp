@@ -25,8 +25,8 @@ namespace EngineManagedWrapper
 	{
 	private:
 		RSkybox						m_Skybox;
-		ID3D11Buffer*				m_cbPerObject;
-		ID3D11Buffer*				m_cbScene;
+		RShaderConstantBuffer<SHADER_OBJECT_BUFFER>			m_cbPerObject;
+		RShaderConstantBuffer<SHADER_SCENE_BUFFER>			m_cbScene;
 		ID3D11SamplerState*			m_SamplerState;
 		float						m_CamYaw, m_CamPitch;
 		
@@ -64,8 +64,8 @@ namespace EngineManagedWrapper
 		~EditorApp()
 		{
 			m_Skybox.Release();
-			SAFE_RELEASE(m_cbPerObject);
-			SAFE_RELEASE(m_cbScene);
+			m_cbPerObject.Release();
+			m_cbScene.Release();
 			SAFE_RELEASE(m_SamplerState);
 			m_PrimitiveMeshBuffer.Release();
 
@@ -79,23 +79,8 @@ namespace EngineManagedWrapper
 		{
 			RResourceManager::Instance().Initialize();
 
-			D3D11_BUFFER_DESC cbPerObjectDesc;
-			ZeroMemory(&cbPerObjectDesc, sizeof(cbPerObjectDesc));
-			cbPerObjectDesc.ByteWidth = sizeof(SHADER_OBJECT_BUFFER);
-			cbPerObjectDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-			cbPerObjectDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-			cbPerObjectDesc.Usage = D3D11_USAGE_DYNAMIC;
-
-			RRenderer.D3DDevice()->CreateBuffer(&cbPerObjectDesc, NULL, &m_cbPerObject);
-
-			D3D11_BUFFER_DESC cbSceneDesc;
-			ZeroMemory(&cbSceneDesc, sizeof(cbSceneDesc));
-			cbSceneDesc.ByteWidth = sizeof(SHADER_SCENE_BUFFER);
-			cbSceneDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-			cbSceneDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-			cbSceneDesc.Usage = D3D11_USAGE_DYNAMIC;
-
-			RRenderer.D3DDevice()->CreateBuffer(&cbSceneDesc, NULL, &m_cbScene);
+			m_cbPerObject.Initialize();
+			m_cbScene.Initialize();
 
 			RShaderManager::Instance().LoadShaders("../Shaders");
 
@@ -295,15 +280,12 @@ namespace EngineManagedWrapper
 			cbScene.viewProjMatrix = viewProjMatrix;
 			cbScene.cameraPos = m_CameraMatrix.GetRow(3);
 
-			D3D11_MAPPED_SUBRESOURCE subres;
-			RRenderer.D3DImmediateContext()->Map(m_cbScene, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-			memcpy(subres.pData, &cbScene, sizeof(SHADER_SCENE_BUFFER));
-			RRenderer.D3DImmediateContext()->Unmap(m_cbScene, 0);
+			m_cbScene.UpdateContent(&cbScene);
 
 			m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(m_PrimitiveList.data(), sizeof(RVertex::PRIMITIVE_VERTEX), m_PrimitiveList.size());
 
-			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, &m_cbPerObject);
-			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, &m_cbScene);
+			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(0, 1, m_cbPerObject.GetDeviceBuffer());
+			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(1, 1, m_cbScene.GetDeviceBuffer());
 			RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
 		}
 
@@ -315,10 +297,7 @@ namespace EngineManagedWrapper
 			SHADER_OBJECT_BUFFER cbObject;
 			cbObject.worldMatrix = RMatrix4::IDENTITY;
 
-			D3D11_MAPPED_SUBRESOURCE subres;
-			RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-			memcpy(subres.pData, &cbObject, sizeof(cbObject));
-			RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
+			m_cbPerObject.UpdateContent(&cbObject);
 
 			m_Skybox.Draw();
 
@@ -329,18 +308,14 @@ namespace EngineManagedWrapper
 			{
 				cbObject.worldMatrix = (*iter)->GetNodeTransform();
 
-				RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-				memcpy(subres.pData, &cbObject, sizeof(cbObject));
-				RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
+				m_cbPerObject.UpdateContent(&cbObject);
 
 				(*iter)->Draw();
 			}
 
 			cbObject.worldMatrix = RMatrix4::IDENTITY;
 
-			RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-			memcpy(subres.pData, &cbObject, sizeof(cbObject));
-			RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
+			m_cbPerObject.UpdateContent(&cbObject);
 
 			if (m_PrimitiveList.size())
 			{
@@ -349,9 +324,7 @@ namespace EngineManagedWrapper
 				else
 					cbObject.worldMatrix = RMatrix4::IDENTITY;
 
-				RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-				memcpy(subres.pData, &cbObject, sizeof(cbObject));
-				RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
+				m_cbPerObject.UpdateContent(&cbObject);
 
 				m_ColorShader->Bind();
 				RRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);
@@ -374,9 +347,7 @@ namespace EngineManagedWrapper
 				m_AxisMatrix = RMatrix4::CreateTranslation(axis_pos);
 				cbObject.worldMatrix = m_AxisMatrix;
 
-				RRenderer.D3DImmediateContext()->Map(m_cbPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-				memcpy(subres.pData, &cbObject, sizeof(cbObject));
-				RRenderer.D3DImmediateContext()->Unmap(m_cbPerObject, 0);
+				m_cbPerObject.UpdateContent(&cbObject);
 
 				RRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);
 				m_EditorAxis.Draw();
