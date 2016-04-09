@@ -1,0 +1,5 @@
+<Material Mesh="../Assets/Island.fbx">
+    <MeshElement Name="TR_FloatingIsland02:Rock" Shader="Lighting">
+        <Texture Slot="0">../Assets/TR_FloatingIsland02.dds</Texture>
+    </MeshElement>
+</Material>
