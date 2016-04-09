@@ -1,0 +1,6 @@
+<Material Mesh="../Assets/SpeedballPlayer.fbx">
+    <MeshElement Name="Body_01" Shader="BumpLighting">
+        <Texture Slot="0">../Assets/Body_Diffuse_01.dds</Texture>
+        <Texture Slot="1">../Assets/Body_Normal_01.dds</Texture>
+    </MeshElement>
+</Material>
