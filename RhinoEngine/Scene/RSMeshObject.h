@@ -31,6 +31,8 @@ public:
 
 	float GetResourceTimestamp();
 private:
+	void UpdateMaterialsFromResource();
+
 	RMesh*					m_Mesh;
 	vector<RMaterial>		m_Materials;
 	RShader*				m_OverridingShader;

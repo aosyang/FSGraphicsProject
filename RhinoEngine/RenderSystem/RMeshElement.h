@@ -17,6 +17,8 @@ protected:
 	UINT				m_Stride;
 	UINT				m_VertexCount;
 	UINT				m_IndexCount;
+
+	string				m_Name;
 public:
 	RMeshElement();
 
@@ -29,6 +31,9 @@ public:
 
 	void Draw(D3D11_PRIMITIVE_TOPOLOGY topology);
 	void DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology);
+
+	void SetName(const char* name) { m_Name = name; }
+	string GetName() const { return m_Name; }
 };
 
 #endif

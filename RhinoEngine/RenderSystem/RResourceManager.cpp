@@ -584,6 +584,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		RMeshElement meshElem;
 		meshElem.CreateVertexBuffer(optimizedVertData.data(), sizeof(RVertex::MESH_VERTEX), optimizedVertData.size());
 		meshElem.CreateIndexBuffer(optimizedIndexData.data(), sizeof(UINT32), optimizedIndexData.size());
+		meshElem.SetName(node->GetName());
 		meshElements.push_back(meshElem);
 
 		sprintf_s(msg_buf, "Mesh loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
@@ -599,7 +600,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
 	if (doc->LoadFile(mtlFilename.c_str()) == tinyxml2::XML_SUCCESS)
 	{
-		materials.clear();
+		vector<RMaterial> xmlMaterials;
 
 		tinyxml2::XMLElement* root = doc->RootElement();
 		tinyxml2::XMLElement* elem = root->FirstChildElement("MeshElement");
@@ -625,8 +626,13 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 				elem_tex = elem_tex->NextSiblingElement();
 			}
 
-			materials.push_back(material);
+			xmlMaterials.push_back(material);
 			elem = elem->NextSiblingElement();
+		}
+
+		if (xmlMaterials.size())
+		{
+			materials = xmlMaterials;
 		}
 	}
 	delete doc;
