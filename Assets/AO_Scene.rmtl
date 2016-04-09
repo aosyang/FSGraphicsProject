@@ -1,5 +1,5 @@
 <Material Mesh="../Assets/AO_Scene.fbx">
-    <MeshElement Shader="AmbientOcclusion">
+    <MeshElement Name="Plane001" Shader="AmbientOcclusion">
         <Texture Slot="0">../Assets/Grey.dds</Texture>
         <Texture Slot="1">../Assets/AO_Scene.dds</Texture>
     </MeshElement>

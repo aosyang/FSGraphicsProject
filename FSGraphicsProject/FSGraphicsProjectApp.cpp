@@ -66,14 +66,9 @@ struct ObjectDepthComparer
 FSGraphicsProjectApp::FSGraphicsProjectApp()
 	: m_ColorPrimitiveIL(nullptr),
 	  m_ColorShader(nullptr),
-	  m_LightingShader(nullptr),
 	  m_SamplerState(nullptr),
 	  m_RenderTargetView(nullptr)
 {
-	m_MeshTexture[0] = nullptr;
-	m_MeshTexture[1] = nullptr;
-	m_MeshTexture[2] = nullptr;
-
 	m_EnableLights[0] = true;
 	m_EnableLights[1] = true;
 	m_EnableLights[2] = true;
@@ -128,14 +123,12 @@ bool FSGraphicsProjectApp::Initialize()
 	RShaderManager::Instance().LoadShaders("../Shaders");
 	
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
-	m_LightingShader = RShaderManager::Instance().GetShaderResource("Lighting");
 	m_BumpLightingShader = RShaderManager::Instance().GetShaderResource("BumpLighting");
 	m_InstancedLightingShader = RShaderManager::Instance().GetShaderResource("InstancedLighting");
 	m_DepthShader = RShaderManager::Instance().GetShaderResource("Depth");
 	m_InstancedDepthShader = RShaderManager::Instance().GetShaderResource("InstancedDepth");
 	m_ParticleShader = RShaderManager::Instance().GetShaderResource("Particle");
 	m_RefractionShader = RShaderManager::Instance().GetShaderResource("Refraction");
-	m_AOShader = RShaderManager::Instance().GetShaderResource("AmbientOcclusion");
 
 	m_PostProcessor.Initialize();
 
@@ -219,9 +212,6 @@ bool FSGraphicsProjectApp::Initialize()
 	m_cbInstance[1].Initialize();
 	m_cbScreen.Initialize();
 
-	m_MeshTexture[0] = RResourceManager::Instance().LoadDDSTexture("../Assets/cty1.dds");
-	m_MeshTexture[1] = RResourceManager::Instance().LoadDDSTexture("../Assets/ang1.dds");
-	m_MeshTexture[2] = RResourceManager::Instance().LoadDDSTexture("../Assets/cty2x.dds");
 	m_BumpBaseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlate.dds");
 	m_BumpNormalTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlateNormal.dds");
 	RResourceManager::Instance().LoadDDSTexture("../Assets/powderpeak.dds");
@@ -243,19 +233,9 @@ bool FSGraphicsProjectApp::Initialize()
 
 	m_AOSceneMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/AO_Scene.fbx");
 	m_AOSceneObj.SetMesh(m_AOSceneMesh);
-	m_AOTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/AO_Scene.dds");
-	RTexture* greyTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/Grey.dds");
-
-	RMaterial aoMat[] =
-	{
-		{ m_AOShader, 2, greyTexture, m_AOTexture },
-	};
-
-	m_AOSceneObj.SetMaterial(aoMat, 1);
 	m_AOSceneObj.SetPosition(RVec3(-500.0f, 0.0f, 500.0f));
 
 	m_CharacterObj.SetMesh(RResourceManager::Instance().LoadFbxMesh("../Assets/SpeedballPlayer.fbx"));
-	m_CharacterObj.SetOverridingShader(m_BumpLightingShader);
 	m_CharacterObj.SetTransform(RMatrix4::CreateXAxisRotation(-90.0f) * RMatrix4::CreateTranslation(-1100.0f, 40.0f, 0.0f));
 
 	RMesh* sphereMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.fbx");

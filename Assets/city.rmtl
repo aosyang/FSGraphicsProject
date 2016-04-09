@@ -1,17 +1,17 @@
 <Material Mesh="../Assets/city.fbx">
-    <MeshElement Shader="AmbientOcclusion">
+    <MeshElement Name="lowBuildings" Shader="AmbientOcclusion">
         <Texture Slot="0">../Assets/cty1.dds</Texture>
         <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
     </MeshElement>
-    <MeshElement Shader="AmbientOcclusion">
+    <MeshElement Name="ground" Shader="AmbientOcclusion">
         <Texture Slot="0">../Assets/ang1.dds</Texture>
         <Texture Slot="1">../Assets/groundAO.dds</Texture>
     </MeshElement>
-    <MeshElement Shader="AmbientOcclusion">
+    <MeshElement Name="tallBuildings" Shader="AmbientOcclusion">
         <Texture Slot="0">../Assets/cty2x.dds</Texture>
         <Texture Slot="1">../Assets/tallBuildingsAO.dds</Texture>
     </MeshElement>
-    <MeshElement Shader="AmbientOcclusion">
+    <MeshElement Name="Street" Shader="AmbientOcclusion">
         <Texture Slot="0">../Assets/ang1.dds</Texture>
         <Texture Slot="1">../Assets/StreetAO.dds</Texture>
     </MeshElement>

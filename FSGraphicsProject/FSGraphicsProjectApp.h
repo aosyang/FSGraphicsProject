@@ -58,8 +58,6 @@ private:
 	RTexture*					m_BumpBaseTexture;
 	RTexture*					m_BumpNormalTexture;
 
-	RShader*					m_LightingShader;
-
 	RShaderConstantBuffer<SHADER_OBJECT_BUFFER>			m_cbPerObject;
 	RShaderConstantBuffer<SHADER_SCENE_BUFFER>			m_cbScene;
 	RShaderConstantBuffer<SHADER_LIGHT_BUFFER>			m_cbLight;
@@ -67,7 +65,6 @@ private:
 	RShaderConstantBuffer<SHADER_INSTANCE_BUFFER>		m_cbInstance[2];
 	RShaderConstantBuffer<SHADER_SCREEN_BUFFER>			m_cbScreen;
 
-	RTexture*					m_MeshTexture[3];
 	ID3D11SamplerState*			m_SamplerState;
 	ID3D11SamplerState*			m_SamplerComparisonState;
 
@@ -82,8 +79,6 @@ private:
 
 	RMesh*						m_AOSceneMesh;
 	RSMeshObject				m_AOSceneObj;
-	RShader*					m_AOShader;
-	RTexture*					m_AOTexture;
 
 	RMesh*						m_SceneMeshIsland;
 	RTexture*					m_IslandTexture;
