@@ -15,6 +15,8 @@
 // FBX SDK
 #include <fbxsdk.h>
 
+#include "tinyxml2/tinyxml2.h"
+
 static mutex								m_TaskQueueMutex;
 static condition_variable					m_TaskQueueCondition;
 

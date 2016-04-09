@@ -7,6 +7,8 @@
 #include "Rhino.h"
 #include "RSMeshObject.h"
 
+#include "tinyxml2/tinyxml2.h"
+
 RSMeshObject::RSMeshObject()
 	: RSceneObject(), m_Mesh(nullptr), m_OverridingShader(nullptr), m_bNeedUpdateMaterial(true)
 {
