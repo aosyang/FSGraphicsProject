@@ -392,7 +392,6 @@ namespace EngineManagedWrapper
 			RSMeshObject* meshObj = new RSMeshObject();
 			RMesh* mesh = RResourceManager::Instance().FindMesh(path);
 			meshObj->SetMesh(mesh);
-			//meshObj->SetOverridingShader(m_DefaultShader);
 			m_MeshObjects.push_back(meshObj);
 		}
 

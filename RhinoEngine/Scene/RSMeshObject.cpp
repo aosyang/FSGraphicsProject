@@ -21,11 +21,7 @@ RSMeshObject::~RSMeshObject()
 void RSMeshObject::SetMesh(RMesh* mesh)
 {
 	m_Mesh = mesh;
-	if (mesh->IsResourceReady())
-	{
-		m_Materials = mesh->GetMaterials();
-		m_bNeedUpdateMaterial = false;
-	}
+	m_bNeedUpdateMaterial = true;
 }
 
 int RSMeshObject::GetSubmeshCount() const
@@ -114,6 +110,13 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 	if (m_bNeedUpdateMaterial)
 	{
 		m_Materials = m_Mesh->GetMaterials();
+
+		for (unsigned int i = 0; i < m_Materials.size(); i++)
+		{
+			if (m_Materials[i].Shader == nullptr)
+				m_Materials[i].Shader = RShaderManager::Instance().GetShaderResource("Default");
+		}
+
 		m_bNeedUpdateMaterial = false;
 	}
 
