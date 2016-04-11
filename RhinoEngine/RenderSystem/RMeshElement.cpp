@@ -71,6 +71,8 @@ void RMeshElement::UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSize, UI
 	RRenderer.D3DImmediateContext()->Map(m_VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 	memcpy(subres.pData, data, vertexTypeSize * vertexCount);
 	RRenderer.D3DImmediateContext()->Unmap(m_VertexBuffer, 0);
+
+	m_VertexCount = vertexCount;
 }
 
 void RMeshElement::Draw(D3D11_PRIMITIVE_TOPOLOGY topology)
