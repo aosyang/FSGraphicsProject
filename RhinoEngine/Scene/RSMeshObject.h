@@ -16,7 +16,7 @@ public:
 
 	void SetMesh(RMesh* mesh);
 
-	int GetSubmeshCount() const;
+	int GetMeshElementCount() const;
 	void SetMaterial(RMaterial* materials, int materialNum);
 	RMaterial GetMaterial(int index) const;
 
@@ -25,6 +25,7 @@ public:
 	void SetOverridingShader(RShader* shader);
 
 	const RAabb& GetAabb() const;
+	const RAabb& GetMeshElementAabb(int index) const;
 
 	void Draw(bool instanced = false, int instanceCount = 0);
 	void DrawWithShader(RShader* shader, bool instanced = false, int instanceCount = 0);

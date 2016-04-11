@@ -19,6 +19,7 @@ protected:
 	UINT				m_IndexCount;
 
 	string				m_Name;
+	RAabb				m_Aabb;
 public:
 	RMeshElement();
 
@@ -34,6 +35,9 @@ public:
 
 	void SetName(const char* name) { m_Name = name; }
 	string GetName() const { return m_Name; }
+
+	void SetAabb(const RAabb& aabb) { m_Aabb = aabb; }
+	const RAabb& GetAabb() const { return m_Aabb; }
 };
 
 #endif

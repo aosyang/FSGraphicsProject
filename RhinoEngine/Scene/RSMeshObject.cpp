@@ -26,10 +26,10 @@ void RSMeshObject::SetMesh(RMesh* mesh)
 	m_bNeedUpdateMaterial = true;
 }
 
-int RSMeshObject::GetSubmeshCount() const
+int RSMeshObject::GetMeshElementCount() const
 {
 	if (m_Mesh)
-		return (int)m_Mesh->GetSubmeshCount();
+		return (int)m_Mesh->GetMeshElementCount();
 	return 0;
 }
 
@@ -66,7 +66,7 @@ void RSMeshObject::SaveMaterialsToFile()
 	tinyxml2::XMLElement* elem_mat = doc->NewElement("Material");
 	elem_mat->SetAttribute("Mesh", m_Mesh->GetPath().c_str());
 
-	for (int i = 0; i < m_Mesh->GetSubmeshCount(); i++)
+	for (int i = 0; i < m_Mesh->GetMeshElementCount(); i++)
 	{
 		tinyxml2::XMLElement* elem_submesh = doc->NewElement("MeshElement");
 		elem_submesh->SetAttribute("Name", m_Mesh->GetMeshElements()[i].GetName().c_str());
@@ -112,6 +112,13 @@ const RAabb& RSMeshObject::GetAabb() const
 {
 	if (m_Mesh)
 		return m_Mesh->GetAabb();
+	return RAabb::Default;
+}
+
+const RAabb& RSMeshObject::GetMeshElementAabb(int index) const
+{
+	if (m_Mesh)
+		return m_Mesh->GetMeshElementAabb(index);
 	return RAabb::Default;
 }
 

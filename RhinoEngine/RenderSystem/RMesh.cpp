@@ -59,11 +59,6 @@ vector<RMaterial>& RMesh::GetMaterials()
 	return m_Materials;
 }
 
-int RMesh::GetSubmeshCount() const
-{
-	return (int)m_MeshElements.size();
-}
-
 void RMesh::SetInputLayout(ID3D11InputLayout* inputLayout)
 {
 	m_InputLayout = inputLayout;
@@ -77,6 +72,11 @@ ID3D11InputLayout* RMesh::GetInputLayout() const
 vector<RMeshElement>& RMesh::GetMeshElements()
 {
 	return m_MeshElements;
+}
+
+int RMesh::GetMeshElementCount() const
+{
+	return (int)m_MeshElements.size();
 }
 
 void RMesh::SetMeshElements(RMeshElement* meshElements, int numElement)
@@ -100,6 +100,11 @@ void RMesh::SetAabb(const RAabb& aabb)
 const RAabb& RMesh::GetAabb() const
 {
 	return m_Aabb;
+}
+
+const RAabb& RMesh::GetMeshElementAabb(int index) const
+{
+	return m_MeshElements[index].GetAabb();
 }
 
 void RMesh::SetResourceTimestamp(float time)

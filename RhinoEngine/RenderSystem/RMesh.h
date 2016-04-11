@@ -26,17 +26,18 @@ public:
 
 	RMaterial GetMaterial(int index) const;
 	vector<RMaterial>& GetMaterials();
-	int GetSubmeshCount() const;
 
 	void SetInputLayout(ID3D11InputLayout* inputLayout);
 	ID3D11InputLayout* GetInputLayout() const;
 	vector<RMeshElement>& GetMeshElements();
+	int GetMeshElementCount() const;
 
 	void SetMeshElements(RMeshElement* meshElements, int numElement);
 	void SetMaterials(RMaterial* materials, int numMaterial);
 
 	void SetAabb(const RAabb& aabb);
 	const RAabb& GetAabb() const;
+	const RAabb& GetMeshElementAabb(int index) const;
 
 	void SetResourceTimestamp(float time);
 	float GetResourceTimestamp();

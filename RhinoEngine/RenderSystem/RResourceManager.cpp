@@ -169,7 +169,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 {
 	vector<RMeshElement> meshElements;
 	vector<RMaterial> materials;
-	RAabb aabb;
+	RAabb mesh_aabb;
 
 	char msg_buf[1024];
 	sprintf_s(msg_buf, sizeof(msg_buf), "Loading mesh [%s]...\n", task->Filename.data());
@@ -259,6 +259,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		int controlPointCount = mesh->GetControlPointsCount();
 
 		vertData.resize(controlPointCount);
+
+		RAabb aabb;
 
 		// Fill vertex data
 		for (int i = 0; i < controlPointCount; i++)
@@ -587,7 +589,10 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		meshElem.CreateVertexBuffer(optimizedVertData.data(), sizeof(RVertex::MESH_VERTEX), optimizedVertData.size());
 		meshElem.CreateIndexBuffer(optimizedIndexData.data(), sizeof(UINT32), optimizedIndexData.size());
 		meshElem.SetName(node->GetName());
+		meshElem.SetAabb(aabb);
 		meshElements.push_back(meshElem);
+
+		mesh_aabb.Expand(aabb);
 
 		sprintf_s(msg_buf, "Mesh loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
 			optimizedVertData.size(), optimizedIndexData.size() / 3, flatVertData.size(), indexData.size() / 3);
@@ -642,7 +647,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	static_cast<RMesh*>(task->Resource)->SetInputLayout(RRenderer.GetInputLayout(RVertex::MESH_VERTEX::GetTypeName()));
 	static_cast<RMesh*>(task->Resource)->SetMeshElements(meshElements.data(), meshElements.size());
 	static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), materials.size());
-	static_cast<RMesh*>(task->Resource)->SetAabb(aabb);
+	static_cast<RMesh*>(task->Resource)->SetAabb(mesh_aabb);
 	static_cast<RMesh*>(task->Resource)->SetResourceTimestamp(REngine::GetTimer().TotalTime());
 	task->Resource->m_State = RS_Loaded;
 }
