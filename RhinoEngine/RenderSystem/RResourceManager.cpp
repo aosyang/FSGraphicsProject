@@ -20,6 +20,8 @@
 static mutex								m_TaskQueueMutex;
 static condition_variable					m_TaskQueueCondition;
 
+static mutex	TextureResourcesMutex;
+
 void ResourceLoaderThread(LoaderThreadData* data)
 {
 	while (1)
@@ -123,11 +125,13 @@ void RResourceManager::UnloadAllResources()
 	}
 	m_MeshResources.clear();
 
+	TextureResourcesMutex.lock();
 	for (UINT32 i = 0; i < m_TextureResources.size(); i++)
 	{
 		delete m_TextureResources[i];
 	}
 	m_TextureResources.clear();
+	TextureResourcesMutex.unlock();
 
 	UnloadSRVWrappers();
 }
@@ -694,7 +698,10 @@ RTexture* RResourceManager::LoadDDSTexture(const char* filename, ResourceLoading
 
 	pTexture = new RTexture(GetResourcePath(filename));
 	pTexture->m_State = RS_EnqueuedForLoading;
+
+	TextureResourcesMutex.lock();
 	m_TextureResources.push_back(pTexture);
+	TextureResourcesMutex.unlock();
 
 	LoaderThreadTask task;
 	task.Filename = string(filename);
@@ -763,7 +770,7 @@ int strcasecmp(const char* str1, const char* str2)
 
 RTexture* RResourceManager::FindTexture(const char* resourcePath)
 {
-	// TODO: Mutex needed here
+	unique_lock<mutex> lock(TextureResourcesMutex);
 	for (vector<RTexture*>::iterator iter = m_TextureResources.begin(); iter != m_TextureResources.end(); iter++)
 	{
 		if (strcasecmp((*iter)->GetPath().data(), resourcePath) == 0)
