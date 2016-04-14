@@ -782,6 +782,10 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 			}
 		}
 
+		// Hack: don't use uv1 on skinned mesh
+		if (hasDeformer)
+			VertexComponentMask &= ~VCM_UV1;
+
 		RMeshElement meshElem;
 
 		int stride = RVertexDeclaration::Instance().GetVertexStride(VertexComponentMask);

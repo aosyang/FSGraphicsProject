@@ -90,6 +90,7 @@ private:
 	RShadowMap					m_ShadowMap;
 	RShader*					m_DepthShader;
 	RShader*					m_InstancedDepthShader;
+	RShader*					m_SkinnedDepthShader;
 
 	RSMeshObject				m_TransparentMesh;
 
