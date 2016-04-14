@@ -18,7 +18,7 @@
 #include "tinyxml2/tinyxml2.h"
 #include "../../Shaders/ConstBufferVS.h"	// MAX_BONE_COUNT
 
-#define ENABLE_THREADED_LOADING 0
+#define ENABLE_THREADED_LOADING 1
 
 static mutex								m_TaskQueueMutex;
 static condition_variable					m_TaskQueueCondition;
