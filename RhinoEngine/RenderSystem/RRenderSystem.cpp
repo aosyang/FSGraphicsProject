@@ -166,14 +166,14 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 
 	m_pD3DImmediateContext->RSSetViewports(1, &vp);
 
-	m_VertexDeclaration.Initialize();
+	RVertexDeclaration::Instance().Initialize();
 
 	return true;
 }
 
 void RRenderSystem::Shutdown()
 {
-	m_VertexDeclaration.Release();
+	RVertexDeclaration::Instance().Release();
 
 	m_DepthStencilView->Release();
 	m_DepthStencilBuffer->Release();
@@ -251,11 +251,6 @@ void RRenderSystem::Present()
 	assert(m_SwapChain);
 
 	HR(m_SwapChain->Present(0, 0));
-}
-
-ID3D11InputLayout* RRenderSystem::GetInputLayout(const string& vertexTypeName)
-{
-	return m_VertexDeclaration.GetInputLayout(vertexTypeName);
 }
 
 void RRenderSystem::SetRenderTarget(ID3D11RenderTargetView* renderTargetView, ID3D11DepthStencilView* depthStencilView)

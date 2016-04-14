@@ -8,7 +8,7 @@
 #include "RMeshElement.h"
 
 RMeshElement::RMeshElement()
-	: m_VertexBuffer(nullptr), m_IndexBuffer(nullptr)
+	: m_VertexBuffer(nullptr), m_IndexBuffer(nullptr), m_InputLayout(nullptr)
 {
 
 }
@@ -19,8 +19,10 @@ void RMeshElement::Release()
 	SAFE_RELEASE(m_IndexBuffer);
 }
 
-void RMeshElement::CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, bool dynamic /*= false*/)
+void RMeshElement::CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, ID3D11InputLayout* inputLayout, bool dynamic /*= false*/)
 {
+	m_InputLayout = inputLayout;
+
 	D3D11_BUFFER_DESC vbd;
 	ZeroMemory(&vbd, sizeof(vbd));
 	vbd.Usage = dynamic ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
@@ -81,19 +83,19 @@ void RMeshElement::Draw(D3D11_PRIMITIVE_TOPOLOGY topology)
 
 	if (m_IndexBuffer)
 	{
+		assert(m_InputLayout);
+		RRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
 		RRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
 		RRenderer.D3DImmediateContext()->IASetIndexBuffer(m_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
 		RRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
-
 		RRenderer.D3DImmediateContext()->DrawIndexed(m_IndexCount, 0, 0);
 	}
 	else if (m_VertexBuffer)
 	{
+		assert(m_InputLayout);
+		RRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
 		RRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
-
 		RRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
-
 		RRenderer.D3DImmediateContext()->Draw(m_VertexCount, 0);
 	}
 }

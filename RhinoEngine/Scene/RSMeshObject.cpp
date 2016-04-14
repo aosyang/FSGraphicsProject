@@ -129,7 +129,7 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 
 	UpdateMaterialsFromResource();
 
-	RRenderer.D3DImmediateContext()->IASetInputLayout(m_Mesh->GetInputLayout());
+	//RRenderer.D3DImmediateContext()->IASetInputLayout(m_Mesh->GetInputLayout());
 
 	for (UINT32 i = 0; i < m_Mesh->GetMeshElements().size(); i++)
 	{
@@ -174,7 +174,7 @@ void RSMeshObject::DrawWithShader(RShader* shader, bool instanced, int instanceC
 	if (!m_Mesh || !m_Mesh->IsResourceReady() || !shader)
 		return;
 
-	RRenderer.D3DImmediateContext()->IASetInputLayout(m_Mesh->GetInputLayout());
+	//RRenderer.D3DImmediateContext()->IASetInputLayout(m_Mesh->GetInputLayout());
 
 	for (UINT32 i = 0; i < m_Mesh->GetMeshElements().size(); i++)
 	{

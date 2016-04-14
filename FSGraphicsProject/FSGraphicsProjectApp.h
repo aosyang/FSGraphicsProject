@@ -37,7 +37,7 @@ public:
 
 private:
 	void CreateSceneRenderTargetView();
-	void SetPerObjectConstBuffuer(const RMatrix4& world);
+	void SetPerObjectConstBuffer(const RMatrix4& world);
 	void RenderSinglePass(RenderPass pass);
 	void SetMaterialConstBuffer(SHADER_MATERIAL_BUFFER* buffer);
 

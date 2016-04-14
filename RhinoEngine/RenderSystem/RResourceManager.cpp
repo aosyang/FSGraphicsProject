@@ -144,7 +144,7 @@ void RResourceManager::UnloadSRVWrappers()
 	m_WrapperTextureResources.clear();
 }
 
-RMesh* RResourceManager::LoadFbxMesh(const char* filename)
+RMesh* RResourceManager::LoadFbxMesh(const char* filename, ResourceLoadingMode mode)
 {
 	RMesh* pMesh = new RMesh(GetResourcePath(filename));
 	pMesh->m_State = RS_EnqueuedForLoading;
@@ -154,13 +154,20 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename)
 	task.Filename = string(filename);
 	task.Resource = pMesh;
 
-	// Upload task to working queue
-	m_TaskQueueMutex.lock();
-	m_LoaderThreadTaskQueue.push(task);
-	m_TaskQueueMutex.unlock();
+	if (mode == RLM_Immediate)
+	{
+		ThreadLoadFbxMeshData(&task);
+	}
+	else
+	{
+		// Upload task to working queue
+		m_TaskQueueMutex.lock();
+		m_LoaderThreadTaskQueue.push(task);
+		m_TaskQueueMutex.unlock();
 
-	// Notify loader thread to start working
-	m_TaskQueueCondition.notify_all();
+		// Notify loader thread to start working
+		m_TaskQueueCondition.notify_all();
+	}
 
 	return pMesh;
 }
@@ -251,9 +258,10 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		OutputDebugStringA(msg_buf);
 		
 		FbxVector4* controlPointArray;
-		vector<RVertex::MESH_VERTEX> vertData;
+		vector<RVertex::MESH_LOADER_VERTEX> vertData;
 		vector<int> indexData;
-		vector<RVertex::MESH_VERTEX> flatVertData;
+		vector<RVertex::MESH_LOADER_VERTEX> flatVertData;
+		int VertexComponentMask = 0;
 
 		controlPointArray = mesh->GetControlPoints();
 		int controlPointCount = mesh->GetControlPointsCount();
@@ -268,6 +276,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 			vertData[i].pos.x = (float)controlPointArray[i][0];
 			vertData[i].pos.y = (float)controlPointArray[i][1];
 			vertData[i].pos.z = (float)controlPointArray[i][2];
+
+			VertexComponentMask |= VCM_Pos;
 
 			aabb.Expand(vertData[i].pos);
 		}
@@ -289,6 +299,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					vertData[i].normal.x = (float)normal[0];
 					vertData[i].normal.y = (float)normal[1];
 					vertData[i].normal.z = (float)normal[2];
+
+					VertexComponentMask |= VCM_Normal;
 				}
 				break;
 
@@ -301,20 +313,9 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					vertData[i].normal.x = (float)normal[0];
 					vertData[i].normal.y = (float)normal[1];
 					vertData[i].normal.z = (float)normal[2];
+
+					VertexComponentMask |= VCM_Normal;
 				}
-				break;
-			}
-			break;
-
-		case FbxGeometryElement::eByPolygonVertex:
-			switch (normalArray->GetReferenceMode())
-			{
-			case FbxGeometryElement::eDirect:
-				// TODO
-				break;
-
-			case FbxGeometryElement::eIndexToDirect:
-				// TODO
 				break;
 			}
 			break;
@@ -336,6 +337,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					vertData[i].tangent.x = (float)tangent[0];
 					vertData[i].tangent.y = (float)tangent[1];
 					vertData[i].tangent.z = (float)tangent[2];
+				
+					VertexComponentMask |= VCM_Tangent;
 				}
 				break;
 
@@ -348,6 +351,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					vertData[i].tangent.x = (float)tangent[0];
 					vertData[i].tangent.y = (float)tangent[1];
 					vertData[i].tangent.z = (float)tangent[2];
+
+					VertexComponentMask |= VCM_Tangent;
 				}
 				break;
 			}
@@ -378,6 +383,11 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 						vertUV.x = (float)uv[0];
 						vertUV.y = 1.0f - (float)uv[1];
+
+						if (uvLayer == 0)
+							VertexComponentMask |= VCM_UV0;
+						else
+							VertexComponentMask |= VCM_UV1;
 					}
 					break;
 
@@ -391,6 +401,11 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 						vertUV.x = (float)uv[0];
 						vertUV.y = 1.0f - (float)uv[1];
+
+						if (uvLayer == 0)
+							VertexComponentMask |= VCM_UV0;
+						else
+							VertexComponentMask |= VCM_UV1;
 					}
 					break;
 				}
@@ -416,7 +431,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 				triangle[idxVert] = idxPoly * 3 + idxVert;
 				int iv = mesh->GetPolygonVertex(idxPoly, idxVert);
 
-				RVertex::MESH_VERTEX vertex = vertData[iv];
+				RVertex::MESH_LOADER_VERTEX vertex = vertData[iv];
 				
 				if (hasPerPolygonVertexNormal)
 				{
@@ -426,6 +441,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					vertex.normal.x = (float)normal[0];
 					vertex.normal.y = (float)normal[1];
 					vertex.normal.z = (float)normal[2];
+
+					VertexComponentMask |= VCM_Normal;
 				}
 
 				if (hasPerPolygonVertexTangent)
@@ -433,24 +450,28 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					switch (tangentArray->GetReferenceMode())
 					{
 					case FbxGeometryElement::eDirect:
-					{
-						FbxVector4 tangent = tangentArray->GetDirectArray().GetAt(idxPoly * 3 + idxVert);
+						{
+							FbxVector4 tangent = tangentArray->GetDirectArray().GetAt(idxPoly * 3 + idxVert);
 
-						vertex.tangent.x = (float)tangent[0];
-						vertex.tangent.y = (float)tangent[1];
-						vertex.tangent.z = (float)tangent[2];
-					}
-					break;
+							vertex.tangent.x = (float)tangent[0];
+							vertex.tangent.y = (float)tangent[1];
+							vertex.tangent.z = (float)tangent[2];
+
+							VertexComponentMask |= VCM_Tangent;
+						}
+						break;
 					case FbxGeometryElement::eIndexToDirect:
-					{
-						int index = tangentArray->GetIndexArray().GetAt(idxPoly * 3 + idxVert);
-						FbxVector4 tangent = tangentArray->GetDirectArray().GetAt(index);
+						{
+							int index = tangentArray->GetIndexArray().GetAt(idxPoly * 3 + idxVert);
+							FbxVector4 tangent = tangentArray->GetDirectArray().GetAt(index);
 
-						vertex.tangent.x = (float)tangent[0];
-						vertex.tangent.y = (float)tangent[1];
-						vertex.tangent.z = (float)tangent[2];
-					}
-					break;
+							vertex.tangent.x = (float)tangent[0];
+							vertex.tangent.y = (float)tangent[1];
+							vertex.tangent.z = (float)tangent[2];
+
+							VertexComponentMask |= VCM_Tangent;
+						}
+						break;
 					}
 				}
 
@@ -470,6 +491,11 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 						vertUV.x = (float)uv[0];
 						vertUV.y = 1.0f - (float)uv[1];
+
+						if (uvLayer == 0)
+							VertexComponentMask |= VCM_UV0;
+						else
+							VertexComponentMask |= VCM_UV1;
 					}
 				}
 
@@ -564,14 +590,14 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		// Optimize mesh
 		sprintf_s(msg_buf, "Optimizing mesh...\n");
 		OutputDebugStringA(msg_buf);
-		map<RVertex::MESH_VERTEX, int> meshVertIndexTable;
-		vector<RVertex::MESH_VERTEX> optimizedVertData;
+		map<RVertex::MESH_LOADER_VERTEX, int> meshVertIndexTable;
+		vector<RVertex::MESH_LOADER_VERTEX> optimizedVertData;
 		vector<int> optimizedIndexData;
 		int index = 0;
 		for (UINT i = 0; i < indexData.size(); i++)
 		{
-			RVertex::MESH_VERTEX& v = flatVertData[indexData[i]];
-			map<RVertex::MESH_VERTEX, int>::iterator iterResult = meshVertIndexTable.find(v);
+			RVertex::MESH_LOADER_VERTEX& v = flatVertData[indexData[i]];
+			map<RVertex::MESH_LOADER_VERTEX, int>::iterator iterResult = meshVertIndexTable.find(v);
 			if (iterResult == meshVertIndexTable.end())
 			{
 				meshVertIndexTable[v] = index;
@@ -586,7 +612,16 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		}
 
 		RMeshElement meshElem;
-		meshElem.CreateVertexBuffer(optimizedVertData.data(), sizeof(RVertex::MESH_VERTEX), optimizedVertData.size());
+
+		int stride = RVertexDeclaration::Instance().GetVertexStride(VertexComponentMask);
+		ID3D11InputLayout* inputLayout = RVertexDeclaration::Instance().GetInputLayoutByVertexComponents(VertexComponentMask);
+		BYTE* compactVertexData = new BYTE[optimizedVertData.size() * stride];
+		RVertexDeclaration::Instance().CopyVertexComponents(compactVertexData, optimizedVertData.data(), (int)optimizedVertData.size(), VertexComponentMask);
+
+		meshElem.CreateVertexBuffer(compactVertexData, stride, optimizedVertData.size(), inputLayout);
+
+		delete[] compactVertexData;
+
 		meshElem.CreateIndexBuffer(optimizedIndexData.data(), sizeof(UINT32), optimizedIndexData.size());
 		meshElem.SetName(node->GetName());
 		meshElem.SetAabb(aabb);
@@ -644,7 +679,6 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	}
 	delete doc;
 
-	static_cast<RMesh*>(task->Resource)->SetInputLayout(RRenderer.GetInputLayout(RVertex::MESH_VERTEX::GetTypeName()));
 	static_cast<RMesh*>(task->Resource)->SetMeshElements(meshElements.data(), meshElements.size());
 	static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), materials.size());
 	static_cast<RMesh*>(task->Resource)->SetAabb(mesh_aabb);

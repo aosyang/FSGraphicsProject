@@ -12,6 +12,18 @@
 #include "RSkyboxVertexSignature.csh"
 #include "RParticleVertexSignature.csh"
 
+ShaderInputVertex VertexSemantics[] =
+{
+	{ "float3", "POSITION", },
+	{ "float2", "TEXCOORD0", },
+	{ "float3", "NORMAL", },
+	{ "float3", "TANGENT", },
+	{ "float2", "TEXCOORD1", },
+	{ "int4",	"BLENDINDICES", },
+	{ "float4", "BLENDWEIGHT", },
+};
+
+
 RVertexDeclaration::RVertexDeclaration()
 {
 }
@@ -81,6 +93,12 @@ void RVertexDeclaration::Release()
 		iter->second->Release();
 	}
 
+	for (map<int, ID3D11InputLayout*>::iterator iter = m_VertexComponentInputLayouts.begin();
+		 iter != m_VertexComponentInputLayouts.end(); iter++)
+	{
+		iter->second->Release();
+	}
+
 	m_InputLayouts.clear();
 }
 
@@ -93,4 +111,136 @@ ID3D11InputLayout* RVertexDeclaration::GetInputLayout(const string& vertexTypeNa
 	}
 
 	return nullptr;
+}
+
+ID3D11InputLayout* RVertexDeclaration::GetInputLayoutByVertexComponents(int vertexComponents)
+{
+	map<int, ID3D11InputLayout*>::const_iterator iter = m_VertexComponentInputLayouts.find(vertexComponents);
+	if (iter == m_VertexComponentInputLayouts.end())
+	{
+		// Create input layout based on vertex component
+		static D3D11_INPUT_ELEMENT_DESC ComponentDescs[VertexComponent_Count] =
+		{
+			{ "POSITION",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD",		0, DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL",			0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TANGENT",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD",		1, DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BLENDINDICES",	0, DXGI_FORMAT_R32G32B32A32_SINT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BLENDWEIGHT",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		};
+
+		ID3D11InputLayout* pInputLayout;
+		int componentCount = 0;
+		D3D11_INPUT_ELEMENT_DESC desc[VertexComponent_Count];
+		for (int i = 0; i < VertexComponent_Count; i++)
+		{
+			if (vertexComponents & (1 << i))
+			{
+				desc[componentCount] = ComponentDescs[i];
+				componentCount++;
+			}
+		}
+
+		// Create shader
+		string vertexShaderSignature = "struct INPUT_VERTEX {\n";
+
+		for (int i = 0; i < VertexComponent_Count; i++)
+		{
+			if (vertexComponents & (1 << i))
+			{
+				string variableName = VertexSemantics[i].Semantic;
+				for (UINT n = 1; n < variableName.length(); n++)
+				{
+					variableName[n] = tolower(variableName[n]);
+				}
+
+				vertexShaderSignature += string(VertexSemantics[i].Type) + " " + variableName + " : " + VertexSemantics[i].Semantic + ";\n";
+			}
+		}
+
+		vertexShaderSignature +=
+			"};\n"
+			"float4 main(INPUT_VERTEX Input) : SV_POSITION { return float4(0, 0, 0, 0); }\n";
+
+		ID3DBlob* pShaderCode = nullptr;
+		ID3DBlob* pErrorMsg = nullptr;
+
+		char filename[1024];
+		sprintf_s(filename, 1024, "VS_Signature_%d.hlsl", vertexComponents);
+
+		if (SUCCEEDED(D3DCompile(vertexShaderSignature.data(), vertexShaderSignature.size(), filename, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", 0, 0, &pShaderCode, &pErrorMsg)))
+		{
+			RRenderer.D3DDevice()->CreateInputLayout(desc, componentCount, pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), &pInputLayout);
+		}
+		else
+		{
+			OutputDebugStringA((char*)pErrorMsg->GetBufferPointer());
+			OutputDebugStringA("\n");
+			assert(0);
+		}
+
+		m_VertexComponentInputLayouts[vertexComponents] = pInputLayout;
+
+		return pInputLayout;
+	}
+	else
+	{
+		return iter->second;
+	}
+}
+
+int RVertexDeclaration::GetVertexStride(int vertexComponents) const
+{
+	int stride = 0;
+
+	if (vertexComponents & VCM_Pos)
+		stride += sizeof(RVec3);
+	if (vertexComponents & VCM_UV0)
+		stride += sizeof(RVec2);
+	if (vertexComponents & VCM_UV1)
+		stride += sizeof(RVec2);
+	if (vertexComponents & VCM_Normal)
+		stride += sizeof(RVec3);
+	if (vertexComponents & VCM_Tangent)
+		stride += sizeof(RVec3);
+	if (vertexComponents & VCM_BoneId)
+		stride += sizeof(int) * 4;
+	if (vertexComponents & VCM_BoneWeights)
+		stride += sizeof(float) * 4;
+
+	return stride;
+}
+
+void RVertexDeclaration::CopyVertexComponents(void* out, const RVertex::MESH_LOADER_VERTEX* in, int count, int vertexComponents) const
+{
+	struct VC_Info
+	{
+		int size;
+		int offset;
+	};
+
+	static VC_Info strides[VertexComponent_Count] =
+	{
+		{ GetVertexStride(VCM_Pos),			offsetof(RVertex::MESH_LOADER_VERTEX, pos) },
+		{ GetVertexStride(VCM_UV0),			offsetof(RVertex::MESH_LOADER_VERTEX, uv0) },
+		{ GetVertexStride(VCM_Normal),		offsetof(RVertex::MESH_LOADER_VERTEX, normal) },
+		{ GetVertexStride(VCM_Tangent),		offsetof(RVertex::MESH_LOADER_VERTEX, tangent) },
+		{ GetVertexStride(VCM_UV1),			offsetof(RVertex::MESH_LOADER_VERTEX, uv1) },
+		{ GetVertexStride(VCM_BoneId),		offsetof(RVertex::MESH_LOADER_VERTEX, boneId) },
+		{ GetVertexStride(VCM_BoneWeights),	offsetof(RVertex::MESH_LOADER_VERTEX, weight) },
+	};
+
+	int offset = 0;
+	for (int i = 0; i < count; i++)
+	{
+		for (int n = 0; n < VertexComponent_Count; n++)
+		{
+			if ((1 << n) & vertexComponents)
+			{
+				memcpy((BYTE*)out + offset, (BYTE*)&in[i] + strides[n].offset, strides[n].size);
+				offset += strides[n].size;
+			}
+		}
+	}
 }

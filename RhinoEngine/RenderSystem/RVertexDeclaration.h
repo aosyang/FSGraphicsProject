@@ -19,34 +19,62 @@
 			(const float*)&rhs + sizeof(v) / 4);		\
 		}
 
-
-class RVertexDeclaration
+enum EVertexComponent
 {
-public:
-	RVertexDeclaration();
-	~RVertexDeclaration();
+	VertexComponent_Pos,
+	VertexComponent_UV0,
+	VertexComponent_Normal,
+	VertexComponent_Tangent,
+	VertexComponent_UV1,
+	VertexComponent_BoneId,
+	VertexComponent_BoneWeights,
 
-	void Initialize();
-	void Release();
+	VertexComponent_Count,
+};
 
-	ID3D11InputLayout* GetInputLayout(const string& vertexTypeName) const;
+struct ShaderInputVertex
+{
+	char Type[10];
+	char Semantic[20];
+};
 
-private:
-	map<string, ID3D11InputLayout*>		m_InputLayouts;
+enum EVertexComponentMask
+{
+	VCM_Pos								= 1 << VertexComponent_Pos,
+	VCM_UV0								= 1 << VertexComponent_UV0,
+	VCM_Normal							= 1 << VertexComponent_Normal,
+	VCM_Tangent							= 1 << VertexComponent_Tangent,
+	VCM_UV1								= 1 << VertexComponent_UV1,
+	VCM_BoneId							= 1 << VertexComponent_BoneId,
+	VCM_BoneWeights						= 1 << VertexComponent_BoneWeights,
 
+	VCM_PosNormal						= VCM_Pos | VCM_Normal,
+	VCM_PosUV0Normal					= VCM_Pos | VCM_UV0 | VCM_Normal,
+	VCM_PosUV0NormalUV1					= VCM_Pos | VCM_UV0 | VCM_Normal | VCM_UV1,
+	VCM_PosUV0NormalTangent				= VCM_Pos | VCM_UV0 | VCM_Normal | VCM_Tangent,
+	VCM_PosUV0NormalTangentUV1			= VCM_Pos | VCM_UV0 | VCM_Normal | VCM_Tangent | VCM_UV1,
 };
 
 namespace RVertex
 {
+	VERTEX_TYPE_BEGIN(MESH_LOADER_VERTEX)
+		RVec3 pos;
+		RVec2 uv0;
+		RVec2 uv1;
+		RVec3 normal;
+		RVec3 tangent;
+		int boneId[4];
+		float weight[4];
+	VERTEX_TYPE_DECLARE_LEXICOGRAPHICAL_COMPARE(MESH_LOADER_VERTEX)
+	VERTEX_TYPE_END
+
 	VERTEX_TYPE_BEGIN(MESH_VERTEX)
 		RVec3 pos;
 		RVec2 uv0;
 		RVec3 normal;
 		RVec3 tangent;
 		RVec2 uv1;
-	VERTEX_TYPE_DECLARE_LEXICOGRAPHICAL_COMPARE(MESH_VERTEX)
 	VERTEX_TYPE_END
-
 
 	VERTEX_TYPE_BEGIN(PRIMITIVE_VERTEX)
 		RVec4	pos;
@@ -67,6 +95,24 @@ namespace RVertex
 	VERTEX_TYPE_END
 
 }
+
+class RVertexDeclaration : public RSingleton<RVertexDeclaration>
+{
+public:
+	RVertexDeclaration();
+	~RVertexDeclaration();
+
+	void Initialize();
+	void Release();
+
+	ID3D11InputLayout* GetInputLayout(const string& vertexTypeName) const;
+	ID3D11InputLayout* GetInputLayoutByVertexComponents(int vertexComponents);
+	int GetVertexStride(int vertexComponents) const;
+	void CopyVertexComponents(void* out, const RVertex::MESH_LOADER_VERTEX* in, int count, int vertexComponents) const;
+private:
+	map<string, ID3D11InputLayout*>		m_InputLayouts;
+	map<int, ID3D11InputLayout*>		m_VertexComponentInputLayouts;
+};
 
 
 #endif

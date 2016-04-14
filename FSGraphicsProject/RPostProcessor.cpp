@@ -30,7 +30,7 @@ void RPostProcessor::Initialize()
 	RRenderer.D3DDevice()->CreatePixelShader(PostProcessor_ColorEdgeDetection, sizeof(PostProcessor_ColorEdgeDetection), 0, &m_PPPixelShader[PPE_ColorEdgeDetection]);
 
 	// Find vertex declaration for screen quad
-	m_InputLayout = RRenderer.GetInputLayout(RVertex::SKYBOX_VERTEX::GetTypeName());
+	m_InputLayout = RVertexDeclaration::Instance().GetInputLayout(RVertex::SKYBOX_VERTEX::GetTypeName());
 
 	// Create vertex buffer for screen quad
 
@@ -44,7 +44,7 @@ void RPostProcessor::Initialize()
 		RVec3( 1.0f,  1.0f, 1.0f),
 		RVec3( 1.0f, -1.0f, 1.0f),
 	};
-	m_ScreenQuad.CreateVertexBuffer(quad, sizeof(PP_QUAD), 6);
+	m_ScreenQuad.CreateVertexBuffer(quad, sizeof(PP_QUAD), 6, m_InputLayout);
 
 	CreateRenderTargetResources();
 }

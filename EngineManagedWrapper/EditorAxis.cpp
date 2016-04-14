@@ -67,7 +67,8 @@ void EditorAxis::Create()
 			0, 7, 4, 0, 3, 7,
 		};
 
-		m_AxisMeshBuffer[n].CreateVertexBuffer(axisVerts, sizeof(RVertex::PRIMITIVE_VERTEX), sizeof(axisVerts) / sizeof(RVertex::PRIMITIVE_VERTEX));
+		ID3D11InputLayout* pInputLayout = RVertexDeclaration::Instance().GetInputLayout(RVertex::PRIMITIVE_VERTEX::GetTypeName());
+		m_AxisMeshBuffer[n].CreateVertexBuffer(axisVerts, sizeof(RVertex::PRIMITIVE_VERTEX), sizeof(axisVerts) / sizeof(RVertex::PRIMITIVE_VERTEX), pInputLayout);
 		m_AxisMeshBuffer[n].CreateIndexBuffer(axisIndices, sizeof(UINT), sizeof(axisIndices) / sizeof(UINT));
 
 		for (int i = 0; i < 8; i++)

@@ -13,6 +13,7 @@ class RMeshElement
 protected:
 	ID3D11Buffer*		m_VertexBuffer;
 	ID3D11Buffer*		m_IndexBuffer;
+	ID3D11InputLayout*	m_InputLayout;
 
 	UINT				m_Stride;
 	UINT				m_VertexCount;
@@ -25,7 +26,7 @@ public:
 
 	void Release();
 
-	void CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, bool dynamic = false);
+	void CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, ID3D11InputLayout* inputLayout, bool dynamic = false);
 	void CreateIndexBuffer(void* data, UINT indexTypeSize, UINT indexCount, bool dynamic = false);
 
 	void UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount);

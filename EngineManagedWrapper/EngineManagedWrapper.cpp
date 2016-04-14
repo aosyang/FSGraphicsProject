@@ -93,8 +93,8 @@ namespace EngineManagedWrapper
 			m_DefaultShader = RShaderManager::Instance().GetShaderResource("Default");
 			m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 
-			m_PrimitiveInputLayout = RRenderer.GetInputLayout(RVertex::PRIMITIVE_VERTEX::GetTypeName());
-			m_PrimitiveMeshBuffer.CreateVertexBuffer(nullptr, sizeof(RVertex::PRIMITIVE_VERTEX), 65536, true);
+			m_PrimitiveInputLayout = RVertexDeclaration::Instance().GetInputLayout(RVertex::PRIMITIVE_VERTEX::GetTypeName());
+			m_PrimitiveMeshBuffer.CreateVertexBuffer(nullptr, sizeof(RVertex::PRIMITIVE_VERTEX), 65536, m_PrimitiveInputLayout, true);
 
 #if 1
 			RResourceManager::Instance().LoadAllResources();
@@ -172,7 +172,7 @@ namespace EngineManagedWrapper
 
 					RInput.GetCursorPos(cur_x, cur_y);
 					float fx = float(cur_x - rect.left) / float(rect.right - rect.left),
-						fy = float(cur_y - rect.top) / float(rect.bottom - rect.top);
+						  fy = float(cur_y - rect.top) / float(rect.bottom - rect.top);
 
 					RunScreenToCameraRayPicking(fx, fy);
 				}

@@ -33,8 +33,6 @@ public:
 	int	GetClientHeight() const { return m_ClientHeight; }
 	const TCHAR* GetAdapterName() const { return m_AdapterName; }
 
-	ID3D11InputLayout* GetInputLayout(const string& vertexTypeName);
-
 	void SetRenderTarget(ID3D11RenderTargetView* renderTargetView = DefaultRenderTargetView, ID3D11DepthStencilView* depthStencilView = DefaultDepthStencilView);
 
 	static ID3D11RenderTargetView* DefaultRenderTargetView;
@@ -61,8 +59,6 @@ protected:
 
 	ID3D11RenderTargetView*	m_CurrentRenderTargetView;
 	ID3D11DepthStencilView*	m_CurrentDepthStencilView;
-
-	RVertexDeclaration		m_VertexDeclaration;
 };
 
 #define RRenderer RRenderSystem::Instance()

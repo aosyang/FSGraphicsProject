@@ -6,6 +6,14 @@
 #ifndef _RRESOURCEMANAGER_H
 #define _RRESOURCEMANAGER_H
 
+#define ENABLE_THREADED_LOADING 1
+
+#if (ENABLE_THREADED_LOADING == 1)
+#define DEFAULT_LOADING_MODE RLM_Threaded
+#else
+#define DEFAULT_LOADING_MODE RLM_Immediate
+#endif
+
 namespace std
 {
 	class mutex;
@@ -44,8 +52,8 @@ public:
 	void UnloadAllResources();
 	void UnloadSRVWrappers();
 
-	RMesh* LoadFbxMesh(const char* filename);
-	RTexture* LoadDDSTexture(const char* filename, ResourceLoadingMode mode = RLM_Threaded);
+	RMesh* LoadFbxMesh(const char* filename, ResourceLoadingMode mode = DEFAULT_LOADING_MODE);
+	RTexture* LoadDDSTexture(const char* filename, ResourceLoadingMode mode = DEFAULT_LOADING_MODE);
 
 	RTexture* FindTexture(const char* resourcePath);
 	RMesh* FindMesh(const char* resourcePath);

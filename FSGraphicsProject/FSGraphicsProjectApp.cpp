@@ -149,10 +149,9 @@ bool FSGraphicsProjectApp::Initialize()
 		0, 1, 10, 1, 2, 10, 2, 3, 10, 3, 4, 10, 4, 5, 10, 5, 6, 10, 6, 7, 10, 7, 8, 10, 8, 9, 10, 9, 0, 10,
 		1, 0, 11, 2, 1, 11, 3, 2, 11, 4, 3, 11, 5, 4, 11, 6, 5, 11, 7, 6, 11, 8, 7, 11, 9, 8, 11, 0, 9, 11, };
 
-	m_StarMesh.CreateVertexBuffer(starVertex, sizeof(RVertex::PRIMITIVE_VERTEX), 12);
+	m_ColorPrimitiveIL = RVertexDeclaration::Instance().GetInputLayout(RVertex::PRIMITIVE_VERTEX::GetTypeName());
+	m_StarMesh.CreateVertexBuffer(starVertex, sizeof(RVertex::PRIMITIVE_VERTEX), 12, m_ColorPrimitiveIL);
 	m_StarMesh.CreateIndexBuffer(starIndex, sizeof(UINT32), sizeof(starIndex) / sizeof(UINT32));
-
-	m_ColorPrimitiveIL = RRenderer.GetInputLayout(RVertex::PRIMITIVE_VERTEX::GetTypeName());
 
 	// Create buffer for bump cube
 	RVertex::MESH_VERTEX boxVertex[] = 
@@ -199,10 +198,9 @@ bool FSGraphicsProjectApp::Initialize()
 		12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23,
 	};
 
-	m_BumpCubeMesh.CreateVertexBuffer(boxVertex, sizeof(RVertex::MESH_VERTEX), 24);
+	m_BumpLightingIL = RVertexDeclaration::Instance().GetInputLayout(RVertex::MESH_VERTEX::GetTypeName());
+	m_BumpCubeMesh.CreateVertexBuffer(boxVertex, sizeof(RVertex::MESH_VERTEX), 24, m_BumpLightingIL);
 	m_BumpCubeMesh.CreateIndexBuffer(boxIndex, sizeof(UINT32), 36);
-
-	m_BumpLightingIL = RRenderer.GetInputLayout(RVertex::MESH_VERTEX::GetTypeName());
 
 	m_cbPerObject.Initialize();
 	m_cbScene.Initialize();
@@ -297,9 +295,8 @@ bool FSGraphicsProjectApp::Initialize()
 
 	m_ShadowMap.Initialize(1024, 1024);
 
-	m_ParticleBuffer.CreateVertexBuffer(nullptr, sizeof(RVertex::PARTICLE_VERTEX), PARTICLE_COUNT, true);
-
-	m_ParticleIL = RRenderer.GetInputLayout(RVertex::PARTICLE_VERTEX::GetTypeName());
+	m_ParticleIL = RVertexDeclaration::Instance().GetInputLayout(RVertex::PARTICLE_VERTEX::GetTypeName());
+	m_ParticleBuffer.CreateVertexBuffer(nullptr, sizeof(RVertex::PARTICLE_VERTEX), PARTICLE_COUNT, m_ParticleIL, true);
 
 	for (int i = 0; i < PARTICLE_COUNT; i++)
 	{
@@ -689,7 +686,7 @@ void FSGraphicsProjectApp::CreateSceneRenderTargetView()
 	RRenderer.D3DDevice()->CreateDepthStencilView(m_RenderTargetDepthBuffer, 0, &m_RenderTargetDepthView);
 }
 
-void FSGraphicsProjectApp::SetPerObjectConstBuffuer(const RMatrix4& world)
+void FSGraphicsProjectApp::SetPerObjectConstBuffer(const RMatrix4& world)
 {
 	SHADER_OBJECT_BUFFER cbObject;
 	cbObject.worldMatrix = world;
@@ -716,7 +713,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
 
 	// Set up object world matrix
-	SetPerObjectConstBuffuer(RMatrix4::IDENTITY);
+	SetPerObjectConstBuffer(RMatrix4::IDENTITY);
 
 	if (pass != ShadowPass)
 	{
@@ -731,21 +728,19 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	}
 
 	// Draw star
-	SetPerObjectConstBuffuer(RMatrix4::CreateTranslation(0.0f, 500.0f, 0.0f));
+	SetPerObjectConstBuffer(RMatrix4::CreateTranslation(0.0f, 500.0f, 0.0f));
 
 	if (pass == ShadowPass)
 		m_DepthShader->Bind();
 	else
 		m_ColorShader->Bind();
 
-	RRenderer.D3DImmediateContext()->IASetInputLayout(m_ColorPrimitiveIL);
-
 	m_StarMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Draw meshes
 
 	// Draw city
-	SetPerObjectConstBuffuer(m_FbxMeshObj.GetNodeTransform());
+	SetPerObjectConstBuffer(m_FbxMeshObj.GetNodeTransform());
 
 	if (pass == ShadowPass)
 		m_FbxMeshObj.DrawWithShader(m_DepthShader);
@@ -767,7 +762,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	}
 
 	// Draw islands
-	SetPerObjectConstBuffuer(m_IslandMeshObj.GetNodeTransform());
+	SetPerObjectConstBuffer(m_IslandMeshObj.GetNodeTransform());
 	m_cbInstance[0].ApplyToShaders();
 
 	if (pass == ShadowPass)
@@ -790,7 +785,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	}
 
 	// Draw AO scene
-	SetPerObjectConstBuffuer(m_AOSceneObj.GetNodeTransform());
+	SetPerObjectConstBuffer(m_AOSceneObj.GetNodeTransform());
 
 	if (pass == ShadowPass)
 		m_AOSceneObj.DrawWithShader(m_DepthShader);
@@ -812,7 +807,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	}
 
 	// Draw bumped cube
-	SetPerObjectConstBuffuer(RMatrix4::CreateTranslation(-1400.0f, 150.0f, 0.0f));
+	SetPerObjectConstBuffer(RMatrix4::CreateTranslation(-1400.0f, 150.0f, 0.0f));
 
 	if (pass == ShadowPass)
 	{
@@ -825,12 +820,11 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		m_BumpLightingShader->Bind();
 		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_BumpBaseTexture->GetPtrSRV());
 		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, m_BumpNormalTexture->GetPtrSRV());
-		RRenderer.D3DImmediateContext()->IASetInputLayout(m_BumpLightingIL);
 		m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
 	// Draw character
-	SetPerObjectConstBuffuer(m_CharacterObj.GetNodeTransform());
+	SetPerObjectConstBuffer(m_CharacterObj.GetNodeTransform());
 	
 	if (pass == ShadowPass)
 		m_CharacterObj.DrawWithShader(m_DepthShader);
@@ -856,7 +850,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	{
 		m_cbInstance[1].ApplyToShaders();
 
-		SetPerObjectConstBuffuer(m_TransparentMesh.GetNodeTransform());
+		SetPerObjectConstBuffer(m_TransparentMesh.GetNodeTransform());
 
 		float opacity = (timeNow - m_TransparentMesh.GetResourceTimestamp()) / loadingFadeInTime;
 		if (opacity >= 0.0f && opacity <= 1.0f)
@@ -876,7 +870,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	}
 
 	// Draw tachikoma
-	SetPerObjectConstBuffuer(m_TachikomaObj.GetNodeTransform());
+	SetPerObjectConstBuffer(m_TachikomaObj.GetNodeTransform());
 
 	if (pass == ShadowPass)
 		m_TachikomaObj.DrawWithShader(m_DepthShader);
@@ -903,11 +897,10 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[1], blendFactor, 0xFFFFFFFF);
 		RRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[1], 0);
 
-		SetPerObjectConstBuffuer(RMatrix4::CreateTranslation(0.0f, 150.0f, 150.0f));
+		SetPerObjectConstBuffer(RMatrix4::CreateTranslation(0.0f, 150.0f, 150.0f));
 		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_ParticleDiffuseTexture->GetPtrSRV());
 		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, m_ParticleNormalTexture->GetPtrSRV());
 		m_ParticleShader->Bind();
-		RRenderer.D3DImmediateContext()->IASetInputLayout(m_ParticleIL);
 		m_ParticleBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 		// Restore depth writing
