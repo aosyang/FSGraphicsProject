@@ -26,6 +26,11 @@ void RSMeshObject::SetMesh(RMesh* mesh)
 	m_bNeedUpdateMaterial = true;
 }
 
+RMesh* RSMeshObject::GetMesh() const
+{
+	return m_Mesh;
+}
+
 int RSMeshObject::GetMeshElementCount() const
 {
 	if (m_Mesh)

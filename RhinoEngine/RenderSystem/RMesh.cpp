@@ -9,7 +9,9 @@
 
 RMesh::RMesh(string path)
 	: RBaseResource(RT_Mesh, path),
-	  m_InputLayout(nullptr)
+	  m_InputLayout(nullptr),
+	  m_Animation(nullptr),
+	  m_BoneInitInvMatrices(nullptr)
 {
 	m_LoadingFinishTime = 0.0f;
 }
@@ -46,6 +48,9 @@ RMesh::~RMesh()
 	{
 		m_MeshElements[i].Release();
 	}
+
+	SAFE_DELETE(m_Animation);
+	SAFE_DELETE(m_BoneInitInvMatrices);
 }
 
 RMaterial RMesh::GetMaterial(int index) const
@@ -105,6 +110,21 @@ const RAabb& RMesh::GetAabb() const
 const RAabb& RMesh::GetMeshElementAabb(int index) const
 {
 	return m_MeshElements[index].GetAabb();
+}
+
+void RMesh::SetAnimation(RAnimation* anim)
+{
+	m_Animation = anim;
+}
+
+RAnimation* RMesh::GetAnimation() const
+{
+	return m_Animation;
+}
+
+void RMesh::SetBoneInitInvMatrices(BoneMatrices* bonePoses)
+{
+	m_BoneInitInvMatrices = bonePoses;
 }
 
 void RMesh::SetResourceTimestamp(float time)

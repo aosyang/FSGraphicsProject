@@ -60,9 +60,10 @@ private:
 
 	RShaderConstantBuffer<SHADER_OBJECT_BUFFER,		CBST_VS, 0>				m_cbPerObject;
 	RShaderConstantBuffer<SHADER_SCENE_BUFFER,		CBST_VS|CBST_GS, 1>		m_cbScene;
+	RShaderConstantBuffer<SHADER_INSTANCE_BUFFER,	CBST_VS, 2>				m_cbInstance[2];
+	RShaderConstantBuffer<SHADER_SKINNED_BUFFER,	CBST_VS, 3>				m_cbBoneMatrices;
 	RShaderConstantBuffer<SHADER_LIGHT_BUFFER,		CBST_PS, 0>				m_cbLight;
 	RShaderConstantBuffer<SHADER_MATERIAL_BUFFER,	CBST_PS, 1>				m_cbMaterial;
-	RShaderConstantBuffer<SHADER_INSTANCE_BUFFER,	CBST_VS, 2>				m_cbInstance[2];
 	RShaderConstantBuffer<SHADER_SCREEN_BUFFER,		CBST_PS, 2>				m_cbScreen;
 
 	ID3D11SamplerState*			m_SamplerState;
@@ -76,6 +77,7 @@ private:
 	RShader*					m_RefractionShader;
 
 	RSMeshObject				m_CharacterObj;
+	RMesh*						m_CharacterAnimation;
 
 	RMesh*						m_AOSceneMesh;
 	RSMeshObject				m_AOSceneObj;

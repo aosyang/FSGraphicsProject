@@ -16,6 +16,9 @@
 #include <fbxsdk.h>
 
 #include "tinyxml2/tinyxml2.h"
+#include "../../Shaders/ConstBufferVS.h"	// MAX_BONE_COUNT
+
+#define ENABLE_THREADED_LOADING 0
 
 static mutex								m_TaskQueueMutex;
 static condition_variable					m_TaskQueueCondition;
@@ -158,6 +161,10 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename, ResourceLoadingMode m
 	task.Filename = string(filename);
 	task.Resource = pMesh;
 
+#if (ENABLE_THREADED_LOADING == 0)
+	mode = RLM_Immediate;
+#endif
+
 	if (mode == RLM_Immediate)
 	{
 		ThreadLoadFbxMeshData(&task);
@@ -174,6 +181,17 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename, ResourceLoadingMode m
 	}
 
 	return pMesh;
+}
+
+inline void MatrixTransfer(RMatrix4* dest, const FbxAMatrix* src)
+{
+	for (int y = 0; y < 4; y++)
+	{
+		for (int x = 0; x < 4; x++)
+		{
+			dest->m[y][x] = (float)src->Get(y, x);
+		}
+	}
 }
 
 void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
@@ -243,12 +261,88 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	lGeomConverter.Triangulate(lFbxScene, true, true);
 	//bool result = lGeomConverter.SplitMeshesPerMaterial(lFbxScene, true);
 
-	// Load meshes
+	// Load skinning nodes
+	vector<FbxNode*> meshBoneNodes;
 
+	// Load bone information into an array
+	for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
+	{
+		FbxNode* node = lFbxScene->GetNode(idxNode);
+		if (node->GetNodeAttribute() && node->GetNodeAttribute()->GetAttributeType() && node->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+		{
+			meshBoneNodes.push_back(node);
+		}
+	}
+
+	// Load animation
+	RAnimation* animation = nullptr;
+	FbxArray<FbxString*> animStackNameArray;
+	lFbxScene->FillAnimStackNameArray(animStackNameArray);
+	if (animStackNameArray.GetCount() > 0)
+	{
+		FbxAnimStack* animStack = lFbxScene->FindMember<FbxAnimStack>(animStackNameArray[0]->Buffer());
+		FbxTakeInfo* takeInfo = lFbxScene->GetTakeInfo(*(animStackNameArray[0]));
+
+		FbxArrayDelete(animStackNameArray);
+
+		FbxTime::EMode				animTimeMode;
+		FbxTime						frameTime, animStartTime, animEndTime;
+		float						animFrameRate;
+
+		frameTime.SetTime(0, 0, 0, 1, 0, lFbxScene->GetGlobalSettings().GetTimeMode());
+		animTimeMode = lFbxScene->GetGlobalSettings().GetTimeMode();
+		animFrameRate = (float)frameTime.GetFrameRate(animTimeMode);
+		animStartTime = takeInfo->mLocalTimeSpan.GetStart();
+		animEndTime = takeInfo->mLocalTimeSpan.GetStop();
+
+		int totalFrameCount = (int)animEndTime.GetFrameCount(animTimeMode) + 1;
+		animation = new RAnimation(
+			meshBoneNodes.size(),
+			totalFrameCount,
+			(float)animStartTime.GetFrameCountPrecise(animTimeMode),
+			(float)animEndTime.GetFrameCountPrecise(animTimeMode),
+			animFrameRate);
+
+		map<FbxNode*, int> boneIdMap;
+
+		for (int idxBone = 0; idxBone < (int)meshBoneNodes.size(); idxBone++)
+		{
+			for (FbxTime animTime = animStartTime;
+				animTime <= animEndTime;
+				animTime += frameTime)
+			{
+				RMatrix4 matrix;
+
+				FbxNode* node = meshBoneNodes[idxBone];
+				FbxNode* animNode = lFbxScene->FindNodeByName(node->GetName());
+				assert(animNode);
+
+				FbxAMatrix childTransform = animNode->EvaluateGlobalTransform(animTime);
+				MatrixTransfer(&matrix, &childTransform);
+				int frameIdx = (int)((float)animTime.GetFrameCount(animTimeMode) - (float)animStartTime.GetFrameCountPrecise(animTimeMode));
+				animation->AddNodePose(idxBone, frameIdx, &matrix);
+
+				boneIdMap[node] = idxBone;
+			}
+		}
+
+		for (int idxBone = 0; idxBone < (int)meshBoneNodes.size(); idxBone++)
+		{
+			FbxNode* node = meshBoneNodes[idxBone]->GetParent();
+			if (boneIdMap.find(node) != boneIdMap.end())
+			{
+				animation->SetParentId(idxBone, boneIdMap[node]);
+			}
+		}
+	}
+
+	BoneMatrices* boneInitInvPose = nullptr;
+
+	// Load meshes
 	int nodeCount = lFbxScene->GetNodeCount();
 	for (int idxNode = 0; idxNode < nodeCount; idxNode++)
 	{
-		sprintf_s(msg_buf, sizeof(msg_buf), "Loading FBX node [%d/%d]...\n", idxNode + 1, nodeCount);
+		sprintf_s(msg_buf, sizeof(msg_buf), "  FBX node [%d/%d]...\n", idxNode + 1, nodeCount);
 		OutputDebugStringA(msg_buf);
 
 		FbxNode* node = lFbxScene->GetNode(idxNode);
@@ -258,7 +352,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 			continue;
 
 		//mesh->SplitPoints();
-		sprintf_s(msg_buf, sizeof(msg_buf), "[%s]\n", node->GetName());
+		sprintf_s(msg_buf, sizeof(msg_buf), "  Mesh element [%s]\n", node->GetName());
 		OutputDebugStringA(msg_buf);
 		
 		FbxVector4* controlPointArray;
@@ -280,6 +374,9 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 			vertData[i].pos.x = (float)controlPointArray[i][0];
 			vertData[i].pos.y = (float)controlPointArray[i][1];
 			vertData[i].pos.z = (float)controlPointArray[i][2];
+
+			memset(vertData[i].boneId, -1, sizeof(int) * 4);
+			memset(vertData[i].weight, 0, sizeof(float) * 4);
 
 			VertexComponentMask |= VCM_Pos;
 
@@ -413,6 +510,76 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					}
 					break;
 				}
+			}
+		}
+
+		bool hasDeformer = (mesh->GetDeformer(0, FbxDeformer::eSkin) != NULL);
+		if (hasDeformer)
+		{
+			int deformerCount = mesh->GetDeformerCount();
+
+			for (int idxSkinDeformer = 0; idxSkinDeformer < deformerCount; idxSkinDeformer++)
+			{
+				// A deformer on a mesh is a skinning controller that keeps all cluster (bone) information
+				FbxSkin* skinDeformer = (FbxSkin*)mesh->GetDeformer(idxSkinDeformer, FbxDeformer::eSkin);
+
+				int clusterCount = skinDeformer->GetClusterCount();
+				for (int idxCluster = 0; idxCluster < clusterCount; idxCluster++)
+				{
+					// A cluster is structure contains bone node, affected points and weight of affection
+					// Binding pose matrix can also be retrieved from cluster
+					FbxCluster* cluster = skinDeformer->GetCluster(idxCluster);
+
+					if (!cluster->GetLink())
+						continue;
+
+					int boneId = std::find(meshBoneNodes.begin(), meshBoneNodes.end(), cluster->GetLink()) - meshBoneNodes.begin();
+					assert(boneId < MAX_BONE_COUNT);
+
+					// Store inversed initial transform for each bone to apply skinning with correct binding pose
+					FbxAMatrix clusterInitTransform;
+					cluster->GetTransformLinkMatrix(clusterInitTransform);
+					clusterInitTransform = clusterInitTransform.Inverse();
+
+					if (!boneInitInvPose)
+						boneInitInvPose = new BoneMatrices;
+					MatrixTransfer(&boneInitInvPose->boneMatrix[boneId], &clusterInitTransform);
+
+					int cpIndicesCount = cluster->GetControlPointIndicesCount();
+					for (int idxCpIndex = 0; idxCpIndex < cpIndicesCount; idxCpIndex++)
+					{
+						// Note: A control point is a point affected by this cluster (bone)
+
+						int index = cluster->GetControlPointIndices()[idxCpIndex];
+						float weight = (float)cluster->GetControlPointWeights()[idxCpIndex];
+
+						// Store bone id and weight in an empty slot of vertex skinning attributes
+						for (int i = 0; i < 4; i++)
+						{
+							if (vertData[index].boneId[i] == -1)
+							{
+								vertData[index].boneId[i] = boneId;
+								vertData[index].weight[i] = weight;
+
+								VertexComponentMask |= VCM_BoneId;
+								VertexComponentMask |= VCM_BoneWeights;
+
+								break;
+							}
+						}
+					}
+
+				}
+			}
+		}
+
+		// Set bone id in unused slot to 0 so shader won't mess up
+		for (UINT32 n = 0; n < vertData.size(); n++)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				if (vertData[n].boneId[i] == -1)
+					vertData[n].boneId[i] = 0;
 			}
 		}
 
@@ -686,6 +853,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	static_cast<RMesh*>(task->Resource)->SetMeshElements(meshElements.data(), meshElements.size());
 	static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), materials.size());
 	static_cast<RMesh*>(task->Resource)->SetAabb(mesh_aabb);
+	static_cast<RMesh*>(task->Resource)->SetAnimation(animation);
+	static_cast<RMesh*>(task->Resource)->SetBoneInitInvMatrices(boneInitInvPose);
 	static_cast<RMesh*>(task->Resource)->SetResourceTimestamp(REngine::GetTimer().TotalTime());
 	task->Resource->m_State = RS_Loaded;
 }
@@ -706,6 +875,10 @@ RTexture* RResourceManager::LoadDDSTexture(const char* filename, ResourceLoading
 	LoaderThreadTask task;
 	task.Filename = string(filename);
 	task.Resource = pTexture;
+
+#if (ENABLE_THREADED_LOADING == 0)
+	mode = RLM_Immediate;
+#endif
 
 	if (mode == RLM_Immediate)
 	{

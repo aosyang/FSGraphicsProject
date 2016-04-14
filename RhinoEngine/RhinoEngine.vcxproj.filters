@@ -83,6 +83,9 @@
     <ClInclude Include="tinyxml2\tinyxml2.h">
       <Filter>tinyxml2</Filter>
     </ClInclude>
+    <ClInclude Include="RenderSystem\RAnimation.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -144,6 +147,9 @@
     </ClCompile>
     <ClCompile Include="tinyxml2\tinyxml2.cpp">
       <Filter>tinyxml2</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem\RAnimation.cpp">
+      <Filter>RenderSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

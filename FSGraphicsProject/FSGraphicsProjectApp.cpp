@@ -102,6 +102,7 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	m_cbScene.Release();
 	m_cbInstance[0].Release();
 	m_cbInstance[1].Release();
+	m_cbBoneMatrices.Release();
 
 	m_BumpCubeMesh.Release();
 
@@ -208,6 +209,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_cbMaterial.Initialize();
 	m_cbInstance[0].Initialize();
 	m_cbInstance[1].Initialize();
+	m_cbBoneMatrices.Initialize();
 	m_cbScreen.Initialize();
 
 	m_BumpBaseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlate.dds");
@@ -233,8 +235,9 @@ bool FSGraphicsProjectApp::Initialize()
 	m_AOSceneObj.SetMesh(m_AOSceneMesh);
 	m_AOSceneObj.SetPosition(RVec3(-500.0f, 0.0f, 500.0f));
 
-	m_CharacterObj.SetMesh(RResourceManager::Instance().LoadFbxMesh("../Assets/SpeedballPlayer.fbx"));
-	m_CharacterObj.SetTransform(RMatrix4::CreateXAxisRotation(-90.0f) * RMatrix4::CreateTranslation(-1100.0f, 40.0f, 0.0f));
+	m_CharacterAnimation = RResourceManager::Instance().LoadFbxMesh("../Assets/spin_combo.fbx");
+	m_CharacterObj.SetMesh(m_CharacterAnimation);
+	m_CharacterObj.SetTransform(RMatrix4::CreateTranslation(-1100.0f, 40.0f, 0.0f));
 
 	RMesh* sphereMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.fbx");
 
@@ -532,6 +535,30 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	std::sort(cbInstance[1].instancedWorldMatrix, cbInstance[1].instancedWorldMatrix + 125, objCmp);
 
 	m_cbInstance[1].UpdateContent(&cbInstance[1]);
+
+	// Update animation
+	RAnimation* animation = m_CharacterAnimation->GetAnimation();
+	if (animation)
+	{
+		static float currTime = animation->GetStartTime();
+		currTime += timer.DeltaTime() * animation->GetFrameRate();
+
+		if (currTime > animation->GetEndTime())
+		{
+			currTime -= animation->GetEndTime() - animation->GetStartTime();
+		}
+
+		BoneMatrices boneMatrix;
+		for (int i = 0; i < animation->GetNodeCount(); i++)
+		{
+			RMatrix4 matrix;
+			animation->GetNodePose(i, currTime, &matrix);
+			boneMatrix.boneMatrix[i] = m_CharacterAnimation->GetBoneInitInvMatrices(i) * matrix * m_CharacterObj.GetNodeTransform();
+		}
+
+		m_cbBoneMatrices.UpdateContent(&boneMatrix);
+		m_cbBoneMatrices.ApplyToShaders();
+	}
 }
 
 void FSGraphicsProjectApp::RenderScene()

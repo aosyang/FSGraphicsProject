@@ -33,7 +33,7 @@ public:
 
 	RMatrix4& operator=(const RMatrix4& rhs);
 
-	RMatrix4 operator*(const RMatrix4& rhs);
+	RMatrix4 operator*(const RMatrix4& rhs) const;
 	RMatrix4& operator*=(const RMatrix4& rhs);
 
 	// Fast inverse a camera matrix

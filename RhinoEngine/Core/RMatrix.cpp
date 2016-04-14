@@ -25,7 +25,7 @@ RMatrix4::RMatrix4(float m11, float m12, float m13, float m14,
 	
 }
 
-RMatrix4 RMatrix4::operator*(const RMatrix4& rhs)
+RMatrix4 RMatrix4::operator*(const RMatrix4& rhs) const
 {
 	RMatrix4 mat;
 

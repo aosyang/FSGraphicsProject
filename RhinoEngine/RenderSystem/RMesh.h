@@ -8,12 +8,18 @@
 
 #include "RShaderManager.h"
 #include "IResource.h"
+#include "../../Shaders/ConstBufferVS.h"	// MAX_BONE_COUNT
 
 struct RMaterial
 {
 	RShader*					Shader;
 	int							TextureNum;
 	RTexture*					Textures[8];
+};
+
+struct BoneMatrices
+{
+	RMatrix4 boneMatrix[MAX_BONE_COUNT];
 };
 
 class RMesh : public RBaseResource
@@ -39,6 +45,12 @@ public:
 	const RAabb& GetAabb() const;
 	const RAabb& GetMeshElementAabb(int index) const;
 
+	void SetAnimation(RAnimation* anim);
+	RAnimation* GetAnimation() const;
+
+	void SetBoneInitInvMatrices(BoneMatrices* bonePoses);
+	const RMatrix4& GetBoneInitInvMatrices(int index) const { return m_BoneInitInvMatrices->boneMatrix[index]; }
+
 	void SetResourceTimestamp(float time);
 	float GetResourceTimestamp();
 private:
@@ -48,6 +60,9 @@ private:
 	vector<RMaterial>		m_Materials;
 	RAabb					m_Aabb;
 	float					m_LoadingFinishTime;
+
+	RAnimation*				m_Animation;
+	BoneMatrices*			m_BoneInitInvMatrices;
 };
 
 #endif

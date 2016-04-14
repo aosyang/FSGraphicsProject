@@ -33,6 +33,7 @@
     <ClInclude Include="RenderSystem\d3dUtil.h" />
     <ClInclude Include="RenderSystem\DDSTextureLoader.h" />
     <ClInclude Include="RenderSystem\IResource.h" />
+    <ClInclude Include="RenderSystem\RAnimation.h" />
     <ClInclude Include="RenderSystem\RMesh.h" />
     <ClInclude Include="RenderSystem\RMeshElement.h" />
     <ClInclude Include="RenderSystem\RRenderSystem.h" />
@@ -57,6 +58,7 @@
     <ClCompile Include="Core\RRay.cpp" />
     <ClCompile Include="Core\RTimer.cpp" />
     <ClCompile Include="RenderSystem\DDSTextureLoader.cpp" />
+    <ClCompile Include="RenderSystem\RAnimation.cpp" />
     <ClCompile Include="RenderSystem\RMesh.cpp" />
     <ClCompile Include="RenderSystem\RMeshElement.cpp" />
     <ClCompile Include="RenderSystem\RRenderSystem.cpp" />

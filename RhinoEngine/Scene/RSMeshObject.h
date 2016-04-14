@@ -15,6 +15,7 @@ public:
 	~RSMeshObject();
 
 	void SetMesh(RMesh* mesh);
+	RMesh* GetMesh() const;
 
 	int GetMeshElementCount() const;
 	void SetMaterial(RMaterial* materials, int materialNum);
