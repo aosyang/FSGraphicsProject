@@ -47,8 +47,8 @@ void RAnimation::GetNodePose(int nodeId, float frameId, RMatrix4* matrix) const
 
 	int frame1 = (int)frameId;
 	int frame2 = ((int)frameId + 1) % m_FrameCount;
-	if (frame2 < frame1)
-		frame2 = frame1;
+	//if (frame2 < frame1)
+	//	frame2 = frame1;
 	float t = frameId - frame1;
 
 	// Linear interpolate two matrices
@@ -91,8 +91,8 @@ RVec3 RAnimation::GetRootPosition(float time) const
 
 	int frame1 = (int)time;
 	int frame2 = ((int)time + 1) % m_FrameCount;
-	if (frame2 < frame1)
-		frame2 = frame1;
+	//if (frame2 < frame1)
+	//	frame2 = frame1;
 	float t = time - frame1;
 
 	RVec3 va = m_RootDisplacement[frame1];

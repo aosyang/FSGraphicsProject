@@ -48,6 +48,44 @@ void RDebugRenderer::DrawLine(const RVec3& start, const RVec3& end, const RColor
 	m_bDirtyBuffer = true;
 }
 
+void RDebugRenderer::DrawAabb(const RAabb& aabb)
+{
+	DrawAabb(aabb, m_PrimitiveColor);
+}
+
+void RDebugRenderer::DrawAabb(const RAabb& aabb, const RColor& color)
+{
+	RVec3 cornerPoints[] =
+	{
+		RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMin.z),
+		RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMax.z),
+		RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMax.z),
+		RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMin.z),
+
+		RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMin.z),
+		RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMax.z),
+		RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMax.z),
+		RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMin.z),
+	};
+
+	int wiredCubeIdx[] =
+	{
+		0, 1, 1, 2, 2, 3, 3, 0,
+		4, 5, 5, 6, 6, 7, 7, 4,
+		0, 4, 1, 5, 2, 6, 3, 7,
+	};
+
+	for (int i = 0; i < 24; i++)
+	{
+		RVertex::PRIMITIVE_VERTEX v =
+		{
+			RVec4(cornerPoints[wiredCubeIdx[i]]),
+			RColor(0.0f, 1.0f, 0.0f),
+		};
+		m_PrimitiveVertices.push_back(v);
+	}
+}
+
 void RDebugRenderer::Draw()
 {
 	if (m_bDirtyBuffer)

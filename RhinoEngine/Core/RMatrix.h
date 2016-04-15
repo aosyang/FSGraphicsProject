@@ -46,6 +46,8 @@ public:
 	RVec4 GetRow(int index) const;
 	void SetRow(int index, const RVec4& row);
 
+	void Translate(const RVec3& vec);
+	void Translate(float x, float y, float z);
 	void TranslateLocal(const RVec3& vec);
 	void TranslateLocal(float x, float y, float z);
 
@@ -53,6 +55,8 @@ public:
 	void SetTranslation(float x, float y, float z);
 	RVec3 GetTranslation() const;
 	void GetTranslation(float& x, float& y, float& z) const;
+
+	RVec3 RotateVector(const RVec3& vec) const;
 
 	RMatrix4 Inverse() const;
 

@@ -113,6 +113,7 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 
 	RShaderManager::Instance().UnloadAllShaders();
 	RResourceManager::Instance().Destroy();
+	m_DebugRenderer.Release();
 }
 
 bool FSGraphicsProjectApp::Initialize()
@@ -133,6 +134,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_RefractionShader = RShaderManager::Instance().GetShaderResource("Refraction");
 
 	m_PostProcessor.Initialize();
+	m_DebugRenderer.Initialize();
 
 	// Create buffer for star mesh
 	RVertex::PRIMITIVE_VERTEX starVertex[12];
@@ -236,9 +238,33 @@ bool FSGraphicsProjectApp::Initialize()
 	m_AOSceneObj.SetMesh(m_AOSceneMesh);
 	m_AOSceneObj.SetPosition(RVec3(-500.0f, 0.0f, 500.0f));
 
-	m_CharacterAnimation = RResourceManager::Instance().LoadFbxMesh("../Assets/spin_combo.fbx");
-	m_CharacterObj.SetMesh(m_CharacterAnimation);
-	m_CharacterObj.SetTransform(RMatrix4::CreateTranslation(-1100.0f, 40.0f, 0.0f));
+	const char* animationNames[] =
+	{
+		"../Assets/unitychan/FUCM02_0004_CH01_AS_MAWAK.fbx",
+		"../Assets/unitychan/FUCM02_0025_MYA_TF_DOWN.fbx",
+		"../Assets/unitychan/FUCM02_0029_Cha01_STL01_ScrewK01.fbx",
+		"../Assets/unitychan/FUCM03_0005_Landing.fbx",
+		"../Assets/unitychan/FUCM03_0019_HeadSpring.fbx",
+		"../Assets/unitychan/FUCM05_0000_Idle.fbx",
+		"../Assets/unitychan/FUCM05_0001_M_CMN_LJAB.fbx",
+		"../Assets/unitychan/FUCM05_0022_M_RISING_P.fbx",
+		"../Assets/unitychan/FUCM_0012b_EH_RUN_LP_NoZ.fbx",
+		"../Assets/unitychan/FUCM_04_0001_RHiKick.fbx",
+		"../Assets/unitychan/FUCM_04_0010_MC2_SAMK.fbx",
+	};
+
+	m_CurrentAnim = 0;
+
+	for (int i = 0; i < sizeof(animationNames) / sizeof(const char*); i++)
+	{
+		m_CharacterAnimations.push_back(RResourceManager::Instance().LoadFbxMesh(animationNames[i]));
+	}
+
+	m_CharacterAnimation = m_CharacterAnimations[0];
+	m_CharacterObj.SetMesh(RResourceManager::Instance().LoadFbxMesh("../Assets/unitychan/unitychan.fbx"));
+	//m_CharacterAnimations[0] = m_CharacterAnimation = RResourceManager::Instance().LoadFbxMesh("../Assets/spin_combo.fbx");
+	//m_CharacterObj.SetMesh(m_CharacterAnimation);
+	m_CharacterObj.SetTransform(RMatrix4::CreateYAxisRotation(90) * RMatrix4::CreateTranslation(-1100.0f, 40.0f, 0.0f));
 
 	RMesh* sphereMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.fbx");
 
@@ -427,6 +453,24 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	if (RInput.GetBufferedKeyState('6') == BKS_Pressed)
 		m_EnabledPostProcessor = 0;
 
+	if (RInput.GetBufferedKeyState('X') == BKS_Pressed)
+	{
+		m_CurrentAnim++;
+		m_CurrentAnim %= m_CharacterAnimations.size();
+		m_CharacterAnimation = m_CharacterAnimations[m_CurrentAnim];
+	}
+
+	if (RInput.GetBufferedKeyState('Z') == BKS_Pressed)
+	{
+		m_CurrentAnim--;
+		if (m_CurrentAnim < 0)
+			m_CurrentAnim = m_CharacterAnimations.size() - 1;
+		m_CharacterAnimation = m_CharacterAnimations[m_CurrentAnim];
+	}
+
+	if (RInput.GetBufferedKeyState('R') == BKS_Pressed)
+		m_CharacterObj.SetPosition(RVec3(-1100.0f, 40.0f, 0.0f));
+
 	RVec3 camPos = m_CameraMatrix.GetTranslation();
 	m_CameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
 	m_CameraMatrix.SetTranslation(camPos + (RVec4(moveVec, 1.0f) * m_CameraMatrix).ToVec3());
@@ -442,7 +486,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	cbScene.viewProjMatrix = viewMatrix * projMatrix;
 	cbScene.cameraPos = m_CameraMatrix.GetRow(3);
 
-	float ct = timer.TotalTime() * 0.2f;
+	float ct = 1.0f;// timer.TotalTime() * 0.2f;
 	m_SunVec = RVec3(sinf(ct) * 0.5f, 0.25f, cosf(ct) * 0.5f).GetNormalizedVec3() * 2000.0f;
 	RMatrix4 shadowViewMatrix = RMatrix4::CreateLookAtViewLH(m_SunVec, RVec3(0.0f, 0.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f));
 
@@ -541,24 +585,56 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	RAnimation* animation = m_CharacterAnimation->GetAnimation();
 	if (animation)
 	{
-		m_CharacterObj.GetMesh()->CacheAnimation(m_CharacterAnimation->GetAnimation());
+		m_CharacterObj.GetMesh()->CacheAnimation(animation);
 
 		static float currTime = animation->GetStartTime();
-		currTime += timer.DeltaTime() * animation->GetFrameRate();
 
-		if (currTime > animation->GetEndTime())
+		// Changing time may cause start time greater than end time
+		if  (currTime >= animation->GetEndTime() - 1.0f)
 		{
-			currTime -= animation->GetEndTime() - animation->GetStartTime();
+			currTime = animation->GetStartTime();
 		}
+		RVec3 start_offset = animation->GetRootPosition(currTime);
+
+		currTime += timer.DeltaTime() * animation->GetFrameRate();
+		bool startOver = false;
+
+		while (currTime >= animation->GetEndTime() - 1.0f)
+		{
+			currTime -= animation->GetEndTime() - 1.0f - animation->GetStartTime();
+			startOver = true;
+		}
+
+		RVec3 offset = animation->GetRootPosition(currTime) - start_offset;
+		if (startOver)
+		{
+			offset = animation->GetRootPosition(animation->GetEndTime() - 1) - start_offset +
+					 animation->GetRootPosition(currTime) - animation->GetInitRootPosition();
+		}
+
+		m_CharacterObj.TranslateLocal(offset);
+		RVec3 invOffset = -animation->GetRootPosition(currTime);
+		invOffset = m_CharacterObj.GetNodeTransform().RotateVector(invOffset);
+		RMatrix4 trans = RMatrix4::CreateTranslation(invOffset);
 
 		BoneMatrices boneMatrix;
 		for (int i = 0; i < m_CharacterObj.GetMesh()->GetBoneCount(); i++)
 		{
 			RMatrix4 matrix;
+
 			int boneId = m_CharacterObj.GetMesh()->GetCachedAnimationNodeId(animation, i);
 			animation->GetNodePose(boneId, currTime, &matrix);
-			boneMatrix.boneMatrix[i] = m_CharacterObj.GetMesh()->GetBoneInitInvMatrices(i) * matrix * m_CharacterObj.GetNodeTransform();
+
+			boneMatrix.boneMatrix[i] = m_CharacterObj.GetMesh()->GetBoneInitInvMatrices(i) * matrix * m_CharacterObj.GetNodeTransform() * trans;
 		}
+
+		RVec3 nodePos = m_CharacterObj.GetNodeTransform().GetTranslation();
+		m_DebugRenderer.DrawLine(nodePos, nodePos + offset * 100, RColor(1.0f, 0.0f, 0.0f), RColor(1.0f, 0.0f, 0.0f));
+
+		RAabb aabb = m_CharacterObj.GetAabb();
+		aabb.pMin += nodePos;
+		aabb.pMax += nodePos;
+		m_DebugRenderer.DrawAabb(aabb);
 
 		m_cbBoneMatrices.UpdateContent(&boneMatrix);
 		m_cbBoneMatrices.ApplyToShaders();
@@ -657,6 +733,7 @@ void FSGraphicsProjectApp::RenderScene()
 	}
 
 	RRenderer.Present();
+	m_DebugRenderer.Reset();
 }
 
 void FSGraphicsProjectApp::OnResize(int width, int height)
@@ -793,27 +870,27 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	}
 
 	// Draw islands
-	SetPerObjectConstBuffer(m_IslandMeshObj.GetNodeTransform());
-	m_cbInstance[0].ApplyToShaders();
+	//SetPerObjectConstBuffer(m_IslandMeshObj.GetNodeTransform());
+	//m_cbInstance[0].ApplyToShaders();
 
-	if (pass == ShadowPass)
-		m_IslandMeshObj.DrawWithShader(m_InstancedDepthShader, true, MAX_INSTANCE_COUNT);
-	else
-	{
-		float opacity = (timeNow - m_IslandMeshObj.GetResourceTimestamp()) / loadingFadeInTime;
-		if (opacity >= 0.0f && opacity <= 1.0f)
-		{
-			cbMaterial.GlobalOpacity = opacity;
-			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[2], blendFactor, 0xFFFFFFFF);
-			m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
-		}
-		else
-		{
-			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
-			m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
-		}
-	}
+	//if (pass == ShadowPass)
+	//	m_IslandMeshObj.DrawWithShader(m_InstancedDepthShader, true, MAX_INSTANCE_COUNT);
+	//else
+	//{
+	//	float opacity = (timeNow - m_IslandMeshObj.GetResourceTimestamp()) / loadingFadeInTime;
+	//	if (opacity >= 0.0f && opacity <= 1.0f)
+	//	{
+	//		cbMaterial.GlobalOpacity = opacity;
+	//		SetMaterialConstBuffer(&cbMaterial);
+	//		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[2], blendFactor, 0xFFFFFFFF);
+	//		m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
+	//	}
+	//	else
+	//	{
+	//		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
+	//		m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
+	//	}
+	//}
 
 	// Draw AO scene
 	SetPerObjectConstBuffer(m_AOSceneObj.GetNodeTransform());
@@ -936,6 +1013,10 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 
 		// Restore depth writing
 		RRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[0], 0);
+
+		// Draw debug lines
+		SetPerObjectConstBuffer(RMatrix4::IDENTITY);
+		m_DebugRenderer.Draw();
 	}
 
 	// Unbind all shader resources so we can write into it

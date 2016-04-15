@@ -78,6 +78,8 @@ private:
 
 	RSMeshObject				m_CharacterObj;
 	RMesh*						m_CharacterAnimation;
+	vector<RMesh*>				m_CharacterAnimations;
+	int							m_CurrentAnim;
 
 	RMesh*						m_AOSceneMesh;
 	RSMeshObject				m_AOSceneObj;
@@ -116,6 +118,8 @@ private:
 	SHADER_SCENE_BUFFER			cbScene;
 	SHADER_LIGHT_BUFFER			cbLight;
 	SHADER_INSTANCE_BUFFER		cbInstance[2];
+
+	RDebugRenderer				m_DebugRenderer;
 };
 
 #endif

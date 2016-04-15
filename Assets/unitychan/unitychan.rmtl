@@ -1,0 +1,80 @@
+<Material Mesh="../Assets/unitychan/unitychan.fbx">
+    <MeshElement Name="head_back" Shader="Default">
+        <Texture Slot="0">../Assets/unitychan/face_00.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="eye_base_old" Shader="Default">
+        <Texture Slot="0">../Assets/unitychan/eyeline_00.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="eye_L_old" Shader="Default">
+        <Texture Slot="0">../Assets/unitychan/eye_iris_L_00.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="eye_R_old" Shader="Default">
+        <Texture Slot="0">../Assets/unitychan/eye_iris_R_00.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="MTH_DEF" Shader="Default">
+        <Texture Slot="0">../Assets/unitychan/face_00.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="EYE_DEF" Shader="Default">
+        <Texture Slot="0">../Assets/unitychan/face_00.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="EL_DEF" Shader="Default"/>
+    <MeshElement Name="BLW_DEF" Shader="Default"/>
+    <MeshElement Name="tail" Shader="SkinnedDefault">
+        <Texture Slot="0">../Assets/unitychan/hair_01.dds</Texture>
+        <Texture Slot="1">../Assets/unitychan/hair_01_NRM.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="hair_frontside" Shader="SkinnedDefault">
+        <Texture Slot="0">../Assets/unitychan/hair_01.dds</Texture>
+        <Texture Slot="1">../Assets/unitychan/hair_01_NRM.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="hair_front" Shader="SkinnedDefault">
+        <Texture Slot="0">../Assets/unitychan/hair_01.dds</Texture>
+        <Texture Slot="1">../Assets/unitychan/hair_01_NRM.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="tail_bottom" Shader="SkinnedDefault">
+        <Texture Slot="0">../Assets/unitychan/hair_01.dds</Texture>
+        <Texture Slot="1">../Assets/unitychan/hair_01_NRM.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="hair_accce" Shader="SkinnedDefault">
+        <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
+        <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="skin" Shader="SkinnedDefault">
+        <Texture Slot="0">../Assets/unitychan/skin_01.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="uwagi" Shader="SkinnedDefault">
+        <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
+        <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="uwagi_BK" Shader="SkinnedDefault">
+        <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
+        <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="Shirts" Shader="SkinnedDefault">
+        <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
+        <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="shirts_sode" Shader="SkinnedDefault">
+        <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
+        <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="shirts_sode_BK" Shader="SkinnedDefault">
+        <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
+        <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="button" Shader="SkinnedDefault">
+        <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
+        <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="hairband" Shader="SkinnedDefault">
+        <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
+        <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="cheek" Shader="SkinnedDefault">
+        <Texture Slot="0">../Assets/unitychan/cheek_00.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="Leg" Shader="SkinnedDefault">
+        <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
+        <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
+    </MeshElement>
+</Material>

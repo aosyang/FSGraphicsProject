@@ -119,6 +119,18 @@ void RMatrix4::SetRow(int index, const RVec4& row)
 	m[index][3] = row.w;
 }
 
+void RMatrix4::Translate(const RVec3& vec)
+{
+	Translate(vec.x, vec.y, vec.z);
+}
+
+void RMatrix4::Translate(float x, float y, float z)
+{
+	m[3][0] += x;
+	m[3][1] += y;
+	m[3][2] += z;
+}
+
 void RMatrix4::TranslateLocal(const RVec3& vec)
 {
 	TranslateLocal(vec.x, vec.y, vec.z);
@@ -157,6 +169,15 @@ void RMatrix4::GetTranslation(float& x, float& y, float& z) const
 	x = m[3][0];
 	y = m[3][1];
 	z = m[3][2];
+}
+
+RVec3 RMatrix4::RotateVector(const RVec3& vec) const
+{
+	float _x = vec.x * m[0][0] + vec.y * m[1][0] + vec.z * m[2][0];
+	float _y = vec.x * m[0][1] + vec.y * m[1][1] + vec.z * m[2][1];
+	float _z = vec.x * m[0][2] + vec.y * m[1][2] + vec.z * m[2][2];
+
+	return RVec3(_x, _y, _z);
 }
 
 // Calculate the determinant of a 3x3 matrix

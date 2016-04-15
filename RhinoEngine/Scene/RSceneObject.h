@@ -19,6 +19,7 @@ public:
 	RVec3 GetPosition() const;
 
 	void Translate(const RVec3& v);
+	void TranslateLocal(const RVec3& v);
 
 	virtual void Draw();
 

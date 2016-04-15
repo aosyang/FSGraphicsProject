@@ -19,6 +19,8 @@ public:
 	void SetColor(const RColor& color);
 	void DrawLine(const RVec3& start, const RVec3& end);
 	void DrawLine(const RVec3& start, const RVec3& end, const RColor& color1, const RColor& color2);
+	void DrawAabb(const RAabb& aabb);
+	void DrawAabb(const RAabb& aabb, const RColor& color);
 
 	// Present primitive to the screen
 	void Draw();

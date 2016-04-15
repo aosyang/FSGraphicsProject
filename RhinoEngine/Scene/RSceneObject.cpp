@@ -40,7 +40,12 @@ RVec3 RSceneObject::GetPosition() const
 
 void RSceneObject::Translate(const RVec3& v)
 {
-	m_NodeTransform.SetTranslation(GetPosition() + v);
+	m_NodeTransform.Translate(v);
+}
+
+void RSceneObject::TranslateLocal(const RVec3& v)
+{
+	m_NodeTransform.TranslateLocal(v);
 }
 
 void RSceneObject::Draw()
