@@ -18,11 +18,18 @@ public:
 	void GetNodePose(int nodeId, float frameId, RMatrix4* matrix) const;
 	int GetNodeCount() const { return (int)m_NodeKeyFrames.size(); }
 
+	RVec3 GetInitRootPosition() const;
+	RVec3 GetRootPosition(float time) const;
+
 	void SetParentId(int nodeId, int parentId);
 	int GetParentId(int nodeId) const;
 
 	void AddNodeNameToId(const char* nodeName, int nodeId);
 	int GetNodeIdByName(const char* nodeName) const;
+
+	void SetRootNode(int nodeId) { m_RootNode = nodeId; }
+	int GetRootNode() const { return m_RootNode; }
+	void BuildRootDisplacementArray();
 
 	float GetStartTime() const { return m_StartTime; }
 	float GetEndTime() const { return m_EndTime; }
@@ -33,6 +40,9 @@ private:
 	vector<RMatrix4*>		m_NodeKeyFrames;
 	vector<int>				m_NodeParents;
 	map<string, int>		m_NodeNameToIdMap;
+
+	vector<RVec3>			m_RootDisplacement;
+	int						m_RootNode;
 };
 
 #endif

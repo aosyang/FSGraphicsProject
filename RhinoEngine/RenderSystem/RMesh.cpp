@@ -147,6 +147,10 @@ void RMesh::CacheAnimation(RAnimation* anim)
 	if (!anim || !m_BoneIdToName.size() || m_AnimationNodeCache.find(anim) != m_AnimationNodeCache.end())
 		return;
 
+	const char* rootNodeName = m_BoneIdToName[0].data();
+	anim->SetRootNode(anim->GetNodeIdByName(rootNodeName));
+	anim->BuildRootDisplacementArray();
+
 	map<int, int> nodeIdMap;
 	for (int i = 0; i < (int)m_BoneIdToName.size(); i++)
 	{

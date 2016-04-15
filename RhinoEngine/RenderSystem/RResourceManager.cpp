@@ -273,6 +273,9 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		{
 			fbxBoneNodes.push_back(node);
 			meshBoneIdToName.push_back(node->GetName());
+
+			sprintf_s(msg_buf, sizeof(msg_buf), "  FBX bone node: %s\n", node->GetName());
+			OutputDebugStringA(msg_buf);
 		}
 	}
 

@@ -18,6 +18,8 @@ public:
 	void SetPosition(const RVec3& pos);
 	RVec3 GetPosition() const;
 
+	void Translate(const RVec3& v);
+
 	virtual void Draw();
 
 private:

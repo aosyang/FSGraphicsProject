@@ -9,7 +9,7 @@
 
 
 RAnimation::RAnimation(int nodeCount, int frameCount, float startTime, float endTime, float frameRate)
-	: m_FrameCount(frameCount), m_StartTime(startTime), m_EndTime(endTime), m_FrameRate(frameRate)
+	: m_FrameCount(frameCount), m_StartTime(startTime), m_EndTime(endTime), m_FrameRate(frameRate), m_RootNode(-1)
 {
 	m_NodeKeyFrames = vector<RMatrix4*>(nodeCount, nullptr);
 	m_NodeParents = vector<int>(nodeCount, -1);
@@ -47,6 +47,8 @@ void RAnimation::GetNodePose(int nodeId, float frameId, RMatrix4* matrix) const
 
 	int frame1 = (int)frameId;
 	int frame2 = ((int)frameId + 1) % m_FrameCount;
+	if (frame2 < frame1)
+		frame2 = frame1;
 	float t = frameId - frame1;
 
 	// Linear interpolate two matrices
@@ -74,6 +76,30 @@ void RAnimation::GetNodePose(int nodeId, float frameId, RMatrix4* matrix) const
 	//XMStoreFloat4x4(matrix, m);
 }
 
+RVec3 RAnimation::GetInitRootPosition() const
+{
+	if (m_RootDisplacement.size() == 0)
+		return RVec3::Zero();
+
+	return m_RootDisplacement[0];
+}
+
+RVec3 RAnimation::GetRootPosition(float time) const
+{
+	if (m_RootDisplacement.size() == 0)
+		return RVec3::Zero();
+
+	int frame1 = (int)time;
+	int frame2 = ((int)time + 1) % m_FrameCount;
+	if (frame2 < frame1)
+		frame2 = frame1;
+	float t = time - frame1;
+
+	RVec3 va = m_RootDisplacement[frame1];
+	RVec3 vb = m_RootDisplacement[frame2];
+	return RVec3::Lerp(va, vb, t);
+}
+
 void RAnimation::SetParentId(int nodeId, int parentId)
 {
 	m_NodeParents[nodeId] = parentId;
@@ -96,4 +122,18 @@ int RAnimation::GetNodeIdByName(const char* nodeName) const
 		return -1;
 
 	return iter->second;
+}
+
+void RAnimation::BuildRootDisplacementArray()
+{
+	if (m_RootNode == -1)
+		return;
+
+	m_RootDisplacement.resize(m_FrameCount);
+
+	for (int i = 0; i < m_FrameCount; i++)
+	{
+		m_RootDisplacement[i] = m_NodeKeyFrames[m_RootNode][i].GetTranslation();
+		m_RootDisplacement[i].y = 0.0f;
+	}
 }

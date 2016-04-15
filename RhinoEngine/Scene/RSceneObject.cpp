@@ -38,6 +38,11 @@ RVec3 RSceneObject::GetPosition() const
 	return m_NodeTransform.GetRow(3).ToVec3();
 }
 
+void RSceneObject::Translate(const RVec3& v)
+{
+	m_NodeTransform.SetTranslation(GetPosition() + v);
+}
+
 void RSceneObject::Draw()
 {
 
