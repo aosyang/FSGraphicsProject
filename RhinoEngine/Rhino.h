@@ -55,6 +55,7 @@ class RBaseResource;
 #include "RenderSystem/RVertexDeclaration.h"
 #include "RenderSystem/RRenderSystem.h"
 #include "RenderSystem/RMeshElement.h"
+#include "RenderSystem/RDebugRenderer.h"
 #include "RenderSystem/DDSTextureLoader.h"
 #include "RenderSystem/RAnimation.h"
 #include "RenderSystem/RResourceManager.h"
