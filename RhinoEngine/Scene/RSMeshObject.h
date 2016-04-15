@@ -29,6 +29,7 @@ public:
 	const RAabb& GetMeshElementAabb(int index) const;
 
 	void Draw(bool instanced = false, int instanceCount = 0);
+	void DrawDepthPass(bool instanced = false, int instanceCount = 0);
 	void DrawWithShader(RShader* shader, bool instanced = false, int instanceCount = 0);
 
 	float GetResourceTimestamp();

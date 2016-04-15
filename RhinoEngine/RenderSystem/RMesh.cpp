@@ -127,6 +127,47 @@ void RMesh::SetBoneInitInvMatrices(BoneMatrices* bonePoses)
 	m_BoneInitInvMatrices = bonePoses;
 }
 
+void RMesh::SetBoneNameList(const vector<string>& boneNameList)
+{
+	m_BoneIdToName = boneNameList;
+}
+
+const string& RMesh::GetBoneName(int boneId) const
+{
+	return m_BoneIdToName[boneId];
+}
+
+int RMesh::GetBoneCount() const
+{
+	return (int)m_BoneIdToName.size();
+}
+
+void RMesh::CacheAnimation(RAnimation* anim)
+{
+	if (!anim || !m_BoneIdToName.size() || m_AnimationNodeCache.find(anim) != m_AnimationNodeCache.end())
+		return;
+
+	map<int, int> nodeIdMap;
+	for (int i = 0; i < (int)m_BoneIdToName.size(); i++)
+	{
+		nodeIdMap[i] = anim->GetNodeIdByName(m_BoneIdToName[i].data());
+	}
+
+	m_AnimationNodeCache[anim] = nodeIdMap;
+}
+
+int RMesh::GetCachedAnimationNodeId(RAnimation* anim, int boneId)
+{
+	if (!anim || !m_BoneIdToName.size())
+		return -1;
+
+	map<RAnimation*, map<int, int>>::const_iterator iter = m_AnimationNodeCache.find(anim);
+	if (iter == m_AnimationNodeCache.end())
+		return -1;
+
+	return m_AnimationNodeCache[anim][boneId];
+}
+
 void RMesh::SetResourceTimestamp(float time)
 {
 	m_LoadingFinishTime = time;

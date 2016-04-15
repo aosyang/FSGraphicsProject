@@ -262,7 +262,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	//bool result = lGeomConverter.SplitMeshesPerMaterial(lFbxScene, true);
 
 	// Load skinning nodes
-	vector<FbxNode*> meshBoneNodes;
+	vector<FbxNode*> fbxBoneNodes;
+	vector<string> meshBoneIdToName;
 
 	// Load bone information into an array
 	for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
@@ -270,7 +271,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		FbxNode* node = lFbxScene->GetNode(idxNode);
 		if (node->GetNodeAttribute() && node->GetNodeAttribute()->GetAttributeType() && node->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
 		{
-			meshBoneNodes.push_back(node);
+			fbxBoneNodes.push_back(node);
+			meshBoneIdToName.push_back(node->GetName());
 		}
 	}
 
@@ -297,41 +299,45 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 		int totalFrameCount = (int)animEndTime.GetFrameCount(animTimeMode) + 1;
 		animation = new RAnimation(
-			meshBoneNodes.size(),
+			lFbxScene->GetNodeCount(),
 			totalFrameCount,
 			(float)animStartTime.GetFrameCountPrecise(animTimeMode),
 			(float)animEndTime.GetFrameCountPrecise(animTimeMode),
 			animFrameRate);
 
-		map<FbxNode*, int> boneIdMap;
+		map<string, int> nodeNameToId;
 
-		for (int idxBone = 0; idxBone < (int)meshBoneNodes.size(); idxBone++)
+		for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
 		{
+			FbxNode* node = lFbxScene->GetNode(idxNode);
+
 			for (FbxTime animTime = animStartTime;
 				animTime <= animEndTime;
 				animTime += frameTime)
 			{
 				RMatrix4 matrix;
 
-				FbxNode* node = meshBoneNodes[idxBone];
-				FbxNode* animNode = lFbxScene->FindNodeByName(node->GetName());
-				assert(animNode);
-
-				FbxAMatrix childTransform = animNode->EvaluateGlobalTransform(animTime);
+				FbxAMatrix childTransform = node->EvaluateGlobalTransform(animTime);
 				MatrixTransfer(&matrix, &childTransform);
 				int frameIdx = (int)((float)animTime.GetFrameCount(animTimeMode) - (float)animStartTime.GetFrameCountPrecise(animTimeMode));
-				animation->AddNodePose(idxBone, frameIdx, &matrix);
+				animation->AddNodePose(idxNode, frameIdx, &matrix);
+				animation->AddNodeNameToId(node->GetName(), idxNode);
 
-				boneIdMap[node] = idxBone;
+				nodeNameToId[node->GetName()] = idxNode;
 			}
 		}
 
-		for (int idxBone = 0; idxBone < (int)meshBoneNodes.size(); idxBone++)
+		for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
 		{
-			FbxNode* node = meshBoneNodes[idxBone]->GetParent();
-			if (boneIdMap.find(node) != boneIdMap.end())
+			FbxNode* node = lFbxScene->GetNode(idxNode);
+			FbxNode* parent = node->GetParent();
+			if (parent && nodeNameToId.find(parent->GetName()) != nodeNameToId.end())
 			{
-				animation->SetParentId(idxBone, boneIdMap[node]);
+				animation->SetParentId(idxNode, nodeNameToId[parent->GetName()]);
+			}
+			else
+			{
+				animation->SetParentId(idxNode, -1);
 			}
 		}
 	}
@@ -533,7 +539,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					if (!cluster->GetLink())
 						continue;
 
-					int boneId = std::find(meshBoneNodes.begin(), meshBoneNodes.end(), cluster->GetLink()) - meshBoneNodes.begin();
+					int boneId = std::find(fbxBoneNodes.begin(), fbxBoneNodes.end(), cluster->GetLink()) - fbxBoneNodes.begin();
 					assert(boneId < MAX_BONE_COUNT);
 
 					// Store inversed initial transform for each bone to apply skinning with correct binding pose
@@ -800,7 +806,15 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		meshElem.CreateIndexBuffer(optimizedIndexData.data(), sizeof(UINT32), optimizedIndexData.size());
 		meshElem.SetName(node->GetName());
 		meshElem.SetAabb(aabb);
+
+		UINT flag = 0;
+		if (hasDeformer)
+			flag |= MEF_Skinned;
+
+		meshElem.SetFlag(flag);
+
 		meshElements.push_back(meshElem);
+
 
 		mesh_aabb.Expand(aabb);
 
@@ -858,6 +872,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), materials.size());
 	static_cast<RMesh*>(task->Resource)->SetAabb(mesh_aabb);
 	static_cast<RMesh*>(task->Resource)->SetAnimation(animation);
+	static_cast<RMesh*>(task->Resource)->SetBoneNameList(meshBoneIdToName);
 	static_cast<RMesh*>(task->Resource)->SetBoneInitInvMatrices(boneInitInvPose);
 	static_cast<RMesh*>(task->Resource)->SetResourceTimestamp(REngine::GetTimer().TotalTime());
 	task->Resource->m_State = RS_Loaded;

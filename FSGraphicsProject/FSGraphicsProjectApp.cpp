@@ -541,6 +541,8 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	RAnimation* animation = m_CharacterAnimation->GetAnimation();
 	if (animation)
 	{
+		m_CharacterObj.GetMesh()->CacheAnimation(m_CharacterAnimation->GetAnimation());
+
 		static float currTime = animation->GetStartTime();
 		currTime += timer.DeltaTime() * animation->GetFrameRate();
 
@@ -550,11 +552,12 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		}
 
 		BoneMatrices boneMatrix;
-		for (int i = 0; i < animation->GetNodeCount(); i++)
+		for (int i = 0; i < m_CharacterObj.GetMesh()->GetBoneCount(); i++)
 		{
 			RMatrix4 matrix;
-			animation->GetNodePose(i, currTime, &matrix);
-			boneMatrix.boneMatrix[i] = m_CharacterAnimation->GetBoneInitInvMatrices(i) * matrix * m_CharacterObj.GetNodeTransform();
+			int boneId = m_CharacterObj.GetMesh()->GetCachedAnimationNodeId(animation, i);
+			animation->GetNodePose(boneId, currTime, &matrix);
+			boneMatrix.boneMatrix[i] = m_CharacterObj.GetMesh()->GetBoneInitInvMatrices(i) * matrix * m_CharacterObj.GetNodeTransform();
 		}
 
 		m_cbBoneMatrices.UpdateContent(&boneMatrix);
@@ -855,7 +858,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	SetPerObjectConstBuffer(m_CharacterObj.GetNodeTransform());
 	
 	if (pass == ShadowPass)
-		m_CharacterObj.DrawWithShader(m_SkinnedDepthShader);
+		m_CharacterObj.DrawDepthPass();
 	else
 	{
 		float opacity = (timeNow - m_CharacterObj.GetResourceTimestamp()) / loadingFadeInTime;

@@ -174,6 +174,29 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 	}
 }
 
+void RSMeshObject::DrawDepthPass(bool instanced, int instanceCount)
+{
+	if (!m_Mesh || !m_Mesh->IsResourceReady())
+		return;
+
+	static RShader* DefaultShader = RShaderManager::Instance().GetShaderResource("Depth");
+	static RShader* SkinnedShader = RShaderManager::Instance().GetShaderResource("SkinnedDepth");
+
+	for (UINT32 i = 0; i < m_Mesh->GetMeshElements().size(); i++)
+	{
+		RShader* shader = DefaultShader;
+		if (m_Mesh->GetMeshElements()[i].GetFlag() & MEF_Skinned)
+			shader = SkinnedShader;
+
+		shader->Bind();
+
+		if (instanced)
+			m_Mesh->GetMeshElements()[i].DrawInstanced(instanceCount, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		else
+			m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	}
+}
+
 void RSMeshObject::DrawWithShader(RShader* shader, bool instanced, int instanceCount)
 {
 	if (!m_Mesh || !m_Mesh->IsResourceReady() || !shader)

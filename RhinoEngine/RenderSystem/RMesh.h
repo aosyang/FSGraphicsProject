@@ -51,6 +51,13 @@ public:
 	void SetBoneInitInvMatrices(BoneMatrices* bonePoses);
 	const RMatrix4& GetBoneInitInvMatrices(int index) const { return m_BoneInitInvMatrices->boneMatrix[index]; }
 
+	void SetBoneNameList(const vector<string>& boneNameList);
+	const string& GetBoneName(int boneId) const;
+	int GetBoneCount() const;
+
+	void CacheAnimation(RAnimation* anim);
+	int GetCachedAnimationNodeId(RAnimation* anim, int boneId);
+
 	void SetResourceTimestamp(float time);
 	float GetResourceTimestamp();
 private:
@@ -63,6 +70,9 @@ private:
 
 	RAnimation*				m_Animation;
 	BoneMatrices*			m_BoneInitInvMatrices;
+	vector<string>			m_BoneIdToName;
+	map<RAnimation*, map<int, int>>
+							m_AnimationNodeCache;
 };
 
 #endif

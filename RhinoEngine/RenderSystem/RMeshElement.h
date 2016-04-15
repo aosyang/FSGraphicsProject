@@ -8,6 +8,11 @@
 
 #include <d3d11.h>
 
+enum MeshElementFlag
+{
+	MEF_Skinned = 1 << 0,
+};
+
 class RMeshElement
 {
 protected:
@@ -21,6 +26,8 @@ protected:
 
 	string				m_Name;
 	RAabb				m_Aabb;
+
+	UINT				m_Flag;
 public:
 	RMeshElement();
 
@@ -39,6 +46,9 @@ public:
 
 	void SetAabb(const RAabb& aabb) { m_Aabb = aabb; }
 	const RAabb& GetAabb() const { return m_Aabb; }
+
+	void SetFlag(int flag) { m_Flag = flag; }
+	int GetFlag() const { return m_Flag; }
 };
 
 #endif

@@ -8,7 +8,7 @@
 #include "RMeshElement.h"
 
 RMeshElement::RMeshElement()
-	: m_VertexBuffer(nullptr), m_IndexBuffer(nullptr), m_InputLayout(nullptr)
+	: m_VertexBuffer(nullptr), m_IndexBuffer(nullptr), m_InputLayout(nullptr), m_Flag(0)
 {
 
 }
