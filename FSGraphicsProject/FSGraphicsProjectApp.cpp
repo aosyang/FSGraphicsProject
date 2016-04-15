@@ -948,7 +948,9 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		}
 		else
 		{
-			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
+			cbMaterial.GlobalOpacity = 1.0f;
+			SetMaterialConstBuffer(&cbMaterial);
+			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[1], blendFactor, 0xFFFFFFFF);
 			m_CharacterObj.Draw();
 		}
 	}

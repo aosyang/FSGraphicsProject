@@ -1,79 +1,79 @@
 <Material Mesh="../Assets/unitychan/unitychan.fbx">
-    <MeshElement Name="head_back" Shader="Default">
+    <MeshElement Name="head_back" Shader="Lighting">
         <Texture Slot="0">../Assets/unitychan/face_00.dds</Texture>
     </MeshElement>
-    <MeshElement Name="eye_base_old" Shader="Default">
+    <MeshElement Name="eye_base_old" Shader="Lighting">
         <Texture Slot="0">../Assets/unitychan/eyeline_00.dds</Texture>
     </MeshElement>
-    <MeshElement Name="eye_L_old" Shader="Default">
+    <MeshElement Name="eye_L_old" Shader="Lighting">
         <Texture Slot="0">../Assets/unitychan/eye_iris_L_00.dds</Texture>
     </MeshElement>
-    <MeshElement Name="eye_R_old" Shader="Default">
+    <MeshElement Name="eye_R_old" Shader="Lighting">
         <Texture Slot="0">../Assets/unitychan/eye_iris_R_00.dds</Texture>
     </MeshElement>
-    <MeshElement Name="MTH_DEF" Shader="Default">
+    <MeshElement Name="MTH_DEF" Shader="Lighting">
         <Texture Slot="0">../Assets/unitychan/face_00.dds</Texture>
     </MeshElement>
-    <MeshElement Name="EYE_DEF" Shader="Default">
+    <MeshElement Name="EYE_DEF" Shader="Lighting">
         <Texture Slot="0">../Assets/unitychan/face_00.dds</Texture>
     </MeshElement>
     <MeshElement Name="EL_DEF" Shader="Default"/>
     <MeshElement Name="BLW_DEF" Shader="Default"/>
-    <MeshElement Name="tail" Shader="SkinnedDefault">
+    <MeshElement Name="tail" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/hair_01.dds</Texture>
         <Texture Slot="1">../Assets/unitychan/hair_01_NRM.dds</Texture>
     </MeshElement>
-    <MeshElement Name="hair_frontside" Shader="SkinnedDefault">
+    <MeshElement Name="hair_frontside" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/hair_01.dds</Texture>
         <Texture Slot="1">../Assets/unitychan/hair_01_NRM.dds</Texture>
     </MeshElement>
-    <MeshElement Name="hair_front" Shader="SkinnedDefault">
+    <MeshElement Name="hair_front" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/hair_01.dds</Texture>
         <Texture Slot="1">../Assets/unitychan/hair_01_NRM.dds</Texture>
     </MeshElement>
-    <MeshElement Name="tail_bottom" Shader="SkinnedDefault">
+    <MeshElement Name="tail_bottom" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/hair_01.dds</Texture>
         <Texture Slot="1">../Assets/unitychan/hair_01_NRM.dds</Texture>
     </MeshElement>
-    <MeshElement Name="hair_accce" Shader="SkinnedDefault">
+    <MeshElement Name="hair_accce" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
         <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
     </MeshElement>
-    <MeshElement Name="skin" Shader="SkinnedDefault">
+    <MeshElement Name="skin" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/skin_01.dds</Texture>
     </MeshElement>
-    <MeshElement Name="uwagi" Shader="SkinnedDefault">
+    <MeshElement Name="uwagi" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
         <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
     </MeshElement>
-    <MeshElement Name="uwagi_BK" Shader="SkinnedDefault">
+    <MeshElement Name="uwagi_BK" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
         <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
     </MeshElement>
-    <MeshElement Name="Shirts" Shader="SkinnedDefault">
+    <MeshElement Name="Shirts" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
         <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
     </MeshElement>
-    <MeshElement Name="shirts_sode" Shader="SkinnedDefault">
+    <MeshElement Name="shirts_sode" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
         <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
     </MeshElement>
-    <MeshElement Name="shirts_sode_BK" Shader="SkinnedDefault">
+    <MeshElement Name="shirts_sode_BK" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
         <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
     </MeshElement>
-    <MeshElement Name="button" Shader="SkinnedDefault">
+    <MeshElement Name="button" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
         <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
     </MeshElement>
-    <MeshElement Name="hairband" Shader="SkinnedDefault">
+    <MeshElement Name="hairband" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
         <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
     </MeshElement>
-    <MeshElement Name="cheek" Shader="SkinnedDefault">
+    <MeshElement Name="cheek" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/cheek_00.dds</Texture>
     </MeshElement>
-    <MeshElement Name="Leg" Shader="SkinnedDefault">
+    <MeshElement Name="Leg" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/body_01.dds</Texture>
         <Texture Slot="1">../Assets/unitychan/body_01_NRM.dds</Texture>
     </MeshElement>
