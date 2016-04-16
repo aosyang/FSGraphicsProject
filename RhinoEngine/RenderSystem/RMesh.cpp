@@ -165,11 +165,11 @@ int RMesh::GetCachedAnimationNodeId(RAnimation* anim, int boneId)
 	if (!anim || !m_BoneIdToName.size())
 		return -1;
 
-	map<RAnimation*, map<int, int>>::const_iterator iter = m_AnimationNodeCache.find(anim);
+	map<RAnimation*, map<int, int>>::iterator iter = m_AnimationNodeCache.find(anim);
 	if (iter == m_AnimationNodeCache.end())
 		return -1;
 
-	return m_AnimationNodeCache[anim][boneId];
+	return iter->second[boneId];
 }
 
 void RMesh::SetResourceTimestamp(float time)
