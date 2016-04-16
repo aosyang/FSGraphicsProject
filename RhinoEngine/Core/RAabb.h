@@ -32,6 +32,12 @@ public:
 		Expand(aabb.pMax);
 	}
 
+	bool TestIntersectionWithAabb(const RAabb& aabb) const;
+
+	// Check movement collision with another aabb.
+	// Returns corrected movement vector result.
+	RVec3 TestDynamicCollisionWithAabb(const RVec3& moveVec, const RAabb& aabb) const;
+
 	static RAabb Default;
 };
 

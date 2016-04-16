@@ -264,7 +264,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_CharacterObj.SetMesh(RResourceManager::Instance().LoadFbxMesh("../Assets/unitychan/unitychan.fbx"));
 	//m_CharacterAnimations[0] = m_CharacterAnimation = RResourceManager::Instance().LoadFbxMesh("../Assets/spin_combo.fbx");
 	//m_CharacterObj.SetMesh(m_CharacterAnimation);
-	m_CharacterObj.SetTransform(RMatrix4::CreateYAxisRotation(90) * RMatrix4::CreateTranslation(-1100.0f, 40.0f, 0.0f));
+	m_CharacterObj.SetTransform(RMatrix4::CreateYAxisRotation(90) * RMatrix4::CreateTranslation(-1100.0f, 50.0f, 0.0f));
 
 	RMesh* sphereMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.fbx");
 
@@ -434,6 +434,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	if (RInput.IsKeyDown('D'))
 		moveVec += RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 
+
 	// Toggle lights
 	if (RInput.GetBufferedKeyState('F') == BKS_Pressed)
 		m_EnableLights[2] = !m_EnableLights[2];
@@ -469,11 +470,24 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	}
 
 	if (RInput.GetBufferedKeyState('R') == BKS_Pressed)
-		m_CharacterObj.SetPosition(RVec3(-1100.0f, 40.0f, 0.0f));
+		m_CharacterObj.SetPosition(RVec3(-1100.0f, 50.0f, 0.0f));
 
 	RVec3 camPos = m_CameraMatrix.GetTranslation();
 	m_CameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
-	m_CameraMatrix.SetTranslation(camPos + (RVec4(moveVec, 1.0f) * m_CameraMatrix).ToVec3());
+
+	RVec3 worldMoveVec = (RVec4(moveVec, 0.0f) * m_CameraMatrix).ToVec3();
+
+	RAabb camAabb;
+	camAabb.Expand(camPos + RVec3(5.0f, 5.0f, 5.0f));
+	camAabb.Expand(camPos - RVec3(5.0f, 5.0f, 5.0f));
+
+	const vector<RMeshElement>& sceneMeshElements = m_SceneMeshCity->GetMeshElements();
+	for (UINT i = 0; i < sceneMeshElements.size(); i++)
+	{
+		worldMoveVec = camAabb.TestDynamicCollisionWithAabb(worldMoveVec, sceneMeshElements[i].GetAabb());
+		m_DebugRenderer.DrawAabb(sceneMeshElements[i].GetAabb());
+	}
+	m_CameraMatrix.SetTranslation(camPos + worldMoveVec);
 
 	RMatrix4 viewMatrix = m_CameraMatrix.GetViewMatrix();
 	RMatrix4 projMatrix = RMatrix4::CreatePerspectiveProjectionLH(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
@@ -612,7 +626,22 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 					 animation->GetRootPosition(currTime) - animation->GetInitRootPosition();
 		}
 
-		m_CharacterObj.TranslateLocal(offset);
+		RVec3 nodePos = m_CharacterObj.GetNodeTransform().GetTranslation();
+		RVec3 worldOffset = (RVec4(offset, 0.0f) * m_CharacterObj.GetNodeTransform()).ToVec3();
+
+		RAabb aabb = m_CharacterObj.GetAabb();
+		aabb.pMin += nodePos;
+		aabb.pMax += nodePos;
+
+		m_DebugRenderer.DrawAabb(aabb);
+
+		const vector<RMeshElement>& sceneMeshElements = m_SceneMeshCity->GetMeshElements();
+		for (UINT i = 0; i < sceneMeshElements.size(); i++)
+		{
+			worldOffset = aabb.TestDynamicCollisionWithAabb(worldOffset, sceneMeshElements[i].GetAabb());
+		}
+
+		m_CharacterObj.Translate(worldOffset);
 		RVec3 invOffset = -animation->GetRootPosition(currTime);
 		invOffset = m_CharacterObj.GetNodeTransform().RotateVector(invOffset);
 		RMatrix4 trans = RMatrix4::CreateTranslation(invOffset);
@@ -628,13 +657,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 			boneMatrix.boneMatrix[i] = m_CharacterObj.GetMesh()->GetBoneInitInvMatrices(i) * matrix * m_CharacterObj.GetNodeTransform() * trans;
 		}
 
-		RVec3 nodePos = m_CharacterObj.GetNodeTransform().GetTranslation();
-		m_DebugRenderer.DrawLine(nodePos, nodePos + offset * 100, RColor(1.0f, 0.0f, 0.0f), RColor(1.0f, 0.0f, 0.0f));
-
-		RAabb aabb = m_CharacterObj.GetAabb();
-		aabb.pMin += nodePos;
-		aabb.pMax += nodePos;
-		m_DebugRenderer.DrawAabb(aabb);
+		m_DebugRenderer.DrawLine(nodePos, nodePos + worldOffset * 10, RColor(1.0f, 0.0f, 0.0f), RColor(1.0f, 0.0f, 0.0f));
 
 		m_cbBoneMatrices.UpdateContent(&boneMatrix);
 		m_cbBoneMatrices.ApplyToShaders();
@@ -1017,6 +1040,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		RRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[0], 0);
 
 		// Draw debug lines
+		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
 		SetPerObjectConstBuffer(RMatrix4::IDENTITY);
 		m_DebugRenderer.Draw();
 	}
