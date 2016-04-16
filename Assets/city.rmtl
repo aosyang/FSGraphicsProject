@@ -1,12 +1,4 @@
 <Material Mesh="../Assets/city.fbx">
-    <MeshElement Name="lowBuildings" Shader="AmbientOcclusion">
-        <Texture Slot="0">../Assets/cty1.dds</Texture>
-        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="ground" Shader="AmbientOcclusion">
-        <Texture Slot="0">../Assets/ang1.dds</Texture>
-        <Texture Slot="1">../Assets/groundAO.dds</Texture>
-    </MeshElement>
     <MeshElement Name="tallBuildings" Shader="AmbientOcclusion">
         <Texture Slot="0">../Assets/cty2x.dds</Texture>
         <Texture Slot="1">../Assets/tallBuildingsAO.dds</Texture>
@@ -14,5 +6,169 @@
     <MeshElement Name="Street" Shader="AmbientOcclusion">
         <Texture Slot="0">../Assets/ang1.dds</Texture>
         <Texture Slot="1">../Assets/StreetAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="tallBuildings_part1" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty2x.dds</Texture>
+        <Texture Slot="1">../Assets/tallBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="tallBuildings_part2" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/ang1.dds</Texture>
+        <Texture Slot="1">../Assets/tallBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="tallBuildings_part3" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty2x.dds</Texture>
+        <Texture Slot="1">../Assets/tallBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="tallBuildings_part4" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty2x.dds</Texture>
+        <Texture Slot="1">../Assets/tallBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="tallBuildings_part5" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty2x.dds</Texture>
+        <Texture Slot="1">../Assets/tallBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="tallBuildings_part6" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty2x.dds</Texture>
+        <Texture Slot="1">../Assets/tallBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part1" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part2" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part3" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part4" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part5" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part6" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part7" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part8" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part9" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part10" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part11" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part12" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part13" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part14" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part15" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part16" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part17" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part18" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part19" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part20" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part21" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part22" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part23" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part24" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part25" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part26" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part27" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part28" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part29" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part30" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part31" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part32" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part33" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="lowBuilding_part34" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/cty1.dds</Texture>
+        <Texture Slot="1">../Assets/lowBuildingsAO.dds</Texture>
+    </MeshElement>
+    <MeshElement Name="Ground" Shader="AmbientOcclusion">
+        <Texture Slot="0">../Assets/ang1.dds</Texture>
+        <Texture Slot="1">../Assets/groundAO.dds</Texture>
     </MeshElement>
 </Material>
