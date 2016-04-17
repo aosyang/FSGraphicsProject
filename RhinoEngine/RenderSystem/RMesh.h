@@ -71,7 +71,7 @@ private:
 	RAnimation*				m_Animation;
 	BoneMatrices*			m_BoneInitInvMatrices;
 	vector<string>			m_BoneIdToName;
-	map<RAnimation*, map<int, int>>
+	map<RAnimation*, vector<int>>
 							m_AnimationNodeCache;
 };
 

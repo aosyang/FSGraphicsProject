@@ -151,7 +151,8 @@ void RMesh::CacheAnimation(RAnimation* anim)
 	anim->SetRootNode(anim->GetNodeIdByName(rootNodeName));
 	anim->BuildRootDisplacementArray();
 
-	map<int, int> nodeIdMap;
+	vector<int> nodeIdMap;
+	nodeIdMap.resize(m_BoneIdToName.size());
 	for (int i = 0; i < (int)m_BoneIdToName.size(); i++)
 	{
 		nodeIdMap[i] = anim->GetNodeIdByName(m_BoneIdToName[i].data());
@@ -165,7 +166,7 @@ int RMesh::GetCachedAnimationNodeId(RAnimation* anim, int boneId)
 	if (!anim || !m_BoneIdToName.size())
 		return -1;
 
-	map<RAnimation*, map<int, int>>::iterator iter = m_AnimationNodeCache.find(anim);
+	map<RAnimation*, vector<int>>::iterator iter = m_AnimationNodeCache.find(anim);
 	if (iter == m_AnimationNodeCache.end())
 		return -1;
 
