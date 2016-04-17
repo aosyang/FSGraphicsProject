@@ -14,9 +14,6 @@
     <MeshElement Name="MTH_DEF" Shader="SkinnedLighting">
         <Texture Slot="0">../Assets/unitychan/face_00.dds</Texture>
     </MeshElement>
-    <MeshElement Name="EYE_DEF" Shader="SkinnedLighting">
-        <Texture Slot="0">../Assets/unitychan/face_00.dds</Texture>
-    </MeshElement>
     <MeshElement Name="EL_DEF" Shader="SkinnedDefault"/>
     <MeshElement Name="BLW_DEF" Shader="SkinnedDefault"/>
     <MeshElement Name="tail" Shader="SkinnedLighting">
