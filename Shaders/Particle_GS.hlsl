@@ -26,7 +26,7 @@ struct GSOutput
 	float4 PosH			: SV_POSITION;
 };
 
-[maxvertexcount(6)]
+[maxvertexcount(4)]
 void main(
 	point OUTPUT_VERTEX Input[1],
 	inout TriangleStream< GSOutput > output
@@ -53,8 +53,8 @@ void main(
 	float4 offset[4];
 	offset[0] = float4(mul(float3(-0.5f, -0.5f, 0.0f), invView), 0.0f);
 	offset[1] = float4(mul(float3(-0.5f, 0.5f, 0.0f), invView), 0.0f);
-	offset[2] = float4(mul(float3(0.5f, 0.5f, 0.0f), invView), 0.0f);
-	offset[3] = float4(mul(float3(0.5f, -0.5f, 0.0f), invView), 0.0f);
+	offset[2] = float4(mul(float3(0.5f, -0.5f, 0.0f), invView), 0.0f);
+	offset[3] = float4(mul(float3(0.5f, 0.5f, 0.0f), invView), 0.0f);
 
 	float3 normal = mul(float3(0.0f, 0.0f, -1.0f), invView);
 	float3 tangent = mul(float3(1.0f, 0.0f, 0.0f), invView);
@@ -62,8 +62,8 @@ void main(
 	float2 uv[4];
 	uv[0] = float2(0.0f, 1.0f);
 	uv[1] = float2(0.0f, 0.0f);
-	uv[2] = float2(1.0f, 0.0f);
-	uv[3] = float2(1.0f, 1.0f);
+	uv[2] = float2(1.0f, 1.0f);
+	uv[3] = float2(1.0f, 0.0f);
 
 	GSOutput Vert[4];
 	[unroll]
@@ -76,15 +76,7 @@ void main(
 		Vert[i].UV = uv[i] * Input[0].UVScaleOffset.xy + Input[0].UVScaleOffset.zw;
 		Vert[i].NormalW = normal;
 		Vert[i].TangentW = tangent;
+
+		output.Append(Vert[i]);
 	}
-
-	output.Append(Vert[0]);
-	output.Append(Vert[1]);
-	output.Append(Vert[2]);
-	output.RestartStrip();
-
-	output.Append(Vert[0]);
-	output.Append(Vert[2]);
-	output.Append(Vert[3]);
-	output.RestartStrip();
 }
