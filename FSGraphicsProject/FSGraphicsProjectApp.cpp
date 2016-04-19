@@ -489,7 +489,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	}
 	m_CameraMatrix.SetTranslation(camPos + worldMoveVec);
 
-	RMatrix4 viewMatrix = m_CameraMatrix.GetViewMatrix();
+	RMatrix4 viewMatrix = m_CameraMatrix.FastInverse();
 	RMatrix4 projMatrix = RMatrix4::CreatePerspectiveProjectionLH(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
 
 	// Update scene constant buffer

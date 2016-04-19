@@ -71,7 +71,7 @@ RMatrix4& RMatrix4::operator*=(const RMatrix4& rhs)
 	return *this;
 }
 
-RMatrix4 RMatrix4::GetViewMatrix() const
+RMatrix4 RMatrix4::FastInverse() const
 {
 	RMatrix4 view = *this;
 

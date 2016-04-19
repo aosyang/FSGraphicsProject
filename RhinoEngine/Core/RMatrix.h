@@ -36,8 +36,8 @@ public:
 	RMatrix4 operator*(const RMatrix4& rhs) const;
 	RMatrix4& operator*=(const RMatrix4& rhs);
 
-	// Fast inverse a camera matrix
-	RMatrix4 GetViewMatrix() const;
+	// Fast inverse a homogenous transformation matrix
+	RMatrix4 FastInverse() const;
 
 	RVec3 GetForward() const;
 	RVec3 GetUp() const;

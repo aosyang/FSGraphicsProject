@@ -250,7 +250,7 @@ namespace EngineManagedWrapper
 			m_CameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
 			m_CameraMatrix.SetTranslation(camPos + (RVec4(moveVec, 1.0f) * m_CameraMatrix).ToVec3());
 
-			RMatrix4 viewMatrix = m_CameraMatrix.GetViewMatrix();
+			RMatrix4 viewMatrix = m_CameraMatrix.FastInverse();
 			RMatrix4 projMatrix = RMatrix4::CreatePerspectiveProjectionLH(m_CamFov, RRenderer.AspectRatio(), 1.0f, 10000.0f);
 			RMatrix4 viewProjMatrix = viewMatrix * projMatrix;
 
@@ -407,7 +407,7 @@ namespace EngineManagedWrapper
 
 			if (m_SelectedObject)
 			{
-				axis_ray = ray.Transform(m_AxisMatrix.GetViewMatrix());
+				axis_ray = ray.Transform(m_AxisMatrix.FastInverse());
 			}
 
 			m_MouseControlMode = MCM_NONE;
@@ -430,7 +430,7 @@ namespace EngineManagedWrapper
 
 				for (vector<RSMeshObject*>::iterator iter = m_MeshObjects.begin(); iter != m_MeshObjects.end(); iter++)
 				{
-					RRay local_ray = ray.Transform((*iter)->GetNodeTransform().GetViewMatrix());
+					RRay local_ray = ray.Transform((*iter)->GetNodeTransform().FastInverse());
 
 					if (local_ray.TestAabbIntersection((*iter)->GetAabb()))
 					{
