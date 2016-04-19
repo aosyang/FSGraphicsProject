@@ -40,16 +40,19 @@ void RAnimation::AddNodePose(int nodeId, int frameId, const RMatrix4* matrix)
 	memcpy(&m_NodeKeyFrames[nodeId][frameId], matrix, sizeof(RMatrix4));
 }
 
-void RAnimation::GetNodePose(int nodeId, float frameId, RMatrix4* matrix) const
+void RAnimation::GetNodePose(int nodeId, float time, RMatrix4* matrix) const
 {
-	assert(nodeId >= 0 && nodeId < (int)m_NodeKeyFrames.size());
-	assert(frameId >= 0 && frameId < m_FrameCount);
+	// Make zero based time
+	time -= m_StartTime;
 
-	int frame1 = (int)frameId;
-	int frame2 = ((int)frameId + 1) % m_FrameCount;
+	assert(nodeId >= 0 && nodeId < (int)m_NodeKeyFrames.size());
+	assert(time >= 0 && time < m_FrameCount);
+
+	int frame1 = (int)time;
+	int frame2 = ((int)time + 1) % m_FrameCount;
 	//if (frame2 < frame1)
 	//	frame2 = frame1;
-	float t = frameId - frame1;
+	float t = time - frame1;
 
 	// Linear interpolate two matrices
 	// TODO: Use quaternion slerp and position lerp instead!
@@ -88,6 +91,9 @@ RVec3 RAnimation::GetRootPosition(float time) const
 {
 	if (m_RootDisplacement.size() == 0)
 		return RVec3::Zero();
+
+	// Make zero based time
+	time -= m_StartTime;
 
 	int frame1 = (int)time;
 	int frame2 = ((int)time + 1) % m_FrameCount;

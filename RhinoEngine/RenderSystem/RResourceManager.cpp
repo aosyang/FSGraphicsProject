@@ -300,7 +300,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		animStartTime = takeInfo->mLocalTimeSpan.GetStart();
 		animEndTime = takeInfo->mLocalTimeSpan.GetStop();
 
-		int totalFrameCount = (int)animEndTime.GetFrameCount(animTimeMode) + 1;
+		int totalFrameCount = (int)(animEndTime.GetFrameCount(animTimeMode) - animStartTime.GetFrameCount(animTimeMode)) + 1;
 		animation = new RAnimation(
 			lFbxScene->GetNodeCount(),
 			totalFrameCount,

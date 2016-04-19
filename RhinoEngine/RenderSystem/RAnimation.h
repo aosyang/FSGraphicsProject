@@ -15,7 +15,7 @@ public:
 	~RAnimation();
 
 	void AddNodePose(int nodeId, int frameId, const RMatrix4* matrix);
-	void GetNodePose(int nodeId, float frameId, RMatrix4* matrix) const;
+	void GetNodePose(int nodeId, float time, RMatrix4* matrix) const;
 	int GetNodeCount() const { return (int)m_NodeKeyFrames.size(); }
 
 	RVec3 GetInitRootPosition() const;
