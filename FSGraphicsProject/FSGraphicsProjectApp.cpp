@@ -604,7 +604,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		static float currTime = animation->GetStartTime();
 
 		// Changing time may cause start time greater than end time
-		if  (currTime >= animation->GetEndTime() - 1.0f)
+		if  (currTime >= animation->GetEndTime())
 		{
 			currTime = animation->GetStartTime();
 		}
@@ -613,9 +613,9 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		currTime += timer.DeltaTime() * animation->GetFrameRate();
 		bool startOver = false;
 
-		while (currTime >= animation->GetEndTime() - 1.0f)
+		while (currTime >= animation->GetEndTime())
 		{
-			currTime -= animation->GetEndTime() - 1.0f - animation->GetStartTime();
+			currTime -= animation->GetEndTime() - animation->GetStartTime();
 			startOver = true;
 		}
 
