@@ -322,7 +322,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 				FbxAMatrix childTransform = node->EvaluateGlobalTransform(animTime);
 				MatrixTransfer(&matrix, &childTransform);
-				int frameIdx = (int)((float)animTime.GetFrameCount(animTimeMode) - (float)animStartTime.GetFrameCountPrecise(animTimeMode));
+				int frameIdx = (int)((float)animTime.GetFrameCountPrecise(animTimeMode) - (float)animStartTime.GetFrameCountPrecise(animTimeMode));
 				animation->AddNodePose(idxNode, frameIdx, &matrix);
 				animation->AddNodeNameToId(node->GetName(), idxNode);
 
