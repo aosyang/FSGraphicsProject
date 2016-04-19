@@ -29,6 +29,9 @@ RRay RRay::Transform(const RMatrix4& mat) const
 
 bool RRay::TestAabbIntersection(const RAabb& aabb) const
 {
+	if (!aabb.IsValid())
+		return false;
+
 	float tmin = -FLT_MAX, tmax = FLT_MAX;
 
 	if (!FLT_EQUAL_ZERO(Direction.x))

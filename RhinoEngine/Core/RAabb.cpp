@@ -17,6 +17,11 @@ RAabb::RAabb()
 {
 }
 
+bool RAabb::IsValid() const
+{
+	return pMax.x >= pMin.x && pMax.y >= pMin.y && pMax.z >= pMin.z;
+}
+
 bool RAabb::TestIntersectionWithAabb(const RAabb& aabb) const
 {
 	if (pMax.x <= aabb.pMin.x || pMin.x >= aabb.pMax.x)

@@ -32,6 +32,8 @@ public:
 		Expand(aabb.pMax);
 	}
 
+	bool IsValid() const;
+
 	bool TestIntersectionWithAabb(const RAabb& aabb) const;
 
 	// Check movement collision with another aabb.
