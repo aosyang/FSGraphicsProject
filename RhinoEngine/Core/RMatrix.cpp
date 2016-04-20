@@ -324,6 +324,20 @@ RMatrix4 RMatrix4::CreateLookAtViewLH(const RVec3& eye, const RVec3& lookAt, con
 					-xaxis.Dot(eye),	-yaxis.Dot(eye),	-zaxis.Dot(eye),	1);
 }
 
+RMatrix4 RMatrix4::Leap(const RMatrix4& lhs, const RMatrix4& rhs, float t)
+{
+	RMatrix4 result;
+
+	for (int j = 0; j < 16; j++)
+	{
+		float va = ((float*)&lhs)[j];
+		float vb = ((float*)&rhs)[j];
+		((float*)&result)[j] = va + (vb - va) * t;
+	}
+
+	return result;
+}
+
 RVec4 operator*(const RVec4& v, const RMatrix4& m)
 {
 	RVec4 v_result = v;
