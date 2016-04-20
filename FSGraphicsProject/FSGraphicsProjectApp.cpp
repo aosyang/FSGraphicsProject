@@ -391,6 +391,9 @@ bool FSGraphicsProjectApp::Initialize()
 	RRenderer.D3DDevice()->CreateDepthStencilState(&depthDesc, &m_DepthState[1]);
 
 	m_EnabledPostProcessor = 0;
+	m_CharacterRot = 0.0f;
+	m_CharacterYVel = 0.0f;
+	m_RenderCollisionWireframe = false;
 
 	return true;
 }
@@ -454,6 +457,9 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	if (RInput.GetBufferedKeyState('6') == BKS_Pressed)
 		m_EnabledPostProcessor = 0;
 
+	if (RInput.GetBufferedKeyState('P') == BKS_Pressed)
+		m_RenderCollisionWireframe = !m_RenderCollisionWireframe;
+
 	if (RInput.GetBufferedKeyState('X') == BKS_Pressed)
 	{
 		m_CurrentAnim++;
@@ -469,8 +475,18 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		m_CharacterAnimation = m_CharacterAnimations[m_CurrentAnim];
 	}
 
+	if (RInput.GetBufferedKeyState(VK_SPACE) == BKS_Pressed)
+		m_CharacterYVel = 4.0f;
+
 	if (RInput.GetBufferedKeyState('R') == BKS_Pressed)
 		m_CharacterObj.SetPosition(RVec3(-1100.0f, 50.0f, 0.0f));
+
+	if (RInput.IsKeyDown(VK_LEFT))
+		m_CharacterRot -= timer.DeltaTime() * 100.0f;
+
+	if (RInput.IsKeyDown(VK_RIGHT))
+		m_CharacterRot += timer.DeltaTime() * 100.0f;
+
 
 	RVec3 camPos = m_CameraMatrix.GetTranslation();
 	m_CameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
@@ -485,7 +501,9 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	for (UINT i = 0; i < sceneMeshElements.size(); i++)
 	{
 		worldMoveVec = camAabb.TestDynamicCollisionWithAabb(worldMoveVec, sceneMeshElements[i].GetAabb());
-		m_DebugRenderer.DrawAabb(sceneMeshElements[i].GetAabb());
+
+		if (m_RenderCollisionWireframe)
+			m_DebugRenderer.DrawAabb(sceneMeshElements[i].GetAabb());
 	}
 	m_CameraMatrix.SetTranslation(camPos + worldMoveVec);
 
@@ -595,6 +613,11 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 	m_cbInstance[1].UpdateContent(&cbInstance[1]);
 
+	RVec3 charPos = m_CharacterObj.GetNodeTransform().GetTranslation();
+	RMatrix4 charMatrix = RMatrix4::CreateYAxisRotation(m_CharacterRot);
+	charMatrix.SetTranslation(charPos);
+	m_CharacterObj.SetTransform(charMatrix);
+
 	// Update animation
 	RAnimation* animation = m_CharacterAnimation->GetAnimation();
 	if (animation)
@@ -626,10 +649,21 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 					 animation->GetRootPosition(currTime) - animation->GetInitRootPosition();
 		}
 
+		m_CharacterYVel -= 10.0f * timer.DeltaTime();
+
 		RVec3 nodePos = m_CharacterObj.GetNodeTransform().GetTranslation();
 		RVec3 worldOffset = (RVec4(offset, 0.0f) * m_CharacterObj.GetNodeTransform()).ToVec3();
+		worldOffset.y = m_CharacterYVel;
 
-		RAabb aabb = m_CharacterObj.GetAabb();
+		if (RInput.IsKeyDown(VK_UP))
+			worldOffset += m_CharacterObj.GetNodeTransform().GetForward() * timer.DeltaTime() * 500.0f;
+
+		if (RInput.IsKeyDown(VK_DOWN))
+			worldOffset -= m_CharacterObj.GetNodeTransform().GetForward() * timer.DeltaTime() * 500.0f;
+
+		RAabb aabb;
+		aabb.Expand(RVec3(-50.0f, 0.0f, -50.0f));
+		aabb.Expand(RVec3(50.0f, 200.0f, 50.0f));
 		aabb.pMin += nodePos;
 		aabb.pMax += nodePos;
 
@@ -640,6 +674,9 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		{
 			worldOffset = aabb.TestDynamicCollisionWithAabb(worldOffset, sceneMeshElements[i].GetAabb());
 		}
+
+		if (fabs(worldOffset.y) < fabs(m_CharacterYVel))
+			m_CharacterYVel = 0.0f;
 
 		m_CharacterObj.Translate(worldOffset);
 		RVec3 invOffset = -animation->GetRootPosition(currTime);

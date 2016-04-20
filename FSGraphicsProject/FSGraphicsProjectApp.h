@@ -120,6 +120,9 @@ private:
 	SHADER_INSTANCE_BUFFER		cbInstance[2];
 
 	RDebugRenderer				m_DebugRenderer;
+	float						m_CharacterRot;
+	float						m_CharacterYVel;
+	bool						m_RenderCollisionWireframe;
 };
 
 #endif
