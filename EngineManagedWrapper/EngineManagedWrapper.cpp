@@ -222,9 +222,9 @@ namespace EngineManagedWrapper
 					int mdx, mdy;
 					RInput.GetCursorRelPos(mdx, mdy);
 
-					RVec3 obj_forward = m_SelectedObject->GetNodeTransform().GetForward();
-					RVec3 obj_up = m_SelectedObject->GetNodeTransform().GetUp();
-					RVec3 obj_right = m_SelectedObject->GetNodeTransform().GetRight();
+					RVec3 world_x = RVec3(1, 0, 0);
+					RVec3 world_y = RVec3(0, 1, 0);
+					RVec3 world_z = RVec3(0, 0, 1);
 
 					RVec3 cam_right = m_CameraMatrix.GetRight();
 					RVec3 cam_up = m_CameraMatrix.GetUp();
@@ -232,15 +232,27 @@ namespace EngineManagedWrapper
 					RVec3 pos = m_SelectedObject->GetPosition();
 					if (m_MouseControlMode == MCM_MOVE_X)
 					{
-						pos.x += obj_right.Dot(cam_right) * mdx - obj_right.Dot(cam_up) * mdy;
+						pos.x += world_x.Dot(cam_right) * mdx - world_x.Dot(cam_up) * mdy;
 					}
 					else if (m_MouseControlMode == MCM_MOVE_Y)
 					{
-						pos.y += obj_up.Dot(cam_right) * mdx - obj_up.Dot(cam_up) * mdy;
+						if (RInput.IsKeyDown(VK_LMENU))
+						{
+							RMatrix4 transform = m_SelectedObject->GetNodeTransform();
+							RVec3 pos = transform.GetTranslation();
+							transform.SetTranslation(RVec3(0, 0, 0));
+							transform *= RMatrix4::CreateYAxisRotation((float)mdx);
+							transform.SetTranslation(pos);
+							m_SelectedObject->SetTransform(transform);
+						}
+						else
+						{
+							pos.y += world_y.Dot(cam_right) * mdx - world_y.Dot(cam_up) * mdy;
+						}
 					}
 					else if (m_MouseControlMode == MCM_MOVE_Z)
 					{
-						pos.z += obj_forward.Dot(cam_right) * mdx - obj_forward.Dot(cam_up) * mdy;
+						pos.z += world_z.Dot(cam_right) * mdx - world_z.Dot(cam_up) * mdy;
 					}
 					m_SelectedObject->SetPosition(pos);
 				}
@@ -350,13 +362,6 @@ namespace EngineManagedWrapper
 
 			if (m_PrimitiveList.size())
 			{
-				if (m_SelectedObject)
-					cbObject.worldMatrix = m_SelectedObject->GetNodeTransform();
-				else
-					cbObject.worldMatrix = RMatrix4::IDENTITY;
-
-				m_cbPerObject.UpdateContent(&cbObject);
-
 				m_ColorShader->Bind();
 				RRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);
 				m_PrimitiveMeshBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
@@ -430,9 +435,7 @@ namespace EngineManagedWrapper
 
 				for (vector<RSMeshObject*>::iterator iter = m_MeshObjects.begin(); iter != m_MeshObjects.end(); iter++)
 				{
-					RRay local_ray = ray.Transform((*iter)->GetNodeTransform().FastInverse());
-
-					if (local_ray.TestAabbIntersection((*iter)->GetAabb()))
+					if (ray.TestAabbIntersection((*iter)->GetAabb()))
 					{
 						rayPickingList.push_back(*iter);
 					}
