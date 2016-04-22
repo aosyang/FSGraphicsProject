@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Collision\RCollision.h" />
     <ClInclude Include="Core\IApp.h" />
     <ClInclude Include="Core\MathHelper.h" />
     <ClInclude Include="Core\RAabb.h" />
@@ -45,12 +46,14 @@
     <ClInclude Include="RenderSystem\RTexture.h" />
     <ClInclude Include="RenderSystem\RVertexDeclaration.h" />
     <ClInclude Include="Rhino.h" />
+    <ClInclude Include="Scene\RCamera.h" />
     <ClInclude Include="Scene\RSceneObject.h" />
     <ClInclude Include="Scene\RSkybox.h" />
     <ClInclude Include="Scene\RSMeshObject.h" />
     <ClInclude Include="tinyxml2\tinyxml2.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Collision\RCollision.cpp" />
     <ClCompile Include="Core\MathHelper.cpp" />
     <ClCompile Include="Core\RAabb.cpp" />
     <ClCompile Include="Core\REngine.cpp" />
@@ -69,6 +72,7 @@
     <ClCompile Include="RenderSystem\RShadowMap.cpp" />
     <ClCompile Include="RenderSystem\RTexture.cpp" />
     <ClCompile Include="RenderSystem\RVertexDeclaration.cpp" />
+    <ClCompile Include="Scene\RCamera.cpp" />
     <ClCompile Include="Scene\RSceneObject.cpp" />
     <ClCompile Include="Scene\RSkybox.cpp" />
     <ClCompile Include="Scene\RSMeshObject.cpp" />

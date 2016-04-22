@@ -89,6 +89,12 @@
     <ClInclude Include="RenderSystem\RDebugRenderer.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="Collision\RCollision.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\RCamera.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -157,6 +163,12 @@
     <ClCompile Include="RenderSystem\RDebugRenderer.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
+    <ClCompile Include="Collision\RCollision.cpp">
+      <Filter>Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\RCamera.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="RenderSystem">
@@ -173,6 +185,9 @@
     </Filter>
     <Filter Include="tinyxml2">
       <UniqueIdentifier>{d7042b42-536a-46b9-a83e-eb98c7265624}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collision">
+      <UniqueIdentifier>{a18b39c6-87e9-4475-b9cc-10439a62b8c3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

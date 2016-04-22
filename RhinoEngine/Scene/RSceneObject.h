@@ -23,7 +23,7 @@ public:
 
 	virtual void Draw();
 
-private:
+protected:
 	RMatrix4	m_NodeTransform;
 };
 

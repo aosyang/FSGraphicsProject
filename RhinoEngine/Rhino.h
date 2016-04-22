@@ -68,6 +68,7 @@ class RBaseResource;
 #include "Core/REngine.h"
 
 #include "Scene/RSceneObject.h"
+#include "Scene/RCamera.h"
 #include "Scene/RSMeshObject.h"
 #include "Scene/RSkybox.h"
 

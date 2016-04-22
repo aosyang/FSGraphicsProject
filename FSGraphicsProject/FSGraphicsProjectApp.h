@@ -43,7 +43,7 @@ private:
 
 	bool						m_EnableLights[3];
 
-	RMatrix4					m_CameraMatrix;
+	RCamera						m_Camera;
 	float						m_CamPitch, m_CamYaw;
 
 	RSkybox						m_Skybox;

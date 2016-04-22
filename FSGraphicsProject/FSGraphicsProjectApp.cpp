@@ -319,7 +319,11 @@ bool FSGraphicsProjectApp::Initialize()
 
 	m_Skybox.CreateSkybox("../Assets/powderpeak.dds");
 
-	m_CameraMatrix = RMatrix4::CreateTranslation(407.023712f, 339.007507f, 876.396484f);
+	m_Camera.SetPosition(RVec3(407.023712f, 339.007507f, 876.396484f));
+	m_Camera.SetFOV(65.0f);
+	m_Camera.SetAspectRatio(RRenderer.AspectRatio());
+	m_Camera.SetNearPlane(1.0f);
+	m_Camera.SetFarPlane(10000.0f);
 	m_CamPitch = 0.0900001600f;
 	m_CamYaw = 3.88659930f;
 
@@ -488,10 +492,10 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		m_CharacterRot += timer.DeltaTime() * 100.0f;
 
 
-	RVec3 camPos = m_CameraMatrix.GetTranslation();
-	m_CameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
+	RVec3 camPos = m_Camera.GetPosition();
+	RMatrix4 cameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
 
-	RVec3 worldMoveVec = (RVec4(moveVec, 0.0f) * m_CameraMatrix).ToVec3();
+	RVec3 worldMoveVec = (RVec4(moveVec, 0.0f) * cameraMatrix).ToVec3();
 
 	RAabb camAabb;
 	camAabb.Expand(camPos + RVec3(5.0f, 5.0f, 5.0f));
@@ -505,10 +509,11 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		if (m_RenderCollisionWireframe)
 			m_DebugRenderer.DrawAabb(sceneMeshElements[i].GetAabb());
 	}
-	m_CameraMatrix.SetTranslation(camPos + worldMoveVec);
+	cameraMatrix.SetTranslation(camPos + worldMoveVec);
+	m_Camera.SetTransform(cameraMatrix);
 
-	RMatrix4 viewMatrix = m_CameraMatrix.FastInverse();
-	RMatrix4 projMatrix = RMatrix4::CreatePerspectiveProjectionLH(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
+	RMatrix4 viewMatrix = m_Camera.GetViewMatrix();
+	RMatrix4 projMatrix = m_Camera.GetProjectionMatrix();
 
 	// Update scene constant buffer
 	SHADER_SCENE_BUFFER cbScene;
@@ -516,7 +521,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	cbScene.viewMatrix = viewMatrix;
 	cbScene.projMatrix = projMatrix;
 	cbScene.viewProjMatrix = viewMatrix * projMatrix;
-	cbScene.cameraPos = m_CameraMatrix.GetRow(3);
+	cbScene.cameraPos = m_Camera.GetPosition();
 
 	float ct = 1.0f;// timer.TotalTime() * 0.2f;
 	m_SunVec = RVec3(sinf(ct) * 0.5f, 0.25f, cosf(ct) * 0.5f).GetNormalizedVec3() * 2000.0f;
@@ -565,8 +570,8 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	if (m_EnableLights[2])
 	{
 		cbLight.SpotlightCount = 1;
-		RVec4 spotlightPos = RVec4(m_CameraMatrix.GetTranslation(), 2000.0f);
-		RVec4 spotlightDir = RVec4(m_CameraMatrix.GetRow(2).ToVec3(), 1.0f);
+		RVec4 spotlightPos = RVec4(m_Camera.GetPosition(), 2000.0f);
+		RVec4 spotlightDir = RVec4(m_Camera.GetNodeTransform().GetForward(), 1.0f);
 		RVec4 spotlightRatio = RVec4(0.97f, 0.9f, 0.0f, 0.0f);
 		cbLight.Spotlight[0].PosAndRadius = spotlightPos;
 		cbLight.Spotlight[0].Direction = spotlightDir;
@@ -574,7 +579,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		cbLight.Spotlight[0].Color = RVec4(0.85f, 0.85f, 1.0f, 1.0f);
 	}
 
-	cbLight.CameraPos = m_CameraMatrix.GetRow(3);
+	cbLight.CameraPos = m_Camera.GetPosition();
 
 	m_cbLight.UpdateContent(&cbLight);
 
@@ -604,11 +609,11 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	m_cbScreen.UpdateContent(&cbScreen);
 
 	// Update particle vertices
-	ParticleDepthComparer cmp(m_CameraMatrix.GetRow(3), m_CameraMatrix.GetRow(2));
+	ParticleDepthComparer cmp(m_Camera.GetPosition(), m_Camera.GetNodeTransform().GetForward());
 	std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
 	m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(RVertex::PARTICLE_VERTEX), PARTICLE_COUNT);
 
-	ObjectDepthComparer objCmp(m_CameraMatrix.GetRow(3));
+	ObjectDepthComparer objCmp(m_Camera.GetPosition());
 	std::sort(cbInstance[1].instancedWorldMatrix, cbInstance[1].instancedWorldMatrix + 125, objCmp);
 
 	m_cbInstance[1].UpdateContent(&cbInstance[1]);
