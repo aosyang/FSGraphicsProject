@@ -25,7 +25,7 @@ public:
 
 	void SetOverridingShader(RShader* shader);
 
-	const RAabb& GetAabb() const;
+	RAabb GetAabb() const;
 	const RAabb& GetMeshElementAabb(int index) const;
 
 	void Draw(bool instanced = false, int instanceCount = 0);

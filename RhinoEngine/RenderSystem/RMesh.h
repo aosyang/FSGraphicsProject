@@ -42,7 +42,7 @@ public:
 	void SetMaterials(RMaterial* materials, int numMaterial);
 
 	void SetAabb(const RAabb& aabb);
-	const RAabb& GetAabb() const;
+	const RAabb& GetLocalSpaceAabb() const;
 	const RAabb& GetMeshElementAabb(int index) const;
 
 	void SetAnimation(RAnimation* anim);

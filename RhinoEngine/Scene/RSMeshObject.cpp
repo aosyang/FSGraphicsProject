@@ -113,10 +113,10 @@ void RSMeshObject::SetOverridingShader(RShader* shader)
 	m_OverridingShader = shader;
 }
 
-const RAabb& RSMeshObject::GetAabb() const
+RAabb RSMeshObject::GetAabb() const
 {
 	if (m_Mesh)
-		return m_Mesh->GetAabb();
+		return m_Mesh->GetLocalSpaceAabb().GetTransformedAabb(m_NodeTransform);
 	return RAabb::Default;
 }
 

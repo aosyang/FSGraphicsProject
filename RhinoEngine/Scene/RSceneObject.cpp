@@ -47,8 +47,3 @@ void RSceneObject::TranslateLocal(const RVec3& v)
 {
 	m_NodeTransform.TranslateLocal(v);
 }
-
-void RSceneObject::Draw()
-{
-
-}

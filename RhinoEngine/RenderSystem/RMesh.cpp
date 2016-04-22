@@ -102,7 +102,7 @@ void RMesh::SetAabb(const RAabb& aabb)
 	m_Aabb = aabb;
 }
 
-const RAabb& RMesh::GetAabb() const
+const RAabb& RMesh::GetLocalSpaceAabb() const
 {
 	return m_Aabb;
 }

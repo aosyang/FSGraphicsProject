@@ -22,6 +22,33 @@ bool RAabb::IsValid() const
 	return pMax.x >= pMin.x && pMax.y >= pMin.y && pMax.z >= pMin.z;
 }
 
+RAabb RAabb::GetTransformedAabb(const RMatrix4& m) const
+{
+	RAabb aabb;
+	aabb.pMin = aabb.pMax = m.GetTranslation();
+
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			float e = m.m[j][i] * ((float*)&pMin)[j];
+			float f = m.m[j][i] * ((float*)&pMax)[j];
+			if (e < f)
+			{
+				((float*)&aabb.pMin)[i] += e;
+				((float*)&aabb.pMax)[i] += f;
+			}
+			else
+			{
+				((float*)&aabb.pMin)[i] += f;
+				((float*)&aabb.pMax)[i] += e;
+			}
+		}
+	}
+
+	return aabb;
+}
+
 bool RAabb::TestIntersectionWithAabb(const RAabb& aabb) const
 {
 	if (pMax.x <= aabb.pMin.x || pMin.x >= aabb.pMax.x)

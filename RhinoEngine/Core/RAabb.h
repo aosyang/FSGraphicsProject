@@ -34,6 +34,8 @@ public:
 
 	bool IsValid() const;
 
+	RAabb GetTransformedAabb(const RMatrix4& m) const;
+
 	bool TestIntersectionWithAabb(const RAabb& aabb) const;
 
 	// Check movement collision with another aabb.

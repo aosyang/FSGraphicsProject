@@ -21,7 +21,8 @@ public:
 	void Translate(const RVec3& v);
 	void TranslateLocal(const RVec3& v);
 
-	virtual void Draw();
+	virtual RAabb GetAabb() const { return RAabb::Default; }
+	virtual void Draw() {}
 
 protected:
 	RMatrix4	m_NodeTransform;
