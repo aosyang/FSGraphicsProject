@@ -86,10 +86,6 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_DepthState[0]);
 	SAFE_RELEASE(m_DepthState[1]);
 
-	SAFE_RELEASE(m_BlendState[0]);
-	SAFE_RELEASE(m_BlendState[1]);
-	SAFE_RELEASE(m_BlendState[2]);
-
 	m_ParticleBuffer.Release();
 
 	SAFE_RELEASE(m_SamplerComparisonState);
@@ -346,24 +342,6 @@ bool FSGraphicsProjectApp::Initialize()
 
 	m_ParticleDiffuseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/smoke_diffuse.dds");
 	m_ParticleNormalTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/smoke_normal.dds");
-
-	D3D11_BLEND_DESC blendDesc;
-	ZeroMemory(&blendDesc, sizeof(blendDesc));
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[0]);
-
-	blendDesc.RenderTarget[0].BlendEnable = true;
-	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[1]);
-
-	blendDesc.AlphaToCoverageEnable = true;
-	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[2]);
 
 	D3D11_DEPTH_STENCIL_DESC depthDesc;
 
@@ -869,7 +847,6 @@ void FSGraphicsProjectApp::SetPerObjectConstBuffer(const RMatrix4& world)
 void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 {
 	ID3D11ShaderResourceView* shadowMapSRV[] = { m_ShadowMap.GetRenderTargetDepthSRV() };
-	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	float timeNow = REngine::GetTimer().TotalTime();
 	float loadingFadeInTime = 1.0f;
@@ -882,7 +859,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	cbMaterial.GlobalOpacity = 1.0f;
 	SetMaterialConstBuffer(&cbMaterial);
 
-	RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
+	RRenderer.SetBlendState(Blend_Opaque);
 
 	// Set up object world matrix
 	SetPerObjectConstBuffer(RMatrix4::IDENTITY);
@@ -923,12 +900,12 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		{
 			cbMaterial.GlobalOpacity = opacity;
 			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[2], blendFactor, 0xFFFFFFFF);
+			RRenderer.SetBlendState(Blend_AlphaToCoverage);
 			m_FbxMeshObj.Draw();
 		}
 		else
 		{
-			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
+			RRenderer.SetBlendState(Blend_Opaque);
 			m_FbxMeshObj.Draw();
 		}
 	}
@@ -946,12 +923,12 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	//	{
 	//		cbMaterial.GlobalOpacity = opacity;
 	//		SetMaterialConstBuffer(&cbMaterial);
-	//		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[2], blendFactor, 0xFFFFFFFF);
+	//		RRenderer.SetBlendState(Blend_AlphaToCoverage);
 	//		m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
 	//	}
 	//	else
 	//	{
-	//		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
+	//		RRenderer.SetBlendState(Blend_Opaque);
 	//		m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
 	//	}
 	//}
@@ -968,12 +945,12 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		{
 			cbMaterial.GlobalOpacity = opacity;
 			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[2], blendFactor, 0xFFFFFFFF);
+			RRenderer.SetBlendState(Blend_AlphaToCoverage);
 			m_AOSceneObj.Draw();
 		}
 		else
 		{
-			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
+			RRenderer.SetBlendState(Blend_Opaque);
 			m_AOSceneObj.Draw();
 		}
 	}
@@ -988,7 +965,9 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	}
 	else
 	{
-		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
+		cbMaterial.GlobalOpacity = 1.0f;
+		SetMaterialConstBuffer(&cbMaterial);
+		RRenderer.SetBlendState(Blend_AlphaToCoverage);
 		m_BumpLightingShader->Bind();
 		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_BumpBaseTexture->GetPtrSRV());
 		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, m_BumpNormalTexture->GetPtrSRV());
@@ -1007,14 +986,14 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		{
 			cbMaterial.GlobalOpacity = opacity;
 			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[2], blendFactor, 0xFFFFFFFF);
+			RRenderer.SetBlendState(Blend_AlphaToCoverage);
 			m_CharacterObj.Draw();
 		}
 		else
 		{
 			cbMaterial.GlobalOpacity = 1.0f;
 			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[1], blendFactor, 0xFFFFFFFF);
+			RRenderer.SetBlendState(Blend_AlphaBlending);
 			m_CharacterObj.Draw();
 		}
 	}
@@ -1031,14 +1010,14 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		{
 			cbMaterial.GlobalOpacity = opacity * 0.25f;
 			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[2], blendFactor, 0xFFFFFFFF);
+			RRenderer.SetBlendState(Blend_AlphaToCoverage);
 			m_TransparentMesh.Draw(true, 125);
 		}
 		else
 		{
 			cbMaterial.GlobalOpacity = 0.25f;
 			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[1], blendFactor, 0xFFFFFFFF);
+			RRenderer.SetBlendState(Blend_AlphaBlending);
 			m_TransparentMesh.Draw(true, 125);
 		}
 	}
@@ -1055,12 +1034,12 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		{
 			cbMaterial.GlobalOpacity = opacity;
 			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[2], blendFactor, 0xFFFFFFFF);
+			RRenderer.SetBlendState(Blend_AlphaToCoverage);
 			m_TachikomaObj.Draw();
 		}
 		else
 		{
-			RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
+			RRenderer.SetBlendState(Blend_Opaque);
 			m_TachikomaObj.Draw();
 		}
 	}
@@ -1068,7 +1047,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	if (pass != ShadowPass)
 	{
 		// Draw particles
-		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[1], blendFactor, 0xFFFFFFFF);
+		RRenderer.SetBlendState(Blend_AlphaBlending);
 		RRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[1], 0);
 
 		SetPerObjectConstBuffer(RMatrix4::CreateTranslation(0.0f, 150.0f, 150.0f));
@@ -1081,7 +1060,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		RRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[0], 0);
 
 		// Draw debug lines
-		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[0], blendFactor, 0xFFFFFFFF);
+		RRenderer.SetBlendState(Blend_Opaque);
 		SetPerObjectConstBuffer(RMatrix4::IDENTITY);
 		m_DebugRenderer.Draw();
 	}

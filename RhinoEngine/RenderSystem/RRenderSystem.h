@@ -13,6 +13,15 @@
 
 struct RShader;
 
+enum BlendState
+{
+	Blend_Opaque,
+	Blend_AlphaBlending,
+	Blend_AlphaToCoverage,
+
+	BlendStateCount,
+};
+
 class RRenderSystem : public RSingleton<RRenderSystem>
 {
 	friend class RSingleton<RRenderSystem>;
@@ -38,6 +47,8 @@ public:
 	static ID3D11RenderTargetView* DefaultRenderTargetView;
 	static ID3D11DepthStencilView* DefaultDepthStencilView;
 
+	void SetBlendState(BlendState state);
+
 protected:
 	RRenderSystem();
 	~RRenderSystem();
@@ -59,6 +70,9 @@ protected:
 
 	ID3D11RenderTargetView*	m_CurrentRenderTargetView;
 	ID3D11DepthStencilView*	m_CurrentDepthStencilView;
+
+	ID3D11BlendState*		m_BlendState[BlendStateCount];
+	BlendState				m_CurrBlendState;
 };
 
 #define RRenderer RRenderSystem::Instance()

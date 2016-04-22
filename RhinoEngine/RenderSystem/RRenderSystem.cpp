@@ -168,11 +168,36 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 
 	RVertexDeclaration::Instance().Initialize();
 
+	D3D11_BLEND_DESC blendDesc;
+	ZeroMemory(&blendDesc, sizeof(blendDesc));
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_Opaque]);
+
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_AlphaBlending]);
+
+	blendDesc.AlphaToCoverageEnable = true;
+	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_AlphaToCoverage]);
+
+	m_CurrBlendState = Blend_Opaque;
+
 	return true;
 }
 
 void RRenderSystem::Shutdown()
 {
+	for (int i = 0; i < BlendStateCount; i++)
+	{
+		SAFE_RELEASE(m_BlendState[i]);
+	}
+
 	RVertexDeclaration::Instance().Release();
 
 	m_DepthStencilView->Release();
@@ -265,6 +290,16 @@ void RRenderSystem::SetRenderTarget(ID3D11RenderTargetView* renderTargetView, ID
 	}
 	else
 		m_pD3DImmediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+}
+
+void RRenderSystem::SetBlendState(BlendState state)
+{
+	if (m_CurrBlendState != state)
+	{
+		float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[state], blendFactor, 0xFFFFFFFF);
+		m_CurrBlendState = state;
+	}
 }
 
 void RRenderSystem::CreateRenderTargetView()

@@ -102,7 +102,6 @@ private:
 	RVertex::PARTICLE_VERTEX	m_ParticleVert[PARTICLE_COUNT];
 	RTexture*					m_ParticleDiffuseTexture;
 	RTexture*					m_ParticleNormalTexture;
-	ID3D11BlendState*			m_BlendState[3];
 	ID3D11DepthStencilState*	m_DepthState[2];
 
 	ID3D11Texture2D*			m_RenderTargetBuffer;
