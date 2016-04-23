@@ -14,6 +14,8 @@ public:
 	RSMeshObject();
 	~RSMeshObject();
 
+	SceneObjectType GetType() const { return SO_MeshObject; }
+
 	void SetMesh(RMesh* mesh);
 	RMesh* GetMesh() const;
 
@@ -28,7 +30,8 @@ public:
 	RAabb GetAabb() const;
 	const RAabb& GetMeshElementAabb(int index) const;
 
-	void Draw(bool instanced = false, int instanceCount = 0);
+	void Draw();
+	void Draw(bool instanced, int instanceCount);
 	void DrawDepthPass(bool instanced = false, int instanceCount = 0);
 	void DrawWithShader(RShader* shader, bool instanced = false, int instanceCount = 0);
 

@@ -95,6 +95,9 @@
     <ClInclude Include="Scene\RCamera.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\RScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -167,6 +170,9 @@
       <Filter>Collision</Filter>
     </ClCompile>
     <ClCompile Include="Scene\RCamera.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\RScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>

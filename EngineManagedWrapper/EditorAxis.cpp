@@ -76,6 +76,8 @@ void EditorAxis::Create()
 			m_AxisAabb[n].Expand(axisVerts[i].pos.ToVec3());
 		}
 	}
+
+	m_ColorInputLayout = RVertexDeclaration::Instance().GetInputLayout(RVertex::PRIMITIVE_VERTEX::GetTypeName());
 }
 
 void EditorAxis::Release()
@@ -86,6 +88,7 @@ void EditorAxis::Release()
 
 void EditorAxis::Draw()
 {
+	RRenderer.D3DImmediateContext()->IASetInputLayout(m_ColorInputLayout);
 	for (int i = 0; i < 3; i++)
 		m_AxisMeshBuffer[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

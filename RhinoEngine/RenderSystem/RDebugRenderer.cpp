@@ -86,7 +86,7 @@ void RDebugRenderer::DrawAabb(const RAabb& aabb, const RColor& color)
 	}
 }
 
-void RDebugRenderer::Draw()
+void RDebugRenderer::Render()
 {
 	if (m_bDirtyBuffer)
 	{

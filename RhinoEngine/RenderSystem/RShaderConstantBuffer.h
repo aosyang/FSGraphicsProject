@@ -39,7 +39,7 @@ public:
 		SAFE_RELEASE(m_ConstBuffer);
 	}
 
-	void UpdateContent(const void* data)
+	void UpdateContent(const T* data)
 	{
 		D3D11_MAPPED_SUBRESOURCE subres;
 		RRenderer.D3DImmediateContext()->Map(m_ConstBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);

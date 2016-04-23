@@ -16,7 +16,6 @@
 #include <fbxsdk.h>
 
 #include "tinyxml2/tinyxml2.h"
-#include "../../Shaders/ConstBufferVS.h"	// MAX_BONE_COUNT
 
 #define ENABLE_THREADED_LOADING 1
 

@@ -52,6 +52,9 @@ class RBaseResource;
 #include "Core/IApp.h"
 #include "Core/MathHelper.h"
 
+#include "../Shaders/ConstBufferVS.h"
+#include "../Shaders/ConstBufferPS.h"
+
 #include "RenderSystem/RVertexDeclaration.h"
 #include "RenderSystem/RRenderSystem.h"
 #include "RenderSystem/RMeshElement.h"
@@ -71,5 +74,6 @@ class RBaseResource;
 #include "Scene/RCamera.h"
 #include "Scene/RSMeshObject.h"
 #include "Scene/RSkybox.h"
+#include "Scene/RScene.h"
 
 #endif

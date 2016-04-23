@@ -34,5 +34,7 @@ namespace EngineManagedWrapper {
 		void OnKeyUp(int keycode);
 		void RunScreenToCameraRayPicking(float x, float y);
 		void DeleteSelection();
+		void LoadScene(String^ filename);
+		void SaveScene(String^ filename);
 	};
 }

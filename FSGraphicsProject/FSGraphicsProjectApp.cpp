@@ -665,7 +665,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		RVec3 invOffset = -animation->GetRootPosition(currTime);
 		RMatrix4 rootInversedTranslation = RMatrix4::CreateTranslation(invOffset);
 
-		BoneMatrices boneMatrix;
+		SHADER_SKINNED_BUFFER cbSkinned;
 		for (int i = 0; i < m_CharacterObj.GetMesh()->GetBoneCount(); i++)
 		{
 			RMatrix4 matrix;
@@ -673,12 +673,12 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 			int boneId = m_CharacterObj.GetMesh()->GetCachedAnimationNodeId(animation, i);
 			animation->GetNodePose(boneId, currTime, &matrix);
 
-			boneMatrix.boneMatrix[i] = m_CharacterObj.GetMesh()->GetBoneInitInvMatrices(i) * matrix * rootInversedTranslation * m_CharacterObj.GetNodeTransform();
+			cbSkinned.boneMatrix[i] = m_CharacterObj.GetMesh()->GetBoneInitInvMatrices(i) * matrix * rootInversedTranslation * m_CharacterObj.GetNodeTransform();
 		}
 
 		m_DebugRenderer.DrawLine(nodePos, nodePos + worldOffset * 10, RColor(1.0f, 0.0f, 0.0f), RColor(1.0f, 0.0f, 0.0f));
 
-		m_cbBoneMatrices.UpdateContent(&boneMatrix);
+		m_cbBoneMatrices.UpdateContent(&cbSkinned);
 		m_cbBoneMatrices.ApplyToShaders();
 	}
 }
@@ -1062,7 +1062,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		// Draw debug lines
 		RRenderer.SetBlendState(Blend_Opaque);
 		SetPerObjectConstBuffer(RMatrix4::IDENTITY);
-		m_DebugRenderer.Draw();
+		m_DebugRenderer.Render();
 	}
 
 	// Unbind all shader resources so we can write into it

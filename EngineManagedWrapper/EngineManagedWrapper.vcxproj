@@ -83,6 +83,7 @@
     <ClInclude Include="..\Shaders\ConstBufferPS.h" />
     <ClInclude Include="..\Shaders\ConstBufferVS.h" />
     <ClInclude Include="..\Shaders\SharedDefines.h" />
+    <ClInclude Include="EditorApp.h" />
     <ClInclude Include="EditorAxis.h" />
     <ClInclude Include="EngineManagedWrapper.h" />
     <ClInclude Include="resource.h" />
@@ -90,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="EditorApp.cpp" />
     <ClCompile Include="EditorAxis.cpp" />
     <ClCompile Include="EngineManagedWrapper.cpp" />
     <ClCompile Include="Stdafx.cpp">

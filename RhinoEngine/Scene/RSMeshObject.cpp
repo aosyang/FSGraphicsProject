@@ -127,6 +127,11 @@ const RAabb& RSMeshObject::GetMeshElementAabb(int index) const
 	return RAabb::Default;
 }
 
+void RSMeshObject::Draw()
+{
+	Draw(false, 0);
+}
+
 void RSMeshObject::Draw(bool instanced, int instanceCount)
 {
 	if (!m_Mesh || !m_Mesh->IsResourceReady())

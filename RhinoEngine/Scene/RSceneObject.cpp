@@ -9,6 +9,7 @@
 #include "RSceneObject.h"
 
 RSceneObject::RSceneObject()
+	: m_Scene(nullptr)
 {
 	m_NodeTransform = RMatrix4::IDENTITY;
 }

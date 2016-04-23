@@ -79,5 +79,27 @@ namespace RhinoLevelEditor
         {
             engineCanvas1.RhinoEngine.DeleteSelection();
         }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog dlg = new SaveFileDialog();
+            dlg.Filter = "Map files (*.rmap)|*.rmap";
+
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                engineCanvas1.RhinoEngine.SaveScene(dlg.FileName);
+            }
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Filter = "Map files (*.rmap)|*.rmap";
+
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                engineCanvas1.RhinoEngine.LoadScene(dlg.FileName);
+            }
+        }
     }
 }

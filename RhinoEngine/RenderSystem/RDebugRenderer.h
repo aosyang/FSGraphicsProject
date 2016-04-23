@@ -23,7 +23,7 @@ public:
 	void DrawAabb(const RAabb& aabb, const RColor& color);
 
 	// Present primitive to the screen
-	void Draw();
+	void Render();
 	void Reset();
 
 private:

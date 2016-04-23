@@ -15,6 +15,8 @@ public:
 	RCamera();
 	~RCamera();
 
+	SceneObjectType GetType() const { return SO_Camera; }
+
 	const RMatrix4& GetViewMatrix();
 	const RMatrix4& GetProjectionMatrix();
 
