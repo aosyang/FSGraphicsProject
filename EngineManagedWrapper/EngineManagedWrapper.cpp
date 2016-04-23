@@ -119,4 +119,9 @@ namespace EngineManagedWrapper
 	{
 		m_Application->SaveScene(ManagedStringRefToConstCharPtr(filename));
 	}
+
+	void RhinoEngineWrapper::SaveMeshMaterialFromSelection()
+	{
+		m_Application->SaveMeshMaterialFromSelection();
+	}
 }

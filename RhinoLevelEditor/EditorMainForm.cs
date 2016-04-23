@@ -101,5 +101,10 @@ namespace RhinoLevelEditor
                 engineCanvas1.RhinoEngine.LoadScene(dlg.FileName);
             }
         }
+
+        private void saveMaterialToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            engineCanvas1.RhinoEngine.SaveMeshMaterialFromSelection();
+        }
     }
 }

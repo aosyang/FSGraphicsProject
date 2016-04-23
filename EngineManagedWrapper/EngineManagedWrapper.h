@@ -36,5 +36,6 @@ namespace EngineManagedWrapper {
 		void DeleteSelection();
 		void LoadScene(String^ filename);
 		void SaveScene(String^ filename);
+		void SaveMeshMaterialFromSelection();
 	};
 }

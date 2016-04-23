@@ -62,6 +62,7 @@ namespace EngineManagedWrapper
 		void AddMeshObjectToScene(const char* path);
 		void LoadScene(const char* filename);
 		void SaveScene(const char* filename);
+		void SaveMeshMaterialFromSelection();
 
 		void RunScreenToCameraRayPicking(float x, float y);
 

@@ -308,6 +308,14 @@ namespace EngineManagedWrapper
 		m_Scene.SaveToFile(filename);
 	}
 
+	void EditorApp::SaveMeshMaterialFromSelection()
+	{
+		if (m_SelectedObject && m_SelectedObject->GetType() == SO_MeshObject)
+		{
+			((RSMeshObject*)m_SelectedObject)->SaveMaterialsToFile();
+		}
+	}
+
 	void EditorApp::RunScreenToCameraRayPicking(float x, float y)
 	{
 		RVec3 farPoint = RVec3(2.0f * x - 1.0f, -2.0f * y + 1.0f, 1.0f);
