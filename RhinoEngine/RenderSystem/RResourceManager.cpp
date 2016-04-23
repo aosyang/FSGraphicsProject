@@ -90,33 +90,48 @@ void RResourceManager::LoadAllResources()
 	WIN32_FIND_DATAA FindFileData;
 	HANDLE hFind;
 
-	// Load dds textures
-	string resFindingPath = GetAssetsBasePath() + "*.dds";
-	hFind = FindFirstFileA(resFindingPath.data(), &FindFileData);
+	// Load resources including sub-directories
+	queue<string> dir_queue;
+	dir_queue.push("");
 
 	do
 	{
-		if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+		string dir_name = dir_queue.front();
+		dir_queue.pop();
+		string resFindingPath = GetAssetsBasePath() + dir_name + "*.*";
+		hFind = FindFirstFileA(resFindingPath.data(), &FindFileData);
+
+		do
 		{
-			string resName = GetAssetsBasePath() + FindFileData.cFileName;
-			LoadDDSTexture(resName.data());
-		}
+			if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+			{
+				string resName = GetAssetsBasePath() + FindFileData.cFileName;
 
-	} while (FindNextFileA(hFind, &FindFileData) != 0);
+				string lowerExt = resName.substr(resName.size() - 4);
+				for (UINT i = 0; i < lowerExt.size(); i++)
+				{
+					lowerExt[i] = tolower(lowerExt[i]);
+				}
 
-	// Load fbx meshes
-	resFindingPath = GetAssetsBasePath() + "*.fbx";
-	hFind = FindFirstFileA(resFindingPath.data(), &FindFileData);
+				if (lowerExt == ".dds")
+				{
+					LoadDDSTexture(resName.data());
+				}
+				else if (lowerExt == ".fbx")
+				{
+					LoadFbxMesh(resName.data());
+				}
+			}
+			else
+			{
+				if (FindFileData.cFileName[0] != '.')
+				{
+					dir_queue.push(string(FindFileData.cFileName) + "/");
+				}
+			}
 
-	do
-	{
-		if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
-		{
-			string resName = GetAssetsBasePath() + FindFileData.cFileName;
-			LoadFbxMesh(resName.data());
-		}
-
-	} while (FindNextFileA(hFind, &FindFileData) != 0);
+		} while (FindNextFileA(hFind, &FindFileData) != 0);
+	} while (dir_queue.size());
 }
 
 void RResourceManager::UnloadAllResources()
