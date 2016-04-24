@@ -86,6 +86,31 @@ void RDebugRenderer::DrawAabb(const RAabb& aabb, const RColor& color)
 	}
 }
 
+void RDebugRenderer::DrawFrustum(const RFrustum& frustum)
+{
+	DrawFrustum(frustum, m_PrimitiveColor);
+}
+
+void RDebugRenderer::DrawFrustum(const RFrustum& frustum, const RColor& color)
+{
+	int wiredCubeIdx[] =
+	{
+		0, 1, 1, 3, 3, 2, 2, 0,
+		4, 5, 5, 7, 7, 6, 6, 4,
+		0, 4, 1, 5, 2, 6, 3, 7,
+	};
+
+	for (int i = 0; i < 24; i++)
+	{
+		RVertex::PRIMITIVE_VERTEX v =
+		{
+			RVec4(frustum.corners[wiredCubeIdx[i]]),
+			color,
+		};
+		m_PrimitiveVertices.push_back(v);
+	}
+}
+
 void RDebugRenderer::Render()
 {
 	if (m_bDirtyBuffer)

@@ -19,6 +19,7 @@ public:
 
 	const RMatrix4& GetViewMatrix();
 	const RMatrix4& GetProjectionMatrix();
+	RFrustum GetFrustum() const;
 
 	void SetFOV(float fov) { m_FOV = fov; m_DirtyProjMatrix = true; }
 	float GetFOV() const { return m_FOV; }

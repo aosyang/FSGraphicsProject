@@ -47,6 +47,8 @@ class RTexture;
 class RBaseResource;
 
 // Engine Classes
+#include "Collision/RCollision.h"
+
 #include "Core/RTimer.h"
 #include "Core/RInput.h"
 #include "Core/IApp.h"

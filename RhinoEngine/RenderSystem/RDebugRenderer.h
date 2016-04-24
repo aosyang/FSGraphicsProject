@@ -21,6 +21,8 @@ public:
 	void DrawLine(const RVec3& start, const RVec3& end, const RColor& color1, const RColor& color2);
 	void DrawAabb(const RAabb& aabb);
 	void DrawAabb(const RAabb& aabb, const RColor& color);
+	void DrawFrustum(const RFrustum& frustum);
+	void DrawFrustum(const RFrustum& frustum, const RColor& color);
 
 	// Present primitive to the screen
 	void Render();
