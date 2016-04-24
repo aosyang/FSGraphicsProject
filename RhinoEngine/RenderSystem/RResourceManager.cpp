@@ -105,7 +105,7 @@ void RResourceManager::LoadAllResources()
 		{
 			if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
 			{
-				string resName = GetAssetsBasePath() + FindFileData.cFileName;
+				string resName = GetAssetsBasePath() + dir_name + FindFileData.cFileName;
 
 				string lowerExt = resName.substr(resName.size() - 4);
 				for (UINT i = 0; i < lowerExt.size(); i++)
