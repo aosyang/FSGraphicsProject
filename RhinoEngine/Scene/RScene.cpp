@@ -83,7 +83,15 @@ void RScene::LoadFromFile(const char* filename)
 			string obj_type = elem_obj->Attribute("Type");
 			if (obj_type == "MeshObject")
 			{
-				RSMeshObject* meshObj = CreateMeshObject(elem_obj->Attribute("Mesh"));
+				const char* resPath = elem_obj->Attribute("Mesh");
+				RMesh* mesh = RResourceManager::Instance().FindMesh(resPath);
+
+				if (!mesh)
+				{
+					mesh = RResourceManager::Instance().LoadFbxMesh(resPath, RLM_Immediate);
+				}
+
+				RSMeshObject* meshObj = CreateMeshObject(resPath);
 				meshObj->SetTransform(transform);
 			}
 
@@ -133,10 +141,13 @@ void RScene::SaveToFile(const char* filename)
 	doc->SaveFile(filename);
 }
 
-void RScene::Render()
+void RScene::Render(const RFrustum* pFrustum)
 {
 	for (vector<RSceneObject*>::iterator iter = m_SceneObjects.begin(); iter != m_SceneObjects.end(); iter++)
 	{
+		if (pFrustum && !RCollision::TestAabbInsideFrustum(*pFrustum, (*iter)->GetAabb()))
+			continue;
+
 		SHADER_OBJECT_BUFFER cbObject;
 		cbObject.worldMatrix = (*iter)->GetNodeTransform();
 		cbPerObject.UpdateContent(&cbObject);

@@ -168,6 +168,7 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 
 	RVertexDeclaration::Instance().Initialize();
 
+	// Create blend states
 	D3D11_BLEND_DESC blendDesc;
 	ZeroMemory(&blendDesc, sizeof(blendDesc));
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
@@ -188,11 +189,41 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 
 	m_CurrBlendState = Blend_Opaque;
 
+	// Create sampler states
+	D3D11_SAMPLER_DESC samplerDesc;
+	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState[SamplerState_Texture]);
+
+	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+	samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState[SamplerState_ShadowDepthComparison]);
+
+
 	return true;
 }
 
 void RRenderSystem::Shutdown()
 {
+	for (int i = 0; i < SamplerStateCount; i++)
+	{
+		SAFE_RELEASE(m_SamplerState[i]);
+	}
+
 	for (int i = 0; i < BlendStateCount; i++)
 	{
 		SAFE_RELEASE(m_BlendState[i]);
@@ -300,6 +331,11 @@ void RRenderSystem::SetBlendState(BlendState state)
 		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[state], blendFactor, 0xFFFFFFFF);
 		m_CurrBlendState = state;
 	}
+}
+
+void RRenderSystem::SetSamplerState(int slot, SamplerState state)
+{
+	RRenderer.D3DImmediateContext()->PSSetSamplers(slot, 1, &m_SamplerState[state]);
 }
 
 void RRenderSystem::CreateRenderTargetView()

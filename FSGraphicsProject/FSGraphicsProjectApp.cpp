@@ -66,7 +66,6 @@ struct ObjectDepthComparer
 FSGraphicsProjectApp::FSGraphicsProjectApp()
 	: m_ColorPrimitiveIL(nullptr),
 	  m_ColorShader(nullptr),
-	  m_SamplerState(nullptr),
 	  m_RenderTargetView(nullptr)
 {
 	m_EnableLights[0] = true;
@@ -87,9 +86,6 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_DepthState[1]);
 
 	m_ParticleBuffer.Release();
-
-	SAFE_RELEASE(m_SamplerComparisonState);
-	SAFE_RELEASE(m_SamplerState);
 
 	m_cbScreen.Release();
 	m_cbMaterial.Release();
@@ -289,37 +285,10 @@ bool FSGraphicsProjectApp::Initialize()
 	};
 	m_IslandMeshObj.SetMaterial(islandMaterials, 1);
 
-	// Create texture sampler state
-	D3D11_SAMPLER_DESC samplerDesc;
-	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-	RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState);
-
-	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
-	samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-	RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerComparisonState);
-
 	m_Skybox.CreateSkybox("../Assets/powderpeak.dds");
 
 	m_Camera.SetPosition(RVec3(407.023712f, 339.007507f, 876.396484f));
-	m_Camera.SetFOV(65.0f);
-	m_Camera.SetAspectRatio(RRenderer.AspectRatio());
-	m_Camera.SetNearPlane(1.0f);
-	m_Camera.SetFarPlane(10000.0f);
+	m_Camera.SetupView(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
 	m_CamPitch = 0.0900001600f;
 	m_CamYaw = 3.88659930f;
 
@@ -525,7 +494,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbLight, sizeof(cbLight));
 
 	// Setup ambient color
-	cbLight.HighHemisphereAmbientColor = RVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	cbLight.HighHemisphereAmbientColor = RVec4(0.1f, 0.1f, 0.1f, 1.0f);
 	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 1.0f);
 
 	if (m_EnableLights[0])
@@ -533,7 +502,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		RVec4 dirLightVec = RVec4(RVec3(0.25f, 1.0f, 0.5f).GetNormalizedVec3(), 1.0f);
 
 		cbLight.DirectionalLightCount = 1;
-		cbLight.DirectionalLight[0].Color = RVec4(1.0f, 1.0f, 1.0f, 1.0f);
+		cbLight.DirectionalLight[0].Color = RVec4(1.0f, 1.0f, 0.8f, 1.0f);
 		cbLight.DirectionalLight[0].Direction = RVec4(m_SunVec.GetNormalizedVec3(), 1.0f);
 	}
 
@@ -681,6 +650,12 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		m_cbBoneMatrices.UpdateContent(&cbSkinned);
 		m_cbBoneMatrices.ApplyToShaders();
 	}
+
+	RVec3 pos = m_TachikomaObj.GetNodeTransform().GetTranslation();
+	static float t = 0.0f;
+	t += timer.DeltaTime() * 50.0f;
+	m_TachikomaObj.SetTransform(RMatrix4::CreateYAxisRotation(t) * RMatrix4::CreateTranslation(pos));
+	m_DebugRenderer.DrawAabb(m_TachikomaObj.GetAabb());
 }
 
 void FSGraphicsProjectApp::RenderScene()
@@ -698,8 +673,8 @@ void FSGraphicsProjectApp::RenderScene()
 	m_cbLight.ApplyToShaders();
 	m_cbMaterial.ApplyToShaders();
 	m_cbScreen.ApplyToShaders();
-	RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
-	RRenderer.D3DImmediateContext()->PSSetSamplers(2, 1, &m_SamplerComparisonState);
+	RRenderer.SetSamplerState(0, SamplerState_Texture);
+	RRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
 
 	//=========================== Shadow Pass ===========================
 	m_ShadowMap.SetupRenderTarget();

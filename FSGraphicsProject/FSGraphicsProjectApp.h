@@ -10,9 +10,6 @@
 #include "Rhino.h"
 #include "RPostProcessor.h"
 
-#include "../Shaders/ConstBufferPS.h"
-#include "../Shaders/ConstBufferVS.h"
-
 #define PARTICLE_COUNT 200
 
 enum RenderPass
@@ -65,9 +62,6 @@ private:
 	RShaderConstantBuffer<SHADER_LIGHT_BUFFER,		CBST_PS, 0>				m_cbLight;
 	RShaderConstantBuffer<SHADER_MATERIAL_BUFFER,	CBST_PS, 1>				m_cbMaterial;
 	RShaderConstantBuffer<SHADER_SCREEN_BUFFER,		CBST_PS, 2>				m_cbScreen;
-
-	ID3D11SamplerState*			m_SamplerState;
-	ID3D11SamplerState*			m_SamplerComparisonState;
 
 	RMesh*						m_SceneMeshCity;
 	RSMeshObject				m_FbxMeshObj;

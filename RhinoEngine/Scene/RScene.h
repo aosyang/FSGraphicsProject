@@ -21,7 +21,7 @@ public:
 	void LoadFromFile(const char* filename);
 	void SaveToFile(const char* filename);
 
-	void Render();
+	void Render(const RFrustum* pFrustum=nullptr);
 
 	vector<RSceneObject*>& GetSceneObjects();
 

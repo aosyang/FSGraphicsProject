@@ -8,6 +8,7 @@
 struct INPUT_VERTEX
 {
 	float3 PosL		: POSITION;
+	float2 UV		: TEXCOORD0;
 	float3 Normal	: NORMAL;
 };
 

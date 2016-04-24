@@ -1,6 +1,8 @@
 /[Dd]ebug/
 /[Rr]elease/
 /x64/
+/DemoFightingGame/[Dd]ebug/
+/DemoFightingGame/[Rr]elease/
 /EngineManagedWrapper/[Dd]ebug/
 /EngineManagedWrapper/[Rr]elease/
 /FSGraphicsProject/[Dd]ebug/

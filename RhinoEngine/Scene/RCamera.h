@@ -21,16 +21,11 @@ public:
 	const RMatrix4& GetProjectionMatrix();
 	RFrustum GetFrustum() const;
 
-	void SetFOV(float fov) { m_FOV = fov; m_DirtyProjMatrix = true; }
+	void SetupView(float fov, float aspect, float _near, float _far);
+
 	float GetFOV() const { return m_FOV; }
-
-	void SetAspectRatio(float aspect) { m_Aspect = aspect; m_DirtyProjMatrix = true; }
 	float GetAspectRatio() const { return m_Aspect; }
-
-	void SetNearPlane(float _near) { m_Near = _near; m_DirtyProjMatrix = true; }
 	float GetNearPlane() const { return m_Near; }
-
-	void SetFarPlane(float _far) { m_Far = _far; m_DirtyProjMatrix = true; }
 	float GetFarPlane() const { return m_Far; }
 
 private:

@@ -64,3 +64,12 @@ RFrustum RCamera::GetFrustum() const
 
 	return frustum;
 }
+
+void RCamera::SetupView(float fov, float aspect, float _near, float _far)
+{
+	m_FOV = fov;
+	m_Aspect = aspect;
+	m_Near = _near;
+	m_Far = _far;
+	m_DirtyProjMatrix = true;
+}

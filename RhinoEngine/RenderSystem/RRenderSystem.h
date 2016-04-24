@@ -22,6 +22,14 @@ enum BlendState
 	BlendStateCount,
 };
 
+enum SamplerState
+{
+	SamplerState_Texture,
+	SamplerState_ShadowDepthComparison,
+
+	SamplerStateCount,
+};
+
 class RRenderSystem : public RSingleton<RRenderSystem>
 {
 	friend class RSingleton<RRenderSystem>;
@@ -48,6 +56,7 @@ public:
 	static ID3D11DepthStencilView* DefaultDepthStencilView;
 
 	void SetBlendState(BlendState state);
+	void SetSamplerState(int slot, SamplerState state);
 
 protected:
 	RRenderSystem();
@@ -73,6 +82,8 @@ protected:
 
 	ID3D11BlendState*		m_BlendState[BlendStateCount];
 	BlendState				m_CurrBlendState;
+
+	ID3D11SamplerState*		m_SamplerState[SamplerStateCount];
 };
 
 #define RRenderer RRenderSystem::Instance()
