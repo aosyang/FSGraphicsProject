@@ -35,6 +35,7 @@ public:
 	bool IsValid() const;
 
 	RAabb GetTransformedAabb(const RMatrix4& m) const;
+	RAabb GetSweptAabb(const RVec3& moveVec) const;
 
 	bool TestIntersectionWithAabb(const RAabb& aabb) const;
 

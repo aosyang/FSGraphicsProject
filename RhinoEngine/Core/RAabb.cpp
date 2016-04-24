@@ -49,6 +49,17 @@ RAabb RAabb::GetTransformedAabb(const RMatrix4& m) const
 	return aabb;
 }
 
+RAabb RAabb::GetSweptAabb(const RVec3& moveVec) const
+{
+	RAabb sweptAabb;
+	sweptAabb.pMin = pMin;
+	sweptAabb.pMax = pMax;
+	sweptAabb.Expand(pMin + moveVec);
+	sweptAabb.Expand(pMax + moveVec);
+
+	return sweptAabb;
+}
+
 bool RAabb::TestIntersectionWithAabb(const RAabb& aabb) const
 {
 	if (pMax.x <= aabb.pMin.x || pMin.x >= aabb.pMax.x)
@@ -63,15 +74,9 @@ bool RAabb::TestIntersectionWithAabb(const RAabb& aabb) const
 
 RVec3 RAabb::TestDynamicCollisionWithAabb(const RVec3& moveVec, const RAabb& aabb) const
 {
-	static const float tolerance = 0.95f;
+	static const float tolerance = 0.001f;
 
-	RAabb sweptAabb;
-	sweptAabb.Expand(pMin);
-	sweptAabb.Expand(pMax);
-	sweptAabb.Expand(pMin + moveVec);
-	sweptAabb.Expand(pMax + moveVec);
-
-	if (!sweptAabb.TestIntersectionWithAabb(aabb))
+	if (!GetSweptAabb(moveVec).TestIntersectionWithAabb(aabb))
 		return moveVec;
 
 	float tx = 2, ty = 2, tz = 2;
@@ -117,20 +122,25 @@ RVec3 RAabb::TestDynamicCollisionWithAabb(const RVec3& moveVec, const RAabb& aab
 	if (tx > 1 || ty > 1 || tz > 1)
 		return moveVec;
 
+#define FLT_SGN(x) (x > 0.0f) ? 1.0f : ((x < 0.0f) ? -1.0f : 0.0f);
+
 	RVec3 newVec = moveVec;
 	if (tx >= 0 && tx >= ty && tx >= tz)
 	{
-		newVec.x *= tx * tolerance;
+		float s = FLT_SGN(newVec.x);
+		newVec.x = s * max(fabs(newVec.x * tx) - tolerance, 0.0f);
 		return newVec;
 	}
 	else if (ty >= 0 && ty >= tx && ty >= tz)
 	{
-		newVec.y *= ty * tolerance;
+		float s = FLT_SGN(newVec.y);
+		newVec.y = s * max(fabs(newVec.y * ty) - tolerance, 0.0f);
 		return newVec;
 	}
 	else if (tz >= 0 && tz >= tx && tz >= ty)
 	{
-		newVec.z *= tz * tolerance;
+		float s = FLT_SGN(newVec.z);
+		newVec.z = s * max(fabs(newVec.z * tz) - tolerance, 0.0f);
 		return newVec;
 	}
 
