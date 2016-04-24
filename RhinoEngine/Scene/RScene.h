@@ -16,11 +16,16 @@ public:
 	RSMeshObject* CreateMeshObject(const char* meshName);
 	RSMeshObject* CreateMeshObject(RMesh* mesh);
 
-	void RemoveAllObjects();
+	RSceneObject* FindObject(const char* name) const;
+
+	void RemoveObjectFromScene(RSceneObject* obj);
+	void DestroyObject(RSceneObject* obj);
+	void DestroyAllObjects();
 
 	void LoadFromFile(const char* filename);
 	void SaveToFile(const char* filename);
 
+	RVec3 TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec);
 	void Render(const RFrustum* pFrustum=nullptr);
 
 	vector<RSceneObject*>& GetSceneObjects();

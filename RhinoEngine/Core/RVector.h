@@ -133,6 +133,11 @@ public:
 	RVec3& operator*=(float val)									{ x *= val; y *= val; z *= val; return *this; }
 	RVec3& operator/=(float val)									{ x /= val; y /= val; z /= val; return *this; }
 
+	float SquaredMagitude() const
+	{
+		return x*x + y*y + z*z;
+	}
+
 	// Get length of vector
 	float Magnitude() const
 	{

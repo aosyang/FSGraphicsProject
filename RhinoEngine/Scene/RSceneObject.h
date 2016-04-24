@@ -21,6 +21,9 @@ public:
 	RSceneObject();
 	virtual ~RSceneObject();
 
+	void SetName(const string& name)	{ m_Name = name; }
+	string GetName() const				{ return m_Name; }
+
 	void SetScene(RScene* scene)	{ m_Scene = scene; }
 	RScene* GetScene() const		{ return m_Scene; }
 
@@ -29,6 +32,7 @@ public:
 	const RMatrix4& GetNodeTransform() const;
 
 	void SetTransform(const RMatrix4& transform);
+	void SetRotation(const RMatrix4& rot);
 	void SetPosition(const RVec3& pos);
 	RVec3 GetPosition() const;
 
@@ -39,6 +43,7 @@ public:
 	virtual void Draw() {}
 
 protected:
+	string		m_Name;
 	RMatrix4	m_NodeTransform;
 	RScene*		m_Scene;
 };

@@ -25,6 +25,11 @@ public:
 private:
 	RScene				m_Scene;
 	RCamera				m_Camera;
+
+	RSMeshObject*		m_Player;
+	float				m_PlayerRot;
+
+	RDebugRenderer		m_DebugRenderer;
 };
 
 #endif

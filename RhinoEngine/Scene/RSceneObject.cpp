@@ -29,6 +29,13 @@ void RSceneObject::SetTransform(const RMatrix4& transform)
 	m_NodeTransform = transform;
 }
 
+void RSceneObject::SetRotation(const RMatrix4& rot)
+{
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			m_NodeTransform.m[i][j] = rot.m[i][j];
+}
+
 void RSceneObject::SetPosition(const RVec3& pos)
 {
 	m_NodeTransform.SetTranslation(pos);

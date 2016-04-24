@@ -21,7 +21,7 @@ void RScene::Initialize()
 
 void RScene::Release()
 {
-	RemoveAllObjects();
+	DestroyAllObjects();
 
 	cbPerObject.Release();
 	cbScene.Release();
@@ -50,7 +50,37 @@ RSMeshObject* RScene::CreateMeshObject(RMesh* mesh)
 	return meshObject;
 }
 
-void RScene::RemoveAllObjects()
+RSceneObject* RScene::FindObject(const char* name) const
+{
+	for (UINT i = 0; i < m_SceneObjects.size(); i++)
+	{
+		if (m_SceneObjects[i]->GetName() == name)
+			return m_SceneObjects[i];
+	}
+
+	return nullptr;
+}
+
+void RScene::RemoveObjectFromScene(RSceneObject* obj)
+{
+	vector<RSceneObject*>::iterator iter = find(m_SceneObjects.begin(), m_SceneObjects.end(), obj);
+	if (iter != m_SceneObjects.end())
+	{
+		m_SceneObjects.erase(iter);
+	}
+}
+
+void RScene::DestroyObject(RSceneObject* obj)
+{
+	vector<RSceneObject*>::iterator iter = find(m_SceneObjects.begin(), m_SceneObjects.end(), obj);
+	if (iter != m_SceneObjects.end())
+	{
+		m_SceneObjects.erase(iter);
+		delete obj;
+	}
+}
+
+void RScene::DestroyAllObjects()
 {
 	for (UINT i = 0; i < m_SceneObjects.size(); i++)
 	{
@@ -69,6 +99,8 @@ void RScene::LoadFromFile(const char* filename)
 		tinyxml2::XMLElement* elem_obj = root->FirstChildElement("SceneObject");
 		while (elem_obj)
 		{
+			const char* name = elem_obj->Attribute("Name");
+
 			tinyxml2::XMLElement* elem_transform = elem_obj->FirstChildElement("Transform");
 			RMatrix4 transform;
 			int n = 0;
@@ -93,6 +125,8 @@ void RScene::LoadFromFile(const char* filename)
 
 				RSMeshObject* meshObj = CreateMeshObject(resPath);
 				meshObj->SetTransform(transform);
+				if (name)
+					meshObj->SetName(name);
 			}
 
 			elem_obj = elem_obj->NextSiblingElement();
@@ -108,6 +142,11 @@ void RScene::SaveToFile(const char* filename)
 	for (vector<RSceneObject*>::iterator iter = m_SceneObjects.begin(); iter != m_SceneObjects.end(); iter++)
 	{
 		tinyxml2::XMLElement* elem_obj = doc->NewElement("SceneObject");
+
+		if ((*iter)->GetName() != "")
+		{
+			elem_obj->SetAttribute("Name", (*iter)->GetName().c_str());
+		}
 
 		if ((*iter)->GetType() == SO_MeshObject)
 		{
@@ -139,6 +178,30 @@ void RScene::SaveToFile(const char* filename)
 
 	doc->InsertEndChild(elem_scene);
 	doc->SaveFile(filename);
+}
+
+RVec3 RScene::TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec)
+{
+	RVec3 v = moveVec;
+
+	for (vector<RSceneObject*>::iterator iter = m_SceneObjects.begin(); iter != m_SceneObjects.end(); iter++)
+	{
+		if ((*iter)->GetType() == SO_MeshObject)
+		{
+			RSMeshObject* meshObj = (RSMeshObject*)(*iter);
+
+			if (aabb.GetSweptAabb(v).TestIntersectionWithAabb(meshObj->GetAabb()))
+			{
+				for (int i = 0; i < meshObj->GetMeshElementCount(); i++)
+				{
+					RAabb elemAabb = meshObj->GetMeshElementAabb(i).GetTransformedAabb(meshObj->GetNodeTransform());
+					v = aabb.TestDynamicCollisionWithAabb(v, elemAabb);
+				}
+			}
+		}
+	}
+
+	return v;
 }
 
 void RScene::Render(const RFrustum* pFrustum)

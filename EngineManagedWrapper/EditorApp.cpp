@@ -299,7 +299,7 @@ namespace EngineManagedWrapper
 
 	void EditorApp::LoadScene(const char* filename)
 	{
-		m_Scene.RemoveAllObjects();
+		m_Scene.DestroyAllObjects();
 		m_Scene.LoadFromFile(filename);
 	}
 
