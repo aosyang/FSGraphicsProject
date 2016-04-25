@@ -22,7 +22,7 @@ namespace RCollision
 		float dist = sphere.center.Dot(plane.normal) - plane.offset;
 		if (dist > sphere.radius)
 			return PlaneSpace_Front;
-		else if (dist < sphere.radius)
+		else if (dist < -sphere.radius)
 			return PlaneSpace_Back;
 		else
 			return PlaneSpace_Intersecting;

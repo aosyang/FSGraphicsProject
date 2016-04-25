@@ -168,7 +168,8 @@ void FightingGameApp::RenderScene()
 
 	RRenderer.Clear();
 
-	m_Scene.Render();
+	RFrustum frustum = m_Camera.GetFrustum();
+	m_Scene.Render(&frustum);
 
 	SHADER_OBJECT_BUFFER cbObject;
 
@@ -176,6 +177,7 @@ void FightingGameApp::RenderScene()
 	{
 		cbObject.worldMatrix = m_Player->GetNodeTransform();
 		m_Scene.cbPerObject.UpdateContent(&cbObject);
+		m_Scene.cbPerObject.ApplyToShaders();
 		//RRenderer.SetBlendState(Blend_AlphaBlending);
 		m_Player->Draw();
 		//RRenderer.SetBlendState(Blend_Opaque);
@@ -183,6 +185,7 @@ void FightingGameApp::RenderScene()
 
 	cbObject.worldMatrix = RMatrix4::IDENTITY;
 	m_Scene.cbPerObject.UpdateContent(&cbObject);
+	m_Scene.cbPerObject.ApplyToShaders();
 	m_DebugRenderer.Render();
 	m_DebugRenderer.Reset();
 
