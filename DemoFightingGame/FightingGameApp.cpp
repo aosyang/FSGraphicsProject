@@ -191,5 +191,5 @@ void FightingGameApp::RenderScene()
 
 void FightingGameApp::OnResize(int width, int height)
 {
-
+	m_Camera.SetAspectRatio((float)width / (float)height);
 }

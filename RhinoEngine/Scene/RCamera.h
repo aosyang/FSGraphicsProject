@@ -22,6 +22,7 @@ public:
 	RFrustum GetFrustum() const;
 
 	void SetupView(float fov, float aspect, float _near, float _far);
+	void SetAspectRatio(float aspect) { m_Aspect = aspect; m_DirtyProjMatrix = true; }
 
 	float GetFOV() const { return m_FOV; }
 	float GetAspectRatio() const { return m_Aspect; }
