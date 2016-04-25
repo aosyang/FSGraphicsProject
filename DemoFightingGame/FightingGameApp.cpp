@@ -37,50 +37,94 @@ bool FightingGameApp::Initialize()
 	m_Camera.SetTransform(cameraMatrix);
 	m_Camera.SetupView(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
 
-	m_Player = (RSMeshObject*)m_Scene.FindObject("Player");
-	if (m_Player)
-	{
-		m_Scene.RemoveObjectFromScene(m_Player);
-	}
+	//m_Player = (RSMeshObject*)m_Scene.FindObject("Player");
+	//if (m_Player)
+	//{
+	//	m_Scene.RemoveObjectFromScene(m_Player);
+	//}
+
+	m_Player = new PlayerController();
+	m_Player->SetScene(&m_Scene);
+	m_Player->SetPosition(RVec3(0, 100.0f, 0));
+	m_Player->Cache();
 
 	return true;
+}
+
+float LerpDegreeAngle(float from, float to, float t)
+{
+	while (from - to > 180.0f)
+	{
+		from -= 360.0f;
+	}
+
+	while (from - to < -180.0f)
+	{
+		from += 360.0f;
+	}
+
+	if (t < 0) t = 0;
+	if (t > 1) t = 1;
+
+	return from + (to - from) * t;
 }
 
 void FightingGameApp::UpdateScene(const RTimer& timer)
 {
 	if (m_Player)
 	{
+		if (RInput.GetBufferedKeyState('R') == BKS_Pressed)
+			m_Player->SetPosition(RVec3(0, 100.0f, 0));
+
+		m_Player->PreUpdate(timer);
+		
 		RVec3 moveVec = RVec3(0, 0, 0);
 		RAabb playerAabb;
 		playerAabb.pMin = RVec3(-50.0f, 0.0f, -50.0f) + m_Player->GetPosition();
-		playerAabb.pMax = RVec3(50.0f, 95.0f, 50.0f) + m_Player->GetPosition();
+		playerAabb.pMax = RVec3(50.0f, 150.0f, 50.0f) + m_Player->GetPosition();
 
-		if (RInput.IsKeyDown('W')) moveVec += RVec3(1, 0, 0);
-		if (RInput.IsKeyDown('S')) moveVec += RVec3(-1, 0, 0);
-		if (RInput.IsKeyDown('A')) moveVec += RVec3(0, 0, 1);
-		if (RInput.IsKeyDown('D')) moveVec += RVec3(0, 0, -1);
+		RVec3 charRight = m_Camera.GetNodeTransform().GetRight();
+		RVec3 charForward = charRight.Cross(RVec3(0, 1, 0));
+
+		if (RInput.IsKeyDown('W')) moveVec += charForward;
+		if (RInput.IsKeyDown('S')) moveVec -= charForward;
+		if (RInput.IsKeyDown('A')) moveVec -= charRight;
+		if (RInput.IsKeyDown('D')) moveVec += charRight;
 
 		if (moveVec.SquaredMagitude() > 0.0f)
 		{
 			moveVec.Normalize();
-			moveVec *= timer.DeltaTime() * 1000.0f;
+			m_PlayerRot = LerpDegreeAngle(m_PlayerRot, RAD_TO_DEG(atan2f(moveVec.x, moveVec.z)), 10.0f * timer.DeltaTime());
 
-			RVec3 worldMoveVec = (RVec4(moveVec, 0) * m_Player->GetNodeTransform()).ToVec3();
-			worldMoveVec = m_Scene.TestMovingAabbWithScene(playerAabb, worldMoveVec);
+			moveVec *= timer.DeltaTime() * 500.0f;
 
-			m_Player->Translate(worldMoveVec);
+			m_Player->SetBehavior(Player_Running);
+		}
+		else
+		{
+			m_Player->SetBehavior(Player_Idle);
 		}
 
-		if (RInput.IsKeyDown('Q')) m_PlayerRot -= timer.DeltaTime() * 100.0f;
-		if (RInput.IsKeyDown('E')) m_PlayerRot += timer.DeltaTime() * 100.0f;
+		moveVec += RVec3(0, -1000.0f * timer.DeltaTime(), 0);
+
+		RVec3 worldMoveVec = moveVec;
+		worldMoveVec += (RVec4(m_Player->GetRootOffset(), 0) * m_Player->GetNodeTransform()).ToVec3();
+		worldMoveVec = m_Scene.TestMovingAabbWithScene(playerAabb, worldMoveVec);
+
+		m_Player->Translate(worldMoveVec);
+
 		m_Player->SetRotation(RMatrix4::CreateYAxisRotation(m_PlayerRot));
 
-		RMatrix4 cameraTransform = RMatrix4::CreateTranslation(50.0f, 100.0f, -200.0f) * RMatrix4::CreateYAxisRotation(90.0f) * m_Player->GetNodeTransform();
+		RMatrix4 playerTranslation = RMatrix4::CreateTranslation(m_Player->GetNodeTransform().GetTranslation());
+		RMatrix4 cameraTransform = RMatrix4::CreateTranslation(0.0f, 500.0f, 300.0f) * playerTranslation;
 		m_Camera.SetTransform(cameraTransform);
+		m_Camera.LookAt(m_Player->GetPosition() + RVec3(0, 125, 0));
 
 		playerAabb.pMin = RVec3(-50.0f, 0.0f, -50.0f) + m_Player->GetPosition();
-		playerAabb.pMax = RVec3(50.0f, 95.0f, 50.0f) + m_Player->GetPosition();
+		playerAabb.pMax = RVec3(50.0f, 150.0f, 50.0f) + m_Player->GetPosition();
 		m_DebugRenderer.DrawAabb(playerAabb);
+
+		m_Player->PostUpdate(timer);
 	}
 }
 
@@ -123,7 +167,9 @@ void FightingGameApp::RenderScene()
 	{
 		cbObject.worldMatrix = m_Player->GetNodeTransform();
 		m_Scene.cbPerObject.UpdateContent(&cbObject);
+		//RRenderer.SetBlendState(Blend_AlphaBlending);
 		m_Player->Draw();
+		//RRenderer.SetBlendState(Blend_Opaque);
 	}
 
 	cbObject.worldMatrix = RMatrix4::IDENTITY;

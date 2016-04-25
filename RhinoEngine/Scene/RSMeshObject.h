@@ -36,7 +36,7 @@ public:
 	void DrawWithShader(RShader* shader, bool instanced = false, int instanceCount = 0);
 
 	float GetResourceTimestamp();
-private:
+protected:
 	void UpdateMaterialsFromResource();
 
 	RMesh*					m_Mesh;

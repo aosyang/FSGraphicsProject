@@ -8,6 +8,7 @@
 #define _FIGHTINGGAMEAPP_H
 
 #include "Rhino.h"
+#include "PlayerController.h"
 
 class FightingGameApp : public IApp
 {
@@ -26,7 +27,7 @@ private:
 	RScene				m_Scene;
 	RCamera				m_Camera;
 
-	RSMeshObject*		m_Player;
+	PlayerController*	m_Player;
 	float				m_PlayerRot;
 
 	RDebugRenderer		m_DebugRenderer;

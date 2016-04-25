@@ -46,6 +46,21 @@ RVec3 RSceneObject::GetPosition() const
 	return m_NodeTransform.GetRow(3).ToVec3();
 }
 
+void RSceneObject::LookAt(const RVec3 target)
+{
+	RVec3 pos = m_NodeTransform.GetTranslation();
+	RVec3 forward = target - pos;
+	forward.Normalize();
+	RVec3 right = RVec3(0, 1, 0).Cross(forward);
+	right.Normalize();
+	RVec3 up = forward.Cross(right);
+
+	m_NodeTransform.SetRow(0, RVec4(right, 0));
+	m_NodeTransform.SetRow(1, RVec4(up, 0));
+	m_NodeTransform.SetRow(2, RVec4(forward, 0));
+	m_NodeTransform.SetRow(3, RVec4(pos, 1));
+}
+
 void RSceneObject::Translate(const RVec3& v)
 {
 	m_NodeTransform.Translate(v);
