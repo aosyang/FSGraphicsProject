@@ -14,14 +14,16 @@ enum PlayerAnimation
 	PlayerAnim_Idle,
 	PlayerAnim_Run,
 	PlayerAnim_Punch1,
+	PlayerAnim_SpinAttack,
 
 	PlayerAnimCount,
 };
 
 enum PlayerBehavior
 {
-	Player_Idle,
-	Player_Running,
+	BHV_Idle,
+	BHV_Running,
+	BHV_SpinAttack,
 };
 
 class PlayerController : public RSMeshObject
@@ -36,6 +38,9 @@ public:
 	void PostUpdate(const RTimer& timer);
 
 	void SetBehavior(PlayerBehavior behavior);
+	PlayerBehavior GetBehavior() const;
+
+	bool IsPlayingLoopAnimation() const;
 
 private:
 	RAnimation* LoadAnimation(const char* resPath);

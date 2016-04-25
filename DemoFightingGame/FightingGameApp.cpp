@@ -86,23 +86,32 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		RVec3 charRight = m_Camera.GetNodeTransform().GetRight();
 		RVec3 charForward = charRight.Cross(RVec3(0, 1, 0));
 
-		if (RInput.IsKeyDown('W')) moveVec += charForward;
-		if (RInput.IsKeyDown('S')) moveVec -= charForward;
-		if (RInput.IsKeyDown('A')) moveVec -= charRight;
-		if (RInput.IsKeyDown('D')) moveVec += charRight;
-
-		if (moveVec.SquaredMagitude() > 0.0f)
+		if (m_Player->GetBehavior() == BHV_Running ||
+			m_Player->GetBehavior() == BHV_Idle)
 		{
-			moveVec.Normalize();
-			m_PlayerRot = LerpDegreeAngle(m_PlayerRot, RAD_TO_DEG(atan2f(moveVec.x, moveVec.z)), 10.0f * timer.DeltaTime());
+			if (RInput.IsKeyDown('W')) moveVec += charForward;
+			if (RInput.IsKeyDown('S')) moveVec -= charForward;
+			if (RInput.IsKeyDown('A')) moveVec -= charRight;
+			if (RInput.IsKeyDown('D')) moveVec += charRight;
 
-			moveVec *= timer.DeltaTime() * 500.0f;
+			if (moveVec.SquaredMagitude() > 0.0f)
+			{
+				moveVec.Normalize();
+				m_PlayerRot = LerpDegreeAngle(m_PlayerRot, RAD_TO_DEG(atan2f(moveVec.x, moveVec.z)), 10.0f * timer.DeltaTime());
 
-			m_Player->SetBehavior(Player_Running);
+				moveVec *= timer.DeltaTime() * 500.0f;
+
+				m_Player->SetBehavior(BHV_Running);
+			}
+			else
+			{
+				m_Player->SetBehavior(BHV_Idle);
+			}
 		}
-		else
+
+		if (RInput.GetBufferedKeyState(VK_SPACE) == BKS_Pressed)
 		{
-			m_Player->SetBehavior(Player_Idle);
+			m_Player->SetBehavior(BHV_SpinAttack);
 		}
 
 		moveVec += RVec3(0, -1000.0f * timer.DeltaTime(), 0);

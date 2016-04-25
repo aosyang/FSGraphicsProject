@@ -7,7 +7,7 @@
 #include "PlayerController.h"
 
 PlayerController::PlayerController()
-	: m_CurrAnimTime(0.0f), m_Behavior(Player_Idle)
+	: m_CurrAnimTime(0.0f), m_Behavior(BHV_Idle)
 {
 
 }
@@ -15,9 +15,10 @@ PlayerController::PlayerController()
 void PlayerController::Cache()
 {
 	SetMesh(RResourceManager::Instance().LoadFbxMesh("../Assets/unitychan/unitychan.fbx", RLM_Immediate));
-	m_Animations[PlayerAnim_Idle]	= LoadAnimation("../Assets/unitychan/FUCM05_0000_Idle.fbx");
-	m_Animations[PlayerAnim_Run]	= LoadAnimation("../Assets/unitychan/FUCM_0012b_EH_RUN_LP_NoZ.fbx");
-	m_Animations[PlayerAnim_Punch1]	= LoadAnimation("../Assets/unitychan/FUCM05_0001_M_CMN_LJAB.fbx");
+	m_Animations[PlayerAnim_Idle]		= LoadAnimation("../Assets/unitychan/FUCM05_0000_Idle.fbx");
+	m_Animations[PlayerAnim_Run]		= LoadAnimation("../Assets/unitychan/FUCM_0012b_EH_RUN_LP_NoZ.fbx");
+	m_Animations[PlayerAnim_Punch1]		= LoadAnimation("../Assets/unitychan/FUCM05_0001_M_CMN_LJAB.fbx");
+	m_Animations[PlayerAnim_SpinAttack]	= LoadAnimation("../Assets/unitychan/FUCM02_0029_Cha01_STL01_ScrewK01.fbx");
 
 	for (int i = 0; i < PlayerAnimCount; i++)
 	{
@@ -41,11 +42,23 @@ void PlayerController::PreUpdate(const RTimer& timer)
 
 		m_CurrAnimTime += timer.DeltaTime() * m_CurrAnimation->GetFrameRate();
 		bool startOver = false;
+		bool animDone = false;
 
-		while (m_CurrAnimTime >= m_CurrAnimation->GetEndTime() - 1)
+		if (m_CurrAnimTime >= m_CurrAnimation->GetEndTime() - 1)
 		{
-			m_CurrAnimTime -= m_CurrAnimation->GetEndTime() - m_CurrAnimation->GetStartTime() - 1;
-			startOver = true;
+			if (IsPlayingLoopAnimation())
+			{
+				do
+				{
+					m_CurrAnimTime -= m_CurrAnimation->GetEndTime() - m_CurrAnimation->GetStartTime() - 1;
+					startOver = true;
+				} while (m_CurrAnimTime >= m_CurrAnimation->GetEndTime() - 1);
+			}
+			else
+			{
+				m_CurrAnimTime = m_CurrAnimation->GetEndTime() - 1;
+				animDone = true;
+			}
 		}
 
 		m_RootOffset = m_CurrAnimation->GetRootPosition(m_CurrAnimTime) - start_offset;
@@ -55,6 +68,10 @@ void PlayerController::PreUpdate(const RTimer& timer)
 						   m_CurrAnimation->GetRootPosition(m_CurrAnimTime) - m_CurrAnimation->GetInitRootPosition();
 		}
 
+		if (animDone)
+		{
+			SetBehavior(BHV_Idle);
+		}
 	}
 }
 
@@ -85,24 +102,52 @@ void PlayerController::SetBehavior(PlayerBehavior behavior)
 {
 	switch (behavior)
 	{
-	case Player_Idle:
-		if (m_Behavior != Player_Idle)
+	case BHV_Idle:
+		if (m_Behavior != BHV_Idle)
 		{
 			m_CurrAnimation = m_Animations[PlayerAnim_Idle];
 			m_CurrAnimTime = m_CurrAnimation->GetStartTime();
-			m_Behavior = Player_Idle;
+			m_Behavior = BHV_Idle;
 		}
 		break;
 
-	case Player_Running:
-		if (m_Behavior != Player_Running)
+	case BHV_Running:
+		if (m_Behavior != BHV_Running)
 		{
 			m_CurrAnimation = m_Animations[PlayerAnim_Run];
 			m_CurrAnimTime = m_CurrAnimation->GetStartTime();
-			m_Behavior = Player_Running;
+			m_Behavior = BHV_Running;
+		}
+		break;
+
+	case BHV_SpinAttack:
+		if (m_Behavior != BHV_SpinAttack)
+		{
+			m_CurrAnimation = m_Animations[PlayerAnim_SpinAttack];
+			m_CurrAnimTime = m_CurrAnimation->GetStartTime();
+			m_Behavior = BHV_SpinAttack;
 		}
 		break;
 	}
+}
+
+PlayerBehavior PlayerController::GetBehavior() const
+{
+	return m_Behavior;
+}
+
+bool PlayerController::IsPlayingLoopAnimation() const
+{
+	switch (m_Behavior)
+	{
+	case BHV_Idle:
+	case BHV_Running:
+		return true;
+	case BHV_SpinAttack:
+		return false;
+	}
+
+	return false;
 }
 
 RAnimation* PlayerController::LoadAnimation(const char* resPath)
