@@ -32,6 +32,8 @@ bool FightingGameApp::Initialize()
 	m_Scene.Initialize();
 	m_Scene.LoadFromFile("../Assets/TestMap.rmap");
 
+	m_ShadowMap.Initialize(1024, 1024);
+
 	RMatrix4 cameraMatrix = RMatrix4::CreateXAxisRotation(0.09f * 180 / PI) * RMatrix4::CreateYAxisRotation(3.88659930f * 180 / PI);
 	cameraMatrix.SetTranslation(RVec3(407.023712f, 339.007507f, 876.396484f));
 	m_Camera.SetTransform(cameraMatrix);
@@ -71,6 +73,75 @@ float LerpDegreeAngle(float from, float to, float t)
 
 void FightingGameApp::UpdateScene(const RTimer& timer)
 {
+	// Update light constant buffer
+	SHADER_LIGHT_BUFFER cbLight;
+	ZeroMemory(&cbLight, sizeof(cbLight));
+
+	// Setup ambient color
+	cbLight.HighHemisphereAmbientColor = RVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 1.0f);
+
+	RVec4 dirLightVec = RVec4(RVec3(0.25f, 1.0f, 0.5f).GetNormalizedVec3(), 1.0f);
+
+	RVec3 sunVec = RVec3(sinf(1.0f) * 0.5f, 0.25f, cosf(1.0) * 0.5f).GetNormalizedVec3() * 2000.0f;
+	RMatrix4 shadowViewMatrix = RMatrix4::CreateLookAtViewLH(sunVec, RVec3(0.0f, 0.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f));
+
+	cbLight.DirectionalLightCount = 1;
+	cbLight.DirectionalLight[0].Color = RVec4(1.0f, 1.0f, 0.8f, 1.0f);
+	cbLight.DirectionalLight[0].Direction = RVec4(sunVec.GetNormalizedVec3(), 1.0f);
+
+
+	// Update scene constant buffer
+	SHADER_SCENE_BUFFER cbScene;
+
+#if 1
+	cbScene.viewMatrix = m_Camera.GetViewMatrix();
+	cbScene.projMatrix = m_Camera.GetProjectionMatrix();
+	cbScene.viewProjMatrix = cbScene.viewMatrix * cbScene.projMatrix;
+	cbScene.cameraPos = m_Camera.GetPosition();
+
+	cbLight.CameraPos = m_Camera.GetPosition();
+#else
+	RMatrix4 cameraMatrix = RMatrix4::CreateXAxisRotation(0.09f * 180 / PI) * RMatrix4::CreateYAxisRotation(3.88659930f * 180 / PI);
+	cameraMatrix.SetTranslation(RVec3(407.023712f, 339.007507f, 876.396484f));
+
+	cbScene.viewMatrix = RMatrix4::CreateLookAtViewLH(RVec3(407.023712f, 339.007507f, 876.396484f), m_Player->GetPosition(), RVec3(0, 1, 0));
+	cbScene.projMatrix = RMatrix4::CreatePerspectiveProjectionLH(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
+	cbScene.viewProjMatrix = cbScene.viewMatrix * cbScene.projMatrix;
+	cbScene.cameraPos = cameraMatrix.GetTranslation();
+
+	cbLight.CameraPos = cameraMatrix.GetTranslation();
+#endif
+
+	m_ShadowMap.SetViewMatrix(shadowViewMatrix);
+	m_ShadowMap.SetOrthogonalProjection(5000.0f, 5000.0f, 0.1f, 5000.0f);
+
+	RMatrix4 shadowTransform(
+		0.5f, 0.0f, 0.0f, 0.0f,
+		0.0f, -0.5f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.0f, 1.0f);
+
+	RMatrix4 shadowViewProjMatrix = m_ShadowMap.GetViewMatrix() * m_ShadowMap.GetProjectionMatrix();
+	cbScene.shadowViewProjMatrix = shadowViewProjMatrix;
+	shadowViewProjMatrix *= shadowTransform;
+	cbScene.shadowViewProjBiasedMatrix = shadowViewProjMatrix;
+
+	m_Scene.cbScene.UpdateContent(&cbScene);
+	m_Scene.cbScene.ApplyToShaders();
+
+	m_Scene.cbLight.UpdateContent(&cbLight);
+	m_Scene.cbLight.ApplyToShaders();
+
+	SHADER_MATERIAL_BUFFER cbMaterial;
+	ZeroMemory(&cbMaterial, sizeof(cbMaterial));
+
+	cbMaterial.SpecularColorAndPower = RVec4(1.0f, 1.0f, 1.0f, 512.0f);
+	cbMaterial.GlobalOpacity = 1.0f;
+	
+	m_Scene.cbMaterial.UpdateContent(&cbMaterial);
+	m_Scene.cbMaterial.ApplyToShaders();
+
 	if (m_Player)
 	{
 		if (RInput.GetBufferedKeyState('R') == BKS_Pressed)
@@ -129,9 +200,11 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		m_Camera.SetTransform(cameraTransform);
 		m_Camera.LookAt(m_Player->GetPosition() + RVec3(0, 125, 0));
 
-		playerAabb.pMin = RVec3(-50.0f, 0.0f, -50.0f) + m_Player->GetPosition();
-		playerAabb.pMax = RVec3(50.0f, 150.0f, 50.0f) + m_Player->GetPosition();
-		m_DebugRenderer.DrawAabb(playerAabb);
+		//playerAabb.pMin = RVec3(-50.0f, 0.0f, -50.0f) + m_Player->GetPosition();
+		//playerAabb.pMax = RVec3(50.0f, 150.0f, 50.0f) + m_Player->GetPosition();
+		//m_DebugRenderer.DrawAabb(playerAabb);
+
+		//m_DebugRenderer.DrawFrustum(m_Camera.GetFrustum());
 
 		m_Player->PostUpdate(timer);
 	}
@@ -139,48 +212,62 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 void FightingGameApp::RenderScene()
 {
-
-	// Update scene constant buffer
-	SHADER_SCENE_BUFFER cbScene;
-
-	cbScene.viewMatrix = m_Camera.GetViewMatrix();
-	cbScene.projMatrix = m_Camera.GetProjectionMatrix();
-	cbScene.viewProjMatrix = cbScene.viewMatrix * cbScene.projMatrix;
-	cbScene.cameraPos = m_Camera.GetPosition();
-
-	m_Scene.cbScene.UpdateContent(&cbScene);
-	m_Scene.cbScene.ApplyToShaders();
-
-
-	// Update light constant buffer
-	SHADER_LIGHT_BUFFER cbLight;
-	ZeroMemory(&cbLight, sizeof(cbLight));
-
-	// Setup ambient color
-	cbLight.HighHemisphereAmbientColor = RVec4(1.0f, 1.0f, 1.0f, 1.0f);
-	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 1.0f);
-
-	m_Scene.cbLight.UpdateContent(&cbLight);
-	m_Scene.cbLight.ApplyToShaders();
-
 	RRenderer.SetSamplerState(0, SamplerState_Texture);
 	RRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
 
-	RRenderer.Clear();
+	float width = static_cast<float>(RRenderer.GetClientWidth());
+	float height = static_cast<float>(RRenderer.GetClientHeight());
+	D3D11_VIEWPORT vp = { 0.0f, 0.0f, width, height, 0.0f, 1.0f };
 
-	RFrustum frustum = m_Camera.GetFrustum();
-	m_Scene.Render(&frustum);
 
 	SHADER_OBJECT_BUFFER cbObject;
 
-	if (m_Player)
+	for (int pass = 0; pass < 2; pass++)
 	{
-		cbObject.worldMatrix = m_Player->GetNodeTransform();
-		m_Scene.cbPerObject.UpdateContent(&cbObject);
-		m_Scene.cbPerObject.ApplyToShaders();
-		//RRenderer.SetBlendState(Blend_AlphaBlending);
-		m_Player->Draw();
-		//RRenderer.SetBlendState(Blend_Opaque);
+		if (pass == 0)
+		{
+			ID3D11ShaderResourceView* nullSRV[] = { nullptr };
+			RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, nullSRV);
+			
+			m_ShadowMap.SetupRenderTarget();
+		}
+		else
+		{
+			RRenderer.SetRenderTarget();
+			RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
+
+			ID3D11ShaderResourceView* shadowMapSRV[] = { m_ShadowMap.GetRenderTargetDepthSRV() };
+			RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, shadowMapSRV);
+		}
+
+		RRenderer.Clear();
+
+		if (pass == 0)
+		{
+			m_Scene.RenderDepthPass();
+		}
+		else
+		{
+			RFrustum frustum = m_Camera.GetFrustum();
+			m_Scene.Render(&frustum);
+		}
+
+		if (m_Player)
+		{
+			cbObject.worldMatrix = m_Player->GetNodeTransform();
+			m_Scene.cbPerObject.UpdateContent(&cbObject);
+			m_Scene.cbPerObject.ApplyToShaders();
+			//RRenderer.SetBlendState(Blend_AlphaBlending);
+			if (pass == 0)
+			{
+				m_Player->DrawDepthPass();
+			}
+			else
+			{
+				m_Player->Draw();
+			}
+			//RRenderer.SetBlendState(Blend_Opaque);
+		}
 	}
 
 	cbObject.worldMatrix = RMatrix4::IDENTITY;

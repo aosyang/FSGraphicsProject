@@ -43,6 +43,7 @@ public:
 
 	virtual RAabb GetAabb() const { return RAabb::Default; }
 	virtual void Draw() {}
+	virtual void DrawDepthPass() {}
 
 protected:
 	string		m_Name;

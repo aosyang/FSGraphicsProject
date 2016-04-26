@@ -179,6 +179,11 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 	}
 }
 
+void RSMeshObject::DrawDepthPass()
+{
+	DrawDepthPass(false, 0);
+}
+
 void RSMeshObject::DrawDepthPass(bool instanced, int instanceCount)
 {
 	if (!m_Mesh || !m_Mesh->IsResourceReady())

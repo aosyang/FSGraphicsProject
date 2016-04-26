@@ -17,4 +17,7 @@
     <SceneObject Name="Player" Type="MeshObject" Mesh="../Assets/tachikoma.fbx">
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 298.025269, 140.878616, -47.836910, 1.000000</Transform>
     </SceneObject>
+    <SceneObject Type="MeshObject" Mesh="../Assets/Island.FBX">
+        <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 918.920105, -208.590530, 153.841202, 1.000000</Transform>
+    </SceneObject>
 </Scene>

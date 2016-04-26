@@ -32,7 +32,8 @@ public:
 
 	void Draw();
 	void Draw(bool instanced, int instanceCount);
-	void DrawDepthPass(bool instanced = false, int instanceCount = 0);
+	void DrawDepthPass();
+	void DrawDepthPass(bool instanced, int instanceCount);
 	void DrawWithShader(RShader* shader, bool instanced = false, int instanceCount = 0);
 
 	float GetResourceTimestamp();

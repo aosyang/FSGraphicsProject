@@ -27,6 +27,7 @@ public:
 
 	RVec3 TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec);
 	void Render(const RFrustum* pFrustum=nullptr);
+	void RenderDepthPass();
 
 	vector<RSceneObject*>& GetSceneObjects();
 

@@ -219,6 +219,18 @@ void RScene::Render(const RFrustum* pFrustum)
 	}
 }
 
+void RScene::RenderDepthPass()
+{
+	for (vector<RSceneObject*>::iterator iter = m_SceneObjects.begin(); iter != m_SceneObjects.end(); iter++)
+	{
+		SHADER_OBJECT_BUFFER cbObject;
+		cbObject.worldMatrix = (*iter)->GetNodeTransform();
+		cbPerObject.UpdateContent(&cbObject);
+		cbPerObject.ApplyToShaders();
+		(*iter)->DrawDepthPass();
+	}
+}
+
 vector<RSceneObject*>& RScene::GetSceneObjects()
 {
 	return m_SceneObjects;

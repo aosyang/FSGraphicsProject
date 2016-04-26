@@ -26,6 +26,7 @@ public:
 private:
 	RScene				m_Scene;
 	RCamera				m_Camera;
+	RShadowMap			m_ShadowMap;
 
 	PlayerController*	m_Player;
 	float				m_PlayerRot;
