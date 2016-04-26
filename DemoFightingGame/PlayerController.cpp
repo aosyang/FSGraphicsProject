@@ -18,7 +18,9 @@ void PlayerController::Cache()
 	m_Animations[PlayerAnim_Idle]		= LoadAnimation("../Assets/unitychan/FUCM05_0000_Idle.fbx");
 	m_Animations[PlayerAnim_Run]		= LoadAnimation("../Assets/unitychan/FUCM_0012b_EH_RUN_LP_NoZ.fbx");
 	m_Animations[PlayerAnim_Punch1]		= LoadAnimation("../Assets/unitychan/FUCM05_0001_M_CMN_LJAB.fbx");
-	m_Animations[PlayerAnim_SpinAttack]	= LoadAnimation("../Assets/unitychan/FUCM02_0029_Cha01_STL01_ScrewK01.fbx");
+	m_Animations[PlayerAnim_Kick]		= LoadAnimation("../Assets/unitychan/FUCM_04_0001_RHiKick.fbx");
+	m_Animations[PlayerAnim_BackKick]	= LoadAnimation("../Assets/unitychan/FUCM02_0004_CH01_AS_MAWAK.fbx");
+	m_Animations[PlayerAnim_SpinAttack] = LoadAnimation("../Assets/unitychan/FUCM02_0029_Cha01_STL01_ScrewK01.fbx");
 
 	for (int i = 0; i < PlayerAnimCount; i++)
 	{
@@ -120,6 +122,30 @@ void PlayerController::SetBehavior(PlayerBehavior behavior)
 		}
 		break;
 
+	case BHV_Punch:
+		if (m_Behavior != BHV_Punch)
+		{
+			m_CurrAnimation = m_Animations[PlayerAnim_Punch1];
+			m_CurrAnimTime = m_CurrAnimation->GetStartTime();
+			m_Behavior = BHV_Punch;
+		}
+		break;
+
+	case BHV_Kick:
+		if (m_Behavior != BHV_Kick && m_Behavior != BHV_BackKick)
+		{
+			m_CurrAnimation = m_Animations[PlayerAnim_Kick];
+			m_CurrAnimTime = m_CurrAnimation->GetStartTime();
+			m_Behavior = BHV_Kick;
+		}
+		else if (m_Behavior == BHV_Kick && (m_CurrAnimTime / m_CurrAnimation->GetFrameRate()) >= 0.5f)
+		{
+			m_CurrAnimation = m_Animations[PlayerAnim_BackKick];
+			m_CurrAnimTime = m_CurrAnimation->GetStartTime();
+			m_Behavior = BHV_BackKick;
+		}
+		break;
+
 	case BHV_SpinAttack:
 		if (m_Behavior != BHV_SpinAttack)
 		{
@@ -143,6 +169,8 @@ bool PlayerController::IsPlayingLoopAnimation() const
 	case BHV_Idle:
 	case BHV_Running:
 		return true;
+	case BHV_Punch:
+	case BHV_Kick:
 	case BHV_SpinAttack:
 		return false;
 	}

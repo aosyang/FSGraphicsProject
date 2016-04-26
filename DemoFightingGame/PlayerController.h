@@ -14,6 +14,8 @@ enum PlayerAnimation
 	PlayerAnim_Idle,
 	PlayerAnim_Run,
 	PlayerAnim_Punch1,
+	PlayerAnim_Kick,
+	PlayerAnim_BackKick,
 	PlayerAnim_SpinAttack,
 
 	PlayerAnimCount,
@@ -23,6 +25,9 @@ enum PlayerBehavior
 {
 	BHV_Idle,
 	BHV_Running,
+	BHV_Punch,
+	BHV_Kick,
+	BHV_BackKick,
 	BHV_SpinAttack,
 };
 

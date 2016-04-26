@@ -178,11 +178,26 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			{
 				m_Player->SetBehavior(BHV_Idle);
 			}
+
+			if (RInput.GetBufferedKeyState(VK_SPACE) == BKS_Pressed)
+			{
+				m_Player->SetBehavior(BHV_SpinAttack);
+			}
+
+			if (RInput.GetBufferedKeyState('J') == BKS_Pressed)
+			{
+				m_Player->SetBehavior(BHV_Punch);
+			}
 		}
 
-		if (RInput.GetBufferedKeyState(VK_SPACE) == BKS_Pressed)
+		if (m_Player->GetBehavior() == BHV_Running ||
+			m_Player->GetBehavior() == BHV_Idle ||
+			m_Player->GetBehavior() == BHV_Kick)
 		{
-			m_Player->SetBehavior(BHV_SpinAttack);
+			if (RInput.GetBufferedKeyState('K') == BKS_Pressed)
+			{
+				m_Player->SetBehavior(BHV_Kick);
+			}
 		}
 
 		moveVec += RVec3(0, -1000.0f * timer.DeltaTime(), 0);
@@ -197,8 +212,20 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 		RMatrix4 playerTranslation = RMatrix4::CreateTranslation(m_Player->GetNodeTransform().GetTranslation());
 		RMatrix4 cameraTransform = RMatrix4::CreateTranslation(0.0f, 500.0f, 300.0f) * playerTranslation;
-		m_Camera.SetTransform(cameraTransform);
-		m_Camera.LookAt(m_Player->GetPosition() + RVec3(0, 125, 0));
+
+		RAabb camAabb;
+		RVec3 lookTarget = m_Player->GetPosition() + RVec3(0, 125, 0);
+		camAabb.pMin = RVec3(-5, -5, -5) + lookTarget;
+		camAabb.pMax = RVec3(5, 5, 5) + lookTarget;
+
+		RVec3 camVec = cameraTransform.GetTranslation() - lookTarget;
+		camVec = m_Scene.TestMovingAabbWithScene(camAabb, camVec);
+
+		//m_Camera.SetTransform(cameraTransform);
+		static RVec3 actualCamVec;
+		actualCamVec = RVec3::Lerp(actualCamVec, camVec, 5.0f * timer.DeltaTime());
+		m_Camera.SetPosition(actualCamVec + lookTarget);
+		m_Camera.LookAt(lookTarget);
 
 		//playerAabb.pMin = RVec3(-50.0f, 0.0f, -50.0f) + m_Player->GetPosition();
 		//playerAabb.pMax = RVec3(50.0f, 150.0f, 50.0f) + m_Player->GetPosition();
@@ -257,16 +284,16 @@ void FightingGameApp::RenderScene()
 			cbObject.worldMatrix = m_Player->GetNodeTransform();
 			m_Scene.cbPerObject.UpdateContent(&cbObject);
 			m_Scene.cbPerObject.ApplyToShaders();
-			//RRenderer.SetBlendState(Blend_AlphaBlending);
 			if (pass == 0)
 			{
 				m_Player->DrawDepthPass();
 			}
 			else
 			{
+				RRenderer.SetBlendState(Blend_AlphaBlending);
 				m_Player->Draw();
+				RRenderer.SetBlendState(Blend_Opaque);
 			}
-			//RRenderer.SetBlendState(Blend_Opaque);
 		}
 	}
 
