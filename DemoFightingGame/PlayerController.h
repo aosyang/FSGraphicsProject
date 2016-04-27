@@ -53,6 +53,7 @@ public:
 
 	void SetBehavior(PlayerBehavior behavior);
 	PlayerBehavior GetBehavior() const;
+	float GetBehaviorTime() const;
 
 	bool IsPlayingLoopAnimation() const;
 	RAabb GetMovementCollisionShape() const;

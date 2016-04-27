@@ -249,6 +249,16 @@ PlayerBehavior PlayerController::GetBehavior() const
 	return m_Behavior;
 }
 
+float PlayerController::GetBehaviorTime() const
+{
+	if (m_CurrAnimation)
+	{
+		return m_CurrAnimTime / m_CurrAnimation->GetFrameRate();
+	}
+
+	return 0.0f;
+}
+
 bool PlayerController::IsPlayingLoopAnimation() const
 {
 	switch (m_Behavior)

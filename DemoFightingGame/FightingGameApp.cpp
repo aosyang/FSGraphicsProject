@@ -226,12 +226,14 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		//m_DebugRenderer.DrawSphere(cap.end, cap.radius, color);
 
 
-		if (m_Player->GetBehavior() == BHV_SpinAttack)
+		if (m_Player->GetBehavior() == BHV_SpinAttack &&
+			m_Player->GetBehaviorTime() > 0.3f &&
+			m_Player->GetBehaviorTime() < 0.6f)
 		{
 			RSphere hit_sphere;
 			hit_sphere.center = m_Player->GetPosition() + m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 50, 0);
 			hit_sphere.radius = 50.0f;
-			//m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
+			m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
 
 			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
 			{
