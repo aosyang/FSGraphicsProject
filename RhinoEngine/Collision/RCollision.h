@@ -23,6 +23,13 @@ struct RSphere
 	float radius;
 };
 
+struct RCapsule
+{
+	RVec3 start;
+	RVec3 end;
+	float radius;
+};
+
 enum FrustumCorners
 {
 	FC_FTL,
@@ -53,6 +60,7 @@ namespace RCollision
 	PlaneSpace TestSphereToPlane(const RPlane& plane, const RSphere& sphere);
 	PlaneSpace TestAabbToPlane(const RPlane& plane, const RAabb& aabb);
 	bool TestAabbInsideFrustum(const RFrustum& frustum, const RAabb& aabb);
+	bool TestSphereWithCapsule(const RSphere& sphere, const RCapsule& capsule);
 };
 
 #endif

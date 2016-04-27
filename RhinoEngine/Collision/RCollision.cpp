@@ -48,4 +48,24 @@ namespace RCollision
 
 		return true;
 	}
+
+	bool TestSphereWithCapsule(const RSphere& sphere, const RCapsule& capsule)
+	{
+		RVec3 v = capsule.end - capsule.start;
+		RVec3 pt = sphere.center - capsule.start;
+		float dot_r = pt.Dot(v);
+		RVec3 cloest_pt;
+
+		if (dot_r < 0)
+			dot_r = 0;
+		else if (dot_r > 1)
+			dot_r = 1;
+
+		cloest_pt = capsule.start + v * dot_r;
+
+		float sqrdRadius = sphere.radius + capsule.radius;
+		sqrdRadius *= sqrdRadius;
+
+		return (sphere.center - cloest_pt).SquaredMagitude() < sqrdRadius;
+	}
 };
