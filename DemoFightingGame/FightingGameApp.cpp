@@ -7,7 +7,7 @@
 #include "FightingGameApp.h"
 
 FightingGameApp::FightingGameApp()
-	: m_Player(nullptr), m_PlayerRot(0.0f)
+	: m_Player(nullptr)
 {
 
 }
@@ -50,25 +50,12 @@ bool FightingGameApp::Initialize()
 	m_Player->SetPosition(RVec3(0, 100.0f, 0));
 	m_Player->Cache();
 
+	m_AIPlayer = new PlayerController();
+	m_AIPlayer->SetScene(&m_Scene);
+	m_AIPlayer->SetPosition(RVec3(-465, 50, -760));
+	m_AIPlayer->Cache();
+
 	return true;
-}
-
-float LerpDegreeAngle(float from, float to, float t)
-{
-	while (from - to > 180.0f)
-	{
-		from -= 360.0f;
-	}
-
-	while (from - to < -180.0f)
-	{
-		from += 360.0f;
-	}
-
-	if (t < 0) t = 0;
-	if (t > 1) t = 1;
-
-	return from + (to - from) * t;
 }
 
 void FightingGameApp::UpdateScene(const RTimer& timer)
@@ -145,14 +132,14 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	if (m_Player)
 	{
 		if (RInput.GetBufferedKeyState('R') == BKS_Pressed)
+		{
 			m_Player->SetPosition(RVec3(0, 100.0f, 0));
+			m_AIPlayer->SetPosition(RVec3(-465, 50, -760));
+		}
 
 		m_Player->PreUpdate(timer);
 		
 		RVec3 moveVec = RVec3(0, 0, 0);
-		RAabb playerAabb;
-		playerAabb.pMin = RVec3(-50.0f, 0.0f, -50.0f) + m_Player->GetPosition();
-		playerAabb.pMax = RVec3(50.0f, 150.0f, 50.0f) + m_Player->GetPosition();
 
 		RVec3 charRight = m_Camera.GetNodeTransform().GetRight();
 		RVec3 charForward = charRight.Cross(RVec3(0, 1, 0));
@@ -168,8 +155,6 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			if (moveVec.SquaredMagitude() > 0.0f)
 			{
 				moveVec.Normalize();
-				m_PlayerRot = LerpDegreeAngle(m_PlayerRot, RAD_TO_DEG(atan2f(moveVec.x, moveVec.z)), 10.0f * timer.DeltaTime());
-
 				moveVec *= timer.DeltaTime() * 500.0f;
 
 				m_Player->SetBehavior(BHV_Running);
@@ -200,15 +185,11 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			}
 		}
 
+		if (RInput.GetBufferedKeyState('C') == BKS_Pressed)
+			m_Player->SetBehavior(BHV_HitDown);
+
 		moveVec += RVec3(0, -1000.0f * timer.DeltaTime(), 0);
-
-		RVec3 worldMoveVec = moveVec;
-		worldMoveVec += (RVec4(m_Player->GetRootOffset(), 0) * m_Player->GetNodeTransform()).ToVec3();
-		worldMoveVec = m_Scene.TestMovingAabbWithScene(playerAabb, worldMoveVec);
-
-		m_Player->Translate(worldMoveVec);
-
-		m_Player->SetRotation(RMatrix4::CreateYAxisRotation(m_PlayerRot));
+		m_Player->UpdateMovement(timer, moveVec);
 
 		RMatrix4 playerTranslation = RMatrix4::CreateTranslation(m_Player->GetNodeTransform().GetTranslation());
 		RMatrix4 cameraTransform = RMatrix4::CreateTranslation(0.0f, 500.0f, 300.0f) * playerTranslation;
@@ -233,8 +214,40 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 		//m_DebugRenderer.DrawFrustum(m_Camera.GetFrustum());
 
+		//RSphere s = { RVec3(0, 100, 0), 50.0f };
+		//RCapsule cap = m_Player->GetCollisionShape();
+		//RColor color = RColor(0, 1, 1);
+		//if (RCollision::TestSphereWithCapsule(s, cap))
+		//{
+		//	color = RColor(1, 0, 0);
+		//}
+		//m_DebugRenderer.DrawSphere(s.center, s.radius, color);
+		//m_DebugRenderer.DrawSphere(cap.start, cap.radius, color);
+		//m_DebugRenderer.DrawSphere(cap.end, cap.radius, color);
+
+
+		if (m_Player->GetBehavior() == BHV_SpinAttack)
+		{
+			RSphere hit_sphere;
+			hit_sphere.center = m_Player->GetPosition() + m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 50, 0);
+			hit_sphere.radius = 50.0f;
+			//m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
+
+			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
+			{
+				m_AIPlayer->SetBehavior(BHV_HitDown);
+			}
+		}
+
 		m_Player->PostUpdate(timer);
 	}
+
+	// Update AI player
+	m_AIPlayer->PreUpdate(timer);
+	RVec3 moveVec = RVec3(0, 0, 0);
+	moveVec += RVec3(0, -1000.0f * timer.DeltaTime(), 0);
+	m_AIPlayer->UpdateMovement(timer, moveVec);
+	m_AIPlayer->PostUpdate(timer);
 }
 
 void FightingGameApp::RenderScene()
@@ -287,11 +300,13 @@ void FightingGameApp::RenderScene()
 			if (pass == 0)
 			{
 				m_Player->DrawDepthPass();
+				m_AIPlayer->DrawDepthPass();
 			}
 			else
 			{
 				RRenderer.SetBlendState(Blend_AlphaBlending);
 				m_Player->Draw();
+				m_AIPlayer->Draw();
 				RRenderer.SetBlendState(Blend_Opaque);
 			}
 		}

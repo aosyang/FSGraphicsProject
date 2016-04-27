@@ -172,7 +172,7 @@ void RDebugRenderer::Render()
 		m_bDirtyBuffer = false;
 	}
 
-	RRenderer.Clear(false);
+	//RRenderer.Clear(false);
 
 	m_ColorShader->Bind();
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);

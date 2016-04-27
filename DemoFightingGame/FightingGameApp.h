@@ -29,7 +29,7 @@ private:
 	RShadowMap			m_ShadowMap;
 
 	PlayerController*	m_Player;
-	float				m_PlayerRot;
+	PlayerController*	m_AIPlayer;
 
 	RDebugRenderer		m_DebugRenderer;
 };
