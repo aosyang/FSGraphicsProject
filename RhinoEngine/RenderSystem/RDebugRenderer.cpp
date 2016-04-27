@@ -111,6 +111,59 @@ void RDebugRenderer::DrawFrustum(const RFrustum& frustum, const RColor& color)
 	}
 }
 
+void RDebugRenderer::DrawSphere(const RVec3& center, float radius, int segment)
+{
+	DrawSphere(center, radius, m_PrimitiveColor, segment);
+}
+
+void RDebugRenderer::DrawSphere(const RVec3& center, float radius, const RColor& color, int segment)
+{
+	for (int i = 0; i < segment; i++)
+	{
+		for (int j = 1; j < segment; j++)
+		{
+			float y = cosf(PI * j / segment) * radius + center.y;
+			float r = sinf(PI * j / segment) * radius;
+
+			float x0 = sinf(2.0f * PI * i / segment) * r + center.x;
+			float z0 = cosf(2.0f * PI * i / segment) * r + center.z;
+
+			int i1 = (i + 1) % segment;
+			float x1 = sinf(2.0f * PI * i1 / segment) * r + center.x;
+			float z1 = cosf(2.0f * PI * i1 / segment) * r + center.z;
+
+			RVertex::PRIMITIVE_VERTEX v0 = { RVec4(x0, y, z0), color };
+			RVertex::PRIMITIVE_VERTEX v1 = { RVec4(x1, y, z1), color };
+			m_PrimitiveVertices.push_back(v0);
+			m_PrimitiveVertices.push_back(v1);
+		}
+	}
+
+	for (int i = 0; i < segment; i++)
+	{
+		for (int j = 0; j < segment; j++)
+		{
+			float y0 = cosf(PI * j / segment) * radius + center.y;
+			float r0 = sinf(PI * j / segment) * radius;
+
+			int j1 = j + 1;
+			float y1 = cosf(PI * j1 / segment) * radius + center.y;
+			float r1 = sinf(PI * j1 / segment) * radius;
+
+			float x0 = sinf(2.0f * PI * i / segment) * r0 + center.x;
+			float z0 = cosf(2.0f * PI * i / segment) * r0 + center.z;
+
+			float x1 = sinf(2.0f * PI * i / segment) * r1 + center.x;
+			float z1 = cosf(2.0f * PI * i / segment) * r1 + center.z;
+
+			RVertex::PRIMITIVE_VERTEX v0 = { RVec4(x0, y0, z0), color };
+			RVertex::PRIMITIVE_VERTEX v1 = { RVec4(x1, y1, z1), color };
+			m_PrimitiveVertices.push_back(v0);
+			m_PrimitiveVertices.push_back(v1);
+		}
+	}
+}
+
 void RDebugRenderer::Render()
 {
 	if (m_bDirtyBuffer)

@@ -23,6 +23,8 @@ public:
 	void DrawAabb(const RAabb& aabb, const RColor& color);
 	void DrawFrustum(const RFrustum& frustum);
 	void DrawFrustum(const RFrustum& frustum, const RColor& color);
+	void DrawSphere(const RVec3& center, float radius, int segment = 12);
+	void DrawSphere(const RVec3& center, float radius, const RColor& color, int segment = 12);
 
 	// Present primitive to the screen
 	void Render();
