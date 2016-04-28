@@ -294,67 +294,74 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	}
 
 	// Load animation
-	RAnimation* animation = nullptr;
-	FbxArray<FbxString*> animStackNameArray;
-	lFbxScene->FillAnimStackNameArray(animStackNameArray);
-	if (animStackNameArray.GetCount() > 0)
+	RAnimation* animation = new RAnimation();
+	string animFilename = task->Filename.substr(0, task->Filename.size() - 3) + "ranim";
+
+	if (!animation->LoadFromFile(animFilename.c_str()))
 	{
-		FbxAnimStack* animStack = lFbxScene->FindMember<FbxAnimStack>(animStackNameArray[0]->Buffer());
-		FbxTakeInfo* takeInfo = lFbxScene->GetTakeInfo(*(animStackNameArray[0]));
+		SAFE_DELETE(animation);
 
-		FbxArrayDelete(animStackNameArray);
-
-		FbxTime::EMode				animTimeMode;
-		FbxTime						frameTime, animStartTime, animEndTime;
-		float						animFrameRate;
-
-		frameTime.SetTime(0, 0, 0, 1, 0, lFbxScene->GetGlobalSettings().GetTimeMode());
-		animTimeMode = lFbxScene->GetGlobalSettings().GetTimeMode();
-		animFrameRate = (float)frameTime.GetFrameRate(animTimeMode);
-		animStartTime = takeInfo->mLocalTimeSpan.GetStart();
-		animEndTime = takeInfo->mLocalTimeSpan.GetStop();
-
-		int totalFrameCount = (int)(animEndTime.GetFrameCount(animTimeMode) - animStartTime.GetFrameCount(animTimeMode)) + 1;
-		animation = new RAnimation(
-			lFbxScene->GetNodeCount(),
-			totalFrameCount,
-			(float)animStartTime.GetFrameCountPrecise(animTimeMode),
-			(float)animEndTime.GetFrameCountPrecise(animTimeMode),
-			animFrameRate);
-
-		map<string, int> nodeNameToId;
-
-		for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
+		FbxArray<FbxString*> animStackNameArray;
+		lFbxScene->FillAnimStackNameArray(animStackNameArray);
+		if (animStackNameArray.GetCount() > 0)
 		{
-			FbxNode* node = lFbxScene->GetNode(idxNode);
+			FbxAnimStack* animStack = lFbxScene->FindMember<FbxAnimStack>(animStackNameArray[0]->Buffer());
+			FbxTakeInfo* takeInfo = lFbxScene->GetTakeInfo(*(animStackNameArray[0]));
 
-			for (FbxTime animTime = animStartTime;
-				animTime <= animEndTime;
-				animTime += frameTime)
+			FbxArrayDelete(animStackNameArray);
+
+			FbxTime::EMode				animTimeMode;
+			FbxTime						frameTime, animStartTime, animEndTime;
+			float						animFrameRate;
+
+			frameTime.SetTime(0, 0, 0, 1, 0, lFbxScene->GetGlobalSettings().GetTimeMode());
+			animTimeMode = lFbxScene->GetGlobalSettings().GetTimeMode();
+			animFrameRate = (float)frameTime.GetFrameRate(animTimeMode);
+			animStartTime = takeInfo->mLocalTimeSpan.GetStart();
+			animEndTime = takeInfo->mLocalTimeSpan.GetStop();
+
+			int totalFrameCount = (int)(animEndTime.GetFrameCount(animTimeMode) - animStartTime.GetFrameCount(animTimeMode)) + 1;
+			animation = new RAnimation(
+				lFbxScene->GetNodeCount(),
+				totalFrameCount,
+				(float)animStartTime.GetFrameCountPrecise(animTimeMode),
+				(float)animEndTime.GetFrameCountPrecise(animTimeMode),
+				animFrameRate);
+
+			map<string, int> nodeNameToId;
+
+			for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
 			{
-				RMatrix4 matrix;
+				FbxNode* node = lFbxScene->GetNode(idxNode);
 
-				FbxAMatrix childTransform = node->EvaluateGlobalTransform(animTime);
-				MatrixTransfer(&matrix, &childTransform);
-				int frameIdx = (int)((float)animTime.GetFrameCountPrecise(animTimeMode) - (float)animStartTime.GetFrameCountPrecise(animTimeMode));
-				animation->AddNodePose(idxNode, frameIdx, &matrix);
-				animation->AddNodeNameToId(node->GetName(), idxNode);
+				for (FbxTime animTime = animStartTime;
+					animTime <= animEndTime;
+					animTime += frameTime)
+				{
+					RMatrix4 matrix;
 
-				nodeNameToId[node->GetName()] = idxNode;
+					FbxAMatrix childTransform = node->EvaluateGlobalTransform(animTime);
+					MatrixTransfer(&matrix, &childTransform);
+					int frameIdx = (int)((float)animTime.GetFrameCountPrecise(animTimeMode) - (float)animStartTime.GetFrameCountPrecise(animTimeMode));
+					animation->AddNodePose(idxNode, frameIdx, &matrix);
+					animation->AddNodeNameToId(node->GetName(), idxNode);
+
+					nodeNameToId[node->GetName()] = idxNode;
+				}
 			}
-		}
 
-		for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
-		{
-			FbxNode* node = lFbxScene->GetNode(idxNode);
-			FbxNode* parent = node->GetParent();
-			if (parent && nodeNameToId.find(parent->GetName()) != nodeNameToId.end())
+			for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
 			{
-				animation->SetParentId(idxNode, nodeNameToId[parent->GetName()]);
-			}
-			else
-			{
-				animation->SetParentId(idxNode, -1);
+				FbxNode* node = lFbxScene->GetNode(idxNode);
+				FbxNode* parent = node->GetParent();
+				if (parent && nodeNameToId.find(parent->GetName()) != nodeNameToId.end())
+				{
+					animation->SetParentId(idxNode, nodeNameToId[parent->GetName()]);
+				}
+				else
+				{
+					animation->SetParentId(idxNode, -1);
+				}
 			}
 		}
 	}

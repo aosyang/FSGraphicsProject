@@ -11,8 +11,12 @@ using namespace std;
 class RAnimation
 {
 public:
+	RAnimation();
 	RAnimation(int nodeCount, int frameCount, float startTime, float endTime, float frameRate);
 	~RAnimation();
+
+	bool LoadFromFile(const char* filename);
+	void SaveToFile(const char* filename);
 
 	void AddNodePose(int nodeId, int frameId, const RMatrix4* matrix);
 	void GetNodePose(int nodeId, float time, RMatrix4* matrix) const;
@@ -37,9 +41,10 @@ public:
 private:
 	int						m_FrameCount;
 	float					m_StartTime, m_EndTime, m_FrameRate;
-	vector<RMatrix4*>		m_NodeKeyFrames;
+
+	vector<string>			m_NodeNames;
 	vector<int>				m_NodeParents;
-	map<string, int>		m_NodeNameToIdMap;
+	vector<RMatrix4*>		m_NodeKeyFrames;
 
 	vector<RVec3>			m_RootDisplacement;
 	int						m_RootNode;
