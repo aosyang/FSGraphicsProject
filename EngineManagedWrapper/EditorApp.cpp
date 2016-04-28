@@ -316,6 +316,21 @@ namespace EngineManagedWrapper
 		}
 	}
 
+	void EditorApp::ExportAllAnimationsToBinaryFiles()
+	{
+		const vector<RMesh*>& meshVec = RResourceManager::Instance().GetMeshResources();
+		for (UINT i = 0; i < meshVec.size(); i++)
+		{
+			RAnimation* anim = meshVec[i]->GetAnimation();
+			if (anim)
+			{
+				string animFilename = meshVec[i]->GetPath();
+				animFilename = animFilename.substr(0, animFilename.size() - 3) + "ranim";
+				anim->SaveToFile(animFilename.c_str());
+			}
+		}
+	}
+
 	void EditorApp::RunScreenToCameraRayPicking(float x, float y)
 	{
 		RVec3 farPoint = RVec3(2.0f * x - 1.0f, -2.0f * y + 1.0f, 1.0f);

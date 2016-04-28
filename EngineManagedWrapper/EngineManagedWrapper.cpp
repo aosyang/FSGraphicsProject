@@ -124,4 +124,9 @@ namespace EngineManagedWrapper
 	{
 		m_Application->SaveMeshMaterialFromSelection();
 	}
+
+	void RhinoEngineWrapper::ExportAllAnimationsToBinaryFiles()
+	{
+		m_Application->ExportAllAnimationsToBinaryFiles();
+	}
 }

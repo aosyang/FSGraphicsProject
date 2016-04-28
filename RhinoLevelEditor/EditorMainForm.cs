@@ -106,5 +106,10 @@ namespace RhinoLevelEditor
         {
             engineCanvas1.RhinoEngine.SaveMeshMaterialFromSelection();
         }
+
+        private void exportAnimToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            engineCanvas1.RhinoEngine.ExportAllAnimationsToBinaryFiles();
+        }
     }
 }
