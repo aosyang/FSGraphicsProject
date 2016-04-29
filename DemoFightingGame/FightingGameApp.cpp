@@ -65,7 +65,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbLight, sizeof(cbLight));
 
 	// Setup ambient color
-	cbLight.HighHemisphereAmbientColor = RVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	cbLight.HighHemisphereAmbientColor = RVec4(0.5f, 0.5f, 0.5f, 1.0f);
 	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 1.0f);
 
 	RVec4 dirLightVec = RVec4(RVec3(0.25f, 1.0f, 0.5f).GetNormalizedVec3(), 1.0f);
