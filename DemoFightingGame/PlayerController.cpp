@@ -6,6 +6,19 @@
 
 #include "PlayerController.h"
 
+BehaviorInfo PlayerBehaviorInfo[] =
+{
+	{ PlayerAnim_Idle },
+	{ PlayerAnim_Run },
+	{ PlayerAnim_Punch1 },
+	{ PlayerAnim_Kick },
+	{ PlayerAnim_BackKick },
+	{ PlayerAnim_SpinAttack },
+	{ PlayerAnim_Hit },
+	{ PlayerAnim_Down },
+	{ PlayerAnim_GetUp },
+};
+
 PlayerController::PlayerController()
 	: m_Rotation(0.0f), m_CurrAnimTime(0.0f), m_Behavior(BHV_Idle)
 {
@@ -25,6 +38,7 @@ void PlayerController::Cache()
 	m_Animations[PlayerAnim_Kick]		= LoadAnimation("../Assets/unitychan/FUCM_04_0001_RHiKick.fbx");
 	m_Animations[PlayerAnim_BackKick]	= LoadAnimation("../Assets/unitychan/FUCM02_0004_CH01_AS_MAWAK.fbx");
 	m_Animations[PlayerAnim_SpinAttack] = LoadAnimation("../Assets/unitychan/FUCM02_0029_Cha01_STL01_ScrewK01.fbx");
+	m_Animations[PlayerAnim_Hit]		= LoadAnimation("../Assets/unitychan/unitychan_DAMAGED00.fbx");
 	m_Animations[PlayerAnim_Down]		= LoadAnimation("../Assets/unitychan/FUCM02_0025_MYA_TF_DOWN.fbx");
 	m_Animations[PlayerAnim_GetUp]		= LoadAnimation("../Assets/unitychan/FUCM03_0019_HeadSpring.fbx");
 
@@ -173,33 +187,6 @@ void PlayerController::SetBehavior(PlayerBehavior behavior)
 {
 	switch (behavior)
 	{
-	case BHV_Idle:
-		if (m_Behavior != BHV_Idle)
-		{
-			m_CurrAnimation = m_Animations[PlayerAnim_Idle];
-			m_CurrAnimTime = m_CurrAnimation->GetStartTime();
-			m_Behavior = BHV_Idle;
-		}
-		break;
-
-	case BHV_Running:
-		if (m_Behavior != BHV_Running)
-		{
-			m_CurrAnimation = m_Animations[PlayerAnim_Run];
-			m_CurrAnimTime = m_CurrAnimation->GetStartTime();
-			m_Behavior = BHV_Running;
-		}
-		break;
-
-	case BHV_Punch:
-		if (m_Behavior != BHV_Punch)
-		{
-			m_CurrAnimation = m_Animations[PlayerAnim_Punch1];
-			m_CurrAnimTime = m_CurrAnimation->GetStartTime();
-			m_Behavior = BHV_Punch;
-		}
-		break;
-
 	case BHV_Kick:
 		if (m_Behavior != BHV_Kick && m_Behavior != BHV_BackKick)
 		{
@@ -215,32 +202,19 @@ void PlayerController::SetBehavior(PlayerBehavior behavior)
 		}
 		break;
 
-	case BHV_SpinAttack:
-		if (m_Behavior != BHV_SpinAttack)
-		{
-			m_CurrAnimation = m_Animations[PlayerAnim_SpinAttack];
-			m_CurrAnimTime = m_CurrAnimation->GetStartTime();
-			m_Behavior = BHV_SpinAttack;
-		}
+	case BHV_Hit:
+		m_CurrAnimation = m_Animations[PlayerAnim_Hit];
+		m_CurrAnimTime = m_CurrAnimation->GetStartTime();
+		m_Behavior = BHV_Hit;
 		break;
 
-	case BHV_HitDown:
-		if (m_Behavior != BHV_HitDown)
+	default:
+		if (m_Behavior != behavior)
 		{
-			m_CurrAnimation = m_Animations[PlayerAnim_Down];
+			m_CurrAnimation = m_Animations[PlayerBehaviorInfo[behavior].anim];
 			m_CurrAnimTime = m_CurrAnimation->GetStartTime();
-			m_Behavior = BHV_HitDown;
+			m_Behavior = behavior;
 		}
-		break;
-
-	case BHV_GetUp:
-		if (m_Behavior != BHV_GetUp)
-		{
-			m_CurrAnimation = m_Animations[PlayerAnim_GetUp];
-			m_CurrAnimTime = m_CurrAnimation->GetStartTime();
-			m_Behavior = BHV_GetUp;
-		}
-		break;
 	}
 }
 

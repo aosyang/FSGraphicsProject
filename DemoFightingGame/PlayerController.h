@@ -18,6 +18,7 @@ enum PlayerAnimation
 	PlayerAnim_BackKick,
 	PlayerAnim_SpinAttack,
 
+	PlayerAnim_Hit,
 	PlayerAnim_Down,
 	PlayerAnim_GetUp,
 
@@ -32,8 +33,14 @@ enum PlayerBehavior
 	BHV_Kick,
 	BHV_BackKick,
 	BHV_SpinAttack,
+	BHV_Hit,
 	BHV_HitDown,
 	BHV_GetUp,
+};
+
+struct BehaviorInfo
+{
+	PlayerAnimation anim;
 };
 
 class PlayerController : public RSMeshObject
@@ -50,6 +57,8 @@ public:
 
 	void Draw();
 	void DrawDepthPass();
+
+	void SetPlayerRotation(float rot) { m_Rotation = rot; }
 
 	void SetBehavior(PlayerBehavior behavior);
 	PlayerBehavior GetBehavior() const;

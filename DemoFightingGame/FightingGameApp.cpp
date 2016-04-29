@@ -233,13 +233,78 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			RSphere hit_sphere;
 			hit_sphere.center = m_Player->GetPosition() + m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 50, 0);
 			hit_sphere.radius = 50.0f;
-			m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
+			//m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
 
 			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
 			{
+				if (m_AIPlayer->GetBehavior() != BHV_HitDown)
+				{
+					RVec3 relVec = hit_sphere.center - m_AIPlayer->GetPosition();
+					relVec.y = 0.0f;
+					relVec.Normalize();
+
+					m_AIPlayer->SetPlayerRotation(RAD_TO_DEG(atan2f(relVec.x, relVec.z)));
+				}
 				m_AIPlayer->SetBehavior(BHV_HitDown);
 			}
 		}
+
+		if (m_Player->GetBehavior() == BHV_Punch &&
+			m_Player->GetBehaviorTime() > 0.1f &&
+			m_Player->GetBehaviorTime() < 0.3f)
+		{
+			RSphere hit_sphere;
+			hit_sphere.center = m_Player->GetPosition() + m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 100, 0);
+			hit_sphere.radius = 20.0f;
+			//m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
+
+			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
+			{
+				if (m_AIPlayer->GetBehavior() != BHV_HitDown &&
+					m_AIPlayer->GetBehavior() != BHV_Hit)
+				{
+					m_AIPlayer->SetBehavior(BHV_Hit);
+				}
+			}
+		}
+
+		if (m_Player->GetBehavior() == BHV_Kick &&
+			m_Player->GetBehaviorTime() > 0.1f &&
+			m_Player->GetBehaviorTime() < 0.3f)
+		{
+			RSphere hit_sphere;
+			hit_sphere.center = m_Player->GetPosition() + m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 100, 0);
+			hit_sphere.radius = 50.0f;
+			//m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
+
+			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
+			{
+				if (m_AIPlayer->GetBehavior() != BHV_HitDown &&
+					m_AIPlayer->GetBehavior() != BHV_Hit)
+				{
+					m_AIPlayer->SetBehavior(BHV_Hit);
+				}
+			}
+		}
+
+		if (m_Player->GetBehavior() == BHV_BackKick &&
+			m_Player->GetBehaviorTime() > 0.1f &&
+			m_Player->GetBehaviorTime() < 0.3f)
+		{
+			RSphere hit_sphere;
+			hit_sphere.center = m_Player->GetPosition() + m_Player->GetNodeTransform().GetForward() * 30 + RVec3(0, 100, 0);
+			hit_sphere.radius = 50.0f;
+			//m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
+
+			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
+			{
+				if (m_AIPlayer->GetBehavior() != BHV_HitDown)
+				{
+					m_AIPlayer->SetBehavior(BHV_HitDown);
+				}
+			}
+		}
+
 
 		m_Player->PostUpdate(timer);
 	}
