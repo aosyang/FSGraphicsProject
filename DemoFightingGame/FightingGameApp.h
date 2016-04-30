@@ -32,6 +32,7 @@ private:
 	PlayerController*	m_AIPlayer;
 
 	RDebugRenderer		m_DebugRenderer;
+	bool				m_DrawHitBound;
 };
 
 #endif
