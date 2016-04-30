@@ -180,7 +180,7 @@ ID3D11InputLayout* RVertexDeclaration::GetInputLayoutByVertexComponents(int vert
 		char filename[1024];
 		sprintf_s(filename, 1024, "VS_Signature_%d.hlsl", vertexComponents);
 
-		if (SUCCEEDED(D3DCompile(vertexShaderSignature.data(), vertexShaderSignature.size(), filename, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", 0, 0, &pShaderCode, &pErrorMsg)))
+		if (SUCCEEDED(D3DCompile(vertexShaderSignature.data(), vertexShaderSignature.size(), filename, NULL, NULL, "main", "vs_4_0", 0, 0, &pShaderCode, &pErrorMsg)))
 		{
 			RRenderer.D3DDevice()->CreateInputLayout(desc, componentCount, pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), &pInputLayout);
 		}
