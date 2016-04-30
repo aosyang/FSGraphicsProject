@@ -52,16 +52,17 @@ namespace RCollision
 	bool TestSphereWithCapsule(const RSphere& sphere, const RCapsule& capsule)
 	{
 		RVec3 v = capsule.end - capsule.start;
+		RVec3 vn = v.GetNormalizedVec3();
 		RVec3 pt = sphere.center - capsule.start;
-		float dot_r = pt.Dot(v);
+		float scale = pt.Dot(vn) / v.Dot(vn);
 		RVec3 cloest_pt;
 
-		if (dot_r < 0)
-			dot_r = 0;
-		else if (dot_r > 1)
-			dot_r = 1;
+		if (scale < 0)
+			scale = 0;
+		else if (scale > 1)
+			scale = 1;
 
-		cloest_pt = capsule.start + v * dot_r;
+		cloest_pt = capsule.start + v * scale;
 
 		float sqrdRadius = sphere.radius + capsule.radius;
 		sqrdRadius *= sqrdRadius;
