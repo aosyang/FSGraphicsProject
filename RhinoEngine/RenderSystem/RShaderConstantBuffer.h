@@ -32,6 +32,12 @@ public:
 		cbDesc.Usage = D3D11_USAGE_DYNAMIC;
 
 		RRenderer.D3DDevice()->CreateBuffer(&cbDesc, NULL, &m_ConstBuffer);
+
+		// Initialize buffer values with zero
+		T buffer;
+		ZeroMemory(&buffer, sizeof(T));
+		UpdateContent(&buffer);
+		ApplyToShaders();
 	}
 
 	void Release()
