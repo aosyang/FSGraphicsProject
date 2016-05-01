@@ -7,13 +7,215 @@
 #include "Rhino.h"
 #include "RAnimation.h"
 
+
+RAnimationPlayer::RAnimationPlayer()
+	: IsAnimDone(false)
+{
+}
+
+void RAnimationPlayer::Proceed(float time)
+{
+	if (Animation && !IsAnimDone)
+	{
+		// Changing time may cause start time greater than end time
+		if (CurrentTime >= Animation->GetEndTime() - 1)
+		{
+			CurrentTime = Animation->GetStartTime();
+		}
+		RVec3 start_offset = Animation->GetRootPosition(CurrentTime);
+
+		CurrentTime += time * Animation->GetFrameRate() * TimeScale;
+		bool startOver = false;
+
+		if (CurrentTime >= Animation->GetEndTime() - 1)
+		{
+			if (Animation->GetBitFlags() & AnimBitFlag_Loop)
+			{
+				do
+				{
+					CurrentTime -= Animation->GetEndTime() - Animation->GetStartTime() - 1;
+					startOver = true;
+				} while (CurrentTime >= Animation->GetEndTime() - 1);
+			}
+			else
+			{
+				CurrentTime = Animation->GetEndTime() - 1;
+				IsAnimDone = true;
+			}
+		}
+
+		if (Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
+		{
+			RootOffset = Animation->GetRootPosition(CurrentTime) - start_offset;
+			if (startOver)
+			{
+				RootOffset = Animation->GetRootPosition(Animation->GetEndTime() - 1) - start_offset +
+							 Animation->GetRootPosition(CurrentTime) - Animation->GetInitRootPosition();
+			}
+		}
+		else
+		{
+			RootOffset = RVec3(0, 0, 0);
+		}
+
+	}
+}
+
+void RAnimationPlayer::Reset()
+{
+	IsAnimDone = false;
+	CurrentTime = Animation->GetStartTime();
+}
+
+RAnimationBlender::RAnimationBlender()
+{
+
+}
+
+void RAnimationBlender::Play(RAnimation* anim, float time, float timeScale)
+{
+	m_BlendStartAnim.Animation = anim;
+	m_BlendStartAnim.CurrentTime = time;
+	m_BlendStartAnim.TimeScale = timeScale;
+	m_BlendStartAnim.IsAnimDone = false;
+
+	m_BlendEndAnim.Animation = nullptr;
+}
+
+void RAnimationBlender::Play(RAnimation* anim, float timeScale)
+{
+	Play(anim, anim->GetStartTime(), timeScale);
+}
+
+void RAnimationBlender::Blend(RAnimation* start, float startTime, float startTimeScale, RAnimation* end, float endTime, float endTimeScale, float blendTime)
+{
+	m_BlendStartAnim.Animation = start;
+	m_BlendStartAnim.CurrentTime = startTime;
+	m_BlendStartAnim.TimeScale = startTimeScale;
+	m_BlendStartAnim.IsAnimDone = false;
+
+	m_BlendEndAnim.Animation = end;
+	m_BlendEndAnim.CurrentTime = endTime;
+	m_BlendEndAnim.TimeScale = endTimeScale;
+	m_BlendEndAnim.IsAnimDone = false;
+
+	m_BlendTime = blendTime;
+	m_ElapsedBlendTime = 0.0f;
+}
+
+void RAnimationBlender::BlendTo(RAnimation* target, float targetTime, float targetTimeScale, float blendTime)
+{
+	if (m_BlendEndAnim.Animation)
+	{
+		m_BlendStartAnim.Animation = m_BlendEndAnim.Animation;
+		m_BlendStartAnim.CurrentTime = m_BlendEndAnim.CurrentTime;
+		m_BlendStartAnim.TimeScale = m_BlendEndAnim.TimeScale;
+		m_BlendStartAnim.IsAnimDone = m_BlendEndAnim.IsAnimDone;
+	}
+
+	m_BlendEndAnim.Animation = target;
+	m_BlendEndAnim.CurrentTime = targetTime;
+	m_BlendEndAnim.TimeScale = targetTimeScale;
+	m_BlendEndAnim.IsAnimDone = false;
+
+	m_BlendTime = blendTime;
+	m_ElapsedBlendTime = 0.0f;
+}
+
+void RAnimationBlender::ProceedAnimation(float time)
+{
+	m_BlendStartAnim.Proceed(time);
+
+	if (m_BlendEndAnim.Animation)
+	{
+		m_BlendEndAnim.Proceed(time);
+		m_ElapsedBlendTime += time;
+		if (m_ElapsedBlendTime >= m_BlendTime)
+		{
+			m_BlendStartAnim = m_BlendEndAnim;
+			m_BlendEndAnim.Animation = nullptr;
+		}
+	}
+}
+
+void RAnimationBlender::GetCurrentBlendedNodePose(int startNodeId, int endNodeId, RMatrix4* matrix)
+{
+	if (m_BlendStartAnim.Animation && m_BlendEndAnim.Animation)
+	{
+		RMatrix4 mat1, mat2;
+		m_BlendStartAnim.Animation->GetNodePose(startNodeId, m_BlendStartAnim.CurrentTime, &mat1);
+		m_BlendEndAnim.Animation->GetNodePose(endNodeId, m_BlendEndAnim.CurrentTime, &mat2);
+
+		// Apply inversed root translation
+		if (m_BlendStartAnim.Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
+			mat1 *= RMatrix4::CreateTranslation(-m_BlendStartAnim.Animation->GetRootPosition(m_BlendStartAnim.CurrentTime));
+		if (m_BlendEndAnim.Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
+			mat2 *= RMatrix4::CreateTranslation(-m_BlendEndAnim.Animation->GetRootPosition(m_BlendEndAnim.CurrentTime));
+
+		float t = min(1.0f, m_ElapsedBlendTime / m_BlendTime);
+		*matrix = RMatrix4::Lerp(mat1, mat2, t);
+	}
+	else if (m_BlendStartAnim.Animation)
+	{
+		m_BlendStartAnim.Animation->GetNodePose(startNodeId, m_BlendStartAnim.CurrentTime, matrix);
+
+		if (m_BlendStartAnim.Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
+			*matrix *= RMatrix4::CreateTranslation(-m_BlendStartAnim.Animation->GetRootPosition(m_BlendStartAnim.CurrentTime));
+	}
+}
+
+RVec3 RAnimationBlender::GetCurrentRootOffset()
+{
+	if (m_BlendStartAnim.Animation && m_BlendEndAnim.Animation)
+	{
+		float t = min(1.0f, m_ElapsedBlendTime / m_BlendTime);
+
+		return RVec3::Lerp(m_BlendStartAnim.RootOffset, m_BlendEndAnim.RootOffset, t);
+	}
+	else if (m_BlendStartAnim.Animation)
+	{
+		return m_BlendStartAnim.RootOffset;
+	}
+
+	return RVec3::Zero();
+}
+
+bool RAnimationBlender::IsAnimationDone()
+{
+	if (m_BlendEndAnim.Animation)
+		return m_BlendEndAnim.IsAnimDone;
+	return (m_BlendStartAnim.Animation && m_BlendStartAnim.IsAnimDone);
+}
+
+RAnimation* RAnimationBlender::GetStartAnimation()
+{
+	return m_BlendStartAnim.Animation;
+}
+
+float RAnimationBlender::GetStartAnimationTime() const
+{
+	return m_BlendStartAnim.CurrentTime;
+}
+
+RAnimation* RAnimationBlender::GetEndAnimation()
+{
+	return m_BlendEndAnim.Animation;
+}
+
+float RAnimationBlender::GetEndAnimationTime() const
+{
+	return m_BlendEndAnim.CurrentTime;
+}
+
+
 RAnimation::RAnimation()
+	: m_Flags(0)
 {
 
 }
 
 RAnimation::RAnimation(int nodeCount, int frameCount, float startTime, float endTime, float frameRate)
-	: m_FrameCount(frameCount), m_StartTime(startTime), m_EndTime(endTime), m_FrameRate(frameRate), m_RootNode(-1)
+	: m_Flags(0), m_FrameCount(frameCount), m_StartTime(startTime), m_EndTime(endTime), m_FrameRate(frameRate), m_RootNode(-1)
 {
 	m_NodeKeyFrames = vector<RMatrix4*>(nodeCount, nullptr);
 	m_NodeParents = vector<int>(nodeCount, -1);

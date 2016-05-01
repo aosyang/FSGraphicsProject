@@ -41,6 +41,7 @@ enum PlayerBehavior
 struct BehaviorInfo
 {
 	PlayerAnimation anim;
+	float			blendTime;
 };
 
 class PlayerController : public RSMeshObject
@@ -62,23 +63,21 @@ public:
 
 	void SetBehavior(PlayerBehavior behavior);
 	PlayerBehavior GetBehavior() const;
-	float GetBehaviorTime() const;
+	float GetBehaviorTime();
 
-	bool IsPlayingLoopAnimation() const;
 	RAabb GetMovementCollisionShape() const;
 	RCapsule GetCollisionShape() const;
 
 private:
-	RAnimation* LoadAnimation(const char* resPath);
+	RAnimation* LoadAnimation(const char* resPath, int flags=0);
 
-	float			m_Rotation;
-	RAnimation*		m_Animations[PlayerAnimCount];
-	RAnimation*		m_CurrAnimation;
-	float			m_CurrAnimTime;
-	RVec3			m_RootOffset;
-	SHADER_SKINNED_BUFFER cbSkinned;
+	float					m_Rotation;
+	RAnimation*				m_Animations[PlayerAnimCount];
+	RAnimationBlender		m_AnimBlender;
+	RVec3					m_RootOffset;
+	SHADER_SKINNED_BUFFER	cbSkinned;
 
-	PlayerBehavior	m_Behavior;
+	PlayerBehavior			m_Behavior;
 };
 
 #endif

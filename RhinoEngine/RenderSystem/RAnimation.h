@@ -8,12 +8,70 @@
 
 using namespace std;
 
+enum AnimationBitFlag
+{
+	AnimBitFlag_Loop			= 1 << 0,
+	AnimBitFlag_HasRootMotion	= 1 << 1,
+};
+
+class RAnimation;
+
+class RAnimationPlayer
+{
+public:
+	RAnimationPlayer();
+
+	RAnimation*		Animation;
+	float			CurrentTime;
+	float			TimeScale;
+	
+	RVec3			RootOffset;
+	bool			IsAnimDone;
+
+	void Proceed(float time);
+	void Reset();
+};
+
+class RAnimationBlender
+{
+public:
+	RAnimationBlender();
+
+	void Play(RAnimation* anim, float time, float timeScale);
+	void Play(RAnimation* anim, float timeScale = 1.0f);
+	void Blend(RAnimation* start, float startTime, float startTimeScale = 1.0f,
+			   RAnimation* end = nullptr, float endTime = 0.0f, float endTimeScale = 0.0f,
+			   float blendTime = 0.0f);
+	void BlendTo(RAnimation* target, float targetTime, float targetTimeScale = 1.0f, float blendTime = 0.0f);
+
+	void ProceedAnimation(float time);
+	void GetCurrentBlendedNodePose(int startNodeId, int endNodeId, RMatrix4* matrix);
+	RVec3 GetCurrentRootOffset();
+	bool IsAnimationDone();
+	RAnimation* GetStartAnimation();
+	float GetStartAnimationTime() const;
+	RAnimation* GetEndAnimation();
+	float GetEndAnimationTime() const;
+private:
+	RAnimationPlayer	m_BlendStartAnim;
+	RAnimationPlayer	m_BlendEndAnim;
+	float				m_BlendTime;
+	float				m_ElapsedBlendTime;
+};
+
+
 class RAnimation
 {
 public:
 	RAnimation();
 	RAnimation(int nodeCount, int frameCount, float startTime, float endTime, float frameRate);
 	~RAnimation();
+
+	void SetName(const string& name) { m_Name = name; }
+	const string& GetName() const { return m_Name; }
+
+	void SetBitFlags(int flags) { m_Flags = flags; }
+	int GetBitFlags() const { return m_Flags; }
 
 	bool LoadFromFile(const char* filename);
 	void SaveToFile(const char* filename);
@@ -39,6 +97,8 @@ public:
 	float GetEndTime() const { return m_EndTime; }
 	float GetFrameRate() { return m_FrameRate; }
 private:
+	string					m_Name;
+	int						m_Flags;
 	int						m_FrameCount;
 	float					m_StartTime, m_EndTime, m_FrameRate;
 

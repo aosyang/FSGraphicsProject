@@ -78,7 +78,7 @@ public:
 	static RMatrix4 CreateOrthographicProjectionLH(float viewWidth, float viewHeight, float zNear, float zFar);
 	static RMatrix4 CreateLookAtViewLH(const RVec3& eye, const RVec3& lookAt, const RVec3& up);
 
-	static RMatrix4 Leap(const RMatrix4& lhs, const RMatrix4&, float t);
+	static RMatrix4 Lerp(const RMatrix4& lhs, const RMatrix4&, float t);
 };
 
 RVec4 operator*(const RVec4& v, const RMatrix4& m);
