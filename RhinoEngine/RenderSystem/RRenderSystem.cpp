@@ -21,11 +21,12 @@ RRenderSystem::~RRenderSystem()
 {
 }
 
-bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, bool enable4xMsaa)
+bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, bool enable4xMsaa, bool enableGammaCorrection)
 {
 	m_ClientWidth = client_width;
 	m_ClientHeight = client_height;
 	m_Enable4xMsaa = enable4xMsaa;
+	m_UseGammaCorrection = enableGammaCorrection;
 
 	UINT createDeviceFlags = 0;
 
@@ -108,9 +109,11 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 		return false;
 	}
 
+	DXGI_FORMAT backbuffer_format = m_UseGammaCorrection ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
+
 	// Check 4X MSAA quality support
 	HR(m_pD3DDevice->CheckMultisampleQualityLevels(
-		DXGI_FORMAT_R8G8B8A8_UNORM, 4, &m_4xMsaaQuality));
+		backbuffer_format, 4, &m_4xMsaaQuality));
 	assert(m_4xMsaaQuality > 0);
 
 	DXGI_SWAP_CHAIN_DESC sd;
@@ -118,7 +121,7 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 	sd.BufferDesc.Height = client_height;
 	sd.BufferDesc.RefreshRate.Numerator = 60;
 	sd.BufferDesc.RefreshRate.Denominator = 1;
-	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	sd.BufferDesc.Format = backbuffer_format;
 	sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 

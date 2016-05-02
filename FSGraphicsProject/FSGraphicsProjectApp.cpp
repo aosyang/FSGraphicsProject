@@ -551,7 +551,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbScreen, sizeof(cbScreen));
 
 	cbScreen.ScreenSize = RVec2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());
-	cbScreen.UseGammaCorrection = (m_EnabledPostProcessor == 1);
+	cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection() ? 1 : (m_EnabledPostProcessor == 1);
 
 	m_cbScreen.UpdateContent(&cbScreen);
 
@@ -756,6 +756,7 @@ void FSGraphicsProjectApp::RenderScene()
 void FSGraphicsProjectApp::OnResize(int width, int height)
 {
 	m_PostProcessor.RecreateLostResources();
+	m_Camera.SetAspectRatio((float)width / (float)height);
 
 	if (m_RenderTargetView)
 	{
@@ -785,7 +786,7 @@ void FSGraphicsProjectApp::CreateSceneRenderTargetView()
 	renderTargetTextureDesc.Height = RRenderer.GetClientHeight();
 	renderTargetTextureDesc.MipLevels = 1;
 	renderTargetTextureDesc.ArraySize = 1;
-	renderTargetTextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	renderTargetTextureDesc.Format = RRenderer.UsingGammaCorrection() ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
 	renderTargetTextureDesc.SampleDesc.Count = 1;
 	renderTargetTextureDesc.SampleDesc.Quality = 0;
 	renderTargetTextureDesc.Usage = D3D11_USAGE_DEFAULT;

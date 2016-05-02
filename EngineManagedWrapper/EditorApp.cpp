@@ -242,6 +242,16 @@ namespace EngineManagedWrapper
 		m_Scene.cbScene.ApplyToShaders();
 		m_Scene.cbLight.ApplyToShaders();
 
+		// Update screen buffer
+		SHADER_SCREEN_BUFFER cbScreen;
+		ZeroMemory(&cbScreen, sizeof(cbScreen));
+
+		cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();
+
+		m_Scene.cbScreen.UpdateContent(&cbScreen);
+		m_Scene.cbScreen.ApplyToShaders();
+
+
 		RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
 		RRenderer.D3DImmediateContext()->PSSetSamplers(2, 1, &m_SamplerComparisonState);
 	}

@@ -65,7 +65,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbLight, sizeof(cbLight));
 
 	// Setup ambient color
-	cbLight.HighHemisphereAmbientColor = RVec4(0.5f, 0.5f, 0.5f, 1.0f);
+	cbLight.HighHemisphereAmbientColor = RVec4(1.0f, 1.0f, 1.0f, 0.4f);
 	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 1.0f);
 
 	RVec4 dirLightVec = RVec4(RVec3(0.25f, 1.0f, 0.5f).GetNormalizedVec3(), 1.0f);
@@ -74,7 +74,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	RMatrix4 shadowViewMatrix = RMatrix4::CreateLookAtViewLH(sunVec, RVec3(0.0f, 0.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f));
 
 	cbLight.DirectionalLightCount = 1;
-	cbLight.DirectionalLight[0].Color = RVec4(1.0f, 1.0f, 0.8f, 1.0f);
+	cbLight.DirectionalLight[0].Color = RVec4(1.0f, 1.0f, 0.8f, 2.0f);
 	cbLight.DirectionalLight[0].Direction = RVec4(sunVec.GetNormalizedVec3(), 1.0f);
 
 
@@ -131,6 +131,14 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 	if (RInput.GetBufferedKeyState('P') == BKS_Pressed)
 		m_DrawHitBound = !m_DrawHitBound;
+
+	SHADER_SCREEN_BUFFER cbScreen;
+	ZeroMemory(&cbScreen, sizeof(cbScreen));
+
+	cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();
+	
+	m_Scene.cbScreen.UpdateContent(&cbScreen);
+	m_Scene.cbScreen.ApplyToShaders();
 
 	if (m_Player)
 	{

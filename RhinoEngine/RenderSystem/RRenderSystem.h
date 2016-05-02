@@ -34,7 +34,7 @@ class RRenderSystem : public RSingleton<RRenderSystem>
 {
 	friend class RSingleton<RRenderSystem>;
 public:
-	bool Initialize(HWND hWnd, int client_width, int client_height, bool enable4xMsaa);
+	bool Initialize(HWND hWnd, int client_width, int client_height, bool enable4xMsaa, bool enableGammaCorrection=true);
 	void Shutdown();
 
 	float AspectRatio() const;
@@ -58,6 +58,7 @@ public:
 	void SetBlendState(BlendState state);
 	void SetSamplerState(int slot, SamplerState state);
 
+	bool UsingGammaCorrection() const { return m_UseGammaCorrection; }
 protected:
 	RRenderSystem();
 	~RRenderSystem();
@@ -67,6 +68,7 @@ protected:
 
 	int						m_ClientWidth, m_ClientHeight;
 	bool					m_Enable4xMsaa;
+	bool					m_UseGammaCorrection;
 	UINT					m_4xMsaaQuality;
 	TCHAR*					m_AdapterName;
 
