@@ -97,13 +97,18 @@ void PlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVec)
 		m_Rotation = LerpDegreeAngle(m_Rotation, RAD_TO_DEG(atan2f(hVec.x, hVec.z)), 10.0f * timer.DeltaTime());
 	}
 
+	static const RVec3 StairOffset = RVec3(0, 10, 0);
+
 	RAabb playerAabb = GetMovementCollisionShape();
+	playerAabb.pMin += StairOffset;
+	playerAabb.pMax += StairOffset;
 
 	RVec3 worldMoveVec = moveVec;
 	worldMoveVec += (RVec4(GetRootOffset(), 0) * GetNodeTransform()).ToVec3();
+	worldMoveVec -= StairOffset;
 	worldMoveVec = m_Scene->TestMovingAabbWithScene(playerAabb, worldMoveVec);
 
-	Translate(worldMoveVec);
+	Translate(worldMoveVec + StairOffset);
 
 	SetRotation(RMatrix4::CreateYAxisRotation(m_Rotation));
 }
