@@ -29,7 +29,7 @@ void RText::Initialize(RTexture* fontTexture, UINT rows, UINT columns)
 	m_FontShader = RShaderManager::Instance().GetShaderResource("Font");
 }
 
-void RText::SetText(const string& text, const RColor& color)
+void RText::SetText(const string& text, const RColor& fg, const RColor& bg)
 {
 	vector<RVertex::FONT_VERTEX> vertices;
 
@@ -79,13 +79,13 @@ void RText::SetText(const string& text, const RColor& color)
 
 		RVertex::FONT_VERTEX v[6] =
 		{
-			{ RVec4(x0, y0, 0), color, RVec2(u0, v0) },
-			{ RVec4(x1, y0, 0), color, RVec2(u1, v0) },
-			{ RVec4(x0, y1, 0), color, RVec2(u0, v1) },
+			{ RVec4(x0, y0, 0), fg, bg, RVec2(u0, v0) },
+			{ RVec4(x1, y0, 0), fg, bg, RVec2(u1, v0) },
+			{ RVec4(x0, y1, 0), fg, bg, RVec2(u0, v1) },
 
-			{ RVec4(x0, y1, 0), color, RVec2(u0, v1) },
-			{ RVec4(x1, y0, 0), color, RVec2(u1, v0) },
-			{ RVec4(x1, y1, 0), color, RVec2(u1, v1) },
+			{ RVec4(x0, y1, 0), fg, bg, RVec2(u0, v1) },
+			{ RVec4(x1, y0, 0), fg, bg, RVec2(u1, v0) },
+			{ RVec4(x1, y1, 0), fg, bg, RVec2(u1, v1) },
 		};
 
 		for (int j = 0; j < 6; j++)

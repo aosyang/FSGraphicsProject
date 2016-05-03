@@ -7,7 +7,8 @@
 struct INPUT_VERTEX
 {
 	float4 PosL		: POSITION;
-	float4 Color	: COLOR0;
+	float4 ColorFg	: COLOR0;
+	float4 ColorBg	: COLOR1;
 	float2 UV		: TEXCOORD0;
 };
 

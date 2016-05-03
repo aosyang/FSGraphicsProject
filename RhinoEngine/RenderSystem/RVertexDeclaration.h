@@ -96,7 +96,8 @@ namespace RVertex
 
 	VERTEX_TYPE_BEGIN(FONT_VERTEX)
 		RVec4	pos;
-		RColor	color;
+		RColor	color_fg;
+		RColor	color_bg;
 		RVec2	uv;
 	VERTEX_TYPE_END
 }

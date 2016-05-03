@@ -16,7 +16,7 @@ public:
 	~RText();
 
 	void Initialize(RTexture* fontTexture, UINT rows, UINT columns);
-	void SetText(const string& text, const RColor& color=RColor(1, 1, 1));
+	void SetText(const string& text, const RColor& fg=RColor(1, 1, 1), const RColor& bg=RColor(0, 0, 0, 1));
 	void Render();
 
 private:
