@@ -9,6 +9,7 @@
 
 class RTexture : public RBaseResource
 {
+	friend class RResourceManager;
 public:
 	RTexture(string path);
 	RTexture(string path, ID3D11ShaderResourceView* srv);
@@ -16,10 +17,12 @@ public:
 
 	ID3D11ShaderResourceView* GetSRV() { return m_SRV; }
 	ID3D11ShaderResourceView** GetPtrSRV() { return &m_SRV; }
-	void SetSRV(ID3D11ShaderResourceView* srv) { m_SRV = srv; }
+	UINT GetWidth() const { return m_Width; }
+	UINT GetHeight() const { return m_Height; }
 
 private:
 	ID3D11ShaderResourceView*	m_SRV;
+	UINT						m_Width, m_Height;
 };
 
 #endif

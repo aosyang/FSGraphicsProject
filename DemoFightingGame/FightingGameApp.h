@@ -9,6 +9,7 @@
 
 #include "Rhino.h"
 #include "PlayerController.h"
+#include "RText.h"
 
 class FightingGameApp : public IApp
 {
@@ -33,6 +34,7 @@ private:
 
 	RDebugRenderer		m_DebugRenderer;
 	bool				m_DrawHitBound;
+	RText				m_Text;
 };
 
 #endif

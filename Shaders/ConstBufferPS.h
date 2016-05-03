@@ -52,11 +52,6 @@ float4				SpecularColorAndPower;
 float				GlobalOpacity;
 CONSTANT_BUFFER_END
 
-CONSTANT_BUFFER_BEGIN(SHADER_SCREEN_BUFFER, b2)
-float2				ScreenSize;
-bool				UseGammaCorrection;
-CONSTANT_BUFFER_END
-
 #ifndef __cplusplus
 float4 MakeLinearColorFromGammaSpace(float4 color)
 {

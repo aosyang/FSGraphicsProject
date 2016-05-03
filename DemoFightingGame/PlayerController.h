@@ -60,6 +60,7 @@ public:
 	void DrawDepthPass();
 
 	void SetPlayerRotation(float rot) { m_Rotation = rot; }
+	float GetPlayerRotation() const { return m_Rotation; }
 
 	void SetBehavior(PlayerBehavior behavior);
 	PlayerBehavior GetBehavior() const;
@@ -68,6 +69,7 @@ public:
 	RAabb GetMovementCollisionShape() const;
 	RCapsule GetCollisionShape() const;
 
+	RAnimationBlender& GetAnimationBlender() { return m_AnimBlender; }
 private:
 	RAnimation* LoadAnimation(const char* resPath, int flags=0);
 

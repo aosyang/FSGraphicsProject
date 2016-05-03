@@ -159,7 +159,7 @@ void RResourceManager::UnloadSRVWrappers()
 	for (iter = m_WrapperTextureResources.begin(); iter != m_WrapperTextureResources.end(); iter++)
 	{
 		// Delete wrapper textures without releasing shader resource view
-		iter->second->SetSRV(nullptr);
+		iter->second->m_SRV = nullptr;
 		delete iter->second;
 	}
 	m_WrapperTextureResources.clear();
@@ -952,14 +952,31 @@ void RResourceManager::ThreadLoadDDSTextureData(LoaderThreadTask* task)
 	sprintf_s(msg_buf, sizeof(msg_buf), "Loading texture [%s]...\n", task->Filename.data());
 	OutputDebugStringA(msg_buf);
 
-	HRESULT hr = DirectX::CreateDDSTextureFromFile(RRenderer.D3DDevice(), wszName, nullptr, &srv);
+	ID3D11Resource* pResource;
+
+	HRESULT hr = DirectX::CreateDDSTextureFromFile(RRenderer.D3DDevice(), wszName, &pResource, &srv);
 	if (FAILED(hr))
 	{
 		sprintf_s(msg_buf, sizeof(msg_buf), "*** Failed to load texture [%s] ***\n", task->Filename.data());
 		OutputDebugStringA(msg_buf);
 	}
 
-	static_cast<RTexture*>(task->Resource)->SetSRV(srv);
+	if (pResource)
+	{
+		ID3D11Texture2D* pTexture;
+		pResource->QueryInterface(__uuidof(ID3D11Texture2D), (void**)&pTexture);
+
+		if (pTexture)
+		{
+			D3D11_TEXTURE2D_DESC desc;
+			pTexture->GetDesc(&desc);
+
+			static_cast<RTexture*>(task->Resource)->m_Width = desc.Width;
+			static_cast<RTexture*>(task->Resource)->m_Height = desc.Height;
+		}
+	}
+
+	static_cast<RTexture*>(task->Resource)->m_SRV = srv;
 	task->Resource->m_State = RS_Loaded;
 }
 

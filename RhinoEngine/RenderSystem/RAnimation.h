@@ -52,6 +52,7 @@ public:
 	float GetStartAnimationTime() const;
 	RAnimation* GetEndAnimation();
 	float GetEndAnimationTime() const;
+	float GetElapsedBlendTime() const;
 private:
 	RAnimationPlayer	m_BlendStartAnim;
 	RAnimationPlayer	m_BlendEndAnim;

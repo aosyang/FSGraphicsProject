@@ -11,6 +11,7 @@
 #include "RPrimitiveVertexSignature.csh"
 #include "RSkyboxVertexSignature.csh"
 #include "RParticleVertexSignature.csh"
+#include "RFontVertexSignature.csh"
 
 ShaderInputVertex VertexSemantics[] =
 {
@@ -83,6 +84,16 @@ void RVertexDeclaration::Initialize()
 
 	RRenderer.D3DDevice()->CreateInputLayout(particleVertDesc, 4, RParticleVertexSignature, sizeof(RParticleVertexSignature), &pInputLayout);
 	m_InputLayouts.insert(make_pair(RVertex::PARTICLE_VERTEX::GetTypeName(), pInputLayout));
+
+	D3D11_INPUT_ELEMENT_DESC fontVertDesc[] =
+	{
+		{ "POSITION",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR",		0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+
+	RRenderer.D3DDevice()->CreateInputLayout(fontVertDesc, 3, RFontVertexSignature, sizeof(RFontVertexSignature), &pInputLayout);
+	m_InputLayouts.insert(make_pair(RVertex::FONT_VERTEX::GetTypeName(), pInputLayout));
 }
 
 void RVertexDeclaration::Release()

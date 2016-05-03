@@ -55,6 +55,7 @@ bool FightingGameApp::Initialize()
 	m_AIPlayer->SetPosition(RVec3(-465, 50, -760));
 	m_AIPlayer->Cache();
 
+	m_Text.Initialize(RResourceManager::Instance().LoadDDSTexture("../Assets/Fonts/Fixedsys_9c.DDS", RLM_Immediate), 16, 16);
 	return true;
 }
 
@@ -135,6 +136,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	SHADER_SCREEN_BUFFER cbScreen;
 	ZeroMemory(&cbScreen, sizeof(cbScreen));
 
+	cbScreen.ScreenSize = RVec2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());
 	cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();
 	
 	m_Scene.cbScreen.UpdateContent(&cbScreen);
@@ -332,6 +334,20 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		}
 
 		m_Player->PostUpdate(timer);
+
+		char msg_buf[1024];
+		RVec3 playerPos = m_Player->GetPosition();
+		float playerRot = m_Player->GetPlayerRotation();
+		RAnimationBlender& blender = m_Player->GetAnimationBlender();
+		sprintf_s(msg_buf, 1024, "Player: (%f, %f, %f), rot: %f\n"
+								 "Blend From : %s\n"
+								 "Blend To   : %s\n"
+								 "Blend time : %f",
+								 playerPos.x, playerPos.y, playerPos.z, playerRot,
+								 blender.GetStartAnimation() ? blender.GetStartAnimation()->GetName().c_str() : "",
+								 blender.GetEndAnimation() ? blender.GetEndAnimation()->GetName().c_str() : "",
+								 blender.GetElapsedBlendTime());
+		m_Text.SetText(msg_buf, RColor(0, 1, 0));
 	}
 
 	// Update AI player
@@ -409,6 +425,9 @@ void FightingGameApp::RenderScene()
 	m_Scene.cbPerObject.ApplyToShaders();
 	m_DebugRenderer.Render();
 	m_DebugRenderer.Reset();
+
+	RRenderer.Clear(false);
+	m_Text.Render();
 
 	RRenderer.Present();
 }

@@ -30,5 +30,9 @@
 	#define CONSTANT_BUFFER_END }
 #endif
 
+CONSTANT_BUFFER_BEGIN(SHADER_SCREEN_BUFFER, b4)
+float2				ScreenSize;
+bool				UseGammaCorrection;
+CONSTANT_BUFFER_END
 
 #endif //SHARED_DEFINES_H

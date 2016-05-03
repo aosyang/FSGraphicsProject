@@ -207,6 +207,10 @@ float RAnimationBlender::GetEndAnimationTime() const
 	return m_BlendEndAnim.CurrentTime;
 }
 
+float RAnimationBlender::GetElapsedBlendTime() const
+{
+	return m_ElapsedBlendTime;
+}
 
 RAnimation::RAnimation()
 	: m_Flags(0)

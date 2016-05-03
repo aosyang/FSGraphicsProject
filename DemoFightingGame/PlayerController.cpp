@@ -231,7 +231,10 @@ RAnimation* PlayerController::LoadAnimation(const char* resPath, int flags)
 	{
 		RAnimation* anim = mesh->GetAnimation();
 		anim->SetBitFlags(flags);
-		anim->SetName(resPath);
+
+		string strResPath = string(resPath);
+		strResPath = strResPath.substr(strResPath.find_last_of('/') + 1);
+		anim->SetName(strResPath);
 		return anim;
 	}
 

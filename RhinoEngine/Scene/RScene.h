@@ -37,7 +37,7 @@ public:
 	RShaderConstantBuffer<SHADER_SKINNED_BUFFER,	CBST_VS, 3>				cbBoneMatrices;
 	RShaderConstantBuffer<SHADER_LIGHT_BUFFER,		CBST_PS, 0>				cbLight;
 	RShaderConstantBuffer<SHADER_MATERIAL_BUFFER,	CBST_PS, 1>				cbMaterial;
-	RShaderConstantBuffer<SHADER_SCREEN_BUFFER,		CBST_PS, 2>				cbScreen;
+	RShaderConstantBuffer<SHADER_SCREEN_BUFFER,		CBST_VS|CBST_PS, 4>		cbScreen;
 private:
 
 	vector<RSceneObject*>		m_SceneObjects;

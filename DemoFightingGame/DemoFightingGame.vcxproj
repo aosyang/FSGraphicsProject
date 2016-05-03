@@ -85,10 +85,12 @@
     <ClCompile Include="FightingGameApp.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PlayerController.cpp" />
+    <ClCompile Include="RText.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FightingGameApp.h" />
     <ClInclude Include="PlayerController.h" />
+    <ClInclude Include="RText.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DemoFightingGame.licenseheader" />

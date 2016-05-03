@@ -94,6 +94,11 @@ namespace RVertex
 		RVec4 uvScaleOffset;
 	VERTEX_TYPE_END
 
+	VERTEX_TYPE_BEGIN(FONT_VERTEX)
+		RVec4	pos;
+		RColor	color;
+		RVec2	uv;
+	VERTEX_TYPE_END
 }
 
 class RVertexDeclaration : public RSingleton<RVertexDeclaration>
