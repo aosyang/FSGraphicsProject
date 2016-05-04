@@ -973,7 +973,11 @@ void RResourceManager::ThreadLoadDDSTextureData(LoaderThreadTask* task)
 
 			static_cast<RTexture*>(task->Resource)->m_Width = desc.Width;
 			static_cast<RTexture*>(task->Resource)->m_Height = desc.Height;
+
+			pTexture->Release();
 		}
+
+		pResource->Release();
 	}
 
 	static_cast<RTexture*>(task->Resource)->m_SRV = srv;
