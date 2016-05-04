@@ -12,7 +12,7 @@ ID3D11DepthStencilView* RRenderSystem::DefaultDepthStencilView = nullptr;
 ID3D11RenderTargetView* RRenderSystem::DefaultRenderTargetView = nullptr;
 
 RRenderSystem::RRenderSystem()
-	: m_AdapterName(nullptr)
+	: m_AdapterName(nullptr), m_RenderTargetViewNum(0)
 {
 }
 
@@ -287,10 +287,13 @@ void RRenderSystem::Clear(bool clearColor, const RColor& color, bool clearDepth,
 {
 	assert(m_pD3DImmediateContext);
 
-	if (m_CurrentRenderTargetView && clearColor)
+	if (m_RenderTargetViewNum && m_CurrentRenderTargetViews && clearColor)
 	{
-		m_pD3DImmediateContext->ClearRenderTargetView(m_CurrentRenderTargetView,
-			reinterpret_cast<const float*>(&color));
+		for (UINT i = 0; i < m_RenderTargetViewNum; i++)
+		{
+			m_pD3DImmediateContext->ClearRenderTargetView(m_CurrentRenderTargetViews[i],
+				reinterpret_cast<const float*>(&color));
+		}
 	}
 
 	if (m_CurrentDepthStencilView)
@@ -312,9 +315,13 @@ void RRenderSystem::Present()
 	HR(m_SwapChain->Present(0, 0));
 }
 
-void RRenderSystem::SetRenderTarget(ID3D11RenderTargetView* renderTargetView, ID3D11DepthStencilView* depthStencilView)
+void RRenderSystem::SetRenderTargets(UINT numViews, ID3D11RenderTargetView* const* renderTargetView, ID3D11DepthStencilView* depthStencilView)
 {
-	m_CurrentRenderTargetView = renderTargetView;
+	m_RenderTargetViewNum = numViews;
+	for (UINT i = 0; i < numViews; i++)
+	{
+		m_CurrentRenderTargetViews[i] = renderTargetView[i];
+	}
 	m_CurrentDepthStencilView = depthStencilView;
 
 	if (renderTargetView == nullptr)
@@ -323,7 +330,7 @@ void RRenderSystem::SetRenderTarget(ID3D11RenderTargetView* renderTargetView, ID
 		m_pD3DImmediateContext->OMSetRenderTargets(1, nullRTV, depthStencilView);
 	}
 	else
-		m_pD3DImmediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+		m_pD3DImmediateContext->OMSetRenderTargets(numViews, renderTargetView, depthStencilView);
 }
 
 void RRenderSystem::SetBlendState(BlendState state)
@@ -349,7 +356,8 @@ void RRenderSystem::CreateRenderTargetView()
 	m_pD3DDevice->CreateRenderTargetView(backBuffer, 0, &m_RenderTargetView);
 
 	DefaultRenderTargetView = m_RenderTargetView;
-	m_CurrentRenderTargetView = m_RenderTargetView;
+	m_CurrentRenderTargetViews[0] = m_RenderTargetView;
+	m_RenderTargetViewNum = 1;
 
 	backBuffer->Release();
 }

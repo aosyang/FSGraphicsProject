@@ -682,7 +682,7 @@ void FSGraphicsProjectApp::RenderScene()
 	RenderSinglePass(ShadowPass);
 
 	//=========================== Scene Buffer Pass =====================
-	RRenderer.SetRenderTarget(m_RenderTargetView, m_RenderTargetDepthView);
+	RRenderer.SetRenderTargets(1, &m_RenderTargetView, m_RenderTargetDepthView);
 
 	RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp[0]);
 	RRenderer.Clear();
@@ -702,7 +702,7 @@ void FSGraphicsProjectApp::RenderScene()
 			}
 			else
 			{
-				RRenderer.SetRenderTarget();
+				RRenderer.SetRenderTargets();
 			}
 		}
 		else
@@ -728,7 +728,7 @@ void FSGraphicsProjectApp::RenderScene()
 			std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
 			m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(RVertex::PARTICLE_VERTEX), PARTICLE_COUNT);
 	
-			RRenderer.SetRenderTarget();
+			RRenderer.SetRenderTargets();
 		}
 
 		RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp[i]);
@@ -742,7 +742,7 @@ void FSGraphicsProjectApp::RenderScene()
 
 		if (i == 0 && m_EnabledPostProcessor)
 		{
-			RRenderer.SetRenderTarget();
+			RRenderer.SetRenderTargets();
 			RRenderer.Clear();
 
 			m_PostProcessor.Draw(m_EnabledPostProcessor == 1 ? PPE_GammaCorrection : PPE_ColorEdgeDetection);

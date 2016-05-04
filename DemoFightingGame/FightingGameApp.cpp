@@ -381,7 +381,7 @@ void FightingGameApp::RenderScene()
 		}
 		else
 		{
-			RRenderer.SetRenderTarget();
+			RRenderer.SetRenderTargets();
 			RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
 
 			ID3D11ShaderResourceView* shadowMapSRV[] = { m_ShadowMap.GetRenderTargetDepthSRV() };

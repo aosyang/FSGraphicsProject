@@ -81,7 +81,8 @@ void RShadowMap::SetOrthogonalProjection(float viewWidth, float viewHeight, floa
 
 void RShadowMap::SetupRenderTarget()
 {
-	RRenderer.SetRenderTarget(GetRenderTargetView(), GetDepthView());
+	ID3D11RenderTargetView* shadowRenderTargetView = GetRenderTargetView();
+	RRenderer.SetRenderTargets(1, &shadowRenderTargetView, GetDepthView());
 
 	D3D11_VIEWPORT vp;
 	vp.TopLeftX = 0.0f;

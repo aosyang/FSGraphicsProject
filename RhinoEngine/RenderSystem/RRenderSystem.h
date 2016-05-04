@@ -50,7 +50,7 @@ public:
 	int	GetClientHeight() const { return m_ClientHeight; }
 	const TCHAR* GetAdapterName() const { return m_AdapterName; }
 
-	void SetRenderTarget(ID3D11RenderTargetView* renderTargetView = DefaultRenderTargetView, ID3D11DepthStencilView* depthStencilView = DefaultDepthStencilView);
+	void SetRenderTargets(UINT numViews = 1, ID3D11RenderTargetView* const* renderTargetViews = &DefaultRenderTargetView, ID3D11DepthStencilView* depthStencilView = DefaultDepthStencilView);
 
 	static ID3D11RenderTargetView* DefaultRenderTargetView;
 	static ID3D11DepthStencilView* DefaultDepthStencilView;
@@ -79,7 +79,8 @@ protected:
 	ID3D11Texture2D*		m_DepthStencilBuffer;
 	ID3D11DepthStencilView*	m_DepthStencilView;
 
-	ID3D11RenderTargetView*	m_CurrentRenderTargetView;
+	UINT					m_RenderTargetViewNum;
+	ID3D11RenderTargetView*	m_CurrentRenderTargetViews[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT];
 	ID3D11DepthStencilView*	m_CurrentDepthStencilView;
 
 	ID3D11BlendState*		m_BlendState[BlendStateCount];

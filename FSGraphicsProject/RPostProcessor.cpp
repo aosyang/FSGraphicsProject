@@ -79,7 +79,7 @@ void RPostProcessor::RecreateLostResources()
 
 void RPostProcessor::SetupRenderTarget()
 {
-	RRenderer.SetRenderTarget(m_RTView, m_RTDepthStencilView);
+	RRenderer.SetRenderTargets(m_RTView, m_RTDepthStencilView);
 	
 	D3D11_VIEWPORT vp = { 0.0f, 0.0f, (FLOAT)RRenderer.GetClientWidth(), (FLOAT)RRenderer.GetClientHeight(), 0.0f, 1.0f };
 	RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);

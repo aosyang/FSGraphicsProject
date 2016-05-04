@@ -14,6 +14,12 @@ DeferredShadingApp::DeferredShadingApp()
 
 DeferredShadingApp::~DeferredShadingApp()
 {
+	for (int i = 0; i < DeferredBuffer_Count; i++)
+	{
+		m_DeferredBuffers[i].Release();
+	}
+	m_DepthBuffer.Release();
+
 	m_Scene.Release();
 	RShaderManager::Instance().UnloadAllShaders();
 	RResourceManager::Instance().Destroy();
@@ -46,6 +52,11 @@ bool DeferredShadingApp::Initialize()
 
 	m_Scene.cbLight.UpdateContent(&cbLight);
 
+	for (int i = 0; i < DeferredBuffer_Count; i++)
+	{
+		m_DeferredBuffers[i] = CreateRenderTarget();
+	}
+	m_DepthBuffer = CreateDepthStencilBuffer();
 
 	return true;
 }
@@ -129,4 +140,58 @@ void DeferredShadingApp::RenderScene()
 void DeferredShadingApp::OnResize(int width, int height)
 {
 
+}
+
+DeferredRenderBuffer DeferredShadingApp::CreateRenderTarget()
+{
+	DeferredRenderBuffer rb;
+
+	D3D11_TEXTURE2D_DESC renderTargetTextureDesc;
+	renderTargetTextureDesc.Width = RRenderer.GetClientWidth();
+	renderTargetTextureDesc.Height = RRenderer.GetClientHeight();
+	renderTargetTextureDesc.MipLevels = 1;
+	renderTargetTextureDesc.ArraySize = 1;
+	renderTargetTextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	renderTargetTextureDesc.SampleDesc.Count = 1;
+	renderTargetTextureDesc.SampleDesc.Quality = 0;
+	renderTargetTextureDesc.Usage = D3D11_USAGE_DEFAULT;
+	renderTargetTextureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	renderTargetTextureDesc.CPUAccessFlags = 0;
+	renderTargetTextureDesc.MiscFlags = 0;
+
+	RRenderer.D3DDevice()->CreateTexture2D(&renderTargetTextureDesc, 0, &rb.Buffer);
+	RRenderer.D3DDevice()->CreateRenderTargetView(rb.Buffer, 0, &rb.View);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC rtsrvDesc;
+	rtsrvDesc.Format = renderTargetTextureDesc.Format;
+	rtsrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	rtsrvDesc.Texture2D.MostDetailedMip = 0;
+	rtsrvDesc.Texture2D.MipLevels = 1;
+
+	RRenderer.D3DDevice()->CreateShaderResourceView(rb.Buffer, &rtsrvDesc, &rb.SRV);
+
+	return rb;
+}
+
+DepthStencilBuffer DeferredShadingApp::CreateDepthStencilBuffer()
+{
+	DepthStencilBuffer db;
+
+	D3D11_TEXTURE2D_DESC renderTargetTextureDesc;
+	renderTargetTextureDesc.Width = RRenderer.GetClientWidth();
+	renderTargetTextureDesc.Height = RRenderer.GetClientHeight();
+	renderTargetTextureDesc.MipLevels = 1;
+	renderTargetTextureDesc.ArraySize = 1;
+	renderTargetTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	renderTargetTextureDesc.SampleDesc.Count = 1;
+	renderTargetTextureDesc.SampleDesc.Quality = 0;
+	renderTargetTextureDesc.Usage = D3D11_USAGE_DEFAULT;
+	renderTargetTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	renderTargetTextureDesc.CPUAccessFlags = 0;
+	renderTargetTextureDesc.MiscFlags = 0;
+
+	RRenderer.D3DDevice()->CreateTexture2D(&renderTargetTextureDesc, 0, &db.Buffer);
+	RRenderer.D3DDevice()->CreateDepthStencilView(db.Buffer, 0, &db.View);
+
+	return db;
 }
