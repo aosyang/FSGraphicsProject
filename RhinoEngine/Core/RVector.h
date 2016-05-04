@@ -227,6 +227,9 @@ public:
 	RVec4 operator*(float val) const								{ return RVec4(x * val, y * val, z * val, w * val); }
 	RVec4 operator/(float val) const								{ return RVec4(x / val, y / val, z / val, w / val); }
 
+	RVec4& operator*=(float val)									{ x *= val; y *= val; z *= val; w *= val; return *this; }
+	RVec4& operator/=(float val)									{ x /= val; y /= val; z /= val; w /= val; return *this; }
+
 	RVec3 ToVec3() const
 	{
 		return RVec3(x, y, z);

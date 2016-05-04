@@ -21,7 +21,7 @@ public:
 
 	int GetMeshElementCount() const;
 	void SetMaterial(RMaterial* materials, int materialNum);
-	RMaterial GetMaterial(int index) const;
+	RMaterial GetMaterial(int index);
 
 	void SaveMaterialsToFile();
 

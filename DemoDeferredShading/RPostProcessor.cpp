@@ -6,8 +6,8 @@
 
 #include "RPostProcessor.h"
 
-#include "PostProcessor_GammaCorrection.csh"
-#include "PostProcessor_ColorEdgeDetection.csh"
+#include "PostProcessor_DeferredComposition.csh"
+#include "DeferredPointLightPass.csh"
 
 struct PP_QUAD
 {
@@ -26,8 +26,8 @@ void RPostProcessor::Initialize()
 {
 	// Create vertex shader for post processing
 	m_PPVertexShader = RShaderManager::Instance().GetShaderResource("PostProcessor")->VertexShader;
-	RRenderer.D3DDevice()->CreatePixelShader(PostProcessor_GammaCorrection, sizeof(PostProcessor_GammaCorrection), 0, &m_PPPixelShader[PPE_GammaCorrection]);
-	RRenderer.D3DDevice()->CreatePixelShader(PostProcessor_ColorEdgeDetection, sizeof(PostProcessor_ColorEdgeDetection), 0, &m_PPPixelShader[PPE_ColorEdgeDetection]);
+	RRenderer.D3DDevice()->CreatePixelShader(PostProcessor_DeferredComposition, sizeof(PostProcessor_DeferredComposition), 0, &m_PPPixelShader[PPE_DeferredComposition]);
+	RRenderer.D3DDevice()->CreatePixelShader(DeferredPointLightPass, sizeof(DeferredPointLightPass), 0, &m_PPPixelShader[PPE_DeferredPointLightPass]);
 
 	// Find vertex declaration for screen quad
 	m_InputLayout = RVertexDeclaration::Instance().GetInputLayout(RVertex::SKYBOX_VERTEX::GetTypeName());
@@ -90,7 +90,6 @@ void RPostProcessor::Draw(PostProcessingEffect effect)
 	RRenderer.D3DImmediateContext()->PSSetShader(m_PPPixelShader[effect], nullptr, 0);
 	RRenderer.D3DImmediateContext()->VSSetShader(m_PPVertexShader, nullptr, 0);
 	RRenderer.D3DImmediateContext()->GSSetShader(nullptr, nullptr, 0);
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_RTSRV);
 
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
 	m_ScreenQuad.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

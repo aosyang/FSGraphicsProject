@@ -50,8 +50,10 @@ void RSMeshObject::SetMaterial(RMaterial* materials, int materialNum)
 	m_bNeedUpdateMaterial = false;
 }
 
-RMaterial RSMeshObject::GetMaterial(int index) const
+RMaterial RSMeshObject::GetMaterial(int index)
 {
+	UpdateMaterialsFromResource();
+
 	return m_Materials[index];
 }
 

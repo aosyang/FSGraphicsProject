@@ -52,6 +52,10 @@ float4				SpecularColorAndPower;
 float				GlobalOpacity;
 CONSTANT_BUFFER_END
 
+CONSTANT_BUFFER_BEGIN(SHADER_DEFERRED_POINT_LIGHT_BUFFER, b2)
+POINT_LIGHT			DeferredPointLight;
+CONSTANT_BUFFER_END
+
 #ifndef __cplusplus
 float4 MakeLinearColorFromGammaSpace(float4 color)
 {

@@ -190,6 +190,12 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 	blendDesc.AlphaToCoverageEnable = true;
 	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_AlphaToCoverage]);
 
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	blendDesc.AlphaToCoverageEnable = false;
+	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_Additive]);
+	
+
 	m_CurrBlendState = Blend_Opaque;
 
 	// Create sampler states

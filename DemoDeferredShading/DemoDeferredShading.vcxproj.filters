@@ -21,13 +21,23 @@
     <ClCompile Include="DeferredShadingApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RPostProcessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DeferredShadingApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RPostProcessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DemoDeferredShading.licenseheader" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="PostProcessor_DeferredComposition.hlsl" />
+    <FxCompile Include="DeferredPointLightPass.hlsl" />
   </ItemGroup>
 </Project>

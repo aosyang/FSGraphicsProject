@@ -18,6 +18,7 @@ enum BlendState
 	Blend_Opaque,
 	Blend_AlphaBlending,
 	Blend_AlphaToCoverage,
+	Blend_Additive,
 
 	BlendStateCount,
 };
@@ -34,7 +35,7 @@ class RRenderSystem : public RSingleton<RRenderSystem>
 {
 	friend class RSingleton<RRenderSystem>;
 public:
-	bool Initialize(HWND hWnd, int client_width, int client_height, bool enable4xMsaa, bool enableGammaCorrection=true);
+	bool Initialize(HWND hWnd, int client_width, int client_height, bool enable4xMsaa, bool enableGammaCorrection = false);
 	void Shutdown();
 
 	float AspectRatio() const;

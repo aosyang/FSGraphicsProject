@@ -8,6 +8,7 @@
 #define _DEFERREDSHADINGAPP_H
 
 #include "Rhino.h"
+#include "RPostProcessor.h"
 
 struct DeferredRenderBuffer
 {
@@ -44,6 +45,25 @@ enum EDeferredBuffer
 	DeferredBuffer_Count
 };
 
+struct PointLight
+{
+	RVec3 pos;
+	float r;
+	RColor color;
+	RVec3 sin_factor;
+	RVec3 sin_offset;
+};
+
+#define MAX_LIGHT_COUNT 100
+
+enum ERasterizerState
+{
+	RS_Default,
+	RS_Scissor,
+
+	RasterizerState_Count,
+};
+
 class DeferredShadingApp : public IApp
 {
 public:
@@ -67,8 +87,17 @@ private:
 	RScene						m_Scene;
 	RSMeshObject				m_MeshObj;
 
+	RPostProcessor				m_PostProcessor;
+	ID3D11RasterizerState*		m_RasterizerStates[RasterizerState_Count];
+
+	RShaderConstantBuffer<SHADER_DEFERRED_POINT_LIGHT_BUFFER, CBST_PS, 2>
+								m_cbDeferredPointLight;
 	DeferredRenderBuffer		m_DeferredBuffers[DeferredBuffer_Count];
 	DepthStencilBuffer			m_DepthBuffer;
+
+	PointLight					m_PointLights[MAX_LIGHT_COUNT];
+	float						m_TotalTime;
+	RDebugRenderer				m_DebugRenderer;
 };
 
 #endif
