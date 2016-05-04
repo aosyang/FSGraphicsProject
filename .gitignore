@@ -1,6 +1,8 @@
 /[Dd]ebug/
 /[Rr]elease/
 /x64/
+/DemoDeferredShading/[Dd]ebug/
+/DemoDeferredShading/[Rr]elease/
 /DemoFightingGame/[Dd]ebug/
 /DemoFightingGame/[Rr]elease/
 /EngineManagedWrapper/[Dd]ebug/
