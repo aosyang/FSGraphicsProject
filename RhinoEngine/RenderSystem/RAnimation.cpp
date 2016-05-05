@@ -308,12 +308,12 @@ void RAnimation::SaveToFile(const char* filename)
 	fout.write((char*)&m_FrameRate, sizeof(float));
 	fout.write((char*)&m_RootNode, sizeof(int));
 
-	UINT nodeCount = m_NodeNames.size();
+	UINT nodeCount = (UINT)m_NodeNames.size();
 	fout.write((char*)&nodeCount, sizeof(UINT));
 
 	for (UINT i = 0; i < nodeCount; i++)
 	{
-		UINT nameStrSize = m_NodeNames[i].size();
+		UINT nameStrSize = (UINT)m_NodeNames[i].size();
 		fout.write((char*)&nameStrSize, sizeof(UINT));
 		fout.write(m_NodeNames[i].c_str(), sizeof(char) * m_NodeNames[i].size());
 
@@ -423,7 +423,7 @@ int RAnimation::GetNodeIdByName(const char* nodeName) const
 	for (vector<string>::const_iterator iter = m_NodeNames.begin(); iter != m_NodeNames.end(); iter++)
 	{
 		if (strcmp(iter->c_str(), nodeName) == 0)
-			return iter - m_NodeNames.begin();
+			return (int)(iter - m_NodeNames.begin());
 	}
 
 	return -1;

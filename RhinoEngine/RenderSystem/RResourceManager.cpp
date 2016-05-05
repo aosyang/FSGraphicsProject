@@ -563,7 +563,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					if (!cluster->GetLink())
 						continue;
 
-					int boneId = std::find(fbxBoneNodes.begin(), fbxBoneNodes.end(), cluster->GetLink()) - fbxBoneNodes.begin();
+					int boneId = (int)(std::find(fbxBoneNodes.begin(), fbxBoneNodes.end(), cluster->GetLink()) - fbxBoneNodes.begin());
 					assert(boneId < MAX_BONE_COUNT);
 
 					// Store inversed initial transform for each bone to apply skinning with correct binding pose
@@ -823,11 +823,11 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		BYTE* compactVertexData = new BYTE[optimizedVertData.size() * stride];
 		RVertexDeclaration::Instance().CopyVertexComponents(compactVertexData, optimizedVertData.data(), (int)optimizedVertData.size(), VertexComponentMask);
 
-		meshElem.CreateVertexBuffer(compactVertexData, stride, optimizedVertData.size(), inputLayout);
+		meshElem.CreateVertexBuffer(compactVertexData, stride, (UINT)optimizedVertData.size(), inputLayout);
 
 		delete[] compactVertexData;
 
-		meshElem.CreateIndexBuffer(optimizedIndexData.data(), sizeof(UINT32), optimizedIndexData.size());
+		meshElem.CreateIndexBuffer(optimizedIndexData.data(), sizeof(UINT32), (UINT)optimizedIndexData.size());
 		meshElem.SetName(node->GetName());
 		meshElem.SetAabb(aabb);
 
@@ -892,8 +892,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	}
 	delete doc;
 
-	static_cast<RMesh*>(task->Resource)->SetMeshElements(meshElements.data(), meshElements.size());
-	static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), materials.size());
+	static_cast<RMesh*>(task->Resource)->SetMeshElements(meshElements.data(), (UINT)meshElements.size());
+	static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), (UINT)materials.size());
 	static_cast<RMesh*>(task->Resource)->SetAabb(mesh_aabb);
 	static_cast<RMesh*>(task->Resource)->SetAnimation(animation);
 	static_cast<RMesh*>(task->Resource)->SetBoneNameList(meshBoneIdToName);

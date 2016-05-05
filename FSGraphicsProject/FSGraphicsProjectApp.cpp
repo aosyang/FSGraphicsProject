@@ -422,7 +422,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	{
 		m_CurrentAnim--;
 		if (m_CurrentAnim < 0)
-			m_CurrentAnim = m_CharacterAnimations.size() - 1;
+			m_CurrentAnim = (int)m_CharacterAnimations.size() - 1;
 		m_CharacterAnimation = m_CharacterAnimations[m_CurrentAnim];
 	}
 

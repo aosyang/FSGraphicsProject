@@ -63,7 +63,7 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 	// Store adapter's name
 	DXGI_ADAPTER_DESC desc;
 	vAdapters[bestAdapterIndex]->GetDesc(&desc);
-	int desc_len = _tcslen(desc.Description);
+	size_t desc_len = _tcslen(desc.Description);
 	m_AdapterName = new TCHAR[desc_len + 1];
 	_tcscpy_s(m_AdapterName, desc_len + 1, desc.Description);
 

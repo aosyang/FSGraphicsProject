@@ -168,7 +168,7 @@ void RDebugRenderer::Render()
 {
 	if (m_bDirtyBuffer)
 	{
-		m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(m_PrimitiveVertices.data(), sizeof(RVertex::PRIMITIVE_VERTEX), m_PrimitiveVertices.size());
+		m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(m_PrimitiveVertices.data(), sizeof(RVertex::PRIMITIVE_VERTEX), (UINT)m_PrimitiveVertices.size());
 		m_bDirtyBuffer = false;
 	}
 

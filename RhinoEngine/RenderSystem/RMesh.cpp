@@ -84,14 +84,14 @@ int RMesh::GetMeshElementCount() const
 	return (int)m_MeshElements.size();
 }
 
-void RMesh::SetMeshElements(RMeshElement* meshElements, int numElement)
+void RMesh::SetMeshElements(RMeshElement* meshElements, UINT numElement)
 {
 	// TODO: use mutex
 	assert(meshElements && numElement);
 	m_MeshElements.assign(meshElements, meshElements + numElement);
 }
 
-void RMesh::SetMaterials(RMaterial* materials, int numMaterial)
+void RMesh::SetMaterials(RMaterial* materials, UINT numMaterial)
 {
 	assert(materials && numMaterial);
 	m_Materials.assign(materials, materials + numMaterial);

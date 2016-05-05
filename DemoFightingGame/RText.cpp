@@ -96,7 +96,7 @@ void RText::SetText(const string& text, const RColor& fg, const RColor& bg)
 		x0 += glyph_width;
 	}
 
-	m_VertexBuffer.UpdateDynamicVertexBuffer(vertices.data(), sizeof(RVertex::FONT_VERTEX), vertices.size());
+	m_VertexBuffer.UpdateDynamicVertexBuffer(vertices.data(), sizeof(RVertex::FONT_VERTEX), (UINT)vertices.size());
 }
 
 void RText::Render()

@@ -299,11 +299,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_KEYDOWN:
-		RInput._SetKeyDown(wParam, true);
+		RInput._SetKeyDown((int)wParam, true);
 		break;
 
 	case WM_KEYUP:
-		RInput._SetKeyDown(wParam, false);
+		RInput._SetKeyDown((int)wParam, false);
 		break;
 
 	default:

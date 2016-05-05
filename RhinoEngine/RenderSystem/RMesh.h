@@ -38,8 +38,8 @@ public:
 	vector<RMeshElement>& GetMeshElements();
 	int GetMeshElementCount() const;
 
-	void SetMeshElements(RMeshElement* meshElements, int numElement);
-	void SetMaterials(RMaterial* materials, int numMaterial);
+	void SetMeshElements(RMeshElement* meshElements, UINT numElement);
+	void SetMaterials(RMaterial* materials, UINT numMaterial);
 
 	void SetAabb(const RAabb& aabb);
 	const RAabb& GetLocalSpaceAabb() const;
