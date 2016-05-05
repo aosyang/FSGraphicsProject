@@ -78,7 +78,7 @@ public:
 	TCHAR* WindowTitle() { return L"Deferred Shading Demo"; }
 
 private:
-	DeferredRenderBuffer CreateRenderTarget();
+	DeferredRenderBuffer CreateRenderTarget(DXGI_FORMAT format);
 	DepthStencilBuffer CreateDepthStencilBuffer();
 
 	RCamera						m_Camera;

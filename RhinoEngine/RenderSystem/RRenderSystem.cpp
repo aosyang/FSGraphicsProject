@@ -314,6 +314,11 @@ void RRenderSystem::Clear(bool clearColor, const RColor& color, bool clearDepth,
 	}
 }
 
+void RRenderSystem::ClearRenderTarget(ID3D11RenderTargetView* rtv, const RColor& color)
+{
+	m_pD3DImmediateContext->ClearRenderTargetView(rtv, reinterpret_cast<const float*>(&color));
+}
+
 void RRenderSystem::Present()
 {
 	assert(m_SwapChain);

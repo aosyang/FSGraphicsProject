@@ -73,18 +73,17 @@ bool DeferredShadingApp::Initialize()
 
 	m_Scene.cbLight.UpdateContent(&cbLight);
 
-	for (int i = 0; i < DeferredBuffer_Count; i++)
-	{
-		m_DeferredBuffers[i] = CreateRenderTarget();
-	}
+	m_DeferredBuffers[DB_Color]		= CreateRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM);
+	m_DeferredBuffers[DB_Position]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
+	m_DeferredBuffers[DB_Normal]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
 	m_DepthBuffer = CreateDepthStencilBuffer();
 
 	m_cbDeferredPointLight.Initialize();
 
 	for (int i = 0; i < MAX_LIGHT_COUNT; i++)
 	{
-		m_PointLights[i].pos = RVec3(MathHelper::RandF(-1500, 750), MathHelper::RandF(40, 400), MathHelper::RandF(-1850, 300));
-		m_PointLights[i].r = MathHelper::RandF(50, 400);
+		m_PointLights[i].pos = RVec3(MathHelper::RandF(-1500, 750), MathHelper::RandF(200, 400), MathHelper::RandF(-1850, 300));
+		m_PointLights[i].r = MathHelper::RandF(200, 400);
 		m_PointLights[i].color = RColor(MathHelper::RandF(), MathHelper::RandF(), MathHelper::RandF());
 		m_PointLights[i].sin_factor = RVec3(MathHelper::RandF(0, 5), 0, MathHelper::RandF(0, 5));
 		m_PointLights[i].sin_offset = RVec3(MathHelper::RandF(0, 5), 0, MathHelper::RandF(0, 5));
@@ -178,7 +177,10 @@ void DeferredShadingApp::RenderScene()
 
 	RRenderer.SetRenderTargets(DeferredBuffer_Count, rtvs, m_DepthBuffer.View);
 #endif
-	RRenderer.Clear();
+	RRenderer.Clear(false, RColor(0, 0, 0));
+	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Color].View);
+	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Position].View, RColor(0, 0, 0));
+	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Normal].View, RColor(0, 0, 0));
 
 	RRenderer.SetBlendState(Blend_Opaque);
 	RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
@@ -222,48 +224,62 @@ void DeferredShadingApp::RenderScene()
 		aabb.pMin = pos - RVec3(r, r, r);
 		aabb.pMax = pos + RVec3(r, r, r);
 
-		RVec3 corners[] =
+		RVec2 pMin = RVec2(FLT_MAX, FLT_MAX), pMax = RVec2(-FLT_MAX, -FLT_MAX);
+		if (aabb.TestPointInsideAabb(m_Camera.GetPosition()))
 		{
-			RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMin.z),
-			RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMin.z),
-			RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMin.z),
-			RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMin.z),
-
-			RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMax.z),
-			RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMax.z),
-			RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMax.z),
-			RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMax.z),
-		};
-
-		RVec2 pMin = RVec2(1, 1), pMax = RVec2(-1, -1);
-		for (int j = 0; j < 8; j++)
+			pMin.x = 0.0f;
+			pMin.y = (float)RRenderer.GetClientHeight();
+			pMax.x = (float)RRenderer.GetClientWidth();
+			pMax.y = 0.0f;
+		}
+		else
 		{
-			RVec4 ndc_point = RVec4(corners[j], 1.0f) * viewProjMatrix;
-			ndc_point /= ndc_point.w;
+			RVec3 corners[] =
+			{
+				RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMin.z),
+				RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMin.z),
+				RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMin.z),
+				RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMin.z),
 
-			if (ndc_point.x < pMin.x)
-				pMin.x = max(-1.0f, ndc_point.x);
-			if (ndc_point.x > pMax.x)
-				pMax.x = min(1.0f, ndc_point.x);
-			if (ndc_point.y < pMin.y)
-				pMin.y = max(-1.0f, ndc_point.y);
-			if (ndc_point.y > pMax.y)
-				pMax.y = min(1.0f, ndc_point.y);
+				RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMax.z),
+				RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMax.z),
+				RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMax.z),
+				RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMax.z),
+			};
+
+			for (int j = 0; j < 8; j++)
+			{
+				RVec4 ndc_point = RVec4(corners[j], 1.0f) * viewProjMatrix;
+				ndc_point /= ndc_point.w;
+
+				if (ndc_point.x < pMin.x)
+					pMin.x = max(-1.0f, ndc_point.x);
+				if (ndc_point.x > pMax.x)
+					pMax.x = min(1.0f, ndc_point.x);
+				if (ndc_point.y < pMin.y)
+					pMin.y = max(-1.0f, ndc_point.y);
+				if (ndc_point.y > pMax.y)
+					pMax.y = min(1.0f, ndc_point.y);
+			}
+
+			//m_DebugRenderer.DrawLine(RVec3(pMin.x, pMin.y, 0), RVec3(pMin.x, pMax.y, 0));
+			//m_DebugRenderer.DrawLine(RVec3(pMin.x, pMax.y, 0), RVec3(pMax.x, pMax.y, 0));
+			//m_DebugRenderer.DrawLine(RVec3(pMax.x, pMax.y, 0), RVec3(pMax.x, pMin.y, 0));
+			//m_DebugRenderer.DrawLine(RVec3(pMax.x, pMin.y, 0), RVec3(pMin.x, pMin.y, 0));
+
+			pMin.x = (pMin.x + 1.0f) * 0.5f * RRenderer.GetClientWidth();
+			pMin.y = (-pMin.y + 1.0f) * 0.5f * RRenderer.GetClientHeight();
+			pMax.x = (pMax.x + 1.0f) * 0.5f * RRenderer.GetClientWidth();
+			pMax.y = (-pMax.y + 1.0f) * 0.5f * RRenderer.GetClientHeight();
 		}
 
-		//m_DebugRenderer.DrawLine(RVec3(pMin.x, pMin.y, 0), RVec3(pMin.x, pMax.y, 0));
-		//m_DebugRenderer.DrawLine(RVec3(pMin.x, pMax.y, 0), RVec3(pMax.x, pMax.y, 0));
-		//m_DebugRenderer.DrawLine(RVec3(pMax.x, pMax.y, 0), RVec3(pMax.x, pMin.y, 0));
-		//m_DebugRenderer.DrawLine(RVec3(pMax.x, pMin.y, 0), RVec3(pMin.x, pMin.y, 0));
-
-		pMin.x = (pMin.x + 1.0f) * 0.5f * RRenderer.GetClientWidth();
-		pMin.y = (-pMin.y + 1.0f) * 0.5f * RRenderer.GetClientHeight();
-		pMax.x = (pMax.x + 1.0f) * 0.5f * RRenderer.GetClientWidth();
-		pMax.y = (-pMax.y + 1.0f) * 0.5f * RRenderer.GetClientHeight();
-
+		if (pMin.x > pMax.x || pMax.y > pMin.y)
+			continue;
 
 		if (RCollision::TestAabbInsideFrustum(frustum, aabb))
 		{
+			//m_DebugRenderer.DrawAabb(aabb);
+
 			RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Scissor]);
 			
 			D3D11_RECT rect;
@@ -293,6 +309,21 @@ void DeferredShadingApp::RenderScene()
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, nullSRV);
 #endif
 
+	RRenderer.SetRenderTargets();
+	RRenderer.Clear(false, RColor(0, 0, 0));
+
+	RRenderer.SetBlendState(Blend_Opaque);
+	RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
+
+	cbObject.worldMatrix = RMatrix4::IDENTITY;
+
+	m_Scene.cbPerObject.UpdateContent(&cbObject);
+	m_Scene.cbPerObject.ApplyToShaders();
+
+	m_DebugRenderer.Render();
+	m_DebugRenderer.Reset();
+
+
 	RRenderer.Present();
 }
 
@@ -301,7 +332,7 @@ void DeferredShadingApp::OnResize(int width, int height)
 
 }
 
-DeferredRenderBuffer DeferredShadingApp::CreateRenderTarget()
+DeferredRenderBuffer DeferredShadingApp::CreateRenderTarget(DXGI_FORMAT format)
 {
 	DeferredRenderBuffer rb;
 
@@ -310,7 +341,7 @@ DeferredRenderBuffer DeferredShadingApp::CreateRenderTarget()
 	renderTargetTextureDesc.Height = RRenderer.GetClientHeight();
 	renderTargetTextureDesc.MipLevels = 1;
 	renderTargetTextureDesc.ArraySize = 1;
-	renderTargetTextureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	renderTargetTextureDesc.Format = format;
 	renderTargetTextureDesc.SampleDesc.Count = 1;
 	renderTargetTextureDesc.SampleDesc.Quality = 0;
 	renderTargetTextureDesc.Usage = D3D11_USAGE_DEFAULT;

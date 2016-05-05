@@ -60,6 +60,18 @@ RAabb RAabb::GetSweptAabb(const RVec3& moveVec) const
 	return sweptAabb;
 }
 
+bool RAabb::TestPointInsideAabb(const RVec3& point) const
+{
+	if (pMax.x <= point.x || pMin.x >= point.x)
+		return false;
+	if (pMax.y <= point.y || pMin.y >= point.y)
+		return false;
+	if (pMax.z <= point.z || pMin.z >= point.z)
+		return false;
+
+	return true;
+}
+
 bool RAabb::TestIntersectionWithAabb(const RAabb& aabb) const
 {
 	if (pMax.x <= aabb.pMin.x || pMin.x >= aabb.pMax.x)

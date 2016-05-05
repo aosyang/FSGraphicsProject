@@ -37,6 +37,7 @@ public:
 	RAabb GetTransformedAabb(const RMatrix4& m) const;
 	RAabb GetSweptAabb(const RVec3& moveVec) const;
 
+	bool TestPointInsideAabb(const RVec3& point) const;
 	bool TestIntersectionWithAabb(const RAabb& aabb) const;
 
 	// Check movement collision with another aabb.
