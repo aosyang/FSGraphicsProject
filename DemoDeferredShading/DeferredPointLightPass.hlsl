@@ -35,5 +35,12 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	float DiffuseIntensity = saturate(dot(Normal, lightDir));
 	float4 Diffuse = float4((attenuation * DiffuseIntensity * DeferredPointLight.Color.rgb * DeferredPointLight.Color.a), 1.0f);
 
-	return Albedo * Diffuse;
+	// Specular color
+	float3 viewDir = normalize(CameraPos.xyz - PosW);
+	float3 lightReflect = normalize(reflect(-lightDir, Normal));
+	float SpecularIntensity = max(pow(saturate(dot(viewDir, lightReflect)), SpecularColorAndPower.w), 0.0f);
+	float4 Specular = (float4)0;
+	Specular.rgb = attenuation * DeferredPointLight.Color.rgb * DeferredPointLight.Color.a * SpecularColorAndPower.rgb * SpecularIntensity;
+
+	return Albedo * Diffuse + Specular;
 }

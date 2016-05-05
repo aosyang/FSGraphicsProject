@@ -63,16 +63,6 @@ bool DeferredShadingApp::Initialize()
 	RRenderer.SetSamplerState(0, SamplerState_Texture);
 	RRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
 
-	// Update light constant buffer
-	SHADER_LIGHT_BUFFER cbLight;
-	ZeroMemory(&cbLight, sizeof(cbLight));
-
-	// Setup ambient color
-	cbLight.HighHemisphereAmbientColor = RVec4(0.1f, 0.1f, 0.1f, 1.0f);
-	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 1.0f);
-
-	m_Scene.cbLight.UpdateContent(&cbLight);
-
 	m_DeferredBuffers[DB_Color]		= CreateRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM);
 	m_DeferredBuffers[DB_Position]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
 	m_DeferredBuffers[DB_Normal]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
@@ -159,6 +149,27 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 
 	m_Scene.cbScene.UpdateContent(&cbScene);
 	m_Scene.cbScene.ApplyToShaders();
+
+	// Update light constant buffer
+	SHADER_LIGHT_BUFFER cbLight;
+	ZeroMemory(&cbLight, sizeof(cbLight));
+
+	// Setup ambient color
+	cbLight.HighHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.4f, 1.0f);
+	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 1.0f);
+
+	cbLight.CameraPos = m_Camera.GetPosition();
+
+	m_Scene.cbLight.UpdateContent(&cbLight);
+
+	// Update material buffer
+	SHADER_MATERIAL_BUFFER cbMaterial;
+	ZeroMemory(&cbMaterial, sizeof(cbMaterial));
+
+	cbMaterial.SpecularColorAndPower = RVec4(1.0f, 1.0f, 1.0f, 512.0f);
+	cbMaterial.GlobalOpacity = 1.0f;
+	m_Scene.cbMaterial.UpdateContent(&cbMaterial);
+	m_Scene.cbMaterial.ApplyToShaders();
 
 	m_TotalTime = timer.TotalTime();
 }
@@ -278,7 +289,7 @@ void DeferredShadingApp::RenderScene()
 
 		if (RCollision::TestAabbInsideFrustum(frustum, aabb))
 		{
-			//m_DebugRenderer.DrawAabb(aabb);
+			//m_DebugRenderer.DrawSphere(pos, m_PointLights[i].r, m_PointLights[i].color);
 
 			RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Scissor]);
 			
