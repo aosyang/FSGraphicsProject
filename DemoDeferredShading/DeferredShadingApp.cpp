@@ -55,10 +55,10 @@ bool DeferredShadingApp::Initialize()
 	delete[] deferredMats;
 
 	m_Scene.Initialize();
-	m_Camera.SetPosition(RVec3(0, 0, 0));
+	m_Camera.SetPosition(RVec3(-375, 1385, 1200));
 	m_Camera.SetupView(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
-	m_CamPitch = 0;
-	m_CamYaw = 0;
+	m_CamPitch = 0.65f;
+	m_CamYaw = -3.135f;
 
 	RRenderer.SetSamplerState(0, SamplerState_Texture);
 	RRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
