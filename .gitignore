@@ -4,9 +4,11 @@
 /DemoDeferredShading/[Dd]ebug/
 /DemoDeferredShading/[Rr]elease/
 /DemoDeferredShading/x64/
+/DemoDeferredShading/*.dll
 /DemoFightingGame/[Dd]ebug/
 /DemoFightingGame/[Rr]elease/
 /DemoFightingGame/x64/
+/DemoFightingGame/*.dll
 /EngineManagedWrapper/[Dd]ebug/
 /EngineManagedWrapper/[Rr]elease/
 /EngineManagedWrapper/x64/

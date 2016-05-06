@@ -175,6 +175,7 @@
     <ClCompile Include="Scene\RScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Rhino.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="RenderSystem">
