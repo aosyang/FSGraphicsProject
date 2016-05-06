@@ -155,8 +155,8 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbLight, sizeof(cbLight));
 
 	// Setup ambient color
-	cbLight.HighHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.4f, 1.0f);
-	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 1.0f);
+	cbLight.HighHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.4f, 0.1f);
+	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 0.0f);
 
 	cbLight.CameraPos = m_Camera.GetPosition();
 
@@ -170,6 +170,17 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	cbMaterial.GlobalOpacity = 1.0f;
 	m_Scene.cbMaterial.UpdateContent(&cbMaterial);
 	m_Scene.cbMaterial.ApplyToShaders();
+
+	// Update screen buffer
+	SHADER_SCREEN_BUFFER cbScreen;
+	ZeroMemory(&cbScreen, sizeof(cbScreen));
+
+	cbScreen.ScreenSize = RVec2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());
+	cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();
+
+	m_Scene.cbScreen.UpdateContent(&cbScreen);
+	m_Scene.cbScreen.ApplyToShaders();
+
 
 	m_TotalTime = timer.TotalTime();
 }

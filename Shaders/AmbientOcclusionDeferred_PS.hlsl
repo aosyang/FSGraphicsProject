@@ -30,9 +30,9 @@ struct OUTPUT_PIXEL
 OUTPUT_PIXEL main(OUTPUT_VERTEX Input) : SV_TARGET
 {
 	OUTPUT_PIXEL Out = (OUTPUT_PIXEL)0;
-	Out.Albedo = DiffuseTexture.Sample(Sampler, Input.UV0);
+	Out.Albedo = MakeLinearColorFromGammaSpace(DiffuseTexture.Sample(Sampler, Input.UV0));
 	Out.WorldPos = float4(Input.PosW, 1);
-	Out.Normal = float4(Input.NormalW, 1);
+	Out.Normal = float4(normalize(Input.NormalW), 1);
 
 	return Out;
 }
