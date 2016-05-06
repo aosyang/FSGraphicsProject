@@ -123,13 +123,13 @@ void PlayerController::PostUpdate(const RTimer& timer)
 		int targetBondId = m_Mesh->GetCachedAnimationNodeId(m_AnimBlender.GetEndAnimation(), i);
 		m_AnimBlender.GetCurrentBlendedNodePose(boneId, targetBondId, &matrix);
 
-		cbSkinned.boneMatrix[i] = m_Mesh->GetBoneInitInvMatrices(i) * matrix * GetNodeTransform();
+		m_BoneMatrices[i] = m_Mesh->GetBoneInitInvMatrices(i) * matrix * GetNodeTransform();
 	}
 }
 
 void PlayerController::Draw()
 {
-	m_Scene->cbBoneMatrices.UpdateContent(&cbSkinned);
+	m_Scene->cbBoneMatrices.UpdateContent((SHADER_SKINNED_BUFFER*)&m_BoneMatrices);
 	m_Scene->cbBoneMatrices.ApplyToShaders();
 
 	RSMeshObject::Draw();
@@ -137,7 +137,7 @@ void PlayerController::Draw()
 
 void PlayerController::DrawDepthPass()
 {
-	m_Scene->cbBoneMatrices.UpdateContent(&cbSkinned);
+	m_Scene->cbBoneMatrices.UpdateContent((SHADER_SKINNED_BUFFER*)&m_BoneMatrices);
 	m_Scene->cbBoneMatrices.ApplyToShaders();
 
 	RSMeshObject::DrawDepthPass();

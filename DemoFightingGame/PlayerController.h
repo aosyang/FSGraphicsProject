@@ -77,7 +77,7 @@ private:
 	RAnimation*				m_Animations[PlayerAnimCount];
 	RAnimationBlender		m_AnimBlender;
 	RVec3					m_RootOffset;
-	SHADER_SKINNED_BUFFER	cbSkinned;
+	RMatrix4				m_BoneMatrices[MAX_BONE_COUNT];
 
 	PlayerBehavior			m_Behavior;
 };
