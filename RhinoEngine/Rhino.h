@@ -61,6 +61,7 @@ class RBaseResource;
 #include "RenderSystem/RRenderSystem.h"
 #include "RenderSystem/RMeshElement.h"
 #include "RenderSystem/RDebugRenderer.h"
+#include "RenderSystem/RText.h"
 #include "RenderSystem/DDSTextureLoader.h"
 #include "RenderSystem/RAnimation.h"
 #include "RenderSystem/RResourceManager.h"

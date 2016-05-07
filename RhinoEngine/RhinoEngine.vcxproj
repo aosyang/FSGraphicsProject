@@ -43,6 +43,7 @@
     <ClInclude Include="RenderSystem\RShaderConstantBuffer.h" />
     <ClInclude Include="RenderSystem\RShaderManager.h" />
     <ClInclude Include="RenderSystem\RShadowMap.h" />
+    <ClInclude Include="RenderSystem\RText.h" />
     <ClInclude Include="RenderSystem\RTexture.h" />
     <ClInclude Include="RenderSystem\RVertexDeclaration.h" />
     <ClInclude Include="Rhino.h" />
@@ -71,6 +72,7 @@
     <ClCompile Include="RenderSystem\RResourceManager.cpp" />
     <ClCompile Include="RenderSystem\RShaderManager.cpp" />
     <ClCompile Include="RenderSystem\RShadowMap.cpp" />
+    <ClCompile Include="RenderSystem\RText.cpp" />
     <ClCompile Include="RenderSystem\RTexture.cpp" />
     <ClCompile Include="RenderSystem\RVertexDeclaration.cpp" />
     <ClCompile Include="Rhino.cpp">

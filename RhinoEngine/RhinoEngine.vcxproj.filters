@@ -98,6 +98,9 @@
     <ClInclude Include="Scene\RScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="RenderSystem\RText.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -176,6 +179,9 @@
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="Rhino.cpp" />
+    <ClCompile Include="RenderSystem\RText.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="RenderSystem">

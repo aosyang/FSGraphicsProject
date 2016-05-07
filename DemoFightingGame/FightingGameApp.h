@@ -9,7 +9,6 @@
 
 #include "Rhino.h"
 #include "PlayerController.h"
-#include "RText.h"
 
 class FightingGameApp : public IApp
 {
