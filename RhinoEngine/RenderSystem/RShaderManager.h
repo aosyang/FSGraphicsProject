@@ -6,15 +6,20 @@
 #ifndef _RSHADERMANAGER_H
 #define _RSHADERMANAGER_H
 
+enum EShaderFeatureMask
+{
+	SFM_Skinned = 1 << 0,
+};
+
 struct RShader
 {
+	ID3D11VertexShader*		VertexShader[2];
 	ID3D11PixelShader*		PixelShader;
-	ID3D11VertexShader*		VertexShader;
 	ID3D11GeometryShader*	GeometryShader;
 
 	bool operator==(const RShader& rhs) const;
 
-	void Bind();
+	void Bind(int featureMasks = 0);
 	string GetName() const;
 };
 

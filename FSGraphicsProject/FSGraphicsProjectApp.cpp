@@ -121,7 +121,6 @@ bool FSGraphicsProjectApp::Initialize()
 	m_InstancedLightingShader = RShaderManager::Instance().GetShaderResource("InstancedLighting");
 	m_DepthShader = RShaderManager::Instance().GetShaderResource("Depth");
 	m_InstancedDepthShader = RShaderManager::Instance().GetShaderResource("InstancedDepth");
-	m_SkinnedDepthShader = RShaderManager::Instance().GetShaderResource("SkinnedDepth");
 	m_ParticleShader = RShaderManager::Instance().GetShaderResource("Particle");
 	m_RefractionShader = RShaderManager::Instance().GetShaderResource("Refraction");
 
@@ -1051,4 +1050,5 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 void FSGraphicsProjectApp::SetMaterialConstBuffer(SHADER_MATERIAL_BUFFER* buffer)
 {
 	m_cbMaterial.UpdateContent(buffer);
+	m_cbMaterial.ApplyToShaders();
 }

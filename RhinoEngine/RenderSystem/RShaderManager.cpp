@@ -10,15 +10,21 @@
 
 bool RShader::operator==(const RShader& rhs) const
 {
-	return PixelShader == rhs.PixelShader &&
-		VertexShader == rhs.VertexShader &&
+	return
+		VertexShader[0] == rhs.VertexShader[0] &&
+		VertexShader[1] == rhs.VertexShader[1] &&
+		PixelShader == rhs.PixelShader &&
 		GeometryShader == rhs.GeometryShader;
 }
 
-void RShader::Bind()
+void RShader::Bind(int featureMasks)
 {
+	if (featureMasks & SFM_Skinned)
+		RRenderer.D3DImmediateContext()->VSSetShader(VertexShader[1], NULL, 0);
+	else
+		RRenderer.D3DImmediateContext()->VSSetShader(VertexShader[0], NULL, 0);
+
 	RRenderer.D3DImmediateContext()->PSSetShader(PixelShader, NULL, 0);
-	RRenderer.D3DImmediateContext()->VSSetShader(VertexShader, NULL, 0);
 	RRenderer.D3DImmediateContext()->GSSetShader(GeometryShader, NULL, 0);
 }
 
@@ -95,7 +101,19 @@ void RShaderManager::LoadShaders(const char* path)
 				{
 					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 					{
-						RRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader);
+						RRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader[0]);
+					}
+
+					if (strstr(pBuffer, "USE_SKINNING"))
+					{
+						filename = string("Skinned") + filename;
+
+						D3D_SHADER_MACRO skinnedShaderMacro[] = { "USE_SKINNING", "1", NULL, NULL };
+
+						if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), skinnedShaderMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
+						{
+							RRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader[1]);
+						}
 					}
 				}
 				else if (filename.find("_PS.hlsl") != string::npos)
@@ -136,8 +154,9 @@ void RShaderManager::UnloadAllShaders()
 	for (map<string, RShader>::iterator iter = m_Shaders.begin();
 		 iter != m_Shaders.end(); iter++)
 	{
+		SAFE_RELEASE(iter->second.VertexShader[0]);
+		SAFE_RELEASE(iter->second.VertexShader[1]);
 		SAFE_RELEASE(iter->second.PixelShader);
-		SAFE_RELEASE(iter->second.VertexShader);
 		SAFE_RELEASE(iter->second.GeometryShader);
 	}
 
@@ -158,7 +177,8 @@ bool RShaderManager::AddShader(const char* shaderName,
 	RShader shader;
 
 	shader.PixelShader = nullptr;
-	shader.VertexShader = nullptr;
+	shader.VertexShader[0] = nullptr;
+	shader.VertexShader[1] = nullptr;
 	shader.GeometryShader = nullptr;
 
 	if (pixelShaderBytecode && pixelBytecodeLength)
@@ -168,7 +188,7 @@ bool RShaderManager::AddShader(const char* shaderName,
 
 	if (vertexShaderBytecode && vertexBytecodeLength)
 	{
-		RRenderer.D3DDevice()->CreateVertexShader(vertexShaderBytecode, vertexBytecodeLength, NULL, &shader.VertexShader);
+		RRenderer.D3DDevice()->CreateVertexShader(vertexShaderBytecode, vertexBytecodeLength, NULL, &shader.VertexShader[0]);
 	}
 
 	if (geometryShaderBytecode && geometryBytecodeLength)

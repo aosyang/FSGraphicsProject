@@ -11,6 +11,10 @@ struct INPUT_VERTEX
 	float3 PosL		: POSITION;
 	float2 UV		: TEXCOORD0;
 	float3 Normal	: NORMAL;
+#if USE_SKINNING == 1
+	int4   BoneId	: BLENDINDICES;
+	float4 Weight	: BLENDWEIGHT;
+#endif
 };
 
 struct OUTPUT_VERTEX
@@ -27,13 +31,27 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 {
 	OUTPUT_VERTEX Out = (OUTPUT_VERTEX)0;
 
-	float4 worldPos = mul(float4(Input.PosL, 1.0f), worldMatrix);
+	float4 worldPos = (float4)0;
+	float3 Normal = (float3)0;
+
+#if USE_SKINNING == 1
+	for (int i = 0; i < 4; i++)
+	{
+		worldPos += mul(float4(Input.PosL, 1.0f), boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
+		Normal += mul(Input.Normal, (float3x3)boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
+	}
+	Normal = normalize(Normal);
+#else
+	worldPos = mul(float4(Input.PosL, 1.0f), worldMatrix);
+	Normal = mul(Input.Normal, (float3x3)worldMatrix);
+#endif
+	
 	Out.PosW = worldPos.xyz;
 	Out.PosH = mul(worldPos, viewProjMatrix);
 	Out.ShadowPosH = mul(worldPos, shadowViewProjBiasedMatrix);
 
 	Out.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
-	Out.NormalW = mul(Input.Normal, (float3x3)worldMatrix);
+	Out.NormalW = Normal;
 
 	Out.UV = Input.UV;
 

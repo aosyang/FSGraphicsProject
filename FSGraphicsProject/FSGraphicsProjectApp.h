@@ -86,11 +86,10 @@ private:
 	RShadowMap					m_ShadowMap;
 	RShader*					m_DepthShader;
 	RShader*					m_InstancedDepthShader;
-	RShader*					m_SkinnedDepthShader;
 
 	RSMeshObject				m_TransparentMesh;
 
-	RMeshRenderBuffer				m_ParticleBuffer;
+	RMeshRenderBuffer			m_ParticleBuffer;
 	RShader*					m_ParticleShader;
 	ID3D11InputLayout*			m_ParticleIL;
 	RVertex::PARTICLE_VERTEX	m_ParticleVert[PARTICLE_COUNT];
