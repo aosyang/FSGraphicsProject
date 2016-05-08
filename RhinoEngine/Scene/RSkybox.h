@@ -20,7 +20,7 @@ public:
 	void Draw();
 
 private:
-	RMeshElement				m_SkyboxMesh;
+	RMeshRenderBuffer				m_SkyboxMesh;
 	RTexture*					m_SkyboxTexture;
 	ID3D11InputLayout*			m_SkyboxIL;
 	RShader*					m_SkyboxShader;

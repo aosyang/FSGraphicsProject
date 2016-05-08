@@ -16,7 +16,7 @@ RMesh::RMesh(string path)
 	m_LoadingFinishTime = 0.0f;
 }
 
-RMesh::RMesh(string path, const vector<RMeshElement> meshElements, const vector<RMaterial>& materials)
+RMesh::RMesh(string path, const vector<RMeshElement>& meshElements, const vector<RMaterial>& materials)
 	: RMesh(path)
 {
 	m_MeshElements = meshElements;

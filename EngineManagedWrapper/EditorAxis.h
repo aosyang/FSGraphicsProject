@@ -19,7 +19,7 @@ enum EAxis
 class EditorAxis
 {
 private:
-	RMeshElement				m_AxisMeshBuffer[AXIS_COUNT];
+	RMeshRenderBuffer				m_AxisMeshBuffer[AXIS_COUNT];
 	RAabb						m_AxisAabb[AXIS_COUNT];
 	ID3D11InputLayout*			m_ColorInputLayout;
 

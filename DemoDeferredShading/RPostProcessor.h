@@ -36,7 +36,7 @@ private:
 	ID3D11PixelShader*			m_PPPixelShader[PPE_COUNT];
 
 	ID3D11InputLayout*			m_InputLayout;
-	RMeshElement				m_ScreenQuad;
+	RMeshRenderBuffer				m_ScreenQuad;
 
 	ID3D11Texture2D*			m_RTBuffer;
 	ID3D11Texture2D*			m_RTDepthBuffer;

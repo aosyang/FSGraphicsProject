@@ -213,7 +213,7 @@ ID3D11InputLayout* RVertexDeclaration::GetInputLayoutByVertexComponents(int vert
 	}
 }
 
-int RVertexDeclaration::GetVertexStride(int vertexComponents) const
+int RVertexDeclaration::GetVertexStride(int vertexComponents)
 {
 	int stride = 0;
 
@@ -235,7 +235,7 @@ int RVertexDeclaration::GetVertexStride(int vertexComponents) const
 	return stride;
 }
 
-void RVertexDeclaration::CopyVertexComponents(void* out, const RVertex::MESH_LOADER_VERTEX* in, int count, int vertexComponents) const
+void RVertexDeclaration::CopyVertexComponents(void* out, const RVertex::MESH_LOADER_VERTEX* in, int count, int vertexComponents)
 {
 	struct VC_Info
 	{

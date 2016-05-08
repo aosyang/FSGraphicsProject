@@ -47,12 +47,15 @@ enum EVertexComponentMask
 	VCM_UV1								= 1 << VertexComponent_UV1,
 	VCM_BoneId							= 1 << VertexComponent_BoneId,
 	VCM_BoneWeights						= 1 << VertexComponent_BoneWeights,
+};
 
-	VCM_PosNormal						= VCM_Pos | VCM_Normal,
-	VCM_PosUV0Normal					= VCM_Pos | VCM_UV0 | VCM_Normal,
-	VCM_PosUV0NormalUV1					= VCM_Pos | VCM_UV0 | VCM_Normal | VCM_UV1,
-	VCM_PosUV0NormalTangent				= VCM_Pos | VCM_UV0 | VCM_Normal | VCM_Tangent,
-	VCM_PosUV0NormalTangentUV1			= VCM_Pos | VCM_UV0 | VCM_Normal | VCM_Tangent | VCM_UV1,
+enum EVertexComponents
+{
+	VC_PosNormal						= VCM_Pos | VCM_Normal,
+	VC_PosUV0Normal						= VCM_Pos | VCM_UV0 | VCM_Normal,
+	VC_PosUV0NormalUV1					= VCM_Pos | VCM_UV0 | VCM_Normal | VCM_UV1,
+	VC_PosUV0NormalTangent				= VCM_Pos | VCM_UV0 | VCM_Normal | VCM_Tangent,
+	VC_PosUV0NormalTangentUV1			= VCM_Pos | VCM_UV0 | VCM_Normal | VCM_Tangent | VCM_UV1,
 };
 
 namespace RVertex
@@ -113,8 +116,8 @@ public:
 
 	ID3D11InputLayout* GetInputLayout(const string& vertexTypeName) const;
 	ID3D11InputLayout* GetInputLayoutByVertexComponents(int vertexComponents);
-	int GetVertexStride(int vertexComponents) const;
-	void CopyVertexComponents(void* out, const RVertex::MESH_LOADER_VERTEX* in, int count, int vertexComponents) const;
+	static int GetVertexStride(int vertexComponents);
+	static void CopyVertexComponents(void* out, const RVertex::MESH_LOADER_VERTEX* in, int count, int vertexComponents);
 private:
 	map<string, ID3D11InputLayout*>		m_InputLayouts;
 	map<int, ID3D11InputLayout*>		m_VertexComponentInputLayouts;

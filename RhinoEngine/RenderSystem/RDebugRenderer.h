@@ -31,7 +31,7 @@ public:
 	void Reset();
 
 private:
-	RMeshElement		m_PrimitiveMeshBuffer;
+	RMeshRenderBuffer		m_PrimitiveMeshBuffer;
 	ID3D11InputLayout*	m_PrimitiveInputLayout;
 	RShader*			m_ColorShader;
 

@@ -20,7 +20,7 @@ public:
 	void Render();
 
 private:
-	RMeshElement	m_VertexBuffer;
+	RMeshRenderBuffer	m_VertexBuffer;
 	RTexture*		m_FontTexture;
 	RShader*		m_FontShader;
 	UINT			m_Rows, m_Columns;

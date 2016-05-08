@@ -26,7 +26,7 @@ class RMesh : public RBaseResource
 {
 public:
 	RMesh(string path);
-	RMesh(string path, const vector<RMeshElement> meshElements, const vector<RMaterial>& materials);
+	RMesh(string path, const vector<RMeshElement>& meshElements, const vector<RMaterial>& materials);
 	RMesh(string path, RMeshElement* meshElements, int numElement, RMaterial* materials, int numMaterial);
 	~RMesh();
 

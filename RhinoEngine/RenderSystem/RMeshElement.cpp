@@ -7,19 +7,19 @@
 
 #include "RMeshElement.h"
 
-RMeshElement::RMeshElement()
-	: m_VertexBuffer(nullptr), m_IndexBuffer(nullptr), m_InputLayout(nullptr), m_Flag(0)
+RMeshRenderBuffer::RMeshRenderBuffer()
+	: m_VertexBuffer(nullptr), m_IndexBuffer(nullptr), m_InputLayout(nullptr)
 {
 
 }
 
-void RMeshElement::Release()
+void RMeshRenderBuffer::Release()
 {
 	SAFE_RELEASE(m_VertexBuffer);
 	SAFE_RELEASE(m_IndexBuffer);
 }
 
-void RMeshElement::CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, ID3D11InputLayout* inputLayout, bool dynamic /*= false*/)
+void RMeshRenderBuffer::CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, ID3D11InputLayout* inputLayout, bool dynamic /*= false*/)
 {
 	m_InputLayout = inputLayout;
 
@@ -51,7 +51,7 @@ void RMeshElement::CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vert
 	m_Stride = vertexTypeSize;
 }
 
-void RMeshElement::CreateIndexBuffer(void* data, UINT indexTypeSize, UINT indexCount, bool dynamic /*= false*/)
+void RMeshRenderBuffer::CreateIndexBuffer(void* data, UINT indexTypeSize, UINT indexCount, bool dynamic /*= false*/)
 {
 	D3D11_BUFFER_DESC ibd;
 	ZeroMemory(&ibd, sizeof(ibd));
@@ -67,7 +67,7 @@ void RMeshElement::CreateIndexBuffer(void* data, UINT indexTypeSize, UINT indexC
 	m_IndexCount = indexCount;
 }
 
-void RMeshElement::UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount)
+void RMeshRenderBuffer::UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount)
 {
 	D3D11_MAPPED_SUBRESOURCE subres;
 	RRenderer.D3DImmediateContext()->Map(m_VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
@@ -77,7 +77,7 @@ void RMeshElement::UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSize, UI
 	m_VertexCount = vertexCount;
 }
 
-void RMeshElement::Draw(D3D11_PRIMITIVE_TOPOLOGY topology)
+void RMeshRenderBuffer::Draw(D3D11_PRIMITIVE_TOPOLOGY topology)
 {
 	UINT offset = 0;
 
@@ -100,7 +100,7 @@ void RMeshElement::Draw(D3D11_PRIMITIVE_TOPOLOGY topology)
 	}
 }
 
-void RMeshElement::DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology)
+void RMeshRenderBuffer::DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology)
 {
 	UINT offset = 0;
 
@@ -122,3 +122,105 @@ void RMeshElement::DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY top
 		RRenderer.D3DImmediateContext()->DrawInstanced(m_VertexCount, instanceCount, 0, 0);
 	}
 }
+
+RMeshElement::RMeshElement()
+	: m_Flag(0), m_VertexComponentMask(0)
+{
+
+}
+
+void RMeshElement::Release()
+{
+	m_RenderBuffer.Release();
+}
+
+void RMeshElement::SetTriangles(const vector<UINT>& triIndices)
+{
+	TriangleIndices = triIndices;
+}
+
+void RMeshElement::SetVertices(const vector<RVertex::MESH_LOADER_VERTEX>& vertices, int vertexComponentMask)
+{
+	m_VertexComponentMask = vertexComponentMask;
+
+	TriangleIndices.clear();
+	PositionArray.clear();
+	UV0Array.clear();
+	NormalArray.clear();
+	TangentArray.clear();
+	UV1Array.clear();
+	BoneIdArray.clear();
+	BoneWeightArray.clear();
+
+	for (size_t i = 0; i < vertices.size(); i++)
+	{
+		if (vertexComponentMask & VCM_Pos)
+			PositionArray.push_back(vertices[i].pos);
+		if (vertexComponentMask & VCM_UV0)
+			UV0Array.push_back(vertices[i].uv0);
+		if (vertexComponentMask & VCM_Normal)
+			NormalArray.push_back(vertices[i].normal);
+		if (vertexComponentMask & VCM_Tangent)
+			TangentArray.push_back(vertices[i].tangent);
+		if (vertexComponentMask & VCM_UV1)
+			UV1Array.push_back(vertices[i].uv1);
+		if (vertexComponentMask & VCM_BoneId)
+			BoneIdArray.push_back(*((VBoneIds*)vertices[i].boneId));
+		if (vertexComponentMask & VCM_BoneWeights)
+			BoneWeightArray.push_back(vertices[i].weight);
+	}
+}
+
+void RMeshElement::UpdateRenderBuffer()
+{
+	m_RenderBuffer.Release();
+
+	int stride = RVertexDeclaration::GetVertexStride(m_VertexComponentMask);
+	ID3D11InputLayout* inputLayout = RVertexDeclaration::Instance().GetInputLayoutByVertexComponents(m_VertexComponentMask);
+
+	BYTE* compactVertexData = new BYTE[PositionArray.size() * stride];
+	
+	int offset = 0;
+
+#define COPY_VERTEX_COMPONENT(Mask, VArray, Type) \
+	if (m_VertexComponentMask & Mask) \
+	{ \
+		memcpy(compactVertexData + offset, &VArray[i], sizeof(Type)); \
+		offset += sizeof(Type); \
+	}
+
+	for (size_t i = 0; i < PositionArray.size(); i++)
+	{
+		COPY_VERTEX_COMPONENT(VCM_Pos,			PositionArray,		RVec3)
+		COPY_VERTEX_COMPONENT(VCM_UV0,			UV0Array,			RVec2)
+		COPY_VERTEX_COMPONENT(VCM_Normal,		NormalArray,		RVec3)
+		COPY_VERTEX_COMPONENT(VCM_Tangent,		TangentArray,		RVec3)
+		COPY_VERTEX_COMPONENT(VCM_UV1,			UV1Array,			RVec2)
+		COPY_VERTEX_COMPONENT(VCM_BoneId,		BoneIdArray,		VBoneIds)
+		COPY_VERTEX_COMPONENT(VCM_BoneWeights,	BoneWeightArray,	RVec4)
+	}
+#undef COPY_VERTEX_COMPONENT
+
+	m_RenderBuffer.CreateVertexBuffer(compactVertexData, stride, (UINT)PositionArray.size(), inputLayout);
+	m_RenderBuffer.CreateIndexBuffer(TriangleIndices.data(), sizeof(UINT), (UINT)TriangleIndices.size());
+
+	delete[] compactVertexData;
+
+	// Update aabb
+	m_Aabb = RAabb::Default;
+	for (size_t i = 0; i < PositionArray.size(); i++)
+	{
+		m_Aabb.Expand(PositionArray[i]);
+	}
+}
+
+void RMeshElement::Draw(D3D11_PRIMITIVE_TOPOLOGY topology)
+{
+	m_RenderBuffer.Draw(topology);
+}
+
+void RMeshElement::DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology)
+{
+	m_RenderBuffer.DrawInstanced(instanceCount, topology);
+}
+

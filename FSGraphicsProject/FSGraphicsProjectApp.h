@@ -46,10 +46,10 @@ private:
 	RSkybox						m_Skybox;
 
 	ID3D11InputLayout*			m_ColorPrimitiveIL;
-	RMeshElement				m_StarMesh;
+	RMeshRenderBuffer				m_StarMesh;
 	RShader*					m_ColorShader;
 
-	RMeshElement				m_BumpCubeMesh;
+	RMeshRenderBuffer				m_BumpCubeMesh;
 	ID3D11InputLayout*			m_BumpLightingIL;
 	RShader*					m_BumpLightingShader;
 	RTexture*					m_BumpBaseTexture;
@@ -90,7 +90,7 @@ private:
 
 	RSMeshObject				m_TransparentMesh;
 
-	RMeshElement				m_ParticleBuffer;
+	RMeshRenderBuffer				m_ParticleBuffer;
 	RShader*					m_ParticleShader;
 	ID3D11InputLayout*			m_ParticleIL;
 	RVertex::PARTICLE_VERTEX	m_ParticleVert[PARTICLE_COUNT];

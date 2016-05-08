@@ -396,8 +396,6 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 		vertData.resize(controlPointCount);
 
-		RAabb aabb;
-
 		// Fill vertex data
 		for (int i = 0; i < controlPointCount; i++)
 		{
@@ -409,8 +407,6 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 			memset(vertData[i].weight, 0, sizeof(float) * 4);
 
 			VertexComponentMask |= VCM_Pos;
-
-			aabb.Expand(vertData[i].pos);
 		}
 
 		// Fill normal data
@@ -793,8 +789,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		OutputDebugStringA(msg_buf);
 		map<RVertex::MESH_LOADER_VERTEX, int> meshVertIndexTable;
 		vector<RVertex::MESH_LOADER_VERTEX> optimizedVertData;
-		vector<int> optimizedIndexData;
-		int index = 0;
+		vector<UINT> optimizedIndexData;
+		UINT index = 0;
 		for (UINT i = 0; i < indexData.size(); i++)
 		{
 			RVertex::MESH_LOADER_VERTEX& v = flatVertData[indexData[i]];
@@ -818,18 +814,10 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 		RMeshElement meshElem;
 
-		int stride = RVertexDeclaration::Instance().GetVertexStride(VertexComponentMask);
-		ID3D11InputLayout* inputLayout = RVertexDeclaration::Instance().GetInputLayoutByVertexComponents(VertexComponentMask);
-		BYTE* compactVertexData = new BYTE[optimizedVertData.size() * stride];
-		RVertexDeclaration::Instance().CopyVertexComponents(compactVertexData, optimizedVertData.data(), (int)optimizedVertData.size(), VertexComponentMask);
-
-		meshElem.CreateVertexBuffer(compactVertexData, stride, (UINT)optimizedVertData.size(), inputLayout);
-
-		delete[] compactVertexData;
-
-		meshElem.CreateIndexBuffer(optimizedIndexData.data(), sizeof(UINT32), (UINT)optimizedIndexData.size());
+		meshElem.SetVertices(optimizedVertData, VertexComponentMask);
+		meshElem.SetTriangles(optimizedIndexData);
+		meshElem.UpdateRenderBuffer();
 		meshElem.SetName(node->GetName());
-		meshElem.SetAabb(aabb);
 
 		UINT flag = 0;
 		if (hasDeformer)
@@ -840,7 +828,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		meshElements.push_back(meshElem);
 
 
-		mesh_aabb.Expand(aabb);
+		mesh_aabb.Expand(meshElem.GetAabb());
 
 		sprintf_s(msg_buf, "Mesh loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
 			optimizedVertData.size(), optimizedIndexData.size() / 3, flatVertData.size(), indexData.size() / 3);
