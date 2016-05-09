@@ -6,6 +6,8 @@
 #ifndef _RRESOURCEMANAGER_H
 #define _RRESOURCEMANAGER_H
 
+struct RMaterial;
+
 namespace std
 {
 	class mutex;
@@ -62,6 +64,9 @@ private:
 	~RResourceManager() {}
 
 	static void ThreadLoadFbxMeshData(LoaderThreadTask* task);
+	static bool ThreadLoadRmeshData(LoaderThreadTask* task);
+	static void LoadMeshMaterials(const string& mtlFilename, vector<RMaterial>& materials);
+
 	static void ThreadLoadDDSTextureData(LoaderThreadTask* task);
 
 	vector<RMesh*>						m_MeshResources;

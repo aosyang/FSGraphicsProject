@@ -45,7 +45,10 @@ void ResourceLoaderThread(LoaderThreadData* data)
 		switch (task.Resource->GetResourceType())
 		{
 		case RT_Mesh:
-			RResourceManager::ThreadLoadFbxMeshData(&task);
+			if (!RResourceManager::ThreadLoadRmeshData(&task))
+			{
+				RResourceManager::ThreadLoadFbxMeshData(&task);
+			}
 			break;
 
 		case RT_Texture:
@@ -181,7 +184,10 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename, ResourceLoadingMode m
 
 	if (mode == RLM_Immediate)
 	{
-		ThreadLoadFbxMeshData(&task);
+		if (!ThreadLoadRmeshData(&task))
+		{
+			ThreadLoadFbxMeshData(&task);
+		}
 	}
 	else
 	{
@@ -838,6 +844,73 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 	// Load material from file
 	string mtlFilename = task->Filename.substr(0, task->Filename.length() - 3) + "rmtl";
+	LoadMeshMaterials(mtlFilename, materials);
+
+	static_cast<RMesh*>(task->Resource)->SetMeshElements(meshElements.data(), (UINT)meshElements.size());
+	static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), (UINT)materials.size());
+	static_cast<RMesh*>(task->Resource)->UpdateAabb();
+	static_cast<RMesh*>(task->Resource)->SetAnimation(animation);
+	static_cast<RMesh*>(task->Resource)->SetBoneNameList(meshBoneIdToName);
+	static_cast<RMesh*>(task->Resource)->SetBoneInitInvMatrices(boneInitInvPose);
+	static_cast<RMesh*>(task->Resource)->SetResourceTimestamp(REngine::GetTimer().TotalTime());
+	task->Resource->m_State = RS_Loaded;
+
+	if (animation)
+	{
+		string animFilename = task->Filename.substr(0, task->Filename.size() - 3) + "ranim";
+		animation->SaveToFile(animFilename.c_str());
+	}
+
+	string rmeshName = task->Filename.substr(0, task->Filename.length() - 3) + "rmesh";
+	RSerializer serializer;
+	serializer.Open(rmeshName, SM_Write);
+	if (serializer.IsOpen())
+	{
+		static_cast<RMesh*>(task->Resource)->Serialize(serializer);
+		serializer.Close();
+	}
+}
+
+bool RResourceManager::ThreadLoadRmeshData(LoaderThreadTask* task)
+{
+	vector<RMeshElement> meshElements;
+	vector<RMaterial> materials;
+
+	char msg_buf[1024];
+	sprintf_s(msg_buf, sizeof(msg_buf), "Loading mesh [%s]...\n", task->Filename.data());
+	OutputDebugStringA(msg_buf);
+
+	string rmeshName = task->Filename.substr(0, task->Filename.length() - 3) + "rmesh";
+
+	RSerializer serializer;
+	serializer.Open(rmeshName, SM_Read);
+	if (!serializer.IsOpen())
+		return false;
+	static_cast<RMesh*>(task->Resource)->Serialize(serializer);
+	serializer.Close();
+
+	RAnimation* animation = new RAnimation();
+	string animFilename = task->Filename.substr(0, task->Filename.size() - 3) + "ranim";
+
+	if (!animation->LoadFromFile(animFilename.c_str()))
+	{
+		SAFE_DELETE(animation);
+	}
+
+	// Load material from file
+	string mtlFilename = task->Filename.substr(0, task->Filename.length() - 3) + "rmtl";
+	LoadMeshMaterials(mtlFilename, materials);
+	
+	if (materials.size())
+		static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), (UINT)materials.size());
+	static_cast<RMesh*>(task->Resource)->SetAnimation(animation);
+	static_cast<RMesh*>(task->Resource)->SetResourceTimestamp(REngine::GetTimer().TotalTime());
+
+	return true;
+}
+
+void RResourceManager::LoadMeshMaterials(const string& mtlFilename, vector<RMaterial>& materials)
+{
 	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
 	if (doc->LoadFile(mtlFilename.c_str()) == tinyxml2::XML_SUCCESS)
 	{
@@ -876,16 +949,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 			materials = xmlMaterials;
 		}
 	}
-	delete doc;
 
-	static_cast<RMesh*>(task->Resource)->SetMeshElements(meshElements.data(), (UINT)meshElements.size());
-	static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), (UINT)materials.size());
-	static_cast<RMesh*>(task->Resource)->UpdateAabb();
-	static_cast<RMesh*>(task->Resource)->SetAnimation(animation);
-	static_cast<RMesh*>(task->Resource)->SetBoneNameList(meshBoneIdToName);
-	static_cast<RMesh*>(task->Resource)->SetBoneInitInvMatrices(boneInitInvPose);
-	static_cast<RMesh*>(task->Resource)->SetResourceTimestamp(REngine::GetTimer().TotalTime());
-	task->Resource->m_State = RS_Loaded;
+	delete doc;
 }
 
 RTexture* RResourceManager::LoadDDSTexture(const char* filename, ResourceLoadingMode mode)
