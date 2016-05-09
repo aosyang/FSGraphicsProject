@@ -74,8 +74,7 @@ public:
 	void SetBitFlags(int flags) { m_Flags = flags; }
 	int GetBitFlags() const { return m_Flags; }
 
-	bool LoadFromFile(const char* filename);
-	void SaveToFile(const char* filename);
+	void Serialize(RSerializer& serializer);
 
 	void AddNodePose(int nodeId, int frameId, const RMatrix4* matrix);
 	void GetNodePose(int nodeId, float time, RMatrix4* matrix) const;

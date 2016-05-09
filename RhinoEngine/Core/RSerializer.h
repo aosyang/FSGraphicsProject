@@ -148,9 +148,39 @@ public:
 	}
 
 	template<typename T>
+	void SerializeArray(T** arr, UINT size)
+	{
+		if (size)
+		{
+			if (m_Mode == SM_Write)
+				m_FileStream.write((char*)*arr, sizeof(T) * size);
+			else
+			{
+				*arr = new T[size];
+				m_FileStream.read((char*)*arr, sizeof(T) * size);
+			}
+		}
+	}
+
+	template<typename T>
 	void SerializeObject(T& obj)
 	{
 		obj.Serialize(*this);
+	}
+
+	template<typename T>
+	void SerializeObjectPtr(T** pObj)
+	{
+		int flag = (*pObj) ? 1 : 0;
+		SerializeData(flag);
+		if (flag)
+		{
+			if (m_Mode == SM_Read)
+			{
+				*pObj = new T();
+			}
+			(*pObj)->Serialize(*this);
+		}
 	}
 
 private:

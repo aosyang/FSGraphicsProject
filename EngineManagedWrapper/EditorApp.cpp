@@ -336,7 +336,7 @@ namespace EngineManagedWrapper
 			{
 				string animFilename = meshVec[i]->GetPath();
 				animFilename = animFilename.substr(0, animFilename.size() - 3) + "ranim";
-				anim->SaveToFile(animFilename.c_str());
+				//anim->SaveToFile(animFilename.c_str());
 			}
 		}
 	}

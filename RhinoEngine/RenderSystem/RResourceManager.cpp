@@ -308,74 +308,68 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	}
 
 	// Load animation
-	RAnimation* animation = new RAnimation();
-	string animFilename = task->Filename.substr(0, task->Filename.size() - 3) + "ranim";
+	RAnimation* animation = nullptr;
 
-	if (!animation->LoadFromFile(animFilename.c_str()))
+	FbxArray<FbxString*> animStackNameArray;
+	lFbxScene->FillAnimStackNameArray(animStackNameArray);
+	if (animStackNameArray.GetCount() > 0)
 	{
-		SAFE_DELETE(animation);
+		FbxAnimStack* animStack = lFbxScene->FindMember<FbxAnimStack>(animStackNameArray[0]->Buffer());
+		FbxTakeInfo* takeInfo = lFbxScene->GetTakeInfo(*(animStackNameArray[0]));
 
-		FbxArray<FbxString*> animStackNameArray;
-		lFbxScene->FillAnimStackNameArray(animStackNameArray);
-		if (animStackNameArray.GetCount() > 0)
+		FbxArrayDelete(animStackNameArray);
+
+		FbxTime::EMode				animTimeMode;
+		FbxTime						frameTime, animStartTime, animEndTime;
+		float						animFrameRate;
+
+		frameTime.SetTime(0, 0, 0, 1, 0, lFbxScene->GetGlobalSettings().GetTimeMode());
+		animTimeMode = lFbxScene->GetGlobalSettings().GetTimeMode();
+		animFrameRate = (float)frameTime.GetFrameRate(animTimeMode);
+		animStartTime = takeInfo->mLocalTimeSpan.GetStart();
+		animEndTime = takeInfo->mLocalTimeSpan.GetStop();
+
+		int totalFrameCount = (int)(animEndTime.GetFrameCount(animTimeMode) - animStartTime.GetFrameCount(animTimeMode)) + 1;
+		animation = new RAnimation(
+			lFbxScene->GetNodeCount(),
+			totalFrameCount,
+			(float)animStartTime.GetFrameCountPrecise(animTimeMode),
+			(float)animEndTime.GetFrameCountPrecise(animTimeMode),
+			animFrameRate);
+
+		map<string, int> nodeNameToId;
+
+		for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
 		{
-			FbxAnimStack* animStack = lFbxScene->FindMember<FbxAnimStack>(animStackNameArray[0]->Buffer());
-			FbxTakeInfo* takeInfo = lFbxScene->GetTakeInfo(*(animStackNameArray[0]));
+			FbxNode* node = lFbxScene->GetNode(idxNode);
 
-			FbxArrayDelete(animStackNameArray);
-
-			FbxTime::EMode				animTimeMode;
-			FbxTime						frameTime, animStartTime, animEndTime;
-			float						animFrameRate;
-
-			frameTime.SetTime(0, 0, 0, 1, 0, lFbxScene->GetGlobalSettings().GetTimeMode());
-			animTimeMode = lFbxScene->GetGlobalSettings().GetTimeMode();
-			animFrameRate = (float)frameTime.GetFrameRate(animTimeMode);
-			animStartTime = takeInfo->mLocalTimeSpan.GetStart();
-			animEndTime = takeInfo->mLocalTimeSpan.GetStop();
-
-			int totalFrameCount = (int)(animEndTime.GetFrameCount(animTimeMode) - animStartTime.GetFrameCount(animTimeMode)) + 1;
-			animation = new RAnimation(
-				lFbxScene->GetNodeCount(),
-				totalFrameCount,
-				(float)animStartTime.GetFrameCountPrecise(animTimeMode),
-				(float)animEndTime.GetFrameCountPrecise(animTimeMode),
-				animFrameRate);
-
-			map<string, int> nodeNameToId;
-
-			for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
+			for (FbxTime animTime = animStartTime;
+				animTime <= animEndTime;
+				animTime += frameTime)
 			{
-				FbxNode* node = lFbxScene->GetNode(idxNode);
+				RMatrix4 matrix;
 
-				for (FbxTime animTime = animStartTime;
-					animTime <= animEndTime;
-					animTime += frameTime)
-				{
-					RMatrix4 matrix;
+				FbxAMatrix childTransform = node->EvaluateGlobalTransform(animTime);
+				MatrixTransfer(&matrix, &childTransform);
+				int frameIdx = (int)((float)animTime.GetFrameCountPrecise(animTimeMode) - (float)animStartTime.GetFrameCountPrecise(animTimeMode));
+				animation->AddNodePose(idxNode, frameIdx, &matrix);
+				animation->AddNodeNameToId(node->GetName(), idxNode);
 
-					FbxAMatrix childTransform = node->EvaluateGlobalTransform(animTime);
-					MatrixTransfer(&matrix, &childTransform);
-					int frameIdx = (int)((float)animTime.GetFrameCountPrecise(animTimeMode) - (float)animStartTime.GetFrameCountPrecise(animTimeMode));
-					animation->AddNodePose(idxNode, frameIdx, &matrix);
-					animation->AddNodeNameToId(node->GetName(), idxNode);
-
-					nodeNameToId[node->GetName()] = idxNode;
-				}
+				nodeNameToId[node->GetName()] = idxNode;
 			}
+		}
 
-			for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
+		for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
+		{
+			FbxNode* node = lFbxScene->GetNode(idxNode);
+			FbxNode* parent = node->GetParent();
+			if (parent && nodeNameToId.find(parent->GetName()) != nodeNameToId.end())
 			{
-				FbxNode* node = lFbxScene->GetNode(idxNode);
-				FbxNode* parent = node->GetParent();
-				if (parent && nodeNameToId.find(parent->GetName()) != nodeNameToId.end())
-				{
-					animation->SetParentId(idxNode, nodeNameToId[parent->GetName()]);
-				}
-				else
-				{
-					animation->SetParentId(idxNode, -1);
-				}
+				animation->SetParentId(idxNode, nodeNameToId[parent->GetName()]);
+			}
+			else
+			{
+				animation->SetParentId(idxNode, -1);
 			}
 		}
 	}
@@ -864,12 +858,6 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	static_cast<RMesh*>(task->Resource)->SetResourceTimestamp(REngine::GetTimer().TotalTime());
 	task->Resource->m_State = RS_Loaded;
 
-	if (animation)
-	{
-		string animFilename = task->Filename.substr(0, task->Filename.size() - 3) + "ranim";
-		animation->SaveToFile(animFilename.c_str());
-	}
-
 	string rmeshName = task->Filename.substr(0, task->Filename.length() - 3) + "rmesh";
 	RSerializer serializer;
 	serializer.Open(rmeshName, SM_Write);
@@ -901,18 +889,12 @@ bool RResourceManager::ThreadLoadRmeshData(LoaderThreadTask* task)
 	RAnimation* animation = new RAnimation();
 	string animFilename = task->Filename.substr(0, task->Filename.size() - 3) + "ranim";
 
-	if (!animation->LoadFromFile(animFilename.c_str()))
-	{
-		SAFE_DELETE(animation);
-	}
-
 	// Load material from file
 	string mtlFilename = task->Filename.substr(0, task->Filename.length() - 3) + "rmtl";
 	LoadMeshMaterials(mtlFilename, materials);
 	
 	if (materials.size())
 		static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), (UINT)materials.size());
-	static_cast<RMesh*>(task->Resource)->SetAnimation(animation);
 	static_cast<RMesh*>(task->Resource)->SetResourceTimestamp(REngine::GetTimer().TotalTime());
 
 	return true;

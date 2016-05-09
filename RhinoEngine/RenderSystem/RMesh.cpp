@@ -102,6 +102,7 @@ void RMesh::Serialize(RSerializer& serializer)
 
 	serializer.SerializeVector(m_MeshElements, &RSerializer::SerializeObject);
 	serializer.SerializeVector(m_Materials, &RSerializer::SerializeObject);
+	serializer.SerializeObjectPtr(&m_Animation);
 	serializer.SerializeVector(m_BoneInitInvMatrices);
 	serializer.SerializeVector(m_BoneIdToName, &RSerializer::SerializeData);
 
