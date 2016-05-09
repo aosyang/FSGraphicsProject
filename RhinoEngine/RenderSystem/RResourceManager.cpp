@@ -212,7 +212,6 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 {
 	vector<RMeshElement> meshElements;
 	vector<RMaterial> materials;
-	RAabb mesh_aabb;
 
 	char msg_buf[1024];
 	sprintf_s(msg_buf, sizeof(msg_buf), "Loading mesh [%s]...\n", task->Filename.data());
@@ -366,7 +365,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		}
 	}
 
-	BoneMatrices* boneInitInvPose = nullptr;
+	vector<RMatrix4> boneInitInvPose;
 
 	// Load meshes
 	int nodeCount = lFbxScene->GetNodeCount();
@@ -567,9 +566,11 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					cluster->GetTransformLinkMatrix(clusterInitTransform);
 					clusterInitTransform = clusterInitTransform.Inverse();
 
-					if (!boneInitInvPose)
-						boneInitInvPose = new BoneMatrices;
-					MatrixTransfer(&boneInitInvPose->boneMatrix[boneId], &clusterInitTransform);
+					if (boneInitInvPose.size() == 0 && fbxBoneNodes.size())
+						boneInitInvPose.resize(fbxBoneNodes.size());
+
+					if (boneInitInvPose.size() != 0)
+						MatrixTransfer(boneInitInvPose.data() + boneId, &clusterInitTransform);
 
 					int cpIndicesCount = cluster->GetControlPointIndicesCount();
 					for (int idxCpIndex = 0; idxCpIndex < cpIndicesCount; idxCpIndex++)
@@ -827,9 +828,6 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 		meshElements.push_back(meshElem);
 
-
-		mesh_aabb.Expand(meshElem.GetAabb());
-
 		sprintf_s(msg_buf, "Mesh loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
 			optimizedVertData.size(), optimizedIndexData.size() / 3, flatVertData.size(), indexData.size() / 3);
 		OutputDebugStringA(msg_buf);
@@ -882,7 +880,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 	static_cast<RMesh*>(task->Resource)->SetMeshElements(meshElements.data(), (UINT)meshElements.size());
 	static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), (UINT)materials.size());
-	static_cast<RMesh*>(task->Resource)->SetAabb(mesh_aabb);
+	static_cast<RMesh*>(task->Resource)->UpdateAabb();
 	static_cast<RMesh*>(task->Resource)->SetAnimation(animation);
 	static_cast<RMesh*>(task->Resource)->SetBoneNameList(meshBoneIdToName);
 	static_cast<RMesh*>(task->Resource)->SetBoneInitInvMatrices(boneInitInvPose);

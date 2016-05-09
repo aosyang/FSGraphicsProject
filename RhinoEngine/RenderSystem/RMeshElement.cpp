@@ -134,6 +134,24 @@ void RMeshElement::Release()
 	m_RenderBuffer.Release();
 }
 
+void RMeshElement::Serialize(RSerializer& serializer)
+{
+	serializer.SerializeData(m_Name);
+	serializer.SerializeData(m_Flag);
+	serializer.SerializeData(m_VertexComponentMask);
+	serializer.SerializeVector(TriangleIndices);
+	serializer.SerializeVector(PositionArray);
+	serializer.SerializeVector(UV0Array);
+	serializer.SerializeVector(NormalArray);
+	serializer.SerializeVector(TangentArray);
+	serializer.SerializeVector(UV1Array);
+	serializer.SerializeVector(BoneIdArray);
+	serializer.SerializeVector(BoneWeightArray);
+
+	if (serializer.IsReading())
+		UpdateRenderBuffer();
+}
+
 void RMeshElement::SetTriangles(const vector<UINT>& triIndices)
 {
 	TriangleIndices = triIndices;

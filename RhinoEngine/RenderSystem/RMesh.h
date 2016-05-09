@@ -15,6 +15,8 @@ struct RMaterial
 	RShader*					Shader;
 	int							TextureNum;
 	RTexture*					Textures[8];
+
+	void Serialize(RSerializer& serializer);
 };
 
 struct BoneMatrices
@@ -30,26 +32,26 @@ public:
 	RMesh(string path, RMeshElement* meshElements, int numElement, RMaterial* materials, int numMaterial);
 	~RMesh();
 
+	void Serialize(RSerializer& serializer);
+
 	RMaterial GetMaterial(int index) const;
 	vector<RMaterial>& GetMaterials();
 
-	void SetInputLayout(ID3D11InputLayout* inputLayout);
-	ID3D11InputLayout* GetInputLayout() const;
 	vector<RMeshElement>& GetMeshElements();
 	int GetMeshElementCount() const;
 
 	void SetMeshElements(RMeshElement* meshElements, UINT numElement);
 	void SetMaterials(RMaterial* materials, UINT numMaterial);
 
-	void SetAabb(const RAabb& aabb);
+	void UpdateAabb();
 	const RAabb& GetLocalSpaceAabb() const;
 	const RAabb& GetMeshElementAabb(int index) const;
 
 	void SetAnimation(RAnimation* anim);
 	RAnimation* GetAnimation() const;
 
-	void SetBoneInitInvMatrices(BoneMatrices* bonePoses);
-	const RMatrix4& GetBoneInitInvMatrices(int index) const { return m_BoneInitInvMatrices->boneMatrix[index]; }
+	void SetBoneInitInvMatrices(vector<RMatrix4>& bonePoses);
+	const RMatrix4& GetBoneInitInvMatrices(int index) const { return m_BoneInitInvMatrices[index]; }
 
 	void SetBoneNameList(const vector<string>& boneNameList);
 	const string& GetBoneName(int boneId) const;
@@ -62,14 +64,13 @@ public:
 	float GetResourceTimestamp();
 private:
 	vector<RMeshElement>	m_MeshElements;
-	ID3D11InputLayout*		m_InputLayout;
 
 	vector<RMaterial>		m_Materials;
 	RAabb					m_Aabb;
 	float					m_LoadingFinishTime;
 
 	RAnimation*				m_Animation;
-	BoneMatrices*			m_BoneInitInvMatrices;
+	vector<RMatrix4>		m_BoneInitInvMatrices;
 	vector<string>			m_BoneIdToName;
 	map<RAnimation*, vector<int>>
 							m_AnimationNodeCache;

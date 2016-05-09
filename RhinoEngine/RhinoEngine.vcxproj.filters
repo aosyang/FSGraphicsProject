@@ -101,6 +101,9 @@
     <ClInclude Include="RenderSystem\RText.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="Core\RSerializer.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -181,6 +184,9 @@
     <ClCompile Include="Rhino.cpp" />
     <ClCompile Include="RenderSystem\RText.cpp">
       <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\RSerializer.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

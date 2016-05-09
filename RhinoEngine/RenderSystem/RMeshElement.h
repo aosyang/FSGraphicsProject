@@ -47,6 +47,8 @@ public:
 
 	void Release();
 
+	void Serialize(RSerializer& serializer);
+
 	void SetTriangles(const vector<UINT>& triIndices);
 	void SetVertices(const vector<RVertex::MESH_LOADER_VERTEX>& vertices, int vertexComponentMask);
 	void UpdateRenderBuffer();

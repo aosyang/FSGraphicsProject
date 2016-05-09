@@ -28,6 +28,7 @@
     <ClInclude Include="Core\RInput.h" />
     <ClInclude Include="Core\RMatrix.h" />
     <ClInclude Include="Core\RRay.h" />
+    <ClInclude Include="Core\RSerializer.h" />
     <ClInclude Include="Core\RSingleton.h" />
     <ClInclude Include="Core\RTimer.h" />
     <ClInclude Include="Core\RVector.h" />
@@ -62,6 +63,7 @@
     <ClCompile Include="Core\RInput.cpp" />
     <ClCompile Include="Core\RMatrix.cpp" />
     <ClCompile Include="Core\RRay.cpp" />
+    <ClCompile Include="Core\RSerializer.cpp" />
     <ClCompile Include="Core\RTimer.cpp" />
     <ClCompile Include="RenderSystem\DDSTextureLoader.cpp" />
     <ClCompile Include="RenderSystem\RAnimation.cpp" />
