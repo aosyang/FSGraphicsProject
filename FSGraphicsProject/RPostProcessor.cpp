@@ -25,7 +25,7 @@ RPostProcessor::RPostProcessor()
 void RPostProcessor::Initialize()
 {
 	// Create vertex shader for post processing
-	m_PPVertexShader = RShaderManager::Instance().GetShaderResource("PostProcessor")->VertexShader[0];
+	m_PPVertexShader = RShaderManager::Instance().GetShaderResource("PostProcessor")->VertexShader;
 	RRenderer.D3DDevice()->CreatePixelShader(PostProcessor_GammaCorrection, sizeof(PostProcessor_GammaCorrection), 0, &m_PPPixelShader[PPE_GammaCorrection]);
 	RRenderer.D3DDevice()->CreatePixelShader(PostProcessor_ColorEdgeDetection, sizeof(PostProcessor_ColorEdgeDetection), 0, &m_PPPixelShader[PPE_ColorEdgeDetection]);
 

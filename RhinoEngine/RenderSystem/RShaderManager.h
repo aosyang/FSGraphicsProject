@@ -13,9 +13,11 @@ enum EShaderFeatureMask
 
 struct RShader
 {
-	ID3D11VertexShader*		VertexShader[2];
+	ID3D11VertexShader*		VertexShader;
 	ID3D11PixelShader*		PixelShader;
 	ID3D11GeometryShader*	GeometryShader;
+
+	ID3D11VertexShader*		VertexShader_Skinned;
 
 	bool operator==(const RShader& rhs) const;
 
