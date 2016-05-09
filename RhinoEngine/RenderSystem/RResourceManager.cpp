@@ -109,8 +109,8 @@ void RResourceManager::LoadAllResources()
 			if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
 			{
 				string resName = GetAssetsBasePath() + dir_name + FindFileData.cFileName;
-
-				string lowerExt = resName.substr(resName.size() - 4);
+				
+				string lowerExt = resName.substr(resName.find_last_of('.'));
 				for (UINT i = 0; i < lowerExt.size(); i++)
 				{
 					lowerExt[i] = tolower(lowerExt[i]);
@@ -123,6 +123,11 @@ void RResourceManager::LoadAllResources()
 				else if (lowerExt == ".fbx")
 				{
 					LoadFbxMesh(resName.data());
+				}
+				else if (lowerExt == ".rmesh")
+				{
+					string fbxFilename = resName.substr(0, resName.find_last_of('.') + 1) + string("fbx");
+					LoadFbxMesh(fbxFilename.data());
 				}
 			}
 			else
@@ -170,7 +175,11 @@ void RResourceManager::UnloadSRVWrappers()
 
 RMesh* RResourceManager::LoadFbxMesh(const char* filename, ResourceLoadingMode mode)
 {
-	RMesh* pMesh = new RMesh(GetResourcePath(filename));
+	RMesh* pMesh = RResourceManager::FindMesh(filename);
+	if (pMesh)
+		return pMesh;
+
+	pMesh = new RMesh(GetResourcePath(filename));
 	pMesh->m_State = RS_EnqueuedForLoading;
 	m_MeshResources.push_back(pMesh);
 
