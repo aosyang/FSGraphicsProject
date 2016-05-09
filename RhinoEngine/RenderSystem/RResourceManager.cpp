@@ -18,6 +18,7 @@
 #include "tinyxml2/tinyxml2.h"
 
 #define ENABLE_THREADED_LOADING 1
+#define EXPORT_FBX_AS_BINARY_MESH 1
 
 static mutex								m_TaskQueueMutex;
 static condition_variable					m_TaskQueueCondition;
@@ -858,6 +859,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	static_cast<RMesh*>(task->Resource)->SetResourceTimestamp(REngine::GetTimer().TotalTime());
 	task->Resource->m_State = RS_Loaded;
 
+#if EXPORT_FBX_AS_BINARY_MESH == 1
 	string rmeshName = task->Filename.substr(0, task->Filename.length() - 3) + "rmesh";
 	RSerializer serializer;
 	serializer.Open(rmeshName, SM_Write);
@@ -866,6 +868,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		static_cast<RMesh*>(task->Resource)->Serialize(serializer);
 		serializer.Close();
 	}
+#endif
 }
 
 bool RResourceManager::ThreadLoadRmeshData(LoaderThreadTask* task)

@@ -19,7 +19,7 @@ bool RShader::operator==(const RShader& rhs) const
 
 void RShader::Bind(int featureMasks)
 {
-	if (featureMasks & SFM_Skinned)
+	if ((featureMasks & SFM_Skinned) && VertexShader_Skinned)
 		RRenderer.D3DImmediateContext()->VSSetShader(VertexShader_Skinned, NULL, 0);
 	else
 		RRenderer.D3DImmediateContext()->VSSetShader(VertexShader, NULL, 0);
