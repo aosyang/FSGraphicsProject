@@ -46,6 +46,7 @@ int					DirectionalLightCount;
 int					PointLightCount;
 int					SpotlightCount;
 int					CascadedShadowCount;
+float4				CascadedShadowDepth;
 CONSTANT_BUFFER_END
 
 CONSTANT_BUFFER_BEGIN(SHADER_MATERIAL_BUFFER, b1)

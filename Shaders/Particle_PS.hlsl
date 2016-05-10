@@ -39,7 +39,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 		if (id == 0)
 		{
-			lit = SampleCascadedShadowMap(Input.ShadowPosH, dot(DirectionalLight[id].Direction.xyz, normal));
+			lit = SampleCascadedShadowMap(Input.ShadowPosH, dot(DirectionalLight[id].Direction.xyz, normal), Input.PosH.z);
 		}
 
 		// Diffuse lighting

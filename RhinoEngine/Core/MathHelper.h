@@ -13,7 +13,7 @@
 #define DEG_TO_RAD(deg)			(PI/180.0f*(deg))
 #define RAD_TO_DEG(rad)			((rad)*180.0f/PI)
 
-namespace MathHelper
+namespace Math
 {
 	// Returns random float in [0, 1).
 	float RandF();

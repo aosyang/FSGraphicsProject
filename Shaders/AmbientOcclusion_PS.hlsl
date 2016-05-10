@@ -38,18 +38,11 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 	for (int id = 0; id < DirectionalLightCount; id++)
 	{
-		float shadowOffset[3] =
-		{
-			0.01f * saturate(1 - dot(DirectionalLight[id].Direction.xyz, normal)),
-			0.01f * saturate(1 - dot(DirectionalLight[id].Direction.xyz, normal)),
-			0.01 + 0.01f * saturate(1 - dot(DirectionalLight[id].Direction.xyz, normal)),
-		};
-
 		float lit = 1.0f;
 
 		if (id == 0)
 		{
-			lit = SampleCascadedShadowMap(Input.ShadowPosH, dot(DirectionalLight[id].Direction.xyz, normal));
+			lit = SampleCascadedShadowMap(Input.ShadowPosH, dot(DirectionalLight[id].Direction.xyz, normal), Input.PosH.z);
 		}
 
 		// Diffuse lighting

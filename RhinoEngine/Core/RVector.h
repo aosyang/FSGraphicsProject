@@ -89,8 +89,8 @@ public:
 
 	static RVec2 Lerp(const RVec2& a, const RVec2& b, float t)
 	{
-		return RVec2(MathHelper::Lerp(a.x, b.x, t),
-					 MathHelper::Lerp(a.y, b.y, t));
+		return RVec2(Math::Lerp(a.x, b.x, t),
+					 Math::Lerp(a.y, b.y, t));
 	}
 };
 
@@ -188,9 +188,9 @@ public:
 
 	static RVec3 Lerp(const RVec3& a, const RVec3& b, float t)
 	{
-		return RVec3(MathHelper::Lerp(a.x, b.x, t),
-					 MathHelper::Lerp(a.y, b.y, t),
-					 MathHelper::Lerp(a.z, b.z, t));
+		return RVec3(Math::Lerp(a.x, b.x, t),
+					 Math::Lerp(a.y, b.y, t),
+					 Math::Lerp(a.z, b.z, t));
 	}
 };
 
@@ -230,6 +230,8 @@ public:
 	RVec4& operator*=(float val)									{ x *= val; y *= val; z *= val; w *= val; return *this; }
 	RVec4& operator/=(float val)									{ x /= val; y /= val; z /= val; w /= val; return *this; }
 
+	float& operator[](int i)										{ return (&x)[i]; }
+
 	RVec3 ToVec3() const
 	{
 		return RVec3(x, y, z);
@@ -237,10 +239,10 @@ public:
 
 	static RVec4 Lerp(const RVec4& a, const RVec4& b, float t)
 	{
-		return RVec4(MathHelper::Lerp(a.x, b.x, t),
-					 MathHelper::Lerp(a.y, b.y, t),
-					 MathHelper::Lerp(a.z, b.z, t),
-					 MathHelper::Lerp(a.w, b.w, t));
+		return RVec4(Math::Lerp(a.x, b.x, t),
+					 Math::Lerp(a.y, b.y, t),
+					 Math::Lerp(a.z, b.z, t),
+					 Math::Lerp(a.w, b.w, t));
 	}
 };
 

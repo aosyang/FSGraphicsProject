@@ -78,7 +78,7 @@ float SampleShadowMap(Texture2D shadowMap, float3 shadowPosH, float3 depthOffset
 	return final;
 }
 
-float SampleCascadedShadowMap(float4 shadowPosH[3], float NdotL)
+float SampleCascadedShadowMap(float4 shadowPosH[3], float NdotL, float depth)
 {
 	float shadowOffset[3] =
 	{
@@ -93,25 +93,24 @@ float SampleCascadedShadowMap(float4 shadowPosH[3], float NdotL)
 	}
 	else if (CascadedShadowCount > 1)
 	{
-		if (shadowPosH[0].x > 0.01 && shadowPosH[0].x < 0.99 &&
-			shadowPosH[0].y > 0.01 && shadowPosH[0].y < 0.99 &&
-			shadowPosH[0].z > 0.01 && shadowPosH[0].z < 0.99)
+		float level0 = SampleShadowMap(ShadowDepthTexture[0], shadowPosH[0].xyz, shadowOffset[0]);
+		float level1 = SampleShadowMap(ShadowDepthTexture[1], shadowPosH[1].xyz, shadowOffset[1]);
+		float level2 = (CascadedShadowCount > 2) ? SampleShadowMap(ShadowDepthTexture[2], shadowPosH[2].xyz, shadowOffset[2]) : 1.0f;
+
+		if (depth < CascadedShadowDepth[0])
 		{
-			return SampleShadowMap(ShadowDepthTexture[0], shadowPosH[0].xyz, shadowOffset[0]);
+			float blend = saturate((depth - CascadedShadowDepth[0] * 0.9998) / 0.0002);
+			return lerp(level0, level1,	blend);
 		}
-		else if (CascadedShadowCount > 1 &&
-				 shadowPosH[1].x > 0.01 && shadowPosH[1].x < 0.99 &&
-				 shadowPosH[1].y > 0.01 && shadowPosH[1].y < 0.99 &&
-				 shadowPosH[1].z > 0.01 && shadowPosH[1].z < 0.99)
+		else if (depth < CascadedShadowDepth[1])
 		{
-			return SampleShadowMap(ShadowDepthTexture[1], shadowPosH[1].xyz, shadowOffset[1]);
+			float blend = saturate((depth - CascadedShadowDepth[1] * 0.9999) / 0.0001);
+			return lerp(level1, level2, blend);
 		}
-		else if (CascadedShadowCount > 2 &&
-				 shadowPosH[2].x > 0 && shadowPosH[2].x < 1 &&
-				 shadowPosH[2].y > 0 && shadowPosH[2].y < 1 &&
-				 shadowPosH[2].z > 0 && shadowPosH[2].z < 1)
+		else if (CascadedShadowCount > 2 && depth < CascadedShadowDepth[2])
 		{
-			return SampleShadowMap(ShadowDepthTexture[2], shadowPosH[2].xyz, shadowOffset[2]);
+			float blend = saturate((depth - CascadedShadowDepth[2] * 0.99995) / 0.00005);
+			return lerp(level2, 1.0f, blend);
 		}
 	}
 

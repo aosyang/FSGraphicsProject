@@ -7,7 +7,7 @@
 
 #include "MathHelper.h"
 
-namespace MathHelper
+namespace Math
 {
 	// Returns random float in [0, 1].
 	float RandF()

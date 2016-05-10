@@ -301,14 +301,14 @@ bool FSGraphicsProjectApp::Initialize()
 
 	for (int i = 0; i < PARTICLE_COUNT; i++)
 	{
-		float x = MathHelper::RandF(-2000.0f, 1000.0f),
-			  y = MathHelper::RandF(1000.0f, 1200.0f),
-			  z = MathHelper::RandF(-2000.0f, 1000.0f),
-			  w = MathHelper::RandF(500.0f, 750.0f);
-		float ic = MathHelper::RandF(0.5f, 1.0f);
+		float x = Math::RandF(-2000.0f, 1000.0f),
+			  y = Math::RandF(1000.0f, 1200.0f),
+			  z = Math::RandF(-2000.0f, 1000.0f),
+			  w = Math::RandF(500.0f, 750.0f);
+		float ic = Math::RandF(0.5f, 1.0f);
 		float offsetX = (rand() % 2 == 0) ? 0.0f : 0.5f;
 		float offsetY = (rand() % 2 == 0) ? 0.0f : 0.5f;
-		m_ParticleVert[i] = { RVec4(x, y, z, w), RVec4(ic, ic, ic, 1.0f), MathHelper::RandF(0.0f, PI * 2), RVec4(0.5f, 0.5f, offsetX, offsetY) };
+		m_ParticleVert[i] = { RVec4(x, y, z, w), RVec4(ic, ic, ic, 1.0f), Math::RandF(0.0f, PI * 2), RVec4(0.5f, 0.5f, offsetX, offsetY) };
 	}
 
 	m_ParticleDiffuseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/smoke_diffuse.dds");
@@ -490,7 +490,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 	if (RInput.GetBufferedKeyState('I') == BKS_Pressed)
 	{
-		m_MaterialSpecular = RVec4(1.0f, 1.0f, 1.0f, MathHelper::RandF(1.0f, 512.0f));
+		m_MaterialSpecular = RVec4(1.0f, 1.0f, 1.0f, Math::RandF(1.0f, 512.0f));
 	}
 
 	static RFrustum frustum = m_Camera.GetFrustum();
@@ -529,11 +529,26 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 		RVec3 shadowTarget = s0.center;
 		RVec3 shadowEyePos = shadowTarget + m_SunVec.GetNormalizedVec3() * lightDistance[i];
-		RMatrix4 shadowViewMatrix = RMatrix4::CreateLookAtViewLH(shadowEyePos, shadowTarget, RVec3(0.0f, 1.0f, 0.0f));
 
 		RVec3 viewForward = (shadowTarget - shadowEyePos).GetNormalizedVec3();
 		RVec3 viewRight = (RVec3(0, 1, 0).Cross(viewForward)).GetNormalizedVec3();
 		RVec3 viewUp = (viewForward.Cross(viewRight)).GetNormalizedVec3();
+
+		// Calculate texel offset in world space
+		float texel_unit = s0.radius * 2.0f / 1024.0f;
+		float texel_depth_unit = (s0.radius + lightDistance[i]) / 1024.0f;
+
+		float dx = shadowEyePos.Dot(viewRight);
+		float dy = shadowEyePos.Dot(viewUp);
+		float dz = shadowEyePos.Dot(viewForward);
+		float offset_x = dx - floorf(dx / texel_unit) * texel_unit;
+		float offset_y = dy - floorf(dy / texel_unit) * texel_unit;
+		float offset_z = dz - floorf(dz / texel_depth_unit) * texel_depth_unit;
+
+		shadowTarget -= viewRight * offset_x + viewUp * offset_y/* + viewForward * offset_z*/;
+		shadowEyePos -= viewRight * offset_x + viewUp * offset_y/* + viewForward * offset_z*/;
+
+		RMatrix4 shadowViewMatrix = RMatrix4::CreateLookAtViewLH(shadowEyePos, shadowTarget, RVec3(0.0f, 1.0f, 0.0f));
 
 		RFrustum shadowVolume;
 		shadowVolume.corners[0] = shadowTarget - viewRight * s0.radius + viewUp * s0.radius + viewForward * s0.radius; // RVec3(-1,  1,  1);
@@ -609,6 +624,25 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 	cbLight.CameraPos = m_Camera.GetPosition();
 	cbLight.CascadedShadowCount = 3;
+
+	float camNear = m_Camera.GetNearPlane(),
+		  camFar = m_Camera.GetFarPlane();
+
+	RVec4 sPoints[4] =
+	{
+		RVec4(0, 0, Math::Lerp(camNear, camFar, shadowSplitPoints[0]), 1),
+		RVec4(0, 0, Math::Lerp(camNear, camFar, shadowSplitPoints[1]), 1),
+		RVec4(0, 0, Math::Lerp(camNear, camFar, shadowSplitPoints[2]), 1),
+		RVec4(0, 0, Math::Lerp(camNear, camFar, shadowSplitPoints[3]), 1),
+	};
+
+	for (int i = 1; i < 4; i++)
+	{
+		sPoints[i] = sPoints[i] * projMatrix;
+		sPoints[i] /= sPoints[i].w;
+		cbLight.CascadedShadowDepth[i - 1] = sPoints[i].z;
+		//m_DebugRenderer.DrawSphere(sPoints[i].ToVec3(), 50.0f);
+	}
 
 	m_cbLight.UpdateContent(&cbLight);
 
