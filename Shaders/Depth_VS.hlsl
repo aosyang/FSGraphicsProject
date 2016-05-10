@@ -35,7 +35,7 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 	Out.PosH = mul(float4(Input.PosL, 1.0f), worldMatrix);
 #endif
 
-	Out.PosH = mul(Out.PosH, shadowViewProjMatrix);
+	Out.PosH = mul(Out.PosH, shadowViewProjMatrix[cascadedShadowIndex]);
 
 	return Out;
 }

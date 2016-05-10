@@ -172,7 +172,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	m_Scene.cbMaterial.ApplyToShaders();
 
 	// Update screen buffer
-	SHADER_SCREEN_BUFFER cbScreen;
+	SHADER_GLOBAL_BUFFER cbScreen;
 	ZeroMemory(&cbScreen, sizeof(cbScreen));
 
 	cbScreen.ScreenSize = RVec2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());

@@ -70,3 +70,13 @@ namespace RCollision
 		return (sphere.center - cloest_pt).SquaredMagitude() < sqrdRadius;
 	}
 };
+
+void RFrustum::BuildPlanesFromCorners()
+{
+	planes[0] = RPlane(corners[FC_NBR], corners[FC_NTL], corners[FC_NBL]);
+	planes[1] = RPlane(corners[FC_FBL], corners[FC_FTR], corners[FC_FBR]);
+	planes[2] = RPlane(corners[FC_NBL], corners[FC_FTL], corners[FC_FBL]);
+	planes[3] = RPlane(corners[FC_FBR], corners[FC_NTR], corners[FC_NBR]);
+	planes[4] = RPlane(corners[FC_NTR], corners[FC_FTL], corners[FC_NTL]);
+	planes[5] = RPlane(corners[FC_NBL], corners[FC_FBR], corners[FC_NBR]);
+}

@@ -5,19 +5,19 @@
 //=============================================================================
 
 #include "ConstBufferPS.h"
+#include "PixelShaderCommon.hlsli"
 #include "LightShaderCommon.hlsli"
 
 Texture2D DiffuseTexture	: register(t0);
 Texture2D NormalTexture		: register(t1);
 
-SamplerState Sampler;
 
 struct OUTPUT_VERTEX
 {
 	float4 Color		: COLOR;
 	float2 UV			: TEXCOORD0;
 	float3 PosW			: TEXCOORD1;
-	float4 ShadowPosH	: TEXCOORD2;
+	float4 ShadowPosH[3]	: TEXCOORD2;
 	float3 NormalW		: NORMAL;
 	float3 TangentW		: TANGENT;
 };
@@ -35,7 +35,12 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 	for (int id = 0; id < DirectionalLightCount; id++)
 	{
-		float lit = (id == 0) ? SampleShadowMap(ShadowDepthTexture, Sampler, Input.ShadowPosH.xyz) : 1.0f;
+		float lit = 1.0f;
+
+		if (id == 0)
+		{
+			lit = SampleCascadedShadowMap(Input.ShadowPosH, dot(DirectionalLight[id].Direction.xyz, normal));
+		}
 
 		// Diffuse lighting
 		Diffuse.rgb += lit * CalculateHalfLambertDiffuseLight(normal, DirectionalLight[id].Direction.xyz, DirectionalLight[id].Color);

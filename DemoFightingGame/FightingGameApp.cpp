@@ -78,9 +78,12 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	cbLight.DirectionalLight[0].Color = RVec4(1.0f, 1.0f, 0.8f, 2.0f);
 	cbLight.DirectionalLight[0].Direction = RVec4(sunVec.GetNormalizedVec3(), 1.0f);
 
+	cbLight.CascadedShadowCount = 1;
+
 
 	// Update scene constant buffer
 	SHADER_SCENE_BUFFER cbScene;
+	ZeroMemory(&cbScene, sizeof(cbScene));
 
 #if 1
 	cbScene.viewMatrix = m_Camera.GetViewMatrix();
@@ -111,9 +114,9 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		0.5f, 0.5f, 0.0f, 1.0f);
 
 	RMatrix4 shadowViewProjMatrix = m_ShadowMap.GetViewMatrix() * m_ShadowMap.GetProjectionMatrix();
-	cbScene.shadowViewProjMatrix = shadowViewProjMatrix;
+	cbScene.shadowViewProjMatrix[0] = shadowViewProjMatrix;
 	shadowViewProjMatrix *= shadowTransform;
-	cbScene.shadowViewProjBiasedMatrix = shadowViewProjMatrix;
+	cbScene.shadowViewProjBiasedMatrix[0] = shadowViewProjMatrix;
 
 	m_Scene.cbScene.UpdateContent(&cbScene);
 	m_Scene.cbScene.ApplyToShaders();
@@ -133,7 +136,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	if (RInput.GetBufferedKeyState('P') == BKS_Pressed)
 		m_DrawHitBound = !m_DrawHitBound;
 
-	SHADER_SCREEN_BUFFER cbScreen;
+	SHADER_GLOBAL_BUFFER cbScreen;
 	ZeroMemory(&cbScreen, sizeof(cbScreen));
 
 	cbScreen.ScreenSize = RVec2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());

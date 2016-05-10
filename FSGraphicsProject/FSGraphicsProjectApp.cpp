@@ -215,7 +215,7 @@ bool FSGraphicsProjectApp::Initialize()
 
 	m_MeshTachikoma = RResourceManager::Instance().LoadFbxMesh("../Assets/tachikoma.fbx");
 	m_TachikomaObj.SetMesh(m_MeshTachikoma);
-	m_TachikomaObj.SetPosition(RVec3(0.0f, 40.0f, 0.0f));
+	m_TachikomaObj.SetPosition(RVec3(0.0f, 39.0f, 0.0f));
 
 	RMaterial tachikomaMaterials[] =
 	{
@@ -291,7 +291,10 @@ bool FSGraphicsProjectApp::Initialize()
 	m_CamPitch = 0.0900001600f;
 	m_CamYaw = 3.88659930f;
 
-	m_ShadowMap.Initialize(1024, 1024);
+	for (int i = 0; i < 3; i++)
+	{
+		m_ShadowMap[i].Initialize(1024, 1024);
+	}
 
 	m_ParticleIL = RVertexDeclaration::Instance().GetInputLayout(RVertex::PARTICLE_VERTEX::GetTypeName());
 	m_ParticleBuffer.CreateVertexBuffer(nullptr, sizeof(RVertex::PARTICLE_VERTEX), PARTICLE_COUNT, m_ParticleIL, true);
@@ -344,6 +347,9 @@ bool FSGraphicsProjectApp::Initialize()
 	m_CharacterRot = 0.0f;
 	m_CharacterYVel = 0.0f;
 	m_RenderCollisionWireframe = false;
+
+	m_SunVec = RVec3(sinf(1.0f) * 0.5f, 0.25f, cosf(1.0f) * 0.5f).GetNormalizedVec3() * 1000.0f;
+	m_MaterialSpecular = RVec4(1.0f, 1.0f, 1.0f, 16.0f);
 
 	return true;
 }
@@ -462,19 +468,49 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	RMatrix4 projMatrix = m_Camera.GetProjectionMatrix();
 
 	// Update scene constant buffer
-	SHADER_SCENE_BUFFER cbScene;
-
 	cbScene.viewMatrix = viewMatrix;
 	cbScene.projMatrix = projMatrix;
 	cbScene.viewProjMatrix = viewMatrix * projMatrix;
 	cbScene.cameraPos = m_Camera.GetPosition();
 
-	float ct = 1.0f;// timer.TotalTime() * 0.2f;
-	m_SunVec = RVec3(sinf(ct) * 0.5f, 0.25f, cosf(ct) * 0.5f).GetNormalizedVec3() * 2000.0f;
-	RMatrix4 shadowViewMatrix = RMatrix4::CreateLookAtViewLH(m_SunVec, RVec3(0.0f, 0.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f));
+	static bool toggleMovingSun = false;
 
-	m_ShadowMap.SetViewMatrix(shadowViewMatrix);
-	m_ShadowMap.SetOrthogonalProjection(5000.0f, 5000.0f, 0.1f, 5000.0f);
+	if (RInput.GetBufferedKeyState('U') == BKS_Pressed)
+	{
+		toggleMovingSun = !toggleMovingSun;
+	}
+
+	static float ct = timer.TotalTime() * 0.2f;
+
+	if (toggleMovingSun)
+	{
+		ct = timer.TotalTime() * 0.2f;
+		m_SunVec = RVec3(sinf(ct) * 0.5f, 0.25f, cosf(ct) * 0.5f).GetNormalizedVec3() * 1000.0f;
+	}
+
+	if (RInput.GetBufferedKeyState('I') == BKS_Pressed)
+	{
+		m_MaterialSpecular = RVec4(1.0f, 1.0f, 1.0f, MathHelper::RandF(1.0f, 512.0f));
+	}
+
+	static RFrustum frustum = m_Camera.GetFrustum();
+	static bool freezeFrustum = false;
+
+	if (RInput.GetBufferedKeyState('O') == BKS_Pressed)
+	{
+		freezeFrustum = !freezeFrustum;
+	}
+
+	if (!freezeFrustum)
+	{
+		frustum = m_Camera.GetFrustum();
+	}
+
+	//m_DebugRenderer.DrawFrustum(frustum);
+
+	float shadowSplitPoints[4] = { 0.0f, 0.05f, 0.2f, 0.5f };
+	float lightDistance[3] = { 1000.0f, 2000.0f, 2000.0f };
+	RColor frustumColor[3] = { RColor(1, 0, 0), RColor(0, 1, 0), RColor(0, 0, 1) };
 
 	RMatrix4 shadowTransform(
 		0.5f, 0.0f, 0.0f, 0.0f,
@@ -482,12 +518,58 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.5f, 0.5f, 0.0f, 1.0f);
 
-	RMatrix4 shadowViewProjMatrix = m_ShadowMap.GetViewMatrix() * m_ShadowMap.GetProjectionMatrix();
-	cbScene.shadowViewProjMatrix = shadowViewProjMatrix;
-	shadowViewProjMatrix *= shadowTransform;
-	cbScene.shadowViewProjBiasedMatrix = shadowViewProjMatrix;
+	for (int i = 0; i < 3; i++)
+	{
+		RSphere s0 = CalculateFrustumBoundingSphere(frustum, shadowSplitPoints[i], shadowSplitPoints[i + 1]);
 
-	m_cbScene.UpdateContent(&cbScene);
+		if (freezeFrustum)
+			m_DebugRenderer.DrawSphere(s0.center, s0.radius, frustumColor[i]);
+
+		lightDistance[i] = max(lightDistance[i], s0.radius);
+
+		RVec3 shadowTarget = s0.center;
+		RVec3 shadowEyePos = shadowTarget + m_SunVec.GetNormalizedVec3() * lightDistance[i];
+		RMatrix4 shadowViewMatrix = RMatrix4::CreateLookAtViewLH(shadowEyePos, shadowTarget, RVec3(0.0f, 1.0f, 0.0f));
+
+		RVec3 viewForward = (shadowTarget - shadowEyePos).GetNormalizedVec3();
+		RVec3 viewRight = (RVec3(0, 1, 0).Cross(viewForward)).GetNormalizedVec3();
+		RVec3 viewUp = (viewForward.Cross(viewRight)).GetNormalizedVec3();
+
+		RFrustum shadowVolume;
+		shadowVolume.corners[0] = shadowTarget - viewRight * s0.radius + viewUp * s0.radius + viewForward * s0.radius; // RVec3(-1,  1,  1);
+		shadowVolume.corners[1] = shadowTarget + viewRight * s0.radius + viewUp * s0.radius + viewForward * s0.radius; // RVec3( 1,  1,  1);
+		shadowVolume.corners[2] = shadowTarget - viewRight * s0.radius - viewUp * s0.radius + viewForward * s0.radius; // RVec3(-1, -1,  1);
+		shadowVolume.corners[3] = shadowTarget + viewRight * s0.radius - viewUp * s0.radius + viewForward * s0.radius; // RVec3( 1, -1,  1);
+		shadowVolume.corners[4] = shadowEyePos - viewRight * s0.radius + viewUp * s0.radius; // RVec3(-1,  1,  0);
+		shadowVolume.corners[5] = shadowEyePos + viewRight * s0.radius + viewUp * s0.radius; // RVec3( 1,  1,  0);
+		shadowVolume.corners[6] = shadowEyePos - viewRight * s0.radius - viewUp * s0.radius; // RVec3(-1, -1,  0);
+		shadowVolume.corners[7] = shadowEyePos + viewRight * s0.radius - viewUp * s0.radius; // RVec3( 1, -1,  0);
+
+		if (freezeFrustum)
+			m_DebugRenderer.DrawFrustum(shadowVolume, frustumColor[i]);
+
+		m_ShadowMap[i].SetViewMatrix(shadowViewMatrix);
+		//m_ShadowMap.SetOrthogonalProjection(500.0f, 500.0f, 0.1f, 5000.0f);
+		m_ShadowMap[i].SetOrthogonalProjection(s0.radius * 2.0f, s0.radius * 2.0f, 0.1f, s0.radius + lightDistance[i]);
+
+		RMatrix4 shadowViewProjMatrix = m_ShadowMap[i].GetViewMatrix() * m_ShadowMap[i].GetProjectionMatrix();
+		cbScene.shadowViewProjMatrix[i] = shadowViewProjMatrix;
+		shadowViewProjMatrix *= shadowTransform;
+		cbScene.shadowViewProjBiasedMatrix[i] = shadowViewProjMatrix;
+
+
+		//RMatrix4 invShadowViewProj = shadowViewProjMatrix.Inverse();
+
+		//for (int n = 0; n < 8; n++)
+		//{
+		//	RVec4 v = RVec4(shadowVolume.corners[n], 1);
+		//	v = v * invShadowViewProj;
+		//	v /= v.w;
+		//	shadowVolume.corners[n] = v.ToVec3();
+		//}
+
+		//m_DebugRenderer.DrawFrustum(shadowVolume);
+	}
 
 	// Update light constant buffer
 	ZeroMemory(&cbLight, sizeof(cbLight));
@@ -526,6 +608,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	}
 
 	cbLight.CameraPos = m_Camera.GetPosition();
+	cbLight.CascadedShadowCount = 3;
 
 	m_cbLight.UpdateContent(&cbLight);
 
@@ -546,7 +629,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	m_cbInstance[0].UpdateContent(&cbInstance[0]);
 
 	// Update screen information
-	SHADER_SCREEN_BUFFER cbScreen;
+	SHADER_GLOBAL_BUFFER cbScreen;
 	ZeroMemory(&cbScreen, sizeof(cbScreen));
 
 	cbScreen.ScreenSize = RVec2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());
@@ -668,7 +751,6 @@ void FSGraphicsProjectApp::RenderScene()
 	};
 
 	m_cbPerObject.ApplyToShaders();
-	m_cbScene.ApplyToShaders();
 	m_cbLight.ApplyToShaders();
 	m_cbMaterial.ApplyToShaders();
 	m_cbScreen.ApplyToShaders();
@@ -676,9 +758,16 @@ void FSGraphicsProjectApp::RenderScene()
 	RRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
 
 	//=========================== Shadow Pass ===========================
-	m_ShadowMap.SetupRenderTarget();
-	RRenderer.Clear();
-	RenderSinglePass(ShadowPass);
+	for (int i = 0; i < 3; i++)
+	{
+		cbScene.cascadedShadowIndex = i;
+		m_cbScene.UpdateContent(&cbScene);
+		m_cbScene.ApplyToShaders();
+
+		m_ShadowMap[i].SetupRenderTarget();
+		RRenderer.Clear();
+		RenderSinglePass(ShadowPass);
+	}
 
 	//=========================== Scene Buffer Pass =====================
 	RRenderer.SetRenderTargets(1, &m_RenderTargetView, m_RenderTargetDepthView);
@@ -706,8 +795,15 @@ void FSGraphicsProjectApp::RenderScene()
 		}
 		else
 		{
-			RMatrix4 viewMatrix = m_ShadowMap.GetViewMatrix();
-			RMatrix4 projMatrix = m_ShadowMap.GetProjectionMatrix();
+			static int shadowIndex = 0;
+			if (RInput.GetBufferedKeyState(VK_TAB) == BKS_Pressed)
+			{
+				shadowIndex++;
+				shadowIndex %= 3;
+			}
+
+			RMatrix4 viewMatrix = m_ShadowMap[shadowIndex].GetViewMatrix();
+			RMatrix4 projMatrix = m_ShadowMap[shadowIndex].GetProjectionMatrix();
 
 			cbScene.viewMatrix = viewMatrix;
 			cbScene.projMatrix = projMatrix;
@@ -821,7 +917,12 @@ void FSGraphicsProjectApp::SetPerObjectConstBuffer(const RMatrix4& world)
 
 void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 {
-	ID3D11ShaderResourceView* shadowMapSRV[] = { m_ShadowMap.GetRenderTargetDepthSRV() };
+	ID3D11ShaderResourceView* shadowMapSRV[] =
+	{
+		m_ShadowMap[0].GetRenderTargetDepthSRV(),
+		m_ShadowMap[1].GetRenderTargetDepthSRV(),
+		m_ShadowMap[2].GetRenderTargetDepthSRV(),
+	};
 
 	float timeNow = REngine::GetTimer().TotalTime();
 	float loadingFadeInTime = 1.0f;
@@ -830,7 +931,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	SHADER_MATERIAL_BUFFER cbMaterial;
 	ZeroMemory(&cbMaterial, sizeof(cbMaterial));
 
-	cbMaterial.SpecularColorAndPower = RVec4(1.0f, 1.0f, 1.0f, 512.0f);
+	cbMaterial.SpecularColorAndPower = m_MaterialSpecular;
 	cbMaterial.GlobalOpacity = 1.0f;
 	SetMaterialConstBuffer(&cbMaterial);
 
@@ -842,7 +943,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	if (pass != ShadowPass)
 	{
 		// Set shadow map to pixel shader
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, shadowMapSRV);
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 3, shadowMapSRV);
 
 		// Draw skybox
 		m_Skybox.Draw();
@@ -886,27 +987,27 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	}
 
 	// Draw islands
-	//SetPerObjectConstBuffer(m_IslandMeshObj.GetNodeTransform());
-	//m_cbInstance[0].ApplyToShaders();
+	SetPerObjectConstBuffer(m_IslandMeshObj.GetNodeTransform());
+	m_cbInstance[0].ApplyToShaders();
 
-	//if (pass == ShadowPass)
-	//	m_IslandMeshObj.DrawWithShader(m_InstancedDepthShader, true, MAX_INSTANCE_COUNT);
-	//else
-	//{
-	//	float opacity = (timeNow - m_IslandMeshObj.GetResourceTimestamp()) / loadingFadeInTime;
-	//	if (opacity >= 0.0f && opacity <= 1.0f)
-	//	{
-	//		cbMaterial.GlobalOpacity = opacity;
-	//		SetMaterialConstBuffer(&cbMaterial);
-	//		RRenderer.SetBlendState(Blend_AlphaToCoverage);
-	//		m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
-	//	}
-	//	else
-	//	{
-	//		RRenderer.SetBlendState(Blend_Opaque);
-	//		m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
-	//	}
-	//}
+	if (pass == ShadowPass)
+		m_IslandMeshObj.DrawWithShader(m_InstancedDepthShader, true, MAX_INSTANCE_COUNT);
+	else
+	{
+		float opacity = (timeNow - m_IslandMeshObj.GetResourceTimestamp()) / loadingFadeInTime;
+		if (opacity >= 0.0f && opacity <= 1.0f)
+		{
+			cbMaterial.GlobalOpacity = opacity;
+			SetMaterialConstBuffer(&cbMaterial);
+			RRenderer.SetBlendState(Blend_AlphaToCoverage);
+			m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
+		}
+		else
+		{
+			RRenderer.SetBlendState(Blend_Opaque);
+			m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
+		}
+	}
 
 	// Draw AO scene
 	SetPerObjectConstBuffer(m_AOSceneObj.GetNodeTransform());
@@ -1041,14 +1142,39 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	}
 
 	// Unbind all shader resources so we can write into it
-	ID3D11ShaderResourceView* nullSRV[] = { nullptr };
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, nullSRV);
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, nullSRV);
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, nullSRV);
+	ID3D11ShaderResourceView* nullSRV[8] = { nullptr };
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 8, nullSRV);
 }
 
 void FSGraphicsProjectApp::SetMaterialConstBuffer(SHADER_MATERIAL_BUFFER* buffer)
 {
 	m_cbMaterial.UpdateContent(buffer);
 	m_cbMaterial.ApplyToShaders();
+}
+
+RSphere FSGraphicsProjectApp::CalculateFrustumBoundingSphere(const RFrustum& frustum, float start, float end)
+{
+	RVec3 cornerPoints[8] = {
+		RVec3::Lerp(frustum.corners[4], frustum.corners[0], start),
+		RVec3::Lerp(frustum.corners[5], frustum.corners[1], start),
+		RVec3::Lerp(frustum.corners[6], frustum.corners[2], start),
+		RVec3::Lerp(frustum.corners[7], frustum.corners[3], start),
+		RVec3::Lerp(frustum.corners[4], frustum.corners[0], end),
+		RVec3::Lerp(frustum.corners[5], frustum.corners[1], end),
+		RVec3::Lerp(frustum.corners[6], frustum.corners[2], end),
+		RVec3::Lerp(frustum.corners[7], frustum.corners[3], end),
+	};
+	RVec3 nearMidPoint = (cornerPoints[0] + cornerPoints[1] + cornerPoints[2] + cornerPoints[3]) / 4.0f;
+	RVec3 farMidPoint = (cornerPoints[4] + cornerPoints[5] + cornerPoints[6] + cornerPoints[7]) / 4.0f;
+	RVec3 center = (farMidPoint + nearMidPoint) * 0.5f;
+	RSphere s = { center, (cornerPoints[4] - center).Magnitude() };
+
+	//m_DebugRenderer.DrawSphere(center, 50.0f, RColor(1, 0, 0));
+
+	//for (int i = 4; i < 8; i++)
+	//{
+	//	m_DebugRenderer.DrawSphere(cornerPoints[i], 50.0f, RColor(1, 0, 0));
+	//}
+
+	return s;
 }

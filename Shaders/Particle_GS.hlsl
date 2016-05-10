@@ -20,7 +20,7 @@ struct GSOutput
 	float4 Color		: COLOR;
 	float2 UV			: TEXCOORD0;
 	float3 PosW			: TEXCOORD1;
-	float4 ShadowPosH	: TEXCOORD2;
+	float4 ShadowPosH[3]	: TEXCOORD2;
 	float3 NormalW		: NORMAL;
 	float3 TangentW		: TANGENT;
 	float4 PosH			: SV_POSITION;
@@ -71,7 +71,9 @@ void main(
 	{
 		Vert[i].PosW = (Input[0].PosW + offset[i] * Input[0].SizeRot.x).xyz;
 		Vert[i].PosH = mul(float4(Vert[i].PosW, 1.0f), viewProjMatrix);
-		Vert[i].ShadowPosH = mul(float4(Vert[i].PosW, 1.0f), shadowViewProjBiasedMatrix);
+		Vert[i].ShadowPosH[0] = mul(float4(Vert[i].PosW, 1.0f), shadowViewProjBiasedMatrix[0]);
+		Vert[i].ShadowPosH[1] = mul(float4(Vert[i].PosW, 1.0f), shadowViewProjBiasedMatrix[1]);
+		Vert[i].ShadowPosH[2] = mul(float4(Vert[i].PosW, 1.0f), shadowViewProjBiasedMatrix[2]);
 		Vert[i].Color = Input[0].Color;
 		Vert[i].UV = uv[i] * Input[0].UVScaleOffset.xy + Input[0].UVScaleOffset.zw;
 		Vert[i].NormalW = normal;

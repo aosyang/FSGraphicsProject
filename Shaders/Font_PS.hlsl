@@ -5,9 +5,9 @@
 //=============================================================================
 
 #include "ConstBufferPS.h"
+#include "PixelShaderCommon.hlsli"
 
 Texture2D FontTexture	: register(t0);
-SamplerState Sampler;
 
 struct OUTPUT_VERTEX
 {

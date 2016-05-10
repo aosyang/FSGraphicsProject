@@ -5,9 +5,9 @@
 //=============================================================================
 
 #include "ConstBufferPS.h"
+#include "PixelShaderCommon.hlsli"
 
 TextureCube SkyTexture;
-SamplerState Sampler;
 
 struct OUTPUT_VERTEX
 {

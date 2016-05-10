@@ -5,11 +5,11 @@
 //=============================================================================
 
 #include "ConstBufferPS.h"
+#include "PixelShaderCommon.hlsli"
 #include "LightShaderCommon.hlsli"
 
 Texture2D DiffuseTexture			: register(t0);
 Texture2D AmbientOcclusionTexture	: register(t1);
-SamplerState Sampler;
 
 struct OUTPUT_VERTEX
 {

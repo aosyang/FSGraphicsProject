@@ -45,6 +45,7 @@ float4				LowHemisphereAmbientColor;
 int					DirectionalLightCount;
 int					PointLightCount;
 int					SpotlightCount;
+int					CascadedShadowCount;
 CONSTANT_BUFFER_END
 
 CONSTANT_BUFFER_BEGIN(SHADER_MATERIAL_BUFFER, b1)

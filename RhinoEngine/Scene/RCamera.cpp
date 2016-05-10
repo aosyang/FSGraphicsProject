@@ -55,12 +55,7 @@ RFrustum RCamera::GetFrustum() const
 	frustum.corners[FC_NBL] = nc - m_NodeTransform.GetUp() * (hNear * 0.5f) - m_NodeTransform.GetRight() * (wNear * 0.5f);
 	frustum.corners[FC_NBR] = nc - m_NodeTransform.GetUp() * (hNear * 0.5f) + m_NodeTransform.GetRight() * (wNear * 0.5f);
 
-	frustum.planes[0] = RPlane(frustum.corners[FC_NBR], frustum.corners[FC_NTL], frustum.corners[FC_NBL]);
-	frustum.planes[1] = RPlane(frustum.corners[FC_FBL], frustum.corners[FC_FTR], frustum.corners[FC_FBR]);
-	frustum.planes[2] = RPlane(frustum.corners[FC_NBL], frustum.corners[FC_FTL], frustum.corners[FC_FBL]);
-	frustum.planes[3] = RPlane(frustum.corners[FC_FBR], frustum.corners[FC_NTR], frustum.corners[FC_NBR]);
-	frustum.planes[4] = RPlane(frustum.corners[FC_NTR], frustum.corners[FC_FTL], frustum.corners[FC_NTL]);
-	frustum.planes[5] = RPlane(frustum.corners[FC_NBL], frustum.corners[FC_FBR], frustum.corners[FC_NBR]);
+	frustum.BuildPlanesFromCorners();
 
 	return frustum;
 }

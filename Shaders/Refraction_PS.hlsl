@@ -5,10 +5,10 @@
 //=============================================================================
 
 #include "ConstBufferPS.h"
+#include "PixelShaderCommon.hlsli"
 #include "LightShaderCommon.hlsli"
 
 Texture2D ScreenTexture	: register(t0);
-SamplerState Sampler;
 
 struct OUTPUT_VERTEX
 {
@@ -16,7 +16,7 @@ struct OUTPUT_VERTEX
 	float4 UV			: TEXCOORD0;
 	float3 NormalH		: TEXCOORD1;
 	float3 PosW			: TEXCOORD2;
-	float4 ShadowPosH	: TEXCOORD3;
+	float4 ShadowPosH[3]	: TEXCOORD3;
 	float3 NormalW		: NORMAL;
 };
 
@@ -27,11 +27,18 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	float3 normal = normalize(Input.NormalW);
 	float3 viewDir = normalize(CameraPos.xyz - Input.PosW);
 
-	Input.ShadowPosH.xyz /= Input.ShadowPosH.w;
+	Input.ShadowPosH[0].xyz /= Input.ShadowPosH[0].w;
+	Input.ShadowPosH[1].xyz /= Input.ShadowPosH[1].w;
+	Input.ShadowPosH[2].xyz /= Input.ShadowPosH[2].w;
 
 	for (int id = 0; id < DirectionalLightCount; id++)
 	{
-		float lit = (id == 0) ? SampleShadowMap(ShadowDepthTexture, Sampler, Input.ShadowPosH.xyz) : 1.0f;
+		float lit = 1.0f;
+
+		if (id == 0)
+		{
+			lit = SampleCascadedShadowMap(Input.ShadowPosH, dot(DirectionalLight[id].Direction.xyz, normal));
+		}
 
 		// Specular lighting
 		Specular.rgb += lit * CalculateSpecularLight(normal, DirectionalLight[id].Direction.xyz, viewDir, DirectionalLight[id].Color, SpecularColorAndPower);

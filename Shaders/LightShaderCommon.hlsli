@@ -7,7 +7,8 @@
 #ifndef _LIGHTSHADERCOMMON_HLSLI
 #define _LIGHTSHADERCOMMON_HLSLI
 
-Texture2D ShadowDepthTexture : register(t2);
+Texture2D ShadowDepthTexture[3]					: register(t2);
+
 SamplerComparisonState ShadowMapComparisonState : register(s2);
 
 float3x3 CalculateTBNSpace(float3 NormalW, float3 TangentW)
@@ -55,10 +56,10 @@ float3 CalculateSpecularLight(float3 normal,
 	return lightColor.rgb * specularColor.rgb * SpecularIntensity;
 }
 
-float SampleShadowMap(Texture2D shadowMap, SamplerState shadowMapSampler, float3 shadowPosH)
+float SampleShadowMap(Texture2D shadowMap, float3 shadowPosH, float3 depthOffset = 0.01f)
 {
 	// Nearest shadow map sampling
-	//return (shadowPosH.z < ShadowDepthTexture.Sample(shadowMapSampler, shadowPosH.xy).r + 0.0001f) ? 1.0f : 0.0f;
+	//return (shadowPosH.z < ShadowDepthTexture.Sample(Sampler, shadowPosH.xy).r + 0.0001f) ? 1.0f : 0.0f;
 
 	// Bilinear filtered shadow map comparison
 	//return shadowMap.SampleCmpLevelZero(ShadowMapComparisonState, shadowPosH.xy, shadowPosH.z - 0.01f);
@@ -70,11 +71,51 @@ float SampleShadowMap(Texture2D shadowMap, SamplerState shadowMapSampler, float3
 		for (float y = -1.5f; y <= 1.5f; y++)
 		{
 			float2 offset = float2(x, y) / 1024.0f;
-			final += shadowMap.SampleCmpLevelZero(ShadowMapComparisonState, shadowPosH.xy + offset, shadowPosH.z - 0.01f) / 16.0f;
+			final += shadowMap.SampleCmpLevelZero(ShadowMapComparisonState, shadowPosH.xy + offset, shadowPosH.z - depthOffset) / 16.0f;
 		}
 	}
 
 	return final;
+}
+
+float SampleCascadedShadowMap(float4 shadowPosH[3], float NdotL)
+{
+	float shadowOffset[3] =
+	{
+		0.01f * saturate(1 - NdotL),
+		0.01f * saturate(1 - NdotL),
+		0.01 + 0.01f * saturate(1 - NdotL),
+	};
+
+	if (CascadedShadowCount == 1)
+	{
+		return SampleShadowMap(ShadowDepthTexture[0], shadowPosH[0].xyz, shadowOffset[0]);
+	}
+	else if (CascadedShadowCount > 1)
+	{
+		if (shadowPosH[0].x > 0.01 && shadowPosH[0].x < 0.99 &&
+			shadowPosH[0].y > 0.01 && shadowPosH[0].y < 0.99 &&
+			shadowPosH[0].z > 0.01 && shadowPosH[0].z < 0.99)
+		{
+			return SampleShadowMap(ShadowDepthTexture[0], shadowPosH[0].xyz, shadowOffset[0]);
+		}
+		else if (CascadedShadowCount > 1 &&
+				 shadowPosH[1].x > 0.01 && shadowPosH[1].x < 0.99 &&
+				 shadowPosH[1].y > 0.01 && shadowPosH[1].y < 0.99 &&
+				 shadowPosH[1].z > 0.01 && shadowPosH[1].z < 0.99)
+		{
+			return SampleShadowMap(ShadowDepthTexture[1], shadowPosH[1].xyz, shadowOffset[1]);
+		}
+		else if (CascadedShadowCount > 2 &&
+				 shadowPosH[2].x > 0 && shadowPosH[2].x < 1 &&
+				 shadowPosH[2].y > 0 && shadowPosH[2].y < 1 &&
+				 shadowPosH[2].z > 0 && shadowPosH[2].z < 1)
+		{
+			return SampleShadowMap(ShadowDepthTexture[2], shadowPosH[2].xyz, shadowOffset[2]);
+		}
+	}
+
+	return 1.0f;
 }
 
 #endif

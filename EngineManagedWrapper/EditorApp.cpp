@@ -243,7 +243,7 @@ namespace EngineManagedWrapper
 		m_Scene.cbLight.ApplyToShaders();
 
 		// Update screen buffer
-		SHADER_SCREEN_BUFFER cbScreen;
+		SHADER_GLOBAL_BUFFER cbScreen;
 		ZeroMemory(&cbScreen, sizeof(cbScreen));
 
 		cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();

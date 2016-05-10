@@ -18,7 +18,7 @@ struct OUTPUT_VERTEX
 	float4 UV			: TEXCOORD0;
 	float3 NormalH		: TEXCOORD1;
 	float4 PosW			: TEXCOORD2;
-	float4 ShadowPosH	: TEXCOORD3;
+	float4 ShadowPosH[3]	: TEXCOORD3;
 	float3 NormalW		: NORMAL;
 };
 
@@ -29,7 +29,9 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 	Out.PosW = mul(float4(Input.PosL, 1.0f), worldMatrix);
 	Out.PosH = mul(Out.PosW, viewProjMatrix);
 
-	Out.ShadowPosH = mul(Out.PosW, shadowViewProjBiasedMatrix);
+	Out.ShadowPosH[0] = mul(Out.PosW, shadowViewProjBiasedMatrix[0]);
+	Out.ShadowPosH[1] = mul(Out.PosW, shadowViewProjBiasedMatrix[1]);
+	Out.ShadowPosH[2] = mul(Out.PosW, shadowViewProjBiasedMatrix[2]);
 
 	// SV_POSITION interpolation doesn't have perspective correction, use other semantics instead
 	Out.UV = Out.PosH;

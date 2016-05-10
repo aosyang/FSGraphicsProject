@@ -24,7 +24,7 @@ struct OUTPUT_VERTEX
 	float2 UV			: TEXCOORD0;
 	float3 NormalW		: TEXCOORD1;
 	float3 PosW			: TEXCOORD2;
-	float4 ShadowPosH	: TEXCOORD3;
+	float4 ShadowPosH[3]	: TEXCOORD3;
 };
 
 OUTPUT_VERTEX main(INPUT_VERTEX Input)
@@ -48,7 +48,9 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 	
 	Out.PosW = worldPos.xyz;
 	Out.PosH = mul(worldPos, viewProjMatrix);
-	Out.ShadowPosH = mul(worldPos, shadowViewProjBiasedMatrix);
+	Out.ShadowPosH[0] = mul(worldPos, shadowViewProjBiasedMatrix[0]);
+	Out.ShadowPosH[1] = mul(worldPos, shadowViewProjBiasedMatrix[1]);
+	Out.ShadowPosH[2] = mul(worldPos, shadowViewProjBiasedMatrix[2]);
 
 	Out.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	Out.NormalW = Normal;

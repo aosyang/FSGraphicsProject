@@ -37,6 +37,7 @@ private:
 	void SetPerObjectConstBuffer(const RMatrix4& world);
 	void RenderSinglePass(RenderPass pass);
 	void SetMaterialConstBuffer(SHADER_MATERIAL_BUFFER* buffer);
+	RSphere CalculateFrustumBoundingSphere(const RFrustum& frustum, float start, float end);
 
 	bool						m_EnableLights[3];
 
@@ -61,7 +62,7 @@ private:
 	RShaderConstantBuffer<SHADER_SKINNED_BUFFER,	CBST_VS, 3>				m_cbBoneMatrices;
 	RShaderConstantBuffer<SHADER_LIGHT_BUFFER,		CBST_PS, 0>				m_cbLight;
 	RShaderConstantBuffer<SHADER_MATERIAL_BUFFER,	CBST_PS, 1>				m_cbMaterial;
-	RShaderConstantBuffer<SHADER_SCREEN_BUFFER,		CBST_VS|CBST_PS, 4>		m_cbScreen;
+	RShaderConstantBuffer<SHADER_GLOBAL_BUFFER,		CBST_VS|CBST_PS, 4>		m_cbScreen;
 
 	RMesh*						m_SceneMeshCity;
 	RSMeshObject				m_FbxMeshObj;
@@ -83,7 +84,7 @@ private:
 	RSMeshObject				m_IslandMeshObj;
 	RShader*					m_InstancedLightingShader;
 
-	RShadowMap					m_ShadowMap;
+	RShadowMap					m_ShadowMap[3];
 	RShader*					m_DepthShader;
 	RShader*					m_InstancedDepthShader;
 
@@ -115,6 +116,7 @@ private:
 	float						m_CharacterRot;
 	float						m_CharacterYVel;
 	bool						m_RenderCollisionWireframe;
+	RVec4						m_MaterialSpecular;
 };
 
 #endif

@@ -46,6 +46,8 @@ struct RFrustum
 {
 	RPlane planes[6];
 	RVec3 corners[8];
+
+	void BuildPlanesFromCorners();
 };
 
 enum PlaneSpace

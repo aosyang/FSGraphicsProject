@@ -16,13 +16,13 @@ struct INPUT_VERTEX
 
 struct OUTPUT_VERTEX
 {
-	float4 Color		: COLOR;
-	float4 PosH			: SV_POSITION;
-	float2 UV0			: TEXCOORD0;
-	float2 UV1			: TEXCOORD1;
-	float3 PosW			: TEXCOORD2;
-	float4 ShadowPosH	: TEXCOORD3;
-	float3 NormalW		: NORMAL;
+	float4 Color			: COLOR;
+	float4 PosH				: SV_POSITION;
+	float2 UV0				: TEXCOORD0;
+	float2 UV1				: TEXCOORD1;
+	float3 PosW				: TEXCOORD2;
+	float4 ShadowPosH[3]	: TEXCOORD3;
+	float3 NormalW			: NORMAL;
 };
 
 OUTPUT_VERTEX main(INPUT_VERTEX Input)
@@ -32,7 +32,9 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 	float4 worldPos = mul(float4(Input.PosL, 1.0f), worldMatrix);
 	Out.PosW = worldPos.xyz;
 	Out.PosH = mul(worldPos, viewProjMatrix);
-	Out.ShadowPosH = mul(worldPos, shadowViewProjBiasedMatrix);
+	Out.ShadowPosH[0] = mul(worldPos, shadowViewProjBiasedMatrix[0]);
+	Out.ShadowPosH[1] = mul(worldPos, shadowViewProjBiasedMatrix[1]);
+	Out.ShadowPosH[2] = mul(worldPos, shadowViewProjBiasedMatrix[2]);
 
 	Out.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	Out.NormalW = mul(Input.Normal, (float3x3)worldMatrix);
