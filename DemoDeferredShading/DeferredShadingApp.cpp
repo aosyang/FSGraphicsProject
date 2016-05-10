@@ -72,11 +72,12 @@ bool DeferredShadingApp::Initialize()
 
 	for (int i = 0; i < MAX_LIGHT_COUNT; i++)
 	{
-		m_PointLights[i].pos = RVec3(MathHelper::RandF(-1500, 750), MathHelper::RandF(200, 400), MathHelper::RandF(-1850, 300));
-		m_PointLights[i].r = MathHelper::RandF(200, 400);
-		m_PointLights[i].color = RColor(MathHelper::RandF(), MathHelper::RandF(), MathHelper::RandF());
-		m_PointLights[i].sin_factor = RVec3(MathHelper::RandF(0, 5), 0, MathHelper::RandF(0, 5));
-		m_PointLights[i].sin_offset = RVec3(MathHelper::RandF(0, 5), 0, MathHelper::RandF(0, 5));
+		m_PointLights[i].pos = RVec3(Math::RandF(-1500, 750), Math::RandF(50, 50), Math::RandF(-1850, 300));
+		m_PointLights[i].r = Math::RandF(50, 100);
+		//m_PointLights[i].color = RColor(1, 1, 1);
+		m_PointLights[i].color = RColor(Math::RandF(), Math::RandF(), Math::RandF());
+		m_PointLights[i].sin_factor = RVec3(Math::RandF(0, 5), 0, Math::RandF(0, 5));
+		m_PointLights[i].sin_offset = RVec3(Math::RandF(0, 5), 0, Math::RandF(0, 5));
 	}
 
 	CD3D11_RASTERIZER_DESC rastDesc = CD3D11_RASTERIZER_DESC(D3D11_DEFAULT);
