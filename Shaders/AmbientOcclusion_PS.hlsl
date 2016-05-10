@@ -92,26 +92,31 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	Final.a *= GlobalOpacity;
 
 #if DEBUG_CASCADED_LEVELS == 1
-	if (Input.ShadowPosH[0].x > 0.01 && Input.ShadowPosH[0].x < 0.99 &&
-		Input.ShadowPosH[0].y > 0.01 && Input.ShadowPosH[0].y < 0.99 &&
-		Input.ShadowPosH[0].z > 0.01 && Input.ShadowPosH[0].z < 0.99)
+	if (CascadedShadowCount > 1)
 	{
-		Final *= float4(1, 0, 0, 1);
-	}
-	else if (Input.ShadowPosH[1].x > 0.01 && Input.ShadowPosH[1].x < 0.99 &&
-		Input.ShadowPosH[1].y > 0.01 && Input.ShadowPosH[1].y < 0.99 &&
-		Input.ShadowPosH[1].z > 0.01 && Input.ShadowPosH[1].z < 0.99)
-	{
-		Final *= float4(0, 1, 0, 1);
-	}
-	else if (Input.ShadowPosH[2].x > 0 && Input.ShadowPosH[2].x < 1 &&
-		Input.ShadowPosH[2].y > 0 && Input.ShadowPosH[2].y < 1 &&
-		Input.ShadowPosH[2].z > 0 && Input.ShadowPosH[2].z < 1)
-	{
-		Final *= float4(0, 0, 1, 1);
+		float depth = Input.PosH.z;
+
+		float4 level0 = float4(1, 0, 0, 1);
+		float4 level1 = float4(0, 1, 0, 1);
+		float4 level2 = float4(0, 0, 1, 1);
+
+		if (depth < CascadedShadowDepth[0])
+		{
+			float blend = saturate((depth - CascadedShadowDepth[0] * 0.9998) / 0.0002);
+			Final *= lerp(level0, level1, blend);
+		}
+		else if (depth < CascadedShadowDepth[1])
+		{
+			float blend = saturate((depth - CascadedShadowDepth[1] * 0.9999) / 0.0001);
+			Final *= lerp(level1, level2, blend);
+		}
+		else if (CascadedShadowCount > 2 && depth < CascadedShadowDepth[2])
+		{
+			float blend = saturate((depth - CascadedShadowDepth[2] * 0.99995) / 0.00005);
+			Final *= lerp(level2, 1.0f, blend);
+		}
 	}
 #endif
-
 
 	return Final;
 }

@@ -14,12 +14,13 @@ Texture2D NormalTexture		: register(t1);
 
 struct OUTPUT_VERTEX
 {
-	float4 Color		: COLOR;
-	float2 UV			: TEXCOORD0;
-	float3 PosW			: TEXCOORD1;
+	float4 Color			: COLOR;
+	float2 UV				: TEXCOORD0;
+	float3 PosW				: TEXCOORD1;
 	float4 ShadowPosH[3]	: TEXCOORD2;
-	float3 NormalW		: NORMAL;
-	float3 TangentW		: TANGENT;
+	float3 NormalW			: NORMAL;
+	float3 TangentW			: TANGENT;
+	float4 PosH				: SV_POSITION;
 };
 
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET

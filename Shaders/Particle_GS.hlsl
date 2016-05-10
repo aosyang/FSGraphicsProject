@@ -17,13 +17,13 @@ struct OUTPUT_VERTEX
 
 struct GSOutput
 {
-	float4 Color		: COLOR;
-	float2 UV			: TEXCOORD0;
-	float3 PosW			: TEXCOORD1;
+	float4 Color			: COLOR;
+	float2 UV				: TEXCOORD0;
+	float3 PosW				: TEXCOORD1;
 	float4 ShadowPosH[3]	: TEXCOORD2;
-	float3 NormalW		: NORMAL;
-	float3 TangentW		: TANGENT;
-	float4 PosH			: SV_POSITION;
+	float3 NormalW			: NORMAL;
+	float3 TangentW			: TANGENT;
+	float4 PosH				: SV_POSITION;
 };
 
 [maxvertexcount(4)]
