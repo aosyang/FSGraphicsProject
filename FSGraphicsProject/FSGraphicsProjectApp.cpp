@@ -297,11 +297,12 @@ bool FSGraphicsProjectApp::Initialize()
 		float x = Math::RandF(-2000.0f, 1000.0f),
 			  y = Math::RandF(1000.0f, 1200.0f),
 			  z = Math::RandF(-2000.0f, 1000.0f),
-			  w = Math::RandF(500.0f, 750.0f);
-		float ic = Math::RandF(0.5f, 1.0f);
+			  w = Math::RandF(500.0f, 750.0f);					// Particle radius
+		float ic = Math::RandF(0.5f, 1.0f);						// Particle color
 		float offsetX = (rand() % 2 == 0) ? 0.0f : 0.5f;
 		float offsetY = (rand() % 2 == 0) ? 0.0f : 0.5f;
 		m_ParticleVert[i] = { RVec4(x, y, z, w), RVec4(ic, ic, ic, 1.0f), Math::RandF(0.0f, PI * 2), RVec4(0.5f, 0.5f, offsetX, offsetY) };
+		m_ParticleAabb.ExpandBySphere(RVec3(x, y, z), w);
 	}
 
 	m_ParticleDiffuseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/smoke_diffuse.dds");
@@ -644,10 +645,8 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		float z = cosf((float)i / MAX_INSTANCE_COUNT * 2 * PI) * 1000.0f * d;
 		RMatrix4 instanceMatrix = RMatrix4::CreateTranslation(x, y, z) * RMatrix4::CreateYAxisRotation((x + timer.TotalTime() * 0.1f * sinf(d)) * 180 / PI);
 
-		cbInstance[0].instancedWorldMatrix[i] = instanceMatrix;
+		m_InstanceMatrices[i] = instanceMatrix;
 	}
-
-	m_cbInstance[0].UpdateContent(&cbInstance[0]);
 
 	// Update screen information
 	SHADER_GLOBAL_BUFFER cbScreen;
@@ -738,14 +737,21 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		RMatrix4 rootInversedTranslation = RMatrix4::CreateTranslation(invOffset);
 
 		SHADER_SKINNED_BUFFER cbSkinned;
-		for (int i = 0; i < m_CharacterObj.GetMesh()->GetBoneCount(); i++)
+		if (m_CharacterObj.GetMesh()->IsResourceReady())
 		{
-			RMatrix4 matrix;
+			for (int i = 0; i < m_CharacterObj.GetMesh()->GetBoneCount(); i++)
+			{
+				RMatrix4 matrix;
 
-			int boneId = m_CharacterObj.GetMesh()->GetCachedAnimationNodeId(animation, i);
-			animation->GetNodePose(boneId, currTime, &matrix);
+				int boneId = m_CharacterObj.GetMesh()->GetCachedAnimationNodeId(animation, i);
+				animation->GetNodePose(boneId, currTime, &matrix);
 
-			cbSkinned.boneMatrix[i] = m_CharacterObj.GetMesh()->GetBoneInitInvMatrices(i) * matrix * rootInversedTranslation * m_CharacterObj.GetNodeTransform();
+				cbSkinned.boneMatrix[i] = m_CharacterObj.GetMesh()->GetBoneInitInvMatrices(i) * matrix * rootInversedTranslation * m_CharacterObj.GetNodeTransform();
+			}
+		}
+		else
+		{
+			ZeroMemory(&cbSkinned, sizeof(cbSkinned));
 		}
 
 		m_DebugRenderer.DrawLine(nodePos, nodePos + worldOffset * 10, RColor(1.0f, 0.0f, 0.0f), RColor(1.0f, 0.0f, 0.0f));
@@ -1047,10 +1053,27 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 #if 1
 	// Draw islands
 	SetPerObjectConstBuffer(m_IslandMeshObj.GetNodeTransform());
-	m_cbInstance[0].ApplyToShaders();
+
+	SHADER_INSTANCE_BUFFER cbIslandInstance;
+	int islandInstanceCount = 0;
+
+	if (m_IslandMeshObj.GetMesh()->IsResourceReady())
+	{
+		RAabb islandAabb = m_IslandMeshObj.GetMesh()->GetLocalSpaceAabb();
+		for (int i = 0; i < MAX_INSTANCE_COUNT; i++)
+		{
+			if (!RCollision::TestAabbInsideFrustum(cameraFrustum, islandAabb.GetTransformedAabb(m_InstanceMatrices[i])))
+				continue;
+
+			cbIslandInstance.instancedWorldMatrix[islandInstanceCount] = m_InstanceMatrices[i];
+			islandInstanceCount++;
+		}
+		m_cbInstance[0].UpdateContent(&cbIslandInstance);
+		m_cbInstance[0].ApplyToShaders();
+	}
 
 	if (pass == ShadowPass)
-		m_IslandMeshObj.DrawWithShader(m_DepthShader, true, MAX_INSTANCE_COUNT);
+		m_IslandMeshObj.DrawWithShader(m_DepthShader, true, islandInstanceCount);
 	else
 	{
 		float opacity = (timeNow - m_IslandMeshObj.GetResourceTimestamp()) / loadingFadeInTime;
@@ -1059,15 +1082,13 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			cbMaterial.GlobalOpacity = opacity;
 			SetMaterialConstBuffer(&cbMaterial);
 			RRenderer.SetBlendState(Blend_AlphaToCoverage);
-			m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
 		}
 		else
 		{
 			RRenderer.SetBlendState(Blend_Opaque);
-			m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
 		}
+		m_IslandMeshObj.Draw(true, islandInstanceCount);
 	}
-#endif
 
 	// Draw AO scene
 	SetPerObjectConstBuffer(m_AOSceneObj.GetNodeTransform());
@@ -1112,25 +1133,27 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 
 	// Draw character
 	SetPerObjectConstBuffer(m_CharacterObj.GetNodeTransform());
-	
-	if (pass == ShadowPass)
-		m_CharacterObj.DrawDepthPass();
-	else
+	if (RCollision::TestAabbInsideFrustum(cameraFrustum, m_CharacterObj.GetAabb()))
 	{
-		float opacity = (timeNow - m_CharacterObj.GetResourceTimestamp()) / loadingFadeInTime;
-		if (opacity >= 0.0f && opacity <= 1.0f)
-		{
-			cbMaterial.GlobalOpacity = opacity;
-			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.SetBlendState(Blend_AlphaToCoverage);
-			m_CharacterObj.Draw();
-		}
+		if (pass == ShadowPass)
+			m_CharacterObj.DrawDepthPass();
 		else
 		{
-			cbMaterial.GlobalOpacity = 1.0f;
-			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.SetBlendState(Blend_AlphaBlending);
-			m_CharacterObj.Draw();
+			float opacity = (timeNow - m_CharacterObj.GetResourceTimestamp()) / loadingFadeInTime;
+			if (opacity >= 0.0f && opacity <= 1.0f)
+			{
+				cbMaterial.GlobalOpacity = opacity;
+				SetMaterialConstBuffer(&cbMaterial);
+				RRenderer.SetBlendState(Blend_AlphaToCoverage);
+				m_CharacterObj.Draw();
+			}
+			else
+			{
+				cbMaterial.GlobalOpacity = 1.0f;
+				SetMaterialConstBuffer(&cbMaterial);
+				RRenderer.SetBlendState(Blend_AlphaBlending);
+				m_CharacterObj.Draw();
+			}
 		}
 	}
 
@@ -1161,40 +1184,48 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	// Draw tachikoma
 	SetPerObjectConstBuffer(m_TachikomaObj.GetNodeTransform());
 
-	if (pass == ShadowPass)
-		m_TachikomaObj.DrawWithShader(m_DepthShader);
-	else if (pass == NormalPass)
+	if (RCollision::TestAabbInsideFrustum(cameraFrustum, m_TachikomaObj.GetAabb()))
 	{
-		float opacity = (timeNow - m_TachikomaObj.GetResourceTimestamp()) / loadingFadeInTime;
-		if (opacity >= 0.0f && opacity <= 1.0f)
+		if (pass == ShadowPass)
+			m_TachikomaObj.DrawWithShader(m_DepthShader);
+		else if (pass == NormalPass)
 		{
-			cbMaterial.GlobalOpacity = opacity;
-			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.SetBlendState(Blend_AlphaToCoverage);
-			m_TachikomaObj.Draw();
-		}
-		else
-		{
-			RRenderer.SetBlendState(Blend_Opaque);
-			m_TachikomaObj.Draw();
+			float opacity = (timeNow - m_TachikomaObj.GetResourceTimestamp()) / loadingFadeInTime;
+			if (opacity >= 0.0f && opacity <= 1.0f)
+			{
+				cbMaterial.GlobalOpacity = opacity;
+				SetMaterialConstBuffer(&cbMaterial);
+				RRenderer.SetBlendState(Blend_AlphaToCoverage);
+				m_TachikomaObj.Draw();
+			}
+			else
+			{
+				RRenderer.SetBlendState(Blend_Opaque);
+				m_TachikomaObj.Draw();
+			}
 		}
 	}
+#endif
 
 	if (pass != ShadowPass)
 	{
-		// Draw particles
-		RRenderer.SetBlendState(Blend_AlphaBlending);
-		RRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[1], 0);
+#if 1
+		if (RCollision::TestAabbInsideFrustum(cameraFrustum, m_ParticleAabb))
+		{
+			// Draw particles
+			RRenderer.SetBlendState(Blend_AlphaBlending);
+			RRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[1], 0);
 
-		SetPerObjectConstBuffer(RMatrix4::CreateTranslation(0.0f, 150.0f, 150.0f));
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_ParticleDiffuseTexture->GetPtrSRV());
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, m_ParticleNormalTexture->GetPtrSRV());
-		m_ParticleShader->Bind();
-		m_ParticleBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+			SetPerObjectConstBuffer(RMatrix4::CreateTranslation(0.0f, 150.0f, 150.0f));
+			RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_ParticleDiffuseTexture->GetPtrSRV());
+			RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, m_ParticleNormalTexture->GetPtrSRV());
+			m_ParticleShader->Bind();
+			m_ParticleBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
-		// Restore depth writing
-		RRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[0], 0);
-
+			// Restore depth writing
+			RRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[0], 0);
+		}
+#endif
 		// Draw debug lines
 		RRenderer.SetBlendState(Blend_Opaque);
 		SetPerObjectConstBuffer(RMatrix4::IDENTITY);

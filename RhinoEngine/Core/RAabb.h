@@ -32,6 +32,16 @@ public:
 		Expand(aabb.pMax);
 	}
 
+	inline void ExpandBySphere(const RVec3& center, float radius)
+	{
+		if (center.x - radius < pMin.x) pMin.x = center.x - radius;
+		if (center.y - radius < pMin.y) pMin.y = center.y - radius;
+		if (center.z - radius < pMin.z) pMin.z = center.z - radius;
+		if (center.x + radius > pMax.x) pMax.x = center.x + radius;
+		if (center.y + radius > pMax.y) pMax.y = center.y + radius;
+		if (center.z + radius > pMax.z) pMax.z = center.z + radius;
+	}
+
 	bool IsValid() const;
 
 	RAabb GetTransformedAabb(const RMatrix4& m) const;

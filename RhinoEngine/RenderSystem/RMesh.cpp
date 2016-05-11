@@ -109,7 +109,6 @@ void RMesh::Serialize(RSerializer& serializer)
 	if (serializer.IsReading())
 	{
 		UpdateAabb();
-		m_State = RS_Loaded;
 	}
 }
 

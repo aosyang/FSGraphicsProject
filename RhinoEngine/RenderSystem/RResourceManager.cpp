@@ -889,8 +889,8 @@ bool RResourceManager::ThreadLoadRmeshData(LoaderThreadTask* task)
 	static_cast<RMesh*>(task->Resource)->Serialize(serializer);
 	serializer.Close();
 
-	RAnimation* animation = new RAnimation();
-	string animFilename = task->Filename.substr(0, task->Filename.size() - 3) + "ranim";
+	//RAnimation* animation = new RAnimation();
+	//string animFilename = task->Filename.substr(0, task->Filename.size() - 3) + "ranim";
 
 	// Load material from file
 	string mtlFilename = task->Filename.substr(0, task->Filename.length() - 3) + "rmtl";
@@ -899,6 +899,7 @@ bool RResourceManager::ThreadLoadRmeshData(LoaderThreadTask* task)
 	if (materials.size())
 		static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), (UINT)materials.size());
 	static_cast<RMesh*>(task->Resource)->SetResourceTimestamp(REngine::GetTimer().TotalTime());
+	static_cast<RMesh*>(task->Resource)->m_State = RS_Loaded;
 
 	return true;
 }

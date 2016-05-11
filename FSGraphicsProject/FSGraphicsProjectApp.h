@@ -95,6 +95,7 @@ private:
 	RTexture*					m_ParticleDiffuseTexture;
 	RTexture*					m_ParticleNormalTexture;
 	ID3D11DepthStencilState*	m_DepthState[2];
+	RAabb						m_ParticleAabb;
 
 	ID3D11Texture2D*			m_RenderTargetBuffer;
 	ID3D11RenderTargetView*		m_RenderTargetView;
@@ -109,6 +110,7 @@ private:
 	SHADER_SCENE_BUFFER			cbScene;
 	SHADER_LIGHT_BUFFER			cbLight;
 	SHADER_INSTANCE_BUFFER		cbInstance[2];
+	RMatrix4					m_InstanceMatrices[MAX_INSTANCE_COUNT];
 
 	RDebugRenderer				m_DebugRenderer;
 	float						m_CharacterRot;
