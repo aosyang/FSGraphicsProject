@@ -20,6 +20,8 @@ struct INPUT_VERTEX
 struct OUTPUT_VERTEX
 {
 	float4 Color	: COLOR;
+	float3 NormalW	: NORMAL;
+	float4 PosW		: TEXCOORD0;
 	float4 PosH		: SV_POSITION;
 };
 
@@ -32,17 +34,18 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 #if USE_SKINNING == 1
 	for (int i = 0; i < 4; i++)
 	{
-		Out.PosH += mul(float4(Input.PosL, 1.0f), boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
+		Out.PosW += mul(float4(Input.PosL, 1.0f), boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
 		Normal += mul(Input.Normal, (float3x3)boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
 	}
 	Normal = normalize(Normal);
 #else
-	Out.PosH = mul(float4(Input.PosL, 1.0f), worldMatrix);
+	Out.PosW = mul(float4(Input.PosL, 1.0f), worldMatrix);
 
 	Normal = mul(Input.Normal, (float3x3)worldMatrix);
 #endif
 
-	Out.PosH = mul(Out.PosH, viewProjMatrix);
+	Out.PosH = mul(Out.PosW, viewProjMatrix);
+	Out.NormalW = Normal;
 
 	Out.Color.rgb = saturate(dot(Normal, float3(0, 1, 0)) / 2 + 0.5f);
 	Out.Color.a = 1.0f;

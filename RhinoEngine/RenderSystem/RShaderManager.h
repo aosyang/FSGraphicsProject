@@ -10,6 +10,7 @@ enum EShaderFeatureMask
 {
 	SFM_Skinned		= 1 << 0,
 	SFM_Instanced	= 1 << 1,
+	SFM_Deferred	= 1 << 2,
 };
 
 struct RShader
@@ -20,6 +21,8 @@ struct RShader
 
 	ID3D11VertexShader*		VertexShader_Skinned;
 	ID3D11VertexShader*		VertexShader_Instanced;
+
+	ID3D11PixelShader*		PixelShader_Deferred;
 
 	bool operator==(const RShader& rhs) const;
 

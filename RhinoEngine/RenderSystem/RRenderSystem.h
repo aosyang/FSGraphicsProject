@@ -61,6 +61,9 @@ public:
 	void SetSamplerState(int slot, SamplerState state);
 
 	bool UsingGammaCorrection() const { return m_UseGammaCorrection; }
+
+	void SetDefferedShading(bool deferred) { m_bIsDeferred = deferred; }
+	bool UseDeferredShading() const { return m_bIsDeferred; }
 protected:
 	RRenderSystem();
 	~RRenderSystem();
@@ -89,6 +92,8 @@ protected:
 	BlendState				m_CurrBlendState;
 
 	ID3D11SamplerState*		m_SamplerState[SamplerStateCount];
+
+	bool					m_bIsDeferred;
 };
 
 #define RRenderer RRenderSystem::Instance()

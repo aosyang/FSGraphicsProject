@@ -12,12 +12,12 @@ Texture2D ScreenTexture	: register(t0);
 
 struct OUTPUT_VERTEX
 {
-	float4 PosH			: SV_POSITION;
-	float4 UV			: TEXCOORD0;
-	float3 NormalH		: TEXCOORD1;
-	float3 PosW			: TEXCOORD2;
+	float4 PosH				: SV_POSITION;
+	float4 UV				: TEXCOORD0;
+	float3 NormalH			: TEXCOORD1;
+	float3 PosW				: TEXCOORD2;
 	float4 ShadowPosH[3]	: TEXCOORD3;
-	float3 NormalW		: NORMAL;
+	float3 NormalW			: NORMAL;
 };
 
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET

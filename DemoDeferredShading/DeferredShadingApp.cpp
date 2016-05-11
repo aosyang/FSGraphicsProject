@@ -41,20 +41,9 @@ bool DeferredShadingApp::Initialize()
 	RResourceManager::Instance().Initialize();
 	m_PostProcessor.Initialize();
 
-	RMesh* mesh = RResourceManager::Instance().LoadFbxMesh("../Assets/city.FBX", RLM_Immediate);
-	m_MeshObj.SetMesh(mesh);
-
-	int count = m_MeshObj.GetMeshElementCount();
-	RMaterial* deferredMats = new RMaterial[count];
-	for (int i = 0; i < count; i++)
-	{
-		deferredMats[i] = m_MeshObj.GetMaterial(i);
-		deferredMats[i].Shader = RShaderManager::Instance().GetShaderResource("AmbientOcclusionDeferred");
-	}
-	m_MeshObj.SetMaterial(deferredMats, count);
-	delete[] deferredMats;
-
 	m_Scene.Initialize();
+	m_Scene.LoadFromFile("../Assets/TestMap.rmap");
+
 	m_Camera.SetPosition(RVec3(-375, 1385, 1200));
 	m_Camera.SetupView(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
 	m_CamPitch = 0.65f;
@@ -72,8 +61,8 @@ bool DeferredShadingApp::Initialize()
 
 	for (int i = 0; i < MAX_LIGHT_COUNT; i++)
 	{
-		m_PointLights[i].pos = RVec3(Math::RandF(-1500, 750), Math::RandF(50, 50), Math::RandF(-1850, 300));
-		m_PointLights[i].r = Math::RandF(50, 100);
+		m_PointLights[i].pos = RVec3(Math::RandF(-1500, 750), Math::RandF(50, 400), Math::RandF(-1850, 300));
+		m_PointLights[i].r = Math::RandF(50, 200);
 		//m_PointLights[i].color = RColor(1, 1, 1);
 		m_PointLights[i].color = RColor(Math::RandF(), Math::RandF(), Math::RandF());
 		m_PointLights[i].sin_factor = RVec3(Math::RandF(0, 5), 0, Math::RandF(0, 5));
@@ -167,7 +156,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	SHADER_MATERIAL_BUFFER cbMaterial;
 	ZeroMemory(&cbMaterial, sizeof(cbMaterial));
 
-	cbMaterial.SpecularColorAndPower = RVec4(1.0f, 1.0f, 1.0f, 512.0f);
+	cbMaterial.SpecularColorAndPower = RVec4(1.0f, 1.0f, 1.0f, 128.0f);
 	cbMaterial.GlobalOpacity = 1.0f;
 	m_Scene.cbMaterial.UpdateContent(&cbMaterial);
 	m_Scene.cbMaterial.ApplyToShaders();
@@ -198,6 +187,8 @@ void DeferredShadingApp::RenderScene()
 		m_DeferredBuffers[2].View, 
 	};
 
+	RFrustum frustum = m_Camera.GetFrustum();
+
 	RRenderer.SetRenderTargets(DeferredBuffer_Count, rtvs, m_DepthBuffer.View);
 #endif
 	RRenderer.Clear(false, RColor(0, 0, 0));
@@ -208,13 +199,11 @@ void DeferredShadingApp::RenderScene()
 	RRenderer.SetBlendState(Blend_Opaque);
 	RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
 
-	SHADER_OBJECT_BUFFER cbObject;
-	cbObject.worldMatrix = m_MeshObj.GetNodeTransform();
+	RRenderer.SetDefferedShading(true);
 
-	m_Scene.cbPerObject.UpdateContent(&cbObject);
-	m_Scene.cbPerObject.ApplyToShaders();
+	m_Scene.Render(&frustum);
 
-	m_MeshObj.Draw();
+	RRenderer.SetDefferedShading(false);
 
 #if DISABLE_MRT == 0
 	RRenderer.SetRenderTargets();
@@ -226,7 +215,6 @@ void DeferredShadingApp::RenderScene()
 
 	m_PostProcessor.Draw(PPE_DeferredComposition);
 
-	RFrustum frustum = m_Camera.GetFrustum();
 
 	// Render lighting pass
 	RRenderer.SetBlendState(Blend_Additive);
@@ -338,6 +326,7 @@ void DeferredShadingApp::RenderScene()
 	RRenderer.SetBlendState(Blend_Opaque);
 	RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
 
+	SHADER_OBJECT_BUFFER cbObject;
 	cbObject.worldMatrix = RMatrix4::IDENTITY;
 
 	m_Scene.cbPerObject.UpdateContent(&cbObject);

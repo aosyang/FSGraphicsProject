@@ -15,6 +15,7 @@ bool RShader::operator==(const RShader& rhs) const
 		VertexShader_Skinned == rhs.VertexShader_Skinned &&
 		VertexShader_Instanced == rhs.VertexShader_Instanced &&
 		PixelShader == rhs.PixelShader &&
+		PixelShader_Deferred == rhs.PixelShader_Deferred &&
 		GeometryShader == rhs.GeometryShader;
 }
 
@@ -26,7 +27,12 @@ void RShader::Bind(int featureMasks)
 		RRenderer.D3DImmediateContext()->VSSetShader(VertexShader_Instanced, NULL, 0);
 	else
 		RRenderer.D3DImmediateContext()->VSSetShader(VertexShader, NULL, 0);
-	RRenderer.D3DImmediateContext()->PSSetShader(PixelShader, NULL, 0);
+
+	if ((featureMasks & SFM_Deferred) && PixelShader_Deferred)
+		RRenderer.D3DImmediateContext()->PSSetShader(PixelShader_Deferred, NULL, 0);
+	else
+		RRenderer.D3DImmediateContext()->PSSetShader(PixelShader, NULL, 0);
+
 	RRenderer.D3DImmediateContext()->GSSetShader(GeometryShader, NULL, 0);
 }
 
@@ -131,9 +137,9 @@ void RShaderManager::LoadShaders(const char* path)
 					{
 						filename = string("Instanced") + filename;
 
-						D3D_SHADER_MACRO skinnedShaderMacro[] = { "USE_INSTANCING", "1", NULL, NULL };
+						D3D_SHADER_MACRO instancedShaderMacro[] = { "USE_INSTANCING", "1", NULL, NULL };
 
-						if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), skinnedShaderMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
+						if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), instancedShaderMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 						{
 							RRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader_Instanced);
 						}
@@ -147,6 +153,19 @@ void RShaderManager::LoadShaders(const char* path)
 						RRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].PixelShader);
 					}
 					HANDLE_SHADER_COMPILE_ERROR();
+
+					if (strstr(pBuffer, "USE_DEFERRED_SHADING"))
+					{
+						filename = string("Deferred") + filename;
+
+						D3D_SHADER_MACRO deferredShaderMacro[] = { "USE_DEFERRED_SHADING", "1", NULL, NULL };
+
+						if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), deferredShaderMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
+						{
+							RRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].PixelShader_Deferred);
+						}
+						HANDLE_SHADER_COMPILE_ERROR();
+					}
 				}
 				else if (filename.find("_GS.hlsl") != string::npos)
 				{
@@ -178,6 +197,7 @@ void RShaderManager::UnloadAllShaders()
 		SAFE_RELEASE(iter->second.VertexShader_Skinned);
 		SAFE_RELEASE(iter->second.VertexShader_Instanced);
 		SAFE_RELEASE(iter->second.PixelShader);
+		SAFE_RELEASE(iter->second.PixelShader_Deferred);
 		SAFE_RELEASE(iter->second.GeometryShader);
 	}
 

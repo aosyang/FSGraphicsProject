@@ -252,12 +252,6 @@
     <FxCompile Include="..\Shaders\AmbientOcclusion_VS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="..\Shaders\AmbientOcclusionDeferred_PS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Shaders\AmbientOcclusionDeferred_VS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="..\Shaders\BumpLighting_PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>

@@ -162,6 +162,9 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 			else if (instanced)
 				shaderFeatureMask |= SFM_Instanced;
 
+			if (RRenderer.UseDeferredShading())
+				shaderFeatureMask |= SFM_Deferred;
+
 			shader->Bind(shaderFeatureMask);
 
 			// Hack: for shaders bound separately, consider textures loaded from mesh
@@ -238,6 +241,9 @@ void RSMeshObject::DrawWithShader(RShader* shader, bool instanced, int instanceC
 			shaderFeatureMask |= SFM_Skinned;
 		else if (instanced)
 			shaderFeatureMask |= SFM_Instanced;
+
+		if (RRenderer.UseDeferredShading())
+			shaderFeatureMask |= SFM_Deferred;
 
 		shader->Bind(shaderFeatureMask);
 

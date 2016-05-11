@@ -64,7 +64,7 @@ struct PointLight
 	RVec3 sin_offset;
 };
 
-#define MAX_LIGHT_COUNT 100
+#define MAX_LIGHT_COUNT 500
 
 enum ERasterizerState
 {
@@ -95,7 +95,6 @@ private:
 	float						m_CamPitch, m_CamYaw;
 
 	RScene						m_Scene;
-	RSMeshObject				m_MeshObj;
 
 	RPostProcessor				m_PostProcessor;
 	ID3D11RasterizerState*		m_RasterizerStates[RasterizerState_Count];

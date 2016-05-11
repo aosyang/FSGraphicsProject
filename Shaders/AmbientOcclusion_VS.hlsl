@@ -16,7 +16,6 @@ struct INPUT_VERTEX
 
 struct OUTPUT_VERTEX
 {
-	float4 Color			: COLOR;
 	float4 PosH				: SV_POSITION;
 	float2 UV0				: TEXCOORD0;
 	float2 UV1				: TEXCOORD1;
@@ -49,7 +48,6 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input
 	Out.ShadowPosH[1] = mul(worldPos, shadowViewProjBiasedMatrix[1]);
 	Out.ShadowPosH[2] = mul(worldPos, shadowViewProjBiasedMatrix[2]);
 
-	Out.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	Out.NormalW = Normal;
 
 	Out.UV0 = Input.UV0;

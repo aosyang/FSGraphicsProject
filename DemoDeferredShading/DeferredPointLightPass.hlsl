@@ -30,6 +30,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	float3 lightDir = normalize(lightVec);
 
 	float attenuation = 1.0f - saturate(length(lightVec) / DeferredPointLight.PosAndRadius.w);
+	attenuation *= attenuation;
 
 	// Diffuse lighting
 	float DiffuseIntensity = saturate(dot(Normal, lightDir));

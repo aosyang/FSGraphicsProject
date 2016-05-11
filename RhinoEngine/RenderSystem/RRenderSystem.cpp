@@ -12,7 +12,7 @@ ID3D11DepthStencilView* RRenderSystem::DefaultDepthStencilView = nullptr;
 ID3D11RenderTargetView* RRenderSystem::DefaultRenderTargetView = nullptr;
 
 RRenderSystem::RRenderSystem()
-	: m_AdapterName(nullptr), m_RenderTargetViewNum(0)
+	: m_AdapterName(nullptr), m_RenderTargetViewNum(0), m_bIsDeferred(false)
 {
 }
 
