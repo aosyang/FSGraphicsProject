@@ -24,7 +24,7 @@ struct OUTPUT_PIXEL
 OUTPUT_PIXEL main(OUTPUT_VERTEX Input) : SV_TARGET
 {
 	OUTPUT_PIXEL Out = (OUTPUT_PIXEL)0;
-	Out.Albedo = Input.Color;
+	Out.Albedo = float4(1, 1, 1, 1);
 	Out.WorldPos = Input.PosW;
 	Out.Normal = float4(normalize(Input.NormalW), 1);
 
