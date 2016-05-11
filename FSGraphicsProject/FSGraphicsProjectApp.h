@@ -58,7 +58,7 @@ private:
 
 	RShaderConstantBuffer<SHADER_OBJECT_BUFFER,		CBST_VS, 0>				m_cbPerObject;
 	RShaderConstantBuffer<SHADER_SCENE_BUFFER,		CBST_VS|CBST_GS, 1>		m_cbScene;
-	RShaderConstantBuffer<SHADER_INSTANCE_BUFFER,	CBST_VS, 2>				m_cbInstance[2];
+	RShaderConstantBuffer<SHADER_INSTANCE_BUFFER,	CBST_VS, 2>				m_cbInstance[3];
 	RShaderConstantBuffer<SHADER_SKINNED_BUFFER,	CBST_VS, 3>				m_cbBoneMatrices;
 	RShaderConstantBuffer<SHADER_LIGHT_BUFFER,		CBST_PS, 0>				m_cbLight;
 	RShaderConstantBuffer<SHADER_MATERIAL_BUFFER,	CBST_PS, 1>				m_cbMaterial;
@@ -82,11 +82,9 @@ private:
 	RMesh*						m_SceneMeshIsland;
 	RTexture*					m_IslandTexture;
 	RSMeshObject				m_IslandMeshObj;
-	RShader*					m_InstancedLightingShader;
 
 	RShadowMap					m_ShadowMap[3];
 	RShader*					m_DepthShader;
-	RShader*					m_InstancedDepthShader;
 
 	RSMeshObject				m_TransparentMesh;
 
@@ -117,6 +115,7 @@ private:
 	float						m_CharacterYVel;
 	bool						m_RenderCollisionWireframe;
 	RVec4						m_MaterialSpecular;
+	int							m_MeshInstanceCount;
 };
 
 #endif

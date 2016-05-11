@@ -22,7 +22,11 @@ struct OUTPUT_VERTEX
 	float4 PosH		: SV_POSITION;
 };
 
-OUTPUT_VERTEX main(INPUT_VERTEX Input)
+OUTPUT_VERTEX main(INPUT_VERTEX Input
+#if USE_INSTANCING == 1
+				 , uint InstID : SV_InstanceID
+#endif
+	)
 {
 	OUTPUT_VERTEX Out = (OUTPUT_VERTEX)0;
 
@@ -31,6 +35,8 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 	{
 		Out.PosH += mul(float4(Input.PosL, 1.0f), boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
 	}
+#elif USE_INSTANCING == 1
+	Out.PosH = mul(float4(Input.PosL, 1.0f), instancedWorldMatrix[InstID]);
 #else
 	Out.PosH = mul(float4(Input.PosL, 1.0f), worldMatrix);
 #endif

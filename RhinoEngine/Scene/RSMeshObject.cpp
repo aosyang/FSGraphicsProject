@@ -159,8 +159,10 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 			int shaderFeatureMask = 0;
 			if (flag & MEF_Skinned)
 				shaderFeatureMask |= SFM_Skinned;
+			else if (instanced)
+				shaderFeatureMask |= SFM_Instanced;
 
-			shader->Bind(flag);
+			shader->Bind(shaderFeatureMask);
 
 			// Hack: for shaders bound separately, consider textures loaded from mesh
 			if (m_OverridingShader)
@@ -202,10 +204,14 @@ void RSMeshObject::DrawDepthPass(bool instanced, int instanceCount)
 	for (UINT32 i = 0; i < m_Mesh->GetMeshElements().size(); i++)
 	{
 		RShader* shader = DefaultShader;
+
+		int flag = m_Mesh->GetMeshElements()[i].GetFlag();
 		int shaderFeatureMask = 0;
 
-		if (m_Mesh->GetMeshElements()[i].GetFlag() & MEF_Skinned)
-			shaderFeatureMask = SFM_Skinned;
+		if (flag & MEF_Skinned)
+			shaderFeatureMask |= SFM_Skinned;
+		else if (instanced)
+			shaderFeatureMask |= SFM_Instanced;
 
 		shader->Bind(shaderFeatureMask);
 
@@ -225,7 +231,15 @@ void RSMeshObject::DrawWithShader(RShader* shader, bool instanced, int instanceC
 
 	for (UINT32 i = 0; i < m_Mesh->GetMeshElements().size(); i++)
 	{
-		shader->Bind();
+		int flag = m_Mesh->GetMeshElements()[i].GetFlag();
+		int shaderFeatureMask = 0;
+
+		if (flag & MEF_Skinned)
+			shaderFeatureMask |= SFM_Skinned;
+		else if (instanced)
+			shaderFeatureMask |= SFM_Instanced;
+
+		shader->Bind(shaderFeatureMask);
 
 		if (instanced)
 			m_Mesh->GetMeshElements()[i].DrawInstanced(instanceCount, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

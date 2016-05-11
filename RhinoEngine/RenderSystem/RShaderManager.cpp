@@ -13,6 +13,7 @@ bool RShader::operator==(const RShader& rhs) const
 	return
 		VertexShader == rhs.VertexShader &&
 		VertexShader_Skinned == rhs.VertexShader_Skinned &&
+		VertexShader_Instanced == rhs.VertexShader_Instanced &&
 		PixelShader == rhs.PixelShader &&
 		GeometryShader == rhs.GeometryShader;
 }
@@ -21,6 +22,8 @@ void RShader::Bind(int featureMasks)
 {
 	if ((featureMasks & SFM_Skinned) && VertexShader_Skinned)
 		RRenderer.D3DImmediateContext()->VSSetShader(VertexShader_Skinned, NULL, 0);
+	else if ((featureMasks & SFM_Instanced) && VertexShader_Instanced)
+		RRenderer.D3DImmediateContext()->VSSetShader(VertexShader_Instanced, NULL, 0);
 	else
 		RRenderer.D3DImmediateContext()->VSSetShader(VertexShader, NULL, 0);
 	RRenderer.D3DImmediateContext()->PSSetShader(PixelShader, NULL, 0);
@@ -95,6 +98,13 @@ void RShaderManager::LoadShaders(const char* path)
 #endif
 				HRESULT hr = 0;
 
+#define HANDLE_SHADER_COMPILE_ERROR() \
+	if (FAILED(hr)) \
+	{ \
+		OutputDebugStringA((char*)pErrorMsg->GetBufferPointer()); \
+		OutputDebugStringA("\n"); \
+	}
+
 				// Detect shader type by file name suffix
 				if (filename.find("_VS.hlsl") != string::npos)
 				{
@@ -102,11 +112,7 @@ void RShaderManager::LoadShaders(const char* path)
 					{
 						RRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader);
 					}
-					else
-					{
-						OutputDebugStringA((char*)pErrorMsg->GetBufferPointer());
-						OutputDebugStringA("\n");
-					}
+					HANDLE_SHADER_COMPILE_ERROR();
 
 					if (strstr(pBuffer, "USE_SKINNING"))
 					{
@@ -118,6 +124,20 @@ void RShaderManager::LoadShaders(const char* path)
 						{
 							RRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader_Skinned);
 						}
+						HANDLE_SHADER_COMPILE_ERROR();
+					}
+					
+					if (strstr(pBuffer, "USE_INSTANCING"))
+					{
+						filename = string("Instanced") + filename;
+
+						D3D_SHADER_MACRO skinnedShaderMacro[] = { "USE_INSTANCING", "1", NULL, NULL };
+
+						if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), skinnedShaderMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
+						{
+							RRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader_Instanced);
+						}
+						HANDLE_SHADER_COMPILE_ERROR();
 					}
 				}
 				else if (filename.find("_PS.hlsl") != string::npos)
@@ -126,6 +146,7 @@ void RShaderManager::LoadShaders(const char* path)
 					{
 						RRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].PixelShader);
 					}
+					HANDLE_SHADER_COMPILE_ERROR();
 				}
 				else if (filename.find("_GS.hlsl") != string::npos)
 				{
@@ -133,12 +154,7 @@ void RShaderManager::LoadShaders(const char* path)
 					{
 						RRenderer.D3DDevice()->CreateGeometryShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].GeometryShader);
 					}
-				}
-
-				if (FAILED(hr))
-				{
-					OutputDebugStringA((char*)pErrorMsg->GetBufferPointer());
-					OutputDebugStringA("\n");
+					HANDLE_SHADER_COMPILE_ERROR();
 				}
 
 				delete[] pBuffer;
@@ -160,6 +176,7 @@ void RShaderManager::UnloadAllShaders()
 	{
 		SAFE_RELEASE(iter->second.VertexShader);
 		SAFE_RELEASE(iter->second.VertexShader_Skinned);
+		SAFE_RELEASE(iter->second.VertexShader_Instanced);
 		SAFE_RELEASE(iter->second.PixelShader);
 		SAFE_RELEASE(iter->second.GeometryShader);
 	}

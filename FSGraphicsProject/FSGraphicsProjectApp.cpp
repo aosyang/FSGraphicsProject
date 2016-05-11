@@ -94,6 +94,7 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	m_cbScene.Release();
 	m_cbInstance[0].Release();
 	m_cbInstance[1].Release();
+	m_cbInstance[2].Release();
 	m_cbBoneMatrices.Release();
 
 	m_BumpCubeMesh.Release();
@@ -118,9 +119,7 @@ bool FSGraphicsProjectApp::Initialize()
 	
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 	m_BumpLightingShader = RShaderManager::Instance().GetShaderResource("BumpLighting");
-	m_InstancedLightingShader = RShaderManager::Instance().GetShaderResource("InstancedLighting");
 	m_DepthShader = RShaderManager::Instance().GetShaderResource("Depth");
-	m_InstancedDepthShader = RShaderManager::Instance().GetShaderResource("InstancedDepth");
 	m_ParticleShader = RShaderManager::Instance().GetShaderResource("Particle");
 	m_RefractionShader = RShaderManager::Instance().GetShaderResource("Refraction");
 
@@ -203,6 +202,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_cbMaterial.Initialize();
 	m_cbInstance[0].Initialize();
 	m_cbInstance[1].Initialize();
+	m_cbInstance[2].Initialize();
 	m_cbBoneMatrices.Initialize();
 	m_cbScreen.Initialize();
 
@@ -260,7 +260,7 @@ bool FSGraphicsProjectApp::Initialize()
 	RMesh* sphereMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.fbx");
 
 	m_TransparentMesh.SetMesh(sphereMesh);
-	m_TransparentMesh.SetOverridingShader(m_InstancedLightingShader);
+	m_TransparentMesh.SetOverridingShader(RShaderManager::Instance().GetShaderResource("Lighting"));
 
 	for (int i = 0; i < 5; i++)
 	{
@@ -274,15 +274,8 @@ bool FSGraphicsProjectApp::Initialize()
 	}
 
 	m_SceneMeshIsland = RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx");
-	m_IslandTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/TR_FloatingIsland02.dds");
 	m_IslandMeshObj.SetMesh(m_SceneMeshIsland);
 	m_IslandMeshObj.SetPosition(RVec3(0.0f, 0.0f, 500.0f));
-
-	RMaterial islandMaterials[] =
-	{
-		{ m_InstancedLightingShader, 1, m_IslandTexture },
-	};
-	m_IslandMeshObj.SetMaterial(islandMaterials, 1);
 
 	m_Skybox.CreateSkybox("../Assets/powderpeak.dds");
 
@@ -350,6 +343,8 @@ bool FSGraphicsProjectApp::Initialize()
 
 	m_SunVec = RVec3(sinf(1.0f) * 0.5f, 0.25f, cosf(1.0f) * 0.5f).GetNormalizedVec3() * 1000.0f;
 	m_MaterialSpecular = RVec4(1.0f, 1.0f, 1.0f, 16.0f);
+
+	m_MeshInstanceCount = 1;
 
 	return true;
 }
@@ -484,8 +479,8 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 	if (toggleMovingSun)
 	{
-		ct = timer.TotalTime() * 0.2f;
-		m_SunVec = RVec3(sinf(ct) * 0.5f, 0.25f, cosf(ct) * 0.5f).GetNormalizedVec3() * 1000.0f;
+		ct += timer.DeltaTime() * 0.2f;
+		m_SunVec = RVec3(sinf(ct) * 0.5f, cosf(ct) * 0.5f, 0.25f).GetNormalizedVec3() * 1000.0f;
 	}
 
 	if (RInput.GetBufferedKeyState('I') == BKS_Pressed)
@@ -764,6 +759,19 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	t += timer.DeltaTime() * 50.0f;
 	m_TachikomaObj.SetTransform(RMatrix4::CreateYAxisRotation(t) * RMatrix4::CreateTranslation(pos));
 	m_DebugRenderer.DrawAabb(m_TachikomaObj.GetAabb());
+
+
+	if (RInput.GetBufferedKeyState(VK_OEM_PLUS) == BKS_Pressed)
+	{
+		m_MeshInstanceCount += 2;
+	}
+
+	if (RInput.GetBufferedKeyState(VK_OEM_MINUS) == BKS_Pressed)
+	{
+		m_MeshInstanceCount -= 2;
+		if (m_MeshInstanceCount <= 0)
+			m_MeshInstanceCount = 1;
+	}
 }
 
 void FSGraphicsProjectApp::RenderScene()
@@ -806,7 +814,7 @@ void FSGraphicsProjectApp::RenderScene()
 
 	// 0 : Screen pass
 	// 1 : Viewport pass
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		if (i == 0)
 		{
@@ -988,13 +996,37 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 
 	m_StarMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	RFrustum cameraFrustum = (pass == ShadowPass) ? m_ShadowMap[cbScene.cascadedShadowIndex].GetFrustum() : m_Camera.GetFrustum();
+
 	// Draw meshes
 
 	// Draw city
-	SetPerObjectConstBuffer(m_FbxMeshObj.GetNodeTransform());
+	const RAabb meshAabb = m_FbxMeshObj.GetMesh()->GetLocalSpaceAabb();
+
+	int instanceCount = 0;
+	SHADER_INSTANCE_BUFFER cbMeshInstance;
+	ZeroMemory(&cbMeshInstance, sizeof(cbMeshInstance));
+
+	for (int x = -m_MeshInstanceCount / 2; x <= m_MeshInstanceCount / 2; x++)
+	{
+		for (int z = -m_MeshInstanceCount / 2; z <= m_MeshInstanceCount / 2; z++)
+		{
+			RMatrix4 mat = m_FbxMeshObj.GetNodeTransform();
+			mat.SetTranslation(RVec3(1700.0f * x, 0, 1700.0f * z));
+
+			if (!RCollision::TestAabbInsideFrustum(cameraFrustum, meshAabb.GetTransformedAabb(mat)))
+				continue;
+
+			cbMeshInstance.instancedWorldMatrix[instanceCount] = mat;
+			instanceCount++;
+		}
+	}
+
+	m_cbInstance[2].UpdateContent(&cbMeshInstance);
+	m_cbInstance[2].ApplyToShaders();
 
 	if (pass == ShadowPass)
-		m_FbxMeshObj.DrawWithShader(m_DepthShader);
+		m_FbxMeshObj.DrawWithShader(m_DepthShader, true, instanceCount);
 	else
 	{
 		float opacity = (timeNow - m_FbxMeshObj.GetResourceTimestamp()) / loadingFadeInTime;
@@ -1003,21 +1035,22 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			cbMaterial.GlobalOpacity = opacity;
 			SetMaterialConstBuffer(&cbMaterial);
 			RRenderer.SetBlendState(Blend_AlphaToCoverage);
-			m_FbxMeshObj.Draw();
 		}
 		else
 		{
 			RRenderer.SetBlendState(Blend_Opaque);
-			m_FbxMeshObj.Draw();
 		}
+
+		m_FbxMeshObj.Draw(true, instanceCount);
 	}
 
+#if 1
 	// Draw islands
 	SetPerObjectConstBuffer(m_IslandMeshObj.GetNodeTransform());
 	m_cbInstance[0].ApplyToShaders();
 
 	if (pass == ShadowPass)
-		m_IslandMeshObj.DrawWithShader(m_InstancedDepthShader, true, MAX_INSTANCE_COUNT);
+		m_IslandMeshObj.DrawWithShader(m_DepthShader, true, MAX_INSTANCE_COUNT);
 	else
 	{
 		float opacity = (timeNow - m_IslandMeshObj.GetResourceTimestamp()) / loadingFadeInTime;
@@ -1034,6 +1067,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			m_IslandMeshObj.Draw(true, MAX_INSTANCE_COUNT);
 		}
 	}
+#endif
 
 	// Draw AO scene
 	SetPerObjectConstBuffer(m_AOSceneObj.GetNodeTransform());

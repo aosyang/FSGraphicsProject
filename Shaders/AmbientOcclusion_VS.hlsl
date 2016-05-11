@@ -25,11 +25,24 @@ struct OUTPUT_VERTEX
 	float3 NormalW			: NORMAL;
 };
 
-OUTPUT_VERTEX main(INPUT_VERTEX Input)
+OUTPUT_VERTEX main(INPUT_VERTEX Input
+#if USE_INSTANCING == 1
+				 , uint InstID : SV_InstanceID
+#endif
+	)
 {
 	OUTPUT_VERTEX Out = (OUTPUT_VERTEX)0;
 
-	float4 worldPos = mul(float4(Input.PosL, 1.0f), worldMatrix);
+	float4 worldPos = (float4)0;
+	float3 Normal = (float3)0;
+
+#if USE_INSTANCING == 1
+	worldPos = mul(float4(Input.PosL, 1.0f), instancedWorldMatrix[InstID]);
+	Normal = mul(Input.Normal, (float3x3)instancedWorldMatrix[InstID]);
+#else
+	worldPos = mul(float4(Input.PosL, 1.0f), worldMatrix);
+	Normal = mul(Input.Normal, (float3x3)worldMatrix);
+#endif
 	Out.PosW = worldPos.xyz;
 	Out.PosH = mul(worldPos, viewProjMatrix);
 	Out.ShadowPosH[0] = mul(worldPos, shadowViewProjBiasedMatrix[0]);
@@ -37,7 +50,7 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 	Out.ShadowPosH[2] = mul(worldPos, shadowViewProjBiasedMatrix[2]);
 
 	Out.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
-	Out.NormalW = mul(Input.Normal, (float3x3)worldMatrix);
+	Out.NormalW = Normal;
 
 	Out.UV0 = Input.UV0;
 	Out.UV1 = Input.UV1;

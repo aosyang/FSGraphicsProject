@@ -19,15 +19,19 @@ struct INPUT_VERTEX
 
 struct OUTPUT_VERTEX
 {
-	float4 Color		: COLOR;
-	float4 PosH			: SV_POSITION;
-	float2 UV			: TEXCOORD0;
-	float3 NormalW		: TEXCOORD1;
-	float3 PosW			: TEXCOORD2;
+	float4 Color			: COLOR;
+	float4 PosH				: SV_POSITION;
+	float2 UV				: TEXCOORD0;
+	float3 NormalW			: TEXCOORD1;
+	float3 PosW				: TEXCOORD2;
 	float4 ShadowPosH[3]	: TEXCOORD3;
 };
 
-OUTPUT_VERTEX main(INPUT_VERTEX Input)
+OUTPUT_VERTEX main(INPUT_VERTEX Input
+#if USE_INSTANCING == 1
+				 , uint InstID : SV_InstanceID
+#endif
+	)
 {
 	OUTPUT_VERTEX Out = (OUTPUT_VERTEX)0;
 
@@ -41,6 +45,9 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 		Normal += mul(Input.Normal, (float3x3)boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
 	}
 	Normal = normalize(Normal);
+#elif USE_INSTANCING == 1
+	worldPos = mul(float4(Input.PosL, 1.0f), instancedWorldMatrix[InstID]);
+	Normal = mul(Input.Normal, (float3x3)instancedWorldMatrix[InstID]);
 #else
 	worldPos = mul(float4(Input.PosL, 1.0f), worldMatrix);
 	Normal = mul(Input.Normal, (float3x3)worldMatrix);
