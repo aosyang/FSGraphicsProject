@@ -550,15 +550,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 		RMatrix4 shadowViewMatrix = RMatrix4::CreateLookAtViewLH(shadowEyePos, shadowTarget, RVec3(0.0f, 1.0f, 0.0f));
 
-		RFrustum shadowVolume;
-		shadowVolume.corners[0] = shadowTarget - viewRight * s0.radius + viewUp * s0.radius + viewForward * s0.radius; // RVec3(-1,  1,  1);
-		shadowVolume.corners[1] = shadowTarget + viewRight * s0.radius + viewUp * s0.radius + viewForward * s0.radius; // RVec3( 1,  1,  1);
-		shadowVolume.corners[2] = shadowTarget - viewRight * s0.radius - viewUp * s0.radius + viewForward * s0.radius; // RVec3(-1, -1,  1);
-		shadowVolume.corners[3] = shadowTarget + viewRight * s0.radius - viewUp * s0.radius + viewForward * s0.radius; // RVec3( 1, -1,  1);
-		shadowVolume.corners[4] = shadowEyePos - viewRight * s0.radius + viewUp * s0.radius; // RVec3(-1,  1,  0);
-		shadowVolume.corners[5] = shadowEyePos + viewRight * s0.radius + viewUp * s0.radius; // RVec3( 1,  1,  0);
-		shadowVolume.corners[6] = shadowEyePos - viewRight * s0.radius - viewUp * s0.radius; // RVec3(-1, -1,  0);
-		shadowVolume.corners[7] = shadowEyePos + viewRight * s0.radius - viewUp * s0.radius; // RVec3( 1, -1,  0);
+		RFrustum shadowVolume = m_ShadowMap[i].GetFrustum();
 
 		if (freezeFrustum)
 			m_DebugRenderer.DrawFrustum(shadowVolume, frustumColor[i]);

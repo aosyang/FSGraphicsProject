@@ -13,12 +13,13 @@ public:
 	~RShadowMap();
 
 	void Initialize(int width, int height);
-	void SetViewMatrix(const RMatrix4& view) { m_ViewMatrix = view; }
+	void SetViewMatrix(const RMatrix4& view) { m_ViewMatrix = view; m_bNeedUpdateFrustum = true; }
 	void SetOrthogonalProjection(float viewWidth, float viewHeight, float nearZ, float farZ);
 	void SetupRenderTarget();
 
 	RMatrix4 GetViewMatrix() const { return m_ViewMatrix; }
 	RMatrix4 GetProjectionMatrix() const { return m_ProjMatrix; }
+	RFrustum GetFrustum();
 
 	ID3D11RenderTargetView* GetRenderTargetView()		{ return m_RenderTargetView; }
 	ID3D11DepthStencilView* GetDepthView()				{ return m_DepthView; }
@@ -36,7 +37,11 @@ private:
 	RMatrix4					m_ViewMatrix;
 	RMatrix4					m_ProjMatrix;
 
-	int							m_Width, m_Height;
+	int							m_BufferWidth, m_BufferHeight;
+	float						m_ViewWidth, m_ViewHeight;
+	float						m_ViewNear, m_ViewFar;
+	bool						m_bNeedUpdateFrustum;
+	RFrustum					m_Frustum;
 };
 
 #endif

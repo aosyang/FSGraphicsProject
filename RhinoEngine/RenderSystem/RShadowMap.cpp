@@ -9,7 +9,7 @@
 
 RShadowMap::RShadowMap()
 	: m_RenderTargetBuffer(nullptr), m_RenderTargetView(nullptr), m_RenderTargetSRV(nullptr),
-	  m_DepthBuffer(nullptr), m_DepthView(nullptr)
+	  m_DepthBuffer(nullptr), m_DepthView(nullptr), m_bNeedUpdateFrustum(true)
 {
 	m_ViewMatrix = RMatrix4::IDENTITY;
 	m_ProjMatrix = RMatrix4::IDENTITY;
@@ -27,8 +27,8 @@ RShadowMap::~RShadowMap()
 
 void RShadowMap::Initialize(int width, int height)
 {
-	m_Width = width;
-	m_Height = height;
+	m_BufferWidth = width;
+	m_BufferHeight = height;
 
 	D3D11_TEXTURE2D_DESC renderTextureDesc;
 	renderTextureDesc.Width = width;
@@ -76,7 +76,13 @@ void RShadowMap::Initialize(int width, int height)
 
 void RShadowMap::SetOrthogonalProjection(float viewWidth, float viewHeight, float nearZ, float farZ)
 {
+	m_ViewWidth = viewWidth;
+	m_ViewHeight = viewHeight;
+	m_ViewNear = nearZ;
+	m_ViewFar = farZ;
+
 	m_ProjMatrix = RMatrix4::CreateOrthographicProjectionLH(viewWidth, viewHeight, nearZ, farZ);
+	m_bNeedUpdateFrustum = true;
 }
 
 void RShadowMap::SetupRenderTarget()
@@ -87,9 +93,37 @@ void RShadowMap::SetupRenderTarget()
 	D3D11_VIEWPORT vp;
 	vp.TopLeftX = 0.0f;
 	vp.TopLeftY = 0.0f;
-	vp.Width = static_cast<float>(m_Width);
-	vp.Height = static_cast<float>(m_Height);
+	vp.Width = static_cast<float>(m_BufferWidth);
+	vp.Height = static_cast<float>(m_BufferHeight);
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
+}
+
+RFrustum RShadowMap::GetFrustum()
+{
+	if (m_bNeedUpdateFrustum)
+	{
+		RMatrix4 mat = m_ViewMatrix.FastInverse();
+		RVec3 eyePos = mat.GetTranslation();
+		RVec3 viewForward = mat.GetForward();
+		RVec3 viewRight = mat.GetRight();
+		RVec3 viewUp = mat.GetUp();
+		RVec3 nearPoint = eyePos + viewForward * m_ViewNear;
+		RVec3 farPoint = eyePos + viewForward * m_ViewFar;
+
+		m_Frustum.corners[0] = farPoint - viewRight * m_ViewWidth * 0.5f + viewUp * m_ViewHeight * 0.5f; // RVec3(-1,  1,  1);
+		m_Frustum.corners[1] = farPoint + viewRight * m_ViewWidth * 0.5f + viewUp * m_ViewHeight * 0.5f; // RVec3( 1,  1,  1);
+		m_Frustum.corners[2] = farPoint - viewRight * m_ViewWidth * 0.5f - viewUp * m_ViewHeight * 0.5f; // RVec3(-1, -1,  1);
+		m_Frustum.corners[3] = farPoint + viewRight * m_ViewWidth * 0.5f - viewUp * m_ViewHeight * 0.5f; // RVec3( 1, -1,  1);
+		m_Frustum.corners[4] = nearPoint - viewRight * m_ViewWidth * 0.5f + viewUp * m_ViewHeight * 0.5f; // RVec3(-1,  1,  0);
+		m_Frustum.corners[5] = nearPoint + viewRight * m_ViewWidth * 0.5f + viewUp * m_ViewHeight * 0.5f; // RVec3( 1,  1,  0);
+		m_Frustum.corners[6] = nearPoint - viewRight * m_ViewWidth * 0.5f - viewUp * m_ViewHeight * 0.5f; // RVec3(-1, -1,  0);
+		m_Frustum.corners[7] = nearPoint + viewRight * m_ViewWidth * 0.5f - viewUp * m_ViewHeight * 0.5f; // RVec3( 1, -1,  0);
+		m_Frustum.BuildPlanesFromCorners();
+
+		m_bNeedUpdateFrustum = false;
+	}
+
+	return m_Frustum;
 }
