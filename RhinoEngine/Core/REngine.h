@@ -32,10 +32,18 @@ public:
 	RECT GetWindowRectInfo() const;
 
 	static RTimer& GetTimer() { return m_Timer; }
+	static REngine* Instance() { return m_EngineInstance; }
+
+	void SetEditorMode(bool editor) { m_bIsEditor = editor; }
+	bool IsEditor() const { return m_bIsEditor; }
+
 private:
 	bool CreateRenderWindow(int width, int height, bool fullscreen = false, int bpp = 32);
 	void DestroyRenderWindow();
 	void CalculateFrameStats();
+
+	static REngine*		m_EngineInstance;
+	bool				m_bIsEditor;
 
 	HINSTANCE			m_hInst;
 	HWND				m_hWnd;

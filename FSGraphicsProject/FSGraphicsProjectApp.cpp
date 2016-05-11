@@ -673,7 +673,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	m_CharacterObj.SetTransform(charMatrix);
 
 	// Update animation
-	RAnimation* animation = m_CharacterAnimation->GetAnimation();
+	RAnimation* animation = m_CharacterAnimation->IsResourceReady() ? m_CharacterAnimation->GetAnimation() : nullptr;
 	if (animation)
 	{
 		m_CharacterObj.GetMesh()->CacheAnimation(animation);

@@ -352,17 +352,20 @@ void DeferredShadingApp::RenderScene()
 
 void DeferredShadingApp::OnResize(int width, int height)
 {
-	m_DeferredBuffers[DB_Color].Release();
-	m_DeferredBuffers[DB_Position].Release();
-	m_DeferredBuffers[DB_Normal].Release();
-	m_DepthBuffer.Release();
+	if (RRenderer.D3DDevice())
+	{
+		m_DeferredBuffers[DB_Color].Release();
+		m_DeferredBuffers[DB_Position].Release();
+		m_DeferredBuffers[DB_Normal].Release();
+		m_DepthBuffer.Release();
 
-	m_Camera.SetAspectRatio((float)width / (float)height);
+		m_Camera.SetAspectRatio((float)width / (float)height);
 
-	m_DeferredBuffers[DB_Color] = CreateRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM);
-	m_DeferredBuffers[DB_Position] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-	m_DeferredBuffers[DB_Normal] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-	m_DepthBuffer = CreateDepthStencilBuffer();
+		m_DeferredBuffers[DB_Color] = CreateRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM);
+		m_DeferredBuffers[DB_Position] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
+		m_DeferredBuffers[DB_Normal] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
+		m_DepthBuffer = CreateDepthStencilBuffer();
+	}
 }
 
 DeferredRenderBuffer DeferredShadingApp::CreateRenderTarget(DXGI_FORMAT format)

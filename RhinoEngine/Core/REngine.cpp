@@ -7,7 +7,7 @@
 
 #include "REngine.h"
 
-REngine* gEngine = nullptr;
+REngine* REngine::m_EngineInstance;
 
 static TCHAR szWindowClass[] = _T("rhinoapp");
 RTimer REngine::m_Timer;
@@ -16,6 +16,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 REngine::REngine()
 {
+	m_bIsEditor = false;
 	m_hInst = NULL;
 	m_hWnd = NULL;
 	m_bFullScreen = false;
@@ -32,6 +33,8 @@ REngine::~REngine()
 
 bool REngine::Initialize()
 {
+	m_EngineInstance = this;
+
 	int width = 1024,
 		height = 768;
 
@@ -43,7 +46,7 @@ bool REngine::Initialize()
 
 bool REngine::Initialize(HWND hWnd, int width, int height)
 {
-	gEngine = this;
+	m_EngineInstance = this;
 
 	if (!m_hWnd)
 		m_hWnd = hWnd;
@@ -68,7 +71,7 @@ void REngine::Shutdown()
 	if (m_UseEngineRenderWindow)
 		DestroyRenderWindow();
 
-	gEngine = nullptr;
+	m_EngineInstance = nullptr;
 }
 
 void REngine::Run()
@@ -295,7 +298,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_SIZE:
-		if (gEngine) gEngine->ResizeClientWindow(LOWORD(lParam), HIWORD(lParam));
+		if (REngine::Instance()) REngine::Instance()->ResizeClientWindow(LOWORD(lParam), HIWORD(lParam));
 		break;
 
 	case WM_KEYDOWN:

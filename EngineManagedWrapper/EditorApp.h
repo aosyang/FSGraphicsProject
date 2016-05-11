@@ -9,8 +9,6 @@
 #include "EditorAxis.h"
 
 
-extern REngine* gEngine;
-
 namespace EngineManagedWrapper
 {
 #pragma unmanaged

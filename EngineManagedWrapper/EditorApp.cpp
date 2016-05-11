@@ -33,6 +33,7 @@ namespace EngineManagedWrapper
 	bool EditorApp::Initialize()
 	{
 		RResourceManager::Instance().Initialize();
+		REngine::Instance()->SetEditorMode(true);
 
 		m_Scene.Initialize();
 
@@ -97,7 +98,7 @@ namespace EngineManagedWrapper
 	{
 		RVec3 moveVec(0.0f, 0.0f, 0.0f);
 
-		RECT rwRect = gEngine->GetWindowRectInfo();
+		RECT rwRect = REngine::Instance()->GetWindowRectInfo();
 		int mx, my;
 		RInput.GetCursorPos(mx, my);
 
@@ -112,7 +113,7 @@ namespace EngineManagedWrapper
 
 			if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Pressed)
 			{
-				RECT rect = gEngine->GetWindowRectInfo();
+				RECT rect = REngine::Instance()->GetWindowRectInfo();
 				int cur_x, cur_y;
 
 				RInput.GetCursorPos(cur_x, cur_y);

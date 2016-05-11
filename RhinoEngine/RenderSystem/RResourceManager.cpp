@@ -33,6 +33,8 @@ void ResourceLoaderThread(LoaderThreadData* data)
 
 		{
 			unique_lock<mutex> uniqueLock(*data->TaskQueueMutex);
+			if (data->TaskQueue->size() == 0)
+				OutputDebugStringA("=== Loader thread is idle ===\n");
 			data->TaskQueueCondition->wait(uniqueLock, [&]{ return data->TaskQueue->size() != 0 || *data->ShouldQuitThread; });
 
 			if (*data->ShouldQuitThread)

@@ -141,8 +141,6 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 
 	UpdateMaterialsFromResource();
 
-	//RRenderer.D3DImmediateContext()->IASetInputLayout(m_Mesh->GetInputLayout());
-
 	for (UINT32 i = 0; i < m_Mesh->GetMeshElements().size(); i++)
 	{
 		RShader* shader = nullptr;
@@ -157,8 +155,10 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 			int flag = m_Mesh->GetMeshElements()[i].GetFlag();
 
 			int shaderFeatureMask = 0;
-			if (flag & MEF_Skinned)
+			if ((flag & MEF_Skinned) && !REngine::Instance()->IsEditor())
+			{
 				shaderFeatureMask |= SFM_Skinned;
+			}
 			else if (instanced)
 				shaderFeatureMask |= SFM_Instanced;
 

@@ -16,11 +16,16 @@ struct DeferredRenderBuffer
 	ID3D11RenderTargetView*		View;
 	ID3D11ShaderResourceView*	SRV;
 
+	DeferredRenderBuffer()
+		:Buffer(nullptr), View(nullptr), SRV(nullptr)
+	{
+	}
+
 	void Release()
 	{
-		Buffer->Release();
-		View->Release();
-		SRV->Release();
+		SAFE_RELEASE(Buffer);
+		SAFE_RELEASE(View);
+		SAFE_RELEASE(SRV);
 	}
 };
 
@@ -29,10 +34,15 @@ struct DepthStencilBuffer
 	ID3D11Texture2D*			Buffer;
 	ID3D11DepthStencilView*		View;
 
+	DepthStencilBuffer()
+		: Buffer(nullptr), View(nullptr)
+	{
+	}
+
 	void Release()
 	{
-		Buffer->Release();
-		View->Release();
+		SAFE_RELEASE(Buffer);
+		SAFE_RELEASE(View);
 	}
 };
 
