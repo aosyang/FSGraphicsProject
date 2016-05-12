@@ -61,7 +61,7 @@ bool DeferredShadingApp::Initialize()
 
 	for (int i = 0; i < MAX_LIGHT_COUNT; i++)
 	{
-		m_PointLights[i].pos = RVec3(Math::RandF(-1500, 750), Math::RandF(50, 400), Math::RandF(-1850, 300));
+		m_PointLights[i].pos = RVec3(Math::RandF(-1500, 750), Math::RandF(50, 900), Math::RandF(-1850, 300));
 		m_PointLights[i].r = Math::RandF(50, 200);
 		//m_PointLights[i].color = RColor(1, 1, 1);
 		m_PointLights[i].color = RColor(Math::RandF(), Math::RandF(), Math::RandF());
@@ -187,25 +187,32 @@ void DeferredShadingApp::RenderScene()
 		m_DeferredBuffers[2].View, 
 	};
 
+	RRenderer.SetRenderTargets(DeferredBuffer_Count, rtvs, m_DepthBuffer.View);
+#else
+	RRenderer.Clear();
+#endif
+
 	RFrustum frustum = m_Camera.GetFrustum();
 
-	RRenderer.SetRenderTargets(DeferredBuffer_Count, rtvs, m_DepthBuffer.View);
-#endif
 	RRenderer.Clear(false, RColor(0, 0, 0));
-	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Color].View);
+	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Color].View, RColor(0.05f, 0.05f, 0.1f, 0.0f));
 	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Position].View, RColor(0, 0, 0));
 	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Normal].View, RColor(0, 0, 0));
 
 	RRenderer.SetBlendState(Blend_Opaque);
 	RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
 
+#if DISABLE_MRT == 1
+
+	m_Scene.Render(&frustum);
+
+#else
 	RRenderer.SetDefferedShading(true);
 
 	m_Scene.Render(&frustum);
 
 	RRenderer.SetDefferedShading(false);
 
-#if DISABLE_MRT == 0
 	RRenderer.SetRenderTargets();
 	RRenderer.Clear();
 

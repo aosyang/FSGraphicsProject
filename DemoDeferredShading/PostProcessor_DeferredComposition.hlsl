@@ -28,11 +28,10 @@ struct OUTPUT_VERTEX
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 {
 	float4 Albedo = AlbedoTexture.Sample(Sampler, Input.UV);
-	Albedo.a = 1.0f;
 
 	float3 Normal = NormalTexture.Sample(Sampler, Input.UV).rgb;
 	float4 Final = (float4)1;
-	Final.rgb = Albedo.rgb * CalculateAmbientLight(Normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor);
+	Final.rgb = Albedo.rgb * lerp(1.0, CalculateAmbientLight(Normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor), Albedo.a);
 
 	return Final;
 }
