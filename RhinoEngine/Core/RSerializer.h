@@ -55,6 +55,7 @@ public:
 		}
 		else
 		{
+			assert(!m_FileStream.eof());
 			char* pBuf = new char[size];
 			m_FileStream.read(pBuf, size);
 
@@ -85,6 +86,7 @@ public:
 		}
 		else
 		{
+			assert(!m_FileStream.eof());
 			UINT size;
 			m_FileStream.read((char*)&size, sizeof(size));
 			vec.resize(size);
@@ -104,6 +106,7 @@ public:
 		}
 		else
 		{
+			assert(!m_FileStream.eof());
 			m_FileStream.read((char*)&size, sizeof(size));
 			vec.resize(size);
 		}
@@ -123,6 +126,7 @@ public:
 		}
 		else
 		{
+			assert(!m_FileStream.eof());
 			m_FileStream.read((char*)&data, sizeof(T));
 		}
 	}
@@ -139,6 +143,7 @@ public:
 		}
 		else
 		{
+			assert(!m_FileStream.eof());
 			UINT size;
 			m_FileStream.read((char*)&size, sizeof(size));
 			str.resize(size);
@@ -156,6 +161,7 @@ public:
 				m_FileStream.write((char*)*arr, sizeof(T) * size);
 			else
 			{
+				assert(!m_FileStream.eof());
 				*arr = new T[size];
 				m_FileStream.read((char*)*arr, sizeof(T) * size);
 			}
@@ -177,6 +183,7 @@ public:
 		{
 			if (m_Mode == SM_Read)
 			{
+				assert(!m_FileStream.eof());
 				*pObj = new T();
 			}
 			(*pObj)->Serialize(*this);
