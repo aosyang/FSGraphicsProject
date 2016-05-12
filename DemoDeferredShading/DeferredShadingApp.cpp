@@ -42,7 +42,7 @@ bool DeferredShadingApp::Initialize()
 	m_PostProcessor.Initialize();
 
 	m_Scene.Initialize();
-	m_Scene.LoadFromFile("../Assets/TestMap.rmap");
+	m_Scene.LoadFromFile("../Assets/DeferredScene.rmap");
 
 	m_Camera.SetPosition(RVec3(-375, 1385, 1200));
 	m_Camera.SetupView(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);

@@ -64,7 +64,7 @@ struct PointLight
 	RVec3 sin_offset;
 };
 
-#define MAX_LIGHT_COUNT 500
+#define MAX_LIGHT_COUNT 1000
 
 enum ERasterizerState
 {
