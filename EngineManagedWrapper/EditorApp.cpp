@@ -178,7 +178,19 @@ namespace EngineManagedWrapper
 				RVec3 pos = m_SelectedObject->GetPosition();
 				if (m_MouseControlMode == MCM_MOVE_X)
 				{
-					pos.x += world_x.Dot(cam_right) * mdx - world_x.Dot(cam_up) * mdy;
+					if (RInput.IsKeyDown(VK_LMENU))
+					{
+						RMatrix4 transform = m_SelectedObject->GetNodeTransform();
+						RVec3 pos = transform.GetTranslation();
+						transform.SetTranslation(RVec3(0, 0, 0));
+						transform *= RMatrix4::CreateXAxisRotation((float)mdx);
+						transform.SetTranslation(pos);
+						m_SelectedObject->SetTransform(transform);
+					}
+					else
+					{
+						pos.x += world_x.Dot(cam_right) * mdx - world_x.Dot(cam_up) * mdy;
+					}
 				}
 				else if (m_MouseControlMode == MCM_MOVE_Y)
 				{
@@ -198,7 +210,19 @@ namespace EngineManagedWrapper
 				}
 				else if (m_MouseControlMode == MCM_MOVE_Z)
 				{
-					pos.z += world_z.Dot(cam_right) * mdx - world_z.Dot(cam_up) * mdy;
+					if (RInput.IsKeyDown(VK_LMENU))
+					{
+						RMatrix4 transform = m_SelectedObject->GetNodeTransform();
+						RVec3 pos = transform.GetTranslation();
+						transform.SetTranslation(RVec3(0, 0, 0));
+						transform *= RMatrix4::CreateZAxisRotation((float)mdx);
+						transform.SetTranslation(pos);
+						m_SelectedObject->SetTransform(transform);
+					}
+					else
+					{
+						pos.z += world_z.Dot(cam_right) * mdx - world_z.Dot(cam_up) * mdy;
+					}
 				}
 				m_SelectedObject->SetPosition(pos);
 			}
