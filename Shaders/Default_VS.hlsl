@@ -8,13 +8,13 @@
 
 struct INPUT_VERTEX
 {
-	float3 PosL		: POSITION;
-	float2 UV		: TEXCOORD0;
-	float3 Normal	: NORMAL;
 #if USE_SKINNING == 1
 	int4   BoneId	: BLENDINDICES;
 	float4 Weight	: BLENDWEIGHT;
 #endif
+	float3 PosL		: POSITION;
+	float2 UV		: TEXCOORD0;
+	float3 Normal	: NORMAL;
 };
 
 struct OUTPUT_VERTEX

@@ -7,7 +7,7 @@
 #ifndef _LIGHTSHADERCOMMON_HLSLI
 #define _LIGHTSHADERCOMMON_HLSLI
 
-Texture2D ShadowDepthTexture[3]					: register(t2);
+Texture2D ShadowDepthTexture[3]					: register(t4);
 
 SamplerComparisonState ShadowMapComparisonState : register(s2);
 

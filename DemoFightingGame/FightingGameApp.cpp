@@ -378,7 +378,7 @@ void FightingGameApp::RenderScene()
 		if (pass == 0)
 		{
 			ID3D11ShaderResourceView* nullSRV[] = { nullptr };
-			RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, nullSRV);
+			RRenderer.D3DImmediateContext()->PSSetShaderResources(4, 1, nullSRV);
 			
 			m_ShadowMap.SetupRenderTarget();
 		}
@@ -388,7 +388,7 @@ void FightingGameApp::RenderScene()
 			RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
 
 			ID3D11ShaderResourceView* shadowMapSRV[] = { m_ShadowMap.GetRenderTargetDepthSRV() };
-			RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, shadowMapSRV);
+			RRenderer.D3DImmediateContext()->PSSetShaderResources(4, 1, shadowMapSRV);
 		}
 
 		RRenderer.Clear();

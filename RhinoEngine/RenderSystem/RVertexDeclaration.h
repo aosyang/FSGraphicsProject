@@ -21,13 +21,13 @@
 
 enum EVertexComponent
 {
+	VertexComponent_BoneId,
+	VertexComponent_BoneWeights,
 	VertexComponent_Pos,
 	VertexComponent_UV0,
 	VertexComponent_Normal,
 	VertexComponent_Tangent,
 	VertexComponent_UV1,
-	VertexComponent_BoneId,
-	VertexComponent_BoneWeights,
 
 	VertexComponent_Count,
 };
@@ -40,13 +40,13 @@ struct ShaderInputVertex
 
 enum EVertexComponentMask
 {
+	VCM_BoneId							= 1 << VertexComponent_BoneId,
+	VCM_BoneWeights						= 1 << VertexComponent_BoneWeights,
 	VCM_Pos								= 1 << VertexComponent_Pos,
 	VCM_UV0								= 1 << VertexComponent_UV0,
 	VCM_Normal							= 1 << VertexComponent_Normal,
 	VCM_Tangent							= 1 << VertexComponent_Tangent,
 	VCM_UV1								= 1 << VertexComponent_UV1,
-	VCM_BoneId							= 1 << VertexComponent_BoneId,
-	VCM_BoneWeights						= 1 << VertexComponent_BoneWeights,
 };
 
 enum EVertexComponents

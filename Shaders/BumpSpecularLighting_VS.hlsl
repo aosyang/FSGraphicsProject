@@ -1,5 +1,5 @@
 //=============================================================================
-// BumpLighting_VS.hlsl by Shiyang Ao, 2016 All Rights Reserved.
+// BumpSpecularLighting_VS.hlsl by Shiyang Ao, 2016 All Rights Reserved.
 //
 // 
 //=============================================================================
@@ -34,20 +34,20 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 	OUTPUT_VERTEX Out = (OUTPUT_VERTEX)0;
 
 	float4 worldPos = (float4)0;
-		float3 Normal = (float3)0;
-		float3 Tangent = (float3)0;
+	float3 Normal = (float3)0;
+	float3 Tangent = (float3)0;
 
 #if USE_SKINNING == 1
-		for (int i = 0; i < 4; i++)
-		{
-			worldPos += mul(float4(Input.PosL, 1.0f), boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
-			Normal += mul(Input.Normal, (float3x3)boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
-			Tangent += mul(Input.Tangent, (float3x3)boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
-		}
+	for (int i = 0; i < 4; i++)
+	{
+		worldPos += mul(float4(Input.PosL, 1.0f), boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
+		Normal += mul(Input.Normal, (float3x3)boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
+		Tangent += mul(Input.Tangent, (float3x3)boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
+	}
 	Normal = normalize(Normal);
 	Tangent = normalize(Tangent);
 #else
-		worldPos = mul(float4(Input.PosL, 1.0f), worldMatrix);
+	worldPos = mul(float4(Input.PosL, 1.0f), worldMatrix);
 	Normal = mul(Input.Normal, (float3x3)worldMatrix);
 	Tangent = mul(Input.Tangent, (float3x3)worldMatrix);
 #endif

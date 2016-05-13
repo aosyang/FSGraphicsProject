@@ -10,7 +10,7 @@
 #include "tinyxml2/tinyxml2.h"
 
 RSMeshObject::RSMeshObject()
-	: RSceneObject(), m_Mesh(nullptr), m_OverridingShader(nullptr), m_bNeedUpdateMaterial(true)
+	: RSceneObject(), m_Mesh(nullptr), m_OverridingShader(nullptr), m_OverridingShaderFeatures(-1), m_bNeedUpdateMaterial(true)
 {
 
 }
@@ -110,9 +110,10 @@ void RSMeshObject::SaveMaterialsToFile()
 	delete doc;
 }
 
-void RSMeshObject::SetOverridingShader(RShader* shader)
+void RSMeshObject::SetOverridingShader(RShader* shader, int features)
 {
 	m_OverridingShader = shader;
+	m_OverridingShaderFeatures = features;
 }
 
 RAabb RSMeshObject::GetAabb() const
@@ -165,7 +166,10 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 			if (RRenderer.UseDeferredShading())
 				shaderFeatureMask |= SFM_Deferred;
 
-			shader->Bind(shaderFeatureMask);
+			if (m_OverridingShader && m_OverridingShaderFeatures != -1)
+				shader->Bind(m_OverridingShaderFeatures);
+			else
+				shader->Bind(shaderFeatureMask);
 
 			// Hack: for shaders bound separately, consider textures loaded from mesh
 			if (m_OverridingShader)

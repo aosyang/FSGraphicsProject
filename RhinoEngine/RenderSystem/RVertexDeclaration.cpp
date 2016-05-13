@@ -15,13 +15,13 @@
 
 ShaderInputVertex VertexSemantics[] =
 {
+	{ "int4",	"BLENDINDICES", },
+	{ "float4", "BLENDWEIGHT", },
 	{ "float3", "POSITION", },
 	{ "float2", "TEXCOORD0", },
 	{ "float3", "NORMAL", },
 	{ "float3", "TANGENT", },
 	{ "float2", "TEXCOORD1", },
-	{ "int4",	"BLENDINDICES", },
-	{ "float4", "BLENDWEIGHT", },
 };
 
 
@@ -144,13 +144,13 @@ ID3D11InputLayout* RVertexDeclaration::GetInputLayoutByVertexComponents(int vert
 		// Create input layout based on vertex component
 		static D3D11_INPUT_ELEMENT_DESC ComponentDescs[VertexComponent_Count] =
 		{
+			{ "BLENDINDICES",	0, DXGI_FORMAT_R32G32B32A32_SINT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BLENDWEIGHT",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "POSITION",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD",		0, DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "NORMAL",			0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "TANGENT",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD",		1, DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "BLENDINDICES",	0, DXGI_FORMAT_R32G32B32A32_SINT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "BLENDWEIGHT",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 		};
 
 		ID3D11InputLayout* pInputLayout;
@@ -245,13 +245,13 @@ void RVertexDeclaration::CopyVertexComponents(void* out, const RVertex::MESH_LOA
 
 	static VC_Info strides[VertexComponent_Count] =
 	{
+		{ GetVertexStride(VCM_BoneId),		offsetof(RVertex::MESH_LOADER_VERTEX, boneId) },
+		{ GetVertexStride(VCM_BoneWeights),	offsetof(RVertex::MESH_LOADER_VERTEX, weight) },
 		{ GetVertexStride(VCM_Pos),			offsetof(RVertex::MESH_LOADER_VERTEX, pos) },
 		{ GetVertexStride(VCM_UV0),			offsetof(RVertex::MESH_LOADER_VERTEX, uv0) },
 		{ GetVertexStride(VCM_Normal),		offsetof(RVertex::MESH_LOADER_VERTEX, normal) },
 		{ GetVertexStride(VCM_Tangent),		offsetof(RVertex::MESH_LOADER_VERTEX, tangent) },
 		{ GetVertexStride(VCM_UV1),			offsetof(RVertex::MESH_LOADER_VERTEX, uv1) },
-		{ GetVertexStride(VCM_BoneId),		offsetof(RVertex::MESH_LOADER_VERTEX, boneId) },
-		{ GetVertexStride(VCM_BoneWeights),	offsetof(RVertex::MESH_LOADER_VERTEX, weight) },
 	};
 
 	int offset = 0;

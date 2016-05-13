@@ -25,7 +25,7 @@ public:
 
 	void SaveMaterialsToFile();
 
-	void SetOverridingShader(RShader* shader);
+	void SetOverridingShader(RShader* shader, int features = -1);
 
 	RAabb GetAabb() const;
 	const RAabb& GetMeshElementAabb(int index) const;
@@ -43,6 +43,7 @@ protected:
 	RMesh*					m_Mesh;
 	vector<RMaterial>		m_Materials;
 	RShader*				m_OverridingShader;
+	int						m_OverridingShaderFeatures;
 	bool					m_bNeedUpdateMaterial;
 };
 

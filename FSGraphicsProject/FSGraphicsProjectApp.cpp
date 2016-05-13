@@ -983,7 +983,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	if (pass != ShadowPass)
 	{
 		// Set shadow map to pixel shader
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 3, shadowMapSRV);
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(4, 3, shadowMapSRV);
 
 		// Draw skybox
 		m_Skybox.Draw();
@@ -992,6 +992,9 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		RRenderer.Clear(false, RColor(0, 0, 0));
 	}
 
+	RFrustum cameraFrustum = (pass == ShadowPass) ? m_ShadowMap[cbScene.cascadedShadowIndex].GetFrustum() : m_Camera.GetFrustum();
+
+#if 1
 	// Draw star
 	SetPerObjectConstBuffer(RMatrix4::CreateTranslation(0.0f, 500.0f, 0.0f));
 
@@ -1001,8 +1004,6 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		m_ColorShader->Bind();
 
 	m_StarMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	RFrustum cameraFrustum = (pass == ShadowPass) ? m_ShadowMap[cbScene.cascadedShadowIndex].GetFrustum() : m_Camera.GetFrustum();
 
 	// Draw meshes
 
@@ -1049,6 +1050,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 
 		m_FbxMeshObj.Draw(true, instanceCount);
 	}
+#endif
 
 #if 1
 	// Draw islands
@@ -1130,6 +1132,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, m_BumpNormalTexture->GetPtrSRV());
 		m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
+#endif
 
 	// Draw character
 	SetPerObjectConstBuffer(m_CharacterObj.GetNodeTransform());
@@ -1157,6 +1160,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		}
 	}
 
+#if 1
 	// Draw transparent spheres
 	if (pass != ShadowPass)
 	{

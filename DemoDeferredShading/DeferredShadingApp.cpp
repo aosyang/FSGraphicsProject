@@ -216,9 +216,14 @@ void DeferredShadingApp::RenderScene()
 	RRenderer.SetRenderTargets();
 	RRenderer.Clear();
 
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_DeferredBuffers[0].SRV);
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, &m_DeferredBuffers[1].SRV);
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, &m_DeferredBuffers[2].SRV);
+	ID3D11ShaderResourceView* gbufferSRV[] =
+	{
+		m_DeferredBuffers[0].SRV,
+		m_DeferredBuffers[1].SRV,
+		m_DeferredBuffers[2].SRV,
+	};
+
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 3, gbufferSRV);
 
 	m_PostProcessor.Draw(PPE_DeferredComposition);
 
@@ -321,10 +326,8 @@ void DeferredShadingApp::RenderScene()
 		}
 	}
 
-	ID3D11ShaderResourceView* nullSRV[] = { nullptr };
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, nullSRV);
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, nullSRV);
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(2, 1, nullSRV);
+	ID3D11ShaderResourceView* nullSRV[] = { nullptr, nullptr, nullptr };
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 3, nullSRV);
 #endif
 
 	RRenderer.SetRenderTargets();
