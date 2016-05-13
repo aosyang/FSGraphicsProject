@@ -7,6 +7,6 @@
 #ifndef _PIXELSHADERCOMMON_H
 #define _PIXELSHADERCOMMON_H
 
-SamplerState Sampler;
+SamplerState Sampler : register(s0);
 
 #endif

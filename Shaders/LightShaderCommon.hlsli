@@ -56,14 +56,20 @@ float3 CalculateSpecularLight(float3 normal,
 	return lightColor.rgb * specularColor.rgb * SpecularIntensity;
 }
 
-float SampleShadowMap(Texture2D shadowMap, float3 shadowPosH, float3 depthOffset = 0.01f)
+float SampleShadowMap_NearestFiltering(Texture2D shadowMap, float3 shadowPosH, float3 depthOffset = 0.01f)
 {
 	// Nearest shadow map sampling
-	//return (shadowPosH.z < ShadowDepthTexture.Sample(Sampler, shadowPosH.xy).r + 0.0001f) ? 1.0f : 0.0f;
+	return (shadowPosH.z < shadowMap.Sample(Sampler, shadowPosH.xy).r + depthOffset) ? 1.0f : 0.0f;
+}
 
+float SampleShadowMap_BilinearFiltering(Texture2D shadowMap, float3 shadowPosH, float3 depthOffset = 0.01f)
+{
 	// Bilinear filtered shadow map comparison
-	//return shadowMap.SampleCmpLevelZero(ShadowMapComparisonState, shadowPosH.xy, shadowPosH.z - 0.01f);
+	return shadowMap.SampleCmpLevelZero(ShadowMapComparisonState, shadowPosH.xy, shadowPosH.z - depthOffset);
+}
 
+float SampleShadowMap_4x4PCF(Texture2D shadowMap, float3 shadowPosH, float3 depthOffset = 0.01f)
+{
 	// 4x4 PCF 
 	float final = 0;
 	for (float x = -1.5f; x <= 1.5f; x++)
@@ -89,13 +95,13 @@ float SampleCascadedShadowMap(float4 shadowPosH[3], float NdotL, float depth)
 
 	if (CascadedShadowCount == 1)
 	{
-		return SampleShadowMap(ShadowDepthTexture[0], shadowPosH[0].xyz, shadowOffset[0]);
+		return SampleShadowMap_4x4PCF(ShadowDepthTexture[0], shadowPosH[0].xyz, shadowOffset[0]);
 	}
 	else if (CascadedShadowCount > 1)
 	{
-		float level0 = SampleShadowMap(ShadowDepthTexture[0], shadowPosH[0].xyz, shadowOffset[0]);
-		float level1 = SampleShadowMap(ShadowDepthTexture[1], shadowPosH[1].xyz, shadowOffset[1]);
-		float level2 = (CascadedShadowCount > 2) ? SampleShadowMap(ShadowDepthTexture[2], shadowPosH[2].xyz, shadowOffset[2]) : 1.0f;
+		float level0 = SampleShadowMap_4x4PCF(ShadowDepthTexture[0], shadowPosH[0].xyz, shadowOffset[0]);
+		float level1 = SampleShadowMap_BilinearFiltering(ShadowDepthTexture[1], shadowPosH[1].xyz, shadowOffset[1]);
+		float level2 = (CascadedShadowCount > 2) ? SampleShadowMap_BilinearFiltering(ShadowDepthTexture[2], shadowPosH[2].xyz, shadowOffset[2]) : 1.0f;
 
 		if (depth < CascadedShadowDepth[0])
 		{
