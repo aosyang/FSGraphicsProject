@@ -504,7 +504,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 	//m_DebugRenderer.DrawFrustum(frustum);
 
-	float shadowSplitPoints[4] = { 0.0f, 0.05f, 0.2f, 0.5f };
+	float shadowSplitPoints[4] = { 0.0f, 0.05f, 0.4f, 1.0f };
 	float lightDistance[3] = { 1000.0f, 2000.0f, 2000.0f };
 	RColor frustumColor[3] = { RColor(1, 0, 0), RColor(0, 1, 0), RColor(0, 0, 1) };
 
@@ -1021,35 +1021,42 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			RMatrix4 mat = m_FbxMeshObj.GetNodeTransform();
 			mat.SetTranslation(RVec3(1700.0f * x, 0, 1700.0f * z));
 
-			if (!RCollision::TestAabbInsideFrustum(cameraFrustum, meshAabb.GetTransformedAabb(mat)))
-				continue;
+			if (RCollision::TestAabbInsideFrustum(cameraFrustum, meshAabb.GetTransformedAabb(mat)))
+			{
+				cbMeshInstance.instancedWorldMatrix[instanceCount] = mat;
+				instanceCount++;
+			}
 
-			cbMeshInstance.instancedWorldMatrix[instanceCount] = mat;
-			instanceCount++;
+			if (instanceCount >= MAX_INSTANCE_COUNT ||
+				((x == m_MeshInstanceCount / 2) && (z == m_MeshInstanceCount / 2)))
+			{
+				m_cbInstance[2].UpdateContent(&cbMeshInstance);
+				m_cbInstance[2].ApplyToShaders();
+
+				if (pass == ShadowPass)
+					m_FbxMeshObj.DrawWithShader(m_DepthShader, true, instanceCount);
+				else
+				{
+					float opacity = (timeNow - m_FbxMeshObj.GetResourceTimestamp()) / loadingFadeInTime;
+					if (opacity >= 0.0f && opacity <= 1.0f)
+					{
+						cbMaterial.GlobalOpacity = opacity;
+						SetMaterialConstBuffer(&cbMaterial);
+						RRenderer.SetBlendState(Blend_AlphaToCoverage);
+					}
+					else
+					{
+						RRenderer.SetBlendState(Blend_Opaque);
+					}
+
+					m_FbxMeshObj.Draw(true, instanceCount);
+				}
+
+				instanceCount = 0;
+			}
 		}
 	}
 
-	m_cbInstance[2].UpdateContent(&cbMeshInstance);
-	m_cbInstance[2].ApplyToShaders();
-
-	if (pass == ShadowPass)
-		m_FbxMeshObj.DrawWithShader(m_DepthShader, true, instanceCount);
-	else
-	{
-		float opacity = (timeNow - m_FbxMeshObj.GetResourceTimestamp()) / loadingFadeInTime;
-		if (opacity >= 0.0f && opacity <= 1.0f)
-		{
-			cbMaterial.GlobalOpacity = opacity;
-			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.SetBlendState(Blend_AlphaToCoverage);
-		}
-		else
-		{
-			RRenderer.SetBlendState(Blend_Opaque);
-		}
-
-		m_FbxMeshObj.Draw(true, instanceCount);
-	}
 #endif
 
 #if 1
