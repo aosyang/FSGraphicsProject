@@ -45,9 +45,9 @@
 #include "../Shaders/PixelShaderCommon.hlsli"
 #include "../Shaders/LightShaderCommon.hlsli"
 
-Texture2D ScreenTexture	: register(t0);
-Texture2D DepthTexture	: register(t2);
-Texture2D NormalTexture	: register(t4);
+Texture2D ScreenTexture		: register(t0);
+Texture2D PosDepthTexture	: register(t1);
+Texture2D NormalTexture		: register(t3);
 
 static const float cb_stride = 10.0f;
 static const float cb_strideZCutoff = 0.1f;
@@ -91,7 +91,7 @@ void swap(inout float a, inout float b)
 float linearDepthTexelFetch(int2 hitPixel)
 {
 	// Load returns 0 for any value accessed out of bounds
-	return LinearizeDepth(DepthTexture.Load(int3(hitPixel, 0)).r);
+	return LinearizeDepth(PosDepthTexture.Load(int3(hitPixel, 0)).w);
 }
 
 // Returns true if the ray hit something
@@ -214,14 +214,15 @@ float4 main(VertexOut pIn) : SV_TARGET
 	int3 loadIndices = int3(pIn.PosH.xy, 0);
 	float texelWidth = 1.0 / ScreenSize.x;
 	float texelHeight = 1.0 / ScreenSize.y;
+	float4 Final = ScreenTexture.Sample(Sampler, pIn.UV);
 
 	float3 normalVS = NormalTexture.Load(loadIndices).xyz;
 	if (!any(normalVS))
 	{
-		return 0.0f;
+		return Final;
 	}
 
-	float depth = DepthTexture.Load(loadIndices).r;
+	float depth = PosDepthTexture.Load(loadIndices).w;
 	float3 rayOriginVS = pIn.ViewRay * LinearizeDepth(depth);
 
 	/*
@@ -245,7 +246,7 @@ float4 main(VertexOut pIn) : SV_TARGET
 	// perform ray tracing - true if hit found, false otherwise
 	bool intersection = traceScreenSpaceRay(rayOriginVS, rayDirectionVS, jitter, hitPixel, hitPoint);
 
-	depth = DepthTexture.Load(int3(hitPixel, 0)).r;
+	depth = PosDepthTexture.Load(int3(hitPixel, 0)).w;
 
 	// move hit pixel from pixel position to UVs
 	hitPixel *= float2(texelWidth, texelHeight);
@@ -254,7 +255,7 @@ float4 main(VertexOut pIn) : SV_TARGET
 		intersection = false;
 	}
 
-	return ScreenTexture.Sample(Sampler, pIn.UV) + ScreenTexture.Sample(Sampler, hitPixel) * nDotV * (intersection ? 1.0f : 0.0f);
+	return Final + ScreenTexture.Sample(Sampler, hitPixel) * nDotV * (intersection ? 1.0f : 0.0f);
 
 	return float4(hitPixel, depth, rDotV) * (intersection ? 1.0f : 0.0f);
 }

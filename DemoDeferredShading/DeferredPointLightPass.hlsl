@@ -7,9 +7,8 @@
 #include "../Shaders/ConstBufferPS.h"
 
 Texture2D AlbedoTexture		: register(t0);
-Texture2D PositionTexture	: register(t1);
-Texture2D DepthTexture		: register(t2);
-Texture2D NormalTexture		: register(t3);
+Texture2D PosDepthTexture	: register(t1);
+Texture2D NormalTexture		: register(t2);
 
 SamplerState Sampler;
 
@@ -25,7 +24,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	Albedo.a = 1.0f;
 
 	float3 Normal = NormalTexture.Sample(Sampler, Input.UV).rgb;
-	float3 PosW = PositionTexture.Sample(Sampler, Input.UV).rgb;
+	float3 PosW = PosDepthTexture.Sample(Sampler, Input.UV).rgb;
 
 	float3 lightVec = DeferredPointLight.PosAndRadius.xyz - PosW;
 	float3 lightDir = normalize(lightVec);

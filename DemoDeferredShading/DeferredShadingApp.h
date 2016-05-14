@@ -50,7 +50,6 @@ enum EDeferredBuffer
 {
 	DB_Color,
 	DB_Position,
-	DB_Depth,
 	DB_WorldSpaceNormal,
 	DB_ViewSpaceNormal,
 

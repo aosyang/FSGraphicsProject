@@ -55,7 +55,6 @@ bool DeferredShadingApp::Initialize()
 
 	m_DeferredBuffers[DB_Color]				= CreateRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM);
 	m_DeferredBuffers[DB_Position]			= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-	m_DeferredBuffers[DB_Depth]				= CreateRenderTarget(DXGI_FORMAT_R32_FLOAT);
 	m_DeferredBuffers[DB_WorldSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
 	m_DeferredBuffers[DB_ViewSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
 	m_ScenePassBuffer						= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
@@ -217,8 +216,7 @@ void DeferredShadingApp::RenderScene()
 
 	RRenderer.Clear(false, RColor(0, 0, 0));
 	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Color].View, RColor(0.05f, 0.05f, 0.1f, 0.0f));
-	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Position].View, RColor(0, 0, 0));
-	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Depth].View, RColor(1, 0, 0));
+	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Position].View, RColor(0, 0, 0, 1));
 	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_WorldSpaceNormal].View, RColor(0, 0, 0));
 	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_ViewSpaceNormal].View, RColor(0, 0, 0));
 
@@ -239,13 +237,10 @@ void DeferredShadingApp::RenderScene()
 	RRenderer.SetRenderTargets(1, &m_ScenePassBuffer.View, m_DepthBuffer.View);
 	RRenderer.Clear(true, RColor(0, 0, 0));
 
-	ID3D11ShaderResourceView* gbufferSRV[] =
+	ID3D11ShaderResourceView* gbufferSRV[DeferredBuffer_Count];
+	for (int i=0; i<DeferredBuffer_Count; i++)
 	{
-		m_DeferredBuffers[0].SRV,
-		m_DeferredBuffers[1].SRV,
-		m_DeferredBuffers[2].SRV,
-		m_DeferredBuffers[3].SRV,
-		m_DeferredBuffers[4].SRV,
+		gbufferSRV[i] = m_DeferredBuffers[i].SRV;
 	};
 
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, DeferredBuffer_Count, gbufferSRV);
@@ -397,7 +392,6 @@ void DeferredShadingApp::OnResize(int width, int height)
 
 		m_DeferredBuffers[DB_Color] = CreateRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM);
 		m_DeferredBuffers[DB_Position] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-		m_DeferredBuffers[DB_Depth] = CreateRenderTarget(DXGI_FORMAT_R32_FLOAT);
 		m_DeferredBuffers[DB_WorldSpaceNormal] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
 		m_DeferredBuffers[DB_ViewSpaceNormal] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
 		m_ScenePassBuffer = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
