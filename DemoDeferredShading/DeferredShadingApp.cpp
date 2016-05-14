@@ -25,6 +25,7 @@ DeferredShadingApp::~DeferredShadingApp()
 	{
 		m_DeferredBuffers[i].Release();
 	}
+	m_ScenePassBuffer.Release();
 	m_DepthBuffer.Release();
 
 	m_DebugRenderer.Release();
@@ -57,6 +58,7 @@ bool DeferredShadingApp::Initialize()
 	m_DeferredBuffers[DB_Depth]				= CreateRenderTarget(DXGI_FORMAT_R32_FLOAT);
 	m_DeferredBuffers[DB_WorldSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
 	m_DeferredBuffers[DB_ViewSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
+	m_ScenePassBuffer						= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
 	m_DepthBuffer = CreateDepthStencilBuffer();
 
 	m_cbDeferredPointLight.Initialize();
@@ -120,6 +122,10 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 		moveVec -= RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 	if (RInput.IsKeyDown('D'))
 		moveVec += RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+	if (RInput.IsKeyDown('Q'))
+		moveVec -= RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+	if (RInput.IsKeyDown('E'))
+		moveVec += RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 
 	RVec3 camPos = m_Camera.GetPosition();
 	RMatrix4 cameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
@@ -230,7 +236,7 @@ void DeferredShadingApp::RenderScene()
 
 	RRenderer.SetDefferedShading(false);
 
-	RRenderer.SetRenderTargets();
+	RRenderer.SetRenderTargets(1, &m_ScenePassBuffer.View, m_DepthBuffer.View);
 	RRenderer.Clear(true, RColor(0, 0, 0));
 
 	ID3D11ShaderResourceView* gbufferSRV[] =
@@ -344,7 +350,14 @@ void DeferredShadingApp::RenderScene()
 		}
 	}
 
+	// Disable scissor test
 	RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
+
+	RRenderer.SetRenderTargets();
+	RRenderer.SetBlendState(Blend_Opaque);
+
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_ScenePassBuffer.SRV);
+
 	RRenderer.Clear(false, RColor(0, 0, 0), true);
 	m_PostProcessor.Draw(PPE_ScreenSpaceRayTracing);
 
@@ -352,7 +365,6 @@ void DeferredShadingApp::RenderScene()
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, DeferredBuffer_Count, nullSRV);
 #endif
 
-	RRenderer.SetRenderTargets();
 	RRenderer.Clear(false, RColor(0, 0, 0));
 
 	RRenderer.SetBlendState(Blend_Opaque);
@@ -388,6 +400,7 @@ void DeferredShadingApp::OnResize(int width, int height)
 		m_DeferredBuffers[DB_Depth] = CreateRenderTarget(DXGI_FORMAT_R32_FLOAT);
 		m_DeferredBuffers[DB_WorldSpaceNormal] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
 		m_DeferredBuffers[DB_ViewSpaceNormal] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
+		m_ScenePassBuffer = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
 		m_DepthBuffer = CreateDepthStencilBuffer();
 	}
 }

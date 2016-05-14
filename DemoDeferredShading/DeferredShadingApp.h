@@ -104,6 +104,7 @@ private:
 	RShaderConstantBuffer<SHADER_DEFERRED_POINT_LIGHT_BUFFER, CBST_PS, 2>
 								m_cbDeferredPointLight;
 	DeferredRenderBuffer		m_DeferredBuffers[DeferredBuffer_Count];
+	DeferredRenderBuffer		m_ScenePassBuffer;
 	DepthStencilBuffer			m_DepthBuffer;
 
 	PointLight					m_PointLights[MAX_LIGHT_COUNT];

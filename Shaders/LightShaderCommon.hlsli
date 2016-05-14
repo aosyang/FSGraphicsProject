@@ -100,7 +100,7 @@ float SampleCascadedShadowMap(float4 shadowPosH[3], float NdotL, float depth)
 	else if (CascadedShadowCount > 1)
 	{
 		float level0 = SampleShadowMap_4x4PCF(ShadowDepthTexture[0], shadowPosH[0].xyz, shadowOffset[0]);
-		float level1 = SampleShadowMap_BilinearFiltering(ShadowDepthTexture[1], shadowPosH[1].xyz, shadowOffset[1]);
+		float level1 = SampleShadowMap_4x4PCF(ShadowDepthTexture[1], shadowPosH[1].xyz, shadowOffset[1]);
 		float level2 = (CascadedShadowCount > 2) ? SampleShadowMap_BilinearFiltering(ShadowDepthTexture[2], shadowPosH[2].xyz, shadowOffset[2]) : 1.0f;
 
 		if (depth < CascadedShadowDepth[0])

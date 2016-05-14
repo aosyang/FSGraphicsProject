@@ -45,15 +45,15 @@
 #include "../Shaders/PixelShaderCommon.hlsli"
 #include "../Shaders/LightShaderCommon.hlsli"
 
-Texture2D AlbedoTexture	: register(t0);
+Texture2D ScreenTexture	: register(t0);
 Texture2D DepthTexture	: register(t2);
 Texture2D NormalTexture	: register(t4);
 
-static const float cb_stride = 1.0f;
-static const float cb_strideZCutoff = 0.75f;
+static const float cb_stride = 10.0f;
+static const float cb_strideZCutoff = 0.1f;
 static const float cb_zThickness = 0.001;
 static const float cb_maxSteps = 1000;
-static const float cb_maxDistance = 5000.0f;
+static const float cb_maxDistance = 1000.0f;
 
 struct VertexOut
 {
@@ -234,6 +234,7 @@ float4 main(VertexOut pIn) : SV_TARGET
 
 	// output rDotV to the alpha channel for use in determining how much to fade the ray
 	float rDotV = dot(rayDirectionVS, toPositionVS);
+	float nDotV = 1.0 - saturate(dot(normalVS, -toPositionVS) * 2.0);
 
 	// out parameters
 	float2 hitPixel = float2(0.0f, 0.0f);
@@ -253,17 +254,7 @@ float4 main(VertexOut pIn) : SV_TARGET
 		intersection = false;
 	}
 
-	if (!intersection)
-		return float4(0, 0, 0, 0);
-
-	float4 Albedo = AlbedoTexture.Sample(Sampler, hitPixel);
-	float3 Normal = NormalTexture.Sample(Sampler, hitPixel).rgb;
-
-	float4 Final = (float4)1;
-	Final.rgb = Albedo.rgb * lerp(1.0, CalculateAmbientLight(Normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor), Albedo.a);
-
-	Final.rgb *= rDotV;
-	return Final;
+	return ScreenTexture.Sample(Sampler, pIn.UV) + ScreenTexture.Sample(Sampler, hitPixel) * nDotV * (intersection ? 1.0f : 0.0f);
 
 	return float4(hitPixel, depth, rDotV) * (intersection ? 1.0f : 0.0f);
 }
