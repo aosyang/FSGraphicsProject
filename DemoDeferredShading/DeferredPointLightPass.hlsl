@@ -8,7 +8,8 @@
 
 Texture2D AlbedoTexture		: register(t0);
 Texture2D PositionTexture	: register(t1);
-Texture2D NormalTexture		: register(t2);
+Texture2D DepthTexture		: register(t2);
+Texture2D NormalTexture		: register(t3);
 
 SamplerState Sampler;
 

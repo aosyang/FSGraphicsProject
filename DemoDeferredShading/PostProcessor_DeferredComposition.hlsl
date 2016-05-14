@@ -5,19 +5,13 @@
 //=============================================================================
 
 #include "../Shaders/ConstBufferPS.h"
+#include "../Shaders/PixelShaderCommon.hlsli"
+#include "../Shaders/LightShaderCommon.hlsli"
 
 Texture2D AlbedoTexture		: register(t0);
 Texture2D PositionTexture	: register(t1);
-Texture2D NormalTexture		: register(t2);
-
-SamplerState Sampler;
-
-float3 CalculateAmbientLight(float3 normal, float4 highHemisphereColor, float4 lowHemisphereColor)
-{
-	return saturate(dot(normal, float3(0.0f, 1.0f, 0.0f)) / 2.0f + 0.5f) * highHemisphereColor.rgb * highHemisphereColor.w +
-		   saturate(dot(normal, float3(0.0f, -1.0f, 0.0f)) / 2.0f + 0.5f) * lowHemisphereColor.rgb * lowHemisphereColor.w;
-}
-
+Texture2D DepthTexture		: register(t2);
+Texture2D NormalTexture		: register(t3);
 
 struct OUTPUT_VERTEX
 {
@@ -28,8 +22,8 @@ struct OUTPUT_VERTEX
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 {
 	float4 Albedo = AlbedoTexture.Sample(Sampler, Input.UV);
-
 	float3 Normal = NormalTexture.Sample(Sampler, Input.UV).rgb;
+
 	float4 Final = (float4)1;
 	Final.rgb = Albedo.rgb * lerp(1.0, CalculateAmbientLight(Normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor), Albedo.a);
 

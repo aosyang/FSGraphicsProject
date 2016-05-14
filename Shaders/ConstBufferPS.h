@@ -58,14 +58,4 @@ CONSTANT_BUFFER_BEGIN(SHADER_DEFERRED_POINT_LIGHT_BUFFER, b2)
 POINT_LIGHT			DeferredPointLight;
 CONSTANT_BUFFER_END
 
-#ifndef __cplusplus
-float4 MakeLinearColorFromGammaSpace(float4 color)
-{
-	if (UseGammaCorrection)
-		return float4(pow(color.rgb, 2.2f), color.a);
-	else
-		return color;
-}
-#endif
-
 #endif

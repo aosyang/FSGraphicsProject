@@ -32,6 +32,8 @@
 
 CONSTANT_BUFFER_BEGIN(SHADER_GLOBAL_BUFFER, b4)
 float2				ScreenSize;
+float2				ClipPlaneNearFar;
+float4x4			ViewToTextureSpace;			// For screen space reflection
 bool				UseGammaCorrection;
 CONSTANT_BUFFER_END
 

@@ -8,6 +8,7 @@
 
 #include "PostProcessor_DeferredComposition.csh"
 #include "DeferredPointLightPass.csh"
+#include "ScreenSpaceRayTracing.csh"
 
 struct PP_QUAD
 {
@@ -28,6 +29,7 @@ void RPostProcessor::Initialize()
 	m_PPVertexShader = RShaderManager::Instance().GetShaderResource("PostProcessor")->VertexShader;
 	RRenderer.D3DDevice()->CreatePixelShader(PostProcessor_DeferredComposition, sizeof(PostProcessor_DeferredComposition), 0, &m_PPPixelShader[PPE_DeferredComposition]);
 	RRenderer.D3DDevice()->CreatePixelShader(DeferredPointLightPass, sizeof(DeferredPointLightPass), 0, &m_PPPixelShader[PPE_DeferredPointLightPass]);
+	RRenderer.D3DDevice()->CreatePixelShader(ScreenSpaceRayTracing, sizeof(ScreenSpaceRayTracing), 0, &m_PPPixelShader[PPE_ScreenSpaceRayTracing]);
 
 	// Find vertex declaration for screen quad
 	m_InputLayout = RVertexDeclaration::Instance().GetInputLayout(RVertex::SKYBOX_VERTEX::GetTypeName());

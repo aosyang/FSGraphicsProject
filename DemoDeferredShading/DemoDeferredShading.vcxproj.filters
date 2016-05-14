@@ -39,5 +39,6 @@
   <ItemGroup>
     <FxCompile Include="PostProcessor_DeferredComposition.hlsl" />
     <FxCompile Include="DeferredPointLightPass.hlsl" />
+    <FxCompile Include="ScreenSpaceRayTracing.hlsl" />
   </ItemGroup>
 </Project>

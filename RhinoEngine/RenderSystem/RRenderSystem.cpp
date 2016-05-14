@@ -257,35 +257,38 @@ float RRenderSystem::AspectRatio() const
 
 void RRenderSystem::ResizeClient(int width, int height)
 {
-	m_ClientWidth = width;
-	m_ClientHeight = height;
-
-	if (m_SwapChain)
+	if (width && height)
 	{
-		m_pD3DImmediateContext->OMSetRenderTargets(0, 0, 0);
-		SAFE_RELEASE(m_DepthStencilBuffer);
-		SAFE_RELEASE(m_DepthStencilView);
-		SAFE_RELEASE(m_RenderTargetView);
+		m_ClientWidth = width;
+		m_ClientHeight = height;
 
-		HR(m_SwapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0));
+		if (m_SwapChain)
+		{
+			m_pD3DImmediateContext->OMSetRenderTargets(0, 0, 0);
+			SAFE_RELEASE(m_DepthStencilBuffer);
+			SAFE_RELEASE(m_DepthStencilView);
+			SAFE_RELEASE(m_RenderTargetView);
 
-		CreateRenderTargetView();
+			HR(m_SwapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0));
 
-		CreateDepthStencilBufferAndView();
+			CreateRenderTargetView();
 
-		// Bind views to the output merger stage
-		m_pD3DImmediateContext->OMSetRenderTargets(1, &m_RenderTargetView, m_DepthStencilView);
+			CreateDepthStencilBufferAndView();
 
-		// Setup viewport
-		D3D11_VIEWPORT vp;
-		vp.TopLeftX = 0.0f;
-		vp.TopLeftY = 0.0f;
-		vp.Width = static_cast<float>(m_ClientWidth);
-		vp.Height = static_cast<float>(m_ClientHeight);
-		vp.MinDepth = 0.0f;
-		vp.MaxDepth = 1.0f;
+			// Bind views to the output merger stage
+			m_pD3DImmediateContext->OMSetRenderTargets(1, &m_RenderTargetView, m_DepthStencilView);
 
-		m_pD3DImmediateContext->RSSetViewports(1, &vp);
+			// Setup viewport
+			D3D11_VIEWPORT vp;
+			vp.TopLeftX = 0.0f;
+			vp.TopLeftY = 0.0f;
+			vp.Width = static_cast<float>(m_ClientWidth);
+			vp.Height = static_cast<float>(m_ClientHeight);
+			vp.MinDepth = 0.0f;
+			vp.MaxDepth = 1.0f;
+
+			m_pD3DImmediateContext->RSSetViewports(1, &vp);
+		}
 	}
 }
 

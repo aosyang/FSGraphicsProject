@@ -19,10 +19,11 @@ struct INPUT_VERTEX
 
 struct OUTPUT_VERTEX
 {
+	float4 PosH		: SV_POSITION;
 	float4 Color	: COLOR;
 	float3 NormalW	: NORMAL;
 	float4 PosW		: TEXCOORD0;
-	float4 PosH		: SV_POSITION;
+	float3 NormalV	: TEXCOORD1;
 };
 
 OUTPUT_VERTEX main(INPUT_VERTEX Input)
@@ -46,6 +47,7 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 
 	Out.PosH = mul(Out.PosW, viewProjMatrix);
 	Out.NormalW = Normal;
+	Out.NormalV = mul(Normal, viewMatrix);
 
 	Out.Color.rgb = saturate(dot(Normal, float3(0, 1, 0)) / 2 + 0.5f);
 	Out.Color.a = 1.0f;

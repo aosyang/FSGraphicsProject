@@ -13,6 +13,7 @@ enum PostProcessingEffect
 {
 	PPE_DeferredComposition,
 	PPE_DeferredPointLightPass,
+	PPE_ScreenSpaceRayTracing,
 
 	PPE_COUNT,
 };

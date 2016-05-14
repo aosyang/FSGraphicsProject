@@ -983,7 +983,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	if (pass != ShadowPass)
 	{
 		// Set shadow map to pixel shader
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(4, 3, shadowMapSRV);
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(RShadowMap::ShaderResourceSlot(), 3, shadowMapSRV);
 
 		// Draw skybox
 		m_Skybox.Draw();

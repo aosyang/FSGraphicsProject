@@ -5,6 +5,7 @@
 //=============================================================================
 
 #include "ConstBufferPS.h"
+#include "PixelShaderCommon.hlsli"
 
 struct OUTPUT_VERTEX
 {

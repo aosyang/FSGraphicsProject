@@ -26,6 +26,9 @@ public:
 	ID3D11ShaderResourceView* GetRenderTargetSRV()		{ return m_RenderTargetSRV; }
 	ID3D11ShaderResourceView* GetRenderTargetDepthSRV()	{ return m_RenderTargetDepthSRV; }
 
+	// Texture slot number which matches register of ShadowDepthTexture in LightShaderCommon.hlsli
+	static int ShaderResourceSlot()						{ return 5; }
+
 private:
 	ID3D11Texture2D*			m_RenderTargetBuffer;
 	ID3D11Texture2D*			m_DepthBuffer;

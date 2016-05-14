@@ -52,9 +52,11 @@ bool DeferredShadingApp::Initialize()
 	RRenderer.SetSamplerState(0, SamplerState_Texture);
 	RRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
 
-	m_DeferredBuffers[DB_Color]		= CreateRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM);
-	m_DeferredBuffers[DB_Position]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-	m_DeferredBuffers[DB_Normal]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
+	m_DeferredBuffers[DB_Color]				= CreateRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM);
+	m_DeferredBuffers[DB_Position]			= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
+	m_DeferredBuffers[DB_Depth]				= CreateRenderTarget(DXGI_FORMAT_R32_FLOAT);
+	m_DeferredBuffers[DB_WorldSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
+	m_DeferredBuffers[DB_ViewSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
 	m_DepthBuffer = CreateDepthStencilBuffer();
 
 	m_cbDeferredPointLight.Initialize();
@@ -131,10 +133,12 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 
 	// Update scene constant buffer
 	SHADER_SCENE_BUFFER cbScene;
+	ZeroMemory(&cbScene, sizeof(cbScene));
 
 	cbScene.viewMatrix = viewMatrix;
 	cbScene.projMatrix = projMatrix;
 	cbScene.viewProjMatrix = viewMatrix * projMatrix;
+	cbScene.invProjMatrix = projMatrix.Inverse();
 	cbScene.cameraPos = m_Camera.GetPosition();
 
 	m_Scene.cbScene.UpdateContent(&cbScene);
@@ -145,7 +149,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbLight, sizeof(cbLight));
 
 	// Setup ambient color
-	cbLight.HighHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.4f, 0.1f);
+	cbLight.HighHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.4f, 0.5f);
 	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 0.0f);
 
 	cbLight.CameraPos = m_Camera.GetPosition();
@@ -166,6 +170,15 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbScreen, sizeof(cbScreen));
 
 	cbScreen.ScreenSize = RVec2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());
+	cbScreen.ClipPlaneNearFar = RVec2(m_Camera.GetNearPlane(), m_Camera.GetFarPlane());
+
+	RMatrix4 texMat = RMatrix4(
+		0.5f,	0.0f,	0.0f,	0.0f,
+		0.0f,	-0.5f,	0.0f,	0.0f,
+		0.0f,	0.0f,	1.0f,	0.0f,
+		0.5f,	0.5f,	0.0f,	1.0f
+		);
+	cbScreen.ViewToTextureSpace = cbScene.projMatrix * texMat;
 	cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();
 
 	m_Scene.cbScreen.UpdateContent(&cbScreen);
@@ -185,6 +198,8 @@ void DeferredShadingApp::RenderScene()
 		m_DeferredBuffers[0].View,
 		m_DeferredBuffers[1].View, 
 		m_DeferredBuffers[2].View, 
+		m_DeferredBuffers[3].View,
+		m_DeferredBuffers[4].View,
 	};
 
 	RRenderer.SetRenderTargets(DeferredBuffer_Count, rtvs, m_DepthBuffer.View);
@@ -197,7 +212,9 @@ void DeferredShadingApp::RenderScene()
 	RRenderer.Clear(false, RColor(0, 0, 0));
 	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Color].View, RColor(0.05f, 0.05f, 0.1f, 0.0f));
 	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Position].View, RColor(0, 0, 0));
-	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Normal].View, RColor(0, 0, 0));
+	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Depth].View, RColor(1, 0, 0));
+	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_WorldSpaceNormal].View, RColor(0, 0, 0));
+	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_ViewSpaceNormal].View, RColor(0, 0, 0));
 
 	RRenderer.SetBlendState(Blend_Opaque);
 	RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
@@ -214,19 +231,20 @@ void DeferredShadingApp::RenderScene()
 	RRenderer.SetDefferedShading(false);
 
 	RRenderer.SetRenderTargets();
-	RRenderer.Clear();
+	RRenderer.Clear(true, RColor(0, 0, 0));
 
 	ID3D11ShaderResourceView* gbufferSRV[] =
 	{
 		m_DeferredBuffers[0].SRV,
 		m_DeferredBuffers[1].SRV,
 		m_DeferredBuffers[2].SRV,
+		m_DeferredBuffers[3].SRV,
+		m_DeferredBuffers[4].SRV,
 	};
 
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 3, gbufferSRV);
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, DeferredBuffer_Count, gbufferSRV);
 
 	m_PostProcessor.Draw(PPE_DeferredComposition);
-
 
 	// Render lighting pass
 	RRenderer.SetBlendState(Blend_Additive);
@@ -304,7 +322,7 @@ void DeferredShadingApp::RenderScene()
 			//m_DebugRenderer.DrawSphere(pos, m_PointLights[i].r, m_PointLights[i].color);
 
 			RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Scissor]);
-			
+
 			D3D11_RECT rect;
 			rect.left	= (LONG)pMin.x;
 			rect.top	= (LONG)pMax.y;
@@ -326,8 +344,12 @@ void DeferredShadingApp::RenderScene()
 		}
 	}
 
-	ID3D11ShaderResourceView* nullSRV[] = { nullptr, nullptr, nullptr };
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 3, nullSRV);
+	RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
+	RRenderer.Clear(false, RColor(0, 0, 0), true);
+	m_PostProcessor.Draw(PPE_ScreenSpaceRayTracing);
+
+	ID3D11ShaderResourceView* nullSRV[DeferredBuffer_Count] = { nullptr };
+	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, DeferredBuffer_Count, nullSRV);
 #endif
 
 	RRenderer.SetRenderTargets();
@@ -353,16 +375,19 @@ void DeferredShadingApp::OnResize(int width, int height)
 {
 	if (RRenderer.D3DDevice())
 	{
-		m_DeferredBuffers[DB_Color].Release();
-		m_DeferredBuffers[DB_Position].Release();
-		m_DeferredBuffers[DB_Normal].Release();
+		for (int i = 0; i < DeferredBuffer_Count; i++)
+		{
+			m_DeferredBuffers[i].Release();
+		}
 		m_DepthBuffer.Release();
 
 		m_Camera.SetAspectRatio((float)width / (float)height);
 
 		m_DeferredBuffers[DB_Color] = CreateRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM);
 		m_DeferredBuffers[DB_Position] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-		m_DeferredBuffers[DB_Normal] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
+		m_DeferredBuffers[DB_Depth] = CreateRenderTarget(DXGI_FORMAT_R32_FLOAT);
+		m_DeferredBuffers[DB_WorldSpaceNormal] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
+		m_DeferredBuffers[DB_ViewSpaceNormal] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
 		m_DepthBuffer = CreateDepthStencilBuffer();
 	}
 }

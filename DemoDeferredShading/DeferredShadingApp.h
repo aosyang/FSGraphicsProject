@@ -50,7 +50,9 @@ enum EDeferredBuffer
 {
 	DB_Color,
 	DB_Position,
-	DB_Normal,
+	DB_Depth,
+	DB_WorldSpaceNormal,
+	DB_ViewSpaceNormal,
 
 	DeferredBuffer_Count
 };
@@ -64,7 +66,7 @@ struct PointLight
 	RVec3 sin_offset;
 };
 
-#define MAX_LIGHT_COUNT 1000
+#define MAX_LIGHT_COUNT 500
 
 enum ERasterizerState
 {

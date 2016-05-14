@@ -7,7 +7,7 @@
 #ifndef _LIGHTSHADERCOMMON_HLSLI
 #define _LIGHTSHADERCOMMON_HLSLI
 
-Texture2D ShadowDepthTexture[3]					: register(t4);
+Texture2D ShadowDepthTexture[3]					: register(t5);
 
 SamplerComparisonState ShadowMapComparisonState : register(s2);
 
@@ -56,19 +56,19 @@ float3 CalculateSpecularLight(float3 normal,
 	return lightColor.rgb * specularColor.rgb * SpecularIntensity;
 }
 
-float SampleShadowMap_NearestFiltering(Texture2D shadowMap, float3 shadowPosH, float3 depthOffset = 0.01f)
+float SampleShadowMap_NearestFiltering(Texture2D shadowMap, float3 shadowPosH, float depthOffset = 0.01f)
 {
 	// Nearest shadow map sampling
 	return (shadowPosH.z < shadowMap.Sample(Sampler, shadowPosH.xy).r + depthOffset) ? 1.0f : 0.0f;
 }
 
-float SampleShadowMap_BilinearFiltering(Texture2D shadowMap, float3 shadowPosH, float3 depthOffset = 0.01f)
+float SampleShadowMap_BilinearFiltering(Texture2D shadowMap, float3 shadowPosH, float depthOffset = 0.01f)
 {
 	// Bilinear filtered shadow map comparison
 	return shadowMap.SampleCmpLevelZero(ShadowMapComparisonState, shadowPosH.xy, shadowPosH.z - depthOffset);
 }
 
-float SampleShadowMap_4x4PCF(Texture2D shadowMap, float3 shadowPosH, float3 depthOffset = 0.01f)
+float SampleShadowMap_4x4PCF(Texture2D shadowMap, float3 shadowPosH, float depthOffset = 0.01f)
 {
 	// 4x4 PCF 
 	float final = 0;

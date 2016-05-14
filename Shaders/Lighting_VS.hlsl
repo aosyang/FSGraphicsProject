@@ -24,7 +24,8 @@ struct OUTPUT_VERTEX
 	float2 UV				: TEXCOORD0;
 	float3 NormalW			: TEXCOORD1;
 	float3 PosW				: TEXCOORD2;
-	float4 ShadowPosH[3]	: TEXCOORD3;
+	float3 NormalV			: TEXCOORD3;
+	float4 ShadowPosH[3]	: TEXCOORD4;
 };
 
 OUTPUT_VERTEX main(INPUT_VERTEX Input
@@ -61,6 +62,7 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input
 
 	Out.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	Out.NormalW = Normal;
+	Out.NormalV = mul(Normal, viewMatrix);
 
 	Out.UV = Input.UV;
 
