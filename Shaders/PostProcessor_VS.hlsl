@@ -27,7 +27,7 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 	Out.UV.x = 0.5f + Out.PosH.x * 0.5f;
 	Out.UV.y = 0.5f - Out.PosH.y * 0.5f;
 
-	float4 viewRay = mul(float4(Out.PosH.xy, -1, 1), invProjMatrix);
+	float4 viewRay = mul(float4(Out.PosH.xy, 0, 1), invProjMatrix);
 	Out.ViewRay = viewRay.xyz / viewRay.w;
 
 	return Out;

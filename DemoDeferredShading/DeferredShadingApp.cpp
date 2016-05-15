@@ -154,8 +154,8 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbLight, sizeof(cbLight));
 
 	// Setup ambient color
-	cbLight.HighHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.4f, 0.5f);
-	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 0.0f);
+	cbLight.HighHemisphereAmbientColor = RVec4(0.5f, 0.5f, 0.4f, 1.0f);
+	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 0.1f);
 
 	cbLight.CameraPos = m_Camera.GetPosition();
 

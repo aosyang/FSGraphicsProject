@@ -49,10 +49,10 @@ Texture2D ScreenTexture		: register(t0);
 Texture2D PosDepthTexture	: register(t1);
 Texture2D NormalTexture		: register(t3);
 
-static const float cb_stride = 10.0f;
-static const float cb_strideZCutoff = 0.1f;
-static const float cb_zThickness = 0.001;
-static const float cb_maxSteps = 1000;
+static const float cb_stride = 1.0f;
+static const float cb_strideZCutoff = 0.02f;
+static const float cb_zThickness = 0.00001f;
+static const float cb_maxSteps = 500;
 static const float cb_maxDistance = 1000.0f;
 
 struct VertexOut
@@ -234,7 +234,7 @@ float4 main(VertexOut pIn) : SV_TARGET
 	float3 rayDirectionVS = normalize(reflect(toPositionVS, normalVS));
 
 	// output rDotV to the alpha channel for use in determining how much to fade the ray
-	float rDotV = dot(rayDirectionVS, toPositionVS);
+	float rDotV = saturate(dot(rayDirectionVS, toPositionVS));
 	float nDotV = 1.0 - saturate(dot(normalVS, -toPositionVS) * 2.0);
 
 	// out parameters
