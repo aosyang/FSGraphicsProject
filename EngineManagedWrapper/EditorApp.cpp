@@ -175,6 +175,8 @@ namespace EngineManagedWrapper
 				RVec3 cam_right = m_CameraMatrix.GetRight();
 				RVec3 cam_up = m_CameraMatrix.GetUp();
 
+				float move_scale = RRenderer.GetClientHeight() / 500.0f;
+
 				RVec3 pos = m_SelectedObject->GetPosition();
 				if (m_MouseControlMode == MCM_MOVE_X)
 				{
@@ -189,7 +191,7 @@ namespace EngineManagedWrapper
 					}
 					else
 					{
-						pos.x += world_x.Dot(cam_right) * mdx - world_x.Dot(cam_up) * mdy;
+						pos.x += (world_x.Dot(cam_right) * mdx - world_x.Dot(cam_up) * mdy) * move_scale;
 					}
 				}
 				else if (m_MouseControlMode == MCM_MOVE_Y)
@@ -205,7 +207,7 @@ namespace EngineManagedWrapper
 					}
 					else
 					{
-						pos.y += world_y.Dot(cam_right) * mdx - world_y.Dot(cam_up) * mdy;
+						pos.y += (world_y.Dot(cam_right) * mdx - world_y.Dot(cam_up) * mdy) * move_scale;
 					}
 				}
 				else if (m_MouseControlMode == MCM_MOVE_Z)
@@ -221,7 +223,7 @@ namespace EngineManagedWrapper
 					}
 					else
 					{
-						pos.z += world_z.Dot(cam_right) * mdx - world_z.Dot(cam_up) * mdy;
+						pos.z += (world_z.Dot(cam_right) * mdx - world_z.Dot(cam_up) * mdy) * move_scale;
 					}
 				}
 				m_SelectedObject->SetPosition(pos);
@@ -329,7 +331,13 @@ namespace EngineManagedWrapper
 
 	void EditorApp::AddMeshObjectToScene(const char* path)
 	{
-		m_Scene.CreateMeshObject(path);
+		RSMeshObject* pObj = m_Scene.CreateMeshObject(path);
+		RAabb aabb = pObj->GetAabb();
+		RVec3 center = (aabb.pMin + aabb.pMax) * 0.5f;
+		float radius = (aabb.pMax - center).Magnitude();
+
+		RVec3 pos = m_CameraMatrix.GetTranslation() + m_CameraMatrix.GetForward() * radius - center;
+		pObj->SetPosition(pos);
 	}
 
 	void EditorApp::LoadScene(const char* filename)
