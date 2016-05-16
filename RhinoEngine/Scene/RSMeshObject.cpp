@@ -20,6 +20,15 @@ RSMeshObject::~RSMeshObject()
 
 }
 
+RSceneObject* RSMeshObject::Clone() const
+{
+	RSMeshObject* pClone = new RSMeshObject(*this);
+	if (pClone->m_Scene)
+		pClone->m_Scene->AddObjectToScene(pClone);
+
+	return pClone;
+}
+
 void RSMeshObject::SetMesh(RMesh* mesh)
 {
 	m_Mesh = mesh;

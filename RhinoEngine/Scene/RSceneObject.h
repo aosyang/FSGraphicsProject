@@ -28,6 +28,7 @@ public:
 	RScene* GetScene() const		{ return m_Scene; }
 
 	virtual SceneObjectType GetType() const { return SO_None; }
+	virtual RSceneObject* Clone() const { return nullptr; }
 
 	const RMatrix4& GetNodeTransform() const;
 

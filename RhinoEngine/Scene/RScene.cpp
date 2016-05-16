@@ -50,6 +50,11 @@ RSMeshObject* RScene::CreateMeshObject(RMesh* mesh)
 	return meshObject;
 }
 
+RSceneObject* RScene::CloneObject(RSceneObject* obj)
+{
+	return obj->Clone();
+}
+
 RSceneObject* RScene::FindObject(const char* name) const
 {
 	for (UINT i = 0; i < m_SceneObjects.size(); i++)
@@ -59,6 +64,18 @@ RSceneObject* RScene::FindObject(const char* name) const
 	}
 
 	return nullptr;
+}
+
+bool RScene::AddObjectToScene(RSceneObject* obj)
+{
+	vector<RSceneObject*>::iterator iter = find(m_SceneObjects.begin(), m_SceneObjects.end(), obj);
+	if (iter == m_SceneObjects.end())
+	{
+		m_SceneObjects.push_back(obj);
+		return true;
+	}
+
+	return false;
 }
 
 void RScene::RemoveObjectFromScene(RSceneObject* obj)

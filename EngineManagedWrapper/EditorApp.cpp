@@ -177,7 +177,14 @@ namespace EngineManagedWrapper
 
 				float move_scale = RRenderer.GetClientHeight() / 500.0f;
 
+				if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Pressed &&
+					RInput.IsKeyDown(VK_LCONTROL))
+				{
+					m_SelectedObject = m_SelectedObject->Clone();
+				}
+
 				RVec3 pos = m_SelectedObject->GetPosition();
+
 				if (m_MouseControlMode == MCM_MOVE_X)
 				{
 					if (RInput.IsKeyDown(VK_LMENU))

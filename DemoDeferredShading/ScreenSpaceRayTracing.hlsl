@@ -39,6 +39,7 @@
 /**
  * The ray tracing step of the SSLR implementation.
  * Modified version of the work stated above.
+ * Source: http://roar11.com/2015/07/screen-space-glossy-reflections/
  */
 
 #include "../Shaders/ConstBufferPS.h"

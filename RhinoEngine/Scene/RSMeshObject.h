@@ -15,6 +15,7 @@ public:
 	~RSMeshObject();
 
 	SceneObjectType GetType() const { return SO_MeshObject; }
+	RSceneObject* Clone() const;
 
 	void SetMesh(RMesh* mesh);
 	RMesh* GetMesh() const;

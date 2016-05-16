@@ -16,8 +16,10 @@ public:
 	RSMeshObject* CreateMeshObject(const char* meshName);
 	RSMeshObject* CreateMeshObject(RMesh* mesh);
 
+	RSceneObject* CloneObject(RSceneObject* obj);
 	RSceneObject* FindObject(const char* name) const;
 
+	bool AddObjectToScene(RSceneObject* obj);
 	void RemoveObjectFromScene(RSceneObject* obj);
 	void DestroyObject(RSceneObject* obj);
 	void DestroyAllObjects();

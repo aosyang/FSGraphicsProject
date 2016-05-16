@@ -40,7 +40,7 @@ void RDebugMenu::Update()
 	if (IsKeyDownOrRepeat(VK_UP))
 	{
 		if (m_SelMenu == 0)
-			m_SelMenu = m_MenuItems.size() - 1;
+			m_SelMenu = (UINT)m_MenuItems.size() - 1;
 		else
 			m_SelMenu--;
 	}
@@ -61,10 +61,11 @@ void RDebugMenu::Update()
 
 	m_Vertices.clear();
 
+	// Calculate longest menu item name for alignment
 	int max_name_length = 0;
 	for (UINT i = 0; i < m_MenuItems.size(); i++)
 	{
-		int len = strlen(m_MenuItems[i].name);
+		int len = (int)strlen(m_MenuItems[i].name);
 		if (len > max_name_length)
 			max_name_length = len;
 	}
@@ -72,12 +73,11 @@ void RDebugMenu::Update()
 	for (UINT i = 0; i < m_MenuItems.size(); i++)
 	{
 		MenuItem& item = m_MenuItems[i];
-		if (m_SelMenu == i)
-			AddText(">", 2, i + 2, RColor(1, 1, 1), RColor(0, 0, 0));
-		char msg_buf[1024];
+
+		static char msg_buf[1024];
 		char spacing[256] = { 0 };
 
-		int space_count = max_name_length + 2 - strlen(item.name);
+		int space_count = max_name_length + 1 - (int)strlen(item.name);
 		for (int j = 0; j < space_count; j++)
 		{
 			spacing[j] = ' ';
@@ -85,6 +85,9 @@ void RDebugMenu::Update()
 		sprintf_s(msg_buf, 1024, "%s%s: %f", item.name, spacing, item.val ? *item.val : 0.0f);
 		AddText(msg_buf, 4, i + 2, RColor(1, 1, 1), RColor(0, 0, 0));
 	}
+
+	// Draw cursor for selected menu item
+	AddText(">", 2, m_SelMenu + 2, RColor(1, 1, 1), RColor(0, 0, 0));
 }
 
 void RDebugMenu::Render()
