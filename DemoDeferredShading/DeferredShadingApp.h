@@ -9,6 +9,7 @@
 
 #include "Rhino.h"
 #include "RPostProcessor.h"
+#include "RDebugMenu.h"
 
 struct DeferredRenderBuffer
 {
@@ -102,6 +103,10 @@ private:
 
 	RShaderConstantBuffer<SHADER_DEFERRED_POINT_LIGHT_BUFFER, CBST_PS, 2>
 								m_cbDeferredPointLight;
+	RShaderConstantBuffer<SHADER_SSR_BUFFER, CBST_PS, 3>
+								m_cbSSR;
+	SHADER_SSR_BUFFER			cbSSR;
+
 	DeferredRenderBuffer		m_DeferredBuffers[DeferredBuffer_Count];
 	DeferredRenderBuffer		m_ScenePassBuffer;
 	DepthStencilBuffer			m_DepthBuffer;
@@ -109,6 +114,7 @@ private:
 	PointLight					m_PointLights[MAX_LIGHT_COUNT];
 	float						m_TotalTime;
 	RDebugRenderer				m_DebugRenderer;
+	RDebugMenu					m_DebugMenu;
 };
 
 #endif

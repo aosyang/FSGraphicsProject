@@ -58,4 +58,12 @@ CONSTANT_BUFFER_BEGIN(SHADER_DEFERRED_POINT_LIGHT_BUFFER, b2)
 POINT_LIGHT			DeferredPointLight;
 CONSTANT_BUFFER_END
 
+CONSTANT_BUFFER_BEGIN(SHADER_SSR_BUFFER, b3)
+float				cb_stride;
+float				cb_strideZCutoff;
+float				cb_zThickness;
+float				cb_maxSteps;
+float				cb_maxDistance;
+CONSTANT_BUFFER_END
+
 #endif

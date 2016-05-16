@@ -10,7 +10,7 @@
 
 
 RText::RText()
-	: m_FontShader(nullptr)
+	: m_FontShader(nullptr), m_bNeedUpdateBuffer(true)
 {
 }
 
@@ -21,9 +21,17 @@ RText::~RText()
 
 void RText::Initialize(RTexture* fontTexture, UINT rows, UINT columns)
 {
-	m_FontTexture = fontTexture;
-	m_Rows = rows;
-	m_Columns = columns;
+	if (!fontTexture)
+	{
+		m_FontTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/Fonts/Fixedsys_9c.DDS", RLM_Immediate);
+		m_Rows = m_Columns = 16;
+	}
+	else
+	{
+		m_FontTexture = fontTexture;
+		m_Rows = rows;
+		m_Columns = columns;
+	}
 
 	ID3D11InputLayout* pInputLayout = RVertexDeclaration::Instance().GetInputLayout(RVertex::FONT_VERTEX::GetTypeName());
 	m_VertexBuffer.CreateVertexBuffer(nullptr, sizeof(RVertex::FONT_VERTEX), 65536, pInputLayout, true);
@@ -31,18 +39,16 @@ void RText::Initialize(RTexture* fontTexture, UINT rows, UINT columns)
 	m_FontShader = RShaderManager::Instance().GetShaderResource("Font");
 }
 
-void RText::SetText(const string& text, const RColor& fg, const RColor& bg)
+void RText::AddText(const char* text, UINT start_x, UINT start_y, const RColor& fg, const RColor& bg)
 {
-	vector<RVertex::FONT_VERTEX> vertices;
-
 	float glyph_width = (float)m_FontTexture->GetWidth() / m_Columns;
 	float glyph_height = (float)m_FontTexture->GetHeight() / m_Rows;
 
-	float x0 = 0, y0 = 0;
+	float x0 = glyph_width * start_x, y0 = glyph_height * start_y;
 
 	bool isEscape = false;
 
-	for (UINT i = 0; i < text.length(); i++)
+	for (UINT i = 0; text[i]; i++)
 	{
 		unsigned char ch = text[i];
 
@@ -50,7 +56,7 @@ void RText::SetText(const string& text, const RColor& fg, const RColor& bg)
 		{
 			if (ch == 'n')
 			{
-				x0 = 0;
+				x0 = glyph_width * start_x;
 				y0 += glyph_height;
 			}
 			isEscape = false;
@@ -65,7 +71,7 @@ void RText::SetText(const string& text, const RColor& fg, const RColor& bg)
 			}
 			else if (ch == '\n')
 			{
-				x0 = 0;
+				x0 = glyph_width * start_x;
 				y0 += glyph_height;
 				continue;
 			}
@@ -92,17 +98,30 @@ void RText::SetText(const string& text, const RColor& fg, const RColor& bg)
 
 		for (int j = 0; j < 6; j++)
 		{
-			vertices.push_back(v[j]);
+			m_Vertices.push_back(v[j]);
 		}
 
 		x0 += glyph_width;
 	}
 
-	m_VertexBuffer.UpdateDynamicVertexBuffer(vertices.data(), sizeof(RVertex::FONT_VERTEX), (UINT)vertices.size());
+	m_bNeedUpdateBuffer = true;
+}
+
+void RText::SetText(const char* text, const RColor& fg, const RColor& bg)
+{
+	m_Vertices.clear();
+
+	AddText(text, 0, 0, fg, bg);
 }
 
 void RText::Render()
 {
+	if (m_bNeedUpdateBuffer)
+	{
+		m_VertexBuffer.UpdateDynamicVertexBuffer(m_Vertices.data(), sizeof(RVertex::FONT_VERTEX), (UINT)m_Vertices.size());
+		m_bNeedUpdateBuffer = false;
+	}
+
 	RRenderer.SetBlendState(Blend_AlphaBlending);
 	m_FontShader->Bind();
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_FontTexture->GetPtrSRV());

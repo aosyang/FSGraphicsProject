@@ -13,17 +13,20 @@ class RText
 {
 public:
 	RText();
-	~RText();
+	virtual ~RText();
 
-	void Initialize(RTexture* fontTexture, UINT rows, UINT columns);
-	void SetText(const string& text, const RColor& fg=RColor(1, 1, 1), const RColor& bg=RColor(0, 0, 0, 1));
-	void Render();
+	void Initialize(RTexture* fontTexture = nullptr, UINT rows = 0, UINT columns = 0);
+	void AddText(const char* text, UINT start_x, UINT start_y, const RColor& fg, const RColor& bg);
+	void SetText(const char* text, const RColor& fg = RColor(1, 1, 1), const RColor& bg = RColor(0, 0, 0, 1));
+	virtual void Render();
 
-private:
-	RMeshRenderBuffer	m_VertexBuffer;
-	RTexture*		m_FontTexture;
-	RShader*		m_FontShader;
-	UINT			m_Rows, m_Columns;
+protected:
+	vector<RVertex::FONT_VERTEX>	m_Vertices;
+	RMeshRenderBuffer				m_VertexBuffer;
+	RTexture*						m_FontTexture;
+	RShader*						m_FontShader;
+	UINT							m_Rows, m_Columns;
+	bool							m_bNeedUpdateBuffer;
 };
 
 #endif

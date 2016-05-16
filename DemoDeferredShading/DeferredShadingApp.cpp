@@ -15,6 +15,7 @@ DeferredShadingApp::DeferredShadingApp()
 DeferredShadingApp::~DeferredShadingApp()
 {
 	m_cbDeferredPointLight.Release();
+	m_cbSSR.Release();
 
 	for (int i = 0; i < RasterizerState_Count; i++)
 	{
@@ -61,6 +62,7 @@ bool DeferredShadingApp::Initialize()
 	m_DepthBuffer = CreateDepthStencilBuffer();
 
 	m_cbDeferredPointLight.Initialize();
+	m_cbSSR.Initialize();
 
 	for (int i = 0; i < MAX_LIGHT_COUNT; i++)
 	{
@@ -79,6 +81,19 @@ bool DeferredShadingApp::Initialize()
 	RRenderer.D3DDevice()->CreateRasterizerState(&rastDesc, &m_RasterizerStates[RS_Scissor]);
 
 	m_DebugRenderer.Initialize();
+	m_DebugMenu.Initialize();
+	m_DebugMenu.AddMenuItem("cb_stride", &cbSSR.cb_stride);
+	m_DebugMenu.AddMenuItem("cb_strideZCutoff", &cbSSR.cb_strideZCutoff, 0.01f);
+	m_DebugMenu.AddMenuItem("cb_zThickness", &cbSSR.cb_zThickness, 0.01f);
+	m_DebugMenu.AddMenuItem("cb_maxSteps", &cbSSR.cb_maxSteps, 100.0f);
+	m_DebugMenu.AddMenuItem("cb_maxDistance", &cbSSR.cb_maxDistance, 100.0f);
+	m_DebugMenu.SetEnabled(false);
+
+	cbSSR.cb_stride = 1.0f;
+	cbSSR.cb_strideZCutoff = 0.02f;
+	cbSSR.cb_zThickness = 0.00001f;
+	cbSSR.cb_maxSteps = 300.0f;
+	cbSSR.cb_maxDistance = 1000.0f;
 
 	return true;
 }
@@ -189,8 +204,14 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	m_Scene.cbScreen.UpdateContent(&cbScreen);
 	m_Scene.cbScreen.ApplyToShaders();
 
+	m_cbSSR.UpdateContent(&cbSSR);
+	m_cbSSR.ApplyToShaders();
 
 	m_TotalTime = timer.TotalTime();
+
+	if (RInput.GetBufferedKeyState(VK_F5) == BKS_Pressed)
+		m_DebugMenu.SetEnabled(!m_DebugMenu.GetEnabled());
+	m_DebugMenu.Update();
 }
 
 void DeferredShadingApp::RenderScene()
@@ -333,7 +354,7 @@ void DeferredShadingApp::RenderScene()
 			RRenderer.D3DImmediateContext()->RSSetScissorRects(1, &rect);
 
 			SHADER_DEFERRED_POINT_LIGHT_BUFFER cbDeferredPointLight;
-
+			
 			cbDeferredPointLight.DeferredPointLight.PosAndRadius = RVec4(pos, m_PointLights[i].r);
 			cbDeferredPointLight.DeferredPointLight.Color = RVec4((float*)&m_PointLights[i].color);
 
@@ -374,6 +395,7 @@ void DeferredShadingApp::RenderScene()
 	m_DebugRenderer.Render();
 	m_DebugRenderer.Reset();
 
+	m_DebugMenu.Render();
 
 	RRenderer.Present();
 }

@@ -167,10 +167,12 @@
   <ItemGroup>
     <ClCompile Include="DeferredShadingApp.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RDebugMenu.cpp" />
     <ClCompile Include="RPostProcessor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DeferredShadingApp.h" />
+    <ClInclude Include="RDebugMenu.h" />
     <ClInclude Include="RPostProcessor.h" />
   </ItemGroup>
   <ItemGroup>

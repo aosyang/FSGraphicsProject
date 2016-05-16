@@ -49,11 +49,11 @@ Texture2D ScreenTexture		: register(t0);
 Texture2D PosDepthTexture	: register(t1);
 Texture2D NormalTexture		: register(t3);
 
-static const float cb_stride = 1.0f;
-static const float cb_strideZCutoff = 0.02f;
-static const float cb_zThickness = 0.00001f;
-static const float cb_maxSteps = 500;
-static const float cb_maxDistance = 1000.0f;
+//static const float cb_stride = 1.0f;
+//static const float cb_strideZCutoff = 0.02f;
+//static const float cb_zThickness = 0.00001f;
+//static const float cb_maxSteps = 500;
+//static const float cb_maxDistance = 1000.0f;
 
 struct VertexOut
 {
