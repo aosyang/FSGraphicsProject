@@ -82,18 +82,18 @@ bool DeferredShadingApp::Initialize()
 
 	m_DebugRenderer.Initialize();
 	m_DebugMenu.Initialize();
-	m_DebugMenu.AddMenuItem("cb_stride", &cbSSR.cb_stride);
-	m_DebugMenu.AddMenuItem("cb_strideZCutoff", &cbSSR.cb_strideZCutoff, 0.01f);
-	m_DebugMenu.AddMenuItem("cb_zThickness", &cbSSR.cb_zThickness, 0.01f);
-	m_DebugMenu.AddMenuItem("cb_maxSteps", &cbSSR.cb_maxSteps, 100.0f);
-	m_DebugMenu.AddMenuItem("cb_maxDistance", &cbSSR.cb_maxDistance, 100.0f);
+	m_DebugMenu.AddMenuItem("cb_stride",		&cbSSR.cb_stride);
+	m_DebugMenu.AddMenuItem("cb_strideZCutoff",	&cbSSR.cb_strideZCutoff,	0.001f);
+	m_DebugMenu.AddMenuItem("cb_zThickness",	&cbSSR.cb_zThickness,		0.00001f);
+	m_DebugMenu.AddMenuItem("cb_maxSteps",		&cbSSR.cb_maxSteps,			100.0f);
+	m_DebugMenu.AddMenuItem("cb_maxDistance",	&cbSSR.cb_maxDistance,		1.0f);
 	m_DebugMenu.SetEnabled(false);
 
-	cbSSR.cb_stride = 1.0f;
-	cbSSR.cb_strideZCutoff = 0.02f;
-	cbSSR.cb_zThickness = 0.00001f;
+	cbSSR.cb_stride = 4.0f;
+	cbSSR.cb_strideZCutoff = 0.01f;
+	cbSSR.cb_zThickness = 0.0005f;
 	cbSSR.cb_maxSteps = 300.0f;
-	cbSSR.cb_maxDistance = 1000.0f;
+	cbSSR.cb_maxDistance = 100.0f;
 
 	return true;
 }

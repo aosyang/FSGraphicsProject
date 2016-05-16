@@ -103,7 +103,7 @@ bool RDebugMenu::IsKeyDownOrRepeat(int keycode)
 	
 	if ((RInput.IsKeyDown(keycode) && m_KeyRepeatTime < REngine::GetTimer().TotalTime()))
 	{
-		m_KeyRepeatTime = REngine::GetTimer().TotalTime() + 0.05f;
+		m_KeyRepeatTime = REngine::GetTimer().TotalTime() + 0.01f;
 		return true;
 	}
 
