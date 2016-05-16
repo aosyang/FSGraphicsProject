@@ -29,9 +29,13 @@ public:
 	void SetEnabled(bool enabled) { m_bEnabled = enabled; }
 	bool GetEnabled() const { return m_bEnabled; }
 private:
+	bool IsKeyDownOrRepeat(int keycode);
+
+private:
 	vector<MenuItem>		m_MenuItems;
 	UINT					m_SelMenu;
 	bool					m_bEnabled;
+	float					m_KeyRepeatTime;
 };
 
 #endif

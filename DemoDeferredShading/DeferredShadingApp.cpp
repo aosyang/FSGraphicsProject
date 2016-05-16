@@ -408,6 +408,7 @@ void DeferredShadingApp::OnResize(int width, int height)
 		{
 			m_DeferredBuffers[i].Release();
 		}
+		m_ScenePassBuffer.Release();
 		m_DepthBuffer.Release();
 
 		m_Camera.SetAspectRatio((float)width / (float)height);

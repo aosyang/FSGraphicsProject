@@ -31,13 +31,13 @@ void RDebugMenu::Update()
 	if (!m_bEnabled)
 		return;
 
-	if (RInput.GetBufferedKeyState(VK_DOWN) == BKS_Pressed)
+	if (IsKeyDownOrRepeat(VK_DOWN))
 	{
 		m_SelMenu++;
 		m_SelMenu %= m_MenuItems.size();
 	}
 
-	if (RInput.GetBufferedKeyState(VK_UP) == BKS_Pressed)
+	if (IsKeyDownOrRepeat(VK_UP))
 	{
 		if (m_SelMenu == 0)
 			m_SelMenu = m_MenuItems.size() - 1;
@@ -45,14 +45,14 @@ void RDebugMenu::Update()
 			m_SelMenu--;
 	}
 
-	if (RInput.GetBufferedKeyState(VK_RIGHT) == BKS_Pressed)
+	if (IsKeyDownOrRepeat(VK_RIGHT))
 	{
 		MenuItem& item = m_MenuItems[m_SelMenu];
 		if (item.val)
 			*item.val += item.step;
 	}
 
-	if (RInput.GetBufferedKeyState(VK_LEFT) == BKS_Pressed)
+	if (IsKeyDownOrRepeat(VK_LEFT))
 	{
 		MenuItem& item = m_MenuItems[m_SelMenu];
 		if (item.val)
@@ -91,4 +91,21 @@ void RDebugMenu::Render()
 {
 	if (m_bEnabled)
 		RText::Render();
+}
+
+bool RDebugMenu::IsKeyDownOrRepeat(int keycode)
+{
+	if (RInput.GetBufferedKeyState(keycode) == BKS_Pressed)
+	{
+		m_KeyRepeatTime = REngine::GetTimer().TotalTime() + 0.4f;
+		return true;
+	}
+	
+	if ((RInput.IsKeyDown(keycode) && m_KeyRepeatTime < REngine::GetTimer().TotalTime()))
+	{
+		m_KeyRepeatTime = REngine::GetTimer().TotalTime() + 0.05f;
+		return true;
+	}
+
+	return false;
 }
