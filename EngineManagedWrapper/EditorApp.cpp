@@ -250,6 +250,11 @@ namespace EngineManagedWrapper
 		if (m_SelectedObject)
 		{
 			m_DebugRenderer.DrawAabb(m_SelectedObject->GetAabb());
+
+			RVec3 pos = m_SelectedObject->GetPosition();
+			m_DebugRenderer.DrawLine(RVec3(pos.x + 10000.0f, pos.y, pos.z), RVec3(pos.x - 10000.0f, pos.y, pos.z));
+			m_DebugRenderer.DrawLine(RVec3(pos.x, pos.y + 10000.0f, pos.z), RVec3(pos.x, pos.y - 10000.0f, pos.z));
+			m_DebugRenderer.DrawLine(RVec3(pos.x, pos.y, pos.z + 10000.0f), RVec3(pos.x, pos.y, pos.z - 10000.0f));
 		}
 
 		// Update scene constant buffer
