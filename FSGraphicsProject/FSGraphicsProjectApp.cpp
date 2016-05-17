@@ -150,35 +150,35 @@ bool FSGraphicsProjectApp::Initialize()
 	// Create buffer for bump cube
 	RVertex::MESH_VERTEX boxVertex[] = 
 	{
-		{ RVec3(-1.0f, -1.0f, -1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3(-1.0f,  1.0f, -1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3( 1.0f,  1.0f, -1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3( 1.0f, -1.0f, -1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f, -1.0f, -1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f,  1.0f, -1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f,  1.0f, -1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f, -1.0f, -1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
 
-		{ RVec3( 1.0f, -1.0f, -1.0f), RVec2(0.0f, 1.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
-		{ RVec3( 1.0f,  1.0f, -1.0f), RVec2(0.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
-		{ RVec3( 1.0f,  1.0f,  1.0f), RVec2(1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
-		{ RVec3( 1.0f, -1.0f,  1.0f), RVec2(1.0f, 1.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
+		{ RVec3( 1.0f, -1.0f, -1.0f), RVec2(0.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
+		{ RVec3( 1.0f,  1.0f, -1.0f), RVec2(0.0f, 1.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
+		{ RVec3( 1.0f,  1.0f,  1.0f), RVec2(1.0f, 1.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
+		{ RVec3( 1.0f, -1.0f,  1.0f), RVec2(1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
 
-		{ RVec3( 1.0f, -1.0f,  1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
-		{ RVec3( 1.0f,  1.0f,  1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
-		{ RVec3(-1.0f,  1.0f,  1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
-		{ RVec3(-1.0f, -1.0f,  1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f, -1.0f,  1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f,  1.0f,  1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f,  1.0f,  1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f, -1.0f,  1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
 
-		{ RVec3(-1.0f, -1.0f,  1.0f), RVec2(0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(1.0f, 0.0f, -1.0f) },
-		{ RVec3(-1.0f,  1.0f,  1.0f), RVec2(0.0f, 0.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(1.0f, 0.0f, -1.0f) },
-		{ RVec3(-1.0f,  1.0f, -1.0f), RVec2(1.0f, 0.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(1.0f, 0.0f, -1.0f) },
-		{ RVec3(-1.0f, -1.0f, -1.0f), RVec2(1.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(1.0f, 0.0f, -1.0f) },
+		{ RVec3(-1.0f, -1.0f,  1.0f), RVec2(0.0f, 0.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f) },
+		{ RVec3(-1.0f,  1.0f,  1.0f), RVec2(0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f) },
+		{ RVec3(-1.0f,  1.0f, -1.0f), RVec2(1.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f) },
+		{ RVec3(-1.0f, -1.0f, -1.0f), RVec2(1.0f, 0.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f) },
 
-		{ RVec3(-1.0f,  1.0f, -1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3(-1.0f,  1.0f,  1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3( 1.0f,  1.0f,  1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3( 1.0f,  1.0f, -1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f,  1.0f, -1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f,  1.0f,  1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f,  1.0f,  1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f,  1.0f, -1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
 
-		{ RVec3(-1.0f, -1.0f,  1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3(-1.0f, -1.0f, -1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3( 1.0f, -1.0f, -1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3( 1.0f, -1.0f,  1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f, -1.0f,  1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3(-1.0f, -1.0f, -1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f, -1.0f, -1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVec3( 1.0f, -1.0f,  1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
 	};
 
 	for (UINT32 i = 0; i < sizeof(boxVertex) / sizeof(RVertex::MESH_VERTEX); i++)
