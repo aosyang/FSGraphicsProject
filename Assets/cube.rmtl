@@ -1,0 +1,6 @@
+<Material Mesh="../Assets/cube.FBX">
+    <MeshElement Name="Box001" Shader="BumpLighting">
+        <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
+        <Texture Slot="1">../Assets/DiamondPlateNormal.dds</Texture>
+    </MeshElement>
+</Material>
