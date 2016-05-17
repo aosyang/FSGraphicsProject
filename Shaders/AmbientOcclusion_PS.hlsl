@@ -38,6 +38,7 @@ OUTPUT_PIXEL main(OUTPUT_VERTEX Input) : SV_TARGET
 {
 	OUTPUT_PIXEL Out = (OUTPUT_PIXEL)0;
 	Out.Albedo = MakeLinearColorFromGammaSpace(DiffuseTexture.Sample(Sampler, Input.UV0));
+	Out.Albedo.a = AmbientOcclusionTexture.Sample(Sampler, Input.UV1).r;
 	Out.WorldPos = float4(Input.PosW, Input.PosH.z);
 	Out.NormalW = float4(normalize(Input.NormalW), 1);
 	Out.NormalV = float4(normalize(Input.NormalV), 1);

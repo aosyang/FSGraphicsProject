@@ -22,8 +22,11 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	float4 Albedo = AlbedoTexture.Sample(Sampler, Input.UV);
 	float3 Normal = NormalTexture.Sample(Sampler, Input.UV).rgb;
 
+	if (!any(Normal))
+		return float4(Albedo.rgb, 1);
+
 	float4 Final = (float4)1;
-	Final.rgb = Albedo.rgb * lerp(1.0, CalculateAmbientLight(Normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor), Albedo.a);
+	Final.rgb = Albedo.rgb * Albedo.a * CalculateAmbientLight(Normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor);
 
 	return Final;
 }

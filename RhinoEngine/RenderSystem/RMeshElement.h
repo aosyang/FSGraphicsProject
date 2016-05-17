@@ -51,6 +51,9 @@ public:
 
 	void SetTriangles(const vector<UINT>& triIndices);
 	void SetVertices(const vector<RVertex::MESH_LOADER_VERTEX>& vertices, int vertexComponentMask);
+	void SetVertexComponentMask(int mask) { m_VertexComponentMask = mask; }
+	int GetVertexComponentMask() const { return m_VertexComponentMask; }
+	
 	void UpdateRenderBuffer();
 
 	void Draw(D3D11_PRIMITIVE_TOPOLOGY topology);

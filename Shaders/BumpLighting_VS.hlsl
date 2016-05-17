@@ -24,30 +24,40 @@ struct OUTPUT_VERTEX
 	float4 PosH				: SV_POSITION;
 	float2 UV				: TEXCOORD0;
 	float3 PosW				: TEXCOORD1;
+	float3 NormalV			: TEXCOORD2;
+	float3 TangentV			: TEXCOORD3;
 	float3 NormalW			: NORMAL;
 	float3 TangentW			: TANGENT;
-	float4 ShadowPosH[3]	: TEXCOORD3;
+	float4 ShadowPosH[3]	: TEXCOORD4;
 };
 
-OUTPUT_VERTEX main(INPUT_VERTEX Input)
+OUTPUT_VERTEX main(INPUT_VERTEX Input
+#if USE_INSTANCING == 1
+				 , uint InstID : SV_InstanceID
+#endif
+	)
 {
 	OUTPUT_VERTEX Out = (OUTPUT_VERTEX)0;
 
 	float4 worldPos = (float4)0;
-		float3 Normal = (float3)0;
-		float3 Tangent = (float3)0;
+	float3 Normal = (float3)0;
+	float3 Tangent = (float3)0;
 
 #if USE_SKINNING == 1
-		for (int i = 0; i < 4; i++)
-		{
-			worldPos += mul(float4(Input.PosL, 1.0f), boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
-			Normal += mul(Input.Normal, (float3x3)boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
-			Tangent += mul(Input.Tangent, (float3x3)boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
-		}
+	for (int i = 0; i < 4; i++)
+	{
+		worldPos += mul(float4(Input.PosL, 1.0f), boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
+		Normal += mul(Input.Normal, (float3x3)boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
+		Tangent += mul(Input.Tangent, (float3x3)boneMatrix[Input.BoneId[i]]) * Input.Weight[i];
+	}
 	Normal = normalize(Normal);
 	Tangent = normalize(Tangent);
+#elif USE_INSTANCING == 1
+	worldPos = mul(float4(Input.PosL, 1.0f), instancedWorldMatrix[InstID]);
+	Normal = mul(Input.Normal, (float3x3)instancedWorldMatrix[InstID]);
+	Tangent = mul(Input.Tangent, (float3x3)instancedWorldMatrix[InstID]);
 #else
-		worldPos = mul(float4(Input.PosL, 1.0f), worldMatrix);
+	worldPos = mul(float4(Input.PosL, 1.0f), worldMatrix);
 	Normal = mul(Input.Normal, (float3x3)worldMatrix);
 	Tangent = mul(Input.Tangent, (float3x3)worldMatrix);
 #endif
@@ -59,7 +69,9 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 
 	Out.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	Out.NormalW = Normal;
+	Out.NormalV = mul(Normal, (float3x3)viewMatrix);
 	Out.TangentW = Tangent;
+	Out.TangentV = mul(Tangent, (float3x3)viewMatrix);
 
 	Out.UV = Input.UV;
 

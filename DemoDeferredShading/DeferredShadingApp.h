@@ -90,6 +90,8 @@ public:
 	TCHAR* WindowTitle() { return L"Deferred Shading Demo"; }
 
 private:
+	void CreateGBuffers();
+
 	DeferredRenderBuffer CreateRenderTarget(DXGI_FORMAT format);
 	DepthStencilBuffer CreateDepthStencilBuffer();
 

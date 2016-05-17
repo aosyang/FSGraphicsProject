@@ -83,6 +83,7 @@ void RScene::RemoveObjectFromScene(RSceneObject* obj)
 	vector<RSceneObject*>::iterator iter = find(m_SceneObjects.begin(), m_SceneObjects.end(), obj);
 	if (iter != m_SceneObjects.end())
 	{
+		(*iter)->SetScene(nullptr);
 		m_SceneObjects.erase(iter);
 	}
 }

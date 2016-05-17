@@ -18,10 +18,40 @@ struct OUTPUT_VERTEX
 	float4 PosH				: SV_POSITION;
 	float2 UV				: TEXCOORD0;
 	float3 PosW				: TEXCOORD1;
+	float3 NormalV			: TEXCOORD2;
+	float3 TangentV			: TEXCOORD3;
 	float3 NormalW			: NORMAL;
 	float3 TangentW			: TANGENT;
-	float4 ShadowPosH[3]	: TEXCOORD3;
+	float4 ShadowPosH[3]	: TEXCOORD4;
 };
+
+#if USE_DEFERRED_SHADING == 1
+
+struct OUTPUT_PIXEL
+{
+	float4 Albedo		: SV_Target0;
+	float4 WorldPos		: SV_Target1;
+	float4 NormalW		: SV_Target2;
+	float4 NormalV		: SV_Target3;
+};
+
+OUTPUT_PIXEL main(OUTPUT_VERTEX Input) : SV_TARGET
+{
+	OUTPUT_PIXEL Out = (OUTPUT_PIXEL)0;
+	Out.Albedo = MakeLinearColorFromGammaSpace(DiffuseTexture.Sample(Sampler, Input.UV));
+	Out.WorldPos = float4(Input.PosW, Input.PosH.z);
+
+	float3x3 TBN = CalculateTBNSpace(Input.NormalW, Input.TangentW);
+	float3x3 ViewTBN = CalculateTBNSpace(Input.NormalV, Input.TangentV);
+	float3 normal = (NormalTexture.Sample(Sampler, Input.UV) * 2.0f - 1.0f).xyz;
+
+	Out.NormalW = float4(normalize(mul(normal, TBN)), 1);
+	Out.NormalV = float4(normalize(mul(normal, ViewTBN)), 1);
+
+	return Out;
+}
+
+#else
 
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 {
@@ -91,3 +121,5 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	Final.a *= GlobalOpacity;
 	return Final;
 }
+
+#endif	// #if USE_DEFERRED_SHADING == 1

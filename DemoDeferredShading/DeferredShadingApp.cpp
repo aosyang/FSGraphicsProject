@@ -54,12 +54,7 @@ bool DeferredShadingApp::Initialize()
 	RRenderer.SetSamplerState(0, SamplerState_Texture);
 	RRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
 
-	m_DeferredBuffers[DB_Color]				= CreateRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM);
-	m_DeferredBuffers[DB_Position]			= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-	m_DeferredBuffers[DB_WorldSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-	m_DeferredBuffers[DB_ViewSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-	m_ScenePassBuffer						= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-	m_DepthBuffer = CreateDepthStencilBuffer();
+	CreateGBuffers();
 
 	m_cbDeferredPointLight.Initialize();
 	m_cbSSR.Initialize();
@@ -413,13 +408,18 @@ void DeferredShadingApp::OnResize(int width, int height)
 
 		m_Camera.SetAspectRatio((float)width / (float)height);
 
-		m_DeferredBuffers[DB_Color] = CreateRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM);
-		m_DeferredBuffers[DB_Position] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-		m_DeferredBuffers[DB_WorldSpaceNormal] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-		m_DeferredBuffers[DB_ViewSpaceNormal] = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-		m_ScenePassBuffer = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-		m_DepthBuffer = CreateDepthStencilBuffer();
+		CreateGBuffers();
 	}
+}
+
+void DeferredShadingApp::CreateGBuffers()
+{
+	m_DeferredBuffers[DB_Color]				= CreateRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM);
+	m_DeferredBuffers[DB_Position]			= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
+	m_DeferredBuffers[DB_WorldSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
+	m_DeferredBuffers[DB_ViewSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
+	m_ScenePassBuffer = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
+	m_DepthBuffer = CreateDepthStencilBuffer();
 }
 
 DeferredRenderBuffer DeferredShadingApp::CreateRenderTarget(DXGI_FORMAT format)
