@@ -76,6 +76,7 @@ class RBaseResource;
 #include "RenderSystem/RTexture.h"
 #include "RenderSystem/RShadowMap.h"
 
+#include "Core/RDebugMenu.h"
 #include "Core/REngine.h"
 
 #include "Scene/RSceneObject.h"

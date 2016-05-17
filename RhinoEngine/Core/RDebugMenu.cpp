@@ -4,6 +4,7 @@
 // 
 //=============================================================================
 
+#include "Rhino.h"
 #include "RDebugMenu.h"
 
 RDebugMenu::RDebugMenu()

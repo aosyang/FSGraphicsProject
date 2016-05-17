@@ -7,15 +7,6 @@
 #ifndef _RDEBUGMENU_H
 #define _RDEBUGMENU_H
 
-#include "Rhino.h"
-
-struct MenuItem
-{
-	char	name[256];
-	float*	val;
-	float	step;
-};
-
 class RDebugMenu : public RText
 {
 public:
@@ -32,6 +23,13 @@ private:
 	bool IsKeyDownOrRepeat(int keycode);
 
 private:
+	struct MenuItem
+	{
+		char	name[256];
+		float*	val;
+		float	step;
+	};
+
 	vector<MenuItem>		m_MenuItems;
 	UINT					m_SelMenu;
 	bool					m_bEnabled;

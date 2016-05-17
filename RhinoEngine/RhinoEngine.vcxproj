@@ -49,6 +49,7 @@
     <ClInclude Include="Core\MathHelper.h" />
     <ClInclude Include="Core\RAabb.h" />
     <ClInclude Include="Core\RColor.h" />
+    <ClInclude Include="Core\RDebugMenu.h" />
     <ClInclude Include="Core\REngine.h" />
     <ClInclude Include="Core\RInput.h" />
     <ClInclude Include="Core\RMatrix.h" />
@@ -84,6 +85,7 @@
     <ClCompile Include="Collision\RCollision.cpp" />
     <ClCompile Include="Core\MathHelper.cpp" />
     <ClCompile Include="Core\RAabb.cpp" />
+    <ClCompile Include="Core\RDebugMenu.cpp" />
     <ClCompile Include="Core\REngine.cpp" />
     <ClCompile Include="Core\RInput.cpp" />
     <ClCompile Include="Core\RMatrix.cpp" />

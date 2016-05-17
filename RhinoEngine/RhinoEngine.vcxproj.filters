@@ -113,6 +113,9 @@
     <ClInclude Include="..\Shaders\SharedDefines.h">
       <Filter>Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="Core\RDebugMenu.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -195,6 +198,9 @@
       <Filter>RenderSystem</Filter>
     </ClCompile>
     <ClCompile Include="Core\RSerializer.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\RDebugMenu.cpp">
       <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
