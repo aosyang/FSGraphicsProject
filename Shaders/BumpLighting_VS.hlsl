@@ -24,11 +24,9 @@ struct OUTPUT_VERTEX
 	float4 PosH				: SV_POSITION;
 	float2 UV				: TEXCOORD0;
 	float3 PosW				: TEXCOORD1;
-	float3 NormalV			: TEXCOORD2;
-	float3 TangentV			: TEXCOORD3;
 	float3 NormalW			: NORMAL;
 	float3 TangentW			: TANGENT;
-	float4 ShadowPosH[3]	: TEXCOORD4;
+	float4 ShadowPosH[3]	: TEXCOORD2;
 };
 
 OUTPUT_VERTEX main(INPUT_VERTEX Input
@@ -69,9 +67,7 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input
 
 	Out.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	Out.NormalW = Normal;
-	Out.NormalV = mul(Normal, (float3x3)viewMatrix);
 	Out.TangentW = Tangent;
-	Out.TangentV = mul(Tangent, (float3x3)viewMatrix);
 
 	Out.UV = Input.UV;
 

@@ -17,12 +17,34 @@ RDebugMenu::~RDebugMenu()
 {
 }
 
-void RDebugMenu::AddMenuItem(const char* name, float* val, float step)
+void RDebugMenu::AddFloatMenuItem(const char* name, float* val, float step)
 {
 	MenuItem item;
 	strcpy_s(item.name, 256, name);
-	item.val = val;
-	item.step = step;
+	item.type = MenuItem::Item_Float;
+	item.fval = val;
+	item.fstep = step;
+
+	m_MenuItems.push_back(item);
+}
+
+void RDebugMenu::AddIntMenuItem(const char* name, int* val, int step)
+{
+	MenuItem item;
+	strcpy_s(item.name, 256, name);
+	item.type = MenuItem::Item_Int;
+	item.ival = val;
+	item.istep = step;
+
+	m_MenuItems.push_back(item);
+}
+
+void RDebugMenu::AddBoolMenuItem(const char* name, bool* val)
+{
+	MenuItem item;
+	strcpy_s(item.name, 256, name);
+	item.type = MenuItem::Item_Bool;
+	item.bval = val;
 
 	m_MenuItems.push_back(item);
 }
@@ -49,15 +71,13 @@ void RDebugMenu::Update()
 	if (IsKeyDownOrRepeat(VK_RIGHT))
 	{
 		MenuItem& item = m_MenuItems[m_SelMenu];
-		if (item.val)
-			*item.val += item.step;
+		item.Increase();
 	}
 
 	if (IsKeyDownOrRepeat(VK_LEFT))
 	{
 		MenuItem& item = m_MenuItems[m_SelMenu];
-		if (item.val)
-			*item.val -= item.step;
+		item.Decrease();
 	}
 
 	m_Vertices.clear();
@@ -83,7 +103,18 @@ void RDebugMenu::Update()
 		{
 			spacing[j] = ' ';
 		}
-		sprintf_s(msg_buf, 1024, "%s%s: %f", item.name, spacing, item.val ? *item.val : 0.0f);
+		switch (item.type)
+		{
+		case MenuItem::Item_Float:
+			sprintf_s(msg_buf, 1024, "%s%s: %f", item.name, spacing, item.fval ? *item.fval : 0.0f);
+			break;
+		case MenuItem::Item_Int:
+			sprintf_s(msg_buf, 1024, "%s%s: %d", item.name, spacing, item.ival ? *item.ival : 0);
+			break;
+		case MenuItem::Item_Bool:
+			sprintf_s(msg_buf, 1024, "%s%s: %s", item.name, spacing, (item.bval && *item.bval) ? "true" : "false");
+			break;
+		}
 		AddText(msg_buf, 4, i + 2, RColor(1, 1, 1), RColor(0, 0, 0));
 	}
 
@@ -112,4 +143,42 @@ bool RDebugMenu::IsKeyDownOrRepeat(int keycode)
 	}
 
 	return false;
+}
+
+void RDebugMenu::MenuItem::Increase()
+{
+	switch (type)
+	{
+	case Item_Float:
+		if (fval)
+			*fval += fstep;
+		break;
+	case Item_Int:
+		if (ival)
+			*ival += istep;
+		break;
+	case Item_Bool:
+		if (bval)
+			*bval = !*bval;
+		break;
+	}
+}
+
+void RDebugMenu::MenuItem::Decrease()
+{
+	switch (type)
+	{
+	case Item_Float:
+		if (fval)
+			*fval -= fstep;
+		break;
+	case Item_Int:
+		if (ival)
+			*ival -= istep;
+		break;
+	case Item_Bool:
+		if (bval)
+			*bval = !*bval;
+		break;
+	}
 }

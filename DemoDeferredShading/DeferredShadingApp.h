@@ -102,9 +102,9 @@ private:
 	RPostProcessor				m_PostProcessor;
 	ID3D11RasterizerState*		m_RasterizerStates[RasterizerState_Count];
 
-	RShaderConstantBuffer<SHADER_DEFERRED_POINT_LIGHT_BUFFER, CBST_PS, 2>
+	RShaderConstantBuffer<SHADER_DEFERRED_POINT_LIGHT_BUFFER, CBST_PS, 4>
 								m_cbDeferredPointLight;
-	RShaderConstantBuffer<SHADER_SSR_BUFFER, CBST_PS, 3>
+	RShaderConstantBuffer<SHADER_SSR_BUFFER, CBST_PS, 5>
 								m_cbSSR;
 	SHADER_SSR_BUFFER			cbSSR;
 
@@ -116,6 +116,8 @@ private:
 	float						m_TotalTime;
 	RDebugRenderer				m_DebugRenderer;
 	RDebugMenu					m_DebugMenu;
+
+	bool						m_EnableSSR;
 };
 
 #endif

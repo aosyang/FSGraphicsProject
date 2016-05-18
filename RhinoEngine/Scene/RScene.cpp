@@ -16,7 +16,7 @@ void RScene::Initialize()
 	cbBoneMatrices.Initialize();
 	cbLight.Initialize();
 	cbMaterial.Initialize();
-	cbScreen.Initialize();
+	cbGlobal.Initialize();
 }
 
 void RScene::Release()
@@ -28,7 +28,7 @@ void RScene::Release()
 	cbBoneMatrices.Release();
 	cbLight.Release();
 	cbMaterial.Release();
-	cbScreen.Release();
+	cbGlobal.Release();
 }
 
 RSMeshObject* RScene::CreateMeshObject(const char* meshName)

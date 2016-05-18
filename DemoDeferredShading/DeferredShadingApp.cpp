@@ -77,13 +77,15 @@ bool DeferredShadingApp::Initialize()
 
 	m_DebugRenderer.Initialize();
 	m_DebugMenu.Initialize();
-	m_DebugMenu.AddMenuItem("cb_stride",		&cbSSR.cb_stride);
-	m_DebugMenu.AddMenuItem("cb_strideZCutoff",	&cbSSR.cb_strideZCutoff,	0.001f);
-	m_DebugMenu.AddMenuItem("cb_zThickness",	&cbSSR.cb_zThickness,		0.00001f);
-	m_DebugMenu.AddMenuItem("cb_maxSteps",		&cbSSR.cb_maxSteps,			100.0f);
-	m_DebugMenu.AddMenuItem("cb_maxDistance",	&cbSSR.cb_maxDistance,		1.0f);
+	m_DebugMenu.AddBoolMenuItem("Enable SSR",			&m_EnableSSR);
+	m_DebugMenu.AddFloatMenuItem("cb_stride",			&cbSSR.cb_stride);
+	m_DebugMenu.AddFloatMenuItem("cb_strideZCutoff",	&cbSSR.cb_strideZCutoff,	0.001f);
+	m_DebugMenu.AddFloatMenuItem("cb_zThickness",		&cbSSR.cb_zThickness,		0.00001f);
+	m_DebugMenu.AddFloatMenuItem("cb_maxSteps",			&cbSSR.cb_maxSteps,			100.0f);
+	m_DebugMenu.AddFloatMenuItem("cb_maxDistance",		&cbSSR.cb_maxDistance,		1.0f);
 	m_DebugMenu.SetEnabled(false);
 
+	m_EnableSSR = true;
 	cbSSR.cb_stride = 4.0f;
 	cbSSR.cb_strideZCutoff = 0.01f;
 	cbSSR.cb_zThickness = 0.0005f;
@@ -196,8 +198,8 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	cbScreen.ViewToTextureSpace = cbScene.projMatrix * texMat;
 	cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();
 
-	m_Scene.cbScreen.UpdateContent(&cbScreen);
-	m_Scene.cbScreen.ApplyToShaders();
+	m_Scene.cbGlobal.UpdateContent(&cbScreen);
+	m_Scene.cbGlobal.ApplyToShaders();
 
 	m_cbSSR.UpdateContent(&cbSSR);
 	m_cbSSR.ApplyToShaders();
@@ -250,7 +252,10 @@ void DeferredShadingApp::RenderScene()
 
 	RRenderer.SetDefferedShading(false);
 
-	RRenderer.SetRenderTargets(1, &m_ScenePassBuffer.View, m_DepthBuffer.View);
+	if (m_EnableSSR)
+		RRenderer.SetRenderTargets(1, &m_ScenePassBuffer.View, m_DepthBuffer.View);
+	else
+		RRenderer.SetRenderTargets();
 	RRenderer.Clear(true, RColor(0, 0, 0));
 
 	ID3D11ShaderResourceView* gbufferSRV[DeferredBuffer_Count];
@@ -364,13 +369,16 @@ void DeferredShadingApp::RenderScene()
 	// Disable scissor test
 	RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
 
-	RRenderer.SetRenderTargets();
-	RRenderer.SetBlendState(Blend_Opaque);
+	if (m_EnableSSR)
+	{
+		RRenderer.SetRenderTargets();
+		RRenderer.SetBlendState(Blend_Opaque);
 
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_ScenePassBuffer.SRV);
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_ScenePassBuffer.SRV);
 
-	RRenderer.Clear(false, RColor(0, 0, 0), true);
-	m_PostProcessor.Draw(PPE_ScreenSpaceRayTracing);
+		RRenderer.Clear(false, RColor(0, 0, 0), true);
+		m_PostProcessor.Draw(PPE_ScreenSpaceRayTracing);
+	}
 
 	ID3D11ShaderResourceView* nullSRV[DeferredBuffer_Count] = { nullptr };
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, DeferredBuffer_Count, nullSRV);
@@ -416,8 +424,8 @@ void DeferredShadingApp::CreateGBuffers()
 {
 	m_DeferredBuffers[DB_Color]				= CreateRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM);
 	m_DeferredBuffers[DB_Position]			= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-	m_DeferredBuffers[DB_WorldSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-	m_DeferredBuffers[DB_ViewSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
+	m_DeferredBuffers[DB_WorldSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R16G16B16A16_FLOAT);
+	m_DeferredBuffers[DB_ViewSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R16G16B16A16_FLOAT);
 	m_ScenePassBuffer = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
 	m_DepthBuffer = CreateDepthStencilBuffer();
 }

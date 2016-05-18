@@ -7,31 +7,21 @@
 #define _CONSTBUFFERVS_H
 
 #include "SharedDefines.h"
+#include "ConstBufferCommon.h"
 
-CONSTANT_BUFFER_BEGIN(SHADER_OBJECT_BUFFER, b0)
+CONSTANT_BUFFER_BEGIN(SHADER_OBJECT_BUFFER, b2)
 float4x4			worldMatrix;
-CONSTANT_BUFFER_END
-
-CONSTANT_BUFFER_BEGIN(SHADER_SCENE_BUFFER, b1)
-float4x4	viewMatrix;
-float4x4	projMatrix;
-float4x4	viewProjMatrix;
-float4x4	invProjMatrix;
-float4		cameraPos;
-float4x4	shadowViewProjMatrix[3];
-float4x4	shadowViewProjBiasedMatrix[3];
-int			cascadedShadowIndex;
 CONSTANT_BUFFER_END
 
 #define MAX_INSTANCE_COUNT 128
 
-CONSTANT_BUFFER_BEGIN(SHADER_INSTANCE_BUFFER, b2)
+CONSTANT_BUFFER_BEGIN(SHADER_INSTANCE_BUFFER, b3)
 float4x4	instancedWorldMatrix[MAX_INSTANCE_COUNT];
 CONSTANT_BUFFER_END
 
 #define MAX_BONE_COUNT 192
 
-CONSTANT_BUFFER_BEGIN(SHADER_SKINNED_BUFFER, b3)
+CONSTANT_BUFFER_BEGIN(SHADER_SKINNED_BUFFER, b4)
 float4x4	boneMatrix[MAX_BONE_COUNT];
 CONSTANT_BUFFER_END
 

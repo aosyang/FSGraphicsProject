@@ -142,8 +142,8 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	cbScreen.ScreenSize = RVec2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());
 	cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();
 	
-	m_Scene.cbScreen.UpdateContent(&cbScreen);
-	m_Scene.cbScreen.ApplyToShaders();
+	m_Scene.cbGlobal.UpdateContent(&cbScreen);
+	m_Scene.cbGlobal.ApplyToShaders();
 
 	if (m_Player)
 	{

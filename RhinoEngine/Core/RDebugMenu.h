@@ -13,7 +13,9 @@ public:
 	RDebugMenu();
 	~RDebugMenu();
 
-	void AddMenuItem(const char* name, float* val, float step = 0.1f);
+	void AddFloatMenuItem(const char* name, float* val, float step = 0.1f);
+	void AddIntMenuItem(const char* name, int* val, int step = 1);
+	void AddBoolMenuItem(const char* name, bool* val);
 	void Update();
 	void Render();
 
@@ -26,8 +28,31 @@ private:
 	struct MenuItem
 	{
 		char	name[256];
-		float*	val;
-		float	step;
+
+		enum ItemValueType
+		{
+			Item_Float,
+			Item_Int,
+			Item_Bool,
+		};
+
+		ItemValueType type;
+
+		union
+		{
+			float*	fval;
+			int*	ival;
+			bool*	bval;
+		};
+
+		union
+		{
+			float	fstep;
+			int		istep;
+		};
+
+		void Increase();
+		void Decrease();
 	};
 
 	vector<MenuItem>		m_MenuItems;

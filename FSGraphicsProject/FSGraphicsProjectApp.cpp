@@ -87,7 +87,7 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 
 	m_ParticleBuffer.Release();
 
-	m_cbScreen.Release();
+	m_cbGlobal.Release();
 	m_cbMaterial.Release();
 	m_cbLight.Release();
 	m_cbPerObject.Release();
@@ -204,7 +204,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_cbInstance[1].Initialize();
 	m_cbInstance[2].Initialize();
 	m_cbBoneMatrices.Initialize();
-	m_cbScreen.Initialize();
+	m_cbGlobal.Initialize();
 
 	m_BumpBaseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlate.dds");
 	m_BumpNormalTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlateNormal.dds");
@@ -655,7 +655,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	cbScreen.ScreenSize = RVec2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());
 	cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection() ? 1 : (m_EnabledPostProcessor == 1);
 
-	m_cbScreen.UpdateContent(&cbScreen);
+	m_cbGlobal.UpdateContent(&cbScreen);
 
 	// Update particle vertices
 	ParticleDepthComparer cmp(m_Camera.GetPosition(), m_Camera.GetNodeTransform().GetForward());
@@ -793,7 +793,7 @@ void FSGraphicsProjectApp::RenderScene()
 	m_cbPerObject.ApplyToShaders();
 	m_cbLight.ApplyToShaders();
 	m_cbMaterial.ApplyToShaders();
-	m_cbScreen.ApplyToShaders();
+	m_cbGlobal.ApplyToShaders();
 	RRenderer.SetSamplerState(0, SamplerState_Texture);
 	RRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
 

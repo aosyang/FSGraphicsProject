@@ -287,8 +287,8 @@ namespace EngineManagedWrapper
 
 		cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();
 
-		m_Scene.cbScreen.UpdateContent(&cbScreen);
-		m_Scene.cbScreen.ApplyToShaders();
+		m_Scene.cbGlobal.UpdateContent(&cbScreen);
+		m_Scene.cbGlobal.ApplyToShaders();
 
 
 		RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
