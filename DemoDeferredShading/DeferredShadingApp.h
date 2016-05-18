@@ -91,7 +91,7 @@ public:
 private:
 	void CreateGBuffers();
 
-	DeferredRenderBuffer CreateRenderTarget(DXGI_FORMAT format);
+	DeferredRenderBuffer CreateRenderTarget(DXGI_FORMAT format, const char* debugResourceName=nullptr);
 	DepthStencilBuffer CreateDepthStencilBuffer();
 
 	RCamera						m_Camera;

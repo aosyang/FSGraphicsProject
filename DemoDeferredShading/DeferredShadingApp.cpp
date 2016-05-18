@@ -422,15 +422,15 @@ void DeferredShadingApp::OnResize(int width, int height)
 
 void DeferredShadingApp::CreateGBuffers()
 {
-	m_DeferredBuffers[DB_Color]				= CreateRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM);
-	m_DeferredBuffers[DB_Position]			= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
-	m_DeferredBuffers[DB_WorldSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R16G16B16A16_FLOAT);
-	m_DeferredBuffers[DB_ViewSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R16G16B16A16_FLOAT);
+	m_DeferredBuffers[DB_Color]				= CreateRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM, "G-Buffer Color/AO");
+	m_DeferredBuffers[DB_Position]			= CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT, "G-Buffer Position/Depth");
+	m_DeferredBuffers[DB_WorldSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R16G16B16A16_FLOAT, "G-Buffer World Space Normal");
+	m_DeferredBuffers[DB_ViewSpaceNormal]	= CreateRenderTarget(DXGI_FORMAT_R16G16B16A16_FLOAT, "G-Buffer View Space Normal");
 	m_ScenePassBuffer = CreateRenderTarget(DXGI_FORMAT_R32G32B32A32_FLOAT);
 	m_DepthBuffer = CreateDepthStencilBuffer();
 }
 
-DeferredRenderBuffer DeferredShadingApp::CreateRenderTarget(DXGI_FORMAT format)
+DeferredRenderBuffer DeferredShadingApp::CreateRenderTarget(DXGI_FORMAT format, const char* debugResourceName/*=nullptr*/)
 {
 	DeferredRenderBuffer rb;
 
@@ -457,6 +457,16 @@ DeferredRenderBuffer DeferredShadingApp::CreateRenderTarget(DXGI_FORMAT format)
 	rtsrvDesc.Texture2D.MipLevels = 1;
 
 	RRenderer.D3DDevice()->CreateShaderResourceView(rb.Buffer, &rtsrvDesc, &rb.SRV);
+
+#ifdef _DEBUG
+	if (debugResourceName)
+	{
+		rb.Buffer->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(debugResourceName), debugResourceName);
+		rb.View->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(debugResourceName), debugResourceName);
+		rb.SRV->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(debugResourceName), debugResourceName);
+	}
+#endif // _DEBUG
+
 
 	return rb;
 }

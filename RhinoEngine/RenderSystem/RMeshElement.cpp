@@ -19,7 +19,7 @@ void RMeshRenderBuffer::Release()
 	SAFE_RELEASE(m_IndexBuffer);
 }
 
-void RMeshRenderBuffer::CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, ID3D11InputLayout* inputLayout, bool dynamic /*= false*/)
+void RMeshRenderBuffer::CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, ID3D11InputLayout* inputLayout, bool dynamic /*= false*/, const char* debugResourceName /*= nullptr*/)
 {
 	m_InputLayout = inputLayout;
 
@@ -49,9 +49,14 @@ void RMeshRenderBuffer::CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT
 
 	m_VertexCount = vertexCount;
 	m_Stride = vertexTypeSize;
+
+#if _DEBUG
+	if (debugResourceName)
+		m_VertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(debugResourceName), debugResourceName);
+#endif
 }
 
-void RMeshRenderBuffer::CreateIndexBuffer(void* data, UINT indexTypeSize, UINT indexCount, bool dynamic /*= false*/)
+void RMeshRenderBuffer::CreateIndexBuffer(void* data, UINT indexTypeSize, UINT indexCount, bool dynamic /*= false*/, const char* debugResourceName/*=nullptr*/)
 {
 	D3D11_BUFFER_DESC ibd;
 	ZeroMemory(&ibd, sizeof(ibd));
@@ -65,6 +70,11 @@ void RMeshRenderBuffer::CreateIndexBuffer(void* data, UINT indexTypeSize, UINT i
 
 	RRenderer.D3DDevice()->CreateBuffer(&ibd, &initIndexData, &m_IndexBuffer);
 	m_IndexCount = indexCount;
+
+#if _DEBUG
+	if (debugResourceName)
+		m_IndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(debugResourceName), debugResourceName);
+#endif
 }
 
 void RMeshRenderBuffer::UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount)
@@ -217,8 +227,8 @@ void RMeshElement::UpdateRenderBuffer()
 	}
 #undef COPY_VERTEX_COMPONENT
 
-	m_RenderBuffer.CreateVertexBuffer(compactVertexData, stride, (UINT)PositionArray.size(), inputLayout);
-	m_RenderBuffer.CreateIndexBuffer(TriangleIndices.data(), sizeof(UINT), (UINT)TriangleIndices.size());
+	m_RenderBuffer.CreateVertexBuffer(compactVertexData, stride, (UINT)PositionArray.size(), inputLayout, false, m_Name.c_str());
+	m_RenderBuffer.CreateIndexBuffer(TriangleIndices.data(), sizeof(UINT), (UINT)TriangleIndices.size(), false, m_Name.c_str());
 
 	delete[] compactVertexData;
 

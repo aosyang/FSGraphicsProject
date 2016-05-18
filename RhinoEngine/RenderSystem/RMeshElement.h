@@ -31,8 +31,8 @@ public:
 
 	void Release();
 
-	void CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, ID3D11InputLayout* inputLayout, bool dynamic = false);
-	void CreateIndexBuffer(void* data, UINT indexTypeSize, UINT indexCount, bool dynamic = false);
+	void CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, ID3D11InputLayout* inputLayout, bool dynamic = false, const char* debugResourceName = nullptr);
+	void CreateIndexBuffer(void* data, UINT indexTypeSize, UINT indexCount, bool dynamic = false, const char* debugResourceName = nullptr);
 
 	void UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount);
 

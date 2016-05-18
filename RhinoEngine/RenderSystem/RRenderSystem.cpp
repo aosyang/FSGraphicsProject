@@ -177,6 +177,13 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_Opaque]);
 
+#if _DEBUG
+	{
+		char blendStateName[] = "Opaque";
+		m_BlendState[Blend_Opaque]->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(blendStateName) - 1, blendStateName);
+	}
+#endif
+
 	blendDesc.RenderTarget[0].BlendEnable = true;
 	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
 	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
@@ -187,14 +194,35 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_AlphaBlending]);
 
+#if _DEBUG
+	{
+		char blendStateName[] = "Alpha Blending";
+		m_BlendState[Blend_AlphaBlending]->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(blendStateName) - 1, blendStateName);
+	}
+#endif
+
 	blendDesc.AlphaToCoverageEnable = true;
 	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_AlphaToCoverage]);
+
+#if _DEBUG
+	{
+		char blendStateName[] = "Alpha To Coverage Blending";
+		m_BlendState[Blend_AlphaToCoverage]->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(blendStateName) - 1, blendStateName);
+	}
+#endif
 
 	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
 	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
 	blendDesc.AlphaToCoverageEnable = false;
 	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_Additive]);
 	
+#if _DEBUG
+	{
+		char blendStateName[] = "Additive Blending";
+		m_BlendState[Blend_Additive]->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(blendStateName) - 1, blendStateName);
+	}
+#endif
+
 
 	m_CurrBlendState = Blend_Opaque;
 
