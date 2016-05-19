@@ -29,9 +29,11 @@
         private void InitializeComponent()
         {
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.btnReplaceMesh = new System.Windows.Forms.Button();
             this.btnAddMesh = new System.Windows.Forms.Button();
             this.listMesh = new System.Windows.Forms.ListBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.engineCanvas1 = new RhinoLevelEditor.EngineCanvas();
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -48,8 +50,6 @@
             this.saveMaterialToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnReplaceMesh = new System.Windows.Forms.Button();
-            this.engineCanvas1 = new RhinoLevelEditor.EngineCanvas();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -83,6 +83,19 @@
             this.splitContainer1.Size = new System.Drawing.Size(1083, 642);
             this.splitContainer1.SplitterDistance = 225;
             this.splitContainer1.TabIndex = 1;
+            // 
+            // btnReplaceMesh
+            // 
+            this.btnReplaceMesh.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnReplaceMesh.Location = new System.Drawing.Point(3, 601);
+            this.btnReplaceMesh.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnReplaceMesh.Name = "btnReplaceMesh";
+            this.btnReplaceMesh.Size = new System.Drawing.Size(218, 30);
+            this.btnReplaceMesh.TabIndex = 4;
+            this.btnReplaceMesh.Text = "Replace Selection";
+            this.btnReplaceMesh.UseVisualStyleBackColor = true;
+            this.btnReplaceMesh.Click += new System.EventHandler(this.btnReplaceMesh_Click);
             // 
             // btnAddMesh
             // 
@@ -129,6 +142,21 @@
             this.splitContainer2.Size = new System.Drawing.Size(854, 642);
             this.splitContainer2.SplitterDistance = 504;
             this.splitContainer2.TabIndex = 0;
+            // 
+            // engineCanvas1
+            // 
+            this.engineCanvas1.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.engineCanvas1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.engineCanvas1.Location = new System.Drawing.Point(0, 0);
+            this.engineCanvas1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.engineCanvas1.Name = "engineCanvas1";
+            this.engineCanvas1.Size = new System.Drawing.Size(502, 640);
+            this.engineCanvas1.TabIndex = 2;
+            this.engineCanvas1.Load += new System.EventHandler(this.engineCanvas1_Load);
+            this.engineCanvas1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.engineCanvas1_KeyDown);
+            this.engineCanvas1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.engineCanvas1_KeyUp);
+            this.engineCanvas1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.engineCanvas1_MouseClick);
+            this.engineCanvas1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.engineCanvas1_MouseClick);
             // 
             // propertyGrid1
             // 
@@ -185,33 +213,34 @@
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(163, 26);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.newToolStripMenuItem.Text = "&New map";
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(163, 26);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.openToolStripMenuItem.Text = "&Open map...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(160, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(178, 6);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(163, 26);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.saveAsToolStripMenuItem.Text = "Save &As...";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(163, 26);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.exitToolStripMenuItem.Text = "E&xit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // editToolStripMenuItem
             // 
@@ -257,34 +286,6 @@
             this.exportAnimToolStripMenuItem.Size = new System.Drawing.Size(292, 26);
             this.exportAnimToolStripMenuItem.Text = "&Export fbx animations to binary";
             this.exportAnimToolStripMenuItem.Click += new System.EventHandler(this.exportAnimToolStripMenuItem_Click);
-            // 
-            // btnReplaceMesh
-            // 
-            this.btnReplaceMesh.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnReplaceMesh.Location = new System.Drawing.Point(3, 601);
-            this.btnReplaceMesh.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.btnReplaceMesh.Name = "btnReplaceMesh";
-            this.btnReplaceMesh.Size = new System.Drawing.Size(218, 30);
-            this.btnReplaceMesh.TabIndex = 4;
-            this.btnReplaceMesh.Text = "Replace Selection";
-            this.btnReplaceMesh.UseVisualStyleBackColor = true;
-            this.btnReplaceMesh.Click += new System.EventHandler(this.btnReplaceMesh_Click);
-            // 
-            // engineCanvas1
-            // 
-            this.engineCanvas1.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.engineCanvas1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.engineCanvas1.Location = new System.Drawing.Point(0, 0);
-            this.engineCanvas1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.engineCanvas1.Name = "engineCanvas1";
-            this.engineCanvas1.Size = new System.Drawing.Size(502, 640);
-            this.engineCanvas1.TabIndex = 2;
-            this.engineCanvas1.Load += new System.EventHandler(this.engineCanvas1_Load);
-            this.engineCanvas1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.engineCanvas1_KeyDown);
-            this.engineCanvas1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.engineCanvas1_KeyUp);
-            this.engineCanvas1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.engineCanvas1_MouseClick);
-            this.engineCanvas1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.engineCanvas1_MouseClick);
             // 
             // EditorMainForm
             // 

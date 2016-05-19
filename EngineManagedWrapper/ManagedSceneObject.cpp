@@ -51,7 +51,7 @@ namespace EngineManagedWrapper {
 	{
 	}
 
-	System::String^ ManagedMeshObject::Asset::get()
+	String^ ManagedMeshObject::Asset::get()
 	{
 		RMesh* mesh = GetMeshObject()->GetMesh();
 		if (mesh)
@@ -67,7 +67,7 @@ namespace EngineManagedWrapper {
 			GetMeshObject()->SetMesh(mesh);
 	}
 
-	List<EngineManagedWrapper::ManagedMaterial^>^ ManagedMeshObject::Materials::get()
+	List<ManagedMaterial^>^ ManagedMeshObject::Materials::get()
 	{
 		List<ManagedMaterial^>^ matList = gcnew List<ManagedMaterial^>();
 		for (int i = 0; i < GetMeshObject()->GetMeshElementCount(); i++)
@@ -75,6 +75,15 @@ namespace EngineManagedWrapper {
 			matList->Add(gcnew ManagedMaterial(GetMeshObject()->GetMaterial(i)));
 		}
 		return matList;
+	}
+
+	String^ ManagedMeshObject::VertexComponent::get()
+	{
+		RMesh* mesh = GetMeshObject()->GetMesh();
+		if (!mesh || !mesh->GetMeshElementCount())
+			return gcnew String("");
+
+		return gcnew String(RVertexDeclaration::GetVertexComponentsString(mesh->GetMeshElements()[0].GetVertexComponentMask()).c_str());
 	}
 
 }

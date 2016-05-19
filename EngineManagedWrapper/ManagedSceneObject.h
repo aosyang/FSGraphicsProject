@@ -24,7 +24,7 @@ namespace EngineManagedWrapper {
 
 		property String^ Shader
 		{
-			String^ get()			{ return gcnew String(RShaderManager::Instance().GetShaderName(material->Shader).c_str()); }
+			String^ get()			{ return material->Shader ? gcnew String(RShaderManager::Instance().GetShaderName(material->Shader).c_str()) : gcnew String(""); }
 			void set(String^ value)	{ material->Shader = RShaderManager::Instance().GetShaderResource(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer())); }
 		}
 
@@ -129,7 +129,11 @@ namespace EngineManagedWrapper {
 			void set(String^ value);
 		};
 
-		[TypeConverter(ExpandableObjectConverter::typeid)]
+		property String^ VertexComponent
+		{
+			String^ get();
+		}
+
 		property List<ManagedMaterial^>^ Materials
 		{
 			List<ManagedMaterial^>^ get();
@@ -140,21 +144,21 @@ namespace EngineManagedWrapper {
 			int get()				{ return GetMeshObject()->GetMeshElementCount(); }
 		}
 
-		property String^ Shader
-		{
-			String^ get() { return gcnew String(RShaderManager::Instance().GetShaderName(GetMeshObject()->GetMaterial(0)->Shader).c_str()); }
-		}
+		//property String^ Shader
+		//{
+		//	String^ get() { return gcnew String(RShaderManager::Instance().GetShaderName(GetMeshObject()->GetMaterial(0)->Shader).c_str()); }
+		//}
 
-		[TypeConverter(ExpandableObjectConverter::typeid)]
-		property ManagedMaterial^ material
-		{
-			ManagedMaterial^ get() { return gcnew ManagedMaterial(GetMeshObject()->GetMaterial(0)); }
-		}
+		//[TypeConverter(ExpandableObjectConverter::typeid)]
+		//property ManagedMaterial^ material
+		//{
+		//	ManagedMaterial^ get() { return gcnew ManagedMaterial(GetMeshObject()->GetMaterial(0)); }
+		//}
 
-		[TypeConverter(ManagedMaterialCollectionConverter::typeid)]
-		property ManagedMaterialCollection^ MaterialCollection
-		{
-			ManagedMaterialCollection^ get() { return gcnew ManagedMaterialCollection(GetMeshObject()); }
-		}
+		//[TypeConverter(ManagedMaterialCollectionConverter::typeid)]
+		//property ManagedMaterialCollection^ MaterialCollection
+		//{
+		//	ManagedMaterialCollection^ get() { return gcnew ManagedMaterialCollection(GetMeshObject()); }
+		//}
 	};
 }

@@ -128,13 +128,7 @@ ID3D11InputLayout* RVertexDeclaration::GetInputLayout(const string& vertexTypeNa
 ID3D11InputLayout* RVertexDeclaration::GetInputLayoutByVertexComponents(int vertexComponents)
 {
 	string msg_buf = "Input layout: ";
-	for (int i = 0; i < VertexComponent_Count; i++)
-	{
-		if (vertexComponents & (1 << i))
-		{
-			msg_buf += string(VertexSemantics[i].Semantic) + " ";
-		}
-	}
+	msg_buf += GetVertexComponentsString(vertexComponents);
 	msg_buf += "\n";
 	OutputDebugStringA(msg_buf.data());
 
@@ -211,6 +205,21 @@ ID3D11InputLayout* RVertexDeclaration::GetInputLayoutByVertexComponents(int vert
 	{
 		return iter->second;
 	}
+}
+
+string RVertexDeclaration::GetVertexComponentsString(int vertexComponents)
+{
+	string str;
+
+	for (int i = 0; i < VertexComponent_Count; i++)
+	{
+		if (vertexComponents & (1 << i))
+		{
+			str += string(VertexSemantics[i].Semantic) + " ";
+		}
+	}
+
+	return str;
 }
 
 int RVertexDeclaration::GetVertexStride(int vertexComponents)

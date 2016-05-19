@@ -27,7 +27,7 @@ RRay RRay::Transform(const RMatrix4& mat) const
 	return RRay((RVec4(Origin, 1.0f) * mat).ToVec3(), (RVec4(Direction, 0.0f) * mat).ToVec3(), Distance);
 }
 
-bool RRay::TestAabbIntersection(const RAabb& aabb) const
+bool RRay::TestAabbIntersection(const RAabb& aabb, float* t/*=nullptr*/) const
 {
 	if (!aabb.IsValid())
 		return false;
@@ -61,5 +61,12 @@ bool RRay::TestAabbIntersection(const RAabb& aabb) const
 		tmax = min(tmax, max(tz1, tz2));
 	}
 
-	return tmax > tmin;
+	if (tmax > tmin)
+	{
+		if (t)
+			*t = tmin;
+		return true;
+	}
+
+	return false;
 }

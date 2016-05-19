@@ -21,7 +21,7 @@ public:
 	RRay(const RVec3& _start, const RVec3& _end);
 
 	RRay Transform(const RMatrix4& mat) const;
-	bool TestAabbIntersection(const RAabb& aabb) const;
+	bool TestAabbIntersection(const RAabb& aabb, float* t = nullptr) const;
 };
 
 #endif

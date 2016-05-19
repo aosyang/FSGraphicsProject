@@ -116,6 +116,7 @@ public:
 
 	ID3D11InputLayout* GetInputLayout(const string& vertexTypeName) const;
 	ID3D11InputLayout* GetInputLayoutByVertexComponents(int vertexComponents);
+	static string GetVertexComponentsString(int vertexComponents);
 	static int GetVertexStride(int vertexComponents);
 	static void CopyVertexComponents(void* out, const RVertex::MESH_LOADER_VERTEX* in, int count, int vertexComponents);
 private:

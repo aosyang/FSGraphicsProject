@@ -111,6 +111,7 @@ namespace RhinoLevelEditor
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 engineCanvas1.RhinoEngine.LoadScene(dlg.FileName);
+                UpdatePropertyGrid();
             }
         }
 
@@ -128,6 +129,11 @@ namespace RhinoLevelEditor
         {
             engineCanvas1.RhinoEngine.UpdatePreviewMesh(listMesh.SelectedItem.ToString(), true);
             UpdatePropertyGrid();
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }
