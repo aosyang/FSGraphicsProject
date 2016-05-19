@@ -8,6 +8,12 @@
 
 #include "RSceneObject.h"
 
+namespace tinyxml2
+{
+	class XMLDocument;
+	class XMLElement;
+}
+
 class RSMeshObject : public RSceneObject
 {
 public:
@@ -22,9 +28,10 @@ public:
 
 	int GetMeshElementCount() const;
 	void SetMaterial(RMaterial* materials, int materialNum);
-	RMaterial GetMaterial(int index);
+	RMaterial* GetMaterial(int index);
 
 	void SaveMaterialsToFile();
+	void SerializeMaterialsToXML(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* elem_mat);
 
 	void SetOverridingShader(RShader* shader, int features = -1);
 

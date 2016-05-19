@@ -2,10 +2,93 @@
 
 using namespace System;
 using namespace System::Runtime::InteropServices;
+using namespace System::Collections::Generic;
+using namespace System::ComponentModel;
+using namespace System::Globalization;
 
 class RSceneObject;
 
 namespace EngineManagedWrapper {
+
+	public ref class ManagedMaterial
+	{
+		RMaterial* material;
+	public:
+		ManagedMaterial(RMaterial* mat);
+
+		property int TextureCount
+		{
+			int get()				{ return material->TextureNum; }
+			void set(int value)		{ material->TextureNum = value; }
+		}
+
+		property String^ Shader
+		{
+			String^ get()			{ return gcnew String(RShaderManager::Instance().GetShaderName(material->Shader).c_str()); }
+			void set(String^ value)	{ material->Shader = RShaderManager::Instance().GetShaderResource(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer())); }
+		}
+
+#define DECLARE_TEXTURE_PROPERTY(n) \
+		property String^ Texture##n \
+		{ \
+			String^ get()			{ return material->Textures[n] ? gcnew String(material->Textures[n]->GetPath().c_str()) : gcnew String(""); } \
+			void set(String^ value)	{ material->Textures[n] = value != "" ? RResourceManager::Instance().FindTexture(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer())) : nullptr; } \
+		}
+
+		DECLARE_TEXTURE_PROPERTY(0)
+		DECLARE_TEXTURE_PROPERTY(1)
+		DECLARE_TEXTURE_PROPERTY(2)
+		DECLARE_TEXTURE_PROPERTY(3)
+		DECLARE_TEXTURE_PROPERTY(4)
+		DECLARE_TEXTURE_PROPERTY(5)
+		DECLARE_TEXTURE_PROPERTY(6)
+		DECLARE_TEXTURE_PROPERTY(7)
+	};
+
+
+	public ref class ManagedMaterialCollection
+	{
+		List<ManagedMaterial^> materials;
+	public:
+		ManagedMaterialCollection(RSMeshObject* obj);
+
+		int GetCount() { return materials.Count; }
+		ManagedMaterial^ GetMaterial(int i) { return materials[i]; }
+	};
+
+	public ref class ManagedMaterialCollectionConverter : ExpandableObjectConverter
+	{
+	public:
+		bool CanConvertTo(ITypeDescriptorContext^ context, Type^ destinationType) override
+		{
+			if (destinationType == ManagedMaterial::typeid)
+				return true;
+
+			return ExpandableObjectConverter::CanConvertTo(context, destinationType);
+		}
+
+		Object^ ConvertTo(ITypeDescriptorContext^ context,
+						  CultureInfo^ culture,
+						  Object^ value,
+						  Type^ destinationType) override
+		{
+			if (destinationType == String::typeid &&
+				value->GetType() == ManagedMaterialCollection::typeid)
+			{
+
+				ManagedMaterialCollection^ mc = (ManagedMaterialCollection^)value;
+
+				String^ str = gcnew String("");
+				for (int i = 0; i < mc->GetCount(); i++)
+				{
+					str += mc->GetMaterial(i)->Shader + ";";
+				}
+
+				return str;
+			}
+			return ExpandableObjectConverter::ConvertTo(context, culture, value, destinationType);
+		}
+	};
 
 	public ref class ManagedSceneObject
 	{
@@ -42,21 +125,36 @@ namespace EngineManagedWrapper {
 
 		property String^ Asset
 		{
-			String^ get()
-			{
-				RMesh* mesh = GetMeshObject()->GetMesh();
-				if (mesh)
-					return gcnew String(mesh->GetPath().c_str());
-				else
-					return gcnew String("");
-			}
-
-			void set(String^ value)
-			{
-				RMesh* mesh = RResourceManager::Instance().FindMesh(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer()));
-				if (mesh)
-					GetMeshObject()->SetMesh(mesh);
-			}
+			String^ get();
+			void set(String^ value);
 		};
+
+		[TypeConverter(ExpandableObjectConverter::typeid)]
+		property List<ManagedMaterial^>^ Materials
+		{
+			List<ManagedMaterial^>^ get();
+		}
+
+		property int SubMeshCount
+		{
+			int get()				{ return GetMeshObject()->GetMeshElementCount(); }
+		}
+
+		property String^ Shader
+		{
+			String^ get() { return gcnew String(RShaderManager::Instance().GetShaderName(GetMeshObject()->GetMaterial(0)->Shader).c_str()); }
+		}
+
+		[TypeConverter(ExpandableObjectConverter::typeid)]
+		property ManagedMaterial^ material
+		{
+			ManagedMaterial^ get() { return gcnew ManagedMaterial(GetMeshObject()->GetMaterial(0)); }
+		}
+
+		[TypeConverter(ManagedMaterialCollectionConverter::typeid)]
+		property ManagedMaterialCollection^ MaterialCollection
+		{
+			ManagedMaterialCollection^ get() { return gcnew ManagedMaterialCollection(GetMeshObject()); }
+		}
 	};
 }

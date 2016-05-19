@@ -59,11 +59,11 @@ void RSMeshObject::SetMaterial(RMaterial* materials, int materialNum)
 	m_bNeedUpdateMaterial = false;
 }
 
-RMaterial RSMeshObject::GetMaterial(int index)
+RMaterial* RSMeshObject::GetMaterial(int index)
 {
 	UpdateMaterialsFromResource();
 
-	return m_Materials[index];
+	return &m_Materials[index];
 }
 
 void RSMeshObject::SaveMaterialsToFile()
@@ -79,9 +79,24 @@ void RSMeshObject::SaveMaterialsToFile()
 	UpdateMaterialsFromResource();
 
 	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
-	tinyxml2::XMLElement* elem_mat = doc->NewElement("Material");
-	elem_mat->SetAttribute("Mesh", m_Mesh->GetPath().c_str());
+	doc->InsertEndChild(doc->NewComment((string("Mesh path: ") + m_Mesh->GetPath()).c_str()));
 
+	tinyxml2::XMLElement* elem_mat = doc->NewElement("Material");
+
+	SerializeMaterialsToXML(doc, elem_mat);
+	doc->InsertEndChild(elem_mat);
+
+	string filepath = m_Mesh->GetPath();
+	filepath = filepath.substr(0, filepath.length() - 3);
+	filepath += "rmtl";
+
+	doc->SaveFile(filepath.c_str());
+
+	delete doc;
+}
+
+void RSMeshObject::SerializeMaterialsToXML(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* elem_mat)
+{
 	for (int i = 0; i < m_Mesh->GetMeshElementCount(); i++)
 	{
 		tinyxml2::XMLElement* elem_submesh = doc->NewElement("MeshElement");
@@ -108,15 +123,6 @@ void RSMeshObject::SaveMaterialsToFile()
 		}
 		elem_mat->InsertEndChild(elem_submesh);
 	}
-	doc->InsertEndChild(elem_mat);
-
-	string filepath = m_Mesh->GetPath();
-	filepath = filepath.substr(0, filepath.length() - 3);
-	filepath += "rmtl";
-
-	doc->SaveFile(filepath.c_str());
-
-	delete doc;
 }
 
 void RSMeshObject::SetOverridingShader(RShader* shader, int features)
@@ -193,7 +199,8 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 				for (int t = 0; t < m_Materials[i].TextureNum; t++)
 				{
 					RTexture* texture = m_Materials[i].Textures[t];
-					RRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, texture ? texture->GetPtrSRV() : nullptr);
+					ID3D11ShaderResourceView* srv[] = { nullptr };
+					RRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, texture ? texture->GetPtrSRV() : srv);
 				}
 			}
 		}

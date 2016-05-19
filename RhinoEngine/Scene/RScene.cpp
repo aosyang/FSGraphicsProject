@@ -145,6 +145,56 @@ void RScene::LoadFromFile(const char* filename)
 				meshObj->SetTransform(transform);
 				if (name)
 					meshObj->SetName(name);
+
+				tinyxml2::XMLElement* elem_mat = elem_obj->FirstChildElement("Material");
+				vector<RMaterial> xmlMaterials;
+
+				if (elem_mat)
+				{
+					for (int i = 0; i < meshObj->GetMeshElementCount(); i++)
+					{
+						xmlMaterials.push_back(*meshObj->GetMaterial(i));
+					}
+				}
+
+				while (elem_mat)
+				{
+					int index = elem_mat->IntAttribute("Index");
+
+					tinyxml2::XMLElement* elem = elem_mat->FirstChildElement("MeshElement");
+					while (elem)
+					{
+						const char* shaderName = elem->Attribute("Shader");
+						RMaterial material = { nullptr, 0 };
+						material.Shader = RShaderManager::Instance().GetShaderResource(shaderName);
+
+						tinyxml2::XMLElement* elem_tex = elem->FirstChildElement();
+						while (elem_tex)
+						{
+							const char* textureName = elem_tex->GetText();
+
+							RTexture* texture = RResourceManager::Instance().FindTexture(textureName);
+
+							if (!texture)
+							{
+								texture = RResourceManager::Instance().LoadDDSTexture(RResourceManager::GetResourcePath(textureName).data(), RLM_Immediate);
+							}
+
+							material.Textures[material.TextureNum++] = texture;
+							elem_tex = elem_tex->NextSiblingElement();
+						}
+
+						xmlMaterials[index] = material;
+						elem = elem->NextSiblingElement();
+					}
+
+					elem_mat = elem_mat->NextSiblingElement("Material");
+				}
+
+				if (xmlMaterials.size())
+				{
+					meshObj->SetMaterial(xmlMaterials.data(), (int)xmlMaterials.size());
+				}
 			}
 
 			elem_obj = elem_obj->NextSiblingElement();
@@ -171,9 +221,45 @@ void RScene::SaveToFile(const char* filename)
 			elem_obj->SetAttribute("Type", "MeshObject");
 
 			RSMeshObject* meshObj = (RSMeshObject*)(*iter);
-			elem_obj->SetAttribute("Mesh", meshObj->GetMesh()->GetPath().c_str());
+			RMesh* mesh = meshObj->GetMesh();
+			elem_obj->SetAttribute("Mesh", mesh->GetPath().c_str());
+
+			// Save materials
+			for (int i = 0; i < meshObj->GetMeshElementCount(); i++)
+			{
+				RMaterial meshMaterial = mesh->GetMaterial(i);
+				RMaterial* objMaterial = meshObj->GetMaterial(i);
+				bool exportMaterial = false;
+
+				if (meshMaterial.Shader != objMaterial->Shader ||
+					meshMaterial.TextureNum != objMaterial->TextureNum)
+				{
+					exportMaterial = true;
+				}
+
+				if (!exportMaterial)
+				{
+					for (int j = 0; j < meshMaterial.TextureNum; j++)
+					{
+						if (meshMaterial.Textures[j] != objMaterial->Textures[j])
+						{
+							exportMaterial = true;
+							break;
+						}
+					}
+				}
+
+				if (exportMaterial)
+				{
+					tinyxml2::XMLElement* elem_mat = doc->NewElement("Material");
+					elem_mat->SetAttribute("Index", i);
+					meshObj->SerializeMaterialsToXML(doc, elem_mat);
+					elem_obj->InsertEndChild(elem_mat);
+				}
+			}
 		}
 
+		// Save transformation
 		const RMatrix4& t = (*iter)->GetNodeTransform();
 
 		tinyxml2::XMLElement* elem_trans = doc->NewElement("Transform");
