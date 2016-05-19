@@ -4,8 +4,6 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "EditorAxis.h"
 
 
@@ -60,6 +58,8 @@ namespace EngineManagedWrapper
 		void AddMeshObjectToScene(const char* path);
 		void LoadScene(const char* filename);
 		void SaveScene(const char* filename);
+
+		RSceneObject* GetSelection();
 
 		void SaveMeshMaterialFromSelection();
 		void ExportAllAnimationsToBinaryFiles();

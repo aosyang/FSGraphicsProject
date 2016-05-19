@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineManagedWrapper;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -34,7 +35,7 @@ namespace RhinoLevelEditor
 
         private void btnAddMesh_Click(object sender, EventArgs e)
         {
-            engineCanvas1.RhinoEngine.UpdatePreviewMesh(listMesh.SelectedItem.ToString());
+            engineCanvas1.RhinoEngine.UpdatePreviewMesh(listMesh.SelectedItem.ToString(), false);
         }
 
         private void engineCanvas1_KeyDown(object sender, KeyEventArgs e)
@@ -60,8 +61,17 @@ namespace RhinoLevelEditor
             int index = this.listMesh.IndexFromPoint(e.Location);
             if (index != System.Windows.Forms.ListBox.NoMatches)
             {
-                engineCanvas1.RhinoEngine.UpdatePreviewMesh(listMesh.Items[index].ToString());
+                engineCanvas1.RhinoEngine.UpdatePreviewMesh(listMesh.Items[index].ToString(), false);
             }
+        }
+
+        private void UpdatePropertyGrid()
+        {
+            ManagedSceneObject go = engineCanvas1.RhinoEngine.GetSelection();
+            if (go.IsValid())
+                propertyGrid1.SelectedObject = go;
+            else
+                propertyGrid1.SelectedObject = null;
         }
 
         private void engineCanvas1_MouseClick(object sender, MouseEventArgs e)
@@ -71,7 +81,9 @@ namespace RhinoLevelEditor
                 EngineCanvas canvas = (EngineCanvas)sender;
                 float x = (float)e.X / canvas.Width, y = (float)e.Y / canvas.Height;
                 toolStripStatusLabel1.Text = x + " " + y;
-                engineCanvas1.RhinoEngine.RunScreenToCameraRayPicking(x, y);
+                //engineCanvas1.RhinoEngine.RunScreenToCameraRayPicking(x, y);
+
+                UpdatePropertyGrid();
             }
         }
 
@@ -110,6 +122,12 @@ namespace RhinoLevelEditor
         private void exportAnimToolStripMenuItem_Click(object sender, EventArgs e)
         {
             engineCanvas1.RhinoEngine.ExportAllAnimationsToBinaryFiles();
+        }
+
+        private void btnReplaceMesh_Click(object sender, EventArgs e)
+        {
+            engineCanvas1.RhinoEngine.UpdatePreviewMesh(listMesh.SelectedItem.ToString(), true);
+            UpdatePropertyGrid();
         }
     }
 }

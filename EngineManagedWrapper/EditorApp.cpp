@@ -354,6 +354,7 @@ namespace EngineManagedWrapper
 
 	void EditorApp::LoadScene(const char* filename)
 	{
+		m_SelectedObject = nullptr;
 		m_Scene.DestroyAllObjects();
 		m_Scene.LoadFromFile(filename);
 	}
@@ -361,6 +362,11 @@ namespace EngineManagedWrapper
 	void EditorApp::SaveScene(const char* filename)
 	{
 		m_Scene.SaveToFile(filename);
+	}
+
+	RSceneObject* EditorApp::GetSelection()
+	{
+		return m_SelectedObject;
 	}
 
 	void EditorApp::SaveMeshMaterialFromSelection()

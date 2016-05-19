@@ -1,10 +1,10 @@
 // This is the main DLL file.
 
 #include "stdafx.h"
-#include "Rhino.h"
 
 #include "EngineManagedWrapper.h"
 #include "EditorApp.h"
+#include "ManagedSceneObject.h"
 
 #pragma comment(lib, "User32.lib")
 
@@ -85,9 +85,18 @@ namespace EngineManagedWrapper
 		return list;
 	}
 
-	void RhinoEngineWrapper::UpdatePreviewMesh(String^ path)
+	void RhinoEngineWrapper::UpdatePreviewMesh(String^ path, bool replace)
 	{
-		m_Application->AddMeshObjectToScene(ManagedStringRefToConstCharPtr(path));
+		if (!replace)
+			m_Application->AddMeshObjectToScene(ManagedStringRefToConstCharPtr(path));
+		else
+		{
+			RSMeshObject* meshObj = static_cast<RSMeshObject*>(m_Application->GetSelection());
+			if (meshObj)
+			{
+				meshObj->SetMesh(RResourceManager::Instance().FindMesh(ManagedStringRefToConstCharPtr(path)));
+			}
+		}
 	}
 
 	void RhinoEngineWrapper::OnKeyDown(int keycode)
@@ -103,6 +112,22 @@ namespace EngineManagedWrapper
 	void RhinoEngineWrapper::RunScreenToCameraRayPicking(float x, float y)
 	{
 		//m_Application->RunScreenToCameraRayPicking(x, y);
+	}
+
+	EngineManagedWrapper::ManagedSceneObject^ RhinoEngineWrapper::GetSelection()
+	{
+		RSceneObject* sel = m_Application->GetSelection();
+		if (sel)
+		{
+			switch (sel->GetType())
+			{
+			case SO_MeshObject:
+				return gcnew EngineManagedWrapper::ManagedMeshObject(sel);
+				break;
+			}
+		}
+
+		return gcnew EngineManagedWrapper::ManagedSceneObject(sel);
 	}
 
 	void RhinoEngineWrapper::DeleteSelection()

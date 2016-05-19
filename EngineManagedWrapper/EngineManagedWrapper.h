@@ -10,6 +10,7 @@ class REngine;
 namespace EngineManagedWrapper {
 
 	class EditorApp;
+	ref class ManagedSceneObject;
 
 	public ref class RhinoEngineWrapper
 	{
@@ -29,10 +30,13 @@ namespace EngineManagedWrapper {
 		void Resize(int width, int height);
 
 		List<String^>^ GetMeshNameList();
-		void UpdatePreviewMesh(String^ path);
+		void UpdatePreviewMesh(String^ path, bool replace);
 		void OnKeyDown(int keycode);
 		void OnKeyUp(int keycode);
 		void RunScreenToCameraRayPicking(float x, float y);
+		
+		ManagedSceneObject^ GetSelection();
+
 		void DeleteSelection();
 		void LoadScene(String^ filename);
 		void SaveScene(String^ filename);
