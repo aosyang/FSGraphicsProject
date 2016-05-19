@@ -49,6 +49,7 @@
 Texture2D ScreenTexture		: register(t0);
 Texture2D PosDepthTexture	: register(t1);
 Texture2D NormalTexture		: register(t3);
+TextureCube EnvTexture		: register(t4);
 
 //static const float cb_stride = 1.0f;
 //static const float cb_strideZCutoff = 0.02f;
@@ -256,7 +257,12 @@ float4 main(VertexOut pIn) : SV_TARGET
 		intersection = false;
 	}
 
-	return Final + ScreenTexture.Sample(Sampler, hitPixel) * nDotV * (intersection ? 1.0f : 0.0f);
+	float4 cubeReflection = MakeLinearColorFromGammaSpace(EnvTexture.Sample(Sampler, mul(rayDirectionVS, (float3x3)cameraMatrix)));
+	float4 ssReflection = ScreenTexture.Sample(Sampler, hitPixel) * rDotV;
+	float ssr_amount = rDotV * (intersection ? 1.0f : 0.0f);
+	//return Final + ScreenTexture.Sample(Sampler, hitPixel) * rDotV * (intersection ? 1.0f : 0.0f);
+	//return intersection ? float4(1, 1, 1, 1) * rDotV : float4(0, 0, 0, 1);
+	return Final + lerp(cubeReflection, ssReflection, ssr_amount) * nDotV;
 
 	return float4(hitPixel, depth, rDotV) * (intersection ? 1.0f : 0.0f);
 }

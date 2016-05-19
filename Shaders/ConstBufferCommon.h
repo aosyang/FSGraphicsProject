@@ -9,6 +9,7 @@
 
 CONSTANT_BUFFER_BEGIN(SHADER_SCENE_BUFFER, b0)
 float4x4	viewMatrix;
+float4x4	cameraMatrix;			// Inverse view matrix
 float4x4	projMatrix;
 float4x4	viewProjMatrix;
 float4x4	invProjMatrix;

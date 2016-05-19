@@ -117,7 +117,10 @@ private:
 	RDebugRenderer				m_DebugRenderer;
 	RDebugMenu					m_DebugMenu;
 
+	bool						m_EnableDeferredShading;
 	bool						m_EnableSSR;
+
+	RTexture*					m_EnvCube;
 };
 
 #endif

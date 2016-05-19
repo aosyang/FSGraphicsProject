@@ -77,20 +77,24 @@ bool DeferredShadingApp::Initialize()
 
 	m_DebugRenderer.Initialize();
 	m_DebugMenu.Initialize();
-	m_DebugMenu.AddBoolMenuItem("Enable SSR",			&m_EnableSSR);
-	m_DebugMenu.AddFloatMenuItem("cb_stride",			&cbSSR.cb_stride);
-	m_DebugMenu.AddFloatMenuItem("cb_strideZCutoff",	&cbSSR.cb_strideZCutoff,	0.001f);
-	m_DebugMenu.AddFloatMenuItem("cb_zThickness",		&cbSSR.cb_zThickness,		0.00001f);
-	m_DebugMenu.AddFloatMenuItem("cb_maxSteps",			&cbSSR.cb_maxSteps,			100.0f);
-	m_DebugMenu.AddFloatMenuItem("cb_maxDistance",		&cbSSR.cb_maxDistance,		1.0f);
+	m_DebugMenu.AddBoolMenuItem("Deferred Shading",			&m_EnableDeferredShading);
+	m_DebugMenu.AddBoolMenuItem("Screen Space Reflection",	&m_EnableSSR);
+	m_DebugMenu.AddFloatMenuItem("cb_stride",				&cbSSR.cb_stride);
+	m_DebugMenu.AddFloatMenuItem("cb_strideZCutoff",		&cbSSR.cb_strideZCutoff,	0.001f);
+	m_DebugMenu.AddFloatMenuItem("cb_zThickness",			&cbSSR.cb_zThickness,		0.00001f);
+	m_DebugMenu.AddFloatMenuItem("cb_maxSteps",				&cbSSR.cb_maxSteps,			100.0f);
+	m_DebugMenu.AddFloatMenuItem("cb_maxDistance",			&cbSSR.cb_maxDistance,		1.0f);
 	m_DebugMenu.SetEnabled(false);
 
+	m_EnableDeferredShading = true;
 	m_EnableSSR = true;
 	cbSSR.cb_stride = 4.0f;
 	cbSSR.cb_strideZCutoff = 0.01f;
 	cbSSR.cb_zThickness = 0.0005f;
 	cbSSR.cb_maxSteps = 300.0f;
 	cbSSR.cb_maxDistance = 100.0f;
+
+	m_EnvCube = RResourceManager::Instance().FindTexture("../Assets/powderpeak.dds");
 
 	return true;
 }
@@ -153,6 +157,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbScene, sizeof(cbScene));
 
 	cbScene.viewMatrix = viewMatrix;
+	cbScene.cameraMatrix = m_Camera.GetNodeTransform();
 	cbScene.projMatrix = projMatrix;
 	cbScene.viewProjMatrix = viewMatrix * projMatrix;
 	cbScene.invProjMatrix = projMatrix.Inverse();
@@ -213,176 +218,182 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 
 void DeferredShadingApp::RenderScene()
 {
-#define DISABLE_MRT 0
-
-#if DISABLE_MRT == 0
-	ID3D11RenderTargetView* rtvs[] =
+	if (m_EnableDeferredShading)
 	{
-		m_DeferredBuffers[0].View,
-		m_DeferredBuffers[1].View, 
-		m_DeferredBuffers[2].View, 
-		m_DeferredBuffers[3].View,
-		m_DeferredBuffers[4].View,
-	};
+		ID3D11RenderTargetView* rtvs[] =
+		{
+			m_DeferredBuffers[0].View,
+			m_DeferredBuffers[1].View, 
+			m_DeferredBuffers[2].View, 
+			m_DeferredBuffers[3].View,
+			m_DeferredBuffers[4].View,
+		};
 
-	RRenderer.SetRenderTargets(DeferredBuffer_Count, rtvs, m_DepthBuffer.View);
-#else
-	RRenderer.Clear();
-#endif
+		RRenderer.SetRenderTargets(DeferredBuffer_Count, rtvs, m_DepthBuffer.View);
+
+		RRenderer.Clear(false, RColor(0, 0, 0));
+		RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Color].View, RColor(0.05f, 0.05f, 0.1f, 0.0f));
+		RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Position].View, RColor(0, 0, 0, 1));
+		RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_WorldSpaceNormal].View, RColor(0, 0, 0));
+		RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_ViewSpaceNormal].View, RColor(0, 0, 0));
+
+	}
+	else
+	{
+		RRenderer.Clear(true, RColor(0.05f, 0.05f, 0.1f));
+	}
 
 	RFrustum frustum = m_Camera.GetFrustum();
-
-	RRenderer.Clear(false, RColor(0, 0, 0));
-	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Color].View, RColor(0.05f, 0.05f, 0.1f, 0.0f));
-	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_Position].View, RColor(0, 0, 0, 1));
-	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_WorldSpaceNormal].View, RColor(0, 0, 0));
-	RRenderer.ClearRenderTarget(m_DeferredBuffers[DB_ViewSpaceNormal].View, RColor(0, 0, 0));
 
 	RRenderer.SetBlendState(Blend_Opaque);
 	RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
 
-#if DISABLE_MRT == 1
-
-	m_Scene.Render(&frustum);
-
-#else
-	RRenderer.SetDefferedShading(true);
-
-	m_Scene.Render(&frustum);
-
-	RRenderer.SetDefferedShading(false);
-
-	if (m_EnableSSR)
-		RRenderer.SetRenderTargets(1, &m_ScenePassBuffer.View, m_DepthBuffer.View);
-	else
-		RRenderer.SetRenderTargets();
-	RRenderer.Clear(true, RColor(0, 0, 0));
-
-	ID3D11ShaderResourceView* gbufferSRV[DeferredBuffer_Count];
-	for (int i=0; i<DeferredBuffer_Count; i++)
+	if (m_EnableDeferredShading)
 	{
-		gbufferSRV[i] = m_DeferredBuffers[i].SRV;
-	};
+		RRenderer.SetDefferedShading(true);
 
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, DeferredBuffer_Count, gbufferSRV);
+		m_Scene.Render(&frustum);
 
-	m_PostProcessor.Draw(PPE_DeferredComposition);
+		RRenderer.SetDefferedShading(false);
 
-	// Render lighting pass
-	RRenderer.SetBlendState(Blend_Additive);
-
-	const RMatrix4& viewProjMatrix = m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix();
-
-	for (int i = 0; i < MAX_LIGHT_COUNT; i++)
-	{
-		float x = sinf(m_TotalTime * m_PointLights[i].sin_factor.x + m_PointLights[i].sin_offset.x) * 100.0f;
-		float y = sinf(m_TotalTime * m_PointLights[i].sin_factor.y + m_PointLights[i].sin_offset.y) * 100.0f;
-		float z = sinf(m_TotalTime * m_PointLights[i].sin_factor.z + m_PointLights[i].sin_offset.z) * 100.0f;
-		RVec3 offset = RVec3(x, y, z);
-
-		RVec3 pos = m_PointLights[i].pos + offset;
-
-		RAabb aabb;
-		float r = m_PointLights[i].r;
-		aabb.pMin = pos - RVec3(r, r, r);
-		aabb.pMax = pos + RVec3(r, r, r);
-
-		RVec2 pMin = RVec2(FLT_MAX, FLT_MAX), pMax = RVec2(-FLT_MAX, -FLT_MAX);
-		if (aabb.TestPointInsideAabb(m_Camera.GetPosition()))
-		{
-			pMin.x = 0.0f;
-			pMin.y = (float)RRenderer.GetClientHeight();
-			pMax.x = (float)RRenderer.GetClientWidth();
-			pMax.y = 0.0f;
-		}
+		if (m_EnableSSR)
+			RRenderer.SetRenderTargets(1, &m_ScenePassBuffer.View, m_DepthBuffer.View);
 		else
+			RRenderer.SetRenderTargets();
+		RRenderer.Clear(true, RColor(0, 0, 0));
+
+		ID3D11ShaderResourceView* gbufferSRV[DeferredBuffer_Count];
+		for (int i = 0; i < DeferredBuffer_Count; i++)
 		{
-			RVec3 corners[] =
+			gbufferSRV[i] = m_DeferredBuffers[i].SRV;
+		};
+
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, DeferredBuffer_Count, gbufferSRV);
+
+		m_PostProcessor.Draw(PPE_DeferredComposition);
+
+		// Render lighting pass
+		RRenderer.SetBlendState(Blend_Additive);
+
+		const RMatrix4& viewProjMatrix = m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix();
+
+		for (int i = 0; i < MAX_LIGHT_COUNT; i++)
+		{
+			float x = sinf(m_TotalTime * m_PointLights[i].sin_factor.x + m_PointLights[i].sin_offset.x) * 100.0f;
+			float y = sinf(m_TotalTime * m_PointLights[i].sin_factor.y + m_PointLights[i].sin_offset.y) * 100.0f;
+			float z = sinf(m_TotalTime * m_PointLights[i].sin_factor.z + m_PointLights[i].sin_offset.z) * 100.0f;
+			RVec3 offset = RVec3(x, y, z);
+
+			RVec3 pos = m_PointLights[i].pos + offset;
+
+			RAabb aabb;
+			float r = m_PointLights[i].r;
+			aabb.pMin = pos - RVec3(r, r, r);
+			aabb.pMax = pos + RVec3(r, r, r);
+
+			RVec2 pMin = RVec2(FLT_MAX, FLT_MAX), pMax = RVec2(-FLT_MAX, -FLT_MAX);
+			if (aabb.TestPointInsideAabb(m_Camera.GetPosition()))
 			{
-				RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMin.z),
-				RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMin.z),
-				RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMin.z),
-				RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMin.z),
-
-				RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMax.z),
-				RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMax.z),
-				RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMax.z),
-				RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMax.z),
-			};
-
-			for (int j = 0; j < 8; j++)
+				pMin.x = 0.0f;
+				pMin.y = (float)RRenderer.GetClientHeight();
+				pMax.x = (float)RRenderer.GetClientWidth();
+				pMax.y = 0.0f;
+			}
+			else
 			{
-				RVec4 ndc_point = RVec4(corners[j], 1.0f) * viewProjMatrix;
-				ndc_point /= ndc_point.w;
+				RVec3 corners[] =
+				{
+					RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMin.z),
+					RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMin.z),
+					RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMin.z),
+					RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMin.z),
 
-				if (ndc_point.x < pMin.x)
-					pMin.x = max(-1.0f, ndc_point.x);
-				if (ndc_point.x > pMax.x)
-					pMax.x = min(1.0f, ndc_point.x);
-				if (ndc_point.y < pMin.y)
-					pMin.y = max(-1.0f, ndc_point.y);
-				if (ndc_point.y > pMax.y)
-					pMax.y = min(1.0f, ndc_point.y);
+					RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMax.z),
+					RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMax.z),
+					RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMax.z),
+					RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMax.z),
+				};
+
+				for (int j = 0; j < 8; j++)
+				{
+					RVec4 ndc_point = RVec4(corners[j], 1.0f) * viewProjMatrix;
+					ndc_point /= ndc_point.w;
+
+					if (ndc_point.x < pMin.x)
+						pMin.x = max(-1.0f, ndc_point.x);
+					if (ndc_point.x > pMax.x)
+						pMax.x = min(1.0f, ndc_point.x);
+					if (ndc_point.y < pMin.y)
+						pMin.y = max(-1.0f, ndc_point.y);
+					if (ndc_point.y > pMax.y)
+						pMax.y = min(1.0f, ndc_point.y);
+				}
+
+				//m_DebugRenderer.DrawLine(RVec3(pMin.x, pMin.y, 0), RVec3(pMin.x, pMax.y, 0));
+				//m_DebugRenderer.DrawLine(RVec3(pMin.x, pMax.y, 0), RVec3(pMax.x, pMax.y, 0));
+				//m_DebugRenderer.DrawLine(RVec3(pMax.x, pMax.y, 0), RVec3(pMax.x, pMin.y, 0));
+				//m_DebugRenderer.DrawLine(RVec3(pMax.x, pMin.y, 0), RVec3(pMin.x, pMin.y, 0));
+
+				pMin.x = (pMin.x + 1.0f) * 0.5f * RRenderer.GetClientWidth();
+				pMin.y = (-pMin.y + 1.0f) * 0.5f * RRenderer.GetClientHeight();
+				pMax.x = (pMax.x + 1.0f) * 0.5f * RRenderer.GetClientWidth();
+				pMax.y = (-pMax.y + 1.0f) * 0.5f * RRenderer.GetClientHeight();
 			}
 
-			//m_DebugRenderer.DrawLine(RVec3(pMin.x, pMin.y, 0), RVec3(pMin.x, pMax.y, 0));
-			//m_DebugRenderer.DrawLine(RVec3(pMin.x, pMax.y, 0), RVec3(pMax.x, pMax.y, 0));
-			//m_DebugRenderer.DrawLine(RVec3(pMax.x, pMax.y, 0), RVec3(pMax.x, pMin.y, 0));
-			//m_DebugRenderer.DrawLine(RVec3(pMax.x, pMin.y, 0), RVec3(pMin.x, pMin.y, 0));
+			if (pMin.x > pMax.x || pMax.y > pMin.y)
+				continue;
 
-			pMin.x = (pMin.x + 1.0f) * 0.5f * RRenderer.GetClientWidth();
-			pMin.y = (-pMin.y + 1.0f) * 0.5f * RRenderer.GetClientHeight();
-			pMax.x = (pMax.x + 1.0f) * 0.5f * RRenderer.GetClientWidth();
-			pMax.y = (-pMax.y + 1.0f) * 0.5f * RRenderer.GetClientHeight();
+			if (RCollision::TestAabbInsideFrustum(frustum, aabb))
+			{
+				//m_DebugRenderer.DrawSphere(pos, m_PointLights[i].r, m_PointLights[i].color);
+
+				RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Scissor]);
+
+				D3D11_RECT rect;
+				rect.left = (LONG)pMin.x;
+				rect.top = (LONG)pMax.y;
+				rect.right = (LONG)pMax.x;
+				rect.bottom = (LONG)pMin.y;
+
+				RRenderer.D3DImmediateContext()->RSSetScissorRects(1, &rect);
+
+				SHADER_DEFERRED_POINT_LIGHT_BUFFER cbDeferredPointLight;
+
+				cbDeferredPointLight.DeferredPointLight.PosAndRadius = RVec4(pos, m_PointLights[i].r);
+				cbDeferredPointLight.DeferredPointLight.Color = RVec4((float*)&m_PointLights[i].color);
+
+				m_cbDeferredPointLight.UpdateContent(&cbDeferredPointLight);
+				m_cbDeferredPointLight.ApplyToShaders();
+
+				RRenderer.Clear(false, RColor(0, 0, 0), true);
+				m_PostProcessor.Draw(PPE_DeferredPointLightPass);
+			}
 		}
 
-		if (pMin.x > pMax.x || pMax.y > pMin.y)
-			continue;
+		// Disable scissor test
+		RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
 
-		if (RCollision::TestAabbInsideFrustum(frustum, aabb))
+		if (m_EnableSSR)
 		{
-			//m_DebugRenderer.DrawSphere(pos, m_PointLights[i].r, m_PointLights[i].color);
+			RRenderer.D3DImmediateContext()->GenerateMips(m_ScenePassBuffer.SRV);
 
-			RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Scissor]);
+			RRenderer.SetRenderTargets();
+			RRenderer.SetBlendState(Blend_Opaque);
 
-			D3D11_RECT rect;
-			rect.left	= (LONG)pMin.x;
-			rect.top	= (LONG)pMax.y;
-			rect.right	= (LONG)pMax.x;
-			rect.bottom	= (LONG)pMin.y;
-
-			RRenderer.D3DImmediateContext()->RSSetScissorRects(1, &rect);
-
-			SHADER_DEFERRED_POINT_LIGHT_BUFFER cbDeferredPointLight;
-			
-			cbDeferredPointLight.DeferredPointLight.PosAndRadius = RVec4(pos, m_PointLights[i].r);
-			cbDeferredPointLight.DeferredPointLight.Color = RVec4((float*)&m_PointLights[i].color);
-
-			m_cbDeferredPointLight.UpdateContent(&cbDeferredPointLight);
-			m_cbDeferredPointLight.ApplyToShaders();
+			RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_ScenePassBuffer.SRV);
+			RRenderer.D3DImmediateContext()->PSSetShaderResources(4, 1, m_EnvCube->GetPtrSRV());
 
 			RRenderer.Clear(false, RColor(0, 0, 0), true);
-			m_PostProcessor.Draw(PPE_DeferredPointLightPass);
+			m_PostProcessor.Draw(PPE_ScreenSpaceRayTracing);
 		}
+
+		ID3D11ShaderResourceView* nullSRV[DeferredBuffer_Count] = { nullptr };
+		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, DeferredBuffer_Count, nullSRV);
 	}
-
-	// Disable scissor test
-	RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
-
-	if (m_EnableSSR)
+	else
 	{
-		RRenderer.SetRenderTargets();
-		RRenderer.SetBlendState(Blend_Opaque);
-
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_ScenePassBuffer.SRV);
-
-		RRenderer.Clear(false, RColor(0, 0, 0), true);
-		m_PostProcessor.Draw(PPE_ScreenSpaceRayTracing);
+		m_Scene.Render(&frustum);
 	}
-
-	ID3D11ShaderResourceView* nullSRV[DeferredBuffer_Count] = { nullptr };
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, DeferredBuffer_Count, nullSRV);
-#endif
 
 	RRenderer.Clear(false, RColor(0, 0, 0));
 
