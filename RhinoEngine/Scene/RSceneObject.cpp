@@ -38,7 +38,7 @@ static int ScriptFunc_Swing(lua_State* state)
 {
 	int n = lua_gettop(state);
 
-	if (n < 5)
+	if (n < 7)
 		return 0;
 
 	RSceneObject* obj = static_cast<RSceneObject*>(lua_touserdata(state, 1));
@@ -71,10 +71,15 @@ static int ScriptFunc_Rotate(lua_State* state)
 	axis.y = (float)lua_tonumber(state, 3);
 	axis.z = (float)lua_tonumber(state, 4);
 
+	float scale = 1.0f;
+	if (n >= 5)
+		scale = (float)lua_tonumber(state, 5);
+	axis *= REngine().GetTimer().TotalTime() * scale;
+
 	RMatrix4 transform = obj->GetNodeTransform();
-	obj->SetRotation(transform * RMatrix4::CreateZAxisRotation(axis.z) *
-								 RMatrix4::CreateYAxisRotation(axis.y) *
-								 RMatrix4::CreateXAxisRotation(axis.x));
+	obj->SetRotation(RMatrix4::CreateZAxisRotation(axis.z) *
+					 RMatrix4::CreateYAxisRotation(axis.y) *
+					 RMatrix4::CreateXAxisRotation(axis.x));
 
 	return 0;
 }
@@ -84,7 +89,7 @@ void RSceneObject::RegisterScriptFunctions()
 {
 	RScript.RegisterFunction("MoveTo",	ScriptFunc_MoveTo,	{ { SPT_Float, SPT_Float, SPT_Float } });
 	RScript.RegisterFunction("Swing",	ScriptFunc_Swing,	{ { SPT_Float, SPT_Float, SPT_Float, SPT_Float, SPT_Float, SPT_Float, SPT_Float } });
-	RScript.RegisterFunction("Rotate",	ScriptFunc_Rotate,	{ { SPT_Float, SPT_Float, SPT_Float } });
+	RScript.RegisterFunction("Rotate",	ScriptFunc_Rotate,	{ { SPT_Float, SPT_Float, SPT_Float, SPT_Float } });
 }
 
 RSceneObject::RSceneObject()
