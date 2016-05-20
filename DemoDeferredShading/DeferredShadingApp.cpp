@@ -194,7 +194,8 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	SHADER_GLOBAL_BUFFER cbScreen;
 	ZeroMemory(&cbScreen, sizeof(cbScreen));
 
-	cbScreen.ScreenSize = RVec2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());
+	cbScreen.ScreenSize = RVec4((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight(),
+								1.0f / (float)RRenderer.GetClientWidth(), 1.0f / (float)RRenderer.GetClientHeight());
 	cbScreen.ClipPlaneNearFar = RVec2(m_Camera.GetNearPlane(), m_Camera.GetFarPlane());
 
 	RMatrix4 texMat = RMatrix4(

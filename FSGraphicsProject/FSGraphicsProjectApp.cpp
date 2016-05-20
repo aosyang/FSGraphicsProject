@@ -652,7 +652,8 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	SHADER_GLOBAL_BUFFER cbScreen;
 	ZeroMemory(&cbScreen, sizeof(cbScreen));
 
-	cbScreen.ScreenSize = RVec2((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight());
+	cbScreen.ScreenSize = RVec4((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight(),
+								1.0f / (float)RRenderer.GetClientWidth(), 1.0f / (float)RRenderer.GetClientHeight());
 	cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection() ? 1 : (m_EnabledPostProcessor == 1);
 
 	m_cbGlobal.UpdateContent(&cbScreen);

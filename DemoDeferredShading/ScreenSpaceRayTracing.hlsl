@@ -115,13 +115,11 @@ bool traceScreenSpaceRay(
 					  (ClipPlaneNearFar.x - csOrig.z) / csDir.z : cb_maxDistance;
 	float3 csEndPoint = csOrig + csDir * rayLength;
 
-	float4x4 viewToTextureSpaceMatrix = ViewToTextureSpace;
-
 	// Project into homogeneous clip space
-	float4 H0 = mul(float4(csOrig, 1.0f), viewToTextureSpaceMatrix);
-	H0.xy *= ScreenSize;
-	float4 H1 = mul(float4(csEndPoint, 1.0f), viewToTextureSpaceMatrix);
-	H1.xy *= ScreenSize;
+	float4 H0 = mul(float4(csOrig, 1.0f), ViewToTextureSpace);
+	H0.xy *= ScreenSize.xy;
+	float4 H1 = mul(float4(csEndPoint, 1.0f), ViewToTextureSpace);
+	H1.xy *= ScreenSize.xy;
 	float k0 = 1.0f / H0.w;
 	float k1 = 1.0f / H1.w;
 
@@ -214,8 +212,6 @@ bool traceScreenSpaceRay(
 float4 main(VertexOut pIn) : SV_TARGET
 {
 	int3 loadIndices = int3(pIn.PosH.xy, 0);
-	float texelWidth = 1.0 / ScreenSize.x;
-	float texelHeight = 1.0 / ScreenSize.y;
 	float4 Final = ScreenTexture.Sample(Sampler, pIn.UV);
 
 	float3 normalVS = NormalTexture.Load(loadIndices).xyz;
@@ -251,7 +247,7 @@ float4 main(VertexOut pIn) : SV_TARGET
 	depth = PosDepthTexture.Load(int3(hitPixel, 0)).w;
 
 	// move hit pixel from pixel position to UVs
-	hitPixel *= float2(texelWidth, texelHeight);
+	hitPixel *= ScreenSize.zw;
 	if (hitPixel.x > 1.0f || hitPixel.x < 0.0f || hitPixel.y > 1.0f || hitPixel.y < 0.0f)
 	{
 		intersection = false;

@@ -20,9 +20,9 @@ int			cascadedShadowIndex;
 CONSTANT_BUFFER_END
 
 CONSTANT_BUFFER_BEGIN(SHADER_GLOBAL_BUFFER, b1)
-float2				ScreenSize;
-float2				ClipPlaneNearFar;
+float4				ScreenSize;					// z and w for texel size
 float4x4			ViewToTextureSpace;			// For screen space reflection
+float2				ClipPlaneNearFar;
 bool				UseGammaCorrection;
 float				TotalTime;
 CONSTANT_BUFFER_END
