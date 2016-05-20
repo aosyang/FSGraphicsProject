@@ -39,6 +39,8 @@ using namespace std;
 #include "RenderSystem/d3dUtil.h"
 #pragma comment(lib, "d3dcompiler.lib")
 
+#include "../lua5.3/lua.hpp"
+
 #include "Core/RVector.h"
 #include "Core/RMatrix.h"
 
@@ -58,6 +60,7 @@ class RBaseResource;
 #include "Core/RInput.h"
 #include "Core/IApp.h"
 #include "Core/MathHelper.h"
+#include "Core/RScriptSystem.h"
 
 #include "../Shaders/ConstBufferVS.h"
 #include "../Shaders/ConstBufferPS.h"

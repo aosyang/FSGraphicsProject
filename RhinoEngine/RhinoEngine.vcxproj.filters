@@ -119,6 +119,9 @@
     <ClInclude Include="..\Shaders\ConstBufferCommon.h">
       <Filter>Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="Core\RScriptSystem.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -204,6 +207,9 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\RDebugMenu.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\RScriptSystem.cpp">
       <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>

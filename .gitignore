@@ -22,6 +22,9 @@
 /RhinoEngine/x64/
 /RhinoLevelEditor/bin/
 /RhinoLevelEditor/obj/
+/lua5.3/[Dd]ebug/
+/lua5.3/[Rr]elease/
+/lua5.3/x64/
 *.sdf
 *.suo
 *.user

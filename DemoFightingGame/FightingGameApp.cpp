@@ -15,14 +15,19 @@ FightingGameApp::FightingGameApp()
 FightingGameApp::~FightingGameApp()
 {
 	SAFE_DELETE(m_Player);
+	SAFE_DELETE(m_AIPlayer);
 	m_Scene.Release();
 	m_DebugRenderer.Release();
 	RShaderManager::Instance().UnloadAllShaders();
 	RResourceManager::Instance().Destroy();
+	RScript.Shutdown();
 }
 
 bool FightingGameApp::Initialize()
 {
+	RScript.Initialize();
+	RScript.Start();
+
 	RResourceManager::Instance().Initialize();
 	//RResourceManager::Instance().LoadAllResources();
 	RShaderManager::Instance().LoadShaders("../Shaders");
@@ -39,10 +44,11 @@ bool FightingGameApp::Initialize()
 	m_Camera.SetTransform(cameraMatrix);
 	m_Camera.SetupView(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
 
-	//m_Player = (RSMeshObject*)m_Scene.FindObject("Player");
-	//if (m_Player)
+	//RSceneObject* player = m_Scene.FindObject("Player");
+	//for (UINT i = 0; i < m_Scene.GetSceneObjects().size(); i++)
 	//{
-	//	m_Scene.RemoveObjectFromScene(m_Player);
+	//	RSceneObject* obj = m_Scene.GetSceneObjects()[i];
+	//	obj->SetScript("UpdateObject");
 	//}
 
 	m_Player = new PlayerController();
@@ -359,6 +365,8 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	moveVec += RVec3(0, -1000.0f * timer.DeltaTime(), 0);
 	m_AIPlayer->UpdateMovement(timer, moveVec);
 	m_AIPlayer->PostUpdate(timer);
+
+	RScript.UpdateScriptableObjects();
 }
 
 void FightingGameApp::RenderScene()

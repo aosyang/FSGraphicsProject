@@ -55,6 +55,7 @@
     <ClInclude Include="Core\RInput.h" />
     <ClInclude Include="Core\RMatrix.h" />
     <ClInclude Include="Core\RRay.h" />
+    <ClInclude Include="Core\RScriptSystem.h" />
     <ClInclude Include="Core\RSerializer.h" />
     <ClInclude Include="Core\RSingleton.h" />
     <ClInclude Include="Core\RTimer.h" />
@@ -91,6 +92,7 @@
     <ClCompile Include="Core\RInput.cpp" />
     <ClCompile Include="Core\RMatrix.cpp" />
     <ClCompile Include="Core\RRay.cpp" />
+    <ClCompile Include="Core\RScriptSystem.cpp" />
     <ClCompile Include="Core\RSerializer.cpp" />
     <ClCompile Include="Core\RTimer.cpp" />
     <ClCompile Include="RenderSystem\DDSTextureLoader.cpp" />
@@ -603,6 +605,11 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">main</EntryPointName>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">main</EntryPointName>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\lua5.3\lua5.3.vcxproj">
+      <Project>{94a77dcc-d35f-410f-96eb-409166a5a23b}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{609BE637-9CC8-4ABA-9308-3FCC5D0B43EC}</ProjectGuid>

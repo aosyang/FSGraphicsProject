@@ -200,6 +200,8 @@ void RScene::LoadFromFile(const char* filename)
 			elem_obj = elem_obj->NextSiblingElement();
 		}
 	}
+
+	delete doc;
 }
 
 void RScene::SaveToFile(const char* filename)

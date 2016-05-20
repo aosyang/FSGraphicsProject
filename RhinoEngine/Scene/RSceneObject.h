@@ -18,6 +18,8 @@ enum SceneObjectType
 class RSceneObject
 {
 public:
+	static void RegisterScriptFunctions();
+
 	RSceneObject();
 	virtual ~RSceneObject();
 
@@ -46,10 +48,13 @@ public:
 	virtual void Draw() {}
 	virtual void DrawDepthPass() {}
 
+	void SetScript(const char* script)	{ m_Script = string(script); }
+	const char* GetScript() const		{ return m_Script.c_str(); }
 protected:
 	string		m_Name;
 	RMatrix4	m_NodeTransform;
 	RScene*		m_Scene;
+	string		m_Script;
 };
 
 #endif

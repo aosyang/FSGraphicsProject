@@ -8,15 +8,41 @@
 
 #include "RSceneObject.h"
 
+static int MoveTo(lua_State* state)
+{
+	int n = lua_gettop(state);
+
+	if (n < 4)
+		return 0;
+
+	RSceneObject* obj = static_cast<RSceneObject*>(lua_touserdata(state, 1));
+	RVec3 target;
+	target.x = (float)lua_tonumber(state, 2);
+	target.y = (float)lua_tonumber(state, 3);
+	target.z = (float)lua_tonumber(state, 4);
+
+	RVec3 rel = (target - obj->GetPosition()).GetNormalizedVec3();
+	if (rel.SquaredMagitude() > 0.0f)
+		obj->Translate(rel);
+
+	return 0;
+}
+
+void RSceneObject::RegisterScriptFunctions()
+{
+	RScript.RegisterFunction("MoveTo", MoveTo);
+}
+
 RSceneObject::RSceneObject()
 	: m_Scene(nullptr)
 {
 	m_NodeTransform = RMatrix4::IDENTITY;
+	RScript.RegisterScriptableObject(this);
 }
 
 RSceneObject::~RSceneObject()
 {
-
+	RScript.UnregisterScriptableObject(this);
 }
 
 const RMatrix4& RSceneObject::GetNodeTransform() const

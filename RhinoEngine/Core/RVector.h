@@ -159,12 +159,13 @@ public:
 	RVec3 GetNormalizedVec3() const
 	{
 		float mag = Magnitude();
-		RVec3 n;
+		RVec3 n = *this;
 		if (!FLT_EQUAL_ZERO(mag))
 		{
-			n.x = x / mag;
-			n.y = y / mag;
-			n.z = z / mag;
+			float one_over_mag = 1.0f / mag;
+			n.x *= one_over_mag;
+			n.y *= one_over_mag;
+			n.z *= one_over_mag;
 		}
 		return n;
 	}
