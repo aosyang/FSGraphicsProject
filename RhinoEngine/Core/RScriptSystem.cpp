@@ -59,9 +59,10 @@ bool RScriptSystem::Start()
 	return true;
 }
 
-void RScriptSystem::RegisterFunction(const char* func_name, lua_CFunction func)
+void RScriptSystem::RegisterFunction(const char* func_name, lua_CFunction func, ScriptParams paramTypes)
 {
 	lua_register(m_LuaState, func_name, func);
+	m_ScriptParams[func_name] = paramTypes;
 }
 
 void RScriptSystem::RegisterScriptableObject(RSceneObject* obj)
@@ -83,15 +84,39 @@ void RScriptSystem::UpdateScriptableObjects()
 {
 	for (vector<RSceneObject*>::iterator iter = m_ScriptableObjects.begin(); iter != m_ScriptableObjects.end(); iter++)
 	{
-		const char* script = (*iter)->GetScript();
-		if (!script || script[0] == 0)
+		if ((*iter)->GetScript() == "")
 			continue;
 
-		lua_getglobal(m_LuaState, script);
+		const vector<string>& parsedCmds = (*iter)->GetParsedScript();
+		if (parsedCmds.empty())
+			continue;
+
+		//const ScriptParams& params = m_ScriptParams[parsedCmds[0]];
+
+		lua_getglobal(m_LuaState, parsedCmds[0].c_str());
 		if (lua_isfunction(m_LuaState, -1))
 		{
 			lua_pushlightuserdata(m_LuaState, *iter);
-			lua_pcall(m_LuaState, 1, 0, 0);
+
+			int paramCount = 0;
+			for (UINT i = 0; i < parsedCmds.size() - 1; i++)
+			{
+				//switch (params.type[i])
+				//{
+				//case SPT_Float:
+					lua_pushnumber(m_LuaState, atof(parsedCmds[i + 1].c_str()));
+					paramCount++;
+				//	break;
+				//default:
+				//	break;
+				//}
+			}
+
+			int result = lua_pcall(m_LuaState, paramCount + 1, 0, 0);
+			if (result != LUA_OK)
+			{
+				print_error(m_LuaState);
+			}
 		}
 	}
 }

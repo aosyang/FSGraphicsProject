@@ -9,6 +9,17 @@
 
 class RSceneObject;
 
+enum ScriptParamType
+{
+	SPT_None,
+	SPT_Float,
+};
+
+struct ScriptParams
+{
+	ScriptParamType type[10];
+};
+
 class RScriptSystem : public RSingleton<RScriptSystem>
 {
 	friend class RSingleton<RScriptSystem>;
@@ -17,7 +28,7 @@ public:
 	bool Initialize();
 	void Shutdown();
 
-	void RegisterFunction(const char* func_name, lua_CFunction func);
+	void RegisterFunction(const char* func_name, lua_CFunction func, ScriptParams paramTypes);
 	bool Start();
 
 	void RegisterScriptableObject(RSceneObject* obj);
@@ -26,6 +37,7 @@ public:
 private:
 	lua_State*					m_LuaState;
 	vector<RSceneObject*>		m_ScriptableObjects;
+	map<string, ScriptParams>	m_ScriptParams;
 };
 
 #define RScript RScriptSystem::Instance()

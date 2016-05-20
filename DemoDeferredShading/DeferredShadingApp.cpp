@@ -33,6 +33,7 @@ DeferredShadingApp::~DeferredShadingApp()
 	m_Scene.Release();
 
 	m_PostProcessor.Release();
+	RScript.Shutdown();
 	RShaderManager::Instance().UnloadAllShaders();
 	RResourceManager::Instance().Destroy();
 }
@@ -41,10 +42,12 @@ bool DeferredShadingApp::Initialize()
 {
 	RShaderManager::Instance().LoadShaders("../Shaders");
 	RResourceManager::Instance().Initialize();
+	RScript.Initialize();
+	RScript.Start();
 	m_PostProcessor.Initialize();
 
 	m_Scene.Initialize();
-	m_Scene.LoadFromFile("../Assets/DeferredScene.rmap");
+	m_Scene.LoadFromFile("../Assets/ScriptTestMap.rmap");
 
 	m_Camera.SetPosition(RVec3(-375, 1385, 1200));
 	m_Camera.SetupView(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
@@ -202,6 +205,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 		);
 	cbScreen.ViewToTextureSpace = cbScene.projMatrix * texMat;
 	cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();
+	cbScreen.TotalTime = REngine::GetTimer().TotalTime();
 
 	m_Scene.cbGlobal.UpdateContent(&cbScreen);
 	m_Scene.cbGlobal.ApplyToShaders();
@@ -214,6 +218,8 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	if (RInput.GetBufferedKeyState(VK_F5) == BKS_Pressed)
 		m_DebugMenu.SetEnabled(!m_DebugMenu.GetEnabled());
 	m_DebugMenu.Update();
+
+	RScript.UpdateScriptableObjects();
 }
 
 void DeferredShadingApp::RenderScene()
@@ -375,7 +381,7 @@ void DeferredShadingApp::RenderScene()
 
 		if (m_EnableSSR)
 		{
-			RRenderer.D3DImmediateContext()->GenerateMips(m_ScenePassBuffer.SRV);
+			//RRenderer.D3DImmediateContext()->GenerateMips(m_ScenePassBuffer.SRV);
 
 			RRenderer.SetRenderTargets();
 			RRenderer.SetBlendState(Blend_Opaque);

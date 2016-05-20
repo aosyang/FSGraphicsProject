@@ -24,6 +24,7 @@ float2				ScreenSize;
 float2				ClipPlaneNearFar;
 float4x4			ViewToTextureSpace;			// For screen space reflection
 bool				UseGammaCorrection;
+float				TotalTime;
 CONSTANT_BUFFER_END
 
 

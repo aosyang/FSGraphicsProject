@@ -124,6 +124,13 @@ namespace EngineManagedWrapper {
 			void set(String^ value) { m_SceneObject->SetPosition(StringToVec3(value)); }
 		};
 
+		[Category("Scene Object")]
+		property String^ Script
+		{
+			String^ get()			{ return gcnew String(m_SceneObject->GetScript().c_str()); }
+			void set(String^ value)	{ m_SceneObject->SetScript(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer())); }
+		}
+
 	private:
 		String^ Vec3ToString(const RVec3& vec);
 		RVec3 StringToVec3(String^ str);

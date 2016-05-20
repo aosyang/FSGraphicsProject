@@ -118,6 +118,7 @@ void RScene::LoadFromFile(const char* filename)
 		while (elem_obj)
 		{
 			const char* name = elem_obj->Attribute("Name");
+			const char* script = elem_obj->Attribute("Script");
 
 			tinyxml2::XMLElement* elem_transform = elem_obj->FirstChildElement("Transform");
 			RMatrix4 transform;
@@ -129,6 +130,8 @@ void RScene::LoadFromFile(const char* filename)
 				if (ss.peek() == ',')
 					ss.ignore();
 			}
+
+			RSceneObject* sceneObj = nullptr;
 
 			string obj_type = elem_obj->Attribute("Type");
 			if (obj_type == "MeshObject")
@@ -143,8 +146,7 @@ void RScene::LoadFromFile(const char* filename)
 
 				RSMeshObject* meshObj = CreateMeshObject(resPath);
 				meshObj->SetTransform(transform);
-				if (name)
-					meshObj->SetName(name);
+				sceneObj = meshObj;
 
 				tinyxml2::XMLElement* elem_mat = elem_obj->FirstChildElement("Material");
 				vector<RMaterial> xmlMaterials;
@@ -197,6 +199,12 @@ void RScene::LoadFromFile(const char* filename)
 				}
 			}
 
+			if (name)
+				sceneObj->SetName(name);
+
+			if (script)
+				sceneObj->SetScript(script);
+
 			elem_obj = elem_obj->NextSiblingElement();
 		}
 	}
@@ -216,6 +224,11 @@ void RScene::SaveToFile(const char* filename)
 		if ((*iter)->GetName() != "")
 		{
 			elem_obj->SetAttribute("Name", (*iter)->GetName().c_str());
+		}
+
+		if ((*iter)->GetScript() != "")
+		{
+			elem_obj->SetAttribute("Script", (*iter)->GetScript().c_str());
 		}
 
 		if ((*iter)->GetType() == SO_MeshObject)

@@ -48,13 +48,15 @@ public:
 	virtual void Draw() {}
 	virtual void DrawDepthPass() {}
 
-	void SetScript(const char* script)	{ m_Script = string(script); }
-	const char* GetScript() const		{ return m_Script.c_str(); }
+	void SetScript(const string& script)	{ m_Script = script; }
+	string GetScript() const				{ return m_Script; }
+	const vector<string>& GetParsedScript();
 protected:
-	string		m_Name;
-	RMatrix4	m_NodeTransform;
-	RScene*		m_Scene;
-	string		m_Script;
+	string			m_Name;
+	RMatrix4		m_NodeTransform;
+	RScene*			m_Scene;
+	string			m_Script;
+	vector<string>	m_ParsedScript;
 };
 
 #endif

@@ -35,7 +35,7 @@ bool FightingGameApp::Initialize()
 	m_DebugRenderer.Initialize();
 
 	m_Scene.Initialize();
-	m_Scene.LoadFromFile("../Assets/TestMap.rmap");
+	m_Scene.LoadFromFile("../Assets/ScriptTestMap.rmap");
 
 	m_ShadowMap.Initialize(1024, 1024);
 
