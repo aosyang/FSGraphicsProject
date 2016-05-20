@@ -94,7 +94,7 @@ bool DeferredShadingApp::Initialize()
 	cbSSR.cb_maxSteps = 300.0f;
 	cbSSR.cb_maxDistance = 100.0f;
 
-	m_EnvCube = RResourceManager::Instance().FindTexture("../Assets/powderpeak.dds");
+	m_EnvCube = RResourceManager::Instance().LoadDDSTexture("../Assets/powderpeak.dds");
 
 	return true;
 }
