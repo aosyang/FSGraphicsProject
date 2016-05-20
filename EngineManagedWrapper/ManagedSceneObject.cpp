@@ -3,8 +3,8 @@
 
 namespace EngineManagedWrapper {
 
-	ManagedMaterial::ManagedMaterial(RMaterial* mat)
-		: material(mat)
+	ManagedMaterial::ManagedMaterial(RMaterial* mat, const char* elemName)
+		: material(mat), meshElementName(gcnew String(elemName))
 	{
 		
 	}
@@ -13,7 +13,7 @@ namespace EngineManagedWrapper {
 	{
 		for (int i = 0; i < obj->GetMeshElementCount(); i++)
 		{
-			materials.Add(gcnew ManagedMaterial(obj->GetMaterial(i)));
+			materials.Add(gcnew ManagedMaterial(obj->GetMaterial(i), obj->GetMesh()->GetMeshElements()[i].GetName().c_str()));
 		}
 	}
 
@@ -72,12 +72,12 @@ namespace EngineManagedWrapper {
 		List<ManagedMaterial^>^ matList = gcnew List<ManagedMaterial^>();
 		for (int i = 0; i < GetMeshObject()->GetMeshElementCount(); i++)
 		{
-			matList->Add(gcnew ManagedMaterial(GetMeshObject()->GetMaterial(i)));
+			matList->Add(gcnew ManagedMaterial(GetMeshObject()->GetMaterial(i), GetMeshObject()->GetMesh()->GetMeshElements()[i].GetName().c_str()));
 		}
 		return matList;
 	}
 
-	String^ ManagedMeshObject::VertexComponent::get()
+	String^ ManagedMeshObject::VertexComponents::get()
 	{
 		RMesh* mesh = GetMeshObject()->GetMesh();
 		if (!mesh || !mesh->GetMeshElementCount())

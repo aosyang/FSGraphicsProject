@@ -13,8 +13,9 @@ namespace EngineManagedWrapper {
 	public ref class ManagedMaterial
 	{
 		RMaterial* material;
+		String^ meshElementName;
 	public:
-		ManagedMaterial(RMaterial* mat);
+		ManagedMaterial(RMaterial* mat, const char* elemName);
 
 		property int TextureCount
 		{
@@ -29,6 +30,7 @@ namespace EngineManagedWrapper {
 		}
 
 #define DECLARE_TEXTURE_PROPERTY(n) \
+		[DisplayName("Texture Slot "#n)] \
 		property String^ Texture##n \
 		{ \
 			String^ get()			{ return material->Textures[n] ? gcnew String(material->Textures[n]->GetPath().c_str()) : gcnew String(""); } \
@@ -43,6 +45,15 @@ namespace EngineManagedWrapper {
 		DECLARE_TEXTURE_PROPERTY(5)
 		DECLARE_TEXTURE_PROPERTY(6)
 		DECLARE_TEXTURE_PROPERTY(7)
+
+		String^ ToString() override
+		{
+			String^ str = meshElementName + ": ";
+			if (material->Shader)
+				str += gcnew String(material->Shader->GetName().c_str());
+
+			return str;
+		}
 	};
 
 
@@ -99,12 +110,14 @@ namespace EngineManagedWrapper {
 
 		bool IsValid();
 
+		[Category("Scene Object")]
 		property String^ Name
 		{
 			String^ get()           { return gcnew String(m_SceneObject->GetName().c_str()); }
 			void set(String^ value) { m_SceneObject->SetName(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer())); }
 		};
 
+		[Category("Scene Object")]
 		property String^ Position
 		{
 			String^ get()           { return Vec3ToString(m_SceneObject->GetPosition()); }
@@ -123,22 +136,29 @@ namespace EngineManagedWrapper {
 	public:
 		ManagedMeshObject(RSceneObject* obj);
 
+		[Category("Mesh Object")]
+		[DisplayName("Mesh Asset")]
 		property String^ Asset
 		{
 			String^ get();
 			void set(String^ value);
 		};
 
-		property String^ VertexComponent
+		[Category("Mesh Object")]
+		[DisplayName("Vertex Components")]
+		property String^ VertexComponents
 		{
 			String^ get();
 		}
 
+		[Category("Mesh Object")]
 		property List<ManagedMaterial^>^ Materials
 		{
 			List<ManagedMaterial^>^ get();
 		}
 
+		[Category("Mesh Object")]
+		[DisplayName("Submesh Count")]
 		property int SubMeshCount
 		{
 			int get()				{ return GetMeshObject()->GetMeshElementCount(); }
