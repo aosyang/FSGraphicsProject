@@ -390,6 +390,27 @@ void RRenderSystem::SetSamplerState(int slot, SamplerState state)
 	RRenderer.D3DImmediateContext()->PSSetSamplers(slot, 1, &m_SamplerState[state]);
 }
 
+void RRenderSystem::SetVertexShader(ID3D11VertexShader* vertexShader)
+{
+	static ID3D11VertexShader* currentVertexShader = nullptr;
+	if (currentVertexShader != vertexShader)
+		RRenderer.D3DImmediateContext()->VSSetShader(vertexShader, nullptr, 0);
+}
+
+void RRenderSystem::SetPixelShader(ID3D11PixelShader* pixelShader)
+{
+	static ID3D11PixelShader* currentPixelShader = nullptr;
+	if (currentPixelShader != pixelShader)
+		RRenderer.D3DImmediateContext()->PSSetShader(pixelShader, nullptr, 0);
+}
+
+void RRenderSystem::SetGeometryShader(ID3D11GeometryShader* geometryShader)
+{
+	static ID3D11GeometryShader* currentGeometryShader = nullptr;
+	if (currentGeometryShader != geometryShader)
+		RRenderer.D3DImmediateContext()->GSSetShader(geometryShader, nullptr, 0);
+}
+
 void RRenderSystem::CreateRenderTargetView()
 {
 	ID3D11Texture2D* backBuffer;

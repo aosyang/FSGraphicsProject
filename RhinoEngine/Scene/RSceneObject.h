@@ -39,7 +39,7 @@ public:
 	void SetPosition(const RVec3& pos);
 	RVec3 GetPosition() const;
 
-	void LookAt(const RVec3 target);
+	void LookAt(const RVec3& target, const RVec3& world_up = RVec3(0, 1, 0));
 
 	void Translate(const RVec3& v);
 	void TranslateLocal(const RVec3& v);

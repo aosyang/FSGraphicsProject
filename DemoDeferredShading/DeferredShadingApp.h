@@ -46,6 +46,39 @@ struct DepthStencilBuffer
 	}
 };
 
+struct CubeDepthBuffer
+{
+	ID3D11Texture2D*			Buffer;
+	ID3D11RenderTargetView*		View[6];
+	ID3D11ShaderResourceView*	SRV;
+	ID3D11Texture2D*			DepthBuffer;
+	ID3D11DepthStencilView*		DepthView[6];
+	ID3D11ShaderResourceView*	DepthSRV;
+
+	CubeDepthBuffer()
+		: Buffer(nullptr), SRV(nullptr), DepthBuffer(nullptr), DepthSRV(nullptr)
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			View[i] = nullptr;
+			DepthView[i] = nullptr;
+		}
+	}
+
+	void Release()
+	{
+		SAFE_RELEASE(Buffer);
+		SAFE_RELEASE(SRV);
+		for (int i = 0; i < 6; i++)
+		{
+			SAFE_RELEASE(View[i]);
+			SAFE_RELEASE(DepthView[i]);
+		}
+		SAFE_RELEASE(DepthBuffer);
+		SAFE_RELEASE(DepthSRV);
+	}
+};
+
 enum EDeferredBuffer
 {
 	DB_Color,
@@ -63,9 +96,10 @@ struct PointLight
 	RColor color;
 	RVec3 sin_factor;
 	RVec3 sin_offset;
+	bool castShadow;
 };
 
-#define MAX_LIGHT_COUNT 500
+#define MAX_LIGHT_COUNT 10
 
 enum ERasterizerState
 {
@@ -93,6 +127,9 @@ private:
 
 	DeferredRenderBuffer CreateRenderTarget(DXGI_FORMAT format, const char* debugResourceName=nullptr);
 	DepthStencilBuffer CreateDepthStencilBuffer();
+	CubeDepthBuffer CreateCubeDepthBuffer();
+
+	void RenderPointLightCubemapDepth(const RVec3& position, float radius);
 
 	RCamera						m_Camera;
 	float						m_CamPitch, m_CamYaw;
@@ -119,8 +156,11 @@ private:
 
 	bool						m_EnableDeferredShading;
 	bool						m_EnableSSR;
+	bool						m_EnablePointLightShadow;
 
 	RTexture*					m_EnvCube;
+	CubeDepthBuffer				m_CubeDepthBuffer;
+	RSkybox						m_Skybox;
 };
 
 #endif

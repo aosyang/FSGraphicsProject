@@ -24,4 +24,11 @@ float LinearizeDepth(float z)
 	return 1.0 / (c0 * z + c1);
 }
 
+float LinearizeDepth(float near, float far, float z)
+{
+	float c1 = far / near;
+	float c0 = 1.0 - c1;
+	return 1.0 / (c0 * z + c1);
+}
+
 #endif

@@ -338,10 +338,13 @@ void RScene::Render(const RFrustum* pFrustum)
 	}
 }
 
-void RScene::RenderDepthPass()
+void RScene::RenderDepthPass(const RFrustum* pFrustum)
 {
 	for (vector<RSceneObject*>::iterator iter = m_SceneObjects.begin(); iter != m_SceneObjects.end(); iter++)
 	{
+		if (pFrustum && !RCollision::TestAabbInsideFrustum(*pFrustum, (*iter)->GetAabb()))
+			continue;
+
 		SHADER_OBJECT_BUFFER cbObject;
 		cbObject.worldMatrix = (*iter)->GetNodeTransform();
 		cbPerObject.UpdateContent(&cbObject);

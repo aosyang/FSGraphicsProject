@@ -404,7 +404,8 @@ void FightingGameApp::RenderScene()
 
 		if (pass == 0)
 		{
-			m_Scene.RenderDepthPass();
+			RFrustum frustum = m_ShadowMap.GetFrustum();
+			m_Scene.RenderDepthPass(&frustum);
 		}
 		else
 		{

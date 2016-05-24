@@ -87,9 +87,9 @@ void RPostProcessor::SetupRenderTarget()
 
 void RPostProcessor::Draw(PostProcessingEffect effect)
 {
-	RRenderer.D3DImmediateContext()->PSSetShader(m_PPPixelShader[effect], nullptr, 0);
-	RRenderer.D3DImmediateContext()->VSSetShader(m_PPVertexShader, nullptr, 0);
-	RRenderer.D3DImmediateContext()->GSSetShader(nullptr, nullptr, 0);
+	RRenderer.SetPixelShader(m_PPPixelShader[effect]);
+	RRenderer.SetVertexShader(m_PPVertexShader);
+	RRenderer.SetGeometryShader(nullptr);
 	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_RTSRV);
 
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);

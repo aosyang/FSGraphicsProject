@@ -64,6 +64,10 @@ public:
 
 	void SetDefferedShading(bool deferred) { m_bIsDeferred = deferred; }
 	bool UseDeferredShading() const { return m_bIsDeferred; }
+
+	void SetVertexShader(ID3D11VertexShader* vertexShader);
+	void SetPixelShader(ID3D11PixelShader* pixelShader);
+	void SetGeometryShader(ID3D11GeometryShader* geometryShader);
 protected:
 	RRenderSystem();
 	~RRenderSystem();

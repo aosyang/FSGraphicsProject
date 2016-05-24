@@ -5,12 +5,13 @@
 //=============================================================================
 
 #include "../Shaders/ConstBufferPS.h"
+#include "../Shaders/PixelShaderCommon.hlsli"
+#include "../Shaders/LightShaderCommon.hlsli"
 
-Texture2D AlbedoTexture		: register(t0);
-Texture2D PosDepthTexture	: register(t1);
-Texture2D NormalTexture		: register(t2);
-
-SamplerState Sampler;
+Texture2D AlbedoTexture				: register(t0);
+Texture2D PosDepthTexture			: register(t1);
+Texture2D NormalTexture				: register(t2);
+TextureCube PointLightShadowDepth	: register(t6);
 
 struct OUTPUT_VERTEX
 {
@@ -31,6 +32,18 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 	float attenuation = 1.0f - saturate(length(lightVec) / DeferredPointLight.PosAndRadius.w);
 	attenuation *= attenuation;
+
+	if (CastShadow)
+	{
+		float3 vecToLight = DeferredPointLight.PosAndRadius.xyz - PosW;
+
+		float sDepth = max(max(abs(vecToLight.x), abs(vecToLight.y)), abs(vecToLight.z));
+		float linearDepth = saturate((sDepth - 0.1f) / (DeferredPointLight.PosAndRadius.w - 0.1f));
+		float bufferDepth = PointLightShadowDepth.Sample(Sampler, normalize(PosW - DeferredPointLight.PosAndRadius.xyz)).r;
+		float bufferLinearDepth = LinearizeDepth(0.1f, DeferredPointLight.PosAndRadius.w, bufferDepth);
+
+		attenuation *= (linearDepth < bufferLinearDepth + 0.001f);
+	}
 
 	// Diffuse lighting
 	float DiffuseIntensity = saturate(dot(Normal, lightDir));

@@ -89,9 +89,9 @@ void RPostProcessor::SetupRenderTarget()
 
 void RPostProcessor::Draw(PostProcessingEffect effect)
 {
-	RRenderer.D3DImmediateContext()->PSSetShader(m_PPPixelShader[effect], nullptr, 0);
-	RRenderer.D3DImmediateContext()->VSSetShader(m_PPVertexShader, nullptr, 0);
-	RRenderer.D3DImmediateContext()->GSSetShader(nullptr, nullptr, 0);
+	RRenderer.SetPixelShader(m_PPPixelShader[effect]);
+	RRenderer.SetVertexShader(m_PPVertexShader);
+	RRenderer.SetGeometryShader(nullptr);
 
 	RRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
 	m_ScreenQuad.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

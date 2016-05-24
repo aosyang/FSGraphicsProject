@@ -131,12 +131,12 @@ RVec3 RSceneObject::GetPosition() const
 	return m_NodeTransform.GetRow(3).ToVec3();
 }
 
-void RSceneObject::LookAt(const RVec3 target)
+void RSceneObject::LookAt(const RVec3& target, const RVec3& world_up /*= RVec3(0, 1, 0)*/)
 {
 	RVec3 pos = m_NodeTransform.GetTranslation();
 	RVec3 forward = target - pos;
 	forward.Normalize();
-	RVec3 right = RVec3(0, 1, 0).Cross(forward);
+	RVec3 right = world_up.Cross(forward);
 	right.Normalize();
 	RVec3 up = forward.Cross(right);
 

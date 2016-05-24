@@ -14,6 +14,7 @@ DeferredShadingApp::DeferredShadingApp()
 
 DeferredShadingApp::~DeferredShadingApp()
 {
+	m_Skybox.Release();
 	m_cbDeferredPointLight.Release();
 	m_cbSSR.Release();
 
@@ -28,6 +29,7 @@ DeferredShadingApp::~DeferredShadingApp()
 	}
 	m_ScenePassBuffer.Release();
 	m_DepthBuffer.Release();
+	m_CubeDepthBuffer.Release();
 
 	m_DebugRenderer.Release();
 	m_Scene.Release();
@@ -40,6 +42,7 @@ DeferredShadingApp::~DeferredShadingApp()
 
 bool DeferredShadingApp::Initialize()
 {
+	srand((unsigned int)time(nullptr));
 	RShaderManager::Instance().LoadShaders("../Shaders");
 	RResourceManager::Instance().Initialize();
 	RScript.Initialize();
@@ -58,18 +61,21 @@ bool DeferredShadingApp::Initialize()
 	RRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
 
 	CreateGBuffers();
+	m_CubeDepthBuffer = CreateCubeDepthBuffer();
 
 	m_cbDeferredPointLight.Initialize();
 	m_cbSSR.Initialize();
 
+	int shadowCasterCount = 10;
 	for (int i = 0; i < MAX_LIGHT_COUNT; i++)
 	{
-		m_PointLights[i].pos = RVec3(Math::RandF(-1500, 750), Math::RandF(50, 900), Math::RandF(-1850, 300));
-		m_PointLights[i].r = Math::RandF(50, 200);
+		m_PointLights[i].pos = RVec3(Math::RandF(-1500, 750), Math::RandF(50, 100), Math::RandF(-1850, 300));
+		m_PointLights[i].r = Math::RandF(500, 2000);
 		//m_PointLights[i].color = RColor(1, 1, 1);
 		m_PointLights[i].color = RColor(Math::RandF(), Math::RandF(), Math::RandF());
-		m_PointLights[i].sin_factor = RVec3(Math::RandF(0, 5), 0, Math::RandF(0, 5));
+		m_PointLights[i].sin_factor = RVec3(Math::RandF(0, 1), 0, Math::RandF(0, 1));
 		m_PointLights[i].sin_offset = RVec3(Math::RandF(0, 5), 0, Math::RandF(0, 5));
+		m_PointLights[i].castShadow = (i < shadowCasterCount);
 	}
 
 	CD3D11_RASTERIZER_DESC rastDesc = CD3D11_RASTERIZER_DESC(D3D11_DEFAULT);
@@ -81,6 +87,7 @@ bool DeferredShadingApp::Initialize()
 	m_DebugRenderer.Initialize();
 	m_DebugMenu.Initialize();
 	m_DebugMenu.AddBoolMenuItem("Deferred Shading",			&m_EnableDeferredShading);
+	m_DebugMenu.AddBoolMenuItem("Point Light Shadow",		&m_EnablePointLightShadow);
 	m_DebugMenu.AddBoolMenuItem("Screen Space Reflection",	&m_EnableSSR);
 	m_DebugMenu.AddFloatMenuItem("cb_stride",				&cbSSR.cb_stride);
 	m_DebugMenu.AddFloatMenuItem("cb_strideZCutoff",		&cbSSR.cb_strideZCutoff,	0.001f);
@@ -89,7 +96,8 @@ bool DeferredShadingApp::Initialize()
 	m_DebugMenu.AddFloatMenuItem("cb_maxDistance",			&cbSSR.cb_maxDistance,		1.0f);
 	m_DebugMenu.SetEnabled(false);
 
-	m_EnableDeferredShading = true;
+	m_EnableDeferredShading = false;
+	m_EnablePointLightShadow = true;
 	m_EnableSSR = true;
 	cbSSR.cb_stride = 4.0f;
 	cbSSR.cb_strideZCutoff = 0.01f;
@@ -98,6 +106,8 @@ bool DeferredShadingApp::Initialize()
 	cbSSR.cb_maxDistance = 100.0f;
 
 	m_EnvCube = RResourceManager::Instance().LoadDDSTexture("../Assets/powderpeak.dds");
+	m_Skybox.CreateSkybox(RResourceManager::Instance().WrapSRV(m_CubeDepthBuffer.SRV));
+	//m_Skybox.CreateSkybox(m_EnvCube);
 
 	return true;
 }
@@ -152,29 +162,12 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	m_Camera.SetTransform(cameraMatrix);
 	m_Camera.TranslateLocal(moveVec);
 
-	RMatrix4 viewMatrix = m_Camera.GetViewMatrix();
-	RMatrix4 projMatrix = m_Camera.GetProjectionMatrix();
-
-	// Update scene constant buffer
-	SHADER_SCENE_BUFFER cbScene;
-	ZeroMemory(&cbScene, sizeof(cbScene));
-
-	cbScene.viewMatrix = viewMatrix;
-	cbScene.cameraMatrix = m_Camera.GetNodeTransform();
-	cbScene.projMatrix = projMatrix;
-	cbScene.viewProjMatrix = viewMatrix * projMatrix;
-	cbScene.invProjMatrix = projMatrix.Inverse();
-	cbScene.cameraPos = m_Camera.GetPosition();
-
-	m_Scene.cbScene.UpdateContent(&cbScene);
-	m_Scene.cbScene.ApplyToShaders();
-
 	// Update light constant buffer
 	SHADER_LIGHT_BUFFER cbLight;
 	ZeroMemory(&cbLight, sizeof(cbLight));
 
 	// Setup ambient color
-	cbLight.HighHemisphereAmbientColor = RVec4(0.5f, 0.5f, 0.4f, 1.0f);
+	cbLight.HighHemisphereAmbientColor = RVec4(0.5f, 0.5f, 0.4f, 0.2f);
 	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 0.1f);
 
 	cbLight.CameraPos = m_Camera.GetPosition();
@@ -204,7 +197,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 		0.0f,	0.0f,	1.0f,	0.0f,
 		0.5f,	0.5f,	0.0f,	1.0f
 		);
-	cbScreen.ViewToTextureSpace = cbScene.projMatrix * texMat;
+	cbScreen.ViewToTextureSpace = m_Camera.GetProjectionMatrix() * texMat;
 	cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();
 	cbScreen.TotalTime = REngine::GetTimer().TotalTime();
 
@@ -225,6 +218,23 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 
 void DeferredShadingApp::RenderScene()
 {
+	RMatrix4 viewMatrix = m_Camera.GetViewMatrix();
+	RMatrix4 projMatrix = m_Camera.GetProjectionMatrix();
+
+	// Update scene constant buffer
+	SHADER_SCENE_BUFFER cbScene;
+	ZeroMemory(&cbScene, sizeof(cbScene));
+
+	cbScene.viewMatrix = viewMatrix;
+	cbScene.cameraMatrix = m_Camera.GetNodeTransform();
+	cbScene.projMatrix = projMatrix;
+	cbScene.viewProjMatrix = viewMatrix * projMatrix;
+	cbScene.invProjMatrix = projMatrix.Inverse();
+	cbScene.cameraPos = m_Camera.GetPosition();
+
+	m_Scene.cbScene.UpdateContent(&cbScene);
+	m_Scene.cbScene.ApplyToShaders();
+
 	if (m_EnableDeferredShading)
 	{
 		ID3D11RenderTargetView* rtvs[] =
@@ -247,7 +257,11 @@ void DeferredShadingApp::RenderScene()
 	}
 	else
 	{
+		RRenderer.SetRenderTargets();
 		RRenderer.Clear(true, RColor(0.05f, 0.05f, 0.1f));
+
+		m_Skybox.Draw();
+		RRenderer.Clear(false, RColor(0, 0, 0));
 	}
 
 	RFrustum frustum = m_Camera.GetFrustum();
@@ -286,9 +300,9 @@ void DeferredShadingApp::RenderScene()
 
 		for (int i = 0; i < MAX_LIGHT_COUNT; i++)
 		{
-			float x = sinf(m_TotalTime * m_PointLights[i].sin_factor.x + m_PointLights[i].sin_offset.x) * 100.0f;
-			float y = sinf(m_TotalTime * m_PointLights[i].sin_factor.y + m_PointLights[i].sin_offset.y) * 100.0f;
-			float z = sinf(m_TotalTime * m_PointLights[i].sin_factor.z + m_PointLights[i].sin_offset.z) * 100.0f;
+			float x = sinf(m_TotalTime * m_PointLights[i].sin_factor.x + m_PointLights[i].sin_offset.x) * 1000.0f;
+			float y = sinf(m_TotalTime * m_PointLights[i].sin_factor.y + m_PointLights[i].sin_offset.y) * 1000.0f;
+			float z = sinf(m_TotalTime * m_PointLights[i].sin_factor.z + m_PointLights[i].sin_offset.z) * 1000.0f;
 			RVec3 offset = RVec3(x, y, z);
 
 			RVec3 pos = m_PointLights[i].pos + offset;
@@ -354,6 +368,28 @@ void DeferredShadingApp::RenderScene()
 			{
 				//m_DebugRenderer.DrawSphere(pos, m_PointLights[i].r, m_PointLights[i].color);
 
+				m_DebugRenderer.DrawSphere(pos, 10.0f, m_PointLights[i].color);
+
+				if (m_EnablePointLightShadow && m_PointLights[i].castShadow)
+				{
+					RenderPointLightCubemapDepth(pos, m_PointLights[i].r);
+
+					m_Scene.cbScene.UpdateContent(&cbScene);
+					m_Scene.cbScene.ApplyToShaders();
+
+					if (m_EnableSSR)
+						RRenderer.SetRenderTargets(1, &m_ScenePassBuffer.View, m_DepthBuffer.View);
+					else
+						RRenderer.SetRenderTargets();
+
+					float width = static_cast<float>(RRenderer.GetClientWidth());
+					float height = static_cast<float>(RRenderer.GetClientHeight());
+					D3D11_VIEWPORT vp = { 0.0f, 0.0f, width, height, 0.0f, 1.0f };
+					RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
+
+					RRenderer.D3DImmediateContext()->PSSetShaderResources(6, 1, &m_CubeDepthBuffer.DepthSRV);
+				}
+
 				RRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Scissor]);
 
 				D3D11_RECT rect;
@@ -368,12 +404,19 @@ void DeferredShadingApp::RenderScene()
 
 				cbDeferredPointLight.DeferredPointLight.PosAndRadius = RVec4(pos, m_PointLights[i].r);
 				cbDeferredPointLight.DeferredPointLight.Color = RVec4((float*)&m_PointLights[i].color);
+				cbDeferredPointLight.CastShadow = m_EnablePointLightShadow && m_PointLights[i].castShadow;
 
 				m_cbDeferredPointLight.UpdateContent(&cbDeferredPointLight);
 				m_cbDeferredPointLight.ApplyToShaders();
 
 				RRenderer.Clear(false, RColor(0, 0, 0), true);
 				m_PostProcessor.Draw(PPE_DeferredPointLightPass);
+
+				if (m_EnablePointLightShadow && m_PointLights[i].castShadow)
+				{
+					ID3D11ShaderResourceView* nullSRV = nullptr;
+					RRenderer.D3DImmediateContext()->PSSetShaderResources(6, 1, &nullSRV);
+				}
 			}
 		}
 
@@ -510,4 +553,127 @@ DepthStencilBuffer DeferredShadingApp::CreateDepthStencilBuffer()
 	RRenderer.D3DDevice()->CreateDepthStencilView(db.Buffer, 0, &db.View);
 
 	return db;
+}
+
+CubeDepthBuffer DeferredShadingApp::CreateCubeDepthBuffer()
+{
+	CubeDepthBuffer cdb;
+
+	D3D11_TEXTURE2D_DESC cubeTexDesc;
+	cubeTexDesc.Width = 256;
+	cubeTexDesc.Height = 256;
+	cubeTexDesc.MipLevels = 1;
+	cubeTexDesc.ArraySize = 6;
+	cubeTexDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	cubeTexDesc.SampleDesc.Count = 1;
+	cubeTexDesc.SampleDesc.Quality = 0;
+	cubeTexDesc.Usage = D3D11_USAGE_DEFAULT;
+	cubeTexDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	cubeTexDesc.CPUAccessFlags = 0;
+	cubeTexDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+
+	RRenderer.D3DDevice()->CreateTexture2D(&cubeTexDesc, 0, &cdb.Buffer);
+
+	D3D11_RENDER_TARGET_VIEW_DESC cubeRTVDesc;
+	cubeRTVDesc.Format = cubeTexDesc.Format;
+	cubeRTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+	cubeRTVDesc.Texture2DArray.ArraySize = 1;
+	cubeRTVDesc.Texture2DArray.MipSlice = 0;
+	for (int i = 0; i < 6; i++)
+	{
+		cubeRTVDesc.Texture2DArray.FirstArraySlice = i;
+		RRenderer.D3DDevice()->CreateRenderTargetView(cdb.Buffer, &cubeRTVDesc, &cdb.View[i]);
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC cubeSRVDesc;
+	cubeSRVDesc.Format = cubeRTVDesc.Format;
+	cubeSRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+	cubeSRVDesc.TextureCube.MipLevels = 1;
+	cubeSRVDesc.TextureCube.MostDetailedMip = 0;
+	RRenderer.D3DDevice()->CreateShaderResourceView(cdb.Buffer, &cubeSRVDesc, &cdb.SRV);
+
+	cubeTexDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+	cubeTexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+
+	RRenderer.D3DDevice()->CreateTexture2D(&cubeTexDesc, 0, &cdb.DepthBuffer);
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC cubeDSVDesc;
+	cubeDSVDesc.Flags = 0;
+	cubeDSVDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	cubeDSVDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+	cubeDSVDesc.Texture2DArray.ArraySize = 1;
+	cubeDSVDesc.Texture2DArray.MipSlice = 0;
+
+	for (int i = 0; i < 6; i++)
+	{
+		cubeDSVDesc.Texture2DArray.FirstArraySlice = i;
+		RRenderer.D3DDevice()->CreateDepthStencilView(cdb.DepthBuffer, &cubeDSVDesc, &cdb.DepthView[i]);
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC depthSRVDesc;
+	depthSRVDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	depthSRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+	depthSRVDesc.Texture2D.MostDetailedMip = 0;
+	depthSRVDesc.Texture2D.MipLevels = 1;
+
+	RRenderer.D3DDevice()->CreateShaderResourceView(cdb.DepthBuffer, &depthSRVDesc, &cdb.DepthSRV);
+
+
+	return cdb;
+}
+
+void DeferredShadingApp::RenderPointLightCubemapDepth(const RVec3& position, float radius)
+{
+	static RCamera cubeCameras[6];
+	RVec3 targets[6] =
+	{
+		position + RVec3(1, 0, 0),
+		position + RVec3(-1, 0, 0),
+		position + RVec3(0, 1, 0),
+		position + RVec3(0, -1, 0),
+		position + RVec3(0, 0, 1),
+		position + RVec3(0, 0, -1),
+	};
+
+	RVec3 ups[6] =
+	{
+		RVec3(0, 1, 0),
+		RVec3(0, 1, 0),
+		RVec3(0, 0, -1),
+		RVec3(0, 0, 1),
+		RVec3(0, 1, 0),
+		RVec3(0, 1, 0),
+	};
+
+	D3D11_VIEWPORT vp = { 0.0f, 0.0f, 256, 256, 0.0f, 1.0f };
+	RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
+
+	for (int i = 0; i < 6; i++)
+	{
+		cubeCameras[i].SetPosition(position);
+		cubeCameras[i].SetupView(90.0f, 1.0f, 0.1f, radius);
+		cubeCameras[i].LookAt(targets[i], ups[i]);
+
+		RRenderer.SetRenderTargets(1, &m_CubeDepthBuffer.View[i], m_CubeDepthBuffer.DepthView[i]);
+		RRenderer.Clear();
+
+		// Update scene constant buffer
+		SHADER_SCENE_BUFFER cbScene;
+		ZeroMemory(&cbScene, sizeof(cbScene));
+
+		cbScene.viewMatrix = cubeCameras[i].GetViewMatrix();
+		cbScene.cameraMatrix = cubeCameras[i].GetNodeTransform();
+		cbScene.projMatrix = cubeCameras[i].GetProjectionMatrix();
+		cbScene.viewProjMatrix = cbScene.viewMatrix * cbScene.projMatrix;
+		cbScene.invProjMatrix = cbScene.projMatrix.Inverse();
+		cbScene.cameraPos = cubeCameras[i].GetPosition();
+		cbScene.shadowViewProjMatrix[0] = cbScene.viewProjMatrix;
+		cbScene.cascadedShadowIndex = 0;
+
+		m_Scene.cbScene.UpdateContent(&cbScene);
+		m_Scene.cbScene.ApplyToShaders();
+
+		RFrustum frustum = cubeCameras[i].GetFrustum();
+		m_Scene.RenderDepthPass(&frustum);
+	}
 }

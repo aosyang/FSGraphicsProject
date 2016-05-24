@@ -22,18 +22,18 @@ bool RShader::operator==(const RShader& rhs) const
 void RShader::Bind(int featureMasks)
 {
 	if ((featureMasks & SFM_Skinned) && VertexShader_Skinned)
-		RRenderer.D3DImmediateContext()->VSSetShader(VertexShader_Skinned, NULL, 0);
+		RRenderer.SetVertexShader(VertexShader_Skinned);
 	else if ((featureMasks & SFM_Instanced) && VertexShader_Instanced)
-		RRenderer.D3DImmediateContext()->VSSetShader(VertexShader_Instanced, NULL, 0);
+		RRenderer.SetVertexShader(VertexShader_Instanced);
 	else
-		RRenderer.D3DImmediateContext()->VSSetShader(VertexShader, NULL, 0);
+		RRenderer.SetVertexShader(VertexShader);
 
 	if ((featureMasks & SFM_Deferred) && PixelShader_Deferred)
-		RRenderer.D3DImmediateContext()->PSSetShader(PixelShader_Deferred, NULL, 0);
+		RRenderer.SetPixelShader(PixelShader_Deferred);
 	else
-		RRenderer.D3DImmediateContext()->PSSetShader(PixelShader, NULL, 0);
+		RRenderer.SetPixelShader(PixelShader);
 
-	RRenderer.D3DImmediateContext()->GSSetShader(GeometryShader, NULL, 0);
+	RRenderer.SetGeometryShader(GeometryShader);
 }
 
 string RShader::GetName() const

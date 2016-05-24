@@ -28,8 +28,8 @@ public:
 	void SaveToFile(const char* filename);
 
 	RVec3 TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec);
-	void Render(const RFrustum* pFrustum=nullptr);
-	void RenderDepthPass();
+	void Render(const RFrustum* pFrustum = nullptr);
+	void RenderDepthPass(const RFrustum* pFrustum = nullptr);
 
 	vector<RSceneObject*>& GetSceneObjects();
 
