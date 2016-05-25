@@ -12,7 +12,7 @@ SamplerState Sampler : register(s0);
 float4 MakeLinearColorFromGammaSpace(float4 color)
 {
 	if (UseGammaCorrection)
-		return float4(pow(color.rgb, 2.2f), color.a);
+		return float4(pow(max(color.rgb, 0), 2.2f), color.a);
 	else
 		return color;
 }

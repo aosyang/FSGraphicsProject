@@ -96,7 +96,7 @@ bool DeferredShadingApp::Initialize()
 	m_DebugMenu.AddFloatMenuItem("cb_maxDistance",			&cbSSR.cb_maxDistance,		1.0f);
 	m_DebugMenu.SetEnabled(false);
 
-	m_EnableDeferredShading = false;
+	m_EnableDeferredShading = true;
 	m_EnablePointLightShadow = true;
 	m_EnableSSR = true;
 	cbSSR.cb_stride = 4.0f;
