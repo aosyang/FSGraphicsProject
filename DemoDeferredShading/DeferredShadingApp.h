@@ -99,7 +99,7 @@ struct PointLight
 	bool castShadow;
 };
 
-#define MAX_LIGHT_COUNT 10
+#define MAX_LIGHT_COUNT 500
 
 enum ERasterizerState
 {
@@ -158,6 +158,10 @@ private:
 	bool						m_EnableSSR;
 	bool						m_EnablePointLightShadow;
 
+	int							m_LightCount;
+	float						m_LightRadius;
+	bool						m_RenderLightPos;
+	float						m_AmbientIntensity;
 	RTexture*					m_EnvCube;
 	CubeDepthBuffer				m_CubeDepthBuffer;
 	RSkybox						m_Skybox;

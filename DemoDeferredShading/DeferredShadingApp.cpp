@@ -70,7 +70,7 @@ bool DeferredShadingApp::Initialize()
 	for (int i = 0; i < MAX_LIGHT_COUNT; i++)
 	{
 		m_PointLights[i].pos = RVec3(Math::RandF(-1500, 750), Math::RandF(50, 100), Math::RandF(-1850, 300));
-		m_PointLights[i].r = Math::RandF(500, 2000);
+		m_PointLights[i].r = Math::RandF(50, 200);
 		//m_PointLights[i].color = RColor(1, 1, 1);
 		m_PointLights[i].color = RColor(Math::RandF(), Math::RandF(), Math::RandF());
 		m_PointLights[i].sin_factor = RVec3(Math::RandF(0, 1), 0, Math::RandF(0, 1));
@@ -87,6 +87,9 @@ bool DeferredShadingApp::Initialize()
 	m_DebugRenderer.Initialize();
 	m_DebugMenu.Initialize();
 	m_DebugMenu.AddBoolMenuItem("Deferred Shading",			&m_EnableDeferredShading);
+	m_DebugMenu.AddBoolMenuItem("Render Light Position",	&m_RenderLightPos);
+	m_DebugMenu.AddIntMenuItem("Point Light Count",			&m_LightCount);
+	m_DebugMenu.AddFloatMenuItem("Point Light Radius",		&m_LightRadius, 1.0f);
 	m_DebugMenu.AddBoolMenuItem("Point Light Shadow",		&m_EnablePointLightShadow);
 	m_DebugMenu.AddBoolMenuItem("Screen Space Reflection",	&m_EnableSSR);
 	m_DebugMenu.AddFloatMenuItem("cb_stride",				&cbSSR.cb_stride);
@@ -94,16 +97,21 @@ bool DeferredShadingApp::Initialize()
 	m_DebugMenu.AddFloatMenuItem("cb_zThickness",			&cbSSR.cb_zThickness,		0.00001f);
 	m_DebugMenu.AddFloatMenuItem("cb_maxSteps",				&cbSSR.cb_maxSteps,			100.0f);
 	m_DebugMenu.AddFloatMenuItem("cb_maxDistance",			&cbSSR.cb_maxDistance,		1.0f);
+	m_DebugMenu.AddFloatMenuItem("Ambient Intensity",		&m_AmbientIntensity,		0.01f);
 	m_DebugMenu.SetEnabled(false);
 
 	m_EnableDeferredShading = true;
-	m_EnablePointLightShadow = true;
-	m_EnableSSR = true;
+	m_LightCount = 10;
+	m_RenderLightPos = false;
+	m_EnablePointLightShadow = false;
+	m_EnableSSR = false;
 	cbSSR.cb_stride = 4.0f;
 	cbSSR.cb_strideZCutoff = 0.01f;
 	cbSSR.cb_zThickness = 0.0005f;
 	cbSSR.cb_maxSteps = 300.0f;
 	cbSSR.cb_maxDistance = 100.0f;
+	m_AmbientIntensity = 0.2f;
+	m_LightRadius = 1.0f;
 
 	m_EnvCube = RResourceManager::Instance().LoadDDSTexture("../Assets/powderpeak.dds");
 	m_Skybox.CreateSkybox(RResourceManager::Instance().WrapSRV(m_CubeDepthBuffer.SRV));
@@ -167,8 +175,8 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbLight, sizeof(cbLight));
 
 	// Setup ambient color
-	cbLight.HighHemisphereAmbientColor = RVec4(0.5f, 0.5f, 0.4f, 0.2f);
-	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 0.1f);
+	cbLight.HighHemisphereAmbientColor = RVec4(0.9f, 1.0f, 1.0f, min(1.0f, max(0.0f, m_AmbientIntensity)));
+	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, min(1.0f, max(0.0f, m_AmbientIntensity)));
 
 	cbLight.CameraPos = m_Camera.GetPosition();
 
@@ -298,7 +306,7 @@ void DeferredShadingApp::RenderScene()
 
 		const RMatrix4& viewProjMatrix = m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix();
 
-		for (int i = 0; i < MAX_LIGHT_COUNT; i++)
+		for (int i = 0; i < min(m_LightCount, MAX_LIGHT_COUNT); i++)
 		{
 			float x = sinf(m_TotalTime * m_PointLights[i].sin_factor.x + m_PointLights[i].sin_offset.x) * 1000.0f;
 			float y = sinf(m_TotalTime * m_PointLights[i].sin_factor.y + m_PointLights[i].sin_offset.y) * 1000.0f;
@@ -308,7 +316,7 @@ void DeferredShadingApp::RenderScene()
 			RVec3 pos = m_PointLights[i].pos + offset;
 
 			RAabb aabb;
-			float r = m_PointLights[i].r;
+			float r = m_PointLights[i].r * m_LightRadius;
 			aabb.pMin = pos - RVec3(r, r, r);
 			aabb.pMax = pos + RVec3(r, r, r);
 
@@ -368,11 +376,12 @@ void DeferredShadingApp::RenderScene()
 			{
 				//m_DebugRenderer.DrawSphere(pos, m_PointLights[i].r, m_PointLights[i].color);
 
-				m_DebugRenderer.DrawSphere(pos, 10.0f, m_PointLights[i].color);
+				if (m_RenderLightPos)
+					m_DebugRenderer.DrawSphere(pos, 10.0f, m_PointLights[i].color, 3);
 
 				if (m_EnablePointLightShadow && m_PointLights[i].castShadow)
 				{
-					RenderPointLightCubemapDepth(pos, m_PointLights[i].r);
+					RenderPointLightCubemapDepth(pos, r);
 
 					m_Scene.cbScene.UpdateContent(&cbScene);
 					m_Scene.cbScene.ApplyToShaders();
@@ -402,7 +411,7 @@ void DeferredShadingApp::RenderScene()
 
 				SHADER_DEFERRED_POINT_LIGHT_BUFFER cbDeferredPointLight;
 
-				cbDeferredPointLight.DeferredPointLight.PosAndRadius = RVec4(pos, m_PointLights[i].r);
+				cbDeferredPointLight.DeferredPointLight.PosAndRadius = RVec4(pos, r);
 				cbDeferredPointLight.DeferredPointLight.Color = RVec4((float*)&m_PointLights[i].color);
 				cbDeferredPointLight.CastShadow = m_EnablePointLightShadow && m_PointLights[i].castShadow;
 
