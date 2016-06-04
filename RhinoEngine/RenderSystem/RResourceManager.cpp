@@ -19,6 +19,7 @@
 
 #define ENABLE_THREADED_LOADING 1
 #define EXPORT_FBX_AS_BINARY_MESH 1
+#define CONVERT_TO_LEFT_HANDED_MESH 1
 
 static mutex								m_TaskQueueMutex;
 static condition_variable					m_TaskQueueCondition;
@@ -353,6 +354,12 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 				RMatrix4 matrix;
 
 				FbxAMatrix childTransform = node->EvaluateGlobalTransform(animTime);
+#if CONVERT_TO_LEFT_HANDED_MESH == 1
+				FbxVector4 rotation = childTransform.GetR();
+				childTransform[3][2] = -childTransform[3][2];
+				rotation.Set(-rotation[0], -rotation[1], rotation[2]);
+				childTransform.SetR(rotation);
+#endif
 				MatrixTransfer(&matrix, &childTransform);
 				int frameIdx = (int)((float)animTime.GetFrameCountPrecise(animTimeMode) - (float)animStartTime.GetFrameCountPrecise(animTimeMode));
 				animation->AddNodePose(idxNode, frameIdx, &matrix);
@@ -414,6 +421,10 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 			vertData[i].pos.y = (float)controlPointArray[i][1];
 			vertData[i].pos.z = (float)controlPointArray[i][2];
 
+#if CONVERT_TO_LEFT_HANDED_MESH == 1
+			vertData[i].pos.z = -vertData[i].pos.z;
+#endif
+
 			memset(vertData[i].boneId, -1, sizeof(int) * 4);
 			memset(vertData[i].weight, 0, sizeof(float) * 4);
 
@@ -438,6 +449,10 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					vertData[i].normal.y = (float)normal[1];
 					vertData[i].normal.z = (float)normal[2];
 
+#if CONVERT_TO_LEFT_HANDED_MESH == 1
+					vertData[i].normal.z = -vertData[i].normal.z;
+#endif
+
 					VertexComponentMask |= VCM_Normal;
 				}
 				break;
@@ -451,6 +466,10 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					vertData[i].normal.x = (float)normal[0];
 					vertData[i].normal.y = (float)normal[1];
 					vertData[i].normal.z = (float)normal[2];
+
+#if CONVERT_TO_LEFT_HANDED_MESH == 1
+					vertData[i].normal.z = -vertData[i].normal.z;
+#endif
 
 					VertexComponentMask |= VCM_Normal;
 				}
@@ -476,6 +495,10 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					vertData[i].tangent.y = (float)tangent[1];
 					vertData[i].tangent.z = (float)tangent[2];
 				
+#if CONVERT_TO_LEFT_HANDED_MESH == 1
+					vertData[i].tangent.z = -vertData[i].tangent.z;
+#endif
+
 					VertexComponentMask |= VCM_Tangent;
 				}
 				break;
@@ -489,6 +512,10 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					vertData[i].tangent.x = (float)tangent[0];
 					vertData[i].tangent.y = (float)tangent[1];
 					vertData[i].tangent.z = (float)tangent[2];
+
+#if CONVERT_TO_LEFT_HANDED_MESH == 1
+					vertData[i].tangent.z = -vertData[i].tangent.z;
+#endif
 
 					VertexComponentMask |= VCM_Tangent;
 				}
@@ -576,6 +603,12 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					// Store inversed initial transform for each bone to apply skinning with correct binding pose
 					FbxAMatrix clusterInitTransform;
 					cluster->GetTransformLinkMatrix(clusterInitTransform);
+#if CONVERT_TO_LEFT_HANDED_MESH == 1
+					FbxVector4 rotation = clusterInitTransform.GetR();
+					clusterInitTransform[3][2] = -clusterInitTransform[3][2];
+					rotation.Set(-rotation[0], -rotation[1], rotation[2]);
+					clusterInitTransform.SetR(rotation);
+#endif
 					clusterInitTransform = clusterInitTransform.Inverse();
 
 					if (boneInitInvPose.size() == 0 && fbxBoneNodes.size())
@@ -652,6 +685,10 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					vertex.normal.y = (float)normal[1];
 					vertex.normal.z = (float)normal[2];
 
+#if CONVERT_TO_LEFT_HANDED_MESH == 1
+					vertex.normal.z = -vertex.normal.z;
+#endif
+
 					VertexComponentMask |= VCM_Normal;
 				}
 
@@ -667,6 +704,10 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 							vertex.tangent.y = (float)tangent[1];
 							vertex.tangent.z = (float)tangent[2];
 
+#if CONVERT_TO_LEFT_HANDED_MESH == 1
+							vertex.tangent.z = -vertex.tangent.z;
+#endif
+
 							VertexComponentMask |= VCM_Tangent;
 						}
 						break;
@@ -678,6 +719,10 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 							vertex.tangent.x = (float)tangent[0];
 							vertex.tangent.y = (float)tangent[1];
 							vertex.tangent.z = (float)tangent[2];
+
+#if CONVERT_TO_LEFT_HANDED_MESH == 1
+							vertex.tangent.z = -vertex.tangent.z;
+#endif
 
 							VertexComponentMask |= VCM_Tangent;
 						}
@@ -713,9 +758,15 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 			}
 
 			// Change triangle clockwise if necessary
+#if CONVERT_TO_LEFT_HANDED_MESH == 1
+			indexData.push_back(triangle[0]);
+			indexData.push_back(triangle[2]);
+			indexData.push_back(triangle[1]);
+#else
 			indexData.push_back(triangle[0]);
 			indexData.push_back(triangle[1]);
 			indexData.push_back(triangle[2]);
+#endif
 		}
 
 		// Load textures

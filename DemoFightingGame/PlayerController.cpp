@@ -94,7 +94,7 @@ void PlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVec)
 	if (hVec.SquaredMagitude() > 0.0f)
 	{
 		hVec = hVec.GetNormalizedVec3();
-		m_Rotation = LerpDegreeAngle(m_Rotation, RAD_TO_DEG(atan2f(hVec.x, hVec.z)), 10.0f * timer.DeltaTime());
+		m_Rotation = LerpDegreeAngle(m_Rotation, RAD_TO_DEG(atan2f(-hVec.x, -hVec.z)), 10.0f * timer.DeltaTime());
 	}
 
 	static const RVec3 StairOffset = RVec3(0, 10, 0);

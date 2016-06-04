@@ -254,7 +254,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			m_Player->GetBehaviorTime() < 0.6f)
 		{
 			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() + m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 50, 0);
+			hit_sphere.center = m_Player->GetPosition() - m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 50, 0);
 			hit_sphere.radius = 50.0f;
 			if (m_DrawHitBound)
 				m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
@@ -265,12 +265,12 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 				{
 					RVec3 relVec = hit_sphere.center - m_AIPlayer->GetPosition();
 					relVec.y = 0.0f;
-					RVec3 playerForward = m_Player->GetNodeTransform().GetForward();
+					RVec3 playerForward = -m_Player->GetNodeTransform().GetForward();
 					if (playerForward.Dot(relVec) >= 0)
 						relVec = -playerForward;
 					relVec.Normalize();
 
-					m_AIPlayer->SetPlayerRotation(RAD_TO_DEG(atan2f(relVec.x, relVec.z)));
+					m_AIPlayer->SetPlayerRotation(RAD_TO_DEG(atan2f(-relVec.x, -relVec.z)));
 				}
 				m_AIPlayer->SetBehavior(BHV_HitDown);
 			}
@@ -281,7 +281,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			m_Player->GetBehaviorTime() < 0.3f)
 		{
 			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() + m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 100, 0);
+			hit_sphere.center = m_Player->GetPosition() - m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 100, 0);
 			hit_sphere.radius = 20.0f;
 			if (m_DrawHitBound)
 				m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
@@ -301,7 +301,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			m_Player->GetBehaviorTime() < 0.3f)
 		{
 			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() + m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 100, 0);
+			hit_sphere.center = m_Player->GetPosition() - m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 100, 0);
 			hit_sphere.radius = 50.0f;
 			if (m_DrawHitBound)
 				m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
@@ -321,7 +321,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			m_Player->GetBehaviorTime() < 0.3f)
 		{
 			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() + m_Player->GetNodeTransform().GetForward() * 30 + RVec3(0, 100, 0);
+			hit_sphere.center = m_Player->GetPosition() - m_Player->GetNodeTransform().GetForward() * 30 + RVec3(0, 100, 0);
 			hit_sphere.radius = 50.0f;
 			if (m_DrawHitBound)
 				m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
@@ -332,12 +332,12 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 				{
 					RVec3 relVec = hit_sphere.center - m_AIPlayer->GetPosition();
 					relVec.y = 0.0f;
-					RVec3 playerForward = m_Player->GetNodeTransform().GetForward();
+					RVec3 playerForward = -m_Player->GetNodeTransform().GetForward();
 					if (playerForward.Dot(relVec) >= 0)
 						relVec = -playerForward;
 					relVec.Normalize();
 					
-					m_AIPlayer->SetPlayerRotation(RAD_TO_DEG(atan2f(relVec.x, relVec.z)));
+					m_AIPlayer->SetPlayerRotation(RAD_TO_DEG(atan2f(-relVec.x, -relVec.z)));
 					m_AIPlayer->SetBehavior(BHV_HitDown);
 				}
 			}

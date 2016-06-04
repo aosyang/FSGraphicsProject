@@ -3,18 +3,26 @@
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, -399.601349, 0.000000, 472.891449, 1.000000</Transform>
     </SceneObject>
     <SceneObject Type="MeshObject" Mesh="../Assets/city.fbx">
-        <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000</Transform>
+        <Transform>-1.000001, 0.000000, -0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, -1.000001, 0.000000, -891.820007, 0.000000, 0.000000, 1.000000</Transform>
     </SceneObject>
     <SceneObject Type="MeshObject" Mesh="../Assets/city.fbx">
-        <Transform>0.000000, -1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, -1558.368774, 796.001648, 0.000000, 1.000000</Transform>
+        <Transform>0.000000, 1.000001, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, -0.000000, -1.000001, 0.000000, -1653.895996, 1558.176392, 3.512743, 1.000000</Transform>
     </SceneObject>
     <SceneObject Type="MeshObject" Mesh="../Assets/city.fbx">
-        <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, -1.000000, 0.000000, 0.000000, 0.000000, 324.354279, -1876.959229, 1.000000</Transform>
+        <Transform>-1.000002, -0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, -0.000000, 1.000002, 0.000000, 0.000000, -894.444275, 324.354279, -1876.959229, 1.000000</Transform>
     </SceneObject>
     <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
+        <Material Index="0">
+            <MeshElement Name="Sphere001" Shader="Default">
+                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
+            </MeshElement>
+        </Material>
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 151.713776, 92.997810, 0.000000, 1.000000</Transform>
     </SceneObject>
     <SceneObject Name="Player" Script="RotateObject 0, 1, 0 100" Type="MeshObject" Mesh="../Assets/tachikoma.fbx">
+        <Material Index="0">
+            <MeshElement Name="insideShape" Shader="Default"/>
+        </Material>
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 298.025269, 140.878616, -47.836910, 1.000000</Transform>
     </SceneObject>
     <SceneObject Type="MeshObject" Mesh="../Assets/Island.FBX">
@@ -49,6 +57,11 @@
         <Transform>-0.999850, 0.000000, 0.017452, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, -0.017452, 0.000000, -0.999850, 0.000000, -1416.029907, 1940.474854, -304.068115, 1.000000</Transform>
     </SceneObject>
     <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
+        <Material Index="0">
+            <MeshElement Name="Sphere001" Shader="Default">
+                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
+            </MeshElement>
+        </Material>
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, -1478.646729, 79.711197, 0.000000, 1.000000</Transform>
     </SceneObject>
     <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
@@ -60,15 +73,35 @@
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, -1395.834473, 79.832489, -164.016708, 1.000000</Transform>
     </SceneObject>
     <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
+        <Material Index="0">
+            <MeshElement Name="Sphere001" Shader="Default">
+                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
+            </MeshElement>
+        </Material>
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, -1478.646729, 79.711197, -412.595520, 1.000000</Transform>
     </SceneObject>
     <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
+        <Material Index="0">
+            <MeshElement Name="Sphere001" Shader="Default">
+                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
+            </MeshElement>
+        </Material>
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, -1478.646729, 79.711197, -727.689575, 1.000000</Transform>
     </SceneObject>
     <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
+        <Material Index="0">
+            <MeshElement Name="Sphere001" Shader="Default">
+                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
+            </MeshElement>
+        </Material>
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, -1478.646729, 79.711197, -1104.365112, 1.000000</Transform>
     </SceneObject>
     <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
+        <Material Index="0">
+            <MeshElement Name="Sphere001" Shader="Default">
+                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
+            </MeshElement>
+        </Material>
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, -1478.646729, 79.711197, -1376.006836, 1.000000</Transform>
     </SceneObject>
     <SceneObject Script="RotateObject" Type="MeshObject" Mesh="../Assets/cube.FBX">
