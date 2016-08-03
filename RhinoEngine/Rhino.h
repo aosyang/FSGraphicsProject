@@ -21,6 +21,7 @@
 #include <tchar.h>
 
 #include <sstream>
+#include <iterator>
 #include <iostream>
 #include <fstream>
 #include <iomanip>

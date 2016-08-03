@@ -35,8 +35,8 @@ namespace EngineManagedWrapper {
 	RVec3 ManagedSceneObject::StringToVec3(String^ str)
 	{
 		String^ delimStr = ",";
-		array<Char>^ delimiter = delimStr->ToCharArray();
-		array<String^>^ words = str->Split(delimiter);
+		cli::array<Char>^ delimiter = delimStr->ToCharArray();
+		cli::array<String^>^ words = str->Split(delimiter);
 
 		RVec3 vec;
 		vec.x = (float)Convert::ToDouble(words[0]);
