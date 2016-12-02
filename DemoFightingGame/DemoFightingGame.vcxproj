@@ -22,6 +22,7 @@
     <ProjectGuid>{BD4DC52C-5A66-414A-9813-6C53FD241B1E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>DemoFightingGame</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

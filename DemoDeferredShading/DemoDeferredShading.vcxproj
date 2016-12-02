@@ -22,6 +22,7 @@
     <ProjectGuid>{931D592E-0120-42BE-A929-4A6EDB1AA523}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>DemoDeferredShading</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

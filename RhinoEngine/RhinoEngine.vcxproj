@@ -615,6 +615,7 @@
     <ProjectGuid>{609BE637-9CC8-4ABA-9308-3FCC5D0B43EC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>RhinoEngine</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
