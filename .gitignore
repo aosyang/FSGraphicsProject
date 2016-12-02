@@ -33,3 +33,6 @@
 *.csh
 *.fxo
 *.fbm
+*.db
+*.opendb
+*.rmesh
