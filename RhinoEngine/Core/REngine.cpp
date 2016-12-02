@@ -164,7 +164,7 @@ bool REngine::CreateRenderWindow(int width, int height, bool fullscreen, int bpp
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = m_hInst;
-	wcex.hIcon = LoadIcon(m_hInst, MAKEINTRESOURCE(IDI_APPLICATION));
+	wcex.hIcon = LoadIcon(m_hInst, IDI_APPLICATION);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = NULL;
