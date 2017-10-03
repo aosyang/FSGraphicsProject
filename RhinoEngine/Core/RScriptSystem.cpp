@@ -6,6 +6,7 @@
 
 #include "Rhino.h"
 #include "RScriptSystem.h"
+#include "Script/RScriptedBehavior.h"
 
 void print_error(lua_State* state) {
 	// The error message is on top of the stack.
@@ -36,7 +37,7 @@ bool RScriptSystem::Initialize()
 		return false;
 	}
 
-	RSceneObject::RegisterScriptFunctions();
+	ScriptedBehavior::RegisterScriptFunctions();
 
 	return true;
 }

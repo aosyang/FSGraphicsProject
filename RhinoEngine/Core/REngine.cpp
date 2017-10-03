@@ -57,6 +57,9 @@ bool REngine::Initialize(HWND hWnd, int width, int height)
 	if (!RRenderer.Initialize(m_hWnd, width, height, true))
 		return false;
 
+	RScript.Initialize();
+	RScript.Start();
+
 	if (!m_Application->Initialize())
 		return false;
 
@@ -65,6 +68,8 @@ bool REngine::Initialize(HWND hWnd, int width, int height)
 
 void REngine::Shutdown()
 {
+	RScript.Shutdown();
+
 	//delete m_Application;
 	RRenderer.Shutdown();
 
@@ -133,6 +138,9 @@ void REngine::RunOneFrame(bool update_input)
 	m_Timer.Tick();
 
 	m_Application->UpdateScene(m_Timer);
+
+	RScript.UpdateScriptableObjects();
+
 	m_Application->RenderScene();
 }
 

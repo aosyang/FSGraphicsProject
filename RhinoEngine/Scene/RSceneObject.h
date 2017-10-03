@@ -18,8 +18,6 @@ enum SceneObjectType
 class RSceneObject
 {
 public:
-	static void RegisterScriptFunctions();
-
 	RSceneObject();
 	virtual ~RSceneObject();
 

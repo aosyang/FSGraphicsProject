@@ -35,7 +35,6 @@ DeferredShadingApp::~DeferredShadingApp()
 	m_Scene.Release();
 
 	m_PostProcessor.Release();
-	RScript.Shutdown();
 	RShaderManager::Instance().UnloadAllShaders();
 	RResourceManager::Instance().Destroy();
 }
@@ -45,8 +44,7 @@ bool DeferredShadingApp::Initialize()
 	srand((unsigned int)time(nullptr));
 	RShaderManager::Instance().LoadShaders("../Shaders");
 	RResourceManager::Instance().Initialize();
-	RScript.Initialize();
-	RScript.Start();
+
 	m_PostProcessor.Initialize();
 
 	m_Scene.Initialize();
@@ -220,8 +218,6 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	if (RInput.GetBufferedKeyState(VK_F5) == BKS_Pressed)
 		m_DebugMenu.SetEnabled(!m_DebugMenu.GetEnabled());
 	m_DebugMenu.Update();
-
-	RScript.UpdateScriptableObjects();
 }
 
 void DeferredShadingApp::RenderScene()

@@ -122,6 +122,9 @@
     <ClInclude Include="Core\RScriptSystem.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Script\RScriptedBehavior.h">
+      <Filter>Script</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -212,6 +215,9 @@
     <ClCompile Include="Core\RScriptSystem.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Script\RScriptedBehavior.cpp">
+      <Filter>Script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="RenderSystem">
@@ -234,6 +240,9 @@
     </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{370bb2a1-e9c9-4397-8fcf-b3a221a70766}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Script">
+      <UniqueIdentifier>{9a32fefa-661f-4473-8236-775afe9e1814}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

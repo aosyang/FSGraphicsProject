@@ -765,7 +765,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	static float t = 0.0f;
 	t += timer.DeltaTime() * 50.0f;
 	m_TachikomaObj.SetTransform(RMatrix4::CreateYAxisRotation(t) * RMatrix4::CreateTranslation(pos));
-	m_DebugRenderer.DrawAabb(m_TachikomaObj.GetAabb());
+	//m_DebugRenderer.DrawAabb(m_TachikomaObj.GetAabb());
 
 
 	if (RInput.GetBufferedKeyState(VK_OEM_PLUS) == BKS_Pressed)

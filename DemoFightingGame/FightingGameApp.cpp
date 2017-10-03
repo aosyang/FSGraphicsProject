@@ -20,14 +20,10 @@ FightingGameApp::~FightingGameApp()
 	m_DebugRenderer.Release();
 	RShaderManager::Instance().UnloadAllShaders();
 	RResourceManager::Instance().Destroy();
-	RScript.Shutdown();
 }
 
 bool FightingGameApp::Initialize()
 {
-	RScript.Initialize();
-	RScript.Start();
-
 	RResourceManager::Instance().Initialize();
 	//RResourceManager::Instance().LoadAllResources();
 	RShaderManager::Instance().LoadShaders("../Shaders");
@@ -366,8 +362,6 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	moveVec += RVec3(0, -1000.0f * timer.DeltaTime(), 0);
 	m_AIPlayer->UpdateMovement(timer, moveVec);
 	m_AIPlayer->PostUpdate(timer);
-
-	RScript.UpdateScriptableObjects();
 }
 
 void FightingGameApp::RenderScene()
