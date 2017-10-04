@@ -42,9 +42,9 @@ void RSceneObject::SetPosition(const RVec3& pos)
 	m_NodeTransform.SetTranslation(pos);
 }
 
-RVec3 RSceneObject::GetPosition() const
+const RVec3& RSceneObject::GetPosition() const
 {
-	return m_NodeTransform.GetRow(3).ToVec3();
+	return *(RVec3*)(m_NodeTransform.GetRowArray(3));
 }
 
 void RSceneObject::LookAt(const RVec3& target, const RVec3& world_up /*= RVec3(0, 1, 0)*/)
@@ -91,4 +91,9 @@ const vector<string>& RSceneObject::GetParsedScript()
 	}
 
 	return m_ParsedScript;
+}
+
+void RSceneObject::UpdateComponents()
+{
+	// TODO
 }

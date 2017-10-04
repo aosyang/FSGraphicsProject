@@ -758,7 +758,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		m_DebugRenderer.DrawLine(nodePos, nodePos + worldOffset * 10, RColor(1.0f, 0.0f, 0.0f), RColor(1.0f, 0.0f, 0.0f));
 
 		m_cbBoneMatrices.UpdateContent(&cbSkinned);
-		m_cbBoneMatrices.ApplyToShaders();
+		m_cbBoneMatrices.BindBuffer();
 	}
 
 	RVec3 pos = m_TachikomaObj.GetNodeTransform().GetTranslation();
@@ -791,10 +791,10 @@ void FSGraphicsProjectApp::RenderScene()
 		{ 0.0f, 0.0f, 300, 300, 0.0f, 1.0f },
 	};
 
-	m_cbPerObject.ApplyToShaders();
-	m_cbLight.ApplyToShaders();
-	m_cbMaterial.ApplyToShaders();
-	m_cbGlobal.ApplyToShaders();
+	m_cbPerObject.BindBuffer();
+	m_cbLight.BindBuffer();
+	m_cbMaterial.BindBuffer();
+	m_cbGlobal.BindBuffer();
 	RRenderer.SetSamplerState(0, SamplerState_Texture);
 	RRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
 
@@ -803,7 +803,7 @@ void FSGraphicsProjectApp::RenderScene()
 	{
 		cbScene.cascadedShadowIndex = i;
 		m_cbScene.UpdateContent(&cbScene);
-		m_cbScene.ApplyToShaders();
+		m_cbScene.BindBuffer();
 
 		m_ShadowMap[i].SetupRenderTarget();
 		RRenderer.Clear();
@@ -857,8 +857,8 @@ void FSGraphicsProjectApp::RenderScene()
 
 			m_cbLight.UpdateContent(&cbLight);
 
-			m_cbScene.ApplyToShaders();
-			m_cbLight.ApplyToShaders();
+			m_cbScene.BindBuffer();
+			m_cbLight.BindBuffer();
 
 			ParticleDepthComparer cmp(m_SunVec, -m_SunVec);
 			std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
@@ -1032,7 +1032,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 				((x == m_MeshInstanceCount / 2) && (z == m_MeshInstanceCount / 2)))
 			{
 				m_cbInstance[2].UpdateContent(&cbMeshInstance);
-				m_cbInstance[2].ApplyToShaders();
+				m_cbInstance[2].BindBuffer();
 
 				if (pass == ShadowPass)
 					m_FbxMeshObj.DrawWithShader(m_DepthShader, true, instanceCount);
@@ -1079,7 +1079,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			islandInstanceCount++;
 		}
 		m_cbInstance[0].UpdateContent(&cbIslandInstance);
-		m_cbInstance[0].ApplyToShaders();
+		m_cbInstance[0].BindBuffer();
 	}
 
 	if (pass == ShadowPass)
@@ -1172,7 +1172,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	// Draw transparent spheres
 	if (pass != ShadowPass)
 	{
-		m_cbInstance[1].ApplyToShaders();
+		m_cbInstance[1].BindBuffer();
 
 		SetPerObjectConstBuffer(m_TransparentMesh.GetNodeTransform());
 
@@ -1252,7 +1252,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 void FSGraphicsProjectApp::SetMaterialConstBuffer(SHADER_MATERIAL_BUFFER* buffer)
 {
 	m_cbMaterial.UpdateContent(buffer);
-	m_cbMaterial.ApplyToShaders();
+	m_cbMaterial.BindBuffer();
 }
 
 RSphere FSGraphicsProjectApp::CalculateFrustumBoundingSphere(const RFrustum& frustum, float start, float end)

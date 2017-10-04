@@ -187,7 +187,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	cbMaterial.SpecularColorAndPower = RVec4(1.0f, 1.0f, 1.0f, 128.0f);
 	cbMaterial.GlobalOpacity = 1.0f;
 	RConstantBuffers::cbMaterial.UpdateContent(&cbMaterial);
-	RConstantBuffers::cbMaterial.ApplyToShaders();
+	RConstantBuffers::cbMaterial.BindBuffer();
 
 	// Update screen buffer
 	SHADER_GLOBAL_BUFFER cbScreen;
@@ -208,10 +208,10 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	cbScreen.TotalTime = REngine::GetTimer().TotalTime();
 
 	RConstantBuffers::cbGlobal.UpdateContent(&cbScreen);
-	RConstantBuffers::cbGlobal.ApplyToShaders();
+	RConstantBuffers::cbGlobal.BindBuffer();
 
 	m_cbSSR.UpdateContent(&cbSSR);
-	m_cbSSR.ApplyToShaders();
+	m_cbSSR.BindBuffer();
 
 	m_TotalTime = timer.TotalTime();
 
@@ -237,7 +237,7 @@ void DeferredShadingApp::RenderScene()
 	cbScene.cameraPos = m_Camera.GetPosition();
 
 	RConstantBuffers::cbScene.UpdateContent(&cbScene);
-	RConstantBuffers::cbScene.ApplyToShaders();
+	RConstantBuffers::cbScene.BindBuffer();
 
 	if (m_EnableDeferredShading)
 	{
@@ -247,7 +247,6 @@ void DeferredShadingApp::RenderScene()
 			m_DeferredBuffers[1].View, 
 			m_DeferredBuffers[2].View, 
 			m_DeferredBuffers[3].View,
-			m_DeferredBuffers[4].View,
 		};
 
 		RRenderer.SetRenderTargets(DeferredBuffer_Count, rtvs, m_DepthBuffer.View);
@@ -380,7 +379,7 @@ void DeferredShadingApp::RenderScene()
 					RenderPointLightCubemapDepth(pos, r);
 
 					RConstantBuffers::cbScene.UpdateContent(&cbScene);
-					RConstantBuffers::cbScene.ApplyToShaders();
+					RConstantBuffers::cbScene.BindBuffer();
 
 					if (m_EnableSSR)
 						RRenderer.SetRenderTargets(1, &m_ScenePassBuffer.View, m_DepthBuffer.View);
@@ -412,7 +411,7 @@ void DeferredShadingApp::RenderScene()
 				cbDeferredPointLight.CastShadow = m_EnablePointLightShadow && m_PointLights[i].castShadow;
 
 				m_cbDeferredPointLight.UpdateContent(&cbDeferredPointLight);
-				m_cbDeferredPointLight.ApplyToShaders();
+				m_cbDeferredPointLight.BindBuffer();
 
 				RRenderer.Clear(false, RColor(0, 0, 0), true);
 				m_PostProcessor.Draw(PPE_DeferredPointLightPass);
@@ -459,7 +458,7 @@ void DeferredShadingApp::RenderScene()
 	cbObject.worldMatrix = RMatrix4::IDENTITY;
 
 	RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
-	RConstantBuffers::cbPerObject.ApplyToShaders();
+	RConstantBuffers::cbPerObject.BindBuffer();
 
 	m_DebugRenderer.Render();
 	m_DebugRenderer.Reset();
@@ -676,7 +675,7 @@ void DeferredShadingApp::RenderPointLightCubemapDepth(const RVec3& position, flo
 		cbScene.cascadedShadowIndex = 0;
 
 		RConstantBuffers::cbScene.UpdateContent(&cbScene);
-		RConstantBuffers::cbScene.ApplyToShaders();
+		RConstantBuffers::cbScene.BindBuffer();
 
 		RFrustum frustum = cubeCameras[i].GetFrustum();
 		m_Scene.RenderDepthPass(&frustum);

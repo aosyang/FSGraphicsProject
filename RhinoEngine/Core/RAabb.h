@@ -26,6 +26,17 @@ public:
 		if (p.z > pMax.z) pMax.z = p.z;
 	}
 
+	RAabb& operator=(const RAabb& rhs)
+	{
+		if (this != &rhs)
+		{
+			this->pMin = rhs.pMin;
+			this->pMax = rhs.pMax;
+		}
+
+		return *this;
+	}
+
 	inline void Expand(const RAabb& aabb)
 	{
 		Expand(aabb.pMin);

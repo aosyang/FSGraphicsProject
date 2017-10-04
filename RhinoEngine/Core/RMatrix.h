@@ -44,6 +44,7 @@ public:
 	RVec3 GetRight() const;
 
 	RVec4 GetRow(int index) const;
+	const float* GetRowArray(int index) const;
 	void SetRow(int index, const RVec4& row);
 
 	void Translate(const RVec3& vec);

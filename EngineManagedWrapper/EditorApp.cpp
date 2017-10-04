@@ -277,9 +277,9 @@ namespace EngineManagedWrapper
 
 		RConstantBuffers::cbLight.UpdateContent(&cbLight);
 
-		RConstantBuffers::cbPerObject.ApplyToShaders();
-		RConstantBuffers::cbScene.ApplyToShaders();
-		RConstantBuffers::cbLight.ApplyToShaders();
+		RConstantBuffers::cbPerObject.BindBuffer();
+		RConstantBuffers::cbScene.BindBuffer();
+		RConstantBuffers::cbLight.BindBuffer();
 
 		// Update screen buffer
 		SHADER_GLOBAL_BUFFER cbScreen;
@@ -288,7 +288,7 @@ namespace EngineManagedWrapper
 		cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();
 
 		RConstantBuffers::cbGlobal.UpdateContent(&cbScreen);
-		RConstantBuffers::cbGlobal.ApplyToShaders();
+		RConstantBuffers::cbGlobal.BindBuffer();
 
 
 		RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);

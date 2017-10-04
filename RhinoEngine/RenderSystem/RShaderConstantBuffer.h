@@ -37,7 +37,7 @@ public:
 		T buffer;
 		ZeroMemory(&buffer, sizeof(T));
 		UpdateContent(&buffer);
-		ApplyToShaders();
+		BindBuffer();
 	}
 
 	void Release()
@@ -53,8 +53,8 @@ public:
 		RRenderer.D3DImmediateContext()->Unmap(m_ConstBuffer, 0);
 	}
 
-	// Send constant buffer data to shaders
-	void ApplyToShaders()
+	/// Bind constant buffer to shader for rendering
+	void BindBuffer()
 	{
 		if (SHADER_TYPE & CBST_VS)
 			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(SLOT, 1, &m_ConstBuffer);

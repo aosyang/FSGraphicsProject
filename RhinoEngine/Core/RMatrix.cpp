@@ -111,6 +111,11 @@ RVec4 RMatrix4::GetRow(int index) const
 	return RVec4(m[index]);
 }
 
+const float* RMatrix4::GetRowArray(int index) const
+{
+	return m[index];
+}
+
 void RMatrix4::SetRow(int index, const RVec4& row)
 {
 	m[index][0] = row.x;

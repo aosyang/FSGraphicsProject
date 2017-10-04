@@ -13,7 +13,7 @@
 struct RMaterial
 {
 	RShader*					Shader;
-	int							TextureNum;
+	int							TextureNum;		/// Texture numbers, max 8
 	RTexture*					Textures[8];
 
 	void Serialize(RSerializer& serializer);

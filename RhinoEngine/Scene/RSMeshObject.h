@@ -20,8 +20,8 @@ public:
 	RSMeshObject();
 	~RSMeshObject();
 
-	SceneObjectType GetType() const { return SO_MeshObject; }
-	RSceneObject* Clone() const;
+	SceneObjectType GetType() const override { return SO_MeshObject; }
+	RSceneObject* Clone() const override;
 
 	void SetMesh(RMesh* mesh);
 	RMesh* GetMesh() const;
@@ -35,12 +35,13 @@ public:
 
 	void SetOverridingShader(RShader* shader, int features = -1);
 
-	RAabb GetAabb() const;
+	const RAabb& GetAabb() override;
 	const RAabb& GetMeshElementAabb(int index) const;
 
-	void Draw();
+	void Draw() override;
+	void DrawDepthPass() override;
+
 	void Draw(bool instanced, int instanceCount);
-	void DrawDepthPass();
 	void DrawDepthPass(bool instanced, int instanceCount);
 	void DrawWithShader(RShader* shader, bool instanced = false, int instanceCount = 0);
 
@@ -50,6 +51,7 @@ protected:
 
 	RMesh*					m_Mesh;
 	vector<RMaterial>		m_Materials;
+	RAabb					m_MeshAABB;
 	RShader*				m_OverridingShader;
 	int						m_OverridingShaderFeatures;
 	bool					m_bNeedUpdateMaterial;

@@ -66,6 +66,7 @@
     <ClInclude Include="RenderSystem\RAnimation.h" />
     <ClInclude Include="RenderSystem\RDebugRenderer.h" />
     <ClInclude Include="RenderSystem\RMesh.h" />
+    <ClInclude Include="RenderSystem\RMeshComponent.h" />
     <ClInclude Include="RenderSystem\RMeshElement.h" />
     <ClInclude Include="RenderSystem\RRenderSystem.h" />
     <ClInclude Include="RenderSystem\RResourceManager.h" />
@@ -76,8 +77,10 @@
     <ClInclude Include="RenderSystem\RTexture.h" />
     <ClInclude Include="RenderSystem\RVertexDeclaration.h" />
     <ClInclude Include="Rhino.h" />
+    <ClInclude Include="Scene\ISceneComponent.h" />
     <ClInclude Include="Scene\RCamera.h" />
     <ClInclude Include="Scene\RScene.h" />
+    <ClInclude Include="Scene\RSceneComponentBase.h" />
     <ClInclude Include="Scene\RSceneObject.h" />
     <ClInclude Include="Scene\RSkybox.h" />
     <ClInclude Include="Scene\RSMeshObject.h" />
@@ -99,6 +102,7 @@
     <ClCompile Include="RenderSystem\RAnimation.cpp" />
     <ClCompile Include="RenderSystem\RDebugRenderer.cpp" />
     <ClCompile Include="RenderSystem\RMesh.cpp" />
+    <ClCompile Include="RenderSystem\RMeshComponent.cpp" />
     <ClCompile Include="RenderSystem\RMeshElement.cpp" />
     <ClCompile Include="RenderSystem\RRenderSystem.cpp" />
     <ClCompile Include="RenderSystem\RResourceManager.cpp" />
@@ -116,6 +120,7 @@
     </ClCompile>
     <ClCompile Include="Scene\RCamera.cpp" />
     <ClCompile Include="Scene\RScene.cpp" />
+    <ClCompile Include="Scene\RSceneComponentBase.cpp" />
     <ClCompile Include="Scene\RSceneObject.cpp" />
     <ClCompile Include="Scene\RSkybox.cpp" />
     <ClCompile Include="Scene\RSMeshObject.cpp" />
