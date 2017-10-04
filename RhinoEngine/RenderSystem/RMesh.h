@@ -7,7 +7,7 @@
 #define _RMESH_H
 
 #include "RShaderManager.h"
-#include "IResource.h"
+#include "RResourceBase.h"
 #include "../../Shaders/ConstBufferVS.h"	// MAX_BONE_COUNT
 
 struct RMaterial
@@ -24,7 +24,7 @@ struct BoneMatrices
 	RMatrix4 boneMatrix[MAX_BONE_COUNT];
 };
 
-class RMesh : public RBaseResource
+class RMesh : public RResourceBase
 {
 public:
 	RMesh(string path);
@@ -60,14 +60,11 @@ public:
 	void CacheAnimation(RAnimation* anim);
 	int GetCachedAnimationNodeId(RAnimation* anim, int boneId);
 
-	void SetResourceTimestamp(float time);
-	float GetResourceTimestamp();
 private:
 	vector<RMeshElement>	m_MeshElements;
 
 	vector<RMaterial>		m_Materials;
 	RAabb					m_Aabb;
-	float					m_LoadingFinishTime;
 
 	RAnimation*				m_Animation;
 	vector<RMatrix4>		m_BoneInitInvMatrices;

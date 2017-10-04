@@ -51,7 +51,7 @@ using namespace std;
 
 class RMesh;
 class RTexture;
-class RBaseResource;
+class RResourceBase;
 
 // Engine Classes
 #include "Collision/RCollision.h"
@@ -62,6 +62,7 @@ class RBaseResource;
 #include "Core/IApp.h"
 #include "Core/MathHelper.h"
 #include "Core/RScriptSystem.h"
+#include "Core/RFileUtil.h"
 
 #include "../Shaders/ConstBufferVS.h"
 #include "../Shaders/ConstBufferPS.h"

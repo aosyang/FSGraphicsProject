@@ -386,7 +386,7 @@ namespace EngineManagedWrapper
 			if (anim)
 			{
 				string animFilename = meshVec[i]->GetPath();
-				animFilename = animFilename.substr(0, animFilename.size() - 3) + "ranim";
+				animFilename = RFileUtil::ReplaceExt(animFilename, "ranim");
 				//anim->SaveToFile(animFilename.c_str());
 			}
 		}

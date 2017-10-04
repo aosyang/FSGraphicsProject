@@ -52,6 +52,7 @@
     <ClInclude Include="Core\RColor.h" />
     <ClInclude Include="Core\RDebugMenu.h" />
     <ClInclude Include="Core\REngine.h" />
+    <ClInclude Include="Core\RFileUtil.h" />
     <ClInclude Include="Core\RInput.h" />
     <ClInclude Include="Core\RMatrix.h" />
     <ClInclude Include="Core\RRay.h" />
@@ -62,7 +63,7 @@
     <ClInclude Include="Core\RVector.h" />
     <ClInclude Include="RenderSystem\d3dUtil.h" />
     <ClInclude Include="RenderSystem\DDSTextureLoader.h" />
-    <ClInclude Include="RenderSystem\IResource.h" />
+    <ClInclude Include="RenderSystem\RResourceBase.h" />
     <ClInclude Include="RenderSystem\RAnimation.h" />
     <ClInclude Include="RenderSystem\RDebugRenderer.h" />
     <ClInclude Include="RenderSystem\RMesh.h" />
@@ -105,6 +106,7 @@
     <ClCompile Include="RenderSystem\RMeshComponent.cpp" />
     <ClCompile Include="RenderSystem\RMeshElement.cpp" />
     <ClCompile Include="RenderSystem\RRenderSystem.cpp" />
+    <ClCompile Include="RenderSystem\RResourceBase.cpp" />
     <ClCompile Include="RenderSystem\RResourceManager.cpp" />
     <ClCompile Include="RenderSystem\RShaderConstantBuffer.cpp" />
     <ClCompile Include="RenderSystem\RShaderManager.cpp" />

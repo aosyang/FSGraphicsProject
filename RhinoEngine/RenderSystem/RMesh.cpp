@@ -53,21 +53,22 @@ void RMaterial::Serialize(RSerializer& serializer)
 
 
 RMesh::RMesh(string path)
-	: RBaseResource(RT_Mesh, path),
+	: RResourceBase(RT_Mesh, path),
 	  m_Animation(nullptr)
 {
-	m_LoadingFinishTime = 0.0f;
 }
 
 RMesh::RMesh(string path, const vector<RMeshElement>& meshElements, const vector<RMaterial>& materials)
-	: RMesh(path)
+	: RResourceBase(RT_Mesh, path),
+	  m_Animation(nullptr)
 {
 	m_MeshElements = meshElements;
 	m_Materials = materials;
 }
 
 RMesh::RMesh(string path, RMeshElement* meshElements, int numElement, RMaterial* materials, int numMaterial)
-	: RMesh(path)
+	: RResourceBase(RT_Mesh, path),
+	  m_Animation(nullptr)
 {
 	assert(meshElements && numElement);
 	m_MeshElements.assign(meshElements, meshElements + numElement);
@@ -224,14 +225,4 @@ int RMesh::GetCachedAnimationNodeId(RAnimation* anim, int boneId)
 		return -1;
 
 	return iter->second[boneId];
-}
-
-void RMesh::SetResourceTimestamp(float time)
-{
-	m_LoadingFinishTime = time;
-}
-
-float RMesh::GetResourceTimestamp()
-{
-	return m_LoadingFinishTime;
 }

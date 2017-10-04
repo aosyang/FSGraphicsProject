@@ -17,7 +17,7 @@ namespace std
 struct LoaderThreadTask
 {
 	string			Filename;
-	RBaseResource*	Resource;
+	RResourceBase*	Resource;
 };
 
 struct LoaderThreadData

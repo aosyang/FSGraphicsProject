@@ -56,9 +56,6 @@
     <ClInclude Include="Core\RColor.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="RenderSystem\IResource.h">
-      <Filter>RenderSystem</Filter>
-    </ClInclude>
     <ClInclude Include="RenderSystem\RTexture.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
@@ -133,6 +130,12 @@
     </ClInclude>
     <ClInclude Include="RenderSystem\RMeshComponent.h">
       <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderSystem\RResourceBase.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\RFileUtil.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -232,6 +235,9 @@
     </ClCompile>
     <ClCompile Include="Scene\RSceneComponentBase.cpp">
       <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem\RResourceBase.cpp">
+      <Filter>RenderSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

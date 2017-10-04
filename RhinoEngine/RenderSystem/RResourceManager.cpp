@@ -184,7 +184,7 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename, ResourceLoadingMode m
 		return pMesh;
 
 	pMesh = new RMesh(GetResourcePath(filename));
-	pMesh->m_State = RS_EnqueuedForLoading;
+	pMesh->OnEnqueuedForLoading();
 	m_MeshResources.push_back(pMesh);
 
 	LoaderThreadTask task;
@@ -900,25 +900,28 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	lFbxSdkManager->Destroy();
 
 	// Load material from file
-	string mtlFilename = task->Filename.substr(0, task->Filename.length() - 3) + "rmtl";
+	string mtlFilename = RFileUtil::ReplaceExt(task->Filename, "rmtl");
 	LoadMeshMaterials(mtlFilename, materials);
 
-	static_cast<RMesh*>(task->Resource)->SetMeshElements(meshElements.data(), (UINT)meshElements.size());
-	static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), (UINT)materials.size());
-	static_cast<RMesh*>(task->Resource)->UpdateAabb();
-	static_cast<RMesh*>(task->Resource)->SetAnimation(animation);
-	static_cast<RMesh*>(task->Resource)->SetBoneNameList(meshBoneIdToName);
-	static_cast<RMesh*>(task->Resource)->SetBoneInitInvMatrices(boneInitInvPose);
-	static_cast<RMesh*>(task->Resource)->SetResourceTimestamp(REngine::GetTimer().TotalTime());
-	task->Resource->m_State = RS_Loaded;
+	RMesh* MeshResource = static_cast<RMesh*>(task->Resource);
+
+	MeshResource->SetMeshElements(meshElements.data(), (UINT)meshElements.size());
+	MeshResource->SetMaterials(materials.data(), (UINT)materials.size());
+	MeshResource->UpdateAabb();
+	MeshResource->SetAnimation(animation);
+	MeshResource->SetBoneNameList(meshBoneIdToName);
+	MeshResource->SetBoneInitInvMatrices(boneInitInvPose);
+
+	// Notify mesh has been loaded
+	MeshResource->OnLoadingFinsihed();
 
 #if EXPORT_FBX_AS_BINARY_MESH == 1
-	string rmeshName = task->Filename.substr(0, task->Filename.length() - 3) + "rmesh";
+	string rmeshName = RFileUtil::ReplaceExt(task->Filename, "rmesh");
 	RSerializer serializer;
 	serializer.Open(rmeshName, SM_Write);
 	if (serializer.IsOpen())
 	{
-		static_cast<RMesh*>(task->Resource)->Serialize(serializer);
+		MeshResource->Serialize(serializer);
 		serializer.Close();
 	}
 #endif
@@ -933,26 +936,27 @@ bool RResourceManager::ThreadLoadRmeshData(LoaderThreadTask* task)
 	sprintf_s(msg_buf, sizeof(msg_buf), "Loading mesh [%s]...\n", task->Filename.data());
 	OutputDebugStringA(msg_buf);
 
-	string rmeshName = task->Filename.substr(0, task->Filename.length() - 3) + "rmesh";
+	string rmeshName = RFileUtil::ReplaceExt(task->Filename, "rmesh");
+	RMesh* MeshResource = static_cast<RMesh*>(task->Resource);
 
 	RSerializer serializer;
 	serializer.Open(rmeshName, SM_Read);
 	if (!serializer.IsOpen())
 		return false;
-	static_cast<RMesh*>(task->Resource)->Serialize(serializer);
+	MeshResource->Serialize(serializer);
 	serializer.Close();
 
 	//RAnimation* animation = new RAnimation();
-	//string animFilename = task->Filename.substr(0, task->Filename.size() - 3) + "ranim";
+	//string animFilename = RFileUtil::ReplaceExt(task->Filename.size(), "ranim");
 
 	// Load material from file
-	string mtlFilename = task->Filename.substr(0, task->Filename.length() - 3) + "rmtl";
+	string mtlFilename = RFileUtil::ReplaceExt(task->Filename, "rmtl");
 	LoadMeshMaterials(mtlFilename, materials);
 	
 	if (materials.size())
-		static_cast<RMesh*>(task->Resource)->SetMaterials(materials.data(), (UINT)materials.size());
-	static_cast<RMesh*>(task->Resource)->SetResourceTimestamp(REngine::GetTimer().TotalTime());
-	static_cast<RMesh*>(task->Resource)->m_State = RS_Loaded;
+		MeshResource->SetMaterials(materials.data(), (UINT)materials.size());
+
+	MeshResource->OnLoadingFinsihed();
 
 	return true;
 }
@@ -1008,7 +1012,7 @@ RTexture* RResourceManager::LoadDDSTexture(const char* filename, ResourceLoading
 		return pTexture;
 
 	pTexture = new RTexture(GetResourcePath(filename));
-	pTexture->m_State = RS_EnqueuedForLoading;
+	pTexture->OnEnqueuedForLoading();
 
 	TextureResourcesMutex.lock();
 	m_TextureResources.push_back(pTexture);
@@ -1060,6 +1064,8 @@ void RResourceManager::ThreadLoadDDSTextureData(LoaderThreadTask* task)
 		OutputDebugStringA(msg_buf);
 	}
 
+	RTexture* TextureResource = static_cast<RTexture*>(task->Resource);
+
 	if (pResource)
 	{
 		ID3D11Texture2D* pTexture;
@@ -1070,8 +1076,8 @@ void RResourceManager::ThreadLoadDDSTextureData(LoaderThreadTask* task)
 			D3D11_TEXTURE2D_DESC desc;
 			pTexture->GetDesc(&desc);
 
-			static_cast<RTexture*>(task->Resource)->m_Width = desc.Width;
-			static_cast<RTexture*>(task->Resource)->m_Height = desc.Height;
+			TextureResource->m_Width = desc.Width;
+			TextureResource->m_Height = desc.Height;
 
 			pTexture->Release();
 		}
@@ -1079,8 +1085,8 @@ void RResourceManager::ThreadLoadDDSTextureData(LoaderThreadTask* task)
 		pResource->Release();
 	}
 
-	static_cast<RTexture*>(task->Resource)->m_SRV = srv;
-	task->Resource->m_State = RS_Loaded;
+	TextureResource->m_SRV = srv;
+	TextureResource->OnLoadingFinsihed();
 }
 
 // case-insensitive string comparison
@@ -1170,7 +1176,7 @@ RTexture* RResourceManager::WrapSRV(ID3D11ShaderResourceView* srv)
 		return m_WrapperTextureResources[srv];
 
 	RTexture* tex = new RTexture("[Internal]", srv);
-	tex->m_State = RS_Loaded;
+	tex->OnLoadingFinsihed();
 	m_WrapperTextureResources[srv] = tex;
 	return tex;
 }

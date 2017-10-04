@@ -7,7 +7,7 @@
 #ifndef _RTEXTURE_H
 #define _RTEXTURE_H
 
-class RTexture : public RBaseResource
+class RTexture : public RResourceBase
 {
 	friend class RResourceManager;
 public:
