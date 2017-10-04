@@ -2,6 +2,7 @@
 /[Rr]elease/
 /[Dd]ebug_x64/
 /[Rr]elease_x64/
+/Intermediate/
 /DemoDeferredShading/[Dd]ebug/
 /DemoDeferredShading/[Rr]elease/
 /DemoDeferredShading/x64/
