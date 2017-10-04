@@ -527,9 +527,9 @@ DeferredRenderBuffer DeferredShadingApp::CreateRenderTarget(DXGI_FORMAT format, 
 #ifdef _DEBUG
 	if (debugResourceName)
 	{
-		rb.Buffer->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(debugResourceName), debugResourceName);
-		rb.View->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(debugResourceName), debugResourceName);
-		rb.SRV->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(debugResourceName), debugResourceName);
+		rb.Buffer->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen(debugResourceName), debugResourceName);
+		rb.View->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen(debugResourceName), debugResourceName);
+		rb.SRV->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen(debugResourceName), debugResourceName);
 	}
 #endif // _DEBUG
 
