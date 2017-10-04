@@ -265,7 +265,7 @@ namespace EngineManagedWrapper
 		cbScene.viewProjMatrix = viewProjMatrix;
 		cbScene.cameraPos = m_CameraMatrix.GetRow(3);
 
-		m_Scene.cbScene.UpdateContent(&cbScene);
+		RConstantBuffers::cbScene.UpdateContent(&cbScene);
 
 		// Update light constant buffer
 		SHADER_LIGHT_BUFFER cbLight;
@@ -275,11 +275,11 @@ namespace EngineManagedWrapper
 		cbLight.HighHemisphereAmbientColor = RVec4(1.0f, 1.0f, 1.0f, 1.0f);
 		cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 1.0f);
 
-		m_Scene.cbLight.UpdateContent(&cbLight);
+		RConstantBuffers::cbLight.UpdateContent(&cbLight);
 
-		m_Scene.cbPerObject.ApplyToShaders();
-		m_Scene.cbScene.ApplyToShaders();
-		m_Scene.cbLight.ApplyToShaders();
+		RConstantBuffers::cbPerObject.ApplyToShaders();
+		RConstantBuffers::cbScene.ApplyToShaders();
+		RConstantBuffers::cbLight.ApplyToShaders();
 
 		// Update screen buffer
 		SHADER_GLOBAL_BUFFER cbScreen;
@@ -287,8 +287,8 @@ namespace EngineManagedWrapper
 
 		cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();
 
-		m_Scene.cbGlobal.UpdateContent(&cbScreen);
-		m_Scene.cbGlobal.ApplyToShaders();
+		RConstantBuffers::cbGlobal.UpdateContent(&cbScreen);
+		RConstantBuffers::cbGlobal.ApplyToShaders();
 
 
 		RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
@@ -303,7 +303,7 @@ namespace EngineManagedWrapper
 		SHADER_OBJECT_BUFFER cbObject;
 		cbObject.worldMatrix = RMatrix4::IDENTITY;
 
-		m_Scene.cbPerObject.UpdateContent(&cbObject);
+		RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
 
 		m_Skybox.Draw();
 
@@ -312,7 +312,7 @@ namespace EngineManagedWrapper
 		m_Scene.Render();
 
 		cbObject.worldMatrix = RMatrix4::IDENTITY;
-		m_Scene.cbPerObject.UpdateContent(&cbObject);
+		RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
 
 		m_DebugRenderer.Render();
 
@@ -332,7 +332,7 @@ namespace EngineManagedWrapper
 			m_AxisMatrix = RMatrix4::CreateTranslation(axis_pos);
 			cbObject.worldMatrix = m_AxisMatrix;
 
-			m_Scene.cbPerObject.UpdateContent(&cbObject);
+			RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
 
 			m_EditorAxis.Draw();
 		}

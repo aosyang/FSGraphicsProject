@@ -94,7 +94,6 @@
     <ClCompile Include="Core\RMatrix.cpp" />
     <ClCompile Include="Core\RRay.cpp" />
     <ClCompile Include="Core\RScriptSystem.cpp" />
-    <ClCompile Include="Core\RSerializer.cpp" />
     <ClCompile Include="Core\RTimer.cpp" />
     <ClCompile Include="RenderSystem\DDSTextureLoader.cpp" />
     <ClCompile Include="RenderSystem\RAnimation.cpp" />
@@ -103,6 +102,7 @@
     <ClCompile Include="RenderSystem\RMeshElement.cpp" />
     <ClCompile Include="RenderSystem\RRenderSystem.cpp" />
     <ClCompile Include="RenderSystem\RResourceManager.cpp" />
+    <ClCompile Include="RenderSystem\RShaderConstantBuffer.cpp" />
     <ClCompile Include="RenderSystem\RShaderManager.cpp" />
     <ClCompile Include="RenderSystem\RShadowMap.cpp" />
     <ClCompile Include="RenderSystem\RText.cpp" />

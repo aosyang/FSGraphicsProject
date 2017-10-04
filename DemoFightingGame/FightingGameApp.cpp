@@ -120,11 +120,11 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	shadowViewProjMatrix *= shadowTransform;
 	cbScene.shadowViewProjBiasedMatrix[0] = shadowViewProjMatrix;
 
-	m_Scene.cbScene.UpdateContent(&cbScene);
-	m_Scene.cbScene.ApplyToShaders();
+	RConstantBuffers::cbScene.UpdateContent(&cbScene);
+	RConstantBuffers::cbScene.ApplyToShaders();
 
-	m_Scene.cbLight.UpdateContent(&cbLight);
-	m_Scene.cbLight.ApplyToShaders();
+	RConstantBuffers::cbLight.UpdateContent(&cbLight);
+	RConstantBuffers::cbLight.ApplyToShaders();
 
 	SHADER_MATERIAL_BUFFER cbMaterial;
 	ZeroMemory(&cbMaterial, sizeof(cbMaterial));
@@ -132,8 +132,8 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	cbMaterial.SpecularColorAndPower = RVec4(1.0f, 1.0f, 1.0f, 512.0f);
 	cbMaterial.GlobalOpacity = 1.0f;
 	
-	m_Scene.cbMaterial.UpdateContent(&cbMaterial);
-	m_Scene.cbMaterial.ApplyToShaders();
+	RConstantBuffers::cbMaterial.UpdateContent(&cbMaterial);
+	RConstantBuffers::cbMaterial.ApplyToShaders();
 
 	if (RInput.GetBufferedKeyState('P') == BKS_Pressed)
 		m_DrawHitBound = !m_DrawHitBound;
@@ -145,8 +145,8 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 								1.0f / (float)RRenderer.GetClientWidth(), 1.0f / (float)RRenderer.GetClientHeight());
 	cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();
 	
-	m_Scene.cbGlobal.UpdateContent(&cbScreen);
-	m_Scene.cbGlobal.ApplyToShaders();
+	RConstantBuffers::cbGlobal.UpdateContent(&cbScreen);
+	RConstantBuffers::cbGlobal.ApplyToShaders();
 
 	if (m_Player)
 	{
@@ -410,8 +410,8 @@ void FightingGameApp::RenderScene()
 		if (m_Player)
 		{
 			cbObject.worldMatrix = m_Player->GetNodeTransform();
-			m_Scene.cbPerObject.UpdateContent(&cbObject);
-			m_Scene.cbPerObject.ApplyToShaders();
+			RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
+			RConstantBuffers::cbPerObject.ApplyToShaders();
 			if (pass == 0)
 			{
 				m_Player->DrawDepthPass();
@@ -428,8 +428,8 @@ void FightingGameApp::RenderScene()
 	}
 
 	cbObject.worldMatrix = RMatrix4::IDENTITY;
-	m_Scene.cbPerObject.UpdateContent(&cbObject);
-	m_Scene.cbPerObject.ApplyToShaders();
+	RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
+	RConstantBuffers::cbPerObject.ApplyToShaders();
 	m_DebugRenderer.Render();
 	m_DebugRenderer.Reset();
 

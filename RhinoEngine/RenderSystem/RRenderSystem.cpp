@@ -250,12 +250,15 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 
 	RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState[SamplerState_ShadowDepthComparison]);
 
+	RConstantBuffers::Initialize();
 
 	return true;
 }
 
 void RRenderSystem::Shutdown()
 {
+	RConstantBuffers::Shutdown();
+
 	for (int i = 0; i < SamplerStateCount; i++)
 	{
 		SAFE_RELEASE(m_SamplerState[i]);

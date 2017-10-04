@@ -118,7 +118,7 @@ void RShaderManager::LoadShaders(const char* path)
 					{
 						RRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader);
 #ifdef _DEBUG
-						m_Shaders[shaderName].VertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, filename.size(), filename.c_str());
+						m_Shaders[shaderName].VertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 					}
 					HANDLE_SHADER_COMPILE_ERROR();
@@ -133,7 +133,7 @@ void RShaderManager::LoadShaders(const char* path)
 						{
 							RRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader_Skinned);
 #ifdef _DEBUG
-							m_Shaders[shaderName].VertexShader_Skinned->SetPrivateData(WKPDID_D3DDebugObjectName, filename.size(), filename.c_str());
+							m_Shaders[shaderName].VertexShader_Skinned->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 						}
 						HANDLE_SHADER_COMPILE_ERROR();
@@ -149,7 +149,7 @@ void RShaderManager::LoadShaders(const char* path)
 						{
 							RRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader_Instanced);
 #ifdef _DEBUG
-							m_Shaders[shaderName].VertexShader_Instanced->SetPrivateData(WKPDID_D3DDebugObjectName, filename.size(), filename.c_str());
+							m_Shaders[shaderName].VertexShader_Instanced->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 						}
 						HANDLE_SHADER_COMPILE_ERROR();
@@ -161,7 +161,7 @@ void RShaderManager::LoadShaders(const char* path)
 					{
 						RRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].PixelShader);
 #ifdef _DEBUG
-						m_Shaders[shaderName].PixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, filename.size(), filename.c_str());
+						m_Shaders[shaderName].PixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 					}
 					HANDLE_SHADER_COMPILE_ERROR();
@@ -176,7 +176,7 @@ void RShaderManager::LoadShaders(const char* path)
 						{
 							RRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].PixelShader_Deferred);
 #ifdef _DEBUG
-							m_Shaders[shaderName].PixelShader_Deferred->SetPrivateData(WKPDID_D3DDebugObjectName, filename.size(), filename.c_str());
+							m_Shaders[shaderName].PixelShader_Deferred->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 						}
 						HANDLE_SHADER_COMPILE_ERROR();
@@ -188,7 +188,7 @@ void RShaderManager::LoadShaders(const char* path)
 					{
 						RRenderer.D3DDevice()->CreateGeometryShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].GeometryShader);
 #ifdef _DEBUG
-						m_Shaders[shaderName].GeometryShader->SetPrivateData(WKPDID_D3DDebugObjectName, filename.size(), filename.c_str());
+						m_Shaders[shaderName].GeometryShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 					}
 					HANDLE_SHADER_COMPILE_ERROR();

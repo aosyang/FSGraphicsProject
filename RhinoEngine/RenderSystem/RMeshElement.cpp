@@ -52,7 +52,7 @@ void RMeshRenderBuffer::CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT
 
 #if _DEBUG
 	if (debugResourceName)
-		m_VertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(debugResourceName), debugResourceName);
+		m_VertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen(debugResourceName), debugResourceName);
 #endif
 }
 
@@ -73,7 +73,7 @@ void RMeshRenderBuffer::CreateIndexBuffer(void* data, UINT indexTypeSize, UINT i
 
 #if _DEBUG
 	if (debugResourceName)
-		m_IndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(debugResourceName), debugResourceName);
+		m_IndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen(debugResourceName), debugResourceName);
 #endif
 }
 

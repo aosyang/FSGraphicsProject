@@ -11,24 +11,11 @@
 
 void RScene::Initialize()
 {
-	cbPerObject.Initialize();
-	cbScene.Initialize();
-	cbBoneMatrices.Initialize();
-	cbLight.Initialize();
-	cbMaterial.Initialize();
-	cbGlobal.Initialize();
 }
 
 void RScene::Release()
 {
 	DestroyAllObjects();
-
-	cbPerObject.Release();
-	cbScene.Release();
-	cbBoneMatrices.Release();
-	cbLight.Release();
-	cbMaterial.Release();
-	cbGlobal.Release();
 }
 
 RSMeshObject* RScene::CreateMeshObject(const char* meshName)
@@ -332,8 +319,8 @@ void RScene::Render(const RFrustum* pFrustum)
 
 		SHADER_OBJECT_BUFFER cbObject;
 		cbObject.worldMatrix = (*iter)->GetNodeTransform();
-		cbPerObject.UpdateContent(&cbObject);
-		cbPerObject.ApplyToShaders();
+		RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
+		RConstantBuffers::cbPerObject.ApplyToShaders();
 		(*iter)->Draw();
 	}
 }
@@ -347,8 +334,8 @@ void RScene::RenderDepthPass(const RFrustum* pFrustum)
 
 		SHADER_OBJECT_BUFFER cbObject;
 		cbObject.worldMatrix = (*iter)->GetNodeTransform();
-		cbPerObject.UpdateContent(&cbObject);
-		cbPerObject.ApplyToShaders();
+		RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
+		RConstantBuffers::cbPerObject.ApplyToShaders();
 		(*iter)->DrawDepthPass();
 	}
 }

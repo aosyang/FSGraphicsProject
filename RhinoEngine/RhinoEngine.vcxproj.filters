@@ -206,9 +206,6 @@
     <ClCompile Include="RenderSystem\RText.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
-    <ClCompile Include="Core\RSerializer.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Core\RDebugMenu.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -217,6 +214,9 @@
     </ClCompile>
     <ClCompile Include="Script\RScriptedBehavior.cpp">
       <Filter>Script</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem\RShaderConstantBuffer.cpp">
+      <Filter>RenderSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

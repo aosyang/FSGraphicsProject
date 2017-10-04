@@ -892,7 +892,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		meshElements.push_back(meshElem);
 
 		sprintf_s(msg_buf, "Mesh loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
-			optimizedVertData.size(), optimizedIndexData.size() / 3, flatVertData.size(), indexData.size() / 3);
+			(int)optimizedVertData.size(), (int)optimizedIndexData.size() / 3, (int)flatVertData.size(), (int)indexData.size() / 3);
 		OutputDebugStringA(msg_buf);
 	}
 

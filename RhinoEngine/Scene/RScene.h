@@ -32,14 +32,6 @@ public:
 	void RenderDepthPass(const RFrustum* pFrustum = nullptr);
 
 	vector<RSceneObject*>& GetSceneObjects();
-
-	// Constant buffers
-	RShaderConstantBuffer<SHADER_SCENE_BUFFER,		CBST_VS|CBST_GS|CBST_PS, 0>		cbScene;
-	RShaderConstantBuffer<SHADER_GLOBAL_BUFFER,		CBST_VS|CBST_PS, 1>				cbGlobal;
-	RShaderConstantBuffer<SHADER_OBJECT_BUFFER,		CBST_VS, 2>						cbPerObject;
-	RShaderConstantBuffer<SHADER_SKINNED_BUFFER,	CBST_VS, 4>						cbBoneMatrices;
-	RShaderConstantBuffer<SHADER_LIGHT_BUFFER,		CBST_PS, 2>						cbLight;
-	RShaderConstantBuffer<SHADER_MATERIAL_BUFFER,	CBST_PS, 3>						cbMaterial;
 private:
 
 	vector<RSceneObject*>		m_SceneObjects;

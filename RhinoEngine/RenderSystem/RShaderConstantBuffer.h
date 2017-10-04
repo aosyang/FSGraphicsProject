@@ -68,4 +68,40 @@ private:
 	ID3D11Buffer*		m_ConstBuffer;
 };
 
+/// All constant buffers used by render system
+class RConstantBuffers
+{
+public:
+	// Constant buffers
+	static RShaderConstantBuffer<SHADER_SCENE_BUFFER,		CBST_VS|CBST_GS|CBST_PS, 0>		cbScene;
+	static RShaderConstantBuffer<SHADER_GLOBAL_BUFFER,		CBST_VS|CBST_PS, 1>				cbGlobal;
+	static RShaderConstantBuffer<SHADER_OBJECT_BUFFER,		CBST_VS, 2>						cbPerObject;
+	static RShaderConstantBuffer<SHADER_SKINNED_BUFFER,		CBST_VS, 4>						cbBoneMatrices;
+	static RShaderConstantBuffer<SHADER_LIGHT_BUFFER,		CBST_PS, 2>						cbLight;
+	static RShaderConstantBuffer<SHADER_MATERIAL_BUFFER,	CBST_PS, 3>						cbMaterial;
+
+	static void Initialize();
+	static void Shutdown();
+};
+
+FORCEINLINE void RConstantBuffers::Initialize()
+{
+	cbPerObject.Initialize();
+	cbScene.Initialize();
+	cbBoneMatrices.Initialize();
+	cbLight.Initialize();
+	cbMaterial.Initialize();
+	cbGlobal.Initialize();
+}
+
+FORCEINLINE void RConstantBuffers::Shutdown()
+{
+	cbPerObject.Release();
+	cbScene.Release();
+	cbBoneMatrices.Release();
+	cbLight.Release();
+	cbMaterial.Release();
+	cbGlobal.Release();
+}
+
 #endif
