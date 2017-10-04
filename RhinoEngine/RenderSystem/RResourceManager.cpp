@@ -913,7 +913,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	MeshResource->SetBoneInitInvMatrices(boneInitInvPose);
 
 	// Notify mesh has been loaded
-	MeshResource->OnLoadingFinsihed();
+	MeshResource->OnLoadingFinished();
 
 #if EXPORT_FBX_AS_BINARY_MESH == 1
 	string rmeshName = RFileUtil::ReplaceExt(task->Filename, "rmesh");
@@ -956,7 +956,7 @@ bool RResourceManager::ThreadLoadRmeshData(LoaderThreadTask* task)
 	if (materials.size())
 		MeshResource->SetMaterials(materials.data(), (UINT)materials.size());
 
-	MeshResource->OnLoadingFinsihed();
+	MeshResource->OnLoadingFinished();
 
 	return true;
 }
@@ -1086,7 +1086,7 @@ void RResourceManager::ThreadLoadDDSTextureData(LoaderThreadTask* task)
 	}
 
 	TextureResource->m_SRV = srv;
-	TextureResource->OnLoadingFinsihed();
+	TextureResource->OnLoadingFinished();
 }
 
 // case-insensitive string comparison
@@ -1176,7 +1176,7 @@ RTexture* RResourceManager::WrapSRV(ID3D11ShaderResourceView* srv)
 		return m_WrapperTextureResources[srv];
 
 	RTexture* tex = new RTexture("[Internal]", srv);
-	tex->OnLoadingFinsihed();
+	tex->OnLoadingFinished();
 	m_WrapperTextureResources[srv] = tex;
 	return tex;
 }

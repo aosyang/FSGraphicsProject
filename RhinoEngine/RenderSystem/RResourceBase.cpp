@@ -23,7 +23,7 @@ void RResourceBase::OnEnqueuedForLoading()
 	m_State = RS_EnqueuedForLoading;
 }
 
-void RResourceBase::OnLoadingFinsihed()
+void RResourceBase::OnLoadingFinished()
 {
 	assert(m_State != RS_Loaded);
 

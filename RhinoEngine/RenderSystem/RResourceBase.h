@@ -35,7 +35,7 @@ public:
 	virtual void OnEnqueuedForLoading();
 
 	/// Callback when resource loading is complete
-	virtual void OnLoadingFinsihed();
+	virtual void OnLoadingFinished();
 
 	/// Get the time when resource has been fully loaded
 	float GetResourceTimestamp()			{ return m_LoadingFinishTime; }
