@@ -21,11 +21,11 @@ namespace RCollision
 	{
 		float dist = sphere.center.Dot(plane.normal) - plane.offset;
 		if (dist > sphere.radius)
-			return PlaneSpace_Front;
+			return PlaneSpace::Front;
 		else if (dist < -sphere.radius)
-			return PlaneSpace_Back;
+			return PlaneSpace::Back;
 		else
-			return PlaneSpace_Intersecting;
+			return PlaneSpace::Intersecting;
 	}
 
 	PlaneSpace TestAabbToPlane(const RPlane& plane, const RAabb& aabb)
@@ -42,7 +42,7 @@ namespace RCollision
 	{
 		for (int i = 0; i < 6; i++)
 		{
-			if (TestAabbToPlane(frustum.planes[i], aabb) == PlaneSpace_Back)
+			if (TestAabbToPlane(frustum.planes[i], aabb) == PlaneSpace::Back)
 				return false;
 		}
 

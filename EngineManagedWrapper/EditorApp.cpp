@@ -87,7 +87,7 @@ namespace EngineManagedWrapper
 		m_CameraMatrix = RMatrix4::IDENTITY;
 		m_MeshPos = RVec3::Zero();
 		m_SelectedObject = nullptr;
-		m_MouseControlMode = MCM_NONE;
+		m_MouseControlMode = MouseControlMode::None;
 
 		m_EditorAxis.Create();
 
@@ -158,10 +158,10 @@ namespace EngineManagedWrapper
 
 		if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Released)
 		{
-			m_MouseControlMode = MCM_NONE;
+			m_MouseControlMode = MouseControlMode::None;
 		}
 
-		if (m_MouseControlMode != MCM_NONE)
+		if (m_MouseControlMode != MouseControlMode::None)
 		{
 			if (m_SelectedObject)
 			{
@@ -185,7 +185,7 @@ namespace EngineManagedWrapper
 
 				RVec3 pos = m_SelectedObject->GetPosition();
 
-				if (m_MouseControlMode == MCM_MOVE_X)
+				if (m_MouseControlMode == MouseControlMode::MoveX)
 				{
 					if (RInput.IsKeyDown(VK_LMENU))
 					{
@@ -201,7 +201,7 @@ namespace EngineManagedWrapper
 						pos.x += (world_x.Dot(cam_right) * mdx - world_x.Dot(cam_up) * mdy) * move_scale;
 					}
 				}
-				else if (m_MouseControlMode == MCM_MOVE_Y)
+				else if (m_MouseControlMode == MouseControlMode::MoveY)
 				{
 					if (RInput.IsKeyDown(VK_LMENU))
 					{
@@ -217,7 +217,7 @@ namespace EngineManagedWrapper
 						pos.y += (world_y.Dot(cam_right) * mdx - world_y.Dot(cam_up) * mdy) * move_scale;
 					}
 				}
-				else if (m_MouseControlMode == MCM_MOVE_Z)
+				else if (m_MouseControlMode == MouseControlMode::MoveZ)
 				{
 					if (RInput.IsKeyDown(VK_LMENU))
 					{
@@ -407,19 +407,19 @@ namespace EngineManagedWrapper
 			axis_ray = ray.Transform(m_AxisMatrix.FastInverse());
 		}
 
-		m_MouseControlMode = MCM_NONE;
+		m_MouseControlMode = MouseControlMode::None;
 
 		if (m_SelectedObject && axis_ray.TestAabbIntersection(m_EditorAxis.GetAabb(AXIS_X)))
 		{
-			m_MouseControlMode = MCM_MOVE_X;
+			m_MouseControlMode = MouseControlMode::MoveX;
 		}
 		else if (m_SelectedObject && axis_ray.TestAabbIntersection(m_EditorAxis.GetAabb(AXIS_Y)))
 		{
-			m_MouseControlMode = MCM_MOVE_Y;
+			m_MouseControlMode = MouseControlMode::MoveY;
 		}
 		else if (m_SelectedObject && axis_ray.TestAabbIntersection(m_EditorAxis.GetAabb(AXIS_Z)))
 		{
-			m_MouseControlMode = MCM_MOVE_Z;
+			m_MouseControlMode = MouseControlMode::MoveZ;
 		}
 		else
 		{
@@ -485,7 +485,7 @@ namespace EngineManagedWrapper
 			}
 		}
 
-		if (m_MouseControlMode != MCM_NONE)
+		if (m_MouseControlMode != MouseControlMode::None)
 		{
 			RInput.GetCursorPos(m_MouseDownX, m_MouseDownY);
 		}
@@ -499,6 +499,8 @@ namespace EngineManagedWrapper
 			m_Scene.GetSceneObjects().erase(iter);
 			delete m_SelectedObject;
 			m_SelectedObject = nullptr;
+
+			// FIXME: We should notify editor to update property grid or we'll crash the editor
 		}
 	}
 #pragma managed

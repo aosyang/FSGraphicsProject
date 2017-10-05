@@ -87,15 +87,9 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 
 	m_ParticleBuffer.Release();
 
-	m_cbGlobal.Release();
-	m_cbMaterial.Release();
-	m_cbLight.Release();
-	m_cbPerObject.Release();
-	m_cbScene.Release();
 	m_cbInstance[0].Release();
 	m_cbInstance[1].Release();
 	m_cbInstance[2].Release();
-	m_cbBoneMatrices.Release();
 
 	m_BumpCubeMesh.Release();
 
@@ -196,15 +190,9 @@ bool FSGraphicsProjectApp::Initialize()
 	m_BumpCubeMesh.CreateVertexBuffer(boxVertex, sizeof(RVertex::MESH_VERTEX), 24, m_BumpLightingIL);
 	m_BumpCubeMesh.CreateIndexBuffer(boxIndex, sizeof(UINT32), 36);
 
-	m_cbPerObject.Initialize();
-	m_cbScene.Initialize();
-	m_cbLight.Initialize();
-	m_cbMaterial.Initialize();
 	m_cbInstance[0].Initialize();
 	m_cbInstance[1].Initialize();
 	m_cbInstance[2].Initialize();
-	m_cbBoneMatrices.Initialize();
-	m_cbGlobal.Initialize();
 
 	m_BumpBaseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlate.dds");
 	m_BumpNormalTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlateNormal.dds");
@@ -262,6 +250,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_TransparentMesh.SetMesh(sphereMesh);
 	m_TransparentMesh.SetOverridingShader(RShaderManager::Instance().GetShaderResource("Lighting"));
 
+	// Generate random position for floating islands
 	for (int i = 0; i < 5; i++)
 	{
 		for (int j = 0; j < 5; j++)
@@ -632,7 +621,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		//m_DebugRenderer.DrawSphere(sPoints[i].ToVec3(), 50.0f);
 	}
 
-	m_cbLight.UpdateContent(&cbLight);
+	RConstantBuffers::cbLight.UpdateContent(&cbLight);
 
 	// Update instance buffer
 	ZeroMemory(&cbInstance[0], sizeof(cbInstance[0]));
@@ -656,7 +645,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 								1.0f / (float)RRenderer.GetClientWidth(), 1.0f / (float)RRenderer.GetClientHeight());
 	cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection() ? 1 : (m_EnabledPostProcessor == 1);
 
-	m_cbGlobal.UpdateContent(&cbScreen);
+	RConstantBuffers::cbGlobal.UpdateContent(&cbScreen);
 
 	// Update particle vertices
 	ParticleDepthComparer cmp(m_Camera.GetPosition(), m_Camera.GetNodeTransform().GetForward());
@@ -757,8 +746,8 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 		m_DebugRenderer.DrawLine(nodePos, nodePos + worldOffset * 10, RColor(1.0f, 0.0f, 0.0f), RColor(1.0f, 0.0f, 0.0f));
 
-		m_cbBoneMatrices.UpdateContent(&cbSkinned);
-		m_cbBoneMatrices.BindBuffer();
+		RConstantBuffers::cbBoneMatrices.UpdateContent(&cbSkinned);
+		RConstantBuffers::cbBoneMatrices.BindBuffer();
 	}
 
 	RVec3 pos = m_TachikomaObj.GetNodeTransform().GetTranslation();
@@ -791,10 +780,10 @@ void FSGraphicsProjectApp::RenderScene()
 		{ 0.0f, 0.0f, 300, 300, 0.0f, 1.0f },
 	};
 
-	m_cbPerObject.BindBuffer();
-	m_cbLight.BindBuffer();
-	m_cbMaterial.BindBuffer();
-	m_cbGlobal.BindBuffer();
+	RConstantBuffers::cbPerObject.BindBuffer();
+	RConstantBuffers::cbLight.BindBuffer();
+	RConstantBuffers::cbMaterial.BindBuffer();
+	RConstantBuffers::cbGlobal.BindBuffer();
 	RRenderer.SetSamplerState(0, SamplerState_Texture);
 	RRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
 
@@ -802,8 +791,8 @@ void FSGraphicsProjectApp::RenderScene()
 	for (int i = 0; i < 3; i++)
 	{
 		cbScene.cascadedShadowIndex = i;
-		m_cbScene.UpdateContent(&cbScene);
-		m_cbScene.BindBuffer();
+		RConstantBuffers::cbScene.UpdateContent(&cbScene);
+		RConstantBuffers::cbScene.BindBuffer();
 
 		m_ShadowMap[i].SetupRenderTarget();
 		RRenderer.Clear();
@@ -851,14 +840,14 @@ void FSGraphicsProjectApp::RenderScene()
 			cbScene.viewProjMatrix = viewMatrix * projMatrix;
 			cbScene.cameraPos = m_SunVec;
 
-			m_cbScene.UpdateContent(&cbScene);
+			RConstantBuffers::cbScene.UpdateContent(&cbScene);
 	
 			cbLight.CameraPos = m_SunVec;
 
-			m_cbLight.UpdateContent(&cbLight);
+			RConstantBuffers::cbLight.UpdateContent(&cbLight);
 
-			m_cbScene.BindBuffer();
-			m_cbLight.BindBuffer();
+			RConstantBuffers::cbScene.BindBuffer();
+			RConstantBuffers::cbLight.BindBuffer();
 
 			ParticleDepthComparer cmp(m_SunVec, -m_SunVec);
 			std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
@@ -953,7 +942,7 @@ void FSGraphicsProjectApp::SetPerObjectConstBuffer(const RMatrix4& world)
 	SHADER_OBJECT_BUFFER cbObject;
 	cbObject.worldMatrix = world;
 
-	m_cbPerObject.UpdateContent(&cbObject);
+	RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
 }
 
 void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
@@ -1251,8 +1240,8 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 
 void FSGraphicsProjectApp::SetMaterialConstBuffer(SHADER_MATERIAL_BUFFER* buffer)
 {
-	m_cbMaterial.UpdateContent(buffer);
-	m_cbMaterial.BindBuffer();
+	RConstantBuffers::cbMaterial.UpdateContent(buffer);
+	RConstantBuffers::cbMaterial.BindBuffer();
 }
 
 RSphere FSGraphicsProjectApp::CalculateFrustumBoundingSphere(const RFrustum& frustum, float start, float end)

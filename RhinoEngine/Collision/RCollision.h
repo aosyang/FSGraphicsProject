@@ -30,16 +30,17 @@ struct RCapsule
 	float radius;
 };
 
-enum FrustumCorners
+/// Represents all eight corners of frustum
+enum FrustumCorner
 {
-	FC_FTL,
-	FC_FTR,
-	FC_FBL,
-	FC_FBR,
-	FC_NTL,
-	FC_NTR,
-	FC_NBL,
-	FC_NBR,
+	FC_FTL,			// far top left
+	FC_FTR,			// far top right
+	FC_FBL,			// far bottom left
+	FC_FBR,			// far bottom right
+	FC_NTL,			// near top left
+	FC_NTR,			// near top right
+	FC_NBL,			// near bottom left
+	FC_NBR,			// near bottom right
 };
 
 struct RFrustum
@@ -50,11 +51,12 @@ struct RFrustum
 	void BuildPlanesFromCorners();
 };
 
-enum PlaneSpace
+/// Result of testing geometry against a plane
+enum class PlaneSpace
 {
-	PlaneSpace_Front,
-	PlaneSpace_Back,
-	PlaneSpace_Intersecting,
+	Front,
+	Back,
+	Intersecting,
 };
 
 namespace RCollision

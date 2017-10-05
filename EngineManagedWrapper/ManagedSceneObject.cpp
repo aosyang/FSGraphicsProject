@@ -79,11 +79,19 @@ namespace EngineManagedWrapper {
 
 	String^ ManagedMeshObject::VertexComponents::get()
 	{
-		RMesh* mesh = GetMeshObject()->GetMesh();
-		if (!mesh || !mesh->GetMeshElementCount())
-			return gcnew String("");
+		RSMeshObject* MeshObject = GetMeshObject();
 
-		return gcnew String(RVertexDeclaration::GetVertexComponentsString(mesh->GetMeshElements()[0].GetVertexComponentMask()).c_str());
+		if (MeshObject)
+		{
+			RMesh* mesh = MeshObject->GetMesh();
+
+			if (mesh && mesh->GetMeshElementCount())
+			{
+				return gcnew String(RVertexDeclaration::GetVertexComponentsString(mesh->GetMeshElements()[0].GetVertexComponentMask()).c_str());
+			}
+		}
+
+		return gcnew String("");
 	}
 
 }

@@ -36,12 +36,12 @@ namespace EngineManagedWrapper
 		int							m_MouseDownX, m_MouseDownY;
 		RMatrix4					m_AxisMatrix;
 
-		enum MouseControlMode
+		enum class MouseControlMode
 		{
-			MCM_NONE,
-			MCM_MOVE_X,
-			MCM_MOVE_Y,
-			MCM_MOVE_Z,
+			None,
+			MoveX,
+			MoveY,
+			MoveZ,
 		};
 
 		MouseControlMode			m_MouseControlMode;
