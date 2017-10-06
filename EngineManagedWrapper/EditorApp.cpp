@@ -25,19 +25,13 @@ namespace EngineManagedWrapper
 		m_DebugRenderer.Release();
 
 		m_EditorAxis.Release();
-
-		RShaderManager::Instance().UnloadAllShaders();
-		RResourceManager::Instance().Destroy();
 	}
 
 	bool EditorApp::Initialize()
 	{
-		RResourceManager::Instance().Initialize();
 		REngine::Instance()->SetEditorMode(true);
 
 		m_Scene.Initialize();
-
-		RShaderManager::Instance().LoadShaders("../Shaders");
 
 		m_DefaultShader = RShaderManager::Instance().GetShaderResource("Default");
 		m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");

@@ -98,19 +98,13 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	m_Skybox.Release();
 	m_PostProcessor.Release();
 
-	RShaderManager::Instance().UnloadAllShaders();
-	RResourceManager::Instance().Destroy();
 	m_DebugRenderer.Release();
 }
 
 bool FSGraphicsProjectApp::Initialize()
 {
-	RResourceManager::Instance().Initialize();
 	CreateSceneRenderTargetView();
 
-	// Initialize shaders
-	RShaderManager::Instance().LoadShaders("../Shaders");
-	
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 	m_BumpLightingShader = RShaderManager::Instance().GetShaderResource("BumpLighting");
 	m_DepthShader = RShaderManager::Instance().GetShaderResource("Depth");

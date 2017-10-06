@@ -1,3 +1,9 @@
+//=============================================================================
+// RShaderConstantBuffer.cpp by Shiyang Ao, 2017 All Rights Reserved.
+//
+// 
+//=============================================================================
+
 #include "Rhino.h"
 
 #include "RShaderConstantBuffer.h"

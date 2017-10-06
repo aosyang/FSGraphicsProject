@@ -8,6 +8,7 @@
 
 #include "../Core/RVector.h"
 
+/// 3D plane
 struct RPlane
 {
 	RVec3 normal;

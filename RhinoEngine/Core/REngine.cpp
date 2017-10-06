@@ -57,6 +57,12 @@ bool REngine::Initialize(HWND hWnd, int width, int height)
 	if (!RRenderer.Initialize(m_hWnd, width, height, true))
 		return false;
 
+	// Initialize resource manager
+	RResourceManager::Instance().Initialize();
+
+	// Initialize shaders
+	RShaderManager::Instance().LoadShaders("../Shaders");
+
 	RScript.Initialize();
 	RScript.Start();
 
@@ -70,7 +76,12 @@ void REngine::Shutdown()
 {
 	RScript.Shutdown();
 
-	//delete m_Application;
+	// Unload shaders
+	RShaderManager::Instance().UnloadAllShaders();
+
+	// Destroy resource manager
+	RResourceManager::Instance().Destroy();
+
 	RRenderer.Shutdown();
 
 	if (m_UseEngineRenderWindow)

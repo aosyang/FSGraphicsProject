@@ -18,15 +18,11 @@ FightingGameApp::~FightingGameApp()
 	SAFE_DELETE(m_AIPlayer);
 	m_Scene.Release();
 	m_DebugRenderer.Release();
-	RShaderManager::Instance().UnloadAllShaders();
-	RResourceManager::Instance().Destroy();
 }
 
 bool FightingGameApp::Initialize()
 {
-	RResourceManager::Instance().Initialize();
 	//RResourceManager::Instance().LoadAllResources();
-	RShaderManager::Instance().LoadShaders("../Shaders");
 
 	m_DebugRenderer.Initialize();
 

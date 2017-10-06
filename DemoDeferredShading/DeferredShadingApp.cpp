@@ -35,15 +35,11 @@ DeferredShadingApp::~DeferredShadingApp()
 	m_Scene.Release();
 
 	m_PostProcessor.Release();
-	RShaderManager::Instance().UnloadAllShaders();
-	RResourceManager::Instance().Destroy();
 }
 
 bool DeferredShadingApp::Initialize()
 {
 	srand((unsigned int)time(nullptr));
-	RShaderManager::Instance().LoadShaders("../Shaders");
-	RResourceManager::Instance().Initialize();
 
 	m_PostProcessor.Initialize();
 
