@@ -17,14 +17,11 @@ FightingGameApp::~FightingGameApp()
 	SAFE_DELETE(m_Player);
 	SAFE_DELETE(m_AIPlayer);
 	m_Scene.Release();
-	m_DebugRenderer.Release();
 }
 
 bool FightingGameApp::Initialize()
 {
 	//RResourceManager::Instance().LoadAllResources();
-
-	m_DebugRenderer.Initialize();
 
 	m_Scene.Initialize();
 	m_Scene.LoadFromFile("../Assets/ScriptTestMap.rmap");
@@ -34,7 +31,7 @@ bool FightingGameApp::Initialize()
 	RMatrix4 cameraMatrix = RMatrix4::CreateXAxisRotation(0.09f * 180 / PI) * RMatrix4::CreateYAxisRotation(3.88659930f * 180 / PI);
 	cameraMatrix.SetTranslation(RVec3(407.023712f, 339.007507f, 876.396484f));
 	m_Camera.SetTransform(cameraMatrix);
-	m_Camera.SetupView(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
+	m_Camera.SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
 
 	//RSceneObject* player = m_Scene.FindObject("Player");
 	//for (UINT i = 0; i < m_Scene.GetSceneObjects().size(); i++)
@@ -95,7 +92,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	cameraMatrix.SetTranslation(RVec3(407.023712f, 339.007507f, 876.396484f));
 
 	cbScene.viewMatrix = RMatrix4::CreateLookAtViewLH(RVec3(407.023712f, 339.007507f, 876.396484f), m_Player->GetPosition(), RVec3(0, 1, 0));
-	cbScene.projMatrix = RMatrix4::CreatePerspectiveProjectionLH(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
+	cbScene.projMatrix = RMatrix4::CreatePerspectiveProjectionLH(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
 	cbScene.viewProjMatrix = cbScene.viewMatrix * cbScene.projMatrix;
 	cbScene.cameraPos = cameraMatrix.GetTranslation();
 
@@ -137,9 +134,9 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	SHADER_GLOBAL_BUFFER cbScreen;
 	ZeroMemory(&cbScreen, sizeof(cbScreen));
 
-	cbScreen.ScreenSize = RVec4((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight(),
-								1.0f / (float)RRenderer.GetClientWidth(), 1.0f / (float)RRenderer.GetClientHeight());
-	cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();
+	cbScreen.ScreenSize = RVec4((float)GRenderer.GetClientWidth(), (float)GRenderer.GetClientHeight(),
+								1.0f / (float)GRenderer.GetClientWidth(), 1.0f / (float)GRenderer.GetClientHeight());
+	cbScreen.UseGammaCorrection = GRenderer.UsingGammaCorrection();
 	
 	RConstantBuffers::cbGlobal.UpdateContent(&cbScreen);
 	RConstantBuffers::cbGlobal.BindBuffer();
@@ -225,9 +222,9 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 		//playerAabb.pMin = RVec3(-50.0f, 0.0f, -50.0f) + m_Player->GetPosition();
 		//playerAabb.pMax = RVec3(50.0f, 150.0f, 50.0f) + m_Player->GetPosition();
-		//m_DebugRenderer.DrawAabb(playerAabb);
+		//GDebugRenderer.DrawAabb(playerAabb);
 
-		//m_DebugRenderer.DrawFrustum(m_Camera.GetFrustum());
+		//GDebugRenderer.DrawFrustum(m_Camera.GetFrustum());
 
 		//RSphere s = { RVec3(0, 100, 0), 50.0f };
 		//RCapsule cap = m_Player->GetCollisionShape();
@@ -236,9 +233,9 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		//{
 		//	color = RColor(1, 0, 0);
 		//}
-		//m_DebugRenderer.DrawSphere(s.center, s.radius, color);
-		//m_DebugRenderer.DrawSphere(cap.start, cap.radius, color);
-		//m_DebugRenderer.DrawSphere(cap.end, cap.radius, color);
+		//GDebugRenderer.DrawSphere(s.center, s.radius, color);
+		//GDebugRenderer.DrawSphere(cap.start, cap.radius, color);
+		//GDebugRenderer.DrawSphere(cap.end, cap.radius, color);
 
 
 		if (m_Player->GetBehavior() == BHV_SpinAttack &&
@@ -249,7 +246,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			hit_sphere.center = m_Player->GetPosition() - m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 50, 0);
 			hit_sphere.radius = 50.0f;
 			if (m_DrawHitBound)
-				m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
+				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
 
 			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
 			{
@@ -276,7 +273,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			hit_sphere.center = m_Player->GetPosition() - m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 100, 0);
 			hit_sphere.radius = 20.0f;
 			if (m_DrawHitBound)
-				m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
+				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
 
 			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
 			{
@@ -296,7 +293,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			hit_sphere.center = m_Player->GetPosition() - m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 100, 0);
 			hit_sphere.radius = 50.0f;
 			if (m_DrawHitBound)
-				m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
+				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
 
 			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
 			{
@@ -316,7 +313,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			hit_sphere.center = m_Player->GetPosition() - m_Player->GetNodeTransform().GetForward() * 30 + RVec3(0, 100, 0);
 			hit_sphere.radius = 50.0f;
 			if (m_DrawHitBound)
-				m_DebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
+				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
 
 			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
 			{
@@ -362,11 +359,11 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 void FightingGameApp::RenderScene()
 {
-	RRenderer.SetSamplerState(0, SamplerState_Texture);
-	RRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
+	GRenderer.SetSamplerState(0, SamplerState_Texture);
+	GRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
 
-	float width = static_cast<float>(RRenderer.GetClientWidth());
-	float height = static_cast<float>(RRenderer.GetClientHeight());
+	float width = static_cast<float>(GRenderer.GetClientWidth());
+	float height = static_cast<float>(GRenderer.GetClientHeight());
 	D3D11_VIEWPORT vp = { 0.0f, 0.0f, width, height, 0.0f, 1.0f };
 
 
@@ -377,20 +374,20 @@ void FightingGameApp::RenderScene()
 		if (pass == 0)
 		{
 			ID3D11ShaderResourceView* nullSRV[] = { nullptr };
-			RRenderer.D3DImmediateContext()->PSSetShaderResources(RShadowMap::ShaderResourceSlot(), 1, nullSRV);
+			GRenderer.D3DImmediateContext()->PSSetShaderResources(RShadowMap::ShaderResourceSlot(), 1, nullSRV);
 			
 			m_ShadowMap.SetupRenderTarget();
 		}
 		else
 		{
-			RRenderer.SetRenderTargets();
-			RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
+			GRenderer.SetRenderTargets();
+			GRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
 
 			ID3D11ShaderResourceView* shadowMapSRV[] = { m_ShadowMap.GetRenderTargetDepthSRV() };
-			RRenderer.D3DImmediateContext()->PSSetShaderResources(RShadowMap::ShaderResourceSlot(), 1, shadowMapSRV);
+			GRenderer.D3DImmediateContext()->PSSetShaderResources(RShadowMap::ShaderResourceSlot(), 1, shadowMapSRV);
 		}
 
-		RRenderer.Clear();
+		GRenderer.Clear();
 
 		if (pass == 0)
 		{
@@ -415,10 +412,10 @@ void FightingGameApp::RenderScene()
 			}
 			else
 			{
-				RRenderer.SetBlendState(Blend_AlphaBlending);
+				GRenderer.SetBlendState(Blend_AlphaBlending);
 				m_Player->Draw();
 				m_AIPlayer->Draw();
-				RRenderer.SetBlendState(Blend_Opaque);
+				GRenderer.SetBlendState(Blend_Opaque);
 			}
 		}
 	}
@@ -426,13 +423,13 @@ void FightingGameApp::RenderScene()
 	cbObject.worldMatrix = RMatrix4::IDENTITY;
 	RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
 	RConstantBuffers::cbPerObject.BindBuffer();
-	m_DebugRenderer.Render();
-	m_DebugRenderer.Reset();
+	GDebugRenderer.Render();
+	GDebugRenderer.Reset();
 
-	RRenderer.Clear(false);
+	GRenderer.Clear(false);
 	m_Text.Render();
 
-	RRenderer.Present();
+	GRenderer.Present();
 }
 
 void FightingGameApp::OnResize(int width, int height)

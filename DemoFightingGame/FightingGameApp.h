@@ -31,7 +31,6 @@ private:
 	PlayerController*	m_Player;
 	PlayerController*	m_AIPlayer;
 
-	RDebugRenderer		m_DebugRenderer;
 	bool				m_DrawHitBound;
 	RText				m_Text;
 };

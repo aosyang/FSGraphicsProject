@@ -175,7 +175,7 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 	D3D11_BLEND_DESC blendDesc;
 	ZeroMemory(&blendDesc, sizeof(blendDesc));
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_Opaque]);
+	GRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_Opaque]);
 
 #if _DEBUG
 	{
@@ -192,7 +192,7 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_AlphaBlending]);
+	GRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_AlphaBlending]);
 
 #if _DEBUG
 	{
@@ -202,7 +202,7 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 #endif
 
 	blendDesc.AlphaToCoverageEnable = true;
-	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_AlphaToCoverage]);
+	GRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_AlphaToCoverage]);
 
 #if _DEBUG
 	{
@@ -214,7 +214,7 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
 	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
 	blendDesc.AlphaToCoverageEnable = false;
-	RRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_Additive]);
+	GRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_Additive]);
 	
 #if _DEBUG
 	{
@@ -237,7 +237,7 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState[SamplerState_Texture]);
+	GRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState[SamplerState_Texture]);
 
 	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
 	samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
@@ -248,7 +248,7 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState[SamplerState_ShadowDepthComparison]);
+	GRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState[SamplerState_ShadowDepthComparison]);
 
 	RConstantBuffers::Initialize();
 
@@ -383,14 +383,14 @@ void RRenderSystem::SetBlendState(BlendState state)
 	if (m_CurrBlendState != state)
 	{
 		float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-		RRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[state], blendFactor, 0xFFFFFFFF);
+		GRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[state], blendFactor, 0xFFFFFFFF);
 		m_CurrBlendState = state;
 	}
 }
 
 void RRenderSystem::SetSamplerState(int slot, SamplerState state)
 {
-	RRenderer.D3DImmediateContext()->PSSetSamplers(slot, 1, &m_SamplerState[state]);
+	GRenderer.D3DImmediateContext()->PSSetSamplers(slot, 1, &m_SamplerState[state]);
 }
 
 void RRenderSystem::SetVertexShader(ID3D11VertexShader* vertexShader)
@@ -398,7 +398,7 @@ void RRenderSystem::SetVertexShader(ID3D11VertexShader* vertexShader)
 	static ID3D11VertexShader* currentVertexShader = nullptr;
 	if (currentVertexShader != vertexShader)
 	{
-		RRenderer.D3DImmediateContext()->VSSetShader(vertexShader, nullptr, 0);
+		GRenderer.D3DImmediateContext()->VSSetShader(vertexShader, nullptr, 0);
 		currentVertexShader = vertexShader;
 	}
 }
@@ -408,7 +408,7 @@ void RRenderSystem::SetPixelShader(ID3D11PixelShader* pixelShader)
 	static ID3D11PixelShader* currentPixelShader = nullptr;
 	if (currentPixelShader != pixelShader)
 	{
-		RRenderer.D3DImmediateContext()->PSSetShader(pixelShader, nullptr, 0);
+		GRenderer.D3DImmediateContext()->PSSetShader(pixelShader, nullptr, 0);
 		currentPixelShader = pixelShader;
 	}
 }
@@ -418,7 +418,7 @@ void RRenderSystem::SetGeometryShader(ID3D11GeometryShader* geometryShader)
 	static ID3D11GeometryShader* currentGeometryShader = nullptr;
 	if (currentGeometryShader != geometryShader)
 	{
-		RRenderer.D3DImmediateContext()->GSSetShader(geometryShader, nullptr, 0);
+		GRenderer.D3DImmediateContext()->GSSetShader(geometryShader, nullptr, 0);
 		currentGeometryShader = geometryShader;
 	}
 }

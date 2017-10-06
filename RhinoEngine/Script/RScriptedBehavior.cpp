@@ -1,3 +1,8 @@
+//=============================================================================
+// RScriptedBehavior.cpp by Shiyang Ao, 2017 All Rights Reserved.
+//
+// 
+//=============================================================================
 #include "Rhino.h"
 
 #include "RScriptedBehavior.h"
@@ -46,7 +51,7 @@ static int ScriptFunc_Swing(lua_State* state)
 	target.z = (float)lua_tonumber(state, 7);
 
 	float amplitude = (float)lua_tonumber(state, 8);
-	RVec3 pos = RVec3::Lerp(origin, target, sinf(REngine::GetTimer().TotalTime()) * 0.5f + 0.5f);
+	RVec3 pos = RVec3::Lerp(origin, target, sinf(GEngine.GetTimer().TotalTime()) * 0.5f + 0.5f);
 
 	obj->SetPosition(pos);
 
@@ -69,7 +74,7 @@ static int ScriptFunc_Rotate(lua_State* state)
 	float scale = 1.0f;
 	if (n >= 5)
 		scale = (float)lua_tonumber(state, 5);
-	axis *= REngine().GetTimer().TotalTime() * scale;
+	axis *= GEngine.GetTimer().TotalTime() * scale;
 
 	RMatrix4 transform = obj->GetNodeTransform();
 	obj->SetRotation(RMatrix4::CreateZAxisRotation(axis.z) *
@@ -83,8 +88,8 @@ namespace ScriptedBehavior
 {
 	void RegisterScriptFunctions()
 	{
-		RScript.RegisterFunction("MoveTo", ScriptFunc_MoveTo,	{ { SPT_Float, SPT_Float, SPT_Float } });
-		RScript.RegisterFunction("Swing", ScriptFunc_Swing,		{ { SPT_Float, SPT_Float, SPT_Float, SPT_Float, SPT_Float, SPT_Float, SPT_Float } });
-		RScript.RegisterFunction("Rotate", ScriptFunc_Rotate,	{ { SPT_Float, SPT_Float, SPT_Float, SPT_Float } });
+		GScriptSystem.RegisterFunction("MoveTo", ScriptFunc_MoveTo,	{ { SPT_Float, SPT_Float, SPT_Float } });
+		GScriptSystem.RegisterFunction("Swing", ScriptFunc_Swing,		{ { SPT_Float, SPT_Float, SPT_Float, SPT_Float, SPT_Float, SPT_Float, SPT_Float } });
+		GScriptSystem.RegisterFunction("Rotate", ScriptFunc_Rotate,	{ { SPT_Float, SPT_Float, SPT_Float, SPT_Float } });
 	}
 }

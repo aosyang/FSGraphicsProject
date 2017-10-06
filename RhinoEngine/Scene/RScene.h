@@ -13,18 +13,28 @@ public:
 	void Initialize();
 	void Release();
 
+	/// Create a mesh object with mesh file path and add it to the scene
 	RSMeshObject* CreateMeshObject(const char* meshName);
+
+	/// Create a mesh object with mesh resource and add it to the scene
 	RSMeshObject* CreateMeshObject(RMesh* mesh);
 
+	/// Clone an object in the scene
 	RSceneObject* CloneObject(RSceneObject* obj);
+
+	/// Find object in the scene by name
 	RSceneObject* FindObject(const char* name) const;
 
+	/// Add an object to the scene
 	bool AddObjectToScene(RSceneObject* obj);
 	void RemoveObjectFromScene(RSceneObject* obj);
 	void DestroyObject(RSceneObject* obj);
 	void DestroyAllObjects();
 
+	/// Load scene from file on disk
 	void LoadFromFile(const char* filename);
+
+	/// Save scene to file on disk
 	void SaveToFile(const char* filename);
 
 	RVec3 TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec);

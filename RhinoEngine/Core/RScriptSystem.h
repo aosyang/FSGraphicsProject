@@ -40,6 +40,6 @@ private:
 	map<string, ScriptParams>	m_ScriptParams;
 };
 
-#define RScript RScriptSystem::Instance()
+#define GScriptSystem RScriptSystem::Instance()
 
 #endif

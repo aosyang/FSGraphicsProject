@@ -14,15 +14,14 @@ int WINAPI WinMain(HINSTANCE hInstance,
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	REngine Engine;
 	FightingGameApp app;
 
-	Engine.BindApp(&app);
+	GEngine.BindApp(&app);
 
-	if (Engine.Initialize())
+	if (GEngine.Initialize())
 	{
-		Engine.Run();
-		Engine.Shutdown();
+		GEngine.Run();
+		GEngine.Shutdown();
 	}
 	else
 	{

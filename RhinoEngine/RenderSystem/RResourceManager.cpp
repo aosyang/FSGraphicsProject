@@ -1057,7 +1057,7 @@ void RResourceManager::ThreadLoadDDSTextureData(LoaderThreadTask* task)
 
 	ID3D11Resource* pResource;
 
-	HRESULT hr = DirectX::CreateDDSTextureFromFile(RRenderer.D3DDevice(), wszName, &pResource, &srv);
+	HRESULT hr = DirectX::CreateDDSTextureFromFile(GRenderer.D3DDevice(), wszName, &pResource, &srv);
 	if (FAILED(hr))
 	{
 		sprintf_s(msg_buf, sizeof(msg_buf), "*** Failed to load texture [%s] ***\n", task->Filename.data());

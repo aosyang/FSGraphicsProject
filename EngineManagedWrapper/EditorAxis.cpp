@@ -88,7 +88,7 @@ void EditorAxis::Release()
 
 void EditorAxis::Draw()
 {
-	RRenderer.D3DImmediateContext()->IASetInputLayout(m_ColorInputLayout);
+	GRenderer.D3DImmediateContext()->IASetInputLayout(m_ColorInputLayout);
 	for (int i = 0; i < 3; i++)
 		m_AxisMeshBuffer[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

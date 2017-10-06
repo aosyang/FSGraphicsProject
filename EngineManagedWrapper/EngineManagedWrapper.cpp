@@ -23,9 +23,8 @@ namespace EngineManagedWrapper
 	RhinoEngineWrapper::RhinoEngineWrapper()
 	{
 		m_IsInitialized = false;
-		m_Engine = new REngine();
 		m_Application = new EditorApp();
-		m_Engine->BindApp(m_Application);
+		GEngine.BindApp(m_Application);
 	}
 
 	RhinoEngineWrapper::~RhinoEngineWrapper()
@@ -45,31 +44,30 @@ namespace EngineManagedWrapper
 		int width = rect.right - rect.left;
 		int height = rect.bottom - rect.top;
 
-		m_IsInitialized = m_Engine->Initialize((HWND)hWnd.ToPointer(), width, height);
+		m_IsInitialized = GEngine.Initialize((HWND)hWnd.ToPointer(), width, height);
 		return m_IsInitialized;
 	}
 
 	void RhinoEngineWrapper::RunOneFrame()
 	{
 		if (m_IsInitialized)
-			m_Engine->RunOneFrame(true);
+			GEngine.RunOneFrame(true);
 	}
 
 	void RhinoEngineWrapper::Shutdown()
 	{
 		if (m_IsInitialized)
 		{
-			m_Engine->Shutdown();
+			GEngine.Shutdown();
 
 			delete m_Application;
-			delete m_Engine;
 		}
 	}
 
 	void RhinoEngineWrapper::Resize(int width, int height)
 	{
 		if (m_IsInitialized)
-			m_Engine->ResizeClientWindow(width, height);
+			GEngine.ResizeClientWindow(width, height);
 	}
 
 	List<String^>^ RhinoEngineWrapper::GetMeshNameList()

@@ -176,14 +176,14 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 			int flag = m_Mesh->GetMeshElements()[i].GetFlag();
 
 			int shaderFeatureMask = 0;
-			if ((flag & MEF_Skinned) && !REngine::Instance()->IsEditor())
+			if ((flag & MEF_Skinned) && !GEngine.IsEditor())
 			{
 				shaderFeatureMask |= SFM_Skinned;
 			}
 			else if (instanced)
 				shaderFeatureMask |= SFM_Instanced;
 
-			if (RRenderer.UseDeferredShading())
+			if (GRenderer.UseDeferredShading())
 				shaderFeatureMask |= SFM_Deferred;
 
 			if (m_OverridingShader && m_OverridingShaderFeatures != -1)
@@ -196,7 +196,7 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 			{
 				for (int t = 0; t < m_Mesh->GetMaterial(i).TextureNum; t++)
 				{
-					RRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, m_Mesh->GetMaterial(i).Textures[t]->GetPtrSRV());
+					GRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, m_Mesh->GetMaterial(i).Textures[t]->GetPtrSRV());
 				}
 			}
 			else
@@ -205,7 +205,7 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 				{
 					RTexture* texture = m_Materials[i].Textures[t];
 					ID3D11ShaderResourceView* srv[] = { nullptr };
-					RRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, texture ? texture->GetPtrSRV() : srv);
+					GRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, texture ? texture->GetPtrSRV() : srv);
 				}
 			}
 		}
@@ -267,7 +267,7 @@ void RSMeshObject::DrawWithShader(RShader* shader, bool instanced, int instanceC
 		else if (instanced)
 			shaderFeatureMask |= SFM_Instanced;
 
-		if (RRenderer.UseDeferredShading())
+		if (GRenderer.UseDeferredShading())
 			shaderFeatureMask |= SFM_Deferred;
 
 		shader->Bind(shaderFeatureMask);

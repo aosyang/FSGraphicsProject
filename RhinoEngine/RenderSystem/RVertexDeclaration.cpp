@@ -48,7 +48,7 @@ void RVertexDeclaration::Initialize()
 		{ "TEXCOORD",	1, DXGI_FORMAT_R32G32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	RRenderer.D3DDevice()->CreateInputLayout(meshVertDesc, 5, RMeshVertexSignature, sizeof(RMeshVertexSignature), &pInputLayout);
+	GRenderer.D3DDevice()->CreateInputLayout(meshVertDesc, 5, RMeshVertexSignature, sizeof(RMeshVertexSignature), &pInputLayout);
 	m_InputLayouts.insert(make_pair(RVertex::MESH_VERTEX::GetTypeName(), pInputLayout));
 
 
@@ -59,7 +59,7 @@ void RVertexDeclaration::Initialize()
 		{ "COLOR",		0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	RRenderer.D3DDevice()->CreateInputLayout(primitiveVertDesc, 2, RPrimitiveVertexSignature, sizeof(RPrimitiveVertexSignature), &pInputLayout);
+	GRenderer.D3DDevice()->CreateInputLayout(primitiveVertDesc, 2, RPrimitiveVertexSignature, sizeof(RPrimitiveVertexSignature), &pInputLayout);
 	m_InputLayouts.insert(make_pair(RVertex::PRIMITIVE_VERTEX::GetTypeName(), pInputLayout));
 
 
@@ -69,7 +69,7 @@ void RVertexDeclaration::Initialize()
 		{ "POSITION",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	RRenderer.D3DDevice()->CreateInputLayout(skyboxVertDesc, 1, RSkyboxVertexSignature, sizeof(RSkyboxVertexSignature), &pInputLayout);
+	GRenderer.D3DDevice()->CreateInputLayout(skyboxVertDesc, 1, RSkyboxVertexSignature, sizeof(RSkyboxVertexSignature), &pInputLayout);
 	m_InputLayouts.insert(make_pair(RVertex::SKYBOX_VERTEX::GetTypeName(), pInputLayout));
 
 
@@ -82,7 +82,7 @@ void RVertexDeclaration::Initialize()
 		{ "TEXCOORD",	1, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	RRenderer.D3DDevice()->CreateInputLayout(particleVertDesc, 4, RParticleVertexSignature, sizeof(RParticleVertexSignature), &pInputLayout);
+	GRenderer.D3DDevice()->CreateInputLayout(particleVertDesc, 4, RParticleVertexSignature, sizeof(RParticleVertexSignature), &pInputLayout);
 	m_InputLayouts.insert(make_pair(RVertex::PARTICLE_VERTEX::GetTypeName(), pInputLayout));
 
 	D3D11_INPUT_ELEMENT_DESC fontVertDesc[] =
@@ -93,7 +93,7 @@ void RVertexDeclaration::Initialize()
 		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	RRenderer.D3DDevice()->CreateInputLayout(fontVertDesc, 4, RFontVertexSignature, sizeof(RFontVertexSignature), &pInputLayout);
+	GRenderer.D3DDevice()->CreateInputLayout(fontVertDesc, 4, RFontVertexSignature, sizeof(RFontVertexSignature), &pInputLayout);
 	m_InputLayouts.insert(make_pair(RVertex::FONT_VERTEX::GetTypeName(), pInputLayout));
 }
 
@@ -188,7 +188,7 @@ ID3D11InputLayout* RVertexDeclaration::GetInputLayoutByVertexComponents(int vert
 
 		if (SUCCEEDED(D3DCompile(vertexShaderSignature.data(), vertexShaderSignature.size(), filename, NULL, NULL, "main", "vs_4_0", 0, 0, &pShaderCode, &pErrorMsg)))
 		{
-			RRenderer.D3DDevice()->CreateInputLayout(desc, componentCount, pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), &pInputLayout);
+			GRenderer.D3DDevice()->CreateInputLayout(desc, componentCount, pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), &pInputLayout);
 		}
 		else
 		{

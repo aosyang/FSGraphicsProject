@@ -6,12 +6,10 @@
 #ifndef _RENGINE_H
 #define _RENGINE_H
 
-class REngine
+class REngine : public RSingleton<REngine>
 {
+	friend class RSingleton<REngine>;
 public:
-	REngine();
-	~REngine();
-
 	// Initialize all engine components
 	bool Initialize();
 
@@ -31,26 +29,34 @@ public:
 	void ResizeClientWindow(int width, int height);
 	RECT GetWindowRectInfo() const;
 
-	static RTimer& GetTimer() { return m_Timer; }
-	static REngine* Instance() { return m_EngineInstance; }
+	RTimer& GetTimer() { return m_Timer; }
+
+	/// Has engine been initialized
+	bool IsInitialized() const { return m_bIsInitialized; }
 
 	void SetEditorMode(bool editor) { m_bIsEditor = editor; }
 	bool IsEditor() const { return m_bIsEditor; }
+
+protected:
+	REngine();
+	~REngine();
 
 private:
 	bool CreateRenderWindow(int width, int height, bool fullscreen = false, int bpp = 32);
 	void DestroyRenderWindow();
 	void CalculateFrameStats();
 
-	static REngine*		m_EngineInstance;
 	bool				m_bIsEditor;
 
+	bool				m_bIsInitialized;
 	HINSTANCE			m_hInst;
 	HWND				m_hWnd;
 	bool				m_bFullScreen;
 	bool				m_UseEngineRenderWindow;
 	IApp*				m_Application;
-	static RTimer		m_Timer;
+	RTimer				m_Timer;
 };
+
+#define GEngine REngine::Instance()
 
 #endif

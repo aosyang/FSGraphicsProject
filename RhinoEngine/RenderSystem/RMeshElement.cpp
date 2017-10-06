@@ -40,11 +40,11 @@ void RMeshRenderBuffer::CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT
 		ZeroMemory(&initVertexData, sizeof(initVertexData));
 		initVertexData.pSysMem = data;
 
-		RRenderer.D3DDevice()->CreateBuffer(&vbd, &initVertexData, &m_VertexBuffer);
+		GRenderer.D3DDevice()->CreateBuffer(&vbd, &initVertexData, &m_VertexBuffer);
 	}
 	else
 	{
-		RRenderer.D3DDevice()->CreateBuffer(&vbd, NULL, &m_VertexBuffer);
+		GRenderer.D3DDevice()->CreateBuffer(&vbd, NULL, &m_VertexBuffer);
 	}
 
 	m_VertexCount = vertexCount;
@@ -68,7 +68,7 @@ void RMeshRenderBuffer::CreateIndexBuffer(void* data, UINT indexTypeSize, UINT i
 	ZeroMemory(&initIndexData, sizeof(initIndexData));
 	initIndexData.pSysMem = data;
 
-	RRenderer.D3DDevice()->CreateBuffer(&ibd, &initIndexData, &m_IndexBuffer);
+	GRenderer.D3DDevice()->CreateBuffer(&ibd, &initIndexData, &m_IndexBuffer);
 	m_IndexCount = indexCount;
 
 #if _DEBUG
@@ -80,9 +80,9 @@ void RMeshRenderBuffer::CreateIndexBuffer(void* data, UINT indexTypeSize, UINT i
 void RMeshRenderBuffer::UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount)
 {
 	D3D11_MAPPED_SUBRESOURCE subres;
-	RRenderer.D3DImmediateContext()->Map(m_VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+	GRenderer.D3DImmediateContext()->Map(m_VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 	memcpy(subres.pData, data, vertexTypeSize * vertexCount);
-	RRenderer.D3DImmediateContext()->Unmap(m_VertexBuffer, 0);
+	GRenderer.D3DImmediateContext()->Unmap(m_VertexBuffer, 0);
 
 	m_VertexCount = vertexCount;
 }
@@ -94,19 +94,19 @@ void RMeshRenderBuffer::Draw(D3D11_PRIMITIVE_TOPOLOGY topology)
 	if (m_IndexBuffer)
 	{
 		assert(m_InputLayout);
-		RRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
-		RRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
-		RRenderer.D3DImmediateContext()->IASetIndexBuffer(m_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-		RRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
-		RRenderer.D3DImmediateContext()->DrawIndexed(m_IndexCount, 0, 0);
+		GRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
+		GRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
+		GRenderer.D3DImmediateContext()->IASetIndexBuffer(m_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		GRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
+		GRenderer.D3DImmediateContext()->DrawIndexed(m_IndexCount, 0, 0);
 	}
 	else if (m_VertexBuffer)
 	{
 		assert(m_InputLayout);
-		RRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
-		RRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
-		RRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
-		RRenderer.D3DImmediateContext()->Draw(m_VertexCount, 0);
+		GRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
+		GRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
+		GRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
+		GRenderer.D3DImmediateContext()->Draw(m_VertexCount, 0);
 	}
 }
 
@@ -116,18 +116,18 @@ void RMeshRenderBuffer::DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOG
 
 	if (m_IndexBuffer)
 	{
-		RRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
-		RRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
-		RRenderer.D3DImmediateContext()->IASetIndexBuffer(m_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-		RRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
-		RRenderer.D3DImmediateContext()->DrawIndexedInstanced(m_IndexCount, instanceCount, 0, 0, 0);
+		GRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
+		GRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
+		GRenderer.D3DImmediateContext()->IASetIndexBuffer(m_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		GRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
+		GRenderer.D3DImmediateContext()->DrawIndexedInstanced(m_IndexCount, instanceCount, 0, 0, 0);
 	}
 	else if (m_VertexBuffer)
 	{
-		RRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
-		RRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
-		RRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
-		RRenderer.D3DImmediateContext()->DrawInstanced(m_VertexCount, instanceCount, 0, 0);
+		GRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
+		GRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
+		GRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
+		GRenderer.D3DImmediateContext()->DrawInstanced(m_VertexCount, instanceCount, 0, 0);
 	}
 }
 

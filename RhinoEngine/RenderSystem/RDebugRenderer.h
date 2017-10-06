@@ -7,12 +7,10 @@
 #ifndef RDEBUGRENDERER_H
 #define RDEBUGRENDERER_H
 
-class RDebugRenderer
+class RDebugRenderer : public RSingleton<RDebugRenderer>
 {
+	friend class RSingleton<RDebugRenderer>;
 public:
-	RDebugRenderer();
-	~RDebugRenderer();
-
 	void Initialize(int maxVertexCount = 65536);
 	void Release();
 
@@ -28,17 +26,24 @@ public:
 
 	// Present primitive to the screen
 	void Render();
+
+	// Clear debug renderer buffer for next frame
 	void Reset();
 
-private:
-	RMeshRenderBuffer		m_PrimitiveMeshBuffer;
-	ID3D11InputLayout*	m_PrimitiveInputLayout;
-	RShader*			m_ColorShader;
+protected:
+	RDebugRenderer();
+	~RDebugRenderer();
 
-	RColor				m_PrimitiveColor;
-	vector<RVertex::PRIMITIVE_VERTEX>
-						m_PrimitiveVertices;
-	bool				m_bDirtyBuffer;
+private:
+	RMeshRenderBuffer						m_PrimitiveMeshBuffer;
+	ID3D11InputLayout*						m_PrimitiveInputLayout;
+	RShader*								m_ColorShader;
+
+	RColor									m_PrimitiveColor;
+	vector<RVertex::PRIMITIVE_VERTEX>		m_PrimitiveVertices;
+	bool									m_bDirtyBuffer;
 };
+
+#define GDebugRenderer RDebugRenderer::Instance()
 
 #endif

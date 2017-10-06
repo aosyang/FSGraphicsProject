@@ -27,9 +27,9 @@ void RPostProcessor::Initialize()
 {
 	// Create vertex shader for post processing
 	m_PPVertexShader = RShaderManager::Instance().GetShaderResource("PostProcessor")->VertexShader;
-	RRenderer.D3DDevice()->CreatePixelShader(PostProcessor_DeferredComposition, sizeof(PostProcessor_DeferredComposition), 0, &m_PPPixelShader[PPE_DeferredComposition]);
-	RRenderer.D3DDevice()->CreatePixelShader(DeferredPointLightPass, sizeof(DeferredPointLightPass), 0, &m_PPPixelShader[PPE_DeferredPointLightPass]);
-	RRenderer.D3DDevice()->CreatePixelShader(ScreenSpaceRayTracing, sizeof(ScreenSpaceRayTracing), 0, &m_PPPixelShader[PPE_ScreenSpaceRayTracing]);
+	GRenderer.D3DDevice()->CreatePixelShader(PostProcessor_DeferredComposition, sizeof(PostProcessor_DeferredComposition), 0, &m_PPPixelShader[PPE_DeferredComposition]);
+	GRenderer.D3DDevice()->CreatePixelShader(DeferredPointLightPass, sizeof(DeferredPointLightPass), 0, &m_PPPixelShader[PPE_DeferredPointLightPass]);
+	GRenderer.D3DDevice()->CreatePixelShader(ScreenSpaceRayTracing, sizeof(ScreenSpaceRayTracing), 0, &m_PPPixelShader[PPE_ScreenSpaceRayTracing]);
 
 	// Find vertex declaration for screen quad
 	m_InputLayout = RVertexDeclaration::Instance().GetInputLayout(RVertex::SKYBOX_VERTEX::GetTypeName());
@@ -81,19 +81,19 @@ void RPostProcessor::RecreateLostResources()
 
 void RPostProcessor::SetupRenderTarget()
 {
-	RRenderer.SetRenderTargets(1, &m_RTView, m_RTDepthStencilView);
+	GRenderer.SetRenderTargets(1, &m_RTView, m_RTDepthStencilView);
 	
-	D3D11_VIEWPORT vp = { 0.0f, 0.0f, (FLOAT)RRenderer.GetClientWidth(), (FLOAT)RRenderer.GetClientHeight(), 0.0f, 1.0f };
-	RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
+	D3D11_VIEWPORT vp = { 0.0f, 0.0f, (FLOAT)GRenderer.GetClientWidth(), (FLOAT)GRenderer.GetClientHeight(), 0.0f, 1.0f };
+	GRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
 }
 
 void RPostProcessor::Draw(PostProcessingEffect effect)
 {
-	RRenderer.SetPixelShader(m_PPPixelShader[effect]);
-	RRenderer.SetVertexShader(m_PPVertexShader);
-	RRenderer.SetGeometryShader(nullptr);
+	GRenderer.SetPixelShader(m_PPPixelShader[effect]);
+	GRenderer.SetVertexShader(m_PPVertexShader);
+	GRenderer.SetGeometryShader(nullptr);
 
-	RRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
+	GRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
 	m_ScreenQuad.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
@@ -101,8 +101,8 @@ void RPostProcessor::CreateRenderTargetResources()
 {
 	// Create render target
 	D3D11_TEXTURE2D_DESC renderTargetTextureDesc;
-	renderTargetTextureDesc.Width = RRenderer.GetClientWidth();
-	renderTargetTextureDesc.Height = RRenderer.GetClientHeight();
+	renderTargetTextureDesc.Width = GRenderer.GetClientWidth();
+	renderTargetTextureDesc.Height = GRenderer.GetClientHeight();
 	renderTargetTextureDesc.MipLevels = 1;
 	renderTargetTextureDesc.ArraySize = 1;
 	renderTargetTextureDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
@@ -113,8 +113,8 @@ void RPostProcessor::CreateRenderTargetResources()
 	renderTargetTextureDesc.CPUAccessFlags = 0;
 	renderTargetTextureDesc.MiscFlags = 0;
 
-	RRenderer.D3DDevice()->CreateTexture2D(&renderTargetTextureDesc, 0, &m_RTBuffer);
-	RRenderer.D3DDevice()->CreateRenderTargetView(m_RTBuffer, 0, &m_RTView);
+	GRenderer.D3DDevice()->CreateTexture2D(&renderTargetTextureDesc, 0, &m_RTBuffer);
+	GRenderer.D3DDevice()->CreateRenderTargetView(m_RTBuffer, 0, &m_RTView);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC rtsrvDesc;
 	rtsrvDesc.Format = renderTargetTextureDesc.Format;
@@ -122,11 +122,11 @@ void RPostProcessor::CreateRenderTargetResources()
 	rtsrvDesc.Texture2D.MostDetailedMip = 0;
 	rtsrvDesc.Texture2D.MipLevels = 1;
 
-	RRenderer.D3DDevice()->CreateShaderResourceView(m_RTBuffer, &rtsrvDesc, &m_RTSRV);
+	GRenderer.D3DDevice()->CreateShaderResourceView(m_RTBuffer, &rtsrvDesc, &m_RTSRV);
 
 	renderTargetTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	renderTargetTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 
-	RRenderer.D3DDevice()->CreateTexture2D(&renderTargetTextureDesc, 0, &m_RTDepthBuffer);
-	RRenderer.D3DDevice()->CreateDepthStencilView(m_RTDepthBuffer, 0, &m_RTDepthStencilView);
+	GRenderer.D3DDevice()->CreateTexture2D(&renderTargetTextureDesc, 0, &m_RTDepthBuffer);
+	GRenderer.D3DDevice()->CreateDepthStencilView(m_RTDepthBuffer, 0, &m_RTDepthStencilView);
 }

@@ -97,8 +97,6 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 
 	m_Skybox.Release();
 	m_PostProcessor.Release();
-
-	m_DebugRenderer.Release();
 }
 
 bool FSGraphicsProjectApp::Initialize()
@@ -112,7 +110,6 @@ bool FSGraphicsProjectApp::Initialize()
 	m_RefractionShader = RShaderManager::Instance().GetShaderResource("Refraction");
 
 	m_PostProcessor.Initialize();
-	m_DebugRenderer.Initialize();
 
 	// Create buffer for star mesh
 	RVertex::PRIMITIVE_VERTEX starVertex[12];
@@ -263,7 +260,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_Skybox.CreateSkybox("../Assets/powderpeak.dds");
 
 	m_Camera.SetPosition(RVec3(407.023712f, 339.007507f, 876.396484f));
-	m_Camera.SetupView(65.0f, RRenderer.AspectRatio(), 1.0f, 10000.0f);
+	m_Camera.SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
 	m_CamPitch = 0.0900001600f;
 	m_CamYaw = 3.88659930f;
 
@@ -315,10 +312,10 @@ bool FSGraphicsProjectApp::Initialize()
 	depthDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-	RRenderer.D3DDevice()->CreateDepthStencilState(&depthDesc, &m_DepthState[0]);
+	GRenderer.D3DDevice()->CreateDepthStencilState(&depthDesc, &m_DepthState[0]);
 
 	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-	RRenderer.D3DDevice()->CreateDepthStencilState(&depthDesc, &m_DepthState[1]);
+	GRenderer.D3DDevice()->CreateDepthStencilState(&depthDesc, &m_DepthState[1]);
 
 	m_EnabledPostProcessor = 0;
 	m_CharacterRot = 0.0f;
@@ -438,7 +435,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		worldMoveVec = camAabb.TestDynamicCollisionWithAabb(worldMoveVec, sceneMeshElements[i].GetAabb());
 
 		if (m_RenderCollisionWireframe)
-			m_DebugRenderer.DrawAabb(sceneMeshElements[i].GetAabb());
+			GDebugRenderer.DrawAabb(sceneMeshElements[i].GetAabb());
 	}
 	cameraMatrix.SetTranslation(camPos + worldMoveVec);
 	m_Camera.SetTransform(cameraMatrix);
@@ -485,7 +482,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		frustum = m_Camera.GetFrustum();
 	}
 
-	//m_DebugRenderer.DrawFrustum(frustum);
+	//GDebugRenderer.DrawFrustum(frustum);
 
 	float shadowSplitPoints[4] = { 0.0f, 0.05f, 0.4f, 1.0f };
 	float lightDistance[3] = { 1000.0f, 2000.0f, 2000.0f };
@@ -502,7 +499,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		RSphere s0 = CalculateFrustumBoundingSphere(frustum, shadowSplitPoints[i], shadowSplitPoints[i + 1]);
 
 		if (freezeFrustum)
-			m_DebugRenderer.DrawSphere(s0.center, s0.radius, frustumColor[i]);
+			GDebugRenderer.DrawSphere(s0.center, s0.radius, frustumColor[i]);
 
 		lightDistance[i] = max(lightDistance[i], s0.radius);
 
@@ -532,7 +529,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		RFrustum shadowVolume = m_ShadowMap[i].GetFrustum();
 
 		if (freezeFrustum)
-			m_DebugRenderer.DrawFrustum(shadowVolume, frustumColor[i]);
+			GDebugRenderer.DrawFrustum(shadowVolume, frustumColor[i]);
 
 		m_ShadowMap[i].SetViewMatrix(shadowViewMatrix);
 		//m_ShadowMap.SetOrthogonalProjection(500.0f, 500.0f, 0.1f, 5000.0f);
@@ -554,7 +551,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		//	shadowVolume.corners[n] = v.ToVec3();
 		//}
 
-		//m_DebugRenderer.DrawFrustum(shadowVolume);
+		//GDebugRenderer.DrawFrustum(shadowVolume);
 	}
 
 	// Update light constant buffer
@@ -612,7 +609,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		sPoints[i] = sPoints[i] * projMatrix;
 		sPoints[i] /= sPoints[i].w;
 		cbLight.CascadedShadowDepth[i - 1] = sPoints[i].z;
-		//m_DebugRenderer.DrawSphere(sPoints[i].ToVec3(), 50.0f);
+		//GDebugRenderer.DrawSphere(sPoints[i].ToVec3(), 50.0f);
 	}
 
 	RConstantBuffers::cbLight.UpdateContent(&cbLight);
@@ -635,9 +632,9 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	SHADER_GLOBAL_BUFFER cbScreen;
 	ZeroMemory(&cbScreen, sizeof(cbScreen));
 
-	cbScreen.ScreenSize = RVec4((float)RRenderer.GetClientWidth(), (float)RRenderer.GetClientHeight(),
-								1.0f / (float)RRenderer.GetClientWidth(), 1.0f / (float)RRenderer.GetClientHeight());
-	cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection() ? 1 : (m_EnabledPostProcessor == 1);
+	cbScreen.ScreenSize = RVec4((float)GRenderer.GetClientWidth(), (float)GRenderer.GetClientHeight(),
+								1.0f / (float)GRenderer.GetClientWidth(), 1.0f / (float)GRenderer.GetClientHeight());
+	cbScreen.UseGammaCorrection = GRenderer.UsingGammaCorrection() ? 1 : (m_EnabledPostProcessor == 1);
 
 	RConstantBuffers::cbGlobal.UpdateContent(&cbScreen);
 
@@ -705,7 +702,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		aabb.pMin += nodePos;
 		aabb.pMax += nodePos;
 
-		m_DebugRenderer.DrawAabb(aabb);
+		GDebugRenderer.DrawAabb(aabb);
 
 		const vector<RMeshElement>& sceneMeshElements = m_SceneMeshCity->GetMeshElements();
 		for (UINT i = 0; i < sceneMeshElements.size(); i++)
@@ -738,7 +735,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 			ZeroMemory(&cbSkinned, sizeof(cbSkinned));
 		}
 
-		m_DebugRenderer.DrawLine(nodePos, nodePos + worldOffset * 10, RColor(1.0f, 0.0f, 0.0f), RColor(1.0f, 0.0f, 0.0f));
+		GDebugRenderer.DrawLine(nodePos, nodePos + worldOffset * 10, RColor(1.0f, 0.0f, 0.0f), RColor(1.0f, 0.0f, 0.0f));
 
 		RConstantBuffers::cbBoneMatrices.UpdateContent(&cbSkinned);
 		RConstantBuffers::cbBoneMatrices.BindBuffer();
@@ -748,7 +745,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	static float t = 0.0f;
 	t += timer.DeltaTime() * 50.0f;
 	m_TachikomaObj.SetTransform(RMatrix4::CreateYAxisRotation(t) * RMatrix4::CreateTranslation(pos));
-	//m_DebugRenderer.DrawAabb(m_TachikomaObj.GetAabb());
+	//GDebugRenderer.DrawAabb(m_TachikomaObj.GetAabb());
 
 
 	if (RInput.GetBufferedKeyState(VK_OEM_PLUS) == BKS_Pressed)
@@ -766,8 +763,8 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 void FSGraphicsProjectApp::RenderScene()
 {
-	float width = static_cast<float>(RRenderer.GetClientWidth());
-	float height = static_cast<float>(RRenderer.GetClientHeight());
+	float width = static_cast<float>(GRenderer.GetClientWidth());
+	float height = static_cast<float>(GRenderer.GetClientHeight());
 	D3D11_VIEWPORT vp[2] =
 	{
 		{ 0.0f, 0.0f, width, height, 0.0f, 1.0f },
@@ -778,8 +775,8 @@ void FSGraphicsProjectApp::RenderScene()
 	RConstantBuffers::cbLight.BindBuffer();
 	RConstantBuffers::cbMaterial.BindBuffer();
 	RConstantBuffers::cbGlobal.BindBuffer();
-	RRenderer.SetSamplerState(0, SamplerState_Texture);
-	RRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
+	GRenderer.SetSamplerState(0, SamplerState_Texture);
+	GRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
 
 	//=========================== Shadow Pass ===========================
 	for (int i = 0; i < 3; i++)
@@ -789,15 +786,15 @@ void FSGraphicsProjectApp::RenderScene()
 		RConstantBuffers::cbScene.BindBuffer();
 
 		m_ShadowMap[i].SetupRenderTarget();
-		RRenderer.Clear();
+		GRenderer.Clear();
 		RenderSinglePass(ShadowPass);
 	}
 
 	//=========================== Scene Buffer Pass =====================
-	RRenderer.SetRenderTargets(1, &m_RenderTargetView, m_RenderTargetDepthView);
+	GRenderer.SetRenderTargets(1, &m_RenderTargetView, m_RenderTargetDepthView);
 
-	RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp[0]);
-	RRenderer.Clear();
+	GRenderer.D3DImmediateContext()->RSSetViewports(1, &vp[0]);
+	GRenderer.Clear();
 	RenderSinglePass(RefractionScenePass);
 
 	//=========================== Normal Pass ===========================
@@ -814,7 +811,7 @@ void FSGraphicsProjectApp::RenderScene()
 			}
 			else
 			{
-				RRenderer.SetRenderTargets();
+				GRenderer.SetRenderTargets();
 			}
 		}
 		else
@@ -847,29 +844,29 @@ void FSGraphicsProjectApp::RenderScene()
 			std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
 			m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(RVertex::PARTICLE_VERTEX), PARTICLE_COUNT);
 	
-			RRenderer.SetRenderTargets();
+			GRenderer.SetRenderTargets();
 		}
 
-		RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp[i]);
+		GRenderer.D3DImmediateContext()->RSSetViewports(1, &vp[i]);
 
 		if (i == 0)
-			RRenderer.Clear();
+			GRenderer.Clear();
 		else
-			RRenderer.Clear(false, RColor(0.0f, 0.0f, 0.0f));
+			GRenderer.Clear(false, RColor(0.0f, 0.0f, 0.0f));
 
 		RenderSinglePass(NormalPass);
 
 		if (i == 0 && m_EnabledPostProcessor)
 		{
-			RRenderer.SetRenderTargets();
-			RRenderer.Clear();
+			GRenderer.SetRenderTargets();
+			GRenderer.Clear();
 
 			m_PostProcessor.Draw(m_EnabledPostProcessor == 1 ? PPE_GammaCorrection : PPE_ColorEdgeDetection);
 		}
 	}
 
-	RRenderer.Present();
-	m_DebugRenderer.Reset();
+	GRenderer.Present();
+	GDebugRenderer.Reset();
 }
 
 void FSGraphicsProjectApp::OnResize(int width, int height)
@@ -901,11 +898,11 @@ void FSGraphicsProjectApp::OnResize(int width, int height)
 void FSGraphicsProjectApp::CreateSceneRenderTargetView()
 {
 	D3D11_TEXTURE2D_DESC renderTargetTextureDesc;
-	renderTargetTextureDesc.Width = RRenderer.GetClientWidth();
-	renderTargetTextureDesc.Height = RRenderer.GetClientHeight();
+	renderTargetTextureDesc.Width = GRenderer.GetClientWidth();
+	renderTargetTextureDesc.Height = GRenderer.GetClientHeight();
 	renderTargetTextureDesc.MipLevels = 1;
 	renderTargetTextureDesc.ArraySize = 1;
-	renderTargetTextureDesc.Format = RRenderer.UsingGammaCorrection() ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
+	renderTargetTextureDesc.Format = GRenderer.UsingGammaCorrection() ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
 	renderTargetTextureDesc.SampleDesc.Count = 1;
 	renderTargetTextureDesc.SampleDesc.Quality = 0;
 	renderTargetTextureDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -913,8 +910,8 @@ void FSGraphicsProjectApp::CreateSceneRenderTargetView()
 	renderTargetTextureDesc.CPUAccessFlags = 0;
 	renderTargetTextureDesc.MiscFlags = 0;
 
-	RRenderer.D3DDevice()->CreateTexture2D(&renderTargetTextureDesc, 0, &m_RenderTargetBuffer);
-	RRenderer.D3DDevice()->CreateRenderTargetView(m_RenderTargetBuffer, 0, &m_RenderTargetView);
+	GRenderer.D3DDevice()->CreateTexture2D(&renderTargetTextureDesc, 0, &m_RenderTargetBuffer);
+	GRenderer.D3DDevice()->CreateRenderTargetView(m_RenderTargetBuffer, 0, &m_RenderTargetView);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC rtsrvDesc;
 	rtsrvDesc.Format = renderTargetTextureDesc.Format;
@@ -922,13 +919,13 @@ void FSGraphicsProjectApp::CreateSceneRenderTargetView()
 	rtsrvDesc.Texture2D.MostDetailedMip = 0;
 	rtsrvDesc.Texture2D.MipLevels = 1;
 
-	RRenderer.D3DDevice()->CreateShaderResourceView(m_RenderTargetBuffer, &rtsrvDesc, &m_RenderTargetSRV);
+	GRenderer.D3DDevice()->CreateShaderResourceView(m_RenderTargetBuffer, &rtsrvDesc, &m_RenderTargetSRV);
 
 	renderTargetTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	renderTargetTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 
-	RRenderer.D3DDevice()->CreateTexture2D(&renderTargetTextureDesc, 0, &m_RenderTargetDepthBuffer);
-	RRenderer.D3DDevice()->CreateDepthStencilView(m_RenderTargetDepthBuffer, 0, &m_RenderTargetDepthView);
+	GRenderer.D3DDevice()->CreateTexture2D(&renderTargetTextureDesc, 0, &m_RenderTargetDepthBuffer);
+	GRenderer.D3DDevice()->CreateDepthStencilView(m_RenderTargetDepthBuffer, 0, &m_RenderTargetDepthView);
 }
 
 void FSGraphicsProjectApp::SetPerObjectConstBuffer(const RMatrix4& world)
@@ -948,7 +945,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		m_ShadowMap[2].GetRenderTargetDepthSRV(),
 	};
 
-	float timeNow = REngine::GetTimer().TotalTime();
+	float timeNow = GEngine.GetTimer().TotalTime();
 	float loadingFadeInTime = 1.0f;
 
 	// Update material buffer
@@ -959,7 +956,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	cbMaterial.GlobalOpacity = 1.0f;
 	SetMaterialConstBuffer(&cbMaterial);
 
-	RRenderer.SetBlendState(Blend_Opaque);
+	GRenderer.SetBlendState(Blend_Opaque);
 
 	// Set up object world matrix
 	SetPerObjectConstBuffer(RMatrix4::IDENTITY);
@@ -967,13 +964,13 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	if (pass != ShadowPass)
 	{
 		// Set shadow map to pixel shader
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(RShadowMap::ShaderResourceSlot(), 3, shadowMapSRV);
+		GRenderer.D3DImmediateContext()->PSSetShaderResources(RShadowMap::ShaderResourceSlot(), 3, shadowMapSRV);
 
 		// Draw skybox
 		m_Skybox.Draw();
 
 		// Clear depth buffer for skybox
-		RRenderer.Clear(false, RColor(0, 0, 0));
+		GRenderer.Clear(false, RColor(0, 0, 0));
 	}
 
 	RFrustum cameraFrustum = (pass == ShadowPass) ? m_ShadowMap[cbScene.cascadedShadowIndex].GetFrustum() : m_Camera.GetFrustum();
@@ -1026,11 +1023,11 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 					{
 						cbMaterial.GlobalOpacity = opacity;
 						SetMaterialConstBuffer(&cbMaterial);
-						RRenderer.SetBlendState(Blend_AlphaToCoverage);
+						GRenderer.SetBlendState(Blend_AlphaToCoverage);
 					}
 					else
 					{
-						RRenderer.SetBlendState(Blend_Opaque);
+						GRenderer.SetBlendState(Blend_Opaque);
 					}
 
 					m_FbxMeshObj.Draw(true, instanceCount);
@@ -1074,11 +1071,11 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		{
 			cbMaterial.GlobalOpacity = opacity;
 			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.SetBlendState(Blend_AlphaToCoverage);
+			GRenderer.SetBlendState(Blend_AlphaToCoverage);
 		}
 		else
 		{
-			RRenderer.SetBlendState(Blend_Opaque);
+			GRenderer.SetBlendState(Blend_Opaque);
 		}
 		m_IslandMeshObj.Draw(true, islandInstanceCount);
 	}
@@ -1095,12 +1092,12 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		{
 			cbMaterial.GlobalOpacity = opacity;
 			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.SetBlendState(Blend_AlphaToCoverage);
+			GRenderer.SetBlendState(Blend_AlphaToCoverage);
 			m_AOSceneObj.Draw();
 		}
 		else
 		{
-			RRenderer.SetBlendState(Blend_Opaque);
+			GRenderer.SetBlendState(Blend_Opaque);
 			m_AOSceneObj.Draw();
 		}
 	}
@@ -1117,10 +1114,10 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	{
 		cbMaterial.GlobalOpacity = 1.0f;
 		SetMaterialConstBuffer(&cbMaterial);
-		RRenderer.SetBlendState(Blend_AlphaToCoverage);
+		GRenderer.SetBlendState(Blend_AlphaToCoverage);
 		m_BumpLightingShader->Bind();
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_BumpBaseTexture->GetPtrSRV());
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, m_BumpNormalTexture->GetPtrSRV());
+		GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_BumpBaseTexture->GetPtrSRV());
+		GRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, m_BumpNormalTexture->GetPtrSRV());
 		m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 #endif
@@ -1138,14 +1135,14 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			{
 				cbMaterial.GlobalOpacity = opacity;
 				SetMaterialConstBuffer(&cbMaterial);
-				RRenderer.SetBlendState(Blend_AlphaToCoverage);
+				GRenderer.SetBlendState(Blend_AlphaToCoverage);
 				m_CharacterObj.Draw();
 			}
 			else
 			{
 				cbMaterial.GlobalOpacity = 1.0f;
 				SetMaterialConstBuffer(&cbMaterial);
-				RRenderer.SetBlendState(Blend_AlphaBlending);
+				GRenderer.SetBlendState(Blend_AlphaBlending);
 				m_CharacterObj.Draw();
 			}
 		}
@@ -1164,14 +1161,14 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		{
 			cbMaterial.GlobalOpacity = opacity * 0.25f;
 			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.SetBlendState(Blend_AlphaToCoverage);
+			GRenderer.SetBlendState(Blend_AlphaToCoverage);
 			m_TransparentMesh.Draw(true, 125);
 		}
 		else
 		{
 			cbMaterial.GlobalOpacity = 0.25f;
 			SetMaterialConstBuffer(&cbMaterial);
-			RRenderer.SetBlendState(Blend_AlphaBlending);
+			GRenderer.SetBlendState(Blend_AlphaBlending);
 			m_TransparentMesh.Draw(true, 125);
 		}
 	}
@@ -1190,12 +1187,12 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			{
 				cbMaterial.GlobalOpacity = opacity;
 				SetMaterialConstBuffer(&cbMaterial);
-				RRenderer.SetBlendState(Blend_AlphaToCoverage);
+				GRenderer.SetBlendState(Blend_AlphaToCoverage);
 				m_TachikomaObj.Draw();
 			}
 			else
 			{
-				RRenderer.SetBlendState(Blend_Opaque);
+				GRenderer.SetBlendState(Blend_Opaque);
 				m_TachikomaObj.Draw();
 			}
 		}
@@ -1208,28 +1205,28 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		if (RCollision::TestAabbInsideFrustum(cameraFrustum, m_ParticleAabb))
 		{
 			// Draw particles
-			RRenderer.SetBlendState(Blend_AlphaBlending);
-			RRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[1], 0);
+			GRenderer.SetBlendState(Blend_AlphaBlending);
+			GRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[1], 0);
 
 			SetPerObjectConstBuffer(RMatrix4::CreateTranslation(0.0f, 150.0f, 150.0f));
-			RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_ParticleDiffuseTexture->GetPtrSRV());
-			RRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, m_ParticleNormalTexture->GetPtrSRV());
+			GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_ParticleDiffuseTexture->GetPtrSRV());
+			GRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, m_ParticleNormalTexture->GetPtrSRV());
 			m_ParticleShader->Bind();
 			m_ParticleBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 			// Restore depth writing
-			RRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[0], 0);
+			GRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[0], 0);
 		}
 #endif
 		// Draw debug lines
-		RRenderer.SetBlendState(Blend_Opaque);
+		GRenderer.SetBlendState(Blend_Opaque);
 		SetPerObjectConstBuffer(RMatrix4::IDENTITY);
-		m_DebugRenderer.Render();
+		GDebugRenderer.Render();
 	}
 
 	// Unbind all shader resources so we can write into it
 	ID3D11ShaderResourceView* nullSRV[8] = { nullptr };
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 8, nullSRV);
+	GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 8, nullSRV);
 }
 
 void FSGraphicsProjectApp::SetMaterialConstBuffer(SHADER_MATERIAL_BUFFER* buffer)
@@ -1255,11 +1252,11 @@ RSphere FSGraphicsProjectApp::CalculateFrustumBoundingSphere(const RFrustum& fru
 	RVec3 center = (farMidPoint + nearMidPoint) * 0.5f;
 	RSphere s = { center, (cornerPoints[4] - center).Magnitude() };
 
-	//m_DebugRenderer.DrawSphere(center, 50.0f, RColor(1, 0, 0));
+	//GDebugRenderer.DrawSphere(center, 50.0f, RColor(1, 0, 0));
 
 	//for (int i = 4; i < 8; i++)
 	//{
-	//	m_DebugRenderer.DrawSphere(cornerPoints[i], 50.0f, RColor(1, 0, 0));
+	//	GDebugRenderer.DrawSphere(cornerPoints[i], 50.0f, RColor(1, 0, 0));
 	//}
 
 	return s;

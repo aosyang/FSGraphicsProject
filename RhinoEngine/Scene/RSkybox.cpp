@@ -69,7 +69,7 @@ void RSkybox::Draw()
 {
 	if (m_SkyboxShader && m_SkyboxTexture)
 	{
-		RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_SkyboxTexture->GetPtrSRV());
+		GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_SkyboxTexture->GetPtrSRV());
 		m_SkyboxShader->Bind();
 		m_SkyboxMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}

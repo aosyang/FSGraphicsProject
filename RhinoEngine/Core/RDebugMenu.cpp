@@ -132,13 +132,13 @@ bool RDebugMenu::IsKeyDownOrRepeat(int keycode)
 {
 	if (RInput.GetBufferedKeyState(keycode) == BKS_Pressed)
 	{
-		m_KeyRepeatTime = REngine::GetTimer().TotalTime() + 0.4f;
+		m_KeyRepeatTime = GEngine.GetTimer().TotalTime() + 0.4f;
 		return true;
 	}
 	
-	if ((RInput.IsKeyDown(keycode) && m_KeyRepeatTime < REngine::GetTimer().TotalTime()))
+	if ((RInput.IsKeyDown(keycode) && m_KeyRepeatTime < GEngine.GetTimer().TotalTime()))
 	{
-		m_KeyRepeatTime = REngine::GetTimer().TotalTime() + 0.01f;
+		m_KeyRepeatTime = GEngine.GetTimer().TotalTime() + 0.01f;
 		return true;
 	}
 

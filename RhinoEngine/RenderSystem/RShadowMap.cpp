@@ -46,13 +46,13 @@ void RShadowMap::Initialize(int width, int height)
 	renderTextureDesc.CPUAccessFlags = 0;
 	renderTextureDesc.MiscFlags = 0;
 
-	RRenderer.D3DDevice()->CreateTexture2D(&renderTextureDesc, 0, &m_RenderTargetBuffer);
-	RRenderer.D3DDevice()->CreateRenderTargetView(m_RenderTargetBuffer, NULL, &m_RenderTargetView);
+	GRenderer.D3DDevice()->CreateTexture2D(&renderTextureDesc, 0, &m_RenderTargetBuffer);
+	GRenderer.D3DDevice()->CreateRenderTargetView(m_RenderTargetBuffer, NULL, &m_RenderTargetView);
 
 	// Create depth buffer for render target
 	renderTextureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
 	renderTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-	RRenderer.D3DDevice()->CreateTexture2D(&renderTextureDesc, 0, &m_DepthBuffer);
+	GRenderer.D3DDevice()->CreateTexture2D(&renderTextureDesc, 0, &m_DepthBuffer);
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 	depthStencilViewDesc.Flags = 0;
@@ -60,7 +60,7 @@ void RShadowMap::Initialize(int width, int height)
 	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
 
-	RRenderer.D3DDevice()->CreateDepthStencilView(m_DepthBuffer, &depthStencilViewDesc, &m_DepthView);
+	GRenderer.D3DDevice()->CreateDepthStencilView(m_DepthBuffer, &depthStencilViewDesc, &m_DepthView);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
 	shaderResourceViewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
@@ -68,10 +68,10 @@ void RShadowMap::Initialize(int width, int height)
 	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
-	RRenderer.D3DDevice()->CreateShaderResourceView(m_DepthBuffer, &shaderResourceViewDesc, &m_RenderTargetDepthSRV);
+	GRenderer.D3DDevice()->CreateShaderResourceView(m_DepthBuffer, &shaderResourceViewDesc, &m_RenderTargetDepthSRV);
 
 	shaderResourceViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	RRenderer.D3DDevice()->CreateShaderResourceView(m_RenderTargetBuffer, &shaderResourceViewDesc, &m_RenderTargetSRV);
+	GRenderer.D3DDevice()->CreateShaderResourceView(m_RenderTargetBuffer, &shaderResourceViewDesc, &m_RenderTargetSRV);
 }
 
 void RShadowMap::SetOrthogonalProjection(float viewWidth, float viewHeight, float nearZ, float farZ)
@@ -88,7 +88,7 @@ void RShadowMap::SetOrthogonalProjection(float viewWidth, float viewHeight, floa
 void RShadowMap::SetupRenderTarget()
 {
 	ID3D11RenderTargetView* shadowRenderTargetView = GetRenderTargetView();
-	RRenderer.SetRenderTargets(1, &shadowRenderTargetView, GetDepthView());
+	GRenderer.SetRenderTargets(1, &shadowRenderTargetView, GetDepthView());
 
 	D3D11_VIEWPORT vp;
 	vp.TopLeftX = 0.0f;
@@ -97,7 +97,7 @@ void RShadowMap::SetupRenderTarget()
 	vp.Height = static_cast<float>(m_BufferHeight);
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
-	RRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
+	GRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
 }
 
 RFrustum RShadowMap::GetFrustum()

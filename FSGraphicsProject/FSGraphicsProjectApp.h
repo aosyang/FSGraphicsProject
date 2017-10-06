@@ -106,7 +106,6 @@ private:
 	SHADER_INSTANCE_BUFFER		cbInstance[2];
 	RMatrix4					m_InstanceMatrices[MAX_INSTANCE_COUNT];
 
-	RDebugRenderer				m_DebugRenderer;
 	float						m_CharacterRot;
 	float						m_CharacterYVel;
 	bool						m_RenderCollisionWireframe;

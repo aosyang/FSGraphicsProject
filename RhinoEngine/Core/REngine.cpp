@@ -7,22 +7,19 @@
 
 #include "REngine.h"
 
-REngine* REngine::m_EngineInstance;
-
 static TCHAR szWindowClass[] = _T("rhinoapp");
-RTimer REngine::m_Timer;
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 REngine::REngine()
+	: m_bIsEditor				(false),
+	  m_bIsInitialized			(false),
+	  m_hInst					(nullptr),
+	  m_hWnd					(nullptr),
+	  m_bFullScreen				(false),
+	  m_UseEngineRenderWindow	(false),
+	  m_Application				(nullptr)
 {
-	m_bIsEditor = false;
-	m_hInst = NULL;
-	m_hWnd = NULL;
-	m_bFullScreen = false;
-	m_UseEngineRenderWindow = false;
-	m_Application = NULL;
-
 	SetProcessDPIAware();
 }
 
@@ -33,7 +30,7 @@ REngine::~REngine()
 
 bool REngine::Initialize()
 {
-	m_EngineInstance = this;
+	m_bIsInitialized = true;
 
 	int width = 1024,
 		height = 768;
@@ -46,7 +43,7 @@ bool REngine::Initialize()
 
 bool REngine::Initialize(HWND hWnd, int width, int height)
 {
-	m_EngineInstance = this;
+	m_bIsInitialized = true;
 
 	if (!m_hWnd)
 		m_hWnd = hWnd;
@@ -54,7 +51,7 @@ bool REngine::Initialize(HWND hWnd, int width, int height)
 	if (!RInput.Initialize())
 		return false;
 
-	if (!RRenderer.Initialize(m_hWnd, width, height, true))
+	if (!GRenderer.Initialize(m_hWnd, width, height, true))
 		return false;
 
 	// Initialize resource manager
@@ -63,8 +60,11 @@ bool REngine::Initialize(HWND hWnd, int width, int height)
 	// Initialize shaders
 	RShaderManager::Instance().LoadShaders("../Shaders");
 
-	RScript.Initialize();
-	RScript.Start();
+	// Initialize debug renderer
+	GDebugRenderer.Initialize();
+
+	GScriptSystem.Initialize();
+	GScriptSystem.Start();
 
 	if (!m_Application->Initialize())
 		return false;
@@ -74,7 +74,10 @@ bool REngine::Initialize(HWND hWnd, int width, int height)
 
 void REngine::Shutdown()
 {
-	RScript.Shutdown();
+	GScriptSystem.Shutdown();
+
+	// Release debug renderer
+	GDebugRenderer.Release();
 
 	// Unload shaders
 	RShaderManager::Instance().UnloadAllShaders();
@@ -82,12 +85,12 @@ void REngine::Shutdown()
 	// Destroy resource manager
 	RResourceManager::Instance().Destroy();
 
-	RRenderer.Shutdown();
+	GRenderer.Shutdown();
 
 	if (m_UseEngineRenderWindow)
 		DestroyRenderWindow();
 
-	m_EngineInstance = nullptr;
+	m_bIsInitialized = false;
 }
 
 void REngine::Run()
@@ -150,14 +153,14 @@ void REngine::RunOneFrame(bool update_input)
 
 	m_Application->UpdateScene(m_Timer);
 
-	RScript.UpdateScriptableObjects();
+	GScriptSystem.UpdateScriptableObjects();
 
 	m_Application->RenderScene();
 }
 
 void REngine::ResizeClientWindow(int width, int height)
 {
-	RRenderer.ResizeClient(width, height);
+	GRenderer.ResizeClient(width, height);
 	m_Application->OnResize(width, height);
 }
 
@@ -296,7 +299,7 @@ void REngine::CalculateFrameStats()
 		std::wostringstream outs;
 		outs.precision(6);
 		outs << m_Application->WindowTitle()
-			<< L" - " << RRenderer.GetAdapterName() << L"    "
+			<< L" - " << GRenderer.GetAdapterName() << L"    "
 			<< L"FPS: " << fps << L"    "
 			<< L"Frame Time: " << mspf << L" (ms)";
 		SetWindowText(m_hWnd, outs.str().c_str());
@@ -317,7 +320,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_SIZE:
-		if (REngine::Instance()) REngine::Instance()->ResizeClientWindow(LOWORD(lParam), HIWORD(lParam));
+		if (GEngine.IsInitialized())
+		{
+			GEngine.ResizeClientWindow(LOWORD(lParam), HIWORD(lParam));
+		}
 		break;
 
 	case WM_KEYDOWN:

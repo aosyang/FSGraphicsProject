@@ -122,8 +122,8 @@ void RText::Render()
 		m_bNeedUpdateBuffer = false;
 	}
 
-	RRenderer.SetBlendState(Blend_AlphaBlending);
+	GRenderer.SetBlendState(Blend_AlphaBlending);
 	m_FontShader->Bind();
-	RRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_FontTexture->GetPtrSRV());
+	GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_FontTexture->GetPtrSRV());
 	m_VertexBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

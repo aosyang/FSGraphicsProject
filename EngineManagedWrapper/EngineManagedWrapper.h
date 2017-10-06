@@ -15,7 +15,6 @@ namespace EngineManagedWrapper {
 	public ref class RhinoEngineWrapper
 	{
 	private:
-		REngine*	m_Engine;
 		EditorApp*	m_Application;
 		bool		m_IsInitialized;
 

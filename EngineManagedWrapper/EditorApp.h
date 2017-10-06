@@ -30,7 +30,6 @@ namespace EngineManagedWrapper
 		float						m_CamFov;
 
 		RShader*					m_ColorShader;
-		RDebugRenderer				m_DebugRenderer;
 
 		EditorAxis					m_EditorAxis;
 		int							m_MouseDownX, m_MouseDownY;

@@ -22,21 +22,18 @@ namespace EngineManagedWrapper
 
 		SAFE_RELEASE(m_SamplerState);
 		SAFE_RELEASE(m_SamplerComparisonState);
-		m_DebugRenderer.Release();
 
 		m_EditorAxis.Release();
 	}
 
 	bool EditorApp::Initialize()
 	{
-		REngine::Instance()->SetEditorMode(true);
+		GEngine.SetEditorMode(true);
 
 		m_Scene.Initialize();
 
 		m_DefaultShader = RShaderManager::Instance().GetShaderResource("Default");
 		m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
-
-		m_DebugRenderer.Initialize();
 
 #if 1
 		RResourceManager::Instance().LoadAllResources();
@@ -62,7 +59,7 @@ namespace EngineManagedWrapper
 		samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 		samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-		RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState);
+		GRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState);
 
 		ZeroMemory(&samplerDesc, sizeof(samplerDesc));
 		samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
@@ -73,7 +70,7 @@ namespace EngineManagedWrapper
 		samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
 		samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-		RRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerComparisonState);
+		GRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerComparisonState);
 
 
 		m_CamFov = 65.0f;
@@ -92,7 +89,7 @@ namespace EngineManagedWrapper
 	{
 		RVec3 moveVec(0.0f, 0.0f, 0.0f);
 
-		RECT rwRect = REngine::Instance()->GetWindowRectInfo();
+		RECT rwRect = GEngine.GetWindowRectInfo();
 		int mx, my;
 		RInput.GetCursorPos(mx, my);
 
@@ -107,7 +104,7 @@ namespace EngineManagedWrapper
 
 			if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Pressed)
 			{
-				RECT rect = REngine::Instance()->GetWindowRectInfo();
+				RECT rect = GEngine.GetWindowRectInfo();
 				int cur_x, cur_y;
 
 				RInput.GetCursorPos(cur_x, cur_y);
@@ -169,7 +166,7 @@ namespace EngineManagedWrapper
 				RVec3 cam_right = m_CameraMatrix.GetRight();
 				RVec3 cam_up = m_CameraMatrix.GetUp();
 
-				float move_scale = RRenderer.GetClientHeight() / 500.0f;
+				float move_scale = GRenderer.GetClientHeight() / 500.0f;
 
 				if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Pressed &&
 					RInput.IsKeyDown(VK_LCONTROL))
@@ -236,19 +233,19 @@ namespace EngineManagedWrapper
 		m_CameraMatrix.SetTranslation(camPos + (RVec4(moveVec, 1.0f) * m_CameraMatrix).ToVec3());
 
 		RMatrix4 viewMatrix = m_CameraMatrix.FastInverse();
-		RMatrix4 projMatrix = RMatrix4::CreatePerspectiveProjectionLH(m_CamFov, RRenderer.AspectRatio(), 1.0f, 10000.0f);
+		RMatrix4 projMatrix = RMatrix4::CreatePerspectiveProjectionLH(m_CamFov, GRenderer.AspectRatio(), 1.0f, 10000.0f);
 		RMatrix4 viewProjMatrix = viewMatrix * projMatrix;
 
 		m_InvViewProjMatrix = viewProjMatrix.Inverse();
 
 		if (m_SelectedObject)
 		{
-			m_DebugRenderer.DrawAabb(m_SelectedObject->GetAabb());
+			GDebugRenderer.DrawAabb(m_SelectedObject->GetAabb());
 
 			RVec3 pos = m_SelectedObject->GetPosition();
-			m_DebugRenderer.DrawLine(RVec3(pos.x + 10000.0f, pos.y, pos.z), RVec3(pos.x - 10000.0f, pos.y, pos.z));
-			m_DebugRenderer.DrawLine(RVec3(pos.x, pos.y + 10000.0f, pos.z), RVec3(pos.x, pos.y - 10000.0f, pos.z));
-			m_DebugRenderer.DrawLine(RVec3(pos.x, pos.y, pos.z + 10000.0f), RVec3(pos.x, pos.y, pos.z - 10000.0f));
+			GDebugRenderer.DrawLine(RVec3(pos.x + 10000.0f, pos.y, pos.z), RVec3(pos.x - 10000.0f, pos.y, pos.z));
+			GDebugRenderer.DrawLine(RVec3(pos.x, pos.y + 10000.0f, pos.z), RVec3(pos.x, pos.y - 10000.0f, pos.z));
+			GDebugRenderer.DrawLine(RVec3(pos.x, pos.y, pos.z + 10000.0f), RVec3(pos.x, pos.y, pos.z - 10000.0f));
 		}
 
 		// Update scene constant buffer
@@ -279,19 +276,19 @@ namespace EngineManagedWrapper
 		SHADER_GLOBAL_BUFFER cbScreen;
 		ZeroMemory(&cbScreen, sizeof(cbScreen));
 
-		cbScreen.UseGammaCorrection = RRenderer.UsingGammaCorrection();
+		cbScreen.UseGammaCorrection = GRenderer.UsingGammaCorrection();
 
 		RConstantBuffers::cbGlobal.UpdateContent(&cbScreen);
 		RConstantBuffers::cbGlobal.BindBuffer();
 
 
-		RRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
-		RRenderer.D3DImmediateContext()->PSSetSamplers(2, 1, &m_SamplerComparisonState);
+		GRenderer.D3DImmediateContext()->PSSetSamplers(0, 1, &m_SamplerState);
+		GRenderer.D3DImmediateContext()->PSSetSamplers(2, 1, &m_SamplerComparisonState);
 	}
 
 	void EditorApp::RenderScene()
 	{
-		RRenderer.Clear();
+		GRenderer.Clear();
 
 		// Update object constant buffer
 		SHADER_OBJECT_BUFFER cbObject;
@@ -301,16 +298,16 @@ namespace EngineManagedWrapper
 
 		m_Skybox.Draw();
 
-		RRenderer.Clear(false);
+		GRenderer.Clear(false);
 
 		m_Scene.Render();
 
 		cbObject.worldMatrix = RMatrix4::IDENTITY;
 		RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
 
-		m_DebugRenderer.Render();
+		GDebugRenderer.Render();
 
-		RRenderer.Clear(false);
+		GRenderer.Clear(false);
 
 		// Draw axises
 		if (m_SelectedObject)
@@ -331,8 +328,8 @@ namespace EngineManagedWrapper
 			m_EditorAxis.Draw();
 		}
 
-		RRenderer.Present();
-		m_DebugRenderer.Reset();
+		GRenderer.Present();
+		GDebugRenderer.Reset();
 	}
 
 	void EditorApp::AddMeshObjectToScene(const char* path)

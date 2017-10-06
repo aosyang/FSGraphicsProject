@@ -151,7 +151,6 @@ private:
 
 	PointLight					m_PointLights[MAX_LIGHT_COUNT];
 	float						m_TotalTime;
-	RDebugRenderer				m_DebugRenderer;
 	RDebugMenu					m_DebugMenu;
 
 	bool						m_EnableDeferredShading;

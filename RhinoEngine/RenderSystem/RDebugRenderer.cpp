@@ -9,7 +9,10 @@
 
 
 RDebugRenderer::RDebugRenderer()
-	: m_PrimitiveInputLayout(nullptr), m_ColorShader(nullptr), m_PrimitiveColor(0.0f, 1.0f, 0.0f), m_bDirtyBuffer(true)
+	: m_PrimitiveInputLayout	(nullptr),
+	  m_ColorShader				(nullptr),
+	  m_PrimitiveColor			(0.0f, 1.0f, 0.0f),
+	  m_bDirtyBuffer			(true)
 {
 }
 
@@ -175,7 +178,7 @@ void RDebugRenderer::Render()
 	//RRenderer.Clear(false);
 
 	m_ColorShader->Bind();
-	RRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);
+	GRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);
 	m_PrimitiveMeshBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 }
 

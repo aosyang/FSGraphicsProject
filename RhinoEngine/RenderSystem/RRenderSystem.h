@@ -100,6 +100,6 @@ protected:
 	bool					m_bIsDeferred;
 };
 
-#define RRenderer RRenderSystem::Instance()
+#define GRenderer RRenderSystem::Instance()
 
 #endif

@@ -12,12 +12,12 @@ RSceneObject::RSceneObject()
 	: m_Scene(nullptr)
 {
 	m_NodeTransform = RMatrix4::IDENTITY;
-	RScript.RegisterScriptableObject(this);
+	GScriptSystem.RegisterScriptableObject(this);
 }
 
 RSceneObject::~RSceneObject()
 {
-	RScript.UnregisterScriptableObject(this);
+	GScriptSystem.UnregisterScriptableObject(this);
 }
 
 const RMatrix4& RSceneObject::GetNodeTransform() const

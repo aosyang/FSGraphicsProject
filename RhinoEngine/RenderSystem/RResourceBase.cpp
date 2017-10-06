@@ -27,6 +27,6 @@ void RResourceBase::OnLoadingFinished()
 {
 	assert(m_State != RS_Loaded);
 
-	m_LoadingFinishTime = REngine::GetTimer().TotalTime();
+	m_LoadingFinishTime = GEngine.GetTimer().TotalTime();
 	m_State = RS_Loaded;
 }

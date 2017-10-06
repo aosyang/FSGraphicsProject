@@ -22,18 +22,18 @@ bool RShader::operator==(const RShader& rhs) const
 void RShader::Bind(int featureMasks)
 {
 	if ((featureMasks & SFM_Skinned) && VertexShader_Skinned)
-		RRenderer.SetVertexShader(VertexShader_Skinned);
+		GRenderer.SetVertexShader(VertexShader_Skinned);
 	else if ((featureMasks & SFM_Instanced) && VertexShader_Instanced)
-		RRenderer.SetVertexShader(VertexShader_Instanced);
+		GRenderer.SetVertexShader(VertexShader_Instanced);
 	else
-		RRenderer.SetVertexShader(VertexShader);
+		GRenderer.SetVertexShader(VertexShader);
 
 	if ((featureMasks & SFM_Deferred) && PixelShader_Deferred)
-		RRenderer.SetPixelShader(PixelShader_Deferred);
+		GRenderer.SetPixelShader(PixelShader_Deferred);
 	else
-		RRenderer.SetPixelShader(PixelShader);
+		GRenderer.SetPixelShader(PixelShader);
 
-	RRenderer.SetGeometryShader(GeometryShader);
+	GRenderer.SetGeometryShader(GeometryShader);
 }
 
 string RShader::GetName() const
@@ -116,7 +116,7 @@ void RShaderManager::LoadShaders(const char* path)
 				{
 					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 					{
-						RRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader);
+						GRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader);
 #ifdef _DEBUG
 						m_Shaders[shaderName].VertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
@@ -131,7 +131,7 @@ void RShaderManager::LoadShaders(const char* path)
 
 						if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), skinnedShaderMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 						{
-							RRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader_Skinned);
+							GRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader_Skinned);
 #ifdef _DEBUG
 							m_Shaders[shaderName].VertexShader_Skinned->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
@@ -147,7 +147,7 @@ void RShaderManager::LoadShaders(const char* path)
 
 						if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), instancedShaderMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 						{
-							RRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader_Instanced);
+							GRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader_Instanced);
 #ifdef _DEBUG
 							m_Shaders[shaderName].VertexShader_Instanced->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
@@ -159,7 +159,7 @@ void RShaderManager::LoadShaders(const char* path)
 				{
 					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 					{
-						RRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].PixelShader);
+						GRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].PixelShader);
 #ifdef _DEBUG
 						m_Shaders[shaderName].PixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
@@ -174,7 +174,7 @@ void RShaderManager::LoadShaders(const char* path)
 
 						if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), deferredShaderMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 						{
-							RRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].PixelShader_Deferred);
+							GRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].PixelShader_Deferred);
 #ifdef _DEBUG
 							m_Shaders[shaderName].PixelShader_Deferred->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
@@ -186,7 +186,7 @@ void RShaderManager::LoadShaders(const char* path)
 				{
 					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "gs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 					{
-						RRenderer.D3DDevice()->CreateGeometryShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].GeometryShader);
+						GRenderer.D3DDevice()->CreateGeometryShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].GeometryShader);
 #ifdef _DEBUG
 						m_Shaders[shaderName].GeometryShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
@@ -237,17 +237,17 @@ bool RShaderManager::AddShader(const char* shaderName,
 
 	if (pixelShaderBytecode && pixelBytecodeLength)
 	{
-		RRenderer.D3DDevice()->CreatePixelShader(pixelShaderBytecode, pixelBytecodeLength, NULL, &shader.PixelShader);
+		GRenderer.D3DDevice()->CreatePixelShader(pixelShaderBytecode, pixelBytecodeLength, NULL, &shader.PixelShader);
 	}
 
 	if (vertexShaderBytecode && vertexBytecodeLength)
 	{
-		RRenderer.D3DDevice()->CreateVertexShader(vertexShaderBytecode, vertexBytecodeLength, NULL, &shader.VertexShader);
+		GRenderer.D3DDevice()->CreateVertexShader(vertexShaderBytecode, vertexBytecodeLength, NULL, &shader.VertexShader);
 	}
 
 	if (geometryShaderBytecode && geometryBytecodeLength)
 	{
-		RRenderer.D3DDevice()->CreateGeometryShader(geometryShaderBytecode, geometryBytecodeLength, NULL, &shader.GeometryShader);
+		GRenderer.D3DDevice()->CreateGeometryShader(geometryShaderBytecode, geometryBytecodeLength, NULL, &shader.GeometryShader);
 	}
 
 	m_Shaders[shaderName] = shader;

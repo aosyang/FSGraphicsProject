@@ -31,7 +31,7 @@ public:
 		cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		cbDesc.Usage = D3D11_USAGE_DYNAMIC;
 
-		RRenderer.D3DDevice()->CreateBuffer(&cbDesc, NULL, &m_ConstBuffer);
+		GRenderer.D3DDevice()->CreateBuffer(&cbDesc, NULL, &m_ConstBuffer);
 
 		// Initialize buffer values with zero
 		T buffer;
@@ -48,20 +48,20 @@ public:
 	void UpdateContent(const T* data)
 	{
 		D3D11_MAPPED_SUBRESOURCE subres;
-		RRenderer.D3DImmediateContext()->Map(m_ConstBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+		GRenderer.D3DImmediateContext()->Map(m_ConstBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
 		memcpy(subres.pData, data, sizeof(T));
-		RRenderer.D3DImmediateContext()->Unmap(m_ConstBuffer, 0);
+		GRenderer.D3DImmediateContext()->Unmap(m_ConstBuffer, 0);
 	}
 
 	/// Bind constant buffer to shader for rendering
 	void BindBuffer()
 	{
 		if (SHADER_TYPE & CBST_VS)
-			RRenderer.D3DImmediateContext()->VSSetConstantBuffers(SLOT, 1, &m_ConstBuffer);
+			GRenderer.D3DImmediateContext()->VSSetConstantBuffers(SLOT, 1, &m_ConstBuffer);
 		if (SHADER_TYPE & CBST_PS)
-			RRenderer.D3DImmediateContext()->PSSetConstantBuffers(SLOT, 1, &m_ConstBuffer);
+			GRenderer.D3DImmediateContext()->PSSetConstantBuffers(SLOT, 1, &m_ConstBuffer);
 		if (SHADER_TYPE & CBST_GS)
-			RRenderer.D3DImmediateContext()->GSSetConstantBuffers(SLOT, 1, &m_ConstBuffer);
+			GRenderer.D3DImmediateContext()->GSSetConstantBuffers(SLOT, 1, &m_ConstBuffer);
 	}
 
 private:
