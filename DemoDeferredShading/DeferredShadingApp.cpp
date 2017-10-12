@@ -297,9 +297,9 @@ void DeferredShadingApp::RenderScene()
 
 		for (int i = 0; i < min(m_LightCount, MAX_LIGHT_COUNT); i++)
 		{
-			float x = sinf(m_TotalTime * m_PointLights[i].sin_factor.x + m_PointLights[i].sin_offset.x) * 1000.0f;
-			float y = sinf(m_TotalTime * m_PointLights[i].sin_factor.y + m_PointLights[i].sin_offset.y) * 1000.0f;
-			float z = sinf(m_TotalTime * m_PointLights[i].sin_factor.z + m_PointLights[i].sin_offset.z) * 1000.0f;
+			float x = sinf(m_TotalTime * m_PointLights[i].sin_factor.X() + m_PointLights[i].sin_offset.X()) * 1000.0f;
+			float y = sinf(m_TotalTime * m_PointLights[i].sin_factor.Y() + m_PointLights[i].sin_offset.Y()) * 1000.0f;
+			float z = sinf(m_TotalTime * m_PointLights[i].sin_factor.Z() + m_PointLights[i].sin_offset.Z()) * 1000.0f;
 			RVec3 offset = RVec3(x, y, z);
 
 			RVec3 pos = m_PointLights[i].pos + offset;
@@ -321,15 +321,15 @@ void DeferredShadingApp::RenderScene()
 			{
 				RVec3 corners[] =
 				{
-					RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMin.z),
-					RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMin.z),
-					RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMin.z),
-					RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMin.z),
+					RVec3(aabb.pMin.X(), aabb.pMin.Y(), aabb.pMin.Z()),
+					RVec3(aabb.pMin.X(), aabb.pMax.Y(), aabb.pMin.Z()),
+					RVec3(aabb.pMax.X(), aabb.pMax.Y(), aabb.pMin.Z()),
+					RVec3(aabb.pMax.X(), aabb.pMin.Y(), aabb.pMin.Z()),
 
-					RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMax.z),
-					RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMax.z),
-					RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMax.z),
-					RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMax.z),
+					RVec3(aabb.pMin.X(), aabb.pMin.Y(), aabb.pMax.Z()),
+					RVec3(aabb.pMin.X(), aabb.pMax.Y(), aabb.pMax.Z()),
+					RVec3(aabb.pMax.X(), aabb.pMax.Y(), aabb.pMax.Z()),
+					RVec3(aabb.pMax.X(), aabb.pMin.Y(), aabb.pMax.Z()),
 				};
 
 				for (int j = 0; j < 8; j++)

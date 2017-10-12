@@ -10,16 +10,16 @@
 
 RPlane::RPlane(const RVec3& va, const RVec3& vb, const RVec3& vc)
 {
-	normal = (vb - va).Cross(vc - va);
+	normal = RVec3::Cross(vb - va, vc - va);
 	normal.Normalize();
-	offset = normal.Dot(va);
+	offset = RVec3::Dot(normal, va);
 }
 
 namespace RCollision
 {
 	PlaneSpace TestSphereToPlane(const RPlane& plane, const RSphere& sphere)
 	{
-		float dist = sphere.center.Dot(plane.normal) - plane.offset;
+		float dist = RVec3::Dot(sphere.center, plane.normal) - plane.offset;
 		if (dist > sphere.radius)
 			return PlaneSpace::Front;
 		else if (dist < -sphere.radius)
@@ -33,7 +33,7 @@ namespace RCollision
 		RSphere s;
 		s.center = (aabb.pMax + aabb.pMin) * 0.5f;
 		RVec3 e = aabb.pMax - s.center;
-		s.radius = e.x * fabs(plane.normal.x) + e.y * fabs(plane.normal.y) + e.z * fabs(plane.normal.z);
+		s.radius = e.X() * fabs(plane.normal.X()) + e.Y() * fabs(plane.normal.Y()) + e.Z()* fabs(plane.normal.Z());
 
 		return TestSphereToPlane(plane, s);
 	}
@@ -52,9 +52,9 @@ namespace RCollision
 	bool TestSphereWithCapsule(const RSphere& sphere, const RCapsule& capsule)
 	{
 		RVec3 v = capsule.end - capsule.start;
-		RVec3 vn = v.GetNormalizedVec3();
+		RVec3 vn = v.GetNormalized();
 		RVec3 pt = sphere.center - capsule.start;
-		float scale = pt.Dot(vn) / v.Dot(vn);
+		float scale = RVec3::Dot(pt, vn) / RVec3::Dot(v, vn);
 		RVec3 cloest_pt;
 
 		if (scale < 0)

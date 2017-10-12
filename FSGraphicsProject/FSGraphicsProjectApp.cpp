@@ -24,12 +24,12 @@ struct ParticleDepthComparer
 	}
 
 	// Helper functions
-	static float dot(const RVec4& a, const RVec4& b)
+	static float dot(const RVertex::Vec4Data& a, const RVertex::Vec4Data& b)
 	{
 		return a.x * b.x + a.y * b.y + a.z * b.z;
 	}
 
-	static float sqrDist(const RVec4& a, const RVec4 b)
+	static float sqrDist(const RVertex::Vec4Data& a, const RVertex::Vec4Data b)
 	{
 		float dx = b.x - a.x,
 			  dy = b.y - a.y,
@@ -55,10 +55,7 @@ struct ObjectDepthComparer
 	// Helper functions
 	static float sqrDist(const RVec3& a, const RVec3 b)
 	{
-		float dx = b.x - a.x,
-			dy = b.y - a.y,
-			dz = b.z - a.z;
-		return dx * dx + dy * dy + dz * dz;
+		return (b - a).SquaredMagitude();
 	}
 };
 
@@ -135,40 +132,42 @@ bool FSGraphicsProjectApp::Initialize()
 	// Create buffer for bump cube
 	RVertex::MESH_VERTEX boxVertex[] = 
 	{
-		{ RVec3(-1.0f, -1.0f, -1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3(-1.0f,  1.0f, -1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3( 1.0f,  1.0f, -1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3( 1.0f, -1.0f, -1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data(-1.0f, -1.0f, -1.0f), RVertex::Vec2Data(0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data(-1.0f,  1.0f, -1.0f), RVertex::Vec2Data(0.0f, 1.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data( 1.0f,  1.0f, -1.0f), RVertex::Vec2Data(1.0f, 1.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data( 1.0f, -1.0f, -1.0f), RVertex::Vec2Data(1.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
 
-		{ RVec3( 1.0f, -1.0f, -1.0f), RVec2(0.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
-		{ RVec3( 1.0f,  1.0f, -1.0f), RVec2(0.0f, 1.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
-		{ RVec3( 1.0f,  1.0f,  1.0f), RVec2(1.0f, 1.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
-		{ RVec3( 1.0f, -1.0f,  1.0f), RVec2(1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f) },
+		{ RVertex::Vec3Data( 1.0f, -1.0f, -1.0f), RVertex::Vec2Data(0.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f) },
+		{ RVertex::Vec3Data( 1.0f,  1.0f, -1.0f), RVertex::Vec2Data(0.0f, 1.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f) },
+		{ RVertex::Vec3Data( 1.0f,  1.0f,  1.0f), RVertex::Vec2Data(1.0f, 1.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f) },
+		{ RVertex::Vec3Data( 1.0f, -1.0f,  1.0f), RVertex::Vec2Data(1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f) },
 
-		{ RVec3( 1.0f, -1.0f,  1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
-		{ RVec3( 1.0f,  1.0f,  1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
-		{ RVec3(-1.0f,  1.0f,  1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
-		{ RVec3(-1.0f, -1.0f,  1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, 0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data( 1.0f, -1.0f,  1.0f), RVertex::Vec2Data(0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data( 1.0f,  1.0f,  1.0f), RVertex::Vec2Data(0.0f, 1.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data(-1.0f,  1.0f,  1.0f), RVertex::Vec2Data(1.0f, 1.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data(-1.0f, -1.0f,  1.0f), RVertex::Vec2Data(1.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f) },
 
-		{ RVec3(-1.0f, -1.0f,  1.0f), RVec2(0.0f, 0.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f) },
-		{ RVec3(-1.0f,  1.0f,  1.0f), RVec2(0.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f) },
-		{ RVec3(-1.0f,  1.0f, -1.0f), RVec2(1.0f, 1.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f) },
-		{ RVec3(-1.0f, -1.0f, -1.0f), RVec2(1.0f, 0.0f), RVec3(-1.0f, 0.0f, 0.0f), RVec3(0.0f, 0.0f, -1.0f) },
+		{ RVertex::Vec3Data(-1.0f, -1.0f,  1.0f), RVertex::Vec2Data(0.0f, 0.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f) },
+		{ RVertex::Vec3Data(-1.0f,  1.0f,  1.0f), RVertex::Vec2Data(0.0f, 1.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f) },
+		{ RVertex::Vec3Data(-1.0f,  1.0f, -1.0f), RVertex::Vec2Data(1.0f, 1.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f) },
+		{ RVertex::Vec3Data(-1.0f, -1.0f, -1.0f), RVertex::Vec2Data(1.0f, 0.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f) },
 
-		{ RVec3(-1.0f,  1.0f, -1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3(-1.0f,  1.0f,  1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3( 1.0f,  1.0f,  1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3( 1.0f,  1.0f, -1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data(-1.0f,  1.0f, -1.0f), RVertex::Vec2Data(0.0f, 0.0f), RVertex::Vec3Data(0.0f, 1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data(-1.0f,  1.0f,  1.0f), RVertex::Vec2Data(0.0f, 1.0f), RVertex::Vec3Data(0.0f, 1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data( 1.0f,  1.0f,  1.0f), RVertex::Vec2Data(1.0f, 1.0f), RVertex::Vec3Data(0.0f, 1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data( 1.0f,  1.0f, -1.0f), RVertex::Vec2Data(1.0f, 0.0f), RVertex::Vec3Data(0.0f, 1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
 
-		{ RVec3(-1.0f, -1.0f,  1.0f), RVec2(0.0f, 0.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3(-1.0f, -1.0f, -1.0f), RVec2(0.0f, 1.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3( 1.0f, -1.0f, -1.0f), RVec2(1.0f, 1.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
-		{ RVec3( 1.0f, -1.0f,  1.0f), RVec2(1.0f, 0.0f), RVec3(0.0f, -1.0f, 0.0f), RVec3(1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data(-1.0f, -1.0f,  1.0f), RVertex::Vec2Data(0.0f, 0.0f), RVertex::Vec3Data(0.0f, -1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data(-1.0f, -1.0f, -1.0f), RVertex::Vec2Data(0.0f, 1.0f), RVertex::Vec3Data(0.0f, -1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data( 1.0f, -1.0f, -1.0f), RVertex::Vec2Data(1.0f, 1.0f), RVertex::Vec3Data(0.0f, -1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertex::Vec3Data( 1.0f, -1.0f,  1.0f), RVertex::Vec2Data(1.0f, 0.0f), RVertex::Vec3Data(0.0f, -1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
 	};
 
 	for (UINT32 i = 0; i < sizeof(boxVertex) / sizeof(RVertex::MESH_VERTEX); i++)
 	{
-		boxVertex[i].pos *= 100.0f;
+		boxVertex[i].pos.x *= 100.0f;
+		boxVertex[i].pos.y *= 100.0f;
+		boxVertex[i].pos.z *= 100.0f;
 	}
 
 	UINT32 boxIndex[] =
@@ -322,7 +321,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_CharacterYVel = 0.0f;
 	m_RenderCollisionWireframe = false;
 
-	m_SunVec = RVec3(sinf(1.0f) * 0.5f, 0.25f, cosf(1.0f) * 0.5f).GetNormalizedVec3() * 1000.0f;
+	m_SunVec = RVec3(sinf(1.0f) * 0.5f, 0.25f, cosf(1.0f) * 0.5f).GetNormalized() * 1000.0f;
 	m_MaterialSpecular = RVec4(1.0f, 1.0f, 1.0f, 16.0f);
 
 	m_MeshInstanceCount = 1;
@@ -461,7 +460,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	if (toggleMovingSun)
 	{
 		ct += timer.DeltaTime() * 0.2f;
-		m_SunVec = RVec3(sinf(ct) * 0.5f, cosf(ct) * 0.5f, 0.25f).GetNormalizedVec3() * 1000.0f;
+		m_SunVec = RVec3(sinf(ct) * 0.5f, cosf(ct) * 0.5f, 0.25f).GetNormalized() * 1000.0f;
 	}
 
 	if (RInput.GetBufferedKeyState('I') == BKS_Pressed)
@@ -504,19 +503,19 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		lightDistance[i] = max(lightDistance[i], s0.radius);
 
 		RVec3 shadowTarget = s0.center;
-		RVec3 shadowEyePos = shadowTarget + m_SunVec.GetNormalizedVec3() * lightDistance[i];
+		RVec3 shadowEyePos = shadowTarget + m_SunVec.GetNormalized() * lightDistance[i];
 
-		RVec3 viewForward = (shadowTarget - shadowEyePos).GetNormalizedVec3();
-		RVec3 viewRight = (RVec3(0, 1, 0).Cross(viewForward)).GetNormalizedVec3();
-		RVec3 viewUp = (viewForward.Cross(viewRight)).GetNormalizedVec3();
+		RVec3 viewForward = (shadowTarget - shadowEyePos).GetNormalized();
+		RVec3 viewRight = RVec3::Cross(RVec3(0, 1, 0), viewForward).GetNormalized();
+		RVec3 viewUp = RVec3::Cross(viewForward, viewRight).GetNormalized();
 
 		// Calculate texel offset in world space
 		float texel_unit = s0.radius * 2.0f / 1024.0f;
 		float texel_depth_unit = (s0.radius + lightDistance[i]) / 1024.0f;
 
-		float dx = shadowEyePos.Dot(viewRight);
-		float dy = shadowEyePos.Dot(viewUp);
-		float dz = shadowEyePos.Dot(viewForward);
+		float dx = RVec3::Dot(shadowEyePos, viewRight);
+		float dy = RVec3::Dot(shadowEyePos, viewUp);
+		float dz = RVec3::Dot(shadowEyePos, viewForward);
 		float offset_x = dx - floorf(dx / texel_unit) * texel_unit;
 		float offset_y = dy - floorf(dy / texel_unit) * texel_unit;
 		float offset_z = dz - floorf(dz / texel_depth_unit) * texel_depth_unit;
@@ -563,11 +562,11 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 	if (m_EnableLights[0])
 	{
-		RVec4 dirLightVec = RVec4(RVec3(0.25f, 1.0f, 0.5f).GetNormalizedVec3(), 1.0f);
+		RVec4 dirLightVec = RVec4(RVec3(0.25f, 1.0f, 0.5f).GetNormalized(), 1.0f);
 
 		cbLight.DirectionalLightCount = 1;
 		cbLight.DirectionalLight[0].Color = RVec4(1.0f, 1.0f, 0.8f, 1.0f);
-		cbLight.DirectionalLight[0].Direction = RVec4(m_SunVec.GetNormalizedVec3(), 1.0f);
+		cbLight.DirectionalLight[0].Direction = RVec4(m_SunVec.GetNormalized(), 1.0f);
 	}
 
 	if (m_EnableLights[1])
@@ -688,7 +687,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 		RVec3 nodePos = m_CharacterObj.GetNodeTransform().GetTranslation();
 		RVec3 worldOffset = (RVec4(offset, 0.0f) * m_CharacterObj.GetNodeTransform()).ToVec3();
-		worldOffset.y = m_CharacterYVel;
+		worldOffset.SetY(m_CharacterYVel);
 
 		if (RInput.IsKeyDown(VK_UP))
 			worldOffset += m_CharacterObj.GetNodeTransform().GetForward() * timer.DeltaTime() * 500.0f;
@@ -710,7 +709,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 			worldOffset = aabb.TestDynamicCollisionWithAabb(worldOffset, sceneMeshElements[i].GetAabb());
 		}
 
-		if (fabs(worldOffset.y) < fabs(m_CharacterYVel))
+		if (fabs(worldOffset.Y()) < fabs(m_CharacterYVel))
 			m_CharacterYVel = 0.0f;
 
 		m_CharacterObj.Translate(worldOffset);

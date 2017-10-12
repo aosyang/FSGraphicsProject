@@ -87,13 +87,13 @@ void RText::AddText(const char* text, UINT start_x, UINT start_y, const RColor& 
 
 		RVertex::FONT_VERTEX v[6] =
 		{
-			{ RVec4(x0, y0, 0), fg, bg, RVec2(u0, v0) },
-			{ RVec4(x1, y0, 0), fg, bg, RVec2(u1, v0) },
-			{ RVec4(x0, y1, 0), fg, bg, RVec2(u0, v1) },
+			{ RVertex::Vec4Data(x0, y0, 0, 1), fg, bg, RVertex::Vec2Data(u0, v0) },
+			{ RVertex::Vec4Data(x1, y0, 0, 1), fg, bg, RVertex::Vec2Data(u1, v0) },
+			{ RVertex::Vec4Data(x0, y1, 0, 1), fg, bg, RVertex::Vec2Data(u0, v1) },
 
-			{ RVec4(x0, y1, 0), fg, bg, RVec2(u0, v1) },
-			{ RVec4(x1, y0, 0), fg, bg, RVec2(u1, v0) },
-			{ RVec4(x1, y1, 0), fg, bg, RVec2(u1, v1) },
+			{ RVertex::Vec4Data(x0, y1, 0, 1), fg, bg, RVertex::Vec2Data(u0, v1) },
+			{ RVertex::Vec4Data(x1, y0, 0, 1), fg, bg, RVertex::Vec2Data(u1, v0) },
+			{ RVertex::Vec4Data(x1, y1, 0, 1), fg, bg, RVertex::Vec2Data(u1, v1) },
 		};
 
 		for (int j = 0; j < 6; j++)

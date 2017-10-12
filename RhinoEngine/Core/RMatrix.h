@@ -84,4 +84,120 @@ public:
 
 RVec4 operator*(const RVec4& v, const RMatrix4& m);
 
+
+FORCEINLINE RVec3 RMatrix4::GetForward() const
+{
+	return RVec3(m[2][0], m[2][1], m[2][2]);
+}
+
+FORCEINLINE RVec3 RMatrix4::GetUp() const
+{
+	return RVec3(m[1][0], m[1][1], m[1][2]);
+}
+
+FORCEINLINE RVec3 RMatrix4::GetRight() const
+{
+	return RVec3(m[0][0], m[0][1], m[0][2]);
+}
+
+FORCEINLINE RVec4 RMatrix4::GetRow(int index) const
+{
+	return RVec4(m[index]);
+}
+
+FORCEINLINE const float* RMatrix4::GetRowArray(int index) const
+{
+	return m[index];
+}
+
+FORCEINLINE void RMatrix4::SetRow(int index, const RVec4& row)
+{
+	m[index][0] = row.x;
+	m[index][1] = row.y;
+	m[index][2] = row.z;
+	m[index][3] = row.w;
+}
+
+FORCEINLINE void RMatrix4::Translate(const RVec3& vec)
+{
+	Translate(vec.X(), vec.Y(), vec.Z());
+}
+
+FORCEINLINE void RMatrix4::Translate(float x, float y, float z)
+{
+	m[3][0] += x;
+	m[3][1] += y;
+	m[3][2] += z;
+}
+
+FORCEINLINE void RMatrix4::TranslateLocal(const RVec3& vec)
+{
+	TranslateLocal(vec.X(), vec.Y(), vec.Z());
+}
+
+FORCEINLINE void RMatrix4::TranslateLocal(float x, float y, float z)
+{
+	float _x = m[3][0] + x * m[0][0] + y * m[1][0] + z * m[2][0];
+	float _y = m[3][1] + x * m[0][1] + y * m[1][1] + z * m[2][1];
+	float _z = m[3][2] + x * m[0][2] + y * m[1][2] + z * m[2][2];
+
+	m[3][0] = _x;
+	m[3][1] = _y;
+	m[3][2] = _z;
+}
+
+FORCEINLINE void RMatrix4::SetTranslation(const RVec3& vec)
+{
+	SetTranslation(vec.X(), vec.Y(), vec.Z());
+}
+
+FORCEINLINE void RMatrix4::SetTranslation(float x, float y, float z)
+{
+	m[3][0] = x;
+	m[3][1] = y;
+	m[3][2] = z;
+}
+
+FORCEINLINE RVec3 RMatrix4::GetTranslation() const
+{
+	return RVec3(m[3][0], m[3][1], m[3][2]);
+}
+
+FORCEINLINE void RMatrix4::GetTranslation(float& x, float& y, float& z) const
+{
+	x = m[3][0];
+	y = m[3][1];
+	z = m[3][2];
+}
+
+FORCEINLINE RMatrix4 RMatrix4::CreateTranslation(const RVec3& vec)
+{
+	return CreateTranslation(vec.X(), vec.Y(), vec.Z());
+}
+
+FORCEINLINE RMatrix4 RMatrix4::CreateTranslation(float x, float y, float z)
+{
+	RMatrix4 mat = RMatrix4::IDENTITY;
+	mat.m[3][0] = x;
+	mat.m[3][1] = y;
+	mat.m[3][2] = z;
+
+	return mat;
+}
+
+FORCEINLINE RMatrix4 RMatrix4::CreateScale(const RVec3& scale)
+{
+	return CreateScale(scale.X(), scale.Y(), scale.Z());
+}
+
+FORCEINLINE RMatrix4 RMatrix4::CreateScale(float sx, float sy, float sz)
+{
+	RMatrix4 mat = RMatrix4::IDENTITY;
+	mat.m[0][0] = sx;
+	mat.m[1][1] = sy;
+	mat.m[2][2] = sz;
+
+	return mat;
+}
+
 #endif

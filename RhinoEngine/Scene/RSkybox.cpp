@@ -27,15 +27,14 @@ void RSkybox::CreateSkybox(RTexture* skyTexture)
 	// Create skybox buffer
 	RVertex::SKYBOX_VERTEX skyboxVertex[] = 
 	{
-		{ RVec3(-0.5f, -0.5f, -0.5f) },
-		{ RVec3(-0.5f,  0.5f, -0.5f) },
-		{ RVec3( 0.5f,  0.5f, -0.5f) },
-		{ RVec3( 0.5f, -0.5f, -0.5f) },
-
-		{ RVec3(-0.5f, -0.5f,  0.5f) },
-		{ RVec3(-0.5f,  0.5f,  0.5f) },
-		{ RVec3( 0.5f,  0.5f,  0.5f) },
-		{ RVec3( 0.5f, -0.5f,  0.5f) },
+		{ RVertex::Vec3Data(-0.5f, -0.5f, -0.5f) },
+		{ RVertex::Vec3Data(-0.5f,  0.5f, -0.5f) },
+		{ RVertex::Vec3Data( 0.5f,  0.5f, -0.5f) },
+		{ RVertex::Vec3Data( 0.5f, -0.5f, -0.5f) },
+		{ RVertex::Vec3Data(-0.5f, -0.5f,  0.5f) },
+		{ RVertex::Vec3Data(-0.5f,  0.5f,  0.5f) },
+		{ RVertex::Vec3Data( 0.5f,  0.5f,  0.5f) },
+		{ RVertex::Vec3Data( 0.5f, -0.5f,  0.5f) },
 	};
 
 	UINT32 skyboxIndex[] =

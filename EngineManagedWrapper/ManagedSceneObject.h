@@ -120,8 +120,8 @@ namespace EngineManagedWrapper {
 		[Category("Scene Object")]
 		property String^ Position
 		{
-			String^ get()           { return Vec3ToString(m_SceneObject->GetPosition()); }
-			void set(String^ value) { m_SceneObject->SetPosition(StringToVec3(value)); }
+			String^ get();
+			void set(String^ value);
 		};
 
 		[Category("Scene Object")]
@@ -132,9 +132,9 @@ namespace EngineManagedWrapper {
 		}
 
 	private:
-		String^ Vec3ToString(const RVec3& vec);
-		RVec3 StringToVec3(String^ str);
-		};
+		String^ Float3ToString(float x, float y, float z);
+		void StringToFloat3(String^ str, float& x, float &y, float &z);
+	};
 
 	public ref class ManagedMeshObject : ManagedSceneObject
 	{

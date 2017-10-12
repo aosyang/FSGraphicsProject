@@ -91,96 +91,11 @@ RMatrix4 RMatrix4::FastInverse() const
 	return view;
 }
 
-RVec3 RMatrix4::GetForward() const
-{
-	return RVec3(m[2][0], m[2][1], m[2][2]);
-}
-
-RVec3 RMatrix4::GetUp() const
-{
-	return RVec3(m[1][0], m[1][1], m[1][2]);
-}
-
-RVec3 RMatrix4::GetRight() const
-{
-	return RVec3(m[0][0], m[0][1], m[0][2]);
-}
-
-RVec4 RMatrix4::GetRow(int index) const
-{
-	return RVec4(m[index]);
-}
-
-const float* RMatrix4::GetRowArray(int index) const
-{
-	return m[index];
-}
-
-void RMatrix4::SetRow(int index, const RVec4& row)
-{
-	m[index][0] = row.x;
-	m[index][1] = row.y;
-	m[index][2] = row.z;
-	m[index][3] = row.w;
-}
-
-void RMatrix4::Translate(const RVec3& vec)
-{
-	Translate(vec.x, vec.y, vec.z);
-}
-
-void RMatrix4::Translate(float x, float y, float z)
-{
-	m[3][0] += x;
-	m[3][1] += y;
-	m[3][2] += z;
-}
-
-void RMatrix4::TranslateLocal(const RVec3& vec)
-{
-	TranslateLocal(vec.x, vec.y, vec.z);
-}
-
-void RMatrix4::TranslateLocal(float x, float y, float z)
-{
-	float _x = m[3][0] + x * m[0][0] + y * m[1][0] + z * m[2][0];
-	float _y = m[3][1] + x * m[0][1] + y * m[1][1] + z * m[2][1];
-	float _z = m[3][2] + x * m[0][2] + y * m[1][2] + z * m[2][2];
-
-	m[3][0] = _x;
-	m[3][1] = _y;
-	m[3][2] = _z;
-}
-
-void RMatrix4::SetTranslation(const RVec3& vec)
-{
-	SetTranslation(vec.x, vec.y, vec.z);
-}
-
-void RMatrix4::SetTranslation(float x, float y, float z)
-{
-	m[3][0] = x;
-	m[3][1] = y;
-	m[3][2] = z;
-}
-
-RVec3 RMatrix4::GetTranslation() const
-{
-	return RVec3(m[3][0], m[3][1], m[3][2]);
-}
-
-void RMatrix4::GetTranslation(float& x, float& y, float& z) const
-{
-	x = m[3][0];
-	y = m[3][1];
-	z = m[3][2];
-}
-
 RVec3 RMatrix4::RotateVector(const RVec3& vec) const
 {
-	float _x = vec.x * m[0][0] + vec.y * m[1][0] + vec.z * m[2][0];
-	float _y = vec.x * m[0][1] + vec.y * m[1][1] + vec.z * m[2][1];
-	float _z = vec.x * m[0][2] + vec.y * m[1][2] + vec.z * m[2][2];
+	float _x = vec.X() * m[0][0] + vec.Y() * m[1][0] + vec.Z() * m[2][0];
+	float _y = vec.X() * m[0][1] + vec.Y() * m[1][1] + vec.Z() * m[2][1];
+	float _z = vec.X() * m[0][2] + vec.Y() * m[1][2] + vec.Z() * m[2][2];
 
 	return RVec3(_x, _y, _z);
 }
@@ -267,36 +182,6 @@ RMatrix4 RMatrix4::CreateZAxisRotation(float degree)
 	return mat;
 }
 
-RMatrix4 RMatrix4::CreateTranslation(const RVec3& vec)
-{
-	return CreateTranslation(vec.x, vec.y, vec.z);
-}
-
-RMatrix4 RMatrix4::CreateTranslation(float x, float y, float z)
-{
-	RMatrix4 mat = RMatrix4::IDENTITY;
-	mat.m[3][0] = x;
-	mat.m[3][1] = y;
-	mat.m[3][2] = z;
-
-	return mat;
-}
-
-RMatrix4 RMatrix4::CreateScale(const RVec3& scale)
-{
-	return CreateScale(scale.x, scale.y, scale.z);
-}
-
-RMatrix4 RMatrix4::CreateScale(float sx, float sy, float sz)
-{
-	RMatrix4 mat = RMatrix4::IDENTITY;
-	mat.m[0][0] = sx;
-	mat.m[1][1] = sy;
-	mat.m[2][2] = sz;
-
-	return mat;
-}
-
 RMatrix4 RMatrix4::CreatePerspectiveProjectionLH(float fov, float aspect, float zNear, float zFar)
 {
 	float y_scale = 1.0f / tanf(0.5f * DEG_TO_RAD(fov));
@@ -319,14 +204,15 @@ RMatrix4 RMatrix4::CreateOrthographicProjectionLH(float viewWidth, float viewHei
 
 RMatrix4 RMatrix4::CreateLookAtViewLH(const RVec3& eye, const RVec3& lookAt, const RVec3& up)
 {
-	RVec3 zaxis = (lookAt - eye).GetNormalizedVec3();
-	RVec3 xaxis = up.Cross(zaxis).GetNormalizedVec3();
-	RVec3 yaxis = zaxis.Cross(xaxis);
+	RVec3 zaxis = (lookAt - eye).GetNormalized();
+	RVec3 xaxis = RVec3::Cross(up, zaxis).GetNormalized();
+	RVec3 yaxis = RVec3::Cross(zaxis, xaxis);
+	RVec3 pos(-RVec3::Dot(xaxis, eye), -RVec3::Dot(yaxis, eye), -RVec3::Dot(zaxis, eye));
 
-	return RMatrix4(xaxis.x,			yaxis.x,			zaxis.x,			0,
-					xaxis.y,			yaxis.y,			zaxis.y,			0,
-					xaxis.z,			yaxis.z,			zaxis.z,			0,
-					-xaxis.Dot(eye),	-yaxis.Dot(eye),	-zaxis.Dot(eye),	1);
+	return RMatrix4(xaxis.X(),	yaxis.X(),	zaxis.X(),	0,
+					xaxis.Y(),	yaxis.Y(),	zaxis.Y(),	0,
+					xaxis.Z(),	yaxis.Z(),	zaxis.Z(),	0,
+					pos.X(),	pos.Y(),	pos.Z(),	1);
 }
 
 RMatrix4 RMatrix4::Lerp(const RMatrix4& lhs, const RMatrix4& rhs, float t)

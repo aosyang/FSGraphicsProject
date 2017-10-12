@@ -64,14 +64,14 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	cbLight.HighHemisphereAmbientColor = RVec4(1.0f, 1.0f, 1.0f, 0.4f);
 	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 1.0f);
 
-	RVec4 dirLightVec = RVec4(RVec3(0.25f, 1.0f, 0.5f).GetNormalizedVec3(), 1.0f);
+	RVec4 dirLightVec = RVec4(RVec3(0.25f, 1.0f, 0.5f).GetNormalized(), 1.0f);
 
-	RVec3 sunVec = RVec3(sinf(1.0f) * 0.5f, 0.25f, cosf(1.0) * 0.5f).GetNormalizedVec3() * 2000.0f;
+	RVec3 sunVec = RVec3(sinf(1.0f) * 0.5f, 0.25f, cosf(1.0) * 0.5f).GetNormalized() * 2000.0f;
 	RMatrix4 shadowViewMatrix = RMatrix4::CreateLookAtViewLH(sunVec, RVec3(0.0f, 0.0f, 0.0f), RVec3(0.0f, 1.0f, 0.0f));
 
 	cbLight.DirectionalLightCount = 1;
 	cbLight.DirectionalLight[0].Color = RVec4(1.0f, 1.0f, 0.8f, 2.0f);
-	cbLight.DirectionalLight[0].Direction = RVec4(sunVec.GetNormalizedVec3(), 1.0f);
+	cbLight.DirectionalLight[0].Direction = RVec4(sunVec.GetNormalized(), 1.0f);
 
 	cbLight.CascadedShadowCount = 1;
 
@@ -151,10 +151,10 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 		m_Player->PreUpdate(timer);
 		
-		RVec3 moveVec = RVec3(0, 0, 0);
+		RVec3 moveVec(0, 0, 0);
 
 		RVec3 charRight = m_Camera.GetNodeTransform().GetRight();
-		RVec3 charForward = charRight.Cross(RVec3(0, 1, 0));
+		RVec3 charForward = RVec3::Cross(charRight, RVec3(0, 1, 0));
 
 		if (m_Player->GetBehavior() == BHV_Running ||
 			m_Player->GetBehavior() == BHV_Idle)
@@ -253,13 +253,13 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 				if (m_AIPlayer->GetBehavior() != BHV_HitDown)
 				{
 					RVec3 relVec = hit_sphere.center - m_AIPlayer->GetPosition();
-					relVec.y = 0.0f;
+					relVec.SetY(0.0f);
 					RVec3 playerForward = -m_Player->GetNodeTransform().GetForward();
-					if (playerForward.Dot(relVec) >= 0)
+					if (RVec3::Dot(playerForward, relVec) >= 0)
 						relVec = -playerForward;
 					relVec.Normalize();
 
-					m_AIPlayer->SetPlayerRotation(RAD_TO_DEG(atan2f(-relVec.x, -relVec.z)));
+					m_AIPlayer->SetPlayerRotation(RAD_TO_DEG(atan2f(-relVec.X(), -relVec.Z())));
 				}
 				m_AIPlayer->SetBehavior(BHV_HitDown);
 			}
@@ -320,13 +320,13 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 				if (m_AIPlayer->GetBehavior() != BHV_HitDown)
 				{
 					RVec3 relVec = hit_sphere.center - m_AIPlayer->GetPosition();
-					relVec.y = 0.0f;
+					relVec.SetY(0.0f);
 					RVec3 playerForward = -m_Player->GetNodeTransform().GetForward();
-					if (playerForward.Dot(relVec) >= 0)
+					if (RVec3::Dot(playerForward, relVec) >= 0)
 						relVec = -playerForward;
 					relVec.Normalize();
 					
-					m_AIPlayer->SetPlayerRotation(RAD_TO_DEG(atan2f(-relVec.x, -relVec.z)));
+					m_AIPlayer->SetPlayerRotation(RAD_TO_DEG(atan2f(-relVec.X(), -relVec.Z())));
 					m_AIPlayer->SetBehavior(BHV_HitDown);
 				}
 			}
@@ -342,7 +342,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 								 "Blend From : %s\n"
 								 "Blend To   : %s\n"
 								 "Blend time : %f",
-								 playerPos.x, playerPos.y, playerPos.z, playerRot,
+								 playerPos.X(), playerPos.Y(), playerPos.Z(), playerRot,
 								 blender.GetStartAnimation() ? blender.GetStartAnimation()->GetName().c_str() : "",
 								 blender.GetEndAnimation() ? blender.GetEndAnimation()->GetName().c_str() : "",
 								 blender.GetElapsedBlendTime());

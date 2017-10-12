@@ -19,7 +19,7 @@ RAabb::RAabb()
 
 bool RAabb::IsValid() const
 {
-	return pMax.x >= pMin.x && pMax.y >= pMin.y && pMax.z >= pMin.z;
+	return pMax.X() >= pMin.X() && pMax.Y() >= pMin.Y() && pMax.Z() >= pMin.Z();
 }
 
 RAabb RAabb::GetTransformedAabb(const RMatrix4& m) const
@@ -62,11 +62,11 @@ RAabb RAabb::GetSweptAabb(const RVec3& moveVec) const
 
 bool RAabb::TestPointInsideAabb(const RVec3& point) const
 {
-	if (pMax.x <= point.x || pMin.x >= point.x)
+	if (pMax.X() <= point.X() || pMin.X() >= point.X())
 		return false;
-	if (pMax.y <= point.y || pMin.y >= point.y)
+	if (pMax.Y() <= point.Y() || pMin.Y() >= point.Y())
 		return false;
-	if (pMax.z <= point.z || pMin.z >= point.z)
+	if (pMax.Z() <= point.Z() || pMin.Z() >= point.Z())
 		return false;
 
 	return true;
@@ -74,11 +74,11 @@ bool RAabb::TestPointInsideAabb(const RVec3& point) const
 
 bool RAabb::TestIntersectionWithAabb(const RAabb& aabb) const
 {
-	if (pMax.x <= aabb.pMin.x || pMin.x >= aabb.pMax.x)
+	if (pMax.X() <= aabb.pMin.X() || pMin.X() >= aabb.pMax.X())
 		return false;
-	if (pMax.y <= aabb.pMin.y || pMin.y >= aabb.pMax.y)
+	if (pMax.Y() <= aabb.pMin.Y() || pMin.Y() >= aabb.pMax.Y())
 		return false;
-	if (pMax.z <= aabb.pMin.z || pMin.z >= aabb.pMax.z)
+	if (pMax.Z() <= aabb.pMin.Z() || pMin.Z() >= aabb.pMax.Z())
 		return false;
 
 	return true;
@@ -94,40 +94,40 @@ RVec3 RAabb::TestDynamicCollisionWithAabb(const RVec3& moveVec, const RAabb& aab
 	float tx = 2, ty = 2, tz = 2;
 
 	// Check initial colliding
-	if (pMax.x > aabb.pMin.x && pMin.x < aabb.pMax.x)
+	if (pMax.X() > aabb.pMin.X() && pMin.X() < aabb.pMax.X())
 	{
 		tx = -1;
 	}
 	else
 	{
-		if (pMax.x <= aabb.pMin.x && pMax.x + moveVec.x > aabb.pMin.x)
-			tx = (aabb.pMin.x - pMax.x) / moveVec.x;
-		else if (pMin.x >= aabb.pMax.x && pMin.x + moveVec.x < aabb.pMax.x)
-			tx = (aabb.pMax.x - pMin.x) / moveVec.x;
+		if (pMax.X() <= aabb.pMin.X() && pMax.X() + moveVec.X() > aabb.pMin.X())
+			tx = (aabb.pMin.X() - pMax.X()) / moveVec.X();
+		else if (pMin.X() >= aabb.pMax.X() && pMin.X() + moveVec.X() < aabb.pMax.X())
+			tx = (aabb.pMax.X() - pMin.X()) / moveVec.X();
 	}
 
-	if (pMax.y > aabb.pMin.y && pMin.y < aabb.pMax.y)
+	if (pMax.Y() > aabb.pMin.Y() && pMin.Y() < aabb.pMax.Y())
 	{
 		ty = -1;
 	}
 	else
 	{
-		if (pMax.y <= aabb.pMin.y && pMax.y + moveVec.y > aabb.pMin.y)
-			ty = (aabb.pMin.y - pMax.y) / moveVec.y;
-		else if (pMin.y >= aabb.pMax.y && pMin.y + moveVec.y < aabb.pMax.y)
-			ty = (aabb.pMax.y - pMin.y) / moveVec.y;
+		if (pMax.Y() <= aabb.pMin.Y() && pMax.Y() + moveVec.Y() > aabb.pMin.Y())
+			ty = (aabb.pMin.Y() - pMax.Y()) / moveVec.Y();
+		else if (pMin.Y() >= aabb.pMax.Y() && pMin.Y() + moveVec.Y() < aabb.pMax.Y())
+			ty = (aabb.pMax.Y() - pMin.Y()) / moveVec.Y();
 	}
 
-	if (pMax.z > aabb.pMin.z && pMin.z < aabb.pMax.z)
+	if (pMax.Z() > aabb.pMin.Z() && pMin.Z() < aabb.pMax.Z())
 	{
 		tz = -1;
 	}
 	else
 	{
-		if (pMax.z <= aabb.pMin.z && pMax.z + moveVec.z > aabb.pMin.z)
-			tz = (aabb.pMin.z - pMax.z) / moveVec.z;
-		else if (pMin.z >= aabb.pMax.z && pMin.z + moveVec.z < aabb.pMax.z)
-			tz = (aabb.pMax.z - pMin.z) / moveVec.z;
+		if (pMax.Z() <= aabb.pMin.Z() && pMax.Z() + moveVec.Z() > aabb.pMin.Z())
+			tz = (aabb.pMin.Z() - pMax.Z()) / moveVec.Z();
+		else if (pMin.Z() >= aabb.pMax.Z() && pMin.Z() + moveVec.Z() < aabb.pMax.Z())
+			tz = (aabb.pMax.Z() - pMin.Z()) / moveVec.Z();
 	}
 
 	// No collision on any of three axises, moving vector is good
@@ -139,20 +139,20 @@ RVec3 RAabb::TestDynamicCollisionWithAabb(const RVec3& moveVec, const RAabb& aab
 	RVec3 newVec = moveVec;
 	if (tx >= 0 && tx >= ty && tx >= tz)
 	{
-		float s = FLT_SGN(newVec.x);
-		newVec.x = s * max(fabs(newVec.x * tx) - tolerance, 0.0f);
+		float s = FLT_SGN(newVec.X());
+		newVec.SetX(s * max(fabs(newVec.X() * tx) - tolerance, 0.0f));
 		return newVec;
 	}
 	else if (ty >= 0 && ty >= tx && ty >= tz)
 	{
-		float s = FLT_SGN(newVec.y);
-		newVec.y = s * max(fabs(newVec.y * ty) - tolerance, 0.0f);
+		float s = FLT_SGN(newVec.Y());
+		newVec.SetY(s * max(fabs(newVec.Y() * ty) - tolerance, 0.0f));
 		return newVec;
 	}
 	else if (tz >= 0 && tz >= tx && tz >= ty)
 	{
-		float s = FLT_SGN(newVec.z);
-		newVec.z = s * max(fabs(newVec.z * tz) - tolerance, 0.0f);
+		float s = FLT_SGN(newVec.Z());
+		newVec.SetZ(s * max(fabs(newVec.Z() * tz) - tolerance, 0.0f));
 		return newVec;
 	}
 

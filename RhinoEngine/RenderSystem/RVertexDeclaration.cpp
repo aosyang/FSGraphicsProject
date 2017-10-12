@@ -227,15 +227,15 @@ int RVertexDeclaration::GetVertexStride(int vertexComponents)
 	int stride = 0;
 
 	if (vertexComponents & VCM_Pos)
-		stride += sizeof(RVec3);
+		stride += sizeof(RVertex::Vec3Data);
 	if (vertexComponents & VCM_UV0)
-		stride += sizeof(RVec2);
+		stride += sizeof(RVertex::Vec2Data);
 	if (vertexComponents & VCM_UV1)
-		stride += sizeof(RVec2);
+		stride += sizeof(RVertex::Vec2Data);
 	if (vertexComponents & VCM_Normal)
-		stride += sizeof(RVec3);
+		stride += sizeof(RVertex::Vec3Data);
 	if (vertexComponents & VCM_Tangent)
-		stride += sizeof(RVec3);
+		stride += sizeof(RVertex::Vec3Data);
 	if (vertexComponents & VCM_BoneId)
 		stride += sizeof(int) * 4;
 	if (vertexComponents & VCM_BoneWeights)

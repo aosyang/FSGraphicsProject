@@ -73,7 +73,7 @@ void EditorAxis::Create()
 
 		for (int i = 0; i < 8; i++)
 		{
-			m_AxisAabb[n].Expand(axisVerts[i].pos.ToVec3());
+			m_AxisAabb[n].Expand(RVec3((float*)&axisVerts[i].pos));
 		}
 	}
 

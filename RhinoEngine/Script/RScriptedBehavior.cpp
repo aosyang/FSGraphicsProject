@@ -16,17 +16,17 @@ static int ScriptFunc_MoveTo(lua_State* state)
 		return 0;
 
 	RSceneObject* obj = static_cast<RSceneObject*>(lua_touserdata(state, 1));
-	RVec3 target;
-	target.x = (float)lua_tonumber(state, 2);
-	target.y = (float)lua_tonumber(state, 3);
-	target.z = (float)lua_tonumber(state, 4);
+	RVec3 target(
+		(float)lua_tonumber(state, 2),
+		(float)lua_tonumber(state, 3),
+		(float)lua_tonumber(state, 4));
 
 	float sqrDist = (target - obj->GetPosition()).SquaredMagitude();
 	if (sqrDist <= 1.0f)
 		obj->SetPosition(target);
 	else
 	{
-		RVec3 rel = (target - obj->GetPosition()).GetNormalizedVec3();
+		RVec3 rel = (target - obj->GetPosition()).GetNormalized();
 		if (rel.SquaredMagitude() > 0.0f)
 			obj->Translate(rel);
 	}
@@ -42,13 +42,15 @@ static int ScriptFunc_Swing(lua_State* state)
 		return 0;
 
 	RSceneObject* obj = static_cast<RSceneObject*>(lua_touserdata(state, 1));
-	RVec3 origin, target;
-	origin.x = (float)lua_tonumber(state, 2);
-	origin.y = (float)lua_tonumber(state, 3);
-	origin.z = (float)lua_tonumber(state, 4);
-	target.x = (float)lua_tonumber(state, 5);
-	target.y = (float)lua_tonumber(state, 6);
-	target.z = (float)lua_tonumber(state, 7);
+	RVec3 origin(
+		(float)lua_tonumber(state, 2),
+		(float)lua_tonumber(state, 3),
+		(float)lua_tonumber(state, 4));
+
+	RVec3 target(
+		(float)lua_tonumber(state, 5),
+		(float)lua_tonumber(state, 6),
+		(float)lua_tonumber(state, 7));
 
 	float amplitude = (float)lua_tonumber(state, 8);
 	RVec3 pos = RVec3::Lerp(origin, target, sinf(GEngine.GetTimer().TotalTime()) * 0.5f + 0.5f);
@@ -66,10 +68,10 @@ static int ScriptFunc_Rotate(lua_State* state)
 		return 0;
 
 	RSceneObject* obj = static_cast<RSceneObject*>(lua_touserdata(state, 1));
-	RVec3 axis;
-	axis.x = (float)lua_tonumber(state, 2);
-	axis.y = (float)lua_tonumber(state, 3);
-	axis.z = (float)lua_tonumber(state, 4);
+	RVec3 axis(
+		(float)lua_tonumber(state, 2),
+		(float)lua_tonumber(state, 3),
+		(float)lua_tonumber(state, 4));
 
 	float scale = 1.0f;
 	if (n >= 5)
@@ -77,9 +79,9 @@ static int ScriptFunc_Rotate(lua_State* state)
 	axis *= GEngine.GetTimer().TotalTime() * scale;
 
 	RMatrix4 transform = obj->GetNodeTransform();
-	obj->SetRotation(RMatrix4::CreateZAxisRotation(axis.z) *
-					 RMatrix4::CreateYAxisRotation(axis.y) *
-					 RMatrix4::CreateXAxisRotation(axis.x));
+	obj->SetRotation(RMatrix4::CreateZAxisRotation(axis.Z()) *
+					 RMatrix4::CreateYAxisRotation(axis.Y()) *
+					 RMatrix4::CreateXAxisRotation(axis.X()));
 
 	return 0;
 }

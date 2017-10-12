@@ -218,12 +218,12 @@ void RMeshElement::UpdateRenderBuffer()
 	for (size_t i = 0; i < PositionArray.size(); i++)
 	{
 		COPY_VERTEX_COMPONENT(VCM_BoneId,		BoneIdArray,		VBoneIds)
-		COPY_VERTEX_COMPONENT(VCM_BoneWeights,	BoneWeightArray,	RVec4)
-		COPY_VERTEX_COMPONENT(VCM_Pos,			PositionArray,		RVec3)
-		COPY_VERTEX_COMPONENT(VCM_UV0,			UV0Array,			RVec2)
-		COPY_VERTEX_COMPONENT(VCM_Normal,		NormalArray,		RVec3)
-		COPY_VERTEX_COMPONENT(VCM_Tangent,		TangentArray,		RVec3)
-		COPY_VERTEX_COMPONENT(VCM_UV1,			UV1Array,			RVec2)
+		COPY_VERTEX_COMPONENT(VCM_BoneWeights,	BoneWeightArray,	RVertex::Vec4Data)
+		COPY_VERTEX_COMPONENT(VCM_Pos,			PositionArray,		RVertex::Vec3Data)
+		COPY_VERTEX_COMPONENT(VCM_UV0,			UV0Array,			RVertex::Vec2Data)
+		COPY_VERTEX_COMPONENT(VCM_Normal,		NormalArray,		RVertex::Vec3Data)
+		COPY_VERTEX_COMPONENT(VCM_Tangent,		TangentArray,		RVertex::Vec3Data)
+		COPY_VERTEX_COMPONENT(VCM_UV1,			UV1Array,			RVertex::Vec2Data)
 	}
 #undef COPY_VERTEX_COMPONENT
 
@@ -236,7 +236,7 @@ void RMeshElement::UpdateRenderBuffer()
 	m_Aabb = RAabb::Default;
 	for (size_t i = 0; i < PositionArray.size(); i++)
 	{
-		m_Aabb.Expand(PositionArray[i]);
+		m_Aabb.Expand(RVec3((float*)&PositionArray[i]));
 	}
 }
 

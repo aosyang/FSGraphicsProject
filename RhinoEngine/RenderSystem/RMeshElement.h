@@ -68,14 +68,14 @@ public:
 	void SetFlag(int flag) { m_Flag = flag; }
 	int GetFlag() const { return m_Flag; }
 
-	vector<UINT>		TriangleIndices;
-	vector<RVec3>		PositionArray;
-	vector<RVec2>		UV0Array;
-	vector<RVec3>		NormalArray;
-	vector<RVec3>		TangentArray;
-	vector<RVec2>		UV1Array;
-	vector<VBoneIds>	BoneIdArray;
-	vector<RVec4>		BoneWeightArray;
+	vector<UINT>				TriangleIndices;
+	vector<RVertex::Vec3Data>	PositionArray;
+	vector<RVertex::Vec2Data>	UV0Array;
+	vector<RVertex::Vec3Data>	NormalArray;
+	vector<RVertex::Vec3Data>	TangentArray;
+	vector<RVertex::Vec2Data>	UV1Array;
+	vector<VBoneIds>			BoneIdArray;
+	vector<RVertex::Vec4Data>	BoneWeightArray;
 
 private:
 	string				m_Name;

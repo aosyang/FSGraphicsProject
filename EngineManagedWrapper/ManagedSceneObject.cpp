@@ -3,6 +3,23 @@
 
 namespace EngineManagedWrapper {
 
+#pragma managed(push, off)
+
+	FORCEINLINE void GetObjectPositionInFloat3(RSceneObject* SceneObject, float& x, float& y, float& z)
+	{
+		RVec3 Position = SceneObject->GetPosition();
+		x = Position.X();
+		y = Position.Y();
+		z = Position.Z();
+	}
+
+	FORCEINLINE void SetObjectPositionInFloat3(RSceneObject* SceneObject, float& x, float& y, float& z)
+	{
+		SceneObject->SetPosition(RVec3(x, y, z));
+	}
+
+#pragma managed(pop)
+
 	ManagedMaterial::ManagedMaterial(RMaterial* mat, const char* elemName)
 		: material(mat), meshElementName(gcnew String(elemName))
 	{
@@ -27,23 +44,20 @@ namespace EngineManagedWrapper {
 		return m_SceneObject != NULL;
 	}
 
-	String^ ManagedSceneObject::Vec3ToString(const RVec3& vec)
+	String^ ManagedSceneObject::Float3ToString(float x, float y, float z)
 	{
-		return String::Format(L"{0}, {1}, {2}", vec.x, vec.y, vec.z);
+		return String::Format(L"{0}, {1}, {2}", x, y, z);
 	}
 
-	RVec3 ManagedSceneObject::StringToVec3(String^ str)
+	void ManagedSceneObject::StringToFloat3(String^ str, float& x, float &y, float &z)
 	{
 		String^ delimStr = ",";
 		cli::array<Char>^ delimiter = delimStr->ToCharArray();
 		cli::array<String^>^ words = str->Split(delimiter);
 
-		RVec3 vec;
-		vec.x = (float)Convert::ToDouble(words[0]);
-		vec.y = (float)Convert::ToDouble(words[1]);
-		vec.z = (float)Convert::ToDouble(words[2]);
-
-		return vec;
+		x = (float)Convert::ToDouble(words[0]);
+		y = (float)Convert::ToDouble(words[1]);
+		z = (float)Convert::ToDouble(words[2]);
 	}
 
 	ManagedMeshObject::ManagedMeshObject(RSceneObject* obj)
@@ -92,6 +106,20 @@ namespace EngineManagedWrapper {
 		}
 
 		return gcnew String("");
+	}
+
+	System::String^ ManagedSceneObject::Position::get()
+	{
+		float x, y, z;
+		GetObjectPositionInFloat3(m_SceneObject, x, y, z);
+		return Float3ToString(x, y, z);
+	}
+
+	void ManagedSceneObject::Position::set(String^ value)
+	{
+		float x, y, z;
+		StringToFloat3(value, x, y, z);
+		SetObjectPositionInFloat3(m_SceneObject, x, y, z);
 	}
 
 }

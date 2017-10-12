@@ -189,7 +189,7 @@ namespace EngineManagedWrapper
 					}
 					else
 					{
-						pos.x += (world_x.Dot(cam_right) * mdx - world_x.Dot(cam_up) * mdy) * move_scale;
+						pos.SetX(pos.X() + (RVec3::Dot(world_x, cam_right) * mdx - RVec3::Dot(world_x, cam_up) * mdy) * move_scale);
 					}
 				}
 				else if (m_MouseControlMode == MouseControlMode::MoveY)
@@ -205,7 +205,7 @@ namespace EngineManagedWrapper
 					}
 					else
 					{
-						pos.y += (world_y.Dot(cam_right) * mdx - world_y.Dot(cam_up) * mdy) * move_scale;
+						pos.SetY(pos.Y() + (RVec3::Dot(world_y, cam_right) * mdx - RVec3::Dot(world_y, cam_up) * mdy) * move_scale);
 					}
 				}
 				else if (m_MouseControlMode == MouseControlMode::MoveZ)
@@ -221,7 +221,7 @@ namespace EngineManagedWrapper
 					}
 					else
 					{
-						pos.z += (world_z.Dot(cam_right) * mdx - world_z.Dot(cam_up) * mdy) * move_scale;
+						pos.SetZ(pos.Z() + (RVec3::Dot(world_z, cam_right) * mdx - RVec3::Dot(world_z, cam_up) * mdy) * move_scale);
 					}
 				}
 				m_SelectedObject->SetPosition(pos);
@@ -243,9 +243,9 @@ namespace EngineManagedWrapper
 			GDebugRenderer.DrawAabb(m_SelectedObject->GetAabb());
 
 			RVec3 pos = m_SelectedObject->GetPosition();
-			GDebugRenderer.DrawLine(RVec3(pos.x + 10000.0f, pos.y, pos.z), RVec3(pos.x - 10000.0f, pos.y, pos.z));
-			GDebugRenderer.DrawLine(RVec3(pos.x, pos.y + 10000.0f, pos.z), RVec3(pos.x, pos.y - 10000.0f, pos.z));
-			GDebugRenderer.DrawLine(RVec3(pos.x, pos.y, pos.z + 10000.0f), RVec3(pos.x, pos.y, pos.z - 10000.0f));
+			GDebugRenderer.DrawLine(RVec3(pos.X() + 10000.0f, pos.Y(), pos.Z()), RVec3(pos.X() - 10000.0f, pos.Y(), pos.Z()));
+			GDebugRenderer.DrawLine(RVec3(pos.X(), pos.Y() + 10000.0f, pos.Z()), RVec3(pos.X(), pos.Y() - 10000.0f, pos.Z()));
+			GDebugRenderer.DrawLine(RVec3(pos.X(), pos.Y(), pos.Z() + 10000.0f), RVec3(pos.X(), pos.Y(), pos.Z() - 10000.0f));
 		}
 
 		// Update scene constant buffer
@@ -318,7 +318,7 @@ namespace EngineManagedWrapper
 			RVec3 obj_pos = m_SelectedObject->GetPosition();
 			float dist = (cam_pos - obj_pos).Magnitude();
 			dist = max(50.0f, min(100.0f, dist));
-			RVec3 axis_pos = cam_pos + (m_SelectedObject->GetPosition() - cam_pos).GetNormalizedVec3() * dist;
+			RVec3 axis_pos = cam_pos + (m_SelectedObject->GetPosition() - cam_pos).GetNormalized() * dist;
 
 			m_AxisMatrix = RMatrix4::CreateTranslation(axis_pos);
 			cbObject.worldMatrix = m_AxisMatrix;

@@ -426,7 +426,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 #endif
 
 			memset(vertData[i].boneId, -1, sizeof(int) * 4);
-			memset(vertData[i].weight, 0, sizeof(float) * 4);
+			memset(&vertData[i].weight, 0, sizeof(float) * 4);
 
 			VertexComponentMask |= VCM_Pos;
 		}
@@ -542,7 +542,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 				case FbxGeometryElement::eDirect:
 					for (int i = 0; i < controlPointCount; i++)
 					{
-						RVec2& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
+						RVertex::Vec2Data& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
 							
 						FbxVector2 uv = uvArray[i]->GetDirectArray().GetAt(i);
 
@@ -559,7 +559,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 				case FbxGeometryElement::eIndexToDirect:
 					for (int i = 0; i < controlPointCount; i++)
 					{
-						RVec2& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
+						RVertex::Vec2Data& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
 						
 						int index = uvArray[uvLayer]->GetIndexArray().GetAt(i);
 						FbxVector2 uv = uvArray[uvLayer]->GetDirectArray().GetAt(index);
@@ -742,7 +742,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 						FbxVector2 uv = uvArray[uvLayer]->GetDirectArray().GetAt(idxUV);
 
-						RVec2& vertUV = uvLayer == 0 ? vertex.uv0 : vertex.uv1;
+						RVertex::Vec2Data& vertUV = uvLayer == 0 ? vertex.uv0 : vertex.uv1;
 
 						vertUV.x = (float)uv[0];
 						vertUV.y = 1.0f - (float)uv[1];

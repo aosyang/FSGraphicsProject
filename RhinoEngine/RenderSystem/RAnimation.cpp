@@ -377,6 +377,6 @@ void RAnimation::BuildRootDisplacementArray()
 	for (int i = 0; i < m_FrameCount; i++)
 	{
 		m_RootDisplacement[i] = m_NodeKeyFrames[m_RootNode][i].GetTranslation();
-		m_RootDisplacement[i].y = 0.0f;
+		m_RootDisplacement[i].SetY(0.0f);
 	}
 }

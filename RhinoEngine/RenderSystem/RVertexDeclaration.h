@@ -60,48 +60,86 @@ enum EVertexComponents
 
 namespace RVertex
 {
+	struct Vec2Data
+	{
+		float x, y;
+
+		Vec2Data() {}
+		Vec2Data(float _x, float _y)
+			: x(_x), y(_y)
+		{}
+	};
+
+	struct Vec3Data
+	{
+		float x, y, z;
+
+		Vec3Data() {}
+		Vec3Data(float _x, float _y, float _z)
+			: x(_x), y(_y), z(_z)
+		{}
+	};
+
+	struct Vec4Data
+	{
+		float x, y, z, w;
+
+		Vec4Data() {}
+		Vec4Data(float _x, float _y, float _z, float _w)
+			: x(_x), y(_y), z(_z), w(_w)
+		{}
+		Vec4Data(const RVec4& v)
+			: x(v.x), y(v.y), z(v.z), w(v.w)
+		{}
+
+		float& operator[](long index)
+		{
+			return *(&x + index);
+		}
+	};
+
 	VERTEX_TYPE_BEGIN(MESH_LOADER_VERTEX)
-		RVec3 pos;
-		RVec2 uv0;
-		RVec2 uv1;
-		RVec3 normal;
-		RVec3 tangent;
+		Vec3Data pos;
+		Vec2Data uv0;
+		Vec2Data uv1;
+		Vec3Data normal;
+		Vec3Data tangent;
 		int boneId[4];
-		float weight[4];
+		Vec4Data weight;
 	VERTEX_TYPE_DECLARE_LEXICOGRAPHICAL_COMPARE(MESH_LOADER_VERTEX)
 	VERTEX_TYPE_END
 
 	VERTEX_TYPE_BEGIN(MESH_VERTEX)
-		RVec3 pos;
-		RVec2 uv0;
-		RVec3 normal;
-		RVec3 tangent;
-		RVec2 uv1;
+		Vec3Data pos;
+		Vec2Data uv0;
+		Vec3Data normal;
+		Vec3Data tangent;
+		Vec2Data uv1;
 	VERTEX_TYPE_END
 
 	VERTEX_TYPE_BEGIN(PRIMITIVE_VERTEX)
-		RVec4	pos;
-		RColor	color;
+		Vec4Data	pos;
+		RColor		color;
 	VERTEX_TYPE_END
 
 
 	VERTEX_TYPE_BEGIN(SKYBOX_VERTEX)
-		RVec3 pos;
+		Vec3Data pos;
 	VERTEX_TYPE_END
 
 
 	VERTEX_TYPE_BEGIN(PARTICLE_VERTEX)
-		RVec4 pos;
-		RVec4 color;
+		Vec4Data pos;
+		Vec4Data color;
 		float rot;
-		RVec4 uvScaleOffset;
+		Vec4Data uvScaleOffset;
 	VERTEX_TYPE_END
 
 	VERTEX_TYPE_BEGIN(FONT_VERTEX)
-		RVec4	pos;
-		RColor	color_fg;
-		RColor	color_bg;
-		RVec2	uv;
+		Vec4Data	pos;
+		RColor		color_fg;
+		RColor		color_bg;
+		Vec2Data	uv;
 	VERTEX_TYPE_END
 }
 

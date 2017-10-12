@@ -47,7 +47,7 @@ public:
 	void SetPosition(const RVec3& pos);
 
 	/// Get position of scene object
-	const RVec3& GetPosition() const;
+	RVec3 GetPosition() const;
 
 	/// Rotate scene object towards given target
 	void LookAt(const RVec3& target, const RVec3& world_up = RVec3(0, 1, 0));

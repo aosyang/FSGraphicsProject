@@ -60,15 +60,15 @@ void RDebugRenderer::DrawAabb(const RAabb& aabb, const RColor& color)
 {
 	RVec3 cornerPoints[] =
 	{
-		RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMin.z),
-		RVec3(aabb.pMin.x, aabb.pMin.y, aabb.pMax.z),
-		RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMax.z),
-		RVec3(aabb.pMin.x, aabb.pMax.y, aabb.pMin.z),
+		RVec3(aabb.pMin.X(), aabb.pMin.Y(), aabb.pMin.Z()),
+		RVec3(aabb.pMin.X(), aabb.pMin.Y(), aabb.pMax.Z()),
+		RVec3(aabb.pMin.X(), aabb.pMax.Y(), aabb.pMax.Z()),
+		RVec3(aabb.pMin.X(), aabb.pMax.Y(), aabb.pMin.Z()),
 
-		RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMin.z),
-		RVec3(aabb.pMax.x, aabb.pMin.y, aabb.pMax.z),
-		RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMax.z),
-		RVec3(aabb.pMax.x, aabb.pMax.y, aabb.pMin.z),
+		RVec3(aabb.pMax.X(), aabb.pMin.Y(), aabb.pMin.Z()),
+		RVec3(aabb.pMax.X(), aabb.pMin.Y(), aabb.pMax.Z()),
+		RVec3(aabb.pMax.X(), aabb.pMax.Y(), aabb.pMax.Z()),
+		RVec3(aabb.pMax.X(), aabb.pMax.Y(), aabb.pMin.Z()),
 	};
 
 	int wiredCubeIdx[] =
@@ -125,15 +125,15 @@ void RDebugRenderer::DrawSphere(const RVec3& center, float radius, const RColor&
 	{
 		for (int j = 1; j < segment; j++)
 		{
-			float y = cosf(PI * j / segment) * radius + center.y;
+			float y = cosf(PI * j / segment) * radius + center.Y();
 			float r = sinf(PI * j / segment) * radius;
 
-			float x0 = sinf(2.0f * PI * i / segment) * r + center.x;
-			float z0 = cosf(2.0f * PI * i / segment) * r + center.z;
+			float x0 = sinf(2.0f * PI * i / segment) * r + center.X();
+			float z0 = cosf(2.0f * PI * i / segment) * r + center.Z();
 
 			int i1 = (i + 1) % segment;
-			float x1 = sinf(2.0f * PI * i1 / segment) * r + center.x;
-			float z1 = cosf(2.0f * PI * i1 / segment) * r + center.z;
+			float x1 = sinf(2.0f * PI * i1 / segment) * r + center.X();
+			float z1 = cosf(2.0f * PI * i1 / segment) * r + center.Z();
 
 			RVertex::PRIMITIVE_VERTEX v0 = { RVec4(x0, y, z0), color };
 			RVertex::PRIMITIVE_VERTEX v1 = { RVec4(x1, y, z1), color };
@@ -146,18 +146,18 @@ void RDebugRenderer::DrawSphere(const RVec3& center, float radius, const RColor&
 	{
 		for (int j = 0; j < segment; j++)
 		{
-			float y0 = cosf(PI * j / segment) * radius + center.y;
+			float y0 = cosf(PI * j / segment) * radius + center.Y();
 			float r0 = sinf(PI * j / segment) * radius;
 
 			int j1 = j + 1;
-			float y1 = cosf(PI * j1 / segment) * radius + center.y;
+			float y1 = cosf(PI * j1 / segment) * radius + center.Y();
 			float r1 = sinf(PI * j1 / segment) * radius;
 
-			float x0 = sinf(2.0f * PI * i / segment) * r0 + center.x;
-			float z0 = cosf(2.0f * PI * i / segment) * r0 + center.z;
+			float x0 = sinf(2.0f * PI * i / segment) * r0 + center.X();
+			float z0 = cosf(2.0f * PI * i / segment) * r0 + center.Z();
 
-			float x1 = sinf(2.0f * PI * i / segment) * r1 + center.x;
-			float z1 = cosf(2.0f * PI * i / segment) * r1 + center.z;
+			float x1 = sinf(2.0f * PI * i / segment) * r1 + center.X();
+			float z1 = cosf(2.0f * PI * i / segment) * r1 + center.Z();
 
 			RVertex::PRIMITIVE_VERTEX v0 = { RVec4(x0, y0, z0), color };
 			RVertex::PRIMITIVE_VERTEX v1 = { RVec4(x1, y1, z1), color };

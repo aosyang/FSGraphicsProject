@@ -18,12 +18,12 @@ public:
 	RAabb();
 	inline void Expand(const RVec3& p)
 	{
-		if (p.x < pMin.x) pMin.x = p.x;
-		if (p.y < pMin.y) pMin.y = p.y;
-		if (p.z < pMin.z) pMin.z = p.z;
-		if (p.x > pMax.x) pMax.x = p.x;
-		if (p.y > pMax.y) pMax.y = p.y;
-		if (p.z > pMax.z) pMax.z = p.z;
+		if (p.X() < pMin.X()) pMin.SetX(p.X());
+		if (p.Y() < pMin.Y()) pMin.SetY(p.Y());
+		if (p.Z() < pMin.Z()) pMin.SetZ(p.Z());
+		if (p.X() > pMax.X()) pMax.SetX(p.X());
+		if (p.Y() > pMax.Y()) pMax.SetY(p.Y());
+		if (p.Z() > pMax.Z()) pMax.SetZ(p.Z());
 	}
 
 	RAabb& operator=(const RAabb& rhs)
@@ -45,12 +45,12 @@ public:
 
 	inline void ExpandBySphere(const RVec3& center, float radius)
 	{
-		if (center.x - radius < pMin.x) pMin.x = center.x - radius;
-		if (center.y - radius < pMin.y) pMin.y = center.y - radius;
-		if (center.z - radius < pMin.z) pMin.z = center.z - radius;
-		if (center.x + radius > pMax.x) pMax.x = center.x + radius;
-		if (center.y + radius > pMax.y) pMax.y = center.y + radius;
-		if (center.z + radius > pMax.z) pMax.z = center.z + radius;
+		if (center.X() - radius < pMin.X()) pMin.SetX(center.X() - radius);
+		if (center.Y() - radius < pMin.Y()) pMin.SetY(center.Y() - radius);
+		if (center.Z() - radius < pMin.Z()) pMin.SetZ(center.Z() - radius);
+		if (center.X() + radius > pMax.X()) pMax.SetX(center.X() + radius);
+		if (center.Y() + radius > pMax.Y()) pMax.SetY(center.Y() + radius);
+		if (center.Z() + radius > pMax.Z()) pMax.SetZ(center.Z() + radius);
 	}
 
 	bool IsValid() const;
