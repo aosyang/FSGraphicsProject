@@ -121,8 +121,8 @@ public:
 	FORCEINLINE float Z() const { return z; }
 
 	FORCEINLINE void SetX(float _x) { x = _x; }
-	FORCEINLINE void SetY(float _y) { x = _y; }
-	FORCEINLINE void SetZ(float _z) { x = _z; }
+	FORCEINLINE void SetY(float _y) { y = _y; }
+	FORCEINLINE void SetZ(float _z) { z = _z; }
 
 	FORCEINLINE RVec3 operator-() const
 	{ return RVec3(-x, -y, -z); }
