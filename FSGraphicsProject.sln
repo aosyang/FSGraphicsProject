@@ -31,6 +31,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Engine", "Engine", "{119D1A
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Games", "Games", "{F9BCA9FA-4B30-45E8-B665-BC0053522E41}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleGameProject", "SimpleGameProject\SimpleGameProject.vcxproj", "{B33FD764-0058-4DB9-B512-B5C22A9DAAC1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -125,6 +127,18 @@ Global
 		{94A77DCC-D35F-410F-96EB-409166A5A23B}.Release|Win32.Build.0 = Release|Win32
 		{94A77DCC-D35F-410F-96EB-409166A5A23B}.Release|x64.ActiveCfg = Release|x64
 		{94A77DCC-D35F-410F-96EB-409166A5A23B}.Release|x64.Build.0 = Release|x64
+		{B33FD764-0058-4DB9-B512-B5C22A9DAAC1}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{B33FD764-0058-4DB9-B512-B5C22A9DAAC1}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{B33FD764-0058-4DB9-B512-B5C22A9DAAC1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B33FD764-0058-4DB9-B512-B5C22A9DAAC1}.Debug|Win32.Build.0 = Debug|Win32
+		{B33FD764-0058-4DB9-B512-B5C22A9DAAC1}.Debug|x64.ActiveCfg = Debug|x64
+		{B33FD764-0058-4DB9-B512-B5C22A9DAAC1}.Debug|x64.Build.0 = Debug|x64
+		{B33FD764-0058-4DB9-B512-B5C22A9DAAC1}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{B33FD764-0058-4DB9-B512-B5C22A9DAAC1}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{B33FD764-0058-4DB9-B512-B5C22A9DAAC1}.Release|Win32.ActiveCfg = Release|Win32
+		{B33FD764-0058-4DB9-B512-B5C22A9DAAC1}.Release|Win32.Build.0 = Release|Win32
+		{B33FD764-0058-4DB9-B512-B5C22A9DAAC1}.Release|x64.ActiveCfg = Release|x64
+		{B33FD764-0058-4DB9-B512-B5C22A9DAAC1}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -137,5 +151,6 @@ Global
 		{BD4DC52C-5A66-414A-9813-6C53FD241B1E} = {F9BCA9FA-4B30-45E8-B665-BC0053522E41}
 		{931D592E-0120-42BE-A929-4A6EDB1AA523} = {F9BCA9FA-4B30-45E8-B665-BC0053522E41}
 		{94A77DCC-D35F-410F-96EB-409166A5A23B} = {57E21220-1EC9-4C1F-B665-2460F5C16466}
+		{B33FD764-0058-4DB9-B512-B5C22A9DAAC1} = {F9BCA9FA-4B30-45E8-B665-BC0053522E41}
 	EndGlobalSection
 EndGlobal

@@ -36,7 +36,7 @@ public:
 		// Initialize buffer values with zero
 		T buffer;
 		ZeroMemory(&buffer, sizeof(T));
-		UpdateContent(&buffer);
+		UpdateBufferData(&buffer);
 		BindBuffer();
 	}
 
@@ -45,7 +45,8 @@ public:
 		SAFE_RELEASE(m_ConstBuffer);
 	}
 
-	void UpdateContent(const T* data)
+	/// Copy data to GPU buffer
+	void UpdateBufferData(const T* data)
 	{
 		D3D11_MAPPED_SUBRESOURCE subres;
 		GRenderer.D3DImmediateContext()->Map(m_ConstBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);

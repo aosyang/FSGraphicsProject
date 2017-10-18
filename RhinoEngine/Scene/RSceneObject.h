@@ -65,7 +65,7 @@ public:
 
 	/// Create a new component and add to this scene object
 	template<typename T>
-	T* AddSceneComponent();
+	T* AddNewComponent();
 
 	/// Set script string with function name and parameters to be invoked
 	/// example: 'RotateObject 1, 0, 0 50' - rotate object around axis [1, 0, 0] by 50 degree
@@ -94,7 +94,7 @@ protected:
 
 
 template<typename T>
-FORCEINLINE T* RSceneObject::AddSceneComponent()
+FORCEINLINE T* RSceneObject::AddNewComponent()
 {
 	T* NewComponent = T::Create(this);
 	SceneComponents.push_back(NewComponent);

@@ -12,8 +12,7 @@ void print_error(lua_State* state) {
 	// The error message is on top of the stack.
 	// Fetch it, print it and then pop it off the stack.
 	const char* message = lua_tostring(state, -1);
-	OutputDebugStringA(message);
-	OutputDebugStringA("\n");
+	RLog("%s\n", message);
 	lua_pop(state, 1);
 }
 

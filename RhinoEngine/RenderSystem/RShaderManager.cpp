@@ -8,6 +8,8 @@
 
 #include "RShaderManager.h"
 
+const string RShaderManager::EmptyShaderName = "";
+
 bool RShader::operator==(const RShader& rhs) const
 {
 	return
@@ -36,7 +38,7 @@ void RShader::Bind(int featureMasks)
 	GRenderer.SetGeometryShader(GeometryShader);
 }
 
-string RShader::GetName() const
+const string& RShader::GetName() const
 {
 	return RShaderManager::Instance().GetShaderName(this);
 }
@@ -107,8 +109,7 @@ void RShaderManager::LoadShaders(const char* path)
 #define HANDLE_SHADER_COMPILE_ERROR() \
 	if (FAILED(hr)) \
 	{ \
-		OutputDebugStringA((char*)pErrorMsg->GetBufferPointer()); \
-		OutputDebugStringA("\n"); \
+		RLog("%s\n", (char*)pErrorMsg->GetBufferPointer()); \
 	}
 
 				// Detect shader type by file name suffix
@@ -263,7 +264,7 @@ RShader* RShaderManager::GetShaderResource(const char* shaderName)
 	return nullptr;
 }
 
-string RShaderManager::GetShaderName(const RShader* shader) const
+const string& RShaderManager::GetShaderName(const RShader* shader) const
 {
 	map<string, RShader>::const_iterator iter = m_Shaders.begin();
 	for (; iter != m_Shaders.end(); iter++)
@@ -274,5 +275,5 @@ string RShaderManager::GetShaderName(const RShader* shader) const
 		}
 	}
 
-	return "";
+	return EmptyShaderName;
 }

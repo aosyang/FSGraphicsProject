@@ -113,10 +113,10 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	shadowViewProjMatrix *= shadowTransform;
 	cbScene.shadowViewProjBiasedMatrix[0] = shadowViewProjMatrix;
 
-	RConstantBuffers::cbScene.UpdateContent(&cbScene);
+	RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
 	RConstantBuffers::cbScene.BindBuffer();
 
-	RConstantBuffers::cbLight.UpdateContent(&cbLight);
+	RConstantBuffers::cbLight.UpdateBufferData(&cbLight);
 	RConstantBuffers::cbLight.BindBuffer();
 
 	SHADER_MATERIAL_BUFFER cbMaterial;
@@ -125,7 +125,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	cbMaterial.SpecularColorAndPower = RVec4(1.0f, 1.0f, 1.0f, 512.0f);
 	cbMaterial.GlobalOpacity = 1.0f;
 	
-	RConstantBuffers::cbMaterial.UpdateContent(&cbMaterial);
+	RConstantBuffers::cbMaterial.UpdateBufferData(&cbMaterial);
 	RConstantBuffers::cbMaterial.BindBuffer();
 
 	if (RInput.GetBufferedKeyState('P') == BKS_Pressed)
@@ -138,7 +138,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 								1.0f / (float)GRenderer.GetClientWidth(), 1.0f / (float)GRenderer.GetClientHeight());
 	cbScreen.UseGammaCorrection = GRenderer.UsingGammaCorrection();
 	
-	RConstantBuffers::cbGlobal.UpdateContent(&cbScreen);
+	RConstantBuffers::cbGlobal.UpdateBufferData(&cbScreen);
 	RConstantBuffers::cbGlobal.BindBuffer();
 
 	if (m_Player)
@@ -403,7 +403,7 @@ void FightingGameApp::RenderScene()
 		if (m_Player)
 		{
 			cbObject.worldMatrix = m_Player->GetNodeTransform();
-			RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
+			RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 			RConstantBuffers::cbPerObject.BindBuffer();
 			if (pass == 0)
 			{
@@ -421,7 +421,7 @@ void FightingGameApp::RenderScene()
 	}
 
 	cbObject.worldMatrix = RMatrix4::IDENTITY;
-	RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
+	RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 	RConstantBuffers::cbPerObject.BindBuffer();
 	GDebugRenderer.Render();
 	GDebugRenderer.Reset();

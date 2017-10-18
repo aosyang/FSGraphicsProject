@@ -37,6 +37,17 @@ RSMeshObject* RScene::CreateMeshObject(RMesh* mesh)
 	return meshObject;
 }
 
+RSceneObject* RScene::CreateSceneObject(const char* name)
+{
+	RSceneObject* SceneObject = new RSceneObject();
+	SceneObject->SetName(name);
+	SceneObject->SetScene(this);
+
+	m_SceneObjects.push_back(SceneObject);
+
+	return SceneObject;
+}
+
 RSceneObject* RScene::CloneObject(RSceneObject* obj)
 {
 	return obj->Clone();
@@ -319,7 +330,7 @@ void RScene::Render(const RFrustum* pFrustum)
 
 		SHADER_OBJECT_BUFFER cbObject;
 		cbObject.worldMatrix = (*iter)->GetNodeTransform();
-		RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
+		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 		RConstantBuffers::cbPerObject.BindBuffer();
 		(*iter)->Draw();
 	}
@@ -334,7 +345,7 @@ void RScene::RenderDepthPass(const RFrustum* pFrustum)
 
 		SHADER_OBJECT_BUFFER cbObject;
 		cbObject.worldMatrix = (*iter)->GetNodeTransform();
-		RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
+		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 		RConstantBuffers::cbPerObject.BindBuffer();
 		(*iter)->DrawDepthPass();
 	}

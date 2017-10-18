@@ -8,7 +8,8 @@
 #include "RCamera.h"
 
 RCamera::RCamera()
-	: RSceneObject(), m_DirtyProjMatrix(true)
+	: RSceneObject(),
+	  m_DirtyProjMatrix(true)
 {
 
 }

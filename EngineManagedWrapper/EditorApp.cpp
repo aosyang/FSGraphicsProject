@@ -256,7 +256,7 @@ namespace EngineManagedWrapper
 		cbScene.viewProjMatrix = viewProjMatrix;
 		cbScene.cameraPos = m_CameraMatrix.GetRow(3);
 
-		RConstantBuffers::cbScene.UpdateContent(&cbScene);
+		RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
 
 		// Update light constant buffer
 		SHADER_LIGHT_BUFFER cbLight;
@@ -266,7 +266,7 @@ namespace EngineManagedWrapper
 		cbLight.HighHemisphereAmbientColor = RVec4(1.0f, 1.0f, 1.0f, 1.0f);
 		cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 1.0f);
 
-		RConstantBuffers::cbLight.UpdateContent(&cbLight);
+		RConstantBuffers::cbLight.UpdateBufferData(&cbLight);
 
 		RConstantBuffers::cbPerObject.BindBuffer();
 		RConstantBuffers::cbScene.BindBuffer();
@@ -278,7 +278,7 @@ namespace EngineManagedWrapper
 
 		cbScreen.UseGammaCorrection = GRenderer.UsingGammaCorrection();
 
-		RConstantBuffers::cbGlobal.UpdateContent(&cbScreen);
+		RConstantBuffers::cbGlobal.UpdateBufferData(&cbScreen);
 		RConstantBuffers::cbGlobal.BindBuffer();
 
 
@@ -294,7 +294,7 @@ namespace EngineManagedWrapper
 		SHADER_OBJECT_BUFFER cbObject;
 		cbObject.worldMatrix = RMatrix4::IDENTITY;
 
-		RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
+		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 
 		m_Skybox.Draw();
 
@@ -303,7 +303,7 @@ namespace EngineManagedWrapper
 		m_Scene.Render();
 
 		cbObject.worldMatrix = RMatrix4::IDENTITY;
-		RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
+		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 
 		GDebugRenderer.Render();
 
@@ -323,7 +323,7 @@ namespace EngineManagedWrapper
 			m_AxisMatrix = RMatrix4::CreateTranslation(axis_pos);
 			cbObject.worldMatrix = m_AxisMatrix;
 
-			RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
+			RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 
 			m_EditorAxis.Draw();
 		}

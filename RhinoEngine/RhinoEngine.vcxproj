@@ -54,6 +54,7 @@
     <ClInclude Include="Core\REngine.h" />
     <ClInclude Include="Core\RFileUtil.h" />
     <ClInclude Include="Core\RInput.h" />
+    <ClInclude Include="Core\RLog.h" />
     <ClInclude Include="Core\RMatrix.h" />
     <ClInclude Include="Core\RRay.h" />
     <ClInclude Include="Core\RScriptSystem.h" />
@@ -672,19 +673,21 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Binaries\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)$(Configuration)_$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)Binaries\$(Configuration)_$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Binaries\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)$(Configuration)_$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)Binaries\$(Configuration)_$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

@@ -19,6 +19,8 @@ public:
 	/// Create a mesh object with mesh resource and add it to the scene
 	RSMeshObject* CreateMeshObject(RMesh* mesh);
 
+	RSceneObject* CreateSceneObject(const char* name = "");
+
 	/// Clone an object in the scene
 	RSceneObject* CloneObject(RSceneObject* obj);
 

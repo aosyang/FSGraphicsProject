@@ -172,7 +172,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 
 	cbLight.CameraPos = m_Camera.GetPosition();
 
-	RConstantBuffers::cbLight.UpdateContent(&cbLight);
+	RConstantBuffers::cbLight.UpdateBufferData(&cbLight);
 
 	// Update material buffer
 	SHADER_MATERIAL_BUFFER cbMaterial;
@@ -180,7 +180,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 
 	cbMaterial.SpecularColorAndPower = RVec4(1.0f, 1.0f, 1.0f, 128.0f);
 	cbMaterial.GlobalOpacity = 1.0f;
-	RConstantBuffers::cbMaterial.UpdateContent(&cbMaterial);
+	RConstantBuffers::cbMaterial.UpdateBufferData(&cbMaterial);
 	RConstantBuffers::cbMaterial.BindBuffer();
 
 	// Update screen buffer
@@ -201,10 +201,10 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	cbScreen.UseGammaCorrection = GRenderer.UsingGammaCorrection();
 	cbScreen.TotalTime = GEngine.GetTimer().TotalTime();
 
-	RConstantBuffers::cbGlobal.UpdateContent(&cbScreen);
+	RConstantBuffers::cbGlobal.UpdateBufferData(&cbScreen);
 	RConstantBuffers::cbGlobal.BindBuffer();
 
-	m_cbSSR.UpdateContent(&cbSSR);
+	m_cbSSR.UpdateBufferData(&cbSSR);
 	m_cbSSR.BindBuffer();
 
 	m_TotalTime = timer.TotalTime();
@@ -230,7 +230,7 @@ void DeferredShadingApp::RenderScene()
 	cbScene.invProjMatrix = projMatrix.Inverse();
 	cbScene.cameraPos = m_Camera.GetPosition();
 
-	RConstantBuffers::cbScene.UpdateContent(&cbScene);
+	RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
 	RConstantBuffers::cbScene.BindBuffer();
 
 	if (m_EnableDeferredShading)
@@ -268,11 +268,11 @@ void DeferredShadingApp::RenderScene()
 
 	if (m_EnableDeferredShading)
 	{
-		GRenderer.SetDefferedShading(true);
+		GRenderer.SetUsingDefferedShading(true);
 
 		m_Scene.Render(&frustum);
 
-		GRenderer.SetDefferedShading(false);
+		GRenderer.SetUsingDefferedShading(false);
 
 		if (m_EnableSSR)
 			GRenderer.SetRenderTargets(1, &m_ScenePassBuffer.View, m_DepthBuffer.View);
@@ -372,7 +372,7 @@ void DeferredShadingApp::RenderScene()
 				{
 					RenderPointLightCubemapDepth(pos, r);
 
-					RConstantBuffers::cbScene.UpdateContent(&cbScene);
+					RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
 					RConstantBuffers::cbScene.BindBuffer();
 
 					if (m_EnableSSR)
@@ -404,7 +404,7 @@ void DeferredShadingApp::RenderScene()
 				cbDeferredPointLight.DeferredPointLight.Color = RVec4((float*)&m_PointLights[i].color);
 				cbDeferredPointLight.CastShadow = m_EnablePointLightShadow && m_PointLights[i].castShadow;
 
-				m_cbDeferredPointLight.UpdateContent(&cbDeferredPointLight);
+				m_cbDeferredPointLight.UpdateBufferData(&cbDeferredPointLight);
 				m_cbDeferredPointLight.BindBuffer();
 
 				GRenderer.Clear(false, RColor(0, 0, 0), true);
@@ -451,7 +451,7 @@ void DeferredShadingApp::RenderScene()
 	SHADER_OBJECT_BUFFER cbObject;
 	cbObject.worldMatrix = RMatrix4::IDENTITY;
 
-	RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
+	RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 	RConstantBuffers::cbPerObject.BindBuffer();
 
 	GDebugRenderer.Render();
@@ -668,7 +668,7 @@ void DeferredShadingApp::RenderPointLightCubemapDepth(const RVec3& position, flo
 		cbScene.shadowViewProjMatrix[0] = cbScene.viewProjMatrix;
 		cbScene.cascadedShadowIndex = 0;
 
-		RConstantBuffers::cbScene.UpdateContent(&cbScene);
+		RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
 		RConstantBuffers::cbScene.BindBuffer();
 
 		RFrustum frustum = cubeCameras[i].GetFrustum();

@@ -130,7 +130,7 @@ ID3D11InputLayout* RVertexDeclaration::GetInputLayoutByVertexComponents(int vert
 	string msg_buf = "Input layout: ";
 	msg_buf += GetVertexComponentsString(vertexComponents);
 	msg_buf += "\n";
-	OutputDebugStringA(msg_buf.data());
+	RLog(msg_buf.data());
 
 	map<int, ID3D11InputLayout*>::const_iterator iter = m_VertexComponentInputLayouts.find(vertexComponents);
 	if (iter == m_VertexComponentInputLayouts.end())
@@ -192,8 +192,7 @@ ID3D11InputLayout* RVertexDeclaration::GetInputLayoutByVertexComponents(int vert
 		}
 		else
 		{
-			OutputDebugStringA((char*)pErrorMsg->GetBufferPointer());
-			OutputDebugStringA("\n");
+			RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
 			assert(0);
 		}
 

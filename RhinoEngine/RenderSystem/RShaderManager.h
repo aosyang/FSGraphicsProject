@@ -27,7 +27,7 @@ struct RShader
 	bool operator==(const RShader& rhs) const;
 
 	void Bind(int featureMasks = 0);
-	string GetName() const;
+	const string& GetName() const;
 };
 
 class RShaderManager : public RSingleton<RShaderManager>
@@ -47,13 +47,15 @@ public:
 				   SIZE_T geometryBytecodeLength = 0);
 
 	RShader* GetShaderResource(const char* shaderName);
-	string GetShaderName(const RShader* shader) const;
+	const string& GetShaderName(const RShader* shader) const;
 
 private:
 	RShaderManager();
 	~RShaderManager();
 
 	map<string, RShader>	m_Shaders;
+
+	static const string EmptyShaderName;
 };
 
 #endif

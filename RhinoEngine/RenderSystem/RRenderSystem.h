@@ -62,8 +62,8 @@ public:
 
 	bool UsingGammaCorrection() const { return m_UseGammaCorrection; }
 
-	void SetDefferedShading(bool deferred) { m_bIsDeferred = deferred; }
-	bool UseDeferredShading() const { return m_bIsDeferred; }
+	void SetUsingDefferedShading(bool bUseDeferredShading)	{ m_bIsUsingDeferredShading = bUseDeferredShading; }
+	bool IsUsingDeferredShading() const						{ return m_bIsUsingDeferredShading; }
 
 	void SetVertexShader(ID3D11VertexShader* vertexShader);
 	void SetPixelShader(ID3D11PixelShader* pixelShader);
@@ -97,7 +97,7 @@ protected:
 
 	ID3D11SamplerState*		m_SamplerState[SamplerStateCount];
 
-	bool					m_bIsDeferred;
+	bool					m_bIsUsingDeferredShading;
 };
 
 #define GRenderer RRenderSystem::Instance()

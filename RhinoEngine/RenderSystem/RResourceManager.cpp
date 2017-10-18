@@ -35,7 +35,9 @@ void ResourceLoaderThread(LoaderThreadData* data)
 		{
 			unique_lock<mutex> uniqueLock(*data->TaskQueueMutex);
 			if (data->TaskQueue->size() == 0)
-				OutputDebugStringA("=== Loader thread is idle ===\n");
+			{
+				RLog("=== Resource loader thread is idle ===\n");
+			}
 			data->TaskQueueCondition->wait(uniqueLock, [&]{ return data->TaskQueue->size() != 0 || *data->ShouldQuitThread; });
 
 			if (*data->ShouldQuitThread)
@@ -232,9 +234,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	vector<RMeshElement> meshElements;
 	vector<RMaterial> materials;
 
-	char msg_buf[1024];
-	sprintf_s(msg_buf, sizeof(msg_buf), "Loading mesh [%s]...\n", task->Filename.data());
-	OutputDebugStringA(msg_buf);
+	RLog("Loading mesh [%s]...\n", task->Filename.data());
 
 	// Create the FBX SDK manager
 	FbxManager* lFbxSdkManager = FbxManager::Create();
@@ -306,8 +306,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 			fbxBoneNodes.push_back(node);
 			meshBoneIdToName.push_back(node->GetName());
 
-			sprintf_s(msg_buf, sizeof(msg_buf), "  FBX bone node: %s\n", node->GetName());
-			OutputDebugStringA(msg_buf);
+			RLog("  FBX bone node: %s\n", node->GetName());
 		}
 	}
 
@@ -390,8 +389,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	int nodeCount = lFbxScene->GetNodeCount();
 	for (int idxNode = 0; idxNode < nodeCount; idxNode++)
 	{
-		sprintf_s(msg_buf, sizeof(msg_buf), "  FBX node [%d/%d]...\n", idxNode + 1, nodeCount);
-		OutputDebugStringA(msg_buf);
+		RLog("  FBX node [%d/%d]...\n", idxNode + 1, nodeCount);
 
 		FbxNode* node = lFbxScene->GetNode(idxNode);
 		FbxMesh* mesh = node->GetMesh();
@@ -400,8 +398,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 			continue;
 
 		//mesh->SplitPoints();
-		sprintf_s(msg_buf, sizeof(msg_buf), "  Mesh element [%s]\n", node->GetName());
-		OutputDebugStringA(msg_buf);
+		RLog("  Mesh element [%s]\n", node->GetName());
 		
 		FbxVector4* controlPointArray;
 		vector<RVertex::MESH_LOADER_VERTEX> vertData;
@@ -849,8 +846,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 			materials.push_back(RMaterial{ 0 });
 
 		// Optimize mesh
-		sprintf_s(msg_buf, "Optimizing mesh...\n");
-		OutputDebugStringA(msg_buf);
+		RLog("Optimizing mesh...\n");
+
 		map<RVertex::MESH_LOADER_VERTEX, int> meshVertIndexTable;
 		vector<RVertex::MESH_LOADER_VERTEX> optimizedVertData;
 		vector<UINT> optimizedIndexData;
@@ -891,9 +888,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 		meshElements.push_back(meshElem);
 
-		sprintf_s(msg_buf, "Mesh loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
+		RLog("Mesh loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
 			(int)optimizedVertData.size(), (int)optimizedIndexData.size() / 3, (int)flatVertData.size(), (int)indexData.size() / 3);
-		OutputDebugStringA(msg_buf);
 	}
 
 	lFbxScene->Destroy();
@@ -932,9 +928,7 @@ bool RResourceManager::ThreadLoadRmeshData(LoaderThreadTask* task)
 	vector<RMeshElement> meshElements;
 	vector<RMaterial> materials;
 
-	char msg_buf[1024];
-	sprintf_s(msg_buf, sizeof(msg_buf), "Loading mesh [%s]...\n", task->Filename.data());
-	OutputDebugStringA(msg_buf);
+	RLog("Loading mesh [%s]...\n", task->Filename.data());
 
 	string rmeshName = RFileUtil::ReplaceExt(task->Filename, "rmesh");
 	RMesh* MeshResource = static_cast<RMesh*>(task->Resource);
@@ -1051,17 +1045,14 @@ void RResourceManager::ThreadLoadDDSTextureData(LoaderThreadTask* task)
 	wchar_t wszName[1024];
 	mbstowcs_s(&char_len, wszName, 1024, task->Filename.data(), task->Filename.size());
 
-	char msg_buf[1024];
-	sprintf_s(msg_buf, sizeof(msg_buf), "Loading texture [%s]...\n", task->Filename.data());
-	OutputDebugStringA(msg_buf);
+	RLog("Loading texture [%s]...\n", task->Filename.data());
 
 	ID3D11Resource* pResource;
 
 	HRESULT hr = DirectX::CreateDDSTextureFromFile(GRenderer.D3DDevice(), wszName, &pResource, &srv);
 	if (FAILED(hr))
 	{
-		sprintf_s(msg_buf, sizeof(msg_buf), "*** Failed to load texture [%s] ***\n", task->Filename.data());
-		OutputDebugStringA(msg_buf);
+		RLog("*** Failed to load texture [%s] ***\n", task->Filename.data());
 	}
 
 	RTexture* TextureResource = static_cast<RTexture*>(task->Resource);

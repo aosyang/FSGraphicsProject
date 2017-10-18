@@ -611,7 +611,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		//GDebugRenderer.DrawSphere(sPoints[i].ToVec3(), 50.0f);
 	}
 
-	RConstantBuffers::cbLight.UpdateContent(&cbLight);
+	RConstantBuffers::cbLight.UpdateBufferData(&cbLight);
 
 	// Update instance buffer
 	ZeroMemory(&cbInstance[0], sizeof(cbInstance[0]));
@@ -635,7 +635,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 								1.0f / (float)GRenderer.GetClientWidth(), 1.0f / (float)GRenderer.GetClientHeight());
 	cbScreen.UseGammaCorrection = GRenderer.UsingGammaCorrection() ? 1 : (m_EnabledPostProcessor == 1);
 
-	RConstantBuffers::cbGlobal.UpdateContent(&cbScreen);
+	RConstantBuffers::cbGlobal.UpdateBufferData(&cbScreen);
 
 	// Update particle vertices
 	ParticleDepthComparer cmp(m_Camera.GetPosition(), m_Camera.GetNodeTransform().GetForward());
@@ -645,7 +645,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	ObjectDepthComparer objCmp(m_Camera.GetPosition());
 	std::sort(cbInstance[1].instancedWorldMatrix, cbInstance[1].instancedWorldMatrix + 125, objCmp);
 
-	m_cbInstance[1].UpdateContent(&cbInstance[1]);
+	m_cbInstance[1].UpdateBufferData(&cbInstance[1]);
 
 	RVec3 charPos = m_CharacterObj.GetNodeTransform().GetTranslation();
 	RMatrix4 charMatrix = RMatrix4::CreateYAxisRotation(m_CharacterRot);
@@ -736,7 +736,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 		GDebugRenderer.DrawLine(nodePos, nodePos + worldOffset * 10, RColor(1.0f, 0.0f, 0.0f), RColor(1.0f, 0.0f, 0.0f));
 
-		RConstantBuffers::cbBoneMatrices.UpdateContent(&cbSkinned);
+		RConstantBuffers::cbBoneMatrices.UpdateBufferData(&cbSkinned);
 		RConstantBuffers::cbBoneMatrices.BindBuffer();
 	}
 
@@ -781,7 +781,7 @@ void FSGraphicsProjectApp::RenderScene()
 	for (int i = 0; i < 3; i++)
 	{
 		cbScene.cascadedShadowIndex = i;
-		RConstantBuffers::cbScene.UpdateContent(&cbScene);
+		RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
 		RConstantBuffers::cbScene.BindBuffer();
 
 		m_ShadowMap[i].SetupRenderTarget();
@@ -830,11 +830,11 @@ void FSGraphicsProjectApp::RenderScene()
 			cbScene.viewProjMatrix = viewMatrix * projMatrix;
 			cbScene.cameraPos = m_SunVec;
 
-			RConstantBuffers::cbScene.UpdateContent(&cbScene);
+			RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
 	
 			cbLight.CameraPos = m_SunVec;
 
-			RConstantBuffers::cbLight.UpdateContent(&cbLight);
+			RConstantBuffers::cbLight.UpdateBufferData(&cbLight);
 
 			RConstantBuffers::cbScene.BindBuffer();
 			RConstantBuffers::cbLight.BindBuffer();
@@ -932,7 +932,7 @@ void FSGraphicsProjectApp::SetPerObjectConstBuffer(const RMatrix4& world)
 	SHADER_OBJECT_BUFFER cbObject;
 	cbObject.worldMatrix = world;
 
-	RConstantBuffers::cbPerObject.UpdateContent(&cbObject);
+	RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 }
 
 void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
@@ -1010,7 +1010,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			if (instanceCount >= MAX_INSTANCE_COUNT ||
 				((x == m_MeshInstanceCount / 2) && (z == m_MeshInstanceCount / 2)))
 			{
-				m_cbInstance[2].UpdateContent(&cbMeshInstance);
+				m_cbInstance[2].UpdateBufferData(&cbMeshInstance);
 				m_cbInstance[2].BindBuffer();
 
 				if (pass == ShadowPass)
@@ -1057,7 +1057,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			cbIslandInstance.instancedWorldMatrix[islandInstanceCount] = m_InstanceMatrices[i];
 			islandInstanceCount++;
 		}
-		m_cbInstance[0].UpdateContent(&cbIslandInstance);
+		m_cbInstance[0].UpdateBufferData(&cbIslandInstance);
 		m_cbInstance[0].BindBuffer();
 	}
 
@@ -1230,7 +1230,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 
 void FSGraphicsProjectApp::SetMaterialConstBuffer(SHADER_MATERIAL_BUFFER* buffer)
 {
-	RConstantBuffers::cbMaterial.UpdateContent(buffer);
+	RConstantBuffers::cbMaterial.UpdateBufferData(buffer);
 	RConstantBuffers::cbMaterial.BindBuffer();
 }
 

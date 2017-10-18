@@ -59,6 +59,7 @@ class RResourceBase;
 #include "Core/RSerializer.h"
 #include "Core/RTimer.h"
 #include "Core/RInput.h"
+#include "Core/RLog.h"
 #include "Core/IApp.h"
 #include "Core/MathHelper.h"
 #include "Core/RScriptSystem.h"

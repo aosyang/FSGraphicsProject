@@ -129,7 +129,7 @@ void PlayerController::PostUpdate(const RTimer& timer)
 
 void PlayerController::Draw()
 {
-	RConstantBuffers::cbBoneMatrices.UpdateContent((SHADER_SKINNED_BUFFER*)&m_BoneMatrices);
+	RConstantBuffers::cbBoneMatrices.UpdateBufferData((SHADER_SKINNED_BUFFER*)&m_BoneMatrices);
 	RConstantBuffers::cbBoneMatrices.BindBuffer();
 
 	RSMeshObject::Draw();
@@ -137,7 +137,7 @@ void PlayerController::Draw()
 
 void PlayerController::DrawDepthPass()
 {
-	RConstantBuffers::cbBoneMatrices.UpdateContent((SHADER_SKINNED_BUFFER*)&m_BoneMatrices);
+	RConstantBuffers::cbBoneMatrices.UpdateBufferData((SHADER_SKINNED_BUFFER*)&m_BoneMatrices);
 	RConstantBuffers::cbBoneMatrices.BindBuffer();
 
 	RSMeshObject::DrawDepthPass();

@@ -183,7 +183,7 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 			else if (instanced)
 				shaderFeatureMask |= SFM_Instanced;
 
-			if (GRenderer.UseDeferredShading())
+			if (GRenderer.IsUsingDeferredShading())
 				shaderFeatureMask |= SFM_Deferred;
 
 			if (m_OverridingShader && m_OverridingShaderFeatures != -1)
@@ -267,7 +267,7 @@ void RSMeshObject::DrawWithShader(RShader* shader, bool instanced, int instanceC
 		else if (instanced)
 			shaderFeatureMask |= SFM_Instanced;
 
-		if (GRenderer.UseDeferredShading())
+		if (GRenderer.IsUsingDeferredShading())
 			shaderFeatureMask |= SFM_Deferred;
 
 		shader->Bind(shaderFeatureMask);

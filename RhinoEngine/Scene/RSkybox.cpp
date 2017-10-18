@@ -17,7 +17,15 @@ RSkybox::RSkybox()
 void RSkybox::CreateSkybox(const char* skyTextureName)
 {
 	// Load skybox texture
-	CreateSkybox(RResourceManager::Instance().FindTexture(skyTextureName));
+	RTexture* SkyTexture = RResourceManager::Instance().FindTexture(skyTextureName);
+
+	if (SkyTexture == nullptr)
+	{
+		RWarning("Unable to find texture \'%s\' while creating skybox.\n", skyTextureName);
+		return;
+	}
+
+	CreateSkybox(SkyTexture);
 }
 
 void RSkybox::CreateSkybox(RTexture* skyTexture)
@@ -55,7 +63,7 @@ void RSkybox::CreateSkybox(RTexture* skyTexture)
 
 	if (!m_SkyboxShader)
 	{
-		OutputDebugStringA("*** WARNING: Unable to find shader \'Skybox\', skybox will not be rendered properly.\n");
+		RWarning("Unable to find shader \'Skybox\', skybox will not be rendered properly.\n");
 	}
 }
 
