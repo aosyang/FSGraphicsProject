@@ -26,6 +26,7 @@ struct LoaderThreadData
 	condition_variable*			TaskQueueCondition;
 	queue<LoaderThreadTask>*	TaskQueue;
 	bool*						ShouldQuitThread;
+	bool*						HasQuitThread;
 };
 
 enum ResourceLoadingMode
@@ -75,6 +76,7 @@ private:
 										m_WrapperTextureResources;
 
 	bool								m_ShouldQuitLoaderThread;
+	bool								m_HasLoaderThreadQuit;
 	queue<LoaderThreadTask>				m_LoaderThreadTaskQueue;
 	LoaderThreadData					m_LoaderThreadData;
 };

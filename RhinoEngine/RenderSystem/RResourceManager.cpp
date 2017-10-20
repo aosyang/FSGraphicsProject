@@ -38,7 +38,9 @@ void ResourceLoaderThread(LoaderThreadData* data)
 			{
 				RLog("=== Resource loader thread is idle ===\n");
 			}
-			data->TaskQueueCondition->wait(uniqueLock, [&]{ return data->TaskQueue->size() != 0 || *data->ShouldQuitThread; });
+
+			// Block thread until we get signal for another task or need to quit thread
+			data->TaskQueueCondition->wait(uniqueLock, [data]{ return data->TaskQueue->size() != 0 || *data->ShouldQuitThread; });
 
 			if (*data->ShouldQuitThread)
 				break;
@@ -66,17 +68,22 @@ void ResourceLoaderThread(LoaderThreadData* data)
 			break;
 		}
 	}
+
+	// Notify main thread that loader thread has quit
+	*data->HasQuitThread = true;
 }
 
 void RResourceManager::Initialize()
 {
 	// Create resource loader thread
 	m_ShouldQuitLoaderThread = false;
+	m_HasLoaderThreadQuit = false;
 
 	m_LoaderThreadData.TaskQueue = &m_LoaderThreadTaskQueue;
 	m_LoaderThreadData.TaskQueueMutex = &m_TaskQueueMutex;
 	m_LoaderThreadData.TaskQueueCondition = &m_TaskQueueCondition;
 	m_LoaderThreadData.ShouldQuitThread = &m_ShouldQuitLoaderThread;
+	m_LoaderThreadData.HasQuitThread = &m_HasLoaderThreadQuit;
 
 	thread t(ResourceLoaderThread, &m_LoaderThreadData);
 	t.detach();
@@ -90,6 +97,12 @@ void RResourceManager::Destroy()
 		m_ShouldQuitLoaderThread = true;
 	}
 	m_TaskQueueCondition.notify_all();
+
+	// Wait until loader thread has quit
+	while (!m_HasLoaderThreadQuit)
+	{
+		Sleep(1);
+	}
 
 	UnloadAllResources();
 }
