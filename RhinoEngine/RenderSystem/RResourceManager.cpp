@@ -909,7 +909,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	lFbxSdkManager->Destroy();
 
 	// Load material from file
-	string mtlFilename = RFileUtil::ReplaceExt(task->Filename, "rmtl");
+	string mtlFilename = RFileUtil::ReplaceExtension(task->Filename, "rmtl");
 	LoadMeshMaterials(mtlFilename, materials);
 
 	RMesh* MeshResource = static_cast<RMesh*>(task->Resource);
@@ -925,7 +925,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	MeshResource->OnLoadingFinished();
 
 #if EXPORT_FBX_AS_BINARY_MESH == 1
-	string rmeshName = RFileUtil::ReplaceExt(task->Filename, "rmesh");
+	string rmeshName = RFileUtil::ReplaceExtension(task->Filename, "rmesh");
 	RSerializer serializer;
 	serializer.Open(rmeshName, SM_Write);
 	if (serializer.IsOpen())
@@ -943,7 +943,7 @@ bool RResourceManager::ThreadLoadRmeshData(LoaderThreadTask* task)
 
 	RLog("Loading mesh [%s]...\n", task->Filename.data());
 
-	string rmeshName = RFileUtil::ReplaceExt(task->Filename, "rmesh");
+	string rmeshName = RFileUtil::ReplaceExtension(task->Filename, "rmesh");
 	RMesh* MeshResource = static_cast<RMesh*>(task->Resource);
 
 	RSerializer serializer;
@@ -957,7 +957,7 @@ bool RResourceManager::ThreadLoadRmeshData(LoaderThreadTask* task)
 	//string animFilename = RFileUtil::ReplaceExt(task->Filename.size(), "ranim");
 
 	// Load material from file
-	string mtlFilename = RFileUtil::ReplaceExt(task->Filename, "rmtl");
+	string mtlFilename = RFileUtil::ReplaceExtension(task->Filename, "rmtl");
 	LoadMeshMaterials(mtlFilename, materials);
 	
 	if (materials.size())
