@@ -29,15 +29,15 @@ class RMesh : public RResourceBase
 public:
 	RMesh(string path);
 	RMesh(string path, const vector<RMeshElement>& meshElements, const vector<RMaterial>& materials);
-	RMesh(string path, RMeshElement* meshElements, int numElement, RMaterial* materials, int numMaterial);
+	RMesh(string path, const RMeshElement* meshElements, int numElement, const RMaterial* materials, int numMaterial);
 	~RMesh();
 
 	void Serialize(RSerializer& serializer);
 
-	RMaterial GetMaterial(int index) const;
-	vector<RMaterial>& GetMaterials();
+	const RMaterial& GetMaterial(int index) const;
+	const vector<RMaterial>& GetMaterials() const;
 
-	vector<RMeshElement>& GetMeshElements();
+	const vector<RMeshElement>& GetMeshElements() const;
 	int GetMeshElementCount() const;
 
 	void SetMeshElements(RMeshElement* meshElements, UINT numElement);
@@ -72,5 +72,21 @@ private:
 	map<RAnimation*, vector<int>>
 							m_AnimationNodeCache;
 };
+
+FORCEINLINE const vector<RMaterial>& RMesh::GetMaterials() const
+{
+	return m_Materials;
+}
+
+FORCEINLINE const vector<RMeshElement>& RMesh::GetMeshElements() const
+{
+	return m_MeshElements;
+}
+
+FORCEINLINE int RMesh::GetMeshElementCount() const
+{
+	return (int)m_MeshElements.size();
+}
+
 
 #endif

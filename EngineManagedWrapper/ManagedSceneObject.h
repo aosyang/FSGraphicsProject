@@ -25,7 +25,7 @@ namespace EngineManagedWrapper {
 
 		property String^ Shader
 		{
-			String^ get()			{ return material->Shader ? gcnew String(RShaderManager::Instance().GetShaderName(material->Shader).c_str()) : gcnew String(""); }
+			String^ get()			{ return material->Shader ? gcnew String(material->Shader->GetName().c_str()) : gcnew String(""); }
 			void set(String^ value)	{ material->Shader = RShaderManager::Instance().GetShaderResource(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer())); }
 		}
 

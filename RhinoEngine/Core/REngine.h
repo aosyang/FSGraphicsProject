@@ -37,6 +37,9 @@ public:
 	void SetEditorMode(bool editor) { m_bIsEditor = editor; }
 	bool IsEditor() const { return m_bIsEditor; }
 
+	void SetUseCustomRenderingPipeline(bool useCustomRendering)		{ m_UseCustomRenderingPipeline = useCustomRendering; }
+	bool IsUsingCustomRenderingPipeline() const						{ return m_UseCustomRenderingPipeline; }
+
 protected:
 	REngine();
 	~REngine();
@@ -55,6 +58,9 @@ private:
 	bool				m_UseEngineRenderWindow;
 	IApp*				m_Application;
 	RTimer				m_Timer;
+
+	/// Whether engine should call IApp::RenderScene
+	bool				m_UseCustomRenderingPipeline;
 };
 
 #define GEngine REngine::Instance()

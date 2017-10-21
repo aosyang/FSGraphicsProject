@@ -36,8 +36,8 @@ public:
 
 	void UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount);
 
-	void Draw(D3D11_PRIMITIVE_TOPOLOGY topology);
-	void DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology);
+	void Draw(D3D11_PRIMITIVE_TOPOLOGY topology) const;
+	void DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology) const;
 };
 
 class RMeshElement
@@ -56,12 +56,12 @@ public:
 	
 	void UpdateRenderBuffer();
 
-	void Draw(D3D11_PRIMITIVE_TOPOLOGY topology);
-	void DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology);
+	void Draw(D3D11_PRIMITIVE_TOPOLOGY topology) const;
+	void DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology) const;
 
 
 	void SetName(const char* name) { m_Name = name; }
-	string GetName() const { return m_Name; }
+	const string& GetName() const { return m_Name; }
 
 	const RAabb& GetAabb() const { return m_Aabb; }
 

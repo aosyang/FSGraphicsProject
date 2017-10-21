@@ -12,13 +12,14 @@ static TCHAR szWindowClass[] = _T("rhinoapp");
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 REngine::REngine()
-	: m_bIsEditor				(false),
-	  m_bIsInitialized			(false),
-	  m_hInst					(nullptr),
-	  m_hWnd					(nullptr),
-	  m_bFullScreen				(false),
-	  m_UseEngineRenderWindow	(false),
-	  m_Application				(nullptr)
+	: m_bIsEditor					(false),
+	  m_bIsInitialized				(false),
+	  m_hInst						(nullptr),
+	  m_hWnd						(nullptr),
+	  m_bFullScreen					(false),
+	  m_UseEngineRenderWindow		(false),
+	  m_Application					(nullptr),
+	  m_UseCustomRenderingPipeline	(true)
 {
 	SetProcessDPIAware();
 }
@@ -155,7 +156,14 @@ void REngine::RunOneFrame(bool update_input)
 
 	GScriptSystem.UpdateScriptableObjects();
 
-	m_Application->RenderScene();
+	if (m_UseCustomRenderingPipeline)
+	{
+		m_Application->RenderScene();
+	}
+	else
+	{
+		GRenderer.RenderFrame();
+	}
 }
 
 void REngine::ResizeClientWindow(int width, int height)

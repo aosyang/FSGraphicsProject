@@ -43,6 +43,8 @@ public:
 	void Render(const RFrustum* pFrustum = nullptr);
 	void RenderDepthPass(const RFrustum* pFrustum = nullptr);
 
+	void UpdateScene();
+
 	vector<RSceneObject*>& GetSceneObjects();
 private:
 

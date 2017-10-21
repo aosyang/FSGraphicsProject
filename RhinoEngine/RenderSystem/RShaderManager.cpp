@@ -38,11 +38,6 @@ void RShader::Bind(int featureMasks)
 	GRenderer.SetGeometryShader(GeometryShader);
 }
 
-const string& RShader::GetName() const
-{
-	return RShaderManager::Instance().GetShaderName(this);
-}
-
 RShaderManager::RShaderManager()
 {
 

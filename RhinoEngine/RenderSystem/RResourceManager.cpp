@@ -26,6 +26,8 @@ static condition_variable					m_TaskQueueCondition;
 
 static mutex	TextureResourcesMutex;
 
+string RResourceManager::AssetBasePathName = "../Assets/";
+
 void ResourceLoaderThread(LoaderThreadData* data)
 {
 	while (1)
@@ -1146,9 +1148,9 @@ const vector<RMesh*>& RResourceManager::GetMeshResources() const
 	return m_MeshResources;
 }
 
-string RResourceManager::GetAssetsBasePath()
+const string& RResourceManager::GetAssetsBasePath()
 {
-	return string("../Assets/");
+	return AssetBasePathName;
 }
 
 string RResourceManager::GetResourcePath(const string& path)

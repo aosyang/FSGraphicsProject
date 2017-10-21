@@ -19,6 +19,8 @@ RRenderSystem::RRenderSystem()
 
 RRenderSystem::~RRenderSystem()
 {
+	// Should have unregistered all components by now
+	assert(m_RegisteredRenderMeshComponents.size() == 0);
 }
 
 bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, bool enable4xMsaa, bool enableGammaCorrection)
@@ -421,6 +423,49 @@ void RRenderSystem::SetGeometryShader(ID3D11GeometryShader* geometryShader)
 		GRenderer.D3DImmediateContext()->GSSetShader(geometryShader, nullptr, 0);
 		currentGeometryShader = geometryShader;
 	}
+}
+
+void RRenderSystem::RegisterRenderMeshComponent(const RRenderMeshComponent* Component)
+{
+	auto Iter = find(m_RegisteredRenderMeshComponents.begin(), m_RegisteredRenderMeshComponents.end(), Component);
+
+	// Component must not be registered already
+	assert(Iter == m_RegisteredRenderMeshComponents.end());
+
+	m_RegisteredRenderMeshComponents.push_back(Component);
+}
+
+void RRenderSystem::UnregisterRenderMeshComponent(const RRenderMeshComponent* Component)
+{
+	auto Iter = find(m_RegisteredRenderMeshComponents.begin(), m_RegisteredRenderMeshComponents.end(), Component);
+
+	// Shouldn't unregister a component which is not registered
+	assert(Iter != m_RegisteredRenderMeshComponents.end());
+
+	m_RegisteredRenderMeshComponents.erase(Iter);
+}
+
+void RRenderSystem::RenderFrame()
+{
+	Clear();
+
+	SHADER_GLOBAL_BUFFER cbGlobal;
+	ZeroMemory(&cbGlobal, sizeof(cbGlobal));
+
+	cbGlobal.UseGammaCorrection = UsingGammaCorrection();
+
+	RConstantBuffers::cbGlobal.UpdateBufferData(&cbGlobal);
+	RConstantBuffers::cbGlobal.BindBuffer();
+
+	// Shadow map sampler state
+	SetSamplerState(2, SamplerState_ShadowDepthComparison);
+
+	for (auto Iter = m_RegisteredRenderMeshComponents.begin(); Iter != m_RegisteredRenderMeshComponents.end(); Iter++)
+	{
+		(*Iter)->Render();
+	}
+
+	Present();
 }
 
 void RRenderSystem::CreateRenderTargetView()

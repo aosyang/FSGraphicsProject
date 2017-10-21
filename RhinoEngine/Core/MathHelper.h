@@ -16,10 +16,16 @@
 namespace Math
 {
 	// Returns random float in [0, 1).
-	float RandF();
+	FORCEINLINE float RandF()
+	{
+		return (float)(rand()) / (float)RAND_MAX;
+	}
 
 	// Returns random float in [a, b).
-	float RandF(float a, float b);
+	FORCEINLINE float RandRangedF(float a, float b)
+	{
+		return a + RandF()*(b - a);
+	}
 
 	template<typename T>
 	const T& Max(const T& a, const T& b) { return (a > b) ? a : b; }

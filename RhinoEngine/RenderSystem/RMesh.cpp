@@ -66,7 +66,7 @@ RMesh::RMesh(string path, const vector<RMeshElement>& meshElements, const vector
 	m_Materials = materials;
 }
 
-RMesh::RMesh(string path, RMeshElement* meshElements, int numElement, RMaterial* materials, int numMaterial)
+RMesh::RMesh(string path, const RMeshElement* meshElements, int numElement, const RMaterial* materials, int numMaterial)
 	: RResourceBase(RT_Mesh, path),
 	  m_Animation(nullptr)
 {
@@ -113,25 +113,10 @@ void RMesh::Serialize(RSerializer& serializer)
 	}
 }
 
-RMaterial RMesh::GetMaterial(int index) const
+const RMaterial& RMesh::GetMaterial(int index) const
 {
 	assert(index >= 0 && index < (int)m_Materials.size());
 	return m_Materials[index];
-}
-
-vector<RMaterial>& RMesh::GetMaterials()
-{
-	return m_Materials;
-}
-
-vector<RMeshElement>& RMesh::GetMeshElements()
-{
-	return m_MeshElements;
-}
-
-int RMesh::GetMeshElementCount() const
-{
-	return (int)m_MeshElements.size();
 }
 
 void RMesh::SetMeshElements(RMeshElement* meshElements, UINT numElement)

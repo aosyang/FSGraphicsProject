@@ -20,6 +20,16 @@ RSceneObject::~RSceneObject()
 	GScriptSystem.UnregisterScriptableObject(this);
 }
 
+void RSceneObject::Release()
+{
+	for (auto iter = SceneComponents.begin(); iter != SceneComponents.end(); iter++)
+	{
+		delete *iter;
+	}
+
+	SceneComponents.clear();
+}
+
 const RMatrix4& RSceneObject::GetNodeTransform() const
 {
 	return m_NodeTransform;
@@ -72,6 +82,11 @@ void RSceneObject::TranslateLocal(const RVec3& v)
 	m_NodeTransform.TranslateLocal(v);
 }
 
+void RSceneObject::Update()
+{
+	UpdateComponents();
+}
+
 const vector<string>& RSceneObject::GetParsedScript()
 {
 	if (!m_Script.empty() && m_ParsedScript.empty())
@@ -95,5 +110,8 @@ const vector<string>& RSceneObject::GetParsedScript()
 
 void RSceneObject::UpdateComponents()
 {
-	// TODO
+	for (RSceneComponentBase* SceneComponent : SceneComponents)
+	{
+		SceneComponent->Update();
+	}
 }

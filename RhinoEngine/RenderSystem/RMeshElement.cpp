@@ -87,7 +87,7 @@ void RMeshRenderBuffer::UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSiz
 	m_VertexCount = vertexCount;
 }
 
-void RMeshRenderBuffer::Draw(D3D11_PRIMITIVE_TOPOLOGY topology)
+void RMeshRenderBuffer::Draw(D3D11_PRIMITIVE_TOPOLOGY topology) const
 {
 	UINT offset = 0;
 
@@ -110,7 +110,7 @@ void RMeshRenderBuffer::Draw(D3D11_PRIMITIVE_TOPOLOGY topology)
 	}
 }
 
-void RMeshRenderBuffer::DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology)
+void RMeshRenderBuffer::DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology) const
 {
 	UINT offset = 0;
 
@@ -240,12 +240,12 @@ void RMeshElement::UpdateRenderBuffer()
 	}
 }
 
-void RMeshElement::Draw(D3D11_PRIMITIVE_TOPOLOGY topology)
+void RMeshElement::Draw(D3D11_PRIMITIVE_TOPOLOGY topology) const
 {
 	m_RenderBuffer.Draw(topology);
 }
 
-void RMeshElement::DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology)
+void RMeshElement::DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology) const
 {
 	m_RenderBuffer.DrawInstanced(instanceCount, topology);
 }

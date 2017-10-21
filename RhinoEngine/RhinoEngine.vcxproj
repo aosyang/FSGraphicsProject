@@ -64,6 +64,7 @@
     <ClInclude Include="Core\RVector.h" />
     <ClInclude Include="RenderSystem\d3dUtil.h" />
     <ClInclude Include="RenderSystem\DDSTextureLoader.h" />
+    <ClInclude Include="RenderSystem\RRenderMeshComponent.h" />
     <ClInclude Include="RenderSystem\RResourceBase.h" />
     <ClInclude Include="RenderSystem\RAnimation.h" />
     <ClInclude Include="RenderSystem\RDebugRenderer.h" />
@@ -91,7 +92,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Collision\RCollision.cpp" />
-    <ClCompile Include="Core\MathHelper.cpp" />
     <ClCompile Include="Core\RAabb.cpp" />
     <ClCompile Include="Core\RDebugMenu.cpp" />
     <ClCompile Include="Core\REngine.cpp" />
@@ -106,6 +106,7 @@
     <ClCompile Include="RenderSystem\RMesh.cpp" />
     <ClCompile Include="RenderSystem\RMeshComponent.cpp" />
     <ClCompile Include="RenderSystem\RMeshElement.cpp" />
+    <ClCompile Include="RenderSystem\RRenderMeshComponent.cpp" />
     <ClCompile Include="RenderSystem\RRenderSystem.cpp" />
     <ClCompile Include="RenderSystem\RResourceBase.cpp" />
     <ClCompile Include="RenderSystem\RResourceManager.cpp" />

@@ -23,6 +23,8 @@ public:
 	RSceneObject();
 	virtual ~RSceneObject();
 
+	virtual void Release();
+
 	/// Set name of scene object
 	void SetName(const string& name)	{ m_Name = name; }
 
@@ -62,6 +64,8 @@ public:
 	virtual const RAabb& GetAabb() { return RAabb::Default; }
 	virtual void Draw() {}
 	virtual void DrawDepthPass() {}
+
+	virtual void Update();
 
 	/// Create a new component and add to this scene object
 	template<typename T>

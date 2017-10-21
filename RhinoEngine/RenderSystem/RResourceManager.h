@@ -54,7 +54,7 @@ public:
 	RMesh* FindMesh(const char* resourcePath);
 	const vector<RMesh*>& GetMeshResources() const;
 
-	static string GetAssetsBasePath();
+	static const string& GetAssetsBasePath();
 	static string GetResourcePath(const string& path);
 
 	// Wrap a d3d11 srv and get a pointer to texture
@@ -69,6 +69,8 @@ private:
 	static void LoadMeshMaterials(const string& mtlFilename, vector<RMaterial>& materials);
 
 	static void ThreadLoadDDSTextureData(LoaderThreadTask* task);
+
+	static string						AssetBasePathName;
 
 	vector<RMesh*>						m_MeshResources;
 	vector<RTexture*>					m_TextureResources;

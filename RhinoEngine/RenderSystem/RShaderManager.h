@@ -33,9 +33,13 @@ struct RShader
 class RShaderManager : public RSingleton<RShaderManager>
 {
 	friend class RSingleton<RShaderManager>;
+	friend struct RShader;
 public:
 
+	/// Recursively load all shaders in directory
 	void LoadShaders(const char* path);
+
+	/// Unload all loaded shaders
 	void UnloadAllShaders();
 
 	bool AddShader(const char* shaderName,
@@ -47,15 +51,24 @@ public:
 				   SIZE_T geometryBytecodeLength = 0);
 
 	RShader* GetShaderResource(const char* shaderName);
-	const string& GetShaderName(const RShader* shader) const;
 
 private:
 	RShaderManager();
 	~RShaderManager();
 
+	const string& GetShaderName(const RShader* shader) const;
+
+private:
 	map<string, RShader>	m_Shaders;
 
 	static const string EmptyShaderName;
 };
+
+
+FORCEINLINE const string& RShader::GetName() const
+{
+	return RShaderManager::Instance().GetShaderName(this);
+}
+
 
 #endif

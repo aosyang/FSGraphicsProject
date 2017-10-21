@@ -47,6 +47,7 @@ public:
 
 	float GetResourceTimestamp();
 protected:
+	/// Use default materials defined in mesh resource
 	void UpdateMaterialsFromResource();
 
 	RMesh*					m_Mesh;

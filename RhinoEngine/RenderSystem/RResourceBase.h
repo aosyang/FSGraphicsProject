@@ -29,7 +29,9 @@ public:
 	ResourceState GetResourceState() const	{ return m_State; }
 	ResourceType GetResourceType() const	{ return m_Type; }
 	const string& GetPath() const			{ return m_ResourcePath; }
-	bool IsResourceReady() const			{ return m_State == RS_Loaded; }
+
+	/// Check if resource has been fully loaded
+	bool IsLoaded() const					{ return m_State == RS_Loaded; }
 
 	/// Callback when resource has been enqueued for loading
 	virtual void OnEnqueuedForLoading();

@@ -10,7 +10,7 @@
 #include "MathHelper.h"
 #include <math.h>
 
-#define USE_SIMD_MATH 1
+#define USE_SIMD_MATH 0
 
 #if (USE_SIMD_MATH == 1)
 #include <stdint.h>

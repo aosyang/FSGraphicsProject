@@ -140,13 +140,13 @@
     <ClInclude Include="Core\RLog.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="RenderSystem\RRenderMeshComponent.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
       <Filter>RenderSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\MathHelper.cpp">
-      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\REngine.cpp">
       <Filter>Core</Filter>
@@ -240,6 +240,9 @@
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="RenderSystem\RResourceBase.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem\RRenderMeshComponent.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
   </ItemGroup>

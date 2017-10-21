@@ -273,14 +273,14 @@ bool FSGraphicsProjectApp::Initialize()
 
 	for (int i = 0; i < PARTICLE_COUNT; i++)
 	{
-		float x = Math::RandF(-2000.0f, 1000.0f),
-			  y = Math::RandF(1000.0f, 1200.0f),
-			  z = Math::RandF(-2000.0f, 1000.0f),
-			  w = Math::RandF(500.0f, 750.0f);					// Particle radius
-		float ic = Math::RandF(0.5f, 1.0f);						// Particle color
+		float x = Math::RandRangedF(-2000.0f, 1000.0f),
+			  y = Math::RandRangedF(1000.0f, 1200.0f),
+			  z = Math::RandRangedF(-2000.0f, 1000.0f),
+			  w = Math::RandRangedF(500.0f, 750.0f);					// Particle radius
+		float ic = Math::RandRangedF(0.5f, 1.0f);						// Particle color
 		float offsetX = (rand() % 2 == 0) ? 0.0f : 0.5f;
 		float offsetY = (rand() % 2 == 0) ? 0.0f : 0.5f;
-		m_ParticleVert[i] = { RVec4(x, y, z, w), RVec4(ic, ic, ic, 1.0f), Math::RandF(0.0f, PI * 2), RVec4(0.5f, 0.5f, offsetX, offsetY) };
+		m_ParticleVert[i] = { RVec4(x, y, z, w), RVec4(ic, ic, ic, 1.0f), Math::RandRangedF(0.0f, PI * 2), RVec4(0.5f, 0.5f, offsetX, offsetY) };
 		m_ParticleAabb.ExpandBySphere(RVec3(x, y, z), w);
 	}
 
@@ -465,7 +465,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 	if (RInput.GetBufferedKeyState('I') == BKS_Pressed)
 	{
-		m_MaterialSpecular = RVec4(1.0f, 1.0f, 1.0f, Math::RandF(1.0f, 512.0f));
+		m_MaterialSpecular = RVec4(1.0f, 1.0f, 1.0f, Math::RandRangedF(1.0f, 512.0f));
 	}
 
 	static RFrustum frustum = m_Camera.GetFrustum();
@@ -653,7 +653,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	m_CharacterObj.SetTransform(charMatrix);
 
 	// Update animation
-	RAnimation* animation = m_CharacterAnimation->IsResourceReady() ? m_CharacterAnimation->GetAnimation() : nullptr;
+	RAnimation* animation = m_CharacterAnimation->IsLoaded() ? m_CharacterAnimation->GetAnimation() : nullptr;
 	if (animation)
 	{
 		m_CharacterObj.GetMesh()->CacheAnimation(animation);
@@ -717,7 +717,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		RMatrix4 rootInversedTranslation = RMatrix4::CreateTranslation(invOffset);
 
 		SHADER_SKINNED_BUFFER cbSkinned;
-		if (m_CharacterObj.GetMesh()->IsResourceReady())
+		if (m_CharacterObj.GetMesh()->IsLoaded())
 		{
 			for (int i = 0; i < m_CharacterObj.GetMesh()->GetBoneCount(); i++)
 			{
@@ -1046,7 +1046,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	SHADER_INSTANCE_BUFFER cbIslandInstance;
 	int islandInstanceCount = 0;
 
-	if (m_IslandMeshObj.GetMesh()->IsResourceReady())
+	if (m_IslandMeshObj.GetMesh()->IsLoaded())
 	{
 		RAabb islandAabb = m_IslandMeshObj.GetMesh()->GetLocalSpaceAabb();
 		for (int i = 0; i < MAX_INSTANCE_COUNT; i++)

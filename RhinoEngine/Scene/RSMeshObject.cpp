@@ -71,7 +71,7 @@ void RSMeshObject::SaveMaterialsToFile()
 	if (!m_Mesh)
 		return;
 
-	while (!m_Mesh->IsResourceReady())
+	while (!m_Mesh->IsLoaded())
 	{
 		Sleep(10);
 	}
@@ -157,7 +157,7 @@ void RSMeshObject::Draw()
 
 void RSMeshObject::Draw(bool instanced, int instanceCount)
 {
-	if (!m_Mesh || !m_Mesh->IsResourceReady())
+	if (!m_Mesh || !m_Mesh->IsLoaded())
 		return;
 
 	UpdateMaterialsFromResource();
@@ -201,11 +201,12 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 			}
 			else
 			{
+				ID3D11ShaderResourceView* NullShaderResourceView[] = { nullptr };
+
 				for (int t = 0; t < m_Materials[i].TextureNum; t++)
 				{
 					RTexture* texture = m_Materials[i].Textures[t];
-					ID3D11ShaderResourceView* srv[] = { nullptr };
-					GRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, texture ? texture->GetPtrSRV() : srv);
+					GRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, texture ? texture->GetPtrSRV() : NullShaderResourceView);
 				}
 			}
 		}
@@ -224,7 +225,7 @@ void RSMeshObject::DrawDepthPass()
 
 void RSMeshObject::DrawDepthPass(bool instanced, int instanceCount)
 {
-	if (!m_Mesh || !m_Mesh->IsResourceReady())
+	if (!m_Mesh || !m_Mesh->IsLoaded())
 		return;
 
 	static RShader* DefaultShader = RShaderManager::Instance().GetShaderResource("Depth");
@@ -252,7 +253,7 @@ void RSMeshObject::DrawDepthPass(bool instanced, int instanceCount)
 
 void RSMeshObject::DrawWithShader(RShader* shader, bool instanced, int instanceCount)
 {
-	if (!m_Mesh || !m_Mesh->IsResourceReady() || !shader)
+	if (!m_Mesh || !m_Mesh->IsLoaded() || !shader)
 		return;
 
 	//RRenderer.D3DImmediateContext()->IASetInputLayout(m_Mesh->GetInputLayout());

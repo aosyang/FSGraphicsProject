@@ -18,6 +18,9 @@ public:
 	virtual void RenderScene() override;
 
 private:
+	void SetupScene();
+
+private:
 	RScene	m_Scene;
 
 	float m_CamYaw;

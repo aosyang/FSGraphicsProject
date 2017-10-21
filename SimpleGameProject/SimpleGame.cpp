@@ -31,6 +31,8 @@ bool SimpleGame::Initialize()
 	// TODO: if projection is forgotten to set properly, need to make sure user gets some feedbacks
 	m_Camera.SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
 
+	SetupScene();
+
 	return true;
 }
 
@@ -63,18 +65,25 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 	float camSpeed = 1000.0f;
 	if (RInput.IsKeyDown(VK_LSHIFT))
 		camSpeed *= 10.0f;
-	RVec3 moveVec(0.0f, 0.0f, 0.0f);
+	RVec3 MoveVector(0.0f, 0.0f, 0.0f);
 	if (RInput.IsKeyDown('W'))
-		moveVec += RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
+		MoveVector += RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
 	if (RInput.IsKeyDown('S'))
-		moveVec -= RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
-	if (RInput.IsKeyDown('A'))
-		moveVec -= RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+		MoveVector -= RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
 	if (RInput.IsKeyDown('D'))
-		moveVec += RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+		MoveVector += RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+	if (RInput.IsKeyDown('A'))
+		MoveVector -= RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+	if (RInput.IsKeyDown('E'))
+		MoveVector += RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+	if (RInput.IsKeyDown('Q'))
+		MoveVector -= RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 
-	RMatrix4 cameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
-	m_Camera.SetTransform(cameraMatrix);
+	RVec3 CameraPosition = m_Camera.GetPosition();
+	RMatrix4 CameraTransform = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
+	CameraTransform.SetTranslation(CameraPosition);
+	m_Camera.SetTransform(CameraTransform);
+	m_Camera.TranslateLocal(MoveVector);
 
 	RMatrix4 viewMatrix = m_Camera.GetViewMatrix();
 	RMatrix4 projMatrix = m_Camera.GetProjectionMatrix();
@@ -89,31 +98,46 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 	cbScene.cameraPos = m_Camera.GetPosition();
 
 	RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
+	RConstantBuffers::cbScene.BindBuffer();
+
+	// Update light constant buffer
+	SHADER_LIGHT_BUFFER cbLight;
+	ZeroMemory(&cbLight, sizeof(cbLight));
+
+	const float AmbientIntensity = 0.8f;
+
+	// Setup ambient color
+	cbLight.HighHemisphereAmbientColor = RVec4(0.9f, 1.0f, 1.0f, AmbientIntensity);
+	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, AmbientIntensity);
+
+	cbLight.CameraPos = m_Camera.GetPosition();
+
+	RConstantBuffers::cbLight.UpdateBufferData(&cbLight);
+	RConstantBuffers::cbLight.BindBuffer();
+
+	m_Scene.UpdateScene();
 }
 
 void SimpleGame::RenderScene()
 {
-	// Clear back buffer
-	GRenderer.Clear();
+	// Implemented in engine now
+}
 
-	RConstantBuffers::cbScene.BindBuffer();
+void SimpleGame::SetupScene()
+{
+	RMesh* SphereMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.rmesh");
 
-	SHADER_OBJECT_BUFFER cbObject;
-	ZeroMemory(&cbObject, sizeof(cbObject));
+	for (int i = 0; i < 100; i++)
+	{
+		RSceneObject* SceneObject = m_Scene.CreateSceneObject();
+		RVec3 ObjectPosition;
+		ObjectPosition.SetX(Math::RandRangedF(-500.0f, 500.0f));
+		ObjectPosition.SetY(Math::RandRangedF(-500.0f, 500.0f));
+		ObjectPosition.SetZ(Math::RandRangedF(-500.0f, 500.0f));
 
-	cbObject.worldMatrix = RMatrix4::IDENTITY;
-	RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
-	RConstantBuffers::cbPerObject.BindBuffer();
+		SceneObject->SetPosition(ObjectPosition);
 
-	// Use default texture sampler for texture slot 0 
-	GRenderer.SetSamplerState(0, SamplerState_Texture);
-
-	m_Skybox.Draw();
-
-	// Draw the scene
-	RFrustum Frustum = m_Camera.GetFrustum();
-	m_Scene.Render(&Frustum);
-
-	// Present current frame
-	GRenderer.Present();
+		RRenderMeshComponent* RenderMeshComponent = SceneObject->AddNewComponent<RRenderMeshComponent>();
+		RenderMeshComponent->SetMesh(SphereMesh);
+	}
 }

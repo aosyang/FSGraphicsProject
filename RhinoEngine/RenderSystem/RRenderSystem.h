@@ -7,6 +7,7 @@
 #define _RRENDERSYSTEM_H
 
 #include "Core/RSingleton.h"
+#include "RRenderMeshComponent.h"
 
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")
@@ -68,6 +69,12 @@ public:
 	void SetVertexShader(ID3D11VertexShader* vertexShader);
 	void SetPixelShader(ID3D11PixelShader* pixelShader);
 	void SetGeometryShader(ID3D11GeometryShader* geometryShader);
+
+	void RegisterRenderMeshComponent(const RRenderMeshComponent* Component);
+	void UnregisterRenderMeshComponent(const RRenderMeshComponent* Component);
+
+	/// Render current frame
+	void RenderFrame();
 protected:
 	RRenderSystem();
 	~RRenderSystem();
@@ -98,6 +105,8 @@ protected:
 	ID3D11SamplerState*		m_SamplerState[SamplerStateCount];
 
 	bool					m_bIsUsingDeferredShading;
+
+	vector<const RRenderMeshComponent*>	m_RegisteredRenderMeshComponents;
 };
 
 #define GRenderer RRenderSystem::Instance()

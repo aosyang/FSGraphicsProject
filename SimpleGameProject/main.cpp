@@ -18,6 +18,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	SimpleGame app;
 
 	GEngine.BindApp(&app);
+	GEngine.SetUseCustomRenderingPipeline(false);
 
 	if (GEngine.Initialize())
 	{

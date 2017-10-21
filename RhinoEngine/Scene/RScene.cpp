@@ -91,6 +91,7 @@ void RScene::DestroyObject(RSceneObject* obj)
 	vector<RSceneObject*>::iterator iter = find(m_SceneObjects.begin(), m_SceneObjects.end(), obj);
 	if (iter != m_SceneObjects.end())
 	{
+		(*iter)->Release();
 		m_SceneObjects.erase(iter);
 		delete obj;
 	}
@@ -100,6 +101,7 @@ void RScene::DestroyAllObjects()
 {
 	for (UINT i = 0; i < m_SceneObjects.size(); i++)
 	{
+		m_SceneObjects[i]->Release();
 		delete m_SceneObjects[i];
 	}
 
@@ -348,6 +350,14 @@ void RScene::RenderDepthPass(const RFrustum* pFrustum)
 		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 		RConstantBuffers::cbPerObject.BindBuffer();
 		(*iter)->DrawDepthPass();
+	}
+}
+
+void RScene::UpdateScene()
+{
+	for (RSceneObject* SceneObject : m_SceneObjects)
+	{
+		SceneObject->Update();
 	}
 }
 

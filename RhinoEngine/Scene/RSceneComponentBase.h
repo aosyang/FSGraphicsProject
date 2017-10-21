@@ -14,7 +14,17 @@ class RSceneComponentBase : public ISceneComponent
 public:
 	RSceneComponentBase(RSceneObject* InOwner);
 
+	/// Get the scene object which is owning this component
+	FORCEINLINE RSceneObject* GetOwner() const;
+
+	virtual void Update() {}
+
 private:
 	/// The scene object owning this component
 	RSceneObject*	OwnerSceneObject;
 };
+
+RSceneObject* RSceneComponentBase::GetOwner() const
+{
+	return OwnerSceneObject;
+}
