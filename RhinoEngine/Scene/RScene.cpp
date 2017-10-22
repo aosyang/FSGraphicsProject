@@ -141,7 +141,7 @@ void RScene::LoadFromFile(const char* filename)
 
 				if (!mesh)
 				{
-					mesh = RResourceManager::Instance().LoadFbxMesh(resPath, RLM_Immediate);
+					mesh = RResourceManager::Instance().LoadFbxMesh(resPath, EResourceLoadMode::Immediate);
 				}
 
 				RSMeshObject* meshObj = CreateMeshObject(resPath);
@@ -179,7 +179,7 @@ void RScene::LoadFromFile(const char* filename)
 
 							if (!texture)
 							{
-								texture = RResourceManager::Instance().LoadDDSTexture(RResourceManager::GetResourcePath(textureName).data(), RLM_Immediate);
+								texture = RResourceManager::Instance().LoadDDSTexture(RResourceManager::GetResourcePath(textureName).data(), EResourceLoadMode::Immediate);
 							}
 
 							material.Textures[material.TextureNum++] = texture;

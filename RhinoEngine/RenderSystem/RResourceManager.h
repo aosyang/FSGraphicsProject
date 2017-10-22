@@ -29,10 +29,10 @@ struct LoaderThreadData
 	bool*						HasQuitThread;
 };
 
-enum ResourceLoadingMode
+enum class EResourceLoadMode : UINT8
 {
-	RLM_Immediate,
-	RLM_Threaded,
+	Immediate,
+	Threaded,
 };
 
 class RResourceManager : public RSingleton<RResourceManager>
@@ -47,8 +47,8 @@ public:
 	void UnloadAllResources();
 	void UnloadSRVWrappers();
 
-	RMesh* LoadFbxMesh(const char* filename, ResourceLoadingMode mode = RLM_Threaded);
-	RTexture* LoadDDSTexture(const char* filename, ResourceLoadingMode mode = RLM_Threaded);
+	RMesh* LoadFbxMesh(const char* filename, EResourceLoadMode mode = EResourceLoadMode::Threaded);
+	RTexture* LoadDDSTexture(const char* filename, EResourceLoadMode mode = EResourceLoadMode::Threaded);
 
 	RTexture* FindTexture(const char* resourcePath);
 	RMesh* FindMesh(const char* resourcePath);

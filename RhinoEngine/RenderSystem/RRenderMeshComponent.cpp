@@ -22,7 +22,6 @@ RRenderMeshComponent::~RRenderMeshComponent()
 
 RRenderMeshComponent* RRenderMeshComponent::Create(RSceneObject* InOwner)
 {
-	// TODO: Register this with render system
 	RRenderMeshComponent* RenderMeshComponent = new RRenderMeshComponent(InOwner);
 	return RenderMeshComponent;
 }

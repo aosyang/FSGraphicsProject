@@ -7,10 +7,10 @@
 #ifndef _RSERIALIZER_H
 #define _RSERIALIZER_H
 
-enum ESerializeMode
+enum class ESerializeMode : UINT8
 {
-	SM_Read,
-	SM_Write,
+	Read,
+	Write,
 };
 
 class RSerializer
@@ -25,7 +25,7 @@ public:
 	{
 		m_Mode = mode;
 
-		m_FileStream.open(filename.c_str(), (mode == SM_Read ? ios::in : ios::out) | ios::binary);
+		m_FileStream.open(filename.c_str(), (mode == ESerializeMode::Read ? ios::in : ios::out) | ios::binary);
 
 		if (!m_FileStream.is_open())
 			return;
@@ -44,12 +44,12 @@ public:
 
 	bool IsReading()
 	{
-		return m_Mode == SM_Read;
+		return m_Mode == ESerializeMode::Read;
 	}
 
 	bool EnsureHeader(const char* header, UINT size)
 	{
-		if (m_Mode == SM_Write)
+		if (m_Mode == ESerializeMode::Write)
 		{
 			m_FileStream.write(header, size);
 		}
@@ -77,7 +77,7 @@ public:
 	template<typename T>
 	void SerializeVector(vector<T>& vec)
 	{
-		if (m_Mode == SM_Write)
+		if (m_Mode == ESerializeMode::Write)
 		{
 			UINT size = (UINT)vec.size();
 			m_FileStream.write((char*)&size, sizeof(size));
@@ -99,7 +99,7 @@ public:
 	void SerializeVector(vector<T>& vec, void (RSerializer::*func)(T&))
 	{
 		UINT size;
-		if (m_Mode == SM_Write)
+		if (m_Mode == ESerializeMode::Write)
 		{
 			size = (UINT)vec.size();
 			m_FileStream.write((char*)&size, sizeof(size));
@@ -120,7 +120,7 @@ public:
 	template<typename T>
 	void SerializeData(T& data)
 	{
-		if (m_Mode == SM_Write)
+		if (m_Mode == ESerializeMode::Write)
 		{
 			m_FileStream.write((char*)&data, sizeof(T));
 		}
@@ -134,7 +134,7 @@ public:
 	template<>
 	void SerializeData<string>(string& str)
 	{
-		if (m_Mode == SM_Write)
+		if (m_Mode == ESerializeMode::Write)
 		{
 			UINT size = (UINT)str.size();
 			m_FileStream.write((char*)&size, sizeof(size));
@@ -157,7 +157,7 @@ public:
 	{
 		if (size)
 		{
-			if (m_Mode == SM_Write)
+			if (m_Mode == ESerializeMode::Write)
 				m_FileStream.write((char*)*arr, sizeof(T) * size);
 			else
 			{
@@ -181,7 +181,7 @@ public:
 		SerializeData(flag);
 		if (flag)
 		{
-			if (m_Mode == SM_Read)
+			if (m_Mode == ESerializeMode::Read)
 			{
 				assert(!m_FileStream.eof());
 				*pObj = new T();

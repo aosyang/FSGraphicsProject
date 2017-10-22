@@ -25,7 +25,7 @@ void RMaterial::Serialize(RSerializer& serializer)
 			serializer.SerializeData(textureName);
 			Textures[i] = RResourceManager::Instance().FindTexture(textureName.c_str());
 			if (!Textures[i])
-				Textures[i] = RResourceManager::Instance().LoadDDSTexture(textureName.c_str(), RLM_Immediate);
+				Textures[i] = RResourceManager::Instance().LoadDDSTexture(textureName.c_str(), EResourceLoadMode::Immediate);
 		}
 
 		for (; i < 8; i++)

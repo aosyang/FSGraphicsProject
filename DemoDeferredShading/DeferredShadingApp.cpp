@@ -65,7 +65,7 @@ bool DeferredShadingApp::Initialize()
 		m_PointLights[i].pos = RVec3(Math::RandRangedF(-1500, 750), Math::RandRangedF(50, 100), Math::RandRangedF(-1850, 300));
 		m_PointLights[i].r = Math::RandRangedF(50, 200);
 		//m_PointLights[i].color = RColor(1, 1, 1);
-		m_PointLights[i].color = RColor(Math::RandRangedF(), Math::RandRangedF(), Math::RandRangedF());
+		m_PointLights[i].color = RColor(Math::RandF(), Math::RandF(), Math::RandF());
 		m_PointLights[i].sin_factor = RVec3(Math::RandRangedF(0, 1), 0, Math::RandRangedF(0, 1));
 		m_PointLights[i].sin_offset = RVec3(Math::RandRangedF(0, 5), 0, Math::RandRangedF(0, 5));
 		m_PointLights[i].castShadow = (i < shadowCasterCount);

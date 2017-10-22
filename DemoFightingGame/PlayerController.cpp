@@ -29,7 +29,7 @@ void PlayerController::Cache()
 {
 	RMesh* playerMesh = RResourceManager::Instance().FindMesh("../Assets/unitychan/unitychan.fbx");
 	if (!playerMesh)
-		playerMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/unitychan/unitychan.fbx", RLM_Immediate);
+		playerMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/unitychan/unitychan.fbx", EResourceLoadMode::Immediate);
 	SetMesh(playerMesh);
 
 	m_Animations[PlayerAnim_Idle]		= LoadAnimation("../Assets/unitychan/FUCM05_0000_Idle.fbx",					AnimBitFlag_Loop);
@@ -225,7 +225,7 @@ RAnimation* PlayerController::LoadAnimation(const char* resPath, int flags)
 {
 	RMesh* mesh = RResourceManager::Instance().FindMesh(resPath);
 	if (!mesh)
-		mesh = RResourceManager::Instance().LoadFbxMesh(resPath, RLM_Immediate);
+		mesh = RResourceManager::Instance().LoadFbxMesh(resPath, EResourceLoadMode::Immediate);
 
 	if (mesh)
 	{

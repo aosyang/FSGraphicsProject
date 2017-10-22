@@ -50,7 +50,7 @@ bool FightingGameApp::Initialize()
 	m_AIPlayer->SetPosition(RVec3(-465, 50, -760));
 	m_AIPlayer->Cache();
 
-	m_Text.Initialize(RResourceManager::Instance().LoadDDSTexture("../Assets/Fonts/Fixedsys_9c.DDS", RLM_Immediate), 16, 16);
+	m_Text.Initialize(RResourceManager::Instance().LoadDDSTexture("../Assets/Fonts/Fixedsys_9c.DDS", EResourceLoadMode::Immediate), 16, 16);
 	return true;
 }
 

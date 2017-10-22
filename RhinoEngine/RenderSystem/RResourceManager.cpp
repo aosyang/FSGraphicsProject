@@ -194,7 +194,7 @@ void RResourceManager::UnloadSRVWrappers()
 	m_WrapperTextureResources.clear();
 }
 
-RMesh* RResourceManager::LoadFbxMesh(const char* filename, ResourceLoadingMode mode)
+RMesh* RResourceManager::LoadFbxMesh(const char* filename, EResourceLoadMode mode)
 {
 	RMesh* pMesh = RResourceManager::FindMesh(filename);
 	if (pMesh)
@@ -209,10 +209,10 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename, ResourceLoadingMode m
 	task.Resource = pMesh;
 
 #if (ENABLE_THREADED_LOADING == 0)
-	mode = RLM_Immediate;
+	mode = EResourceLoadMode::Immediate;
 #endif
 
-	if (mode == RLM_Immediate)
+	if (mode == EResourceLoadMode::Immediate)
 	{
 		if (!ThreadLoadRmeshData(&task))
 		{
@@ -311,9 +311,10 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	// Load skinning nodes
 	vector<FbxNode*> fbxBoneNodes;
 	vector<string> meshBoneIdToName;
+	int NumFbxNodes = lFbxScene->GetNodeCount();
 
 	// Load bone information into an array
-	for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
+	for (int idxNode = 0; idxNode < NumFbxNodes; idxNode++)
 	{
 		FbxNode* node = lFbxScene->GetNode(idxNode);
 		if (node->GetNodeAttribute() && node->GetNodeAttribute()->GetAttributeType() && node->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
@@ -338,18 +339,18 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		FbxArrayDelete(animStackNameArray);
 
 		FbxTime::EMode				animTimeMode;
-		FbxTime						frameTime, animStartTime, animEndTime;
+		FbxTime						TimePerFrame, animStartTime, animEndTime;
 		float						animFrameRate;
 
-		frameTime.SetTime(0, 0, 0, 1, 0, lFbxScene->GetGlobalSettings().GetTimeMode());
+		TimePerFrame.SetTime(0, 0, 0, 1, 0, lFbxScene->GetGlobalSettings().GetTimeMode());
 		animTimeMode = lFbxScene->GetGlobalSettings().GetTimeMode();
-		animFrameRate = (float)frameTime.GetFrameRate(animTimeMode);
+		animFrameRate = (float)TimePerFrame.GetFrameRate(animTimeMode);
 		animStartTime = takeInfo->mLocalTimeSpan.GetStart();
 		animEndTime = takeInfo->mLocalTimeSpan.GetStop();
 
 		int totalFrameCount = (int)(animEndTime.GetFrameCount(animTimeMode) - animStartTime.GetFrameCount(animTimeMode)) + 1;
 		animation = new RAnimation(
-			lFbxScene->GetNodeCount(),
+			NumFbxNodes,
 			totalFrameCount,
 			(float)animStartTime.GetFrameCountPrecise(animTimeMode),
 			(float)animEndTime.GetFrameCountPrecise(animTimeMode),
@@ -357,43 +358,51 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 		map<string, int> nodeNameToId;
 
-		for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
+		for (int FbxSceneNodeIndex = 0; FbxSceneNodeIndex < NumFbxNodes; FbxSceneNodeIndex++)
 		{
-			FbxNode* node = lFbxScene->GetNode(idxNode);
+			FbxNode* node = lFbxScene->GetNode(FbxSceneNodeIndex);
 
-			for (FbxTime animTime = animStartTime;
-				animTime <= animEndTime;
-				animTime += frameTime)
+			for (FbxTime CurrentFrameTime = animStartTime;
+				 CurrentFrameTime <= animEndTime;
+				 CurrentFrameTime += TimePerFrame)
 			{
-				RMatrix4 matrix;
+				RMatrix4 BoneTransform;
+				const char* BoneName = node->GetName();
 
-				FbxAMatrix childTransform = node->EvaluateGlobalTransform(animTime);
+				// Evaluate bone transform in model space
+				FbxAMatrix FbxBoneTransform = node->EvaluateGlobalTransform(CurrentFrameTime);
+
 #if CONVERT_TO_LEFT_HANDED_MESH == 1
-				FbxVector4 rotation = childTransform.GetR();
-				childTransform[3][2] = -childTransform[3][2];
-				rotation.Set(-rotation[0], -rotation[1], rotation[2]);
-				childTransform.SetR(rotation);
+				FbxVector4 FbxBoneRotation = FbxBoneTransform.GetR();
+				FbxBoneTransform[3][2] = -FbxBoneTransform[3][2];
+				FbxBoneRotation.Set(-FbxBoneRotation[0], -FbxBoneRotation[1], FbxBoneRotation[2]);
+				FbxBoneTransform.SetR(FbxBoneRotation);
 #endif
-				MatrixTransfer(&matrix, &childTransform);
-				int frameIdx = (int)((float)animTime.GetFrameCountPrecise(animTimeMode) - (float)animStartTime.GetFrameCountPrecise(animTimeMode));
-				animation->AddNodePose(idxNode, frameIdx, &matrix);
-				animation->AddNodeNameToId(node->GetName(), idxNode);
+				MatrixTransfer(&BoneTransform, &FbxBoneTransform);
 
-				nodeNameToId[node->GetName()] = idxNode;
+				// Precise frames number in fractions
+				float NumFramesAtCurrentTime = (float)CurrentFrameTime.GetFrameCountPrecise(animTimeMode);
+				float NumFramesAtStartTime = (float)animStartTime.GetFrameCountPrecise(animTimeMode);
+
+				int FrameIndex = (int)(NumFramesAtCurrentTime - NumFramesAtStartTime);
+				animation->AddNodePose(FbxSceneNodeIndex, FrameIndex, &BoneTransform);
+				animation->AddNodeNameToId(BoneName, FbxSceneNodeIndex);
+
+				nodeNameToId[BoneName] = FbxSceneNodeIndex;
 			}
 		}
 
-		for (int idxNode = 0; idxNode < lFbxScene->GetNodeCount(); idxNode++)
+		for (int FbxSceneNodeIndex = 0; FbxSceneNodeIndex < NumFbxNodes; FbxSceneNodeIndex++)
 		{
-			FbxNode* node = lFbxScene->GetNode(idxNode);
+			FbxNode* node = lFbxScene->GetNode(FbxSceneNodeIndex);
 			FbxNode* parent = node->GetParent();
 			if (parent && nodeNameToId.find(parent->GetName()) != nodeNameToId.end())
 			{
-				animation->SetParentId(idxNode, nodeNameToId[parent->GetName()]);
+				animation->SetParentId(FbxSceneNodeIndex, nodeNameToId[parent->GetName()]);
 			}
 			else
 			{
-				animation->SetParentId(idxNode, -1);
+				animation->SetParentId(FbxSceneNodeIndex, -1);
 			}
 		}
 	}
@@ -401,10 +410,9 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	vector<RMatrix4> boneInitInvPose;
 
 	// Load meshes
-	int nodeCount = lFbxScene->GetNodeCount();
-	for (int idxNode = 0; idxNode < nodeCount; idxNode++)
+	for (int idxNode = 0; idxNode < NumFbxNodes; idxNode++)
 	{
-		RLog("  FBX node [%d/%d]...\n", idxNode + 1, nodeCount);
+		RLog("  FBX node [%d/%d]...\n", idxNode + 1, NumFbxNodes);
 
 		FbxNode* node = lFbxScene->GetNode(idxNode);
 		FbxMesh* mesh = node->GetMesh();
@@ -782,9 +790,9 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		}
 
 		// Load textures
-		int matCount = node->GetSrcObjectCount<FbxSurfaceMaterial>();
+		int NumFbxMaterials = node->GetSrcObjectCount<FbxSurfaceMaterial>();
 
-		for (int idxMat = 0; idxMat < matCount; idxMat++)
+		for (int idxMat = 0; idxMat < NumFbxMaterials; idxMat++)
 		{
 			RMaterial meshMaterial = { 0 };
 			FbxSurfaceMaterial* material = (FbxSurfaceMaterial*)node->GetSrcObject<FbxSurfaceMaterial>(idxMat);
@@ -827,26 +835,12 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 				if (textureName.length() != 0)
 				{
-					string ddsFilename = textureName;
-					size_t pos = textureName.find_last_of("/\\");
-					if (pos != string::npos)
-					{
-						ddsFilename = textureName.substr(pos + 1);
-					}
-
-					pos = ddsFilename.find_last_of(".");
-					if (pos != string::npos)
-					{
-						ddsFilename = ddsFilename.substr(0, pos);
-					}
-
-					ddsFilename += ".dds";
-
+					string ddsFilename = RFileUtil::ReplaceExtension(textureName, "dds");
 					RTexture* texture = RResourceManager::Instance().FindTexture(ddsFilename.data());
 
 					if (!texture)
 					{
-						texture = RResourceManager::Instance().LoadDDSTexture(RResourceManager::GetResourcePath(ddsFilename).data(), RLM_Immediate);
+						texture = RResourceManager::Instance().LoadDDSTexture(RResourceManager::GetResourcePath(ddsFilename).data(), EResourceLoadMode::Immediate);
 					}
 
 					meshMaterial.Textures[meshMaterial.TextureNum] = texture;
@@ -857,7 +851,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 			materials.push_back(meshMaterial);
 		}
 
-		if (matCount == 0)
+		if (NumFbxMaterials == 0)
 			materials.push_back(RMaterial{ 0 });
 
 		// Optimize mesh
@@ -929,7 +923,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 #if EXPORT_FBX_AS_BINARY_MESH == 1
 	string rmeshName = RFileUtil::ReplaceExtension(task->Filename, "rmesh");
 	RSerializer serializer;
-	serializer.Open(rmeshName, SM_Write);
+	serializer.Open(rmeshName, ESerializeMode::Write);
 	if (serializer.IsOpen())
 	{
 		MeshResource->Serialize(serializer);
@@ -949,7 +943,7 @@ bool RResourceManager::ThreadLoadRmeshData(LoaderThreadTask* task)
 	RMesh* MeshResource = static_cast<RMesh*>(task->Resource);
 
 	RSerializer serializer;
-	serializer.Open(rmeshName, SM_Read);
+	serializer.Open(rmeshName, ESerializeMode::Read);
 	if (!serializer.IsOpen())
 		return false;
 	MeshResource->Serialize(serializer);
@@ -994,7 +988,7 @@ void RResourceManager::LoadMeshMaterials(const string& mtlFilename, vector<RMate
 
 				if (!texture)
 				{
-					texture = RResourceManager::Instance().LoadDDSTexture(RResourceManager::GetResourcePath(textureName).data(), RLM_Immediate);
+					texture = RResourceManager::Instance().LoadDDSTexture(RResourceManager::GetResourcePath(textureName).data(), EResourceLoadMode::Immediate);
 				}
 
 				material.Textures[material.TextureNum++] = texture;
@@ -1014,7 +1008,7 @@ void RResourceManager::LoadMeshMaterials(const string& mtlFilename, vector<RMate
 	delete doc;
 }
 
-RTexture* RResourceManager::LoadDDSTexture(const char* filename, ResourceLoadingMode mode)
+RTexture* RResourceManager::LoadDDSTexture(const char* filename, EResourceLoadMode mode)
 {
 	RTexture* pTexture = FindTexture(filename);
 	if (pTexture)
@@ -1032,14 +1026,14 @@ RTexture* RResourceManager::LoadDDSTexture(const char* filename, ResourceLoading
 	task.Resource = pTexture;
 
 #if (ENABLE_THREADED_LOADING == 0)
-	mode = RLM_Immediate;
+	mode = EResourceLoadMode::Immediate;
 #endif
 
-	if (mode == RLM_Immediate)
+	if (mode == EResourceLoadMode::Immediate)
 	{
 		ThreadLoadDDSTextureData(&task);
 	}
-	else // mode == RLM_Threaded
+	else // mode == EResourceLoadMode::Threaded
 	{
 		// Upload task to working queue
 		m_TaskQueueMutex.lock();
