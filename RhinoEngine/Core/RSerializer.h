@@ -21,6 +21,7 @@ public:
 		Close();
 	}
 
+	/// Open a file for serialization
 	void Open(const string& filename, ESerializeMode mode)
 	{
 		m_Mode = mode;
@@ -31,22 +32,31 @@ public:
 			return;
 	}
 
-	void Close()
+	/// Close file stream of serializer
+	FORCEINLINE void Close()
 	{
 		if (m_FileStream.is_open())
 			m_FileStream.close();
 	}
 
-	bool IsOpen()
+	/// Check if file stream is open
+	FORCEINLINE bool IsOpen() const
 	{
 		return m_FileStream.is_open();
 	}
 
-	bool IsReading()
+	/// Check if serializer is in reading mode
+	FORCEINLINE bool IsReading() const
 	{
 		return m_Mode == ESerializeMode::Read;
 	}
 
+	/// Serialize a string file header
+	///   Write mode : Write header string to file stream.
+	///                Always returns true
+	///
+	///   Read mode  : Read header string and compare it with given header.
+	///                Returns true if both header equal, false otherwise.
 	bool EnsureHeader(const char* header, UINT size)
 	{
 		if (m_Mode == ESerializeMode::Write)
@@ -74,6 +84,7 @@ public:
 		return true;
 	}
 
+	/// Serialize a std::vector with plain data type
 	template<typename T>
 	void SerializeVector(vector<T>& vec)
 	{
@@ -95,6 +106,7 @@ public:
 		}
 	}
 
+	/// Serialize a std::vector with a custom serialization function
 	template<typename T>
 	void SerializeVector(vector<T>& vec, void (RSerializer::*func)(T&))
 	{
@@ -117,6 +129,7 @@ public:
 		}
 	}
 
+	/// Serialize a plain data type
 	template<typename T>
 	void SerializeData(T& data)
 	{
@@ -131,6 +144,7 @@ public:
 		}
 	}
 
+	/// Serialize a std::string
 	template<>
 	void SerializeData<string>(string& str)
 	{
@@ -152,6 +166,7 @@ public:
 		}
 	}
 
+	/// Serialize an array of plain data type
 	template<typename T>
 	void SerializeArray(T** arr, UINT size)
 	{
@@ -168,12 +183,15 @@ public:
 		}
 	}
 
+	/// Serialize a class which implemented function 'Serialize(RSerializer&)'
 	template<typename T>
 	void SerializeObject(T& obj)
 	{
 		obj.Serialize(*this);
 	}
 
+	/// Serialize a pointer of a class which implemented function 'Serialize(RSerializer&)'.
+	/// When in read mode, pointer should be initially unused.
 	template<typename T>
 	void SerializeObjectPtr(T** pObj)
 	{
