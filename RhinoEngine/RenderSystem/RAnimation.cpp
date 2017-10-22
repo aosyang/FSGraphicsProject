@@ -74,12 +74,12 @@ RAnimationBlender::RAnimationBlender()
 
 void RAnimationBlender::Play(RAnimation* anim, float time, float timeScale)
 {
-	m_BlendStartAnim.Animation = anim;
-	m_BlendStartAnim.CurrentTime = time;
-	m_BlendStartAnim.TimeScale = timeScale;
-	m_BlendStartAnim.IsAnimDone = false;
+	m_SourceAnimation.Animation = anim;
+	m_SourceAnimation.CurrentTime = time;
+	m_SourceAnimation.TimeScale = timeScale;
+	m_SourceAnimation.IsAnimDone = false;
 
-	m_BlendEndAnim.Animation = nullptr;
+	m_TargetAnimation.Animation = nullptr;
 }
 
 void RAnimationBlender::Play(RAnimation* anim, float timeScale)
@@ -87,17 +87,17 @@ void RAnimationBlender::Play(RAnimation* anim, float timeScale)
 	Play(anim, anim->GetStartTime(), timeScale);
 }
 
-void RAnimationBlender::Blend(RAnimation* start, float startTime, float startTimeScale, RAnimation* end, float endTime, float endTimeScale, float blendTime)
+void RAnimationBlender::Blend(RAnimation* source, float sourceTime, float sourceTimeScale /*= 1.0f*/, RAnimation* target /*= nullptr*/, float targetTime /*= 0.0f*/, float targetTimeScale /*= 0.0f*/, float blendTime /*= 0.0f*/)
 {
-	m_BlendStartAnim.Animation = start;
-	m_BlendStartAnim.CurrentTime = startTime;
-	m_BlendStartAnim.TimeScale = startTimeScale;
-	m_BlendStartAnim.IsAnimDone = false;
+	m_SourceAnimation.Animation = source;
+	m_SourceAnimation.CurrentTime = sourceTime;
+	m_SourceAnimation.TimeScale = sourceTimeScale;
+	m_SourceAnimation.IsAnimDone = false;
 
-	m_BlendEndAnim.Animation = end;
-	m_BlendEndAnim.CurrentTime = endTime;
-	m_BlendEndAnim.TimeScale = endTimeScale;
-	m_BlendEndAnim.IsAnimDone = false;
+	m_TargetAnimation.Animation = target;
+	m_TargetAnimation.CurrentTime = targetTime;
+	m_TargetAnimation.TimeScale = targetTimeScale;
+	m_TargetAnimation.IsAnimDone = false;
 
 	m_BlendTime = blendTime;
 	m_ElapsedBlendTime = 0.0f;
@@ -105,18 +105,18 @@ void RAnimationBlender::Blend(RAnimation* start, float startTime, float startTim
 
 void RAnimationBlender::BlendTo(RAnimation* target, float targetTime, float targetTimeScale, float blendTime)
 {
-	if (m_BlendEndAnim.Animation)
+	if (m_TargetAnimation.Animation)
 	{
-		m_BlendStartAnim.Animation = m_BlendEndAnim.Animation;
-		m_BlendStartAnim.CurrentTime = m_BlendEndAnim.CurrentTime;
-		m_BlendStartAnim.TimeScale = m_BlendEndAnim.TimeScale;
-		m_BlendStartAnim.IsAnimDone = m_BlendEndAnim.IsAnimDone;
+		m_SourceAnimation.Animation = m_TargetAnimation.Animation;
+		m_SourceAnimation.CurrentTime = m_TargetAnimation.CurrentTime;
+		m_SourceAnimation.TimeScale = m_TargetAnimation.TimeScale;
+		m_SourceAnimation.IsAnimDone = m_TargetAnimation.IsAnimDone;
 	}
 
-	m_BlendEndAnim.Animation = target;
-	m_BlendEndAnim.CurrentTime = targetTime;
-	m_BlendEndAnim.TimeScale = targetTimeScale;
-	m_BlendEndAnim.IsAnimDone = false;
+	m_TargetAnimation.Animation = target;
+	m_TargetAnimation.CurrentTime = targetTime;
+	m_TargetAnimation.TimeScale = targetTimeScale;
+	m_TargetAnimation.IsAnimDone = false;
 
 	m_BlendTime = blendTime;
 	m_ElapsedBlendTime = 0.0f;
@@ -124,57 +124,57 @@ void RAnimationBlender::BlendTo(RAnimation* target, float targetTime, float targ
 
 void RAnimationBlender::ProceedAnimation(float time)
 {
-	m_BlendStartAnim.Proceed(time);
+	m_SourceAnimation.Proceed(time);
 
-	if (m_BlendEndAnim.Animation)
+	if (m_TargetAnimation.Animation)
 	{
-		m_BlendEndAnim.Proceed(time);
+		m_TargetAnimation.Proceed(time);
 		m_ElapsedBlendTime += time;
 		if (m_ElapsedBlendTime >= m_BlendTime)
 		{
-			m_BlendStartAnim = m_BlendEndAnim;
-			m_BlendEndAnim.Animation = nullptr;
+			m_SourceAnimation = m_TargetAnimation;
+			m_TargetAnimation.Animation = nullptr;
 		}
 	}
 }
 
-void RAnimationBlender::GetCurrentBlendedNodePose(int startNodeId, int endNodeId, RMatrix4* matrix)
+void RAnimationBlender::GetCurrentBlendedNodePose(int sourceNodeId, int targetNodeId, RMatrix4* matrix)
 {
-	if (m_BlendStartAnim.Animation && m_BlendEndAnim.Animation)
+	if (m_SourceAnimation.Animation && m_TargetAnimation.Animation)
 	{
 		RMatrix4 mat1, mat2;
-		m_BlendStartAnim.Animation->GetNodePose(startNodeId, m_BlendStartAnim.CurrentTime, &mat1);
-		m_BlendEndAnim.Animation->GetNodePose(endNodeId, m_BlendEndAnim.CurrentTime, &mat2);
+		m_SourceAnimation.Animation->GetNodePose(sourceNodeId, m_SourceAnimation.CurrentTime, &mat1);
+		m_TargetAnimation.Animation->GetNodePose(targetNodeId, m_TargetAnimation.CurrentTime, &mat2);
 
 		// Apply inversed root translation
-		if (m_BlendStartAnim.Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
-			mat1 *= RMatrix4::CreateTranslation(-m_BlendStartAnim.Animation->GetRootPosition(m_BlendStartAnim.CurrentTime));
-		if (m_BlendEndAnim.Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
-			mat2 *= RMatrix4::CreateTranslation(-m_BlendEndAnim.Animation->GetRootPosition(m_BlendEndAnim.CurrentTime));
+		if (m_SourceAnimation.Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
+			mat1 *= RMatrix4::CreateTranslation(-m_SourceAnimation.Animation->GetRootPosition(m_SourceAnimation.CurrentTime));
+		if (m_TargetAnimation.Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
+			mat2 *= RMatrix4::CreateTranslation(-m_TargetAnimation.Animation->GetRootPosition(m_TargetAnimation.CurrentTime));
 
 		float t = min(1.0f, m_ElapsedBlendTime / m_BlendTime);
 		*matrix = RMatrix4::Lerp(mat1, mat2, t);
 	}
-	else if (m_BlendStartAnim.Animation)
+	else if (m_SourceAnimation.Animation)
 	{
-		m_BlendStartAnim.Animation->GetNodePose(startNodeId, m_BlendStartAnim.CurrentTime, matrix);
+		m_SourceAnimation.Animation->GetNodePose(sourceNodeId, m_SourceAnimation.CurrentTime, matrix);
 
-		if (m_BlendStartAnim.Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
-			*matrix *= RMatrix4::CreateTranslation(-m_BlendStartAnim.Animation->GetRootPosition(m_BlendStartAnim.CurrentTime));
+		if (m_SourceAnimation.Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
+			*matrix *= RMatrix4::CreateTranslation(-m_SourceAnimation.Animation->GetRootPosition(m_SourceAnimation.CurrentTime));
 	}
 }
 
 RVec3 RAnimationBlender::GetCurrentRootOffset()
 {
-	if (m_BlendStartAnim.Animation && m_BlendEndAnim.Animation)
+	if (m_SourceAnimation.Animation && m_TargetAnimation.Animation)
 	{
 		float t = min(1.0f, m_ElapsedBlendTime / m_BlendTime);
 
-		return RVec3::Lerp(m_BlendStartAnim.RootOffset, m_BlendEndAnim.RootOffset, t);
+		return RVec3::Lerp(m_SourceAnimation.RootOffset, m_TargetAnimation.RootOffset, t);
 	}
-	else if (m_BlendStartAnim.Animation)
+	else if (m_SourceAnimation.Animation)
 	{
-		return m_BlendStartAnim.RootOffset;
+		return m_SourceAnimation.RootOffset;
 	}
 
 	return RVec3::Zero();
@@ -182,29 +182,29 @@ RVec3 RAnimationBlender::GetCurrentRootOffset()
 
 bool RAnimationBlender::IsAnimationDone()
 {
-	if (m_BlendEndAnim.Animation)
-		return m_BlendEndAnim.IsAnimDone;
-	return (m_BlendStartAnim.Animation && m_BlendStartAnim.IsAnimDone);
+	if (m_TargetAnimation.Animation)
+		return m_TargetAnimation.IsAnimDone;
+	return (m_SourceAnimation.Animation && m_SourceAnimation.IsAnimDone);
 }
 
-RAnimation* RAnimationBlender::GetStartAnimation()
+RAnimation* RAnimationBlender::GetSourceAnimation() const
 {
-	return m_BlendStartAnim.Animation;
+	return m_SourceAnimation.Animation;
 }
 
-float RAnimationBlender::GetStartAnimationTime() const
+float RAnimationBlender::GetSourceAnimationTime() const
 {
-	return m_BlendStartAnim.CurrentTime;
+	return m_SourceAnimation.CurrentTime;
 }
 
-RAnimation* RAnimationBlender::GetEndAnimation()
+RAnimation* RAnimationBlender::GetTargetAnimation() const
 {
-	return m_BlendEndAnim.Animation;
+	return m_TargetAnimation.Animation;
 }
 
-float RAnimationBlender::GetEndAnimationTime() const
+float RAnimationBlender::GetTargetAnimationTime() const
 {
-	return m_BlendEndAnim.CurrentTime;
+	return m_TargetAnimation.CurrentTime;
 }
 
 float RAnimationBlender::GetElapsedBlendTime() const

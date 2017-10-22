@@ -39,23 +39,23 @@ public:
 
 	void Play(RAnimation* anim, float time, float timeScale);
 	void Play(RAnimation* anim, float timeScale = 1.0f);
-	void Blend(RAnimation* start, float startTime, float startTimeScale = 1.0f,
-			   RAnimation* end = nullptr, float endTime = 0.0f, float endTimeScale = 0.0f,
+	void Blend(RAnimation* source, float sourceTime, float sourceTimeScale = 1.0f,
+			   RAnimation* target = nullptr, float targetTime = 0.0f, float targetTimeScale = 0.0f,
 			   float blendTime = 0.0f);
 	void BlendTo(RAnimation* target, float targetTime, float targetTimeScale = 1.0f, float blendTime = 0.0f);
 
 	void ProceedAnimation(float time);
-	void GetCurrentBlendedNodePose(int startNodeId, int endNodeId, RMatrix4* matrix);
+	void GetCurrentBlendedNodePose(int sourceNodeId, int targetNodeId, RMatrix4* matrix);
 	RVec3 GetCurrentRootOffset();
 	bool IsAnimationDone();
-	RAnimation* GetStartAnimation();
-	float GetStartAnimationTime() const;
-	RAnimation* GetEndAnimation();
-	float GetEndAnimationTime() const;
+	RAnimation* GetSourceAnimation() const;
+	float GetSourceAnimationTime() const;
+	RAnimation* GetTargetAnimation() const;
+	float GetTargetAnimationTime() const;
 	float GetElapsedBlendTime() const;
 private:
-	RAnimationPlayer	m_BlendStartAnim;
-	RAnimationPlayer	m_BlendEndAnim;
+	RAnimationPlayer	m_SourceAnimation;
+	RAnimationPlayer	m_TargetAnimation;
 	float				m_BlendTime;
 	float				m_ElapsedBlendTime;
 };

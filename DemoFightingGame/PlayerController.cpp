@@ -119,9 +119,9 @@ void PlayerController::PostUpdate(const RTimer& timer)
 	{
 		RMatrix4 matrix;
 
-		int boneId = m_Mesh->GetCachedAnimationNodeId(m_AnimBlender.GetStartAnimation(), i);
-		int targetBondId = m_Mesh->GetCachedAnimationNodeId(m_AnimBlender.GetEndAnimation(), i);
-		m_AnimBlender.GetCurrentBlendedNodePose(boneId, targetBondId, &matrix);
+		int sourceBoneId = m_Mesh->GetCachedAnimationNodeId(m_AnimBlender.GetSourceAnimation(), i);
+		int targetBondId = m_Mesh->GetCachedAnimationNodeId(m_AnimBlender.GetTargetAnimation(), i);
+		m_AnimBlender.GetCurrentBlendedNodePose(sourceBoneId, targetBondId, &matrix);
 
 		m_BoneMatrices[i] = m_Mesh->GetBoneInitInvMatrices(i) * matrix * GetNodeTransform();
 	}
@@ -195,13 +195,13 @@ PlayerBehavior PlayerController::GetBehavior() const
 
 float PlayerController::GetBehaviorTime()
 {
-	if (m_AnimBlender.GetStartAnimation() && m_AnimBlender.GetEndAnimation())
+	if (m_AnimBlender.GetSourceAnimation() && m_AnimBlender.GetTargetAnimation())
 	{
-		return m_AnimBlender.GetEndAnimationTime() / m_AnimBlender.GetEndAnimation()->GetFrameRate();
+		return m_AnimBlender.GetTargetAnimationTime() / m_AnimBlender.GetTargetAnimation()->GetFrameRate();
 	}
-	else if (m_AnimBlender.GetStartAnimation())
+	else if (m_AnimBlender.GetSourceAnimation())
 	{
-		return m_AnimBlender.GetStartAnimationTime() / m_AnimBlender.GetStartAnimation()->GetFrameRate();
+		return m_AnimBlender.GetSourceAnimationTime() / m_AnimBlender.GetSourceAnimation()->GetFrameRate();
 	}
 
 	return 0.0f;

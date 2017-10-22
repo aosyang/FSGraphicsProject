@@ -343,8 +343,8 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 								 "Blend To   : %s\n"
 								 "Blend time : %f",
 								 playerPos.X(), playerPos.Y(), playerPos.Z(), playerRot,
-								 blender.GetStartAnimation() ? blender.GetStartAnimation()->GetName().c_str() : "",
-								 blender.GetEndAnimation() ? blender.GetEndAnimation()->GetName().c_str() : "",
+								 blender.GetSourceAnimation() ? blender.GetSourceAnimation()->GetName().c_str() : "",
+								 blender.GetTargetAnimation() ? blender.GetTargetAnimation()->GetName().c_str() : "",
 								 blender.GetElapsedBlendTime());
 		m_Text.SetText(msg_buf, RColor(0, 1, 0));
 	}
