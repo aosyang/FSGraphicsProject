@@ -28,7 +28,7 @@ public:
 	RVec3			RootOffset;
 	bool			IsAnimDone;
 
-	void Proceed(float time);
+	void Proceed(float deltaTime);
 	void Reset();
 };
 
@@ -44,14 +44,14 @@ public:
 			   float blendTime = 0.0f);
 	void BlendTo(RAnimation* target, float targetTime, float targetTimeScale = 1.0f, float blendTime = 0.0f);
 
-	void ProceedAnimation(float time);
+	void ProceedAnimation(float deltaTime);
 	void GetCurrentBlendedNodePose(int sourceNodeId, int targetNodeId, RMatrix4* matrix);
 	RVec3 GetCurrentRootOffset();
 	bool IsAnimationDone();
 	RAnimation* GetSourceAnimation() const;
-	float GetSourceAnimationTime() const;
+	float GetSourcePlaybackTime() const;
 	RAnimation* GetTargetAnimation() const;
-	float GetTargetAnimationTime() const;
+	float GetTargetPlaybackTime() const;
 	float GetElapsedBlendTime() const;
 private:
 	RAnimationPlayer	m_SourceAnimation;
@@ -74,6 +74,9 @@ public:
 	void SetBitFlags(int flags) { m_Flags = flags; }
 	int GetBitFlags() const { return m_Flags; }
 
+	bool HasRootMotion() const;
+	bool IsLooping() const;
+
 	void Serialize(RSerializer& serializer);
 
 	void AddNodePose(int nodeId, int frameId, const RMatrix4* matrix);
@@ -95,7 +98,9 @@ public:
 
 	float GetStartTime() const { return m_StartTime; }
 	float GetEndTime() const { return m_EndTime; }
-	float GetFrameRate() { return m_FrameRate; }
+
+	/// Get frame rate in frames per second
+	float GetFrameRate() const { return m_FrameRate; }
 private:
 	string					m_Name;
 	int						m_Flags;
@@ -109,5 +114,43 @@ private:
 	vector<RVec3>			m_RootDisplacement;
 	int						m_RootNode;
 };
+
+
+FORCEINLINE RAnimation* RAnimationBlender::GetSourceAnimation() const
+{
+	return m_SourceAnimation.Animation;
+}
+
+FORCEINLINE float RAnimationBlender::GetSourcePlaybackTime() const
+{
+	return m_SourceAnimation.CurrentTime;
+}
+
+FORCEINLINE RAnimation* RAnimationBlender::GetTargetAnimation() const
+{
+	return m_TargetAnimation.Animation;
+}
+
+FORCEINLINE float RAnimationBlender::GetTargetPlaybackTime() const
+{
+	return m_TargetAnimation.CurrentTime;
+}
+
+FORCEINLINE float RAnimationBlender::GetElapsedBlendTime() const
+{
+	return m_ElapsedBlendTime;
+}
+
+
+
+FORCEINLINE bool RAnimation::HasRootMotion() const
+{
+	return (GetBitFlags() & AnimBitFlag_HasRootMotion) != 0;
+}
+
+FORCEINLINE bool RAnimation::IsLooping() const
+{
+	return (GetBitFlags() & AnimBitFlag_Loop) != 0;
+}
 
 #endif

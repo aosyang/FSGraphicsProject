@@ -13,7 +13,7 @@ RAnimationPlayer::RAnimationPlayer()
 {
 }
 
-void RAnimationPlayer::Proceed(float time)
+void RAnimationPlayer::Proceed(float deltaTime)
 {
 	if (Animation && !IsAnimDone)
 	{
@@ -24,12 +24,12 @@ void RAnimationPlayer::Proceed(float time)
 		}
 		RVec3 start_offset = Animation->GetRootPosition(CurrentTime);
 
-		CurrentTime += time * Animation->GetFrameRate() * TimeScale;
+		CurrentTime += deltaTime * Animation->GetFrameRate() * TimeScale;
 		bool startOver = false;
 
 		if (CurrentTime >= Animation->GetEndTime() - 1)
 		{
-			if (Animation->GetBitFlags() & AnimBitFlag_Loop)
+			if (Animation->IsLooping())
 			{
 				do
 				{
@@ -122,14 +122,14 @@ void RAnimationBlender::BlendTo(RAnimation* target, float targetTime, float targ
 	m_ElapsedBlendTime = 0.0f;
 }
 
-void RAnimationBlender::ProceedAnimation(float time)
+void RAnimationBlender::ProceedAnimation(float deltaTime)
 {
-	m_SourceAnimation.Proceed(time);
+	m_SourceAnimation.Proceed(deltaTime);
 
 	if (m_TargetAnimation.Animation)
 	{
-		m_TargetAnimation.Proceed(time);
-		m_ElapsedBlendTime += time;
+		m_TargetAnimation.Proceed(deltaTime);
+		m_ElapsedBlendTime += deltaTime;
 		if (m_ElapsedBlendTime >= m_BlendTime)
 		{
 			m_SourceAnimation = m_TargetAnimation;
@@ -147,9 +147,9 @@ void RAnimationBlender::GetCurrentBlendedNodePose(int sourceNodeId, int targetNo
 		m_TargetAnimation.Animation->GetNodePose(targetNodeId, m_TargetAnimation.CurrentTime, &mat2);
 
 		// Apply inversed root translation
-		if (m_SourceAnimation.Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
+		if (m_SourceAnimation.Animation->HasRootMotion())
 			mat1 *= RMatrix4::CreateTranslation(-m_SourceAnimation.Animation->GetRootPosition(m_SourceAnimation.CurrentTime));
-		if (m_TargetAnimation.Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
+		if (m_TargetAnimation.Animation->HasRootMotion())
 			mat2 *= RMatrix4::CreateTranslation(-m_TargetAnimation.Animation->GetRootPosition(m_TargetAnimation.CurrentTime));
 
 		float t = min(1.0f, m_ElapsedBlendTime / m_BlendTime);
@@ -159,7 +159,7 @@ void RAnimationBlender::GetCurrentBlendedNodePose(int sourceNodeId, int targetNo
 	{
 		m_SourceAnimation.Animation->GetNodePose(sourceNodeId, m_SourceAnimation.CurrentTime, matrix);
 
-		if (m_SourceAnimation.Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
+		if (m_SourceAnimation.Animation->HasRootMotion())
 			*matrix *= RMatrix4::CreateTranslation(-m_SourceAnimation.Animation->GetRootPosition(m_SourceAnimation.CurrentTime));
 	}
 }
@@ -185,31 +185,6 @@ bool RAnimationBlender::IsAnimationDone()
 	if (m_TargetAnimation.Animation)
 		return m_TargetAnimation.IsAnimDone;
 	return (m_SourceAnimation.Animation && m_SourceAnimation.IsAnimDone);
-}
-
-RAnimation* RAnimationBlender::GetSourceAnimation() const
-{
-	return m_SourceAnimation.Animation;
-}
-
-float RAnimationBlender::GetSourceAnimationTime() const
-{
-	return m_SourceAnimation.CurrentTime;
-}
-
-RAnimation* RAnimationBlender::GetTargetAnimation() const
-{
-	return m_TargetAnimation.Animation;
-}
-
-float RAnimationBlender::GetTargetAnimationTime() const
-{
-	return m_TargetAnimation.CurrentTime;
-}
-
-float RAnimationBlender::GetElapsedBlendTime() const
-{
-	return m_ElapsedBlendTime;
 }
 
 RAnimation::RAnimation()

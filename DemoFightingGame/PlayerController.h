@@ -9,7 +9,7 @@
 
 #include "Rhino.h"
 
-enum PlayerAnimation
+enum EPlayerAnimation
 {
 	PlayerAnim_Idle,
 	PlayerAnim_Run,
@@ -25,7 +25,7 @@ enum PlayerAnimation
 	PlayerAnimCount,
 };
 
-enum PlayerBehavior
+enum EPlayerBehavior
 {
 	BHV_Idle,
 	BHV_Running,
@@ -40,8 +40,8 @@ enum PlayerBehavior
 
 struct BehaviorInfo
 {
-	PlayerAnimation anim;
-	float			blendTime;
+	EPlayerAnimation	anim;
+	float				blendTime;
 };
 
 class PlayerController : public RSMeshObject
@@ -56,14 +56,14 @@ public:
 	void UpdateMovement(const RTimer& timer, const RVec3 moveVec);
 	void PostUpdate(const RTimer& timer);
 
-	void Draw();
-	void DrawDepthPass();
+	void Draw() override;
+	void DrawDepthPass() override;
 
 	void SetPlayerRotation(float rot) { m_Rotation = rot; }
 	float GetPlayerRotation() const { return m_Rotation; }
 
-	void SetBehavior(PlayerBehavior behavior);
-	PlayerBehavior GetBehavior() const;
+	void SetBehavior(EPlayerBehavior behavior);
+	EPlayerBehavior GetBehavior() const;
 	float GetBehaviorTime();
 
 	RAabb GetMovementCollisionShape() const;
@@ -73,13 +73,23 @@ public:
 private:
 	RAnimation* LoadAnimation(const char* resPath, int flags=0);
 
+	/// Can the player move with user input
+	bool CanMovePlayerWithInput() const;
+
 	float					m_Rotation;
 	RAnimation*				m_Animations[PlayerAnimCount];
 	RAnimationBlender		m_AnimBlender;
 	RVec3					m_RootOffset;
 	RMatrix4				m_BoneMatrices[MAX_BONE_COUNT];
 
-	PlayerBehavior			m_Behavior;
+	EPlayerBehavior			m_Behavior;
 };
+
+
+FORCEINLINE EPlayerBehavior PlayerController::GetBehavior() const
+{
+	return m_Behavior;
+}
+
 
 #endif

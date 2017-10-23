@@ -7,6 +7,20 @@
 
 namespace RFileUtil
 {
+	/// Get file name part of a path
+	FORCEINLINE string GetFileNameInPath(const string& path)
+	{
+		size_t slash_pos = path.find_last_of("/\\");
+		if (slash_pos == string::npos)
+		{
+			return path;
+		}
+		else
+		{
+			return path.substr(slash_pos + 1);
+		}
+	}
+
 	/// Replace extension in filename
 	FORCEINLINE string ReplaceExtension(const string& filename, const string& ext)
 	{

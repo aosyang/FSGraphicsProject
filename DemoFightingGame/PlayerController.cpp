@@ -88,22 +88,31 @@ float LerpDegreeAngle(float from, float to, float t)
 
 void PlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVec)
 {
-	RVec3 hVec = moveVec;
-	hVec.SetY(0.0f);
-
-	if (hVec.SquaredMagitude() > 0.0f)
+	bool bCanMovePlayer = CanMovePlayerWithInput();
+	if (bCanMovePlayer)
 	{
-		hVec = hVec.GetNormalized();
-		m_Rotation = LerpDegreeAngle(m_Rotation, RAD_TO_DEG(atan2f(-hVec.X(), -hVec.Z())), 10.0f * timer.DeltaTime());
+		RVec3 PlannarMoveVector = moveVec;
+		PlannarMoveVector.SetY(0.0f);
+
+		if (PlannarMoveVector.SquaredMagitude() > 0.0f)
+		{
+			PlannarMoveVector = PlannarMoveVector.GetNormalized();
+			m_Rotation = LerpDegreeAngle(m_Rotation, RAD_TO_DEG(atan2f(-PlannarMoveVector.X(), -PlannarMoveVector.Z())), 10.0f * timer.DeltaTime());
+		}
 	}
 
+	// Offset of stair which player can step up
 	static const RVec3 StairOffset = RVec3(0, 10, 0);
 
 	RAabb playerAabb = GetMovementCollisionShape();
 	playerAabb.pMin += StairOffset;
 	playerAabb.pMax += StairOffset;
 
-	RVec3 worldMoveVec = moveVec;
+	RVec3 worldMoveVec = bCanMovePlayer ? moveVec : RVec3::Zero();
+
+	// Apply gravity
+	worldMoveVec += RVec3(0, -1000.0f * timer.DeltaTime(), 0);
+
 	worldMoveVec += (RVec4(GetRootOffset(), 0) * GetNodeTransform()).ToVec3();
 	worldMoveVec -= StairOffset;
 	worldMoveVec = m_Scene->TestMovingAabbWithScene(playerAabb, worldMoveVec);
@@ -143,7 +152,7 @@ void PlayerController::DrawDepthPass()
 	RSMeshObject::DrawDepthPass();
 }
 
-void PlayerController::SetBehavior(PlayerBehavior behavior)
+void PlayerController::SetBehavior(EPlayerBehavior behavior)
 {
 	switch (behavior)
 	{
@@ -168,40 +177,35 @@ void PlayerController::SetBehavior(PlayerBehavior behavior)
 	default:
 		if (m_Behavior != behavior)
 		{
-			if (behavior == BHV_Idle)
-			{
-				int b = 0; b++;
-			}
+			const BehaviorInfo& CurrentBehavior = PlayerBehaviorInfo[behavior];
 
-			if (PlayerBehaviorInfo[behavior].blendTime > 0.0f)
+			if (CurrentBehavior.blendTime > 0.0f)
 			{
-				m_AnimBlender.BlendTo(m_Animations[PlayerBehaviorInfo[behavior].anim],
-									  m_Animations[PlayerBehaviorInfo[behavior].anim]->GetStartTime(), 1.0f,
-									  PlayerBehaviorInfo[behavior].blendTime);
+				m_AnimBlender.BlendTo(m_Animations[CurrentBehavior.anim],
+									  m_Animations[CurrentBehavior.anim]->GetStartTime(), 1.0f,
+									  CurrentBehavior.blendTime);
 			}
 			else
 			{
-				m_AnimBlender.Play(m_Animations[PlayerBehaviorInfo[behavior].anim]);
+				m_AnimBlender.Play(m_Animations[CurrentBehavior.anim]);
 			}
 			m_Behavior = behavior;
 		}
 	}
 }
 
-PlayerBehavior PlayerController::GetBehavior() const
-{
-	return m_Behavior;
-}
-
 float PlayerController::GetBehaviorTime()
 {
-	if (m_AnimBlender.GetSourceAnimation() && m_AnimBlender.GetTargetAnimation())
+	if (m_AnimBlender.GetSourceAnimation())
 	{
-		return m_AnimBlender.GetTargetAnimationTime() / m_AnimBlender.GetTargetAnimation()->GetFrameRate();
-	}
-	else if (m_AnimBlender.GetSourceAnimation())
-	{
-		return m_AnimBlender.GetSourceAnimationTime() / m_AnimBlender.GetSourceAnimation()->GetFrameRate();
+		if (m_AnimBlender.GetTargetAnimation())
+		{
+			return m_AnimBlender.GetTargetPlaybackTime() / m_AnimBlender.GetTargetAnimation()->GetFrameRate();
+		}
+		else
+		{
+			return m_AnimBlender.GetSourcePlaybackTime() / m_AnimBlender.GetSourceAnimation()->GetFrameRate();
+		}
 	}
 
 	return 0.0f;
@@ -229,14 +233,30 @@ RAnimation* PlayerController::LoadAnimation(const char* resPath, int flags)
 
 	if (mesh)
 	{
-		RAnimation* anim = mesh->GetAnimation();
-		anim->SetBitFlags(flags);
+		RAnimation* Animation = mesh->GetAnimation();
+		if (Animation)
+		{
+			Animation->SetBitFlags(flags);
 
-		string strResPath = string(resPath);
-		strResPath = strResPath.substr(strResPath.find_last_of('/') + 1);
-		anim->SetName(strResPath);
-		return anim;
+			string strResPath = string(resPath);
+			string filename = RFileUtil::GetFileNameInPath(strResPath);
+			Animation->SetName(filename);
+			return Animation;
+		}
+		else
+		{
+			RWarning("Unable to find animation data in mesh resource \'%s\'\n", resPath);
+		}
+	}
+	else
+	{
+		RWarning("Failed to load mesh resource \'%s\'\n", resPath);
 	}
 
 	return nullptr;
+}
+
+bool PlayerController::CanMovePlayerWithInput() const
+{
+	return GetBehavior() == BHV_Running || GetBehavior() == BHV_Idle;
 }

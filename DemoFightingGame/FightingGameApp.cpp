@@ -145,6 +145,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	{
 		if (RInput.GetBufferedKeyState('R') == BKS_Pressed)
 		{
+			// Reset all characters' position
 			m_Player->SetPosition(RVec3(0, 100.0f, 0));
 			m_AIPlayer->SetPosition(RVec3(-465, 50, -760));
 		}
@@ -200,7 +201,6 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		if (RInput.GetBufferedKeyState('C') == BKS_Pressed)
 			m_Player->SetBehavior(BHV_HitDown);
 
-		moveVec += RVec3(0, -1000.0f * timer.DeltaTime(), 0);
 		m_Player->UpdateMovement(timer, moveVec);
 
 		RMatrix4 playerTranslation = RMatrix4::CreateTranslation(m_Player->GetNodeTransform().GetTranslation());
@@ -352,7 +352,6 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	// Update AI player
 	m_AIPlayer->PreUpdate(timer);
 	RVec3 moveVec = RVec3(0, 0, 0);
-	moveVec += RVec3(0, -1000.0f * timer.DeltaTime(), 0);
 	m_AIPlayer->UpdateMovement(timer, moveVec);
 	m_AIPlayer->PostUpdate(timer);
 }
