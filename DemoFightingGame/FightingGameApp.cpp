@@ -28,9 +28,7 @@ bool FightingGameApp::Initialize()
 
 	m_ShadowMap.Initialize(1024, 1024);
 
-	RMatrix4 cameraMatrix = RMatrix4::CreateXAxisRotation(0.09f * 180 / PI) * RMatrix4::CreateYAxisRotation(3.88659930f * 180 / PI);
-	cameraMatrix.SetTranslation(RVec3(407.023712f, 339.007507f, 876.396484f));
-	m_Camera.SetTransform(cameraMatrix);
+	m_Camera.SetTransform(RVec3(407.023712f, 339.007507f, 876.396484f), RQuat::Euler(0.09f, 3.88659930f, 0.0f));
 	m_Camera.SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
 
 	//RSceneObject* player = m_Scene.FindObject("Player");

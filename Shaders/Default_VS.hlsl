@@ -42,7 +42,7 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 #else
 	Out.PosW = mul(float4(Input.PosL, 1.0f), worldMatrix);
 
-	Normal = mul(Input.Normal, (float3x3)worldMatrix);
+	Normal = normalize(mul(Input.Normal, (float3x3)worldMatrix));
 #endif
 
 	Out.PosH = mul(Out.PosW, viewProjMatrix);

@@ -121,11 +121,11 @@ void RScene::LoadFromFile(const char* filename)
 			const char* script = elem_obj->Attribute("Script");
 
 			tinyxml2::XMLElement* elem_transform = elem_obj->FirstChildElement("Transform");
-			RMatrix4 transform;
+			RMatrix4 matrix;
 			int n = 0;
 			stringstream ss(elem_transform->GetText());
 
-			while (ss >> ((float*)&transform)[n++] && n < 16)
+			while (ss >> ((float*)&matrix)[n++] && n < 16)
 			{
 				if (ss.peek() == ',')
 					ss.ignore();
@@ -145,7 +145,14 @@ void RScene::LoadFromFile(const char* filename)
 				}
 
 				RSMeshObject* meshObj = CreateMeshObject(resPath);
-				meshObj->SetTransform(transform);
+
+				// Decompose transform from matrix
+				RVec3 ObjectPosition;
+				RQuat ObjectRotation;
+				RVec3 ObjectScale;
+				matrix.Decompose(ObjectPosition, ObjectRotation, ObjectScale);
+
+				meshObj->SetTransform(ObjectPosition, ObjectRotation, ObjectScale);
 				sceneObj = meshObj;
 
 				tinyxml2::XMLElement* elem_mat = elem_obj->FirstChildElement("Material");

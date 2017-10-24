@@ -181,9 +181,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SimpleGame.cpp" />
+    <ClCompile Include="TestMovingComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SimpleGame.h" />
+    <ClInclude Include="TestMovingComponent.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

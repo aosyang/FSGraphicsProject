@@ -56,11 +56,13 @@
     <ClInclude Include="Core\RInput.h" />
     <ClInclude Include="Core\RLog.h" />
     <ClInclude Include="Core\RMatrix.h" />
+    <ClInclude Include="Core\RQuat.h" />
     <ClInclude Include="Core\RRay.h" />
     <ClInclude Include="Core\RScriptSystem.h" />
     <ClInclude Include="Core\RSerializer.h" />
     <ClInclude Include="Core\RSingleton.h" />
     <ClInclude Include="Core\RTimer.h" />
+    <ClInclude Include="Core\RTransform.h" />
     <ClInclude Include="Core\RVector.h" />
     <ClInclude Include="RenderSystem\d3dUtil.h" />
     <ClInclude Include="RenderSystem\DDSTextureLoader.h" />
@@ -97,9 +99,11 @@
     <ClCompile Include="Core\REngine.cpp" />
     <ClCompile Include="Core\RInput.cpp" />
     <ClCompile Include="Core\RMatrix.cpp" />
+    <ClCompile Include="Core\RQuat.cpp" />
     <ClCompile Include="Core\RRay.cpp" />
     <ClCompile Include="Core\RScriptSystem.cpp" />
     <ClCompile Include="Core\RTimer.cpp" />
+    <ClCompile Include="Core\RTransform.cpp" />
     <ClCompile Include="RenderSystem\DDSTextureLoader.cpp" />
     <ClCompile Include="RenderSystem\RAnimation.cpp" />
     <ClCompile Include="RenderSystem\RDebugRenderer.cpp" />

@@ -119,7 +119,7 @@ void PlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVec)
 
 	Translate(worldMoveVec + StairOffset);
 
-	SetRotation(RMatrix4::CreateYAxisRotation(m_Rotation));
+	SetRotation(RQuat::Euler(0.0f, DEG_TO_RAD(m_Rotation), 0.0f));
 }
 
 void PlayerController::PostUpdate(const RTimer& timer)

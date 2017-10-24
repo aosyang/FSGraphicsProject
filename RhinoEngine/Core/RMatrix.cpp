@@ -9,8 +9,136 @@
 
 RMatrix4 RMatrix4::IDENTITY = RMatrix4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
+
+//////////////////////////////////////////////////////////////////////////
+// Matrix3 implementations
+//////////////////////////////////////////////////////////////////////////
+
+RMatrix3::RMatrix3()
+{
+
+}
+
+RMatrix3::RMatrix3(float Array[9])
+{
+	memcpy(&_m11, Array, sizeof(float) * 9);
+}
+
+RMatrix3::RMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33)
+	: _m11(m11), _m12(m12), _m13(m13), _m21(m21), _m22(m22), _m23(m23), _m31(m31), _m32(m32), _m33(m33)
+{
+
+}
+
+RMatrix3& RMatrix3::operator=(const RMatrix3& rhs)
+{
+	if (this != &rhs)
+	{
+		_m11 = rhs._m11; _m12 = rhs._m12; _m13 = rhs._m13;
+		_m21 = rhs._m21; _m22 = rhs._m22; _m23 = rhs._m23;
+		_m31 = rhs._m31; _m32 = rhs._m32; _m33 = rhs._m33;
+	}
+
+	return *this;
+}
+
+RMatrix3 RMatrix3::operator*(const RMatrix3& rhs) const
+{
+	RMatrix3 mat;
+
+	mat.m[0][0] = m[0][0] * rhs.m[0][0] + m[0][1] * rhs.m[1][0] + m[0][2] * rhs.m[2][0];
+	mat.m[0][1] = m[0][0] * rhs.m[0][1] + m[0][1] * rhs.m[1][1] + m[0][2] * rhs.m[2][1];
+	mat.m[0][2] = m[0][0] * rhs.m[0][2] + m[0][1] * rhs.m[1][2] + m[0][2] * rhs.m[2][2];
+
+	mat.m[1][0] = m[1][0] * rhs.m[0][0] + m[1][1] * rhs.m[1][0] + m[1][2] * rhs.m[2][0];
+	mat.m[1][1] = m[1][0] * rhs.m[0][1] + m[1][1] * rhs.m[1][1] + m[1][2] * rhs.m[2][1];
+	mat.m[1][2] = m[1][0] * rhs.m[0][2] + m[1][1] * rhs.m[1][2] + m[1][2] * rhs.m[2][2];
+
+	mat.m[2][0] = m[2][0] * rhs.m[0][0] + m[2][1] * rhs.m[1][0] + m[2][2] * rhs.m[2][0];
+	mat.m[2][1] = m[2][0] * rhs.m[0][1] + m[2][1] * rhs.m[1][1] + m[2][2] * rhs.m[2][1];
+	mat.m[2][2] = m[2][0] * rhs.m[0][2] + m[2][1] * rhs.m[1][2] + m[2][2] * rhs.m[2][2];
+
+	return mat;
+}
+
+RMatrix3& RMatrix3::operator*=(const RMatrix3& rhs)
+{
+	*this = *this * rhs;
+	return *this;
+}
+
+bool RMatrix3::Decompose(RQuat& Rotation, RVec3& Scale)
+{
+	RVec3 v0(m[0][0], m[1][0], m[2][0]);
+	RVec3 v1(m[0][1], m[1][1], m[2][1]);
+	RVec3 v2(m[0][2], m[1][2], m[2][2]);
+
+	float sx = v0.Magnitude();
+	float sy = v1.Magnitude();
+	float sz = v2.Magnitude();
+
+	if (FLT_EQUAL_ZERO(sx) || FLT_EQUAL_ZERO(sy) || FLT_EQUAL_ZERO(sz))
+	{
+		return false;
+	}
+
+	v0 /= sx;
+	v1 /= sy;
+	v2 /= sz;
+
+	float trace = v0.X() + v1.Y() + v2.Z();
+	if (trace > 0)
+	{
+		float s = 0.5f / sqrtf(trace + 1.0f);
+		Rotation.w = 0.25f / s;
+		Rotation.x = (v1.Z() - v2.Y()) * s;
+		Rotation.y = (v2.X() - v0.Z()) * s;
+		Rotation.z = (v0.Y() - v1.X()) * s;
+	}
+	else
+	{
+		if (v0.X() > v1.Y() && v0.X() > v2.Z())
+		{
+			float s = 2.0f * sqrtf(1.0f + v0.X() - v1.Y() - v2.Z());
+			Rotation.w = (v1.Z() - v2.Y()) / s;
+			Rotation.x = 0.25f * s;
+			Rotation.y = (v1.X() + v0.Y()) / s;
+			Rotation.z = (v2.X() + v0.Z()) / s;
+		}
+		else if (v1.Y() > v2.Z())
+		{
+			float s = 2.0f * sqrtf(1.0f + v1.Y() - v0.X() - v2.Z());
+			Rotation.w = (v2.X() - v0.Z()) / s;
+			Rotation.x = (v1.X() + v0.Y()) / s;
+			Rotation.y = 0.25f * s;
+			Rotation.z = (v2.Y() + v1.Z()) / s;
+		}
+		else
+		{
+			float s = 2.0f * sqrtf(1.0f + v2.Z() - v0.X() - v1.Y());
+			Rotation.w = (v0.Y() - v1.X()) / s;
+			Rotation.x = (v2.X() + v0.Z()) / s;
+			Rotation.y = (v2.Y() + v1.Z()) / s;
+			Rotation.z = 0.25f * s;
+		}
+	}
+
+	Scale = RVec3(sx, sy, sz);
+
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Matrix4 implementations
+//////////////////////////////////////////////////////////////////////////
+
 RMatrix4::RMatrix4()
 {
+}
+
+RMatrix4::RMatrix4(float Array[16])
+{
+	memcpy(&_m11, Array, sizeof(float) * 16);
 }
 
 RMatrix4::RMatrix4(float m11, float m12, float m13, float m14,
@@ -89,6 +217,18 @@ RMatrix4 RMatrix4::FastInverse() const
 	view.m[3][2] = -vz;
 
 	return view;
+}
+
+bool RMatrix4::Decompose(RVec3& Position, RQuat& Rotaion, RVec3& Scale) const
+{
+	bool DecomposeMatrix3Result = GetRotationMatrix().Decompose(Rotaion, Scale);
+
+	if (DecomposeMatrix3Result)
+	{
+		Position = RVec3(_m41, _m42, _m43);
+	}
+
+	return DecomposeMatrix3Result;
 }
 
 RVec3 RMatrix4::RotateVector(const RVec3& vec) const

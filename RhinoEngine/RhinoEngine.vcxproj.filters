@@ -143,6 +143,12 @@
     <ClInclude Include="RenderSystem\RRenderMeshComponent.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="Core\RQuat.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\RTransform.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -244,6 +250,12 @@
     </ClCompile>
     <ClCompile Include="RenderSystem\RRenderMeshComponent.cpp">
       <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\RQuat.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\RTransform.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

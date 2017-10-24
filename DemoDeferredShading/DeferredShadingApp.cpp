@@ -155,11 +155,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	if (RInput.IsKeyDown('E'))
 		moveVec += RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 
-	RVec3 camPos = m_Camera.GetPosition();
-	RMatrix4 cameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
-
-	cameraMatrix.SetTranslation(camPos);
-	m_Camera.SetTransform(cameraMatrix);
+	m_Camera.SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0.0f));
 	m_Camera.TranslateLocal(moveVec);
 
 	// Update light constant buffer

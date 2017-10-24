@@ -43,7 +43,9 @@ using namespace std;
 #include "../lua5.3/lua.hpp"
 
 #include "Core/RVector.h"
+#include "Core/RQuat.h"
 #include "Core/RMatrix.h"
+#include "Core/RTransform.h"
 
 #include "Core/RColor.h"
 #include "Core/RAabb.h"

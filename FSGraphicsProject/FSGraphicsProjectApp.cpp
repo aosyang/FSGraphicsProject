@@ -436,8 +436,8 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		if (m_RenderCollisionWireframe)
 			GDebugRenderer.DrawAabb(sceneMeshElements[i].GetAabb());
 	}
-	cameraMatrix.SetTranslation(camPos + worldMoveVec);
-	m_Camera.SetTransform(cameraMatrix);
+	m_Camera.Translate(worldMoveVec);
+	m_Camera.SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0.0f));
 
 	RMatrix4 viewMatrix = m_Camera.GetViewMatrix();
 	RMatrix4 projMatrix = m_Camera.GetProjectionMatrix();

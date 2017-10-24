@@ -37,19 +37,25 @@ public:
 	virtual SceneObjectType GetType() const { return SO_None; }
 	virtual RSceneObject* Clone() const { return nullptr; }
 
-	const RMatrix4& GetNodeTransform() const;
+	RMatrix4 GetNodeTransform() const;
 
 	/// Set matrix as transform of scene object
 	void SetTransform(const RMatrix4& transform);
 
-	/// Set matrix as rotation of scene object (only 3x3 from matrix is used)
-	void SetRotation(const RMatrix4& rot);
+	void SetTransform(const RVec3& InPosition, const RQuat& InRotation, const RVec3& InScale = RVec3(1, 1, 1));
+
+	/// Set rotation by quaternion
+	void SetRotation(const RQuat& quat);
 	
 	/// Set position of scene object
 	void SetPosition(const RVec3& pos);
 
 	/// Get position of scene object
 	RVec3 GetPosition() const;
+
+	void SetScale(const RVec3& scale);
+
+	const RVec3& GetScale() const;
 
 	/// Rotate scene object towards given target
 	void LookAt(const RVec3& target, const RVec3& world_up = RVec3(0, 1, 0));
@@ -87,7 +93,7 @@ protected:
 
 protected:
 	string			m_Name;
-	RMatrix4		m_NodeTransform;
+	RTransform		m_NodeTransform;
 	RScene*			m_Scene;
 	string			m_Script;
 	vector<string>	m_ParsedScript;

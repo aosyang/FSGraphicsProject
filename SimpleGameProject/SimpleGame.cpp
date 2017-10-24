@@ -4,7 +4,7 @@
 // 
 //=============================================================================
 #include "SimpleGame.h"
-
+#include "TestMovingComponent.h"
 
 SimpleGame::SimpleGame()
 {
@@ -79,10 +79,7 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 	if (RInput.IsKeyDown('Q'))
 		MoveVector -= RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 
-	RVec3 CameraPosition = m_Camera.GetPosition();
-	RMatrix4 CameraTransform = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
-	CameraTransform.SetTranslation(CameraPosition);
-	m_Camera.SetTransform(CameraTransform);
+	m_Camera.SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0.0f));
 	m_Camera.TranslateLocal(MoveVector);
 
 	RMatrix4 viewMatrix = m_Camera.GetViewMatrix();
@@ -125,19 +122,24 @@ void SimpleGame::RenderScene()
 
 void SimpleGame::SetupScene()
 {
-	RMesh* SphereMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.rmesh");
+	RMesh* SphereMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/sphere.rmesh");
+	float UnitAngle = 360.0f / 100.0f;
 
 	for (int i = 0; i < 100; i++)
 	{
 		RSceneObject* SceneObject = m_Scene.CreateSceneObject();
 		RVec3 ObjectPosition;
+
 		ObjectPosition.SetX(Math::RandRangedF(-500.0f, 500.0f));
 		ObjectPosition.SetY(Math::RandRangedF(-500.0f, 500.0f));
 		ObjectPosition.SetZ(Math::RandRangedF(-500.0f, 500.0f));
 
 		SceneObject->SetPosition(ObjectPosition);
+		SceneObject->SetRotation(RQuat::Euler(0, DEG_TO_RAD(UnitAngle * i), 0));
 
 		RRenderMeshComponent* RenderMeshComponent = SceneObject->AddNewComponent<RRenderMeshComponent>();
 		RenderMeshComponent->SetMesh(SphereMesh);
+
+		TestMovingComponent* MovingComponent = SceneObject->AddNewComponent<TestMovingComponent>();
 	}
 }

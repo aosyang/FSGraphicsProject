@@ -11,7 +11,6 @@
 RSceneObject::RSceneObject()
 	: m_Scene(nullptr)
 {
-	m_NodeTransform = RMatrix4::IDENTITY;
 	GScriptSystem.RegisterScriptableObject(this);
 }
 
@@ -30,46 +29,72 @@ void RSceneObject::Release()
 	SceneComponents.clear();
 }
 
-const RMatrix4& RSceneObject::GetNodeTransform() const
+RMatrix4 RSceneObject::GetNodeTransform() const
 {
-	return m_NodeTransform;
+	return m_NodeTransform.GetMatrix();
 }
 
 void RSceneObject::SetTransform(const RMatrix4& transform)
 {
-	m_NodeTransform = transform;
+	RVec3 Position;
+	RQuat Rotation;
+	RVec3 Scale;
+
+	if (transform.Decompose(Position, Rotation, Scale))
+	{
+		m_NodeTransform.SetPosition(Position);
+		m_NodeTransform.SetRotation(Rotation);
+		m_NodeTransform.SetScale(Scale);
+	}
 }
 
-void RSceneObject::SetRotation(const RMatrix4& rot)
+void RSceneObject::SetTransform(const RVec3& InPosition, const RQuat& InRotation, const RVec3& InScale /*= RVec3(1, 1, 1)*/)
 {
-	for (int i = 0; i < 3; i++)
-		for (int j = 0; j < 3; j++)
-			m_NodeTransform.m[i][j] = rot.m[i][j];
+	m_NodeTransform.SetPosition(InPosition);
+	m_NodeTransform.SetRotation(InRotation);
+	m_NodeTransform.SetScale(InScale);
+}
+
+void RSceneObject::SetRotation(const RQuat& quat)
+{
+	m_NodeTransform.SetRotation(quat);
 }
 
 void RSceneObject::SetPosition(const RVec3& pos)
 {
-	m_NodeTransform.SetTranslation(pos);
+	m_NodeTransform.SetPosition(pos);
 }
 
 RVec3 RSceneObject::GetPosition() const
 {
-	return m_NodeTransform.GetTranslation();
+	return m_NodeTransform.GetPosition();
+}
+
+void RSceneObject::SetScale(const RVec3& scale)
+{
+	m_NodeTransform.SetScale(scale);
+}
+
+const RVec3& RSceneObject::GetScale() const
+{
+	return m_NodeTransform.GetScale();
 }
 
 void RSceneObject::LookAt(const RVec3& target, const RVec3& world_up /*= RVec3(0, 1, 0)*/)
 {
-	RVec3 pos = m_NodeTransform.GetTranslation();
-	RVec3 forward = target - pos;
-	forward.Normalize();
-	RVec3 right = RVec3::Cross(world_up, forward);
-	right.Normalize();
-	RVec3 up = RVec3::Cross(forward, right);
+	m_NodeTransform.LookAt(target, world_up);
 
-	m_NodeTransform.SetRow(0, RVec4(right, 0));
-	m_NodeTransform.SetRow(1, RVec4(up, 0));
-	m_NodeTransform.SetRow(2, RVec4(forward, 0));
-	m_NodeTransform.SetRow(3, RVec4(pos, 1));
+	//RVec3 pos = m_NodeTransform.GetTranslation();
+	//RVec3 forward = target - pos;
+	//forward.Normalize();
+	//RVec3 right = RVec3::Cross(world_up, forward);
+	//right.Normalize();
+	//RVec3 up = RVec3::Cross(forward, right);
+
+	//m_NodeTransform.SetRow(0, RVec4(right, 0));
+	//m_NodeTransform.SetRow(1, RVec4(up, 0));
+	//m_NodeTransform.SetRow(2, RVec4(forward, 0));
+	//m_NodeTransform.SetRow(3, RVec4(pos, 1));
 }
 
 void RSceneObject::Translate(const RVec3& v)

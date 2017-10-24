@@ -136,7 +136,7 @@ const RAabb& RSMeshObject::GetAabb()
 	// Update aabb for mesh with current transform
 	if (m_Mesh)
 	{
-		m_MeshAABB = m_Mesh->GetLocalSpaceAabb().GetTransformedAabb(m_NodeTransform);
+		m_MeshAABB = m_Mesh->GetLocalSpaceAabb().GetTransformedAabb(m_NodeTransform.GetMatrix());
 		return m_MeshAABB;
 	}
 

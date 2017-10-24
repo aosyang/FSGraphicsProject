@@ -21,7 +21,7 @@ RCamera::~RCamera()
 
 const RMatrix4& RCamera::GetViewMatrix()
 {
-	m_ViewMatrix = m_NodeTransform.FastInverse();
+	m_ViewMatrix = m_NodeTransform.GetMatrix().FastInverse();
 	return m_ViewMatrix;
 }
 
@@ -40,8 +40,8 @@ RFrustum RCamera::GetFrustum() const
 {
 	RFrustum frustum;
 
-	RVec3 nc = m_NodeTransform.GetTranslation() + m_NodeTransform.GetForward() * m_Near;
-	RVec3 fc = m_NodeTransform.GetTranslation() + m_NodeTransform.GetForward() * m_Far;
+	RVec3 nc = m_NodeTransform.GetPosition() + m_NodeTransform.GetForward() * m_Near;
+	RVec3 fc = m_NodeTransform.GetPosition() + m_NodeTransform.GetForward() * m_Far;
 
 	float hNear = 2.0f * tanf(DEG_TO_RAD(m_FOV) / 2.0f) * m_Near;
 	float hFar = 2.0f * tanf(DEG_TO_RAD(m_FOV) / 2.0f) * m_Far;
