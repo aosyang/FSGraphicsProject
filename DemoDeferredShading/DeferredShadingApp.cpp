@@ -444,12 +444,6 @@ void DeferredShadingApp::RenderScene()
 	GRenderer.SetBlendState(Blend_Opaque);
 	GRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
 
-	SHADER_OBJECT_BUFFER cbObject;
-	cbObject.worldMatrix = RMatrix4::IDENTITY;
-
-	RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
-	RConstantBuffers::cbPerObject.BindBuffer();
-
 	GDebugRenderer.Render();
 	GDebugRenderer.Reset();
 

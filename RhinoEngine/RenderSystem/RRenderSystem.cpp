@@ -425,7 +425,7 @@ void RRenderSystem::SetGeometryShader(ID3D11GeometryShader* geometryShader)
 	}
 }
 
-void RRenderSystem::RegisterRenderMeshComponent(const RRenderMeshComponent* Component)
+void RRenderSystem::RegisterRenderMeshComponent(RRenderMeshComponent* Component)
 {
 	auto Iter = find(m_RegisteredRenderMeshComponents.begin(), m_RegisteredRenderMeshComponents.end(), Component);
 
@@ -435,7 +435,7 @@ void RRenderSystem::RegisterRenderMeshComponent(const RRenderMeshComponent* Comp
 	m_RegisteredRenderMeshComponents.push_back(Component);
 }
 
-void RRenderSystem::UnregisterRenderMeshComponent(const RRenderMeshComponent* Component)
+void RRenderSystem::UnregisterRenderMeshComponent(RRenderMeshComponent* Component)
 {
 	auto Iter = find(m_RegisteredRenderMeshComponents.begin(), m_RegisteredRenderMeshComponents.end(), Component);
 
@@ -460,10 +460,13 @@ void RRenderSystem::RenderFrame()
 	// Shadow map sampler state
 	SetSamplerState(2, SamplerState_ShadowDepthComparison);
 
-	for (auto Iter = m_RegisteredRenderMeshComponents.begin(); Iter != m_RegisteredRenderMeshComponents.end(); Iter++)
+	for (auto MeshComponent : m_RegisteredRenderMeshComponents)
 	{
-		(*Iter)->Render();
+		MeshComponent->Render();
 	}
+
+	GDebugRenderer.Render();
+	GDebugRenderer.Reset();
 
 	Present();
 }

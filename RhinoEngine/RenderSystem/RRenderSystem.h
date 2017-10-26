@@ -70,8 +70,8 @@ public:
 	void SetPixelShader(ID3D11PixelShader* pixelShader);
 	void SetGeometryShader(ID3D11GeometryShader* geometryShader);
 
-	void RegisterRenderMeshComponent(const RRenderMeshComponent* Component);
-	void UnregisterRenderMeshComponent(const RRenderMeshComponent* Component);
+	void RegisterRenderMeshComponent(RRenderMeshComponent* Component);
+	void UnregisterRenderMeshComponent(RRenderMeshComponent* Component);
 
 	/// Render current frame
 	void RenderFrame();
@@ -106,7 +106,7 @@ protected:
 
 	bool					m_bIsUsingDeferredShading;
 
-	vector<const RRenderMeshComponent*>	m_RegisteredRenderMeshComponents;
+	vector<RRenderMeshComponent*>	m_RegisteredRenderMeshComponents;
 };
 
 #define GRenderer RRenderSystem::Instance()

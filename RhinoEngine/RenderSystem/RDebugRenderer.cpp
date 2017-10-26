@@ -177,6 +177,12 @@ void RDebugRenderer::Render()
 
 	//RRenderer.Clear(false);
 
+	SHADER_OBJECT_BUFFER cbObject;
+	cbObject.worldMatrix = RMatrix4::IDENTITY;
+
+	RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
+	RConstantBuffers::cbPerObject.BindBuffer();
+
 	m_ColorShader->Bind();
 	GRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);
 	m_PrimitiveMeshBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);

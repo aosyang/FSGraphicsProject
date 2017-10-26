@@ -417,9 +417,6 @@ void FightingGameApp::RenderScene()
 		}
 	}
 
-	cbObject.worldMatrix = RMatrix4::IDENTITY;
-	RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
-	RConstantBuffers::cbPerObject.BindBuffer();
 	GDebugRenderer.Render();
 	GDebugRenderer.Reset();
 

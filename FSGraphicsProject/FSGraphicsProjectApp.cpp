@@ -1219,7 +1219,6 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 #endif
 		// Draw debug lines
 		GRenderer.SetBlendState(Blend_Opaque);
-		SetPerObjectConstBuffer(RMatrix4::IDENTITY);
 		GDebugRenderer.Render();
 	}
 
