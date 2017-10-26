@@ -28,12 +28,14 @@ namespace Math
 	}
 
 	template<typename T>
-	const T& Max(const T& a, const T& b) { return (a > b) ? a : b; }
+	const T& Max(const T& a, const T& b)						{ return (a > b) ? a : b; }
 
 	template<typename T>
-	const T& Min(const T& a, const T& b) { return (a < b) ? a : b; }
+	const T& Min(const T& a, const T& b)						{ return (a < b) ? a : b; }
 
-	inline float Lerp(float a, float b, float t) { return a + (b - a) * t; }
+	FORCEINLINE float Lerp(float a, float b, float t)			{ return a + (b - a) * t; }
+
+	FORCEINLINE float Clamp(float a, float min, float max)		{ return (a < min) ? min : (a > max) ? max : a; }
 }
 
 #endif

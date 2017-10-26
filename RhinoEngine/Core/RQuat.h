@@ -31,9 +31,9 @@ public:
 	{
 		return RQuat(
 			w * rhs.w - x * rhs.x - y * rhs.y - z * rhs.z,
-			w * rhs.w + x * rhs.x + y * rhs.y - z * rhs.z,
-			w * rhs.w - x * rhs.x + y * rhs.y + z * rhs.z,
-			w * rhs.w + x * rhs.x - y * rhs.y + z * rhs.z
+			w * rhs.x + x * rhs.w + y * rhs.z - z * rhs.y,
+			w * rhs.y - x * rhs.z + y * rhs.w + z * rhs.x,
+			w * rhs.z + x * rhs.y - y * rhs.x + z * rhs.w
 		);
 	}
 
@@ -55,6 +55,22 @@ public:
 	RMatrix3 GetRotationMatrix() const;
 
 	static RQuat Euler(float axis_x, float axis_y, float axis_z);
+	
+	static float Dot(const RQuat& lhs, const RQuat& rhs);
+	static RQuat Slerp(const RQuat& a, const RQuat& b, float t);
+	static RQuat SlerpUnnormalized(const RQuat& a, const RQuat& b, float t);
 
 	static RQuat IDENTITY;
 };
+
+FORCEINLINE float RQuat::Dot(const RQuat& lhs, const RQuat& rhs)
+{
+	return lhs.w * rhs.w + lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
+}
+
+FORCEINLINE RQuat RQuat::Slerp(const RQuat& a, const RQuat& b, float t)
+{
+	RQuat Result = RQuat::SlerpUnnormalized(a, b, t);
+	Result.Normalize();
+	return Result;
+}

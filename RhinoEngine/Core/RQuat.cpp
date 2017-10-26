@@ -50,3 +50,28 @@ RQuat RQuat::Euler(float axis_x, float axis_y, float axis_z)
 		cr * cp * sy - sr * sp * cy
 	);
 }
+
+RQuat RQuat::SlerpUnnormalized(const RQuat& a, const RQuat& b, float t)
+{
+	float dot = RQuat::Dot(a, b);
+
+	if (fabsf(dot) >= 1.0f)
+	{
+		return a;
+	}
+
+	float Sgn = 1.0f;
+	if (dot < 0.0f)
+	{
+		Sgn = -1.0f;
+		dot = -dot;
+	}
+
+	dot = Math::Clamp(dot, -1, 1);
+	float Theta = acosf(dot);
+
+	float InvSinTheta = 1.0f / sinf(Theta);
+	RQuat Result = a * (sinf((1.0f - t) * Theta) * InvSinTheta) + b * (sinf(t * Theta) * InvSinTheta * Sgn);
+
+	return Result;
+}

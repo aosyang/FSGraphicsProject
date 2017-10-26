@@ -48,13 +48,6 @@ void RSceneObject::SetTransform(const RMatrix4& transform)
 	}
 }
 
-void RSceneObject::SetTransform(const RVec3& InPosition, const RQuat& InRotation, const RVec3& InScale /*= RVec3(1, 1, 1)*/)
-{
-	m_NodeTransform.SetPosition(InPosition);
-	m_NodeTransform.SetRotation(InRotation);
-	m_NodeTransform.SetScale(InScale);
-}
-
 void RSceneObject::SetRotation(const RQuat& quat)
 {
 	m_NodeTransform.SetRotation(quat);
@@ -83,18 +76,6 @@ const RVec3& RSceneObject::GetScale() const
 void RSceneObject::LookAt(const RVec3& target, const RVec3& world_up /*= RVec3(0, 1, 0)*/)
 {
 	m_NodeTransform.LookAt(target, world_up);
-
-	//RVec3 pos = m_NodeTransform.GetTranslation();
-	//RVec3 forward = target - pos;
-	//forward.Normalize();
-	//RVec3 right = RVec3::Cross(world_up, forward);
-	//right.Normalize();
-	//RVec3 up = RVec3::Cross(forward, right);
-
-	//m_NodeTransform.SetRow(0, RVec4(right, 0));
-	//m_NodeTransform.SetRow(1, RVec4(up, 0));
-	//m_NodeTransform.SetRow(2, RVec4(forward, 0));
-	//m_NodeTransform.SetRow(3, RVec4(pos, 1));
 }
 
 void RSceneObject::Translate(const RVec3& v)

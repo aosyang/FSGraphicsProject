@@ -42,7 +42,11 @@ public:
 	/// Set matrix as transform of scene object
 	void SetTransform(const RMatrix4& transform);
 
+	/// Set transform from position, rotation and scale
 	void SetTransform(const RVec3& InPosition, const RQuat& InRotation, const RVec3& InScale = RVec3(1, 1, 1));
+
+	/// Set transform from another transform
+	void SetTransform(const RTransform& InTransform);
 
 	/// Set rotation by quaternion
 	void SetRotation(const RQuat& quat);
@@ -112,5 +116,16 @@ FORCEINLINE T* RSceneObject::AddNewComponent()
 	return NewComponent;
 }
 
+FORCEINLINE void RSceneObject::SetTransform(const RVec3& InPosition, const RQuat& InRotation, const RVec3& InScale /*= RVec3(1, 1, 1)*/)
+{
+	m_NodeTransform.SetPosition(InPosition);
+	m_NodeTransform.SetRotation(InRotation);
+	m_NodeTransform.SetScale(InScale);
+}
+
+FORCEINLINE void RSceneObject::SetTransform(const RTransform& InTransform)
+{
+	m_NodeTransform = InTransform;
+}
 
 #endif
