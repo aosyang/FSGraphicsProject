@@ -21,7 +21,7 @@
     <ClCompile Include="SimpleGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TestMovingComponent.cpp">
+    <ClCompile Include="RgRubik.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,7 +29,7 @@
     <ClInclude Include="SimpleGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TestMovingComponent.h">
+    <ClInclude Include="RgRubik.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

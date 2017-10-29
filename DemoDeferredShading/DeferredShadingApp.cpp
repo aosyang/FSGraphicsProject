@@ -8,6 +8,7 @@
 
 
 DeferredShadingApp::DeferredShadingApp()
+	: m_Camera(nullptr)
 {
 }
 
@@ -45,8 +46,9 @@ bool DeferredShadingApp::Initialize()
 	m_Scene.Initialize();
 	m_Scene.LoadFromFile("../Assets/ScriptTestMap.rmap");
 
-	m_Camera.SetPosition(RVec3(-375, 1385, 1200));
-	m_Camera.SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
+	m_Camera = m_Scene.CreateSceneObjectOfType<RCamera>();
+	m_Camera->SetPosition(RVec3(-375, 1385, 1200));
+	m_Camera->SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
 	m_CamPitch = 0.65f;
 	m_CamYaw = -3.135f;
 
@@ -155,8 +157,8 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	if (RInput.IsKeyDown('E'))
 		moveVec += RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 
-	m_Camera.SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0.0f));
-	m_Camera.TranslateLocal(moveVec);
+	m_Camera->SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0.0f));
+	m_Camera->TranslateLocal(moveVec);
 
 	// Update light constant buffer
 	SHADER_LIGHT_BUFFER cbLight;
@@ -166,7 +168,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	cbLight.HighHemisphereAmbientColor = RVec4(0.9f, 1.0f, 1.0f, min(1.0f, max(0.0f, m_AmbientIntensity)));
 	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, min(1.0f, max(0.0f, m_AmbientIntensity)));
 
-	cbLight.CameraPos = m_Camera.GetPosition();
+	cbLight.CameraPos = m_Camera->GetPosition();
 
 	RConstantBuffers::cbLight.UpdateBufferData(&cbLight);
 
@@ -185,7 +187,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 
 	cbScreen.ScreenSize = RVec4((float)GRenderer.GetClientWidth(), (float)GRenderer.GetClientHeight(),
 								1.0f / (float)GRenderer.GetClientWidth(), 1.0f / (float)GRenderer.GetClientHeight());
-	cbScreen.ClipPlaneNearFar = RVec2(m_Camera.GetNearPlane(), m_Camera.GetFarPlane());
+	cbScreen.ClipPlaneNearFar = RVec2(m_Camera->GetNearPlane(), m_Camera->GetFarPlane());
 
 	RMatrix4 texMat = RMatrix4(
 		0.5f,	0.0f,	0.0f,	0.0f,
@@ -193,7 +195,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 		0.0f,	0.0f,	1.0f,	0.0f,
 		0.5f,	0.5f,	0.0f,	1.0f
 		);
-	cbScreen.ViewToTextureSpace = m_Camera.GetProjectionMatrix() * texMat;
+	cbScreen.ViewToTextureSpace = m_Camera->GetProjectionMatrix() * texMat;
 	cbScreen.UseGammaCorrection = GRenderer.UsingGammaCorrection();
 	cbScreen.TotalTime = GEngine.GetTimer().TotalTime();
 
@@ -212,19 +214,19 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 
 void DeferredShadingApp::RenderScene()
 {
-	RMatrix4 viewMatrix = m_Camera.GetViewMatrix();
-	RMatrix4 projMatrix = m_Camera.GetProjectionMatrix();
+	RMatrix4 viewMatrix = m_Camera->GetViewMatrix();
+	RMatrix4 projMatrix = m_Camera->GetProjectionMatrix();
 
 	// Update scene constant buffer
 	SHADER_SCENE_BUFFER cbScene;
 	ZeroMemory(&cbScene, sizeof(cbScene));
 
 	cbScene.viewMatrix = viewMatrix;
-	cbScene.cameraMatrix = m_Camera.GetNodeTransform();
+	cbScene.cameraMatrix = m_Camera->GetTransformMatrix();
 	cbScene.projMatrix = projMatrix;
 	cbScene.viewProjMatrix = viewMatrix * projMatrix;
 	cbScene.invProjMatrix = projMatrix.Inverse();
-	cbScene.cameraPos = m_Camera.GetPosition();
+	cbScene.cameraPos = m_Camera->GetPosition();
 
 	RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
 	RConstantBuffers::cbScene.BindBuffer();
@@ -257,7 +259,7 @@ void DeferredShadingApp::RenderScene()
 		GRenderer.Clear(false, RColor(0, 0, 0));
 	}
 
-	RFrustum frustum = m_Camera.GetFrustum();
+	RFrustum frustum = m_Camera->GetFrustum();
 
 	GRenderer.SetBlendState(Blend_Opaque);
 	GRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
@@ -289,7 +291,7 @@ void DeferredShadingApp::RenderScene()
 		// Render lighting pass
 		GRenderer.SetBlendState(Blend_Additive);
 
-		const RMatrix4& viewProjMatrix = m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix();
+		const RMatrix4& viewProjMatrix = m_Camera->GetViewMatrix() * m_Camera->GetProjectionMatrix();
 
 		for (int i = 0; i < min(m_LightCount, MAX_LIGHT_COUNT); i++)
 		{
@@ -306,7 +308,7 @@ void DeferredShadingApp::RenderScene()
 			aabb.pMax = pos + RVec3(r, r, r);
 
 			RVec2 pMin = RVec2(FLT_MAX, FLT_MAX), pMax = RVec2(-FLT_MAX, -FLT_MAX);
-			if (aabb.TestPointInsideAabb(m_Camera.GetPosition()))
+			if (aabb.TestPointInsideAabb(m_Camera->GetPosition()))
 			{
 				pMin.x = 0.0f;
 				pMin.y = (float)GRenderer.GetClientHeight();
@@ -463,7 +465,7 @@ void DeferredShadingApp::OnResize(int width, int height)
 		m_ScenePassBuffer.Release();
 		m_DepthBuffer.Release();
 
-		m_Camera.SetAspectRatio((float)width / (float)height);
+		m_Camera->SetAspectRatio((float)width / (float)height);
 
 		CreateGBuffers();
 	}
@@ -612,7 +614,16 @@ CubeDepthBuffer DeferredShadingApp::CreateCubeDepthBuffer()
 
 void DeferredShadingApp::RenderPointLightCubemapDepth(const RVec3& position, float radius)
 {
-	static RCamera cubeCameras[6];
+	static RCamera* cubeCameras[6]
+	{
+		m_Scene.CreateSceneObjectOfType<RCamera>(),
+		m_Scene.CreateSceneObjectOfType<RCamera>(),
+		m_Scene.CreateSceneObjectOfType<RCamera>(),
+		m_Scene.CreateSceneObjectOfType<RCamera>(),
+		m_Scene.CreateSceneObjectOfType<RCamera>(),
+		m_Scene.CreateSceneObjectOfType<RCamera>(),
+	};
+
 	RVec3 targets[6] =
 	{
 		position + RVec3(1, 0, 0),
@@ -638,9 +649,9 @@ void DeferredShadingApp::RenderPointLightCubemapDepth(const RVec3& position, flo
 
 	for (int i = 0; i < 6; i++)
 	{
-		cubeCameras[i].SetPosition(position);
-		cubeCameras[i].SetupView(90.0f, 1.0f, 0.1f, radius);
-		cubeCameras[i].LookAt(targets[i], ups[i]);
+		cubeCameras[i]->SetPosition(position);
+		cubeCameras[i]->SetupView(90.0f, 1.0f, 0.1f, radius);
+		cubeCameras[i]->LookAt(targets[i], ups[i]);
 
 		GRenderer.SetRenderTargets(1, &m_CubeDepthBuffer.View[i], m_CubeDepthBuffer.DepthView[i]);
 		GRenderer.Clear();
@@ -649,19 +660,19 @@ void DeferredShadingApp::RenderPointLightCubemapDepth(const RVec3& position, flo
 		SHADER_SCENE_BUFFER cbScene;
 		ZeroMemory(&cbScene, sizeof(cbScene));
 
-		cbScene.viewMatrix = cubeCameras[i].GetViewMatrix();
-		cbScene.cameraMatrix = cubeCameras[i].GetNodeTransform();
-		cbScene.projMatrix = cubeCameras[i].GetProjectionMatrix();
+		cbScene.viewMatrix = cubeCameras[i]->GetViewMatrix();
+		cbScene.cameraMatrix = cubeCameras[i]->GetTransformMatrix();
+		cbScene.projMatrix = cubeCameras[i]->GetProjectionMatrix();
 		cbScene.viewProjMatrix = cbScene.viewMatrix * cbScene.projMatrix;
 		cbScene.invProjMatrix = cbScene.projMatrix.Inverse();
-		cbScene.cameraPos = cubeCameras[i].GetPosition();
+		cbScene.cameraPos = cubeCameras[i]->GetPosition();
 		cbScene.shadowViewProjMatrix[0] = cbScene.viewProjMatrix;
 		cbScene.cascadedShadowIndex = 0;
 
 		RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
 		RConstantBuffers::cbScene.BindBuffer();
 
-		RFrustum frustum = cubeCameras[i].GetFrustum();
+		RFrustum frustum = cubeCameras[i]->GetFrustum();
 		m_Scene.RenderDepthPass(&frustum);
 	}
 }

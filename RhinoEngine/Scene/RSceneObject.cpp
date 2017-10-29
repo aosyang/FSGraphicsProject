@@ -8,8 +8,8 @@
 
 #include "RSceneObject.h"
 
-RSceneObject::RSceneObject()
-	: m_Scene(nullptr)
+RSceneObject::RSceneObject(RScene* InScene)
+	: m_Scene(InScene)
 {
 	GScriptSystem.RegisterScriptableObject(this);
 }
@@ -29,7 +29,12 @@ void RSceneObject::Release()
 	SceneComponents.clear();
 }
 
-RMatrix4 RSceneObject::GetNodeTransform() const
+RTransform* RSceneObject::GetTransform()
+{
+	return &m_NodeTransform;
+}
+
+const RMatrix4& RSceneObject::GetTransformMatrix()
 {
 	return m_NodeTransform.GetMatrix();
 }

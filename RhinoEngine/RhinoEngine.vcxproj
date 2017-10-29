@@ -66,6 +66,7 @@
     <ClInclude Include="Core\RVector.h" />
     <ClInclude Include="RenderSystem\d3dUtil.h" />
     <ClInclude Include="RenderSystem\DDSTextureLoader.h" />
+    <ClInclude Include="RenderSystem\RMaterial.h" />
     <ClInclude Include="RenderSystem\RRenderMeshComponent.h" />
     <ClInclude Include="RenderSystem\RResourceBase.h" />
     <ClInclude Include="RenderSystem\RAnimation.h" />
@@ -107,6 +108,7 @@
     <ClCompile Include="RenderSystem\DDSTextureLoader.cpp" />
     <ClCompile Include="RenderSystem\RAnimation.cpp" />
     <ClCompile Include="RenderSystem\RDebugRenderer.cpp" />
+    <ClCompile Include="RenderSystem\RMaterial.cpp" />
     <ClCompile Include="RenderSystem\RMesh.cpp" />
     <ClCompile Include="RenderSystem\RMeshComponent.cpp" />
     <ClCompile Include="RenderSystem\RMeshElement.cpp" />

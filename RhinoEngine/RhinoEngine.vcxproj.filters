@@ -149,6 +149,9 @@
     <ClInclude Include="Core\RTransform.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="RenderSystem\RMaterial.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -256,6 +259,9 @@
     </ClCompile>
     <ClCompile Include="Core\RTransform.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem\RMaterial.cpp">
+      <Filter>RenderSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

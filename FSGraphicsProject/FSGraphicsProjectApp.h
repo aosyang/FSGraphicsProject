@@ -41,9 +41,10 @@ private:
 
 	bool						m_EnableLights[3];
 
-	RCamera						m_Camera;
+	RCamera*					m_Camera;
 	float						m_CamPitch, m_CamYaw;
 
+	RScene						m_Scene;
 	RSkybox						m_Skybox;
 
 	ID3D11InputLayout*			m_ColorPrimitiveIL;
@@ -59,28 +60,28 @@ private:
 	RShaderConstantBuffer<SHADER_INSTANCE_BUFFER,	CBST_VS, 3>						m_cbInstance[3];
 
 	RMesh*						m_SceneMeshCity;
-	RSMeshObject				m_FbxMeshObj;
+	RSMeshObject*				m_FbxMeshObj;
 
 	RMesh*						m_MeshTachikoma;
-	RSMeshObject				m_TachikomaObj;
+	RSMeshObject*				m_TachikomaObj;
 	RShader*					m_RefractionShader;
 
-	RSMeshObject				m_CharacterObj;
+	RSMeshObject*				m_CharacterObj;
 	RMesh*						m_CharacterAnimation;
 	vector<RMesh*>				m_CharacterAnimations;
 	int							m_CurrentAnim;
 
 	RMesh*						m_AOSceneMesh;
-	RSMeshObject				m_AOSceneObj;
+	RSMeshObject*				m_AOSceneObj;
 
 	RMesh*						m_SceneMeshIsland;
 	RTexture*					m_IslandTexture;
-	RSMeshObject				m_IslandMeshObj;
+	RSMeshObject*				m_IslandMeshObj;
 
 	RShadowMap					m_ShadowMap[3];
 	RShader*					m_DepthShader;
 
-	RSMeshObject				m_TransparentMesh;
+	RSMeshObject*				m_TransparentMesh;
 
 	RMeshRenderBuffer			m_ParticleBuffer;
 	RShader*					m_ParticleShader;

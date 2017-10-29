@@ -21,6 +21,10 @@ public:
 
 	RSceneObject* CreateSceneObject(const char* name = "");
 
+	/// Create a object of class derived from scene object
+	template<typename T>
+	T* CreateSceneObjectOfType(const char* name = "");
+
 	/// Clone an object in the scene
 	RSceneObject* CloneObject(RSceneObject* obj);
 
@@ -28,8 +32,6 @@ public:
 	RSceneObject* FindObject(const char* name) const;
 
 	/// Add an object to the scene
-	bool AddObjectToScene(RSceneObject* obj);
-	void RemoveObjectFromScene(RSceneObject* obj);
 	void DestroyObject(RSceneObject* obj);
 	void DestroyAllObjects();
 
@@ -50,5 +52,16 @@ private:
 
 	vector<RSceneObject*>		m_SceneObjects;
 };
+
+template<typename T>
+T* RScene::CreateSceneObjectOfType(const char* name /*= ""*/)
+{
+	T* SceneObject = new T(this);
+	SceneObject->SetName(name);
+
+	m_SceneObjects.push_back(SceneObject);
+
+	return SceneObject;
+}
 
 #endif

@@ -46,9 +46,8 @@ struct BehaviorInfo
 
 class PlayerController : public RSMeshObject
 {
+	DECLARE_SCENE_OBJECT(RSMeshObject);
 public:
-	PlayerController();
-
 	void Cache();
 
 	void PreUpdate(const RTimer& timer);
@@ -71,6 +70,8 @@ public:
 
 	RAnimationBlender& GetAnimationBlender() { return m_AnimBlender; }
 private:
+	PlayerController(RScene* InScene);
+
 	RAnimation* LoadAnimation(const char* resPath, int flags=0);
 
 	/// Can the player move with user input

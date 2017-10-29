@@ -25,7 +25,7 @@ public:
 
 private:
 	RScene				m_Scene;
-	RCamera				m_Camera;
+	RCamera*			m_Camera;
 	RShadowMap			m_ShadowMap;
 
 	PlayerController*	m_Player;

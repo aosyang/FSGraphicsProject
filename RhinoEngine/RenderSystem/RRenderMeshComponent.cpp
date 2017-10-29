@@ -44,7 +44,7 @@ void RRenderMeshComponent::Render() const
 	{
 		// Set up world matrix in constant buffer
 		SHADER_OBJECT_BUFFER cbObject;
-		cbObject.worldMatrix = GetOwner()->GetNodeTransform();
+		cbObject.worldMatrix = GetOwner()->GetTransformMatrix();
 
 		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 		RConstantBuffers::cbPerObject.BindBuffer();
@@ -112,6 +112,23 @@ void RRenderMeshComponent::SetMesh(const RMesh* Mesh)
 	}
 }
 
+void RRenderMeshComponent::SetMaterial(UINT Index, const RMaterial& Material)
+{
+	if (m_PostponeLoadMaterials)
+	{
+		m_PendingAssignedMaterials.push_back({ Index, Material });
+	}
+	else
+	{
+		if (m_Materials.size() <= Index)
+		{
+			m_Materials.resize(Index + 1);
+		}
+
+		m_Materials[Index] = Material;
+	}
+}
+
 void RRenderMeshComponent::LoadMaterialsFromMeshResource()
 {
 	assert(m_Mesh);
@@ -140,5 +157,20 @@ void RRenderMeshComponent::LoadMaterialsFromMeshResource()
 		{
 			m_Materials.push_back(DefaultMaterial);
 		}
+	}
+
+	if (m_PendingAssignedMaterials.size() != 0)
+	{
+		for (PendingAssignedMaterial& Op : m_PendingAssignedMaterials)
+		{
+			if (m_Materials.size() <= Op.Index)
+			{
+				m_Materials.resize(Op.Index + 1);
+			}
+
+			m_Materials[Op.Index] = Op.Material;
+		}
+
+		m_PendingAssignedMaterials.clear();
 	}
 }

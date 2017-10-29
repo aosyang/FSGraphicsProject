@@ -55,6 +55,7 @@ public:
 	RMatrix3 GetRotationMatrix() const;
 
 	static RQuat Euler(float axis_x, float axis_y, float axis_z);
+	static RQuat Euler(const RVec3& axis_angles);
 	
 	static float Dot(const RQuat& lhs, const RQuat& rhs);
 	static RQuat Slerp(const RQuat& a, const RQuat& b, float t);
@@ -62,6 +63,11 @@ public:
 
 	static RQuat IDENTITY;
 };
+
+FORCEINLINE RQuat RQuat::Euler(const RVec3& axis_angles)
+{
+	return Euler(axis_angles.X(), axis_angles.Y(), axis_angles.Z());
+}
 
 FORCEINLINE float RQuat::Dot(const RQuat& lhs, const RQuat& rhs)
 {

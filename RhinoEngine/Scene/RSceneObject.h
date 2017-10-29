@@ -16,28 +16,29 @@ enum SceneObjectType
 	SO_Camera,
 };
 
+#define DECLARE_SCENE_OBJECT(base)	typedef base Base; friend class RScene;
+
 /// Base object that can be placed in a scene
 class RSceneObject
 {
+	friend class RScene;
 public:
-	RSceneObject();
-	virtual ~RSceneObject();
-
 	virtual void Release();
 
 	/// Set name of scene object
-	void SetName(const string& name)	{ m_Name = name; }
+	void SetName(const string& name)		{ m_Name = name; }
 
 	/// Get name of scene object
-	const string& GetName() const		{ return m_Name; }
+	const string& GetName() const			{ return m_Name; }
 
-	void SetScene(RScene* scene)	{ m_Scene = scene; }
-	RScene* GetScene() const		{ return m_Scene; }
+	/// Get the scene which this object belongs to
+	RScene* GetScene() const				{ return m_Scene; }
 
 	virtual SceneObjectType GetType() const { return SO_None; }
-	virtual RSceneObject* Clone() const { return nullptr; }
+	virtual RSceneObject* Clone() const		{ return nullptr; }
 
-	RMatrix4 GetNodeTransform() const;
+	RTransform* GetTransform();
+	const RMatrix4& GetTransformMatrix();
 
 	/// Set matrix as transform of scene object
 	void SetTransform(const RMatrix4& transform);
@@ -92,6 +93,9 @@ public:
 	const vector<string>& GetParsedScript();
 
 protected:
+	RSceneObject(RScene* InScene);
+	virtual ~RSceneObject();
+
 	/// Update all components on this scene object
 	void UpdateComponents();
 

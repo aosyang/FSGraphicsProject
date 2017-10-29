@@ -9,8 +9,12 @@
 
 #include "tinyxml2/tinyxml2.h"
 
-RSMeshObject::RSMeshObject()
-	: RSceneObject(), m_Mesh(nullptr), m_OverridingShader(nullptr), m_OverridingShaderFeatures(-1), m_bNeedUpdateMaterial(true)
+RSMeshObject::RSMeshObject(RScene* InScene)
+	: RSceneObject(InScene),
+	  m_Mesh(nullptr),
+	  m_OverridingShader(nullptr),
+	  m_OverridingShaderFeatures(-1),
+	  m_bNeedUpdateMaterial(true)
 {
 
 }
@@ -23,9 +27,6 @@ RSMeshObject::~RSMeshObject()
 RSceneObject* RSMeshObject::Clone() const
 {
 	RSMeshObject* pClone = new RSMeshObject(*this);
-	if (pClone->m_Scene)
-		pClone->m_Scene->AddObjectToScene(pClone);
-
 	return pClone;
 }
 

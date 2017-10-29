@@ -4,10 +4,11 @@
 // 
 //=============================================================================
 #include "SimpleGame.h"
-#include "TestMovingComponent.h"
+#include "RgRubik.h"
 
 SimpleGame::SimpleGame()
 {
+	m_Camera = m_Scene.CreateSceneObjectOfType<RCamera>();
 }
 
 
@@ -29,7 +30,8 @@ bool SimpleGame::Initialize()
 	m_Skybox.CreateSkybox(SkyboxTextureName);
 
 	// TODO: if projection is forgotten to set properly, need to make sure user gets some feedbacks
-	m_Camera.SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
+	m_Camera->SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
+	m_Camera->SetPosition(RVec3(0, 0, -500.0f));
 
 	SetupScene();
 
@@ -62,7 +64,7 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 		}
 	}
 
-	float camSpeed = 1000.0f;
+	float camSpeed = 100.0f;
 	if (RInput.IsKeyDown(VK_LSHIFT))
 		camSpeed *= 10.0f;
 	RVec3 MoveVector(0.0f, 0.0f, 0.0f);
@@ -79,11 +81,60 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 	if (RInput.IsKeyDown('Q'))
 		MoveVector -= RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 
-	m_Camera.SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0.0f));
-	m_Camera.TranslateLocal(MoveVector);
+	m_Camera->SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0.0f));
+	m_Camera->TranslateLocal(MoveVector);
 
-	RMatrix4 viewMatrix = m_Camera.GetViewMatrix();
-	RMatrix4 projMatrix = m_Camera.GetProjectionMatrix();
+	if (RInput.IsKeyDown(VK_UP))
+	{
+		if (RInput.GetBufferedKeyState(VK_LEFT) == BKS_Pressed)
+		{
+			m_RubikCube->Rotate(ERubikSide::Top, ERubikRotation::CW);
+		}
+		else if (RInput.GetBufferedKeyState(VK_RIGHT) == BKS_Pressed)
+		{
+			m_RubikCube->Rotate(ERubikSide::Top, ERubikRotation::CCW);
+		}
+	}
+
+	if (RInput.IsKeyDown(VK_DOWN))
+	{
+		if (RInput.GetBufferedKeyState(VK_LEFT) == BKS_Pressed)
+		{
+			m_RubikCube->Rotate(ERubikSide::Bottom, ERubikRotation::CCW);
+		}
+		else if (RInput.GetBufferedKeyState(VK_RIGHT) == BKS_Pressed)
+		{
+			m_RubikCube->Rotate(ERubikSide::Bottom, ERubikRotation::CW);
+		}
+	}
+
+	if (RInput.IsKeyDown(VK_LEFT))
+	{
+		if (RInput.GetBufferedKeyState(VK_UP) == BKS_Pressed)
+		{
+			m_RubikCube->Rotate(ERubikSide::West, ERubikRotation::CCW);
+		}
+		else if (RInput.GetBufferedKeyState(VK_DOWN) == BKS_Pressed)
+		{
+			m_RubikCube->Rotate(ERubikSide::West, ERubikRotation::CW);
+		}
+	}
+
+	if (RInput.IsKeyDown(VK_RIGHT))
+	{
+		if (RInput.GetBufferedKeyState(VK_UP) == BKS_Pressed)
+		{
+			m_RubikCube->Rotate(ERubikSide::East, ERubikRotation::CW);
+		}
+		else if (RInput.GetBufferedKeyState(VK_DOWN) == BKS_Pressed)
+		{
+			m_RubikCube->Rotate(ERubikSide::East, ERubikRotation::CCW);
+		}
+	}
+
+
+	RMatrix4 viewMatrix = m_Camera->GetViewMatrix();
+	RMatrix4 projMatrix = m_Camera->GetProjectionMatrix();
 
 	// Update scene constant buffer
 	SHADER_SCENE_BUFFER cbScene;
@@ -92,7 +143,7 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 	cbScene.viewMatrix = viewMatrix;
 	cbScene.projMatrix = projMatrix;
 	cbScene.viewProjMatrix = viewMatrix * projMatrix;
-	cbScene.cameraPos = m_Camera.GetPosition();
+	cbScene.cameraPos = m_Camera->GetPosition();
 
 	RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
 	RConstantBuffers::cbScene.BindBuffer();
@@ -107,7 +158,7 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 	cbLight.HighHemisphereAmbientColor = RVec4(0.9f, 1.0f, 1.0f, AmbientIntensity);
 	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, AmbientIntensity);
 
-	cbLight.CameraPos = m_Camera.GetPosition();
+	cbLight.CameraPos = m_Camera->GetPosition();
 
 	RConstantBuffers::cbLight.UpdateBufferData(&cbLight);
 	RConstantBuffers::cbLight.BindBuffer();
@@ -120,26 +171,20 @@ void SimpleGame::RenderScene()
 	// Implemented in engine now
 }
 
+void SimpleGame::OnResize(int width, int height)
+{
+	if (m_Camera)
+	{
+		m_Camera->SetAspectRatio((float)width / (float)height);
+	}
+}
+
+TCHAR* SimpleGame::WindowTitle()
+{
+	return L"Rubik\'s Cube";
+}
+
 void SimpleGame::SetupScene()
 {
-	RMesh* SphereMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/sphere.rmesh");
-	float UnitAngle = 360.0f / 100.0f;
-
-	for (int i = 0; i < 100; i++)
-	{
-		RSceneObject* SceneObject = m_Scene.CreateSceneObject();
-		RVec3 ObjectPosition;
-
-		ObjectPosition.SetX(Math::RandRangedF(-500.0f, 500.0f));
-		ObjectPosition.SetY(Math::RandRangedF(-500.0f, 500.0f));
-		ObjectPosition.SetZ(Math::RandRangedF(-500.0f, 500.0f));
-
-		SceneObject->SetPosition(ObjectPosition);
-		SceneObject->SetRotation(RQuat::Euler(0, DEG_TO_RAD(UnitAngle * i), 0));
-
-		RRenderMeshComponent* RenderMeshComponent = SceneObject->AddNewComponent<RRenderMeshComponent>();
-		RenderMeshComponent->SetMesh(SphereMesh);
-
-		TestMovingComponent* MovingComponent = SceneObject->AddNewComponent<TestMovingComponent>();
-	}
+	m_RubikCube = m_Scene.CreateSceneObjectOfType<RgRubik>("Rubik Cube");
 }

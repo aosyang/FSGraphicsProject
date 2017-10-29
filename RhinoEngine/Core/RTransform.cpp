@@ -10,9 +10,7 @@
 RTransform RTransform::IDENTITY = RTransform();
 
 RTransform::RTransform()
-	: Position(0, 0, 0),
-	  Rotation(RQuat::IDENTITY),
-	  Scale(1, 1, 1)
+	: RTransform(RVec3(0, 0, 0), RQuat::IDENTITY, RVec3(1, 1, 1))
 {
 
 }
@@ -20,15 +18,15 @@ RTransform::RTransform()
 RTransform::RTransform(const RVec3& InPosition, const RQuat& InRotation, const RVec3& InScale /*= RVec3(1, 1, 1)*/)
 	: Position(InPosition),
 	  Rotation(InRotation),
-	  Scale(InScale)
+	  Scale(InScale),
+	  Parent(nullptr),
+	  bIsCachedMatrixDirty(true)
 {
 
 }
 
 RTransform::RTransform(const RTransform& rhs)
-	: Position(rhs.Position),
-	  Rotation(rhs.Rotation),
-	  Scale(rhs.Scale)
+	: RTransform(rhs.Position, rhs.Rotation, rhs.Scale)
 {
 
 }
@@ -40,19 +38,38 @@ RTransform& RTransform::operator=(const RTransform& rhs)
 		Position = rhs.Position;
 		Rotation = rhs.Rotation;
 		Scale = rhs.Scale;
+		Parent = rhs.Parent;
+		bIsCachedMatrixDirty = true;
 	}
 
 	return *this;
 }
 
-RMatrix4 RTransform::GetMatrix() const
+const RMatrix4& RTransform::GetMatrix()
 {
-	RMatrix4 mat(RMatrix4::IDENTITY);
-	RMatrix3 rot_scale = Rotation.GetRotationMatrix() * RMatrix3::CreateScale(Scale);
-	mat.SetRotation(rot_scale);
-	mat.SetTranslation(Position);
+	if (bIsCachedMatrixDirty)
+	{
+		CachedMatrix = RMatrix4::IDENTITY;
+		RMatrix3 rot_scale = Rotation.GetRotationMatrix() * RMatrix3::CreateScale(Scale);
+		CachedMatrix.SetRotation(rot_scale);
+		CachedMatrix.SetTranslation(Position);
 
-	return mat;
+		if (Parent)
+		{
+			CachedMatrix *= Parent->GetMatrix();
+		}
+		NotifyChildrenMatricesChanged();
+
+		bIsCachedMatrixDirty = false;
+	}
+
+	return CachedMatrix;
+}
+
+bool RTransform::FromMatrix4(const RMatrix4& Matrix)
+{
+	bIsCachedMatrixDirty = true;
+	return Matrix.Decompose(Position, Rotation, Scale);
 }
 
 void RTransform::LookAt(const RVec3& target, const RVec3& world_up /*= RVec3(0, 1, 0)*/)
@@ -71,4 +88,45 @@ void RTransform::LookAt(const RVec3& target, const RVec3& world_up /*= RVec3(0, 
 	m.SetRow(3, RVec4(pos, 1));
 
 	m.Decompose(Position, Rotation, Scale);
+
+	bIsCachedMatrixDirty = true;
+}
+
+void RTransform::Attach(RTransform* NodeParent)
+{
+	assert(Parent == nullptr);
+	Parent = NodeParent;
+
+	// Assume transform is not in parent's child list already
+	assert(find(Parent->Children.begin(), Parent->Children.end(), this) == Parent->Children.end());
+	Parent->Children.push_back(this);
+	bIsCachedMatrixDirty = true;
+}
+
+void RTransform::Detach()
+{
+	auto Iter = find(Parent->Children.begin(), Parent->Children.end(), this);
+	if (Iter != Parent->Children.end())
+	{
+		Parent->Children.erase(Iter);
+	}
+	Parent = nullptr;
+	bIsCachedMatrixDirty = true;
+}
+
+void RTransform::NotifyChildrenMatricesChanged()
+{
+	for (auto Iter : Children)
+	{
+		Iter->bIsCachedMatrixDirty = true;
+		Iter->NotifyChildrenMatricesChanged();
+	}
+}
+
+RTransform RTransform::Combine(RTransform* lhs, RTransform* rhs)
+{
+	// TODO: Implement this without decompose
+	RTransform Result;
+	Result.FromMatrix4(lhs->GetMatrix() * rhs->GetMatrix());
+	return Result;
 }

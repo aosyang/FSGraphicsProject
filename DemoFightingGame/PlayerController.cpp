@@ -19,8 +19,8 @@ BehaviorInfo PlayerBehaviorInfo[] =
 	{ PlayerAnim_GetUp,			0.0f },
 };
 
-PlayerController::PlayerController()
-	: m_Rotation(0.0f), m_Behavior(BHV_Idle)
+PlayerController::PlayerController(RScene* InScene)
+	: Base(InScene), m_Rotation(0.0f), m_Behavior(BHV_Idle)
 {
 
 }
@@ -113,7 +113,7 @@ void PlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVec)
 	// Apply gravity
 	worldMoveVec += RVec3(0, -1000.0f * timer.DeltaTime(), 0);
 
-	worldMoveVec += (RVec4(GetRootOffset(), 0) * GetNodeTransform()).ToVec3();
+	worldMoveVec += (RVec4(GetRootOffset(), 0) * GetTransformMatrix()).ToVec3();
 	worldMoveVec -= StairOffset;
 	worldMoveVec = m_Scene->TestMovingAabbWithScene(playerAabb, worldMoveVec);
 
@@ -132,7 +132,7 @@ void PlayerController::PostUpdate(const RTimer& timer)
 		int targetBondId = m_Mesh->GetCachedAnimationNodeId(m_AnimBlender.GetTargetAnimation(), i);
 		m_AnimBlender.GetCurrentBlendedNodePose(sourceBoneId, targetBondId, &matrix);
 
-		m_BoneMatrices[i] = m_Mesh->GetBoneInitInvMatrices(i) * matrix * GetNodeTransform();
+		m_BoneMatrices[i] = m_Mesh->GetBoneInitInvMatrices(i) * matrix * GetTransformMatrix();
 	}
 }
 

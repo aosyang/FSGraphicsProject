@@ -180,7 +180,7 @@ namespace EngineManagedWrapper
 				{
 					if (RInput.IsKeyDown(VK_LMENU))
 					{
-						RMatrix4 transform = m_SelectedObject->GetNodeTransform();
+						RMatrix4 transform = m_SelectedObject->GetTransformMatrix();
 						RVec3 pos = transform.GetTranslation();
 						transform.SetTranslation(RVec3(0, 0, 0));
 						transform *= RMatrix4::CreateXAxisRotation((float)mdx);
@@ -196,7 +196,7 @@ namespace EngineManagedWrapper
 				{
 					if (RInput.IsKeyDown(VK_LMENU))
 					{
-						RMatrix4 transform = m_SelectedObject->GetNodeTransform();
+						RMatrix4 transform = m_SelectedObject->GetTransformMatrix();
 						RVec3 pos = transform.GetTranslation();
 						transform.SetTranslation(RVec3(0, 0, 0));
 						transform *= RMatrix4::CreateYAxisRotation((float)mdx);
@@ -212,7 +212,7 @@ namespace EngineManagedWrapper
 				{
 					if (RInput.IsKeyDown(VK_LMENU))
 					{
-						RMatrix4 transform = m_SelectedObject->GetNodeTransform();
+						RMatrix4 transform = m_SelectedObject->GetTransformMatrix();
 						RVec3 pos = transform.GetTranslation();
 						transform.SetTranslation(RVec3(0, 0, 0));
 						transform *= RMatrix4::CreateZAxisRotation((float)mdx);
@@ -442,7 +442,7 @@ namespace EngineManagedWrapper
 						RSMeshObject* meshObj = static_cast<RSMeshObject*>(*iter);
 						for (int i = 0; i < meshObj->GetMeshElementCount(); i++)
 						{
-							if (ray.TestAabbIntersection(meshObj->GetMeshElementAabb(i).GetTransformedAabb(meshObj->GetNodeTransform()), &t))
+							if (ray.TestAabbIntersection(meshObj->GetMeshElementAabb(i).GetTransformedAabb(meshObj->GetTransformMatrix()), &t))
 							{
 								rayPickingList.push_back(RayPickingResult(t, *iter));
 								break;
@@ -486,9 +486,8 @@ namespace EngineManagedWrapper
 	{
 		if (m_SelectedObject)
 		{
-			vector<RSceneObject*>::iterator iter = std::find(m_Scene.GetSceneObjects().begin(), m_Scene.GetSceneObjects().end(), m_SelectedObject);
-			m_Scene.GetSceneObjects().erase(iter);
-			delete m_SelectedObject;
+			auto iter = std::find(m_Scene.GetSceneObjects().begin(), m_Scene.GetSceneObjects().end(), m_SelectedObject);
+			m_Scene.DestroyObject(*iter);
 			m_SelectedObject = nullptr;
 
 			// FIXME: We should notify editor to update property grid or we'll crash the editor

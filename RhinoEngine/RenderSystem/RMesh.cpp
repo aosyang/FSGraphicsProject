@@ -7,51 +7,6 @@
 #include "Rhino.h"
 #include "RMesh.h"
 
-
-void RMaterial::Serialize(RSerializer& serializer)
-{
-	if (serializer.IsReading())
-	{
-		string shaderName;
-		serializer.SerializeData(shaderName);
-		Shader = RShaderManager::Instance().GetShaderResource(shaderName.c_str());
-
-		serializer.SerializeData(TextureNum);
-
-		int i;
-		for (i = 0; i < TextureNum; i++)
-		{
-			string textureName;
-			serializer.SerializeData(textureName);
-			Textures[i] = RResourceManager::Instance().FindTexture(textureName.c_str());
-			if (!Textures[i])
-				Textures[i] = RResourceManager::Instance().LoadDDSTexture(textureName.c_str(), EResourceLoadMode::Immediate);
-		}
-
-		for (; i < 8; i++)
-		{
-			Textures[i] = nullptr;
-		}
-	}
-	else
-	{
-		string shaderName;
-		if (Shader)
-			shaderName = Shader->GetName();
-
-		serializer.SerializeData(shaderName);
-		serializer.SerializeData(TextureNum);
-
-		int i;
-		for (i = 0; i < TextureNum; i++)
-		{
-			string textureName = Textures[i]->GetPath();
-			serializer.SerializeData(textureName);
-		}
-	}
-}
-
-
 RMesh::RMesh(string path)
 	: RResourceBase(RT_Mesh, path),
 	  m_Animation(nullptr)

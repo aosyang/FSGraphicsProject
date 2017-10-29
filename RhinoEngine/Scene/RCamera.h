@@ -11,10 +11,9 @@
 
 class RCamera : public RSceneObject
 {
+	typedef RSceneObject Base;
+	friend class RScene;
 public:
-	RCamera();
-	~RCamera();
-
 	SceneObjectType GetType() const { return SO_Camera; }
 
 	const RMatrix4& GetViewMatrix();
@@ -28,6 +27,10 @@ public:
 	float GetAspectRatio() const { return m_Aspect; }
 	float GetNearPlane() const { return m_Near; }
 	float GetFarPlane() const { return m_Far; }
+
+protected:
+	RCamera(RScene* InScene);
+	~RCamera();
 
 private:
 	RMatrix4	m_ViewMatrix;

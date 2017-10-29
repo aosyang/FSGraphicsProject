@@ -7,7 +7,13 @@
 
 #include "Scene/RSceneComponentBase.h"
 
-struct RMaterial;
+#include "RMaterial.h"
+
+struct PendingAssignedMaterial
+{
+	UINT		Index;
+	RMaterial	Material;
+};
 
 class RRenderMeshComponent : public RSceneComponentBase
 {
@@ -26,6 +32,8 @@ public:
 	/// Set mesh resource for the component to render
 	void SetMesh(const RMesh* Mesh);
 
+	void SetMaterial(UINT Index, const RMaterial& Material);
+
 private:
 	RRenderMeshComponent(RSceneObject* InOwner);
 
@@ -35,4 +43,5 @@ private:
 	vector<RMaterial>		m_Materials;
 
 	bool					m_PostponeLoadMaterials;
+	vector<PendingAssignedMaterial>	m_PendingAssignedMaterials;
 };

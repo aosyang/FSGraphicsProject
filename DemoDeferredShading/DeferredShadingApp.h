@@ -131,7 +131,7 @@ private:
 
 	void RenderPointLightCubemapDepth(const RVec3& position, float radius);
 
-	RCamera						m_Camera;
+	RCamera*					m_Camera;
 	float						m_CamPitch, m_CamYaw;
 
 	RScene						m_Scene;

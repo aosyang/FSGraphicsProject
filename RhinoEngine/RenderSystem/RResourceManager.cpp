@@ -15,8 +15,6 @@
 // FBX SDK
 #include <fbxsdk.h>
 
-#include "tinyxml2/tinyxml2.h"
-
 #define ENABLE_THREADED_LOADING 1
 #define EXPORT_FBX_AS_BINARY_MESH 1
 #define CONVERT_TO_LEFT_HANDED_MESH 1
@@ -966,46 +964,7 @@ bool RResourceManager::ThreadLoadRmeshData(LoaderThreadTask* task)
 
 void RResourceManager::LoadMeshMaterials(const string& mtlFilename, vector<RMaterial>& materials)
 {
-	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
-	if (doc->LoadFile(mtlFilename.c_str()) == tinyxml2::XML_SUCCESS)
-	{
-		vector<RMaterial> xmlMaterials;
-
-		tinyxml2::XMLElement* root = doc->RootElement();
-		tinyxml2::XMLElement* elem = root->FirstChildElement("MeshElement");
-		while (elem)
-		{
-			const char* shaderName = elem->Attribute("Shader");
-			RMaterial material = { nullptr, 0 };
-			material.Shader = RShaderManager::Instance().GetShaderResource(shaderName);
-
-			tinyxml2::XMLElement* elem_tex = elem->FirstChildElement();
-			while (elem_tex)
-			{
-				const char* textureName = elem_tex->GetText();
-
-				RTexture* texture = RResourceManager::Instance().FindTexture(textureName);
-
-				if (!texture)
-				{
-					texture = RResourceManager::Instance().LoadDDSTexture(RResourceManager::GetResourcePath(textureName).data(), EResourceLoadMode::Immediate);
-				}
-
-				material.Textures[material.TextureNum++] = texture;
-				elem_tex = elem_tex->NextSiblingElement();
-			}
-
-			xmlMaterials.push_back(material);
-			elem = elem->NextSiblingElement();
-		}
-
-		if (xmlMaterials.size())
-		{
-			materials = xmlMaterials;
-		}
-	}
-
-	delete doc;
+	RMaterial::LoadFromXMLFile(mtlFilename, materials);
 }
 
 RTexture* RResourceManager::LoadDDSTexture(const char* filename, EResourceLoadMode mode)

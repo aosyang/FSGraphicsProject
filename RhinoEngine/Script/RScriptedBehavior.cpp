@@ -78,7 +78,7 @@ static int ScriptFunc_Rotate(lua_State* state)
 		scale = (float)lua_tonumber(state, 5);
 	axis *= GEngine.GetTimer().TotalTime() * scale;
 
-	RMatrix4 transform = obj->GetNodeTransform();
+	RMatrix4 transform = obj->GetTransformMatrix();
 	obj->SetRotation(RQuat::Euler(DEG_TO_RAD(axis.X()), DEG_TO_RAD(axis.Y()), DEG_TO_RAD(axis.Z())));
 
 	return 0;

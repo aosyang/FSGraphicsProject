@@ -28,8 +28,7 @@ RSMeshObject* RScene::CreateMeshObject(const char* meshName)
 
 RSMeshObject* RScene::CreateMeshObject(RMesh* mesh)
 {
-	RSMeshObject* meshObject = new RSMeshObject();
-	meshObject->SetScene(this);
+	RSMeshObject* meshObject = new RSMeshObject(this);
 	meshObject->SetMesh(mesh);
 
 	m_SceneObjects.push_back(meshObject);
@@ -39,9 +38,8 @@ RSMeshObject* RScene::CreateMeshObject(RMesh* mesh)
 
 RSceneObject* RScene::CreateSceneObject(const char* name)
 {
-	RSceneObject* SceneObject = new RSceneObject();
+	RSceneObject* SceneObject = new RSceneObject(this);
 	SceneObject->SetName(name);
-	SceneObject->SetScene(this);
 
 	m_SceneObjects.push_back(SceneObject);
 
@@ -62,28 +60,6 @@ RSceneObject* RScene::FindObject(const char* name) const
 	}
 
 	return nullptr;
-}
-
-bool RScene::AddObjectToScene(RSceneObject* obj)
-{
-	vector<RSceneObject*>::iterator iter = find(m_SceneObjects.begin(), m_SceneObjects.end(), obj);
-	if (iter == m_SceneObjects.end())
-	{
-		m_SceneObjects.push_back(obj);
-		return true;
-	}
-
-	return false;
-}
-
-void RScene::RemoveObjectFromScene(RSceneObject* obj)
-{
-	vector<RSceneObject*>::iterator iter = find(m_SceneObjects.begin(), m_SceneObjects.end(), obj);
-	if (iter != m_SceneObjects.end())
-	{
-		(*iter)->SetScene(nullptr);
-		m_SceneObjects.erase(iter);
-	}
 }
 
 void RScene::DestroyObject(RSceneObject* obj)
@@ -282,7 +258,7 @@ void RScene::SaveToFile(const char* filename)
 		}
 
 		// Save transformation
-		const RMatrix4& t = (*iter)->GetNodeTransform();
+		const RMatrix4& t = (*iter)->GetTransformMatrix();
 
 		tinyxml2::XMLElement* elem_trans = doc->NewElement("Transform");
 
@@ -320,7 +296,7 @@ RVec3 RScene::TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec)
 			{
 				for (int i = 0; i < meshObj->GetMeshElementCount(); i++)
 				{
-					RAabb elemAabb = meshObj->GetMeshElementAabb(i).GetTransformedAabb(meshObj->GetNodeTransform());
+					RAabb elemAabb = meshObj->GetMeshElementAabb(i).GetTransformedAabb(meshObj->GetTransformMatrix());
 					v = aabb.TestDynamicCollisionWithAabb(v, elemAabb);
 				}
 			}
@@ -338,7 +314,7 @@ void RScene::Render(const RFrustum* pFrustum)
 			continue;
 
 		SHADER_OBJECT_BUFFER cbObject;
-		cbObject.worldMatrix = (*iter)->GetNodeTransform();
+		cbObject.worldMatrix = (*iter)->GetTransformMatrix();
 		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 		RConstantBuffers::cbPerObject.BindBuffer();
 		(*iter)->Draw();
@@ -353,7 +329,7 @@ void RScene::RenderDepthPass(const RFrustum* pFrustum)
 			continue;
 
 		SHADER_OBJECT_BUFFER cbObject;
-		cbObject.worldMatrix = (*iter)->GetNodeTransform();
+		cbObject.worldMatrix = (*iter)->GetTransformMatrix();
 		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 		RConstantBuffers::cbPerObject.BindBuffer();
 		(*iter)->DrawDepthPass();

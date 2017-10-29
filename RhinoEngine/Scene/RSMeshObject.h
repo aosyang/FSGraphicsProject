@@ -16,10 +16,9 @@ namespace tinyxml2
 
 class RSMeshObject : public RSceneObject
 {
+	typedef RSceneObject Base;
+	friend class RScene;
 public:
-	RSMeshObject();
-	~RSMeshObject();
-
 	SceneObjectType GetType() const override { return SO_MeshObject; }
 	RSceneObject* Clone() const override;
 
@@ -47,6 +46,9 @@ public:
 
 	float GetResourceTimestamp();
 protected:
+	RSMeshObject(RScene* InScene);
+	~RSMeshObject();
+
 	/// Use default materials defined in mesh resource
 	void UpdateMaterialsFromResource();
 

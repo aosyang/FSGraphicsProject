@@ -7,15 +7,15 @@
 #include "FightingGameApp.h"
 
 FightingGameApp::FightingGameApp()
-	: m_Player(nullptr), m_DrawHitBound(false)
+	: m_Player(nullptr),
+	  m_DrawHitBound(false),
+	  m_Camera(nullptr)
 {
 
 }
 
 FightingGameApp::~FightingGameApp()
 {
-	SAFE_DELETE(m_Player);
-	SAFE_DELETE(m_AIPlayer);
 	m_Scene.Release();
 }
 
@@ -27,9 +27,9 @@ bool FightingGameApp::Initialize()
 	m_Scene.LoadFromFile("../Assets/ScriptTestMap.rmap");
 
 	m_ShadowMap.Initialize(1024, 1024);
-
-	m_Camera.SetTransform(RVec3(407.023712f, 339.007507f, 876.396484f), RQuat::Euler(0.09f, 3.88659930f, 0.0f));
-	m_Camera.SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
+	m_Camera = m_Scene.CreateSceneObjectOfType<RCamera>();
+	m_Camera->SetTransform(RVec3(407.023712f, 339.007507f, 876.396484f), RQuat::Euler(0.09f, 3.88659930f, 0.0f));
+	m_Camera->SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
 
 	//RSceneObject* player = m_Scene.FindObject("Player");
 	//for (UINT i = 0; i < m_Scene.GetSceneObjects().size(); i++)
@@ -38,13 +38,11 @@ bool FightingGameApp::Initialize()
 	//	obj->SetScript("UpdateObject");
 	//}
 
-	m_Player = new PlayerController();
-	m_Player->SetScene(&m_Scene);
+	m_Player = m_Scene.CreateSceneObjectOfType<PlayerController>();
 	m_Player->SetPosition(RVec3(0, 100.0f, 0));
 	m_Player->Cache();
 
-	m_AIPlayer = new PlayerController();
-	m_AIPlayer->SetScene(&m_Scene);
+	m_AIPlayer = m_Scene.CreateSceneObjectOfType<PlayerController>();
 	m_AIPlayer->SetPosition(RVec3(-465, 50, -760));
 	m_AIPlayer->Cache();
 
@@ -79,12 +77,12 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	ZeroMemory(&cbScene, sizeof(cbScene));
 
 #if 1
-	cbScene.viewMatrix = m_Camera.GetViewMatrix();
-	cbScene.projMatrix = m_Camera.GetProjectionMatrix();
+	cbScene.viewMatrix = m_Camera->GetViewMatrix();
+	cbScene.projMatrix = m_Camera->GetProjectionMatrix();
 	cbScene.viewProjMatrix = cbScene.viewMatrix * cbScene.projMatrix;
-	cbScene.cameraPos = m_Camera.GetPosition();
+	cbScene.cameraPos = m_Camera->GetPosition();
 
-	cbLight.CameraPos = m_Camera.GetPosition();
+	cbLight.CameraPos = m_Camera->GetPosition();
 #else
 	RMatrix4 cameraMatrix = RMatrix4::CreateXAxisRotation(0.09f * 180 / PI) * RMatrix4::CreateYAxisRotation(3.88659930f * 180 / PI);
 	cameraMatrix.SetTranslation(RVec3(407.023712f, 339.007507f, 876.396484f));
@@ -152,7 +150,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		
 		RVec3 moveVec(0, 0, 0);
 
-		RVec3 charRight = m_Camera.GetNodeTransform().GetRight();
+		RVec3 charRight = m_Camera->GetTransformMatrix().GetRight();
 		RVec3 charForward = RVec3::Cross(charRight, RVec3(0, 1, 0));
 
 		if (m_Player->GetBehavior() == BHV_Running ||
@@ -201,7 +199,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 		m_Player->UpdateMovement(timer, moveVec);
 
-		RMatrix4 playerTranslation = RMatrix4::CreateTranslation(m_Player->GetNodeTransform().GetTranslation());
+		RMatrix4 playerTranslation = RMatrix4::CreateTranslation(m_Player->GetTransformMatrix().GetTranslation());
 		RMatrix4 cameraTransform = RMatrix4::CreateTranslation(0.0f, 500.0f, 300.0f) * playerTranslation;
 
 		RAabb camAabb;
@@ -212,17 +210,17 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		RVec3 camVec = cameraTransform.GetTranslation() - lookTarget;
 		camVec = m_Scene.TestMovingAabbWithScene(camAabb, camVec);
 
-		//m_Camera.SetTransform(cameraTransform);
+		//m_Camera->SetTransform(cameraTransform);
 		static RVec3 actualCamVec;
 		actualCamVec = RVec3::Lerp(actualCamVec, camVec, 5.0f * timer.DeltaTime());
-		m_Camera.SetPosition(actualCamVec + lookTarget);
-		m_Camera.LookAt(lookTarget);
+		m_Camera->SetPosition(actualCamVec + lookTarget);
+		m_Camera->LookAt(lookTarget);
 
 		//playerAabb.pMin = RVec3(-50.0f, 0.0f, -50.0f) + m_Player->GetPosition();
 		//playerAabb.pMax = RVec3(50.0f, 150.0f, 50.0f) + m_Player->GetPosition();
 		//GDebugRenderer.DrawAabb(playerAabb);
 
-		//GDebugRenderer.DrawFrustum(m_Camera.GetFrustum());
+		//GDebugRenderer.DrawFrustum(m_Camera->GetFrustum());
 
 		//RSphere s = { RVec3(0, 100, 0), 50.0f };
 		//RCapsule cap = m_Player->GetCollisionShape();
@@ -241,7 +239,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			m_Player->GetBehaviorTime() < 0.6f)
 		{
 			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() - m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 50, 0);
+			hit_sphere.center = m_Player->GetPosition() - m_Player->GetTransformMatrix().GetForward() * 50 + RVec3(0, 50, 0);
 			hit_sphere.radius = 50.0f;
 			if (m_DrawHitBound)
 				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
@@ -252,7 +250,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 				{
 					RVec3 relVec = hit_sphere.center - m_AIPlayer->GetPosition();
 					relVec.SetY(0.0f);
-					RVec3 playerForward = -m_Player->GetNodeTransform().GetForward();
+					RVec3 playerForward = -m_Player->GetTransformMatrix().GetForward();
 					if (RVec3::Dot(playerForward, relVec) >= 0)
 						relVec = -playerForward;
 					relVec.Normalize();
@@ -268,7 +266,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			m_Player->GetBehaviorTime() < 0.3f)
 		{
 			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() - m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 100, 0);
+			hit_sphere.center = m_Player->GetPosition() - m_Player->GetTransformMatrix().GetForward() * 50 + RVec3(0, 100, 0);
 			hit_sphere.radius = 20.0f;
 			if (m_DrawHitBound)
 				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
@@ -288,7 +286,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			m_Player->GetBehaviorTime() < 0.3f)
 		{
 			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() - m_Player->GetNodeTransform().GetForward() * 50 + RVec3(0, 100, 0);
+			hit_sphere.center = m_Player->GetPosition() - m_Player->GetTransformMatrix().GetForward() * 50 + RVec3(0, 100, 0);
 			hit_sphere.radius = 50.0f;
 			if (m_DrawHitBound)
 				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
@@ -308,7 +306,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			m_Player->GetBehaviorTime() < 0.3f)
 		{
 			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() - m_Player->GetNodeTransform().GetForward() * 30 + RVec3(0, 100, 0);
+			hit_sphere.center = m_Player->GetPosition() - m_Player->GetTransformMatrix().GetForward() * 30 + RVec3(0, 100, 0);
 			hit_sphere.radius = 50.0f;
 			if (m_DrawHitBound)
 				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
@@ -319,7 +317,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 				{
 					RVec3 relVec = hit_sphere.center - m_AIPlayer->GetPosition();
 					relVec.SetY(0.0f);
-					RVec3 playerForward = -m_Player->GetNodeTransform().GetForward();
+					RVec3 playerForward = -m_Player->GetTransformMatrix().GetForward();
 					if (RVec3::Dot(playerForward, relVec) >= 0)
 						relVec = -playerForward;
 					relVec.Normalize();
@@ -393,13 +391,13 @@ void FightingGameApp::RenderScene()
 		}
 		else
 		{
-			RFrustum frustum = m_Camera.GetFrustum();
+			RFrustum frustum = m_Camera->GetFrustum();
 			m_Scene.Render(&frustum);
 		}
 
 		if (m_Player)
 		{
-			cbObject.worldMatrix = m_Player->GetNodeTransform();
+			cbObject.worldMatrix = m_Player->GetTransformMatrix();
 			RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 			RConstantBuffers::cbPerObject.BindBuffer();
 			if (pass == 0)
@@ -428,5 +426,8 @@ void FightingGameApp::RenderScene()
 
 void FightingGameApp::OnResize(int width, int height)
 {
-	m_Camera.SetAspectRatio((float)width / (float)height);
+	if (m_Camera)
+	{
+		m_Camera->SetAspectRatio((float)width / (float)height);
+	}
 }

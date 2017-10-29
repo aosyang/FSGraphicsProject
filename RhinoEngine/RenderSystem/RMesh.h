@@ -9,15 +9,7 @@
 #include "RShaderManager.h"
 #include "RResourceBase.h"
 #include "../../Shaders/ConstBufferVS.h"	// MAX_BONE_COUNT
-
-struct RMaterial
-{
-	RShader*					Shader;
-	int							TextureNum;		/// Texture numbers, max 8
-	RTexture*					Textures[8];
-
-	void Serialize(RSerializer& serializer);
-};
+#include "RMaterial.h"
 
 struct BoneMatrices
 {
