@@ -71,6 +71,12 @@ public:
 	/// Move scene object in local space
 	void TranslateLocal(const RVec3& v);
 
+	/// Attach to another object
+	void AttachTo(RSceneObject* Parent);
+
+	/// Detach from parent object
+	void DetachFromParent();
+
 	/// Get world space AABB for scene object
 	virtual const RAabb& GetAabb() { return RAabb::Default; }
 	virtual void Draw() {}

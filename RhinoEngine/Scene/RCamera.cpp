@@ -11,12 +11,18 @@ RCamera::RCamera(RScene* InScene)
 	: Base(InScene),
 	  m_DirtyProjMatrix(true)
 {
-
+	if (GRenderer.GetRenderCamera() == nullptr)
+	{
+		GRenderer.SetRenderCamera(this);
+	}
 }
 
 RCamera::~RCamera()
 {
-
+	if (GRenderer.GetRenderCamera() == this)
+	{
+		GRenderer.SetRenderCamera(nullptr);
+	}
 }
 
 const RMatrix4& RCamera::GetViewMatrix()

@@ -46,7 +46,7 @@ RQuat BlockRotations[]
 RgColorPiece::RgColorPiece(RScene* InScene)
 	: Base(InScene)
 {
-	RMesh* CubeMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/cube.rmesh");
+	RMesh* CubeMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/RubikCube/RoundedCornerCube.fbx");
 
 	MeshComponent = AddNewComponent<RRenderMeshComponent>();
 	MeshComponent->SetMesh(CubeMesh);
@@ -92,7 +92,7 @@ RgCubeBlock::RgCubeBlock(RScene* InScene)
 	: Base(InScene),
 	  m_Parent(nullptr)
 {
-	RMesh* CubeMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/cube.rmesh");
+	RMesh* CubeMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/RubikCube/RoundedCornerCube.fbx");
 
 	RRenderMeshComponent* MeshComponent = AddNewComponent<RRenderMeshComponent>();
 	MeshComponent->SetMesh(CubeMesh);
@@ -104,17 +104,17 @@ RgCubeBlock::~RgCubeBlock()
 
 }
 
-void RgCubeBlock::AttachToBlock(RgCubeBlock* Parent)
+void RgCubeBlock::AttachToCenterBlock(RgCubeBlock* CenterBlock)
 {
-	assert(Parent);
+	assert(CenterBlock);
 
-	m_Parent = Parent;
-	RMatrix4 InvParentMatrix = Parent->GetTransform()->GetMatrix().FastInverse();
+	m_Parent = CenterBlock;
+	RMatrix4 InvParentMatrix = CenterBlock->GetTransform()->GetMatrix().FastInverse();
 	RMatrix4 LocalMatrix = m_NodeTransform.GetMatrix() * InvParentMatrix;
 	m_LocalTransform.FromMatrix4(LocalMatrix);
 }
 
-void RgCubeBlock::Detach()
+void RgCubeBlock::DetachFromCenterBlock()
 {
 	assert(m_Parent);
 
@@ -170,14 +170,14 @@ void RgCubeBlock::SetupColors(int x, int y, int z)
 	if (x == 2)
 	{
 		RgColorPiece* RightPiece = GetScene()->CreateSceneObjectOfType<RgColorPiece>();
-		RightPiece->SetTransform(RVec3(SideOffset, 0, 0), RQuat::IDENTITY, RVec3(0.1f, 0.9f, 0.9f));
+		RightPiece->SetTransform(RVec3(SideOffset, 0, 0), RQuat::IDENTITY, RVec3(0.02f, 0.9f, 0.9f));
 		RightPiece->GetTransform()->Attach(GetTransform());
 		RightPiece->SetColor(EPieceColor::Blue);
 	}
 	else if (x == 0)
 	{
 		RgColorPiece* LeftPiece = GetScene()->CreateSceneObjectOfType<RgColorPiece>();
-		LeftPiece->SetTransform(RVec3(-SideOffset, 0, 0), RQuat::IDENTITY, RVec3(0.1f, 0.9f, 0.9f));
+		LeftPiece->SetTransform(RVec3(-SideOffset, 0, 0), RQuat::IDENTITY, RVec3(0.02f, 0.9f, 0.9f));
 		LeftPiece->GetTransform()->Attach(GetTransform());
 		LeftPiece->SetColor(EPieceColor::Green);
 	}
@@ -185,14 +185,14 @@ void RgCubeBlock::SetupColors(int x, int y, int z)
 	if (y == 2)
 	{
 		RgColorPiece* TopPiece = GetScene()->CreateSceneObjectOfType<RgColorPiece>();
-		TopPiece->SetTransform(RVec3(0, SideOffset, 0), RQuat::IDENTITY, RVec3(0.9f, 0.1f, 0.9f));
+		TopPiece->SetTransform(RVec3(0, SideOffset, 0), RQuat::IDENTITY, RVec3(0.9f, 0.02f, 0.9f));
 		TopPiece->GetTransform()->Attach(GetTransform());
 		TopPiece->SetColor(EPieceColor::Red);
 	}
 	else if (y == 0)
 	{
 		RgColorPiece* BottomPiece = GetScene()->CreateSceneObjectOfType<RgColorPiece>();
-		BottomPiece->SetTransform(RVec3(0, -SideOffset, 0), RQuat::IDENTITY, RVec3(0.9f, 0.1f, 0.9f));
+		BottomPiece->SetTransform(RVec3(0, -SideOffset, 0), RQuat::IDENTITY, RVec3(0.9f, 0.02f, 0.9f));
 		BottomPiece->GetTransform()->Attach(GetTransform());
 		BottomPiece->SetColor(EPieceColor::Orange);
 	}
@@ -200,14 +200,14 @@ void RgCubeBlock::SetupColors(int x, int y, int z)
 	if (z == 2)
 	{
 		RgColorPiece* FrontPiece = GetScene()->CreateSceneObjectOfType<RgColorPiece>();
-		FrontPiece->SetTransform(RVec3(0, 0, SideOffset), RQuat::IDENTITY, RVec3(0.9f, 0.9f, 0.1f));
+		FrontPiece->SetTransform(RVec3(0, 0, SideOffset), RQuat::IDENTITY, RVec3(0.9f, 0.9f, 0.02f));
 		FrontPiece->GetTransform()->Attach(GetTransform());
 		FrontPiece->SetColor(EPieceColor::White);
 	}
 	else if (z == 0)
 	{
 		RgColorPiece* BottomPiece = GetScene()->CreateSceneObjectOfType<RgColorPiece>();
-		BottomPiece->SetTransform(RVec3(0, 0, -SideOffset), RQuat::IDENTITY, RVec3(0.9f, 0.9f, 0.1f));
+		BottomPiece->SetTransform(RVec3(0, 0, -SideOffset), RQuat::IDENTITY, RVec3(0.9f, 0.9f, 0.02f));
 		BottomPiece->GetTransform()->Attach(GetTransform());
 		BottomPiece->SetColor(EPieceColor::Yellow);
 	}
@@ -277,7 +277,7 @@ void RgRubik::FinishCurrentMove()
 	{
 		if (Block != m_CenterOfMove)
 		{
-			Block->Detach();
+			Block->DetachFromCenterBlock();
 			Block->FixTransformInaccuracy();
 		}
 	}
@@ -362,7 +362,7 @@ void RgRubik::Rotate(ERubikSide Side, ERubikRotation Rotation)
 	{
 		if (i != 4)
 		{
-			m_MoveBlocks[i]->AttachToBlock(m_CenterOfMove);
+			m_MoveBlocks[i]->AttachToCenterBlock(m_CenterOfMove);
 		}
 	}
 

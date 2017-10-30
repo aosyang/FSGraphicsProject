@@ -21,7 +21,7 @@ void RSkybox::CreateSkybox(const char* skyTextureName)
 
 	if (SkyTexture == nullptr)
 	{
-		RWarning("Unable to find texture \'%s\' while creating skybox.\n", skyTextureName);
+		RLogWarning("Unable to find texture \'%s\' while creating skybox.\n", skyTextureName);
 		return;
 	}
 
@@ -63,7 +63,7 @@ void RSkybox::CreateSkybox(RTexture* skyTexture)
 
 	if (!m_SkyboxShader)
 	{
-		RWarning("Unable to find shader \'Skybox\', skybox will not be rendered properly.\n");
+		RLogWarning("Unable to find shader \'Skybox\', skybox will not be rendered properly.\n");
 	}
 }
 

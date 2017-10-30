@@ -132,36 +132,24 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 		}
 	}
 
+	if (RInput.GetBufferedKeyState('Z') == BKS_Pressed)
+	{
+		m_RubikCube->Rotate(ERubikSide::South, ERubikRotation::CCW);
+	}
+	else if (RInput.GetBufferedKeyState('X') == BKS_Pressed)
+	{
+		m_RubikCube->Rotate(ERubikSide::South, ERubikRotation::CW);
+	}
 
-	RMatrix4 viewMatrix = m_Camera->GetViewMatrix();
-	RMatrix4 projMatrix = m_Camera->GetProjectionMatrix();
+	if (RInput.GetBufferedKeyState('C') == BKS_Pressed)
+	{
+		m_RubikCube->Rotate(ERubikSide::North, ERubikRotation::CW);
+	}
+	else if (RInput.GetBufferedKeyState('V') == BKS_Pressed)
+	{
+		m_RubikCube->Rotate(ERubikSide::North, ERubikRotation::CCW);
+	}
 
-	// Update scene constant buffer
-	SHADER_SCENE_BUFFER cbScene;
-	ZeroMemory(&cbScene, sizeof(cbScene));
-
-	cbScene.viewMatrix = viewMatrix;
-	cbScene.projMatrix = projMatrix;
-	cbScene.viewProjMatrix = viewMatrix * projMatrix;
-	cbScene.cameraPos = m_Camera->GetPosition();
-
-	RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
-	RConstantBuffers::cbScene.BindBuffer();
-
-	// Update light constant buffer
-	SHADER_LIGHT_BUFFER cbLight;
-	ZeroMemory(&cbLight, sizeof(cbLight));
-
-	const float AmbientIntensity = 0.8f;
-
-	// Setup ambient color
-	cbLight.HighHemisphereAmbientColor = RVec4(0.9f, 1.0f, 1.0f, AmbientIntensity);
-	cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, AmbientIntensity);
-
-	cbLight.CameraPos = m_Camera->GetPosition();
-
-	RConstantBuffers::cbLight.UpdateBufferData(&cbLight);
-	RConstantBuffers::cbLight.BindBuffer();
 
 	m_Scene.UpdateScene();
 }
@@ -187,4 +175,8 @@ TCHAR* SimpleGame::WindowTitle()
 void SimpleGame::SetupScene()
 {
 	m_RubikCube = m_Scene.CreateSceneObjectOfType<RgRubik>("Rubik Cube");
+
+	RSceneObject* GlobalLightInfo = m_Scene.CreateSceneObjectOfType<RSceneObject>();
+	RDirectionalLightComponent* DirLightComponent = GlobalLightInfo->AddNewComponent<RDirectionalLightComponent>();
+	DirLightComponent->SetParameters({ RVec3(-0.5f, 1, -0.3f), RColor(0.5f, 0.5f, 0.5f) });
 }

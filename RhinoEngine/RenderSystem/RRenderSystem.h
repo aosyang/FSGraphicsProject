@@ -8,11 +8,13 @@
 
 #include "Core/RSingleton.h"
 #include "RRenderMeshComponent.h"
+#include "ILight.h"
 
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")
 
 struct RShader;
+class RCamera;
 
 enum BlendState
 {
@@ -73,6 +75,12 @@ public:
 	void RegisterRenderMeshComponent(RRenderMeshComponent* Component);
 	void UnregisterRenderMeshComponent(RRenderMeshComponent* Component);
 
+	void RegisterLight(ILight* Light);
+	void UnregisterLight(ILight* Light);
+
+	void SetRenderCamera(RCamera* Camera);
+	RCamera* GetRenderCamera() const;
+
 	/// Render current frame
 	void RenderFrame();
 protected:
@@ -107,6 +115,9 @@ protected:
 	bool					m_bIsUsingDeferredShading;
 
 	vector<RRenderMeshComponent*>	m_RegisteredRenderMeshComponents;
+	vector<ILight*>					m_RegisteredLights;
+
+	RCamera*				m_RenderCamera;			// Default camera will be used for frustum culling
 };
 
 #define GRenderer RRenderSystem::Instance()

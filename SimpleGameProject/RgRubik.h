@@ -65,8 +65,8 @@ public:
 
 	void SetupColors(int x, int y, int z);
 
-	void AttachToBlock(RgCubeBlock* Parent);
-	void Detach();
+	void AttachToCenterBlock(RgCubeBlock* CenterBlock);
+	void DetachFromCenterBlock();
 
 	void FixTransformInaccuracy();
 

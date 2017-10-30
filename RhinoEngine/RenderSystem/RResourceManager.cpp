@@ -278,8 +278,8 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	bool lImportStatus = lImporter->Initialize(task->Filename.data(), -1, lFbxSdkManager->GetIOSettings());
 
 	if (!lImportStatus) {
-		printf("Call to FbxImporter::Initialize() failed.\n");
-		printf("Error returned: %s\n\n", lImporter->GetStatus().GetErrorString());
+		RLogError("Call to FbxImporter::Initialize() failed.\n");
+		RLogError("Error returned: %s\n\n", lImporter->GetStatus().GetErrorString());
 
 		lFbxSdkManager->Destroy();
 		return;

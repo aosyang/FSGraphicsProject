@@ -152,6 +152,12 @@
     <ClInclude Include="RenderSystem\RMaterial.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="RenderSystem\RDirectionalLightComponent.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderSystem\ILight.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -261,6 +267,9 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="RenderSystem\RMaterial.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem\RDirectionalLightComponent.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
   </ItemGroup>

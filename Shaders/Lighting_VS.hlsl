@@ -53,6 +53,8 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input
 	worldPos = mul(float4(Input.PosL, 1.0f), worldMatrix);
 	Normal = mul(Input.Normal, (float3x3)worldMatrix);
 #endif
+
+	Normal = normalize(Normal);
 	
 	Out.PosW = worldPos.xyz;
 	Out.PosH = mul(worldPos, viewProjMatrix);

@@ -72,6 +72,7 @@ class RResourceBase;
 
 #include "RenderSystem/RVertexDeclaration.h"
 #include "RenderSystem/RRenderSystem.h"
+#include "RenderSystem/RDirectionalLightComponent.h"
 #include "RenderSystem/RMeshElement.h"
 #include "RenderSystem/RDebugRenderer.h"
 #include "RenderSystem/RText.h"

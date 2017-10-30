@@ -6,13 +6,18 @@
 #include "Rhino.h"
 
 #include "RRenderSystem.h"
+#include "RDirectionalLightComponent.h"
+
 #include <comdef.h>
 
 ID3D11DepthStencilView* RRenderSystem::DefaultDepthStencilView = nullptr;
 ID3D11RenderTargetView* RRenderSystem::DefaultRenderTargetView = nullptr;
 
 RRenderSystem::RRenderSystem()
-	: m_AdapterName(nullptr), m_RenderTargetViewNum(0), m_bIsUsingDeferredShading(false)
+	: m_AdapterName(nullptr),
+	  m_RenderTargetViewNum(0),
+	  m_bIsUsingDeferredShading(false),
+	  m_RenderCamera(nullptr)
 {
 }
 
@@ -445,6 +450,34 @@ void RRenderSystem::UnregisterRenderMeshComponent(RRenderMeshComponent* Componen
 	m_RegisteredRenderMeshComponents.erase(Iter);
 }
 
+void RRenderSystem::RegisterLight(ILight* Light)
+{
+	auto Iter = find(m_RegisteredLights.begin(), m_RegisteredLights.end(), Light);
+
+	assert(Iter == m_RegisteredLights.end());
+
+	m_RegisteredLights.push_back(Light);
+}
+
+void RRenderSystem::UnregisterLight(ILight* Light)
+{
+	auto Iter = find(m_RegisteredLights.begin(), m_RegisteredLights.end(), Light);
+
+	assert(Iter != m_RegisteredLights.end());
+
+	m_RegisteredLights.erase(Iter);
+}
+
+void RRenderSystem::SetRenderCamera(RCamera* Camera)
+{
+	m_RenderCamera = Camera;
+}
+
+RCamera* RRenderSystem::GetRenderCamera() const
+{
+	return m_RenderCamera;
+}
+
 void RRenderSystem::RenderFrame()
 {
 	Clear();
@@ -460,9 +493,69 @@ void RRenderSystem::RenderFrame()
 	// Shadow map sampler state
 	SetSamplerState(2, SamplerState_ShadowDepthComparison);
 
-	for (auto MeshComponent : m_RegisteredRenderMeshComponents)
+	if (m_RenderCamera)
 	{
-		MeshComponent->Render();
+		RMatrix4 viewMatrix = m_RenderCamera->GetViewMatrix();
+		RMatrix4 projMatrix = m_RenderCamera->GetProjectionMatrix();
+
+		// Update scene constant buffer
+		SHADER_SCENE_BUFFER cbScene;
+		ZeroMemory(&cbScene, sizeof(cbScene));
+
+		cbScene.viewMatrix = viewMatrix;
+		cbScene.projMatrix = projMatrix;
+		cbScene.viewProjMatrix = viewMatrix * projMatrix;
+		cbScene.cameraPos = m_RenderCamera->GetPosition();
+
+		RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
+		RConstantBuffers::cbScene.BindBuffer();
+
+		// Update light constant buffer
+		SHADER_LIGHT_BUFFER cbLight;
+		ZeroMemory(&cbLight, sizeof(cbLight));
+
+		const float AmbientIntensity = 0.5f;
+
+		// Setup default ambient color
+		cbLight.HighHemisphereAmbientColor = RVec4(0.9f, 1.0f, 1.0f, AmbientIntensity);
+		cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, AmbientIntensity);
+
+		cbLight.CameraPos = m_RenderCamera->GetPosition();
+
+		// Setup global lights
+		for (auto Light : m_RegisteredLights)
+		{
+			if (Light->GetLightType() == ELightType::DirectionalLight)
+			{
+				int Index = cbLight.DirectionalLightCount;
+
+				if (Index < MAX_DIRECTIONAL_LIGHT)
+				{
+					cbLight.DirectionalLightCount++;
+
+					RDirectionalLightComponent* DirLight = static_cast<RDirectionalLightComponent*>(Light);
+					cbLight.DirectionalLight[Index].Color = RVec4(&DirLight->GetColor().r);
+
+					RVec3 Dir = DirLight->GetDirection();
+					cbLight.DirectionalLight[Index].Direction = Dir.GetNormalized();
+				}
+			}
+		}
+
+		RConstantBuffers::cbLight.UpdateBufferData(&cbLight);
+		RConstantBuffers::cbLight.BindBuffer();
+
+		SHADER_MATERIAL_BUFFER cbMaterial;
+		cbMaterial.GlobalOpacity = 1.0f;
+		cbMaterial.SpecularColorAndPower = RVec4(1.0f, 1.0f, 1.0f, 32.0f);
+
+		RConstantBuffers::cbMaterial.UpdateBufferData(&cbMaterial);
+		RConstantBuffers::cbMaterial.BindBuffer();
+
+		for (auto MeshComponent : m_RegisteredRenderMeshComponents)
+		{
+			MeshComponent->Render();
+		}
 	}
 
 	GDebugRenderer.Render();

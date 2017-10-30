@@ -245,12 +245,12 @@ RAnimation* PlayerController::LoadAnimation(const char* resPath, int flags)
 		}
 		else
 		{
-			RWarning("Unable to find animation data in mesh resource \'%s\'\n", resPath);
+			RLogWarning("Unable to find animation data in mesh resource \'%s\'\n", resPath);
 		}
 	}
 	else
 	{
-		RWarning("Failed to load mesh resource \'%s\'\n", resPath);
+		RLogWarning("Failed to load mesh resource \'%s\'\n", resPath);
 	}
 
 	return nullptr;

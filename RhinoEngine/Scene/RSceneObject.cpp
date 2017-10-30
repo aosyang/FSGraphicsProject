@@ -93,6 +93,16 @@ void RSceneObject::TranslateLocal(const RVec3& v)
 	m_NodeTransform.TranslateLocal(v);
 }
 
+void RSceneObject::AttachTo(RSceneObject* Parent)
+{
+	m_NodeTransform.Attach(Parent->GetTransform());
+}
+
+void RSceneObject::DetachFromParent()
+{
+	m_NodeTransform.Detach();
+}
+
 void RSceneObject::Update()
 {
 	UpdateComponents();
