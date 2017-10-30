@@ -68,6 +68,11 @@ RVec3 RSceneObject::GetPosition() const
 	return m_NodeTransform.GetPosition();
 }
 
+RVec3 RSceneObject::GetWorldPosition()
+{
+	return m_NodeTransform.GetMatrix().Transform(m_NodeTransform.GetPosition());
+}
+
 void RSceneObject::SetScale(const RVec3& scale)
 {
 	m_NodeTransform.SetScale(scale);
@@ -105,6 +110,11 @@ void RSceneObject::DetachFromParent()
 
 void RSceneObject::Update()
 {
+	if (m_NodeTransform.IsCacheDirty())
+	{
+		m_NodeTransform.NotifyChildrenMatricesChanged();
+	}
+
 	UpdateComponents();
 }
 

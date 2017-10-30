@@ -234,6 +234,12 @@ RVec3 RMatrix4::RotateVector(const RVec3& vec) const
 	return RVec3(_x, _y, _z);
 }
 
+RVec3 RMatrix4::Transform(const RVec3& vec) const
+{
+	RVec4 p(vec.X(), vec.Y(), vec.Z(), 1.0f);
+	return (p * (*this)).ToVec3();
+}
+
 // Calculate the determinant of a 3x3 matrix
 float Matrix_Determinant(float e_11,float e_12,float e_13,
 						 float e_21,float e_22,float e_23,

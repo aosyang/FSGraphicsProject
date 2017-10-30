@@ -35,5 +35,6 @@ private:
 	RSkybox m_Skybox;
 
 	RgRubik* m_RubikCube;
+	RSceneObject*	m_CameraOrbiter;
 };
 

@@ -7,8 +7,9 @@
 #include "RgRubik.h"
 
 SimpleGame::SimpleGame()
+	: m_Camera(nullptr)
 {
-	m_Camera = m_Scene.CreateSceneObjectOfType<RCamera>();
+
 }
 
 
@@ -28,6 +29,8 @@ bool SimpleGame::Initialize()
 	char SkyboxTextureName[] = "../Assets/powderpeak.dds";
 	RResourceManager::Instance().LoadDDSTexture(SkyboxTextureName);
 	m_Skybox.CreateSkybox(SkyboxTextureName);
+
+	m_Camera = m_Scene.CreateSceneObjectOfType<RCamera>("UserCamera");
 
 	// TODO: if projection is forgotten to set properly, need to make sure user gets some feedbacks
 	m_Camera->SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
@@ -64,25 +67,7 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 		}
 	}
 
-	float camSpeed = 100.0f;
-	if (RInput.IsKeyDown(VK_LSHIFT))
-		camSpeed *= 10.0f;
-	RVec3 MoveVector(0.0f, 0.0f, 0.0f);
-	if (RInput.IsKeyDown('W'))
-		MoveVector += RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
-	if (RInput.IsKeyDown('S'))
-		MoveVector -= RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
-	if (RInput.IsKeyDown('D'))
-		MoveVector += RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
-	if (RInput.IsKeyDown('A'))
-		MoveVector -= RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
-	if (RInput.IsKeyDown('E'))
-		MoveVector += RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
-	if (RInput.IsKeyDown('Q'))
-		MoveVector -= RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
-
-	m_Camera->SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0.0f));
-	m_Camera->TranslateLocal(MoveVector);
+	m_CameraOrbiter->SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0.0f));
 
 	if (RInput.IsKeyDown(VK_UP))
 	{
@@ -150,7 +135,6 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 		m_RubikCube->Rotate(ERubikSide::North, ERubikRotation::CCW);
 	}
 
-
 	m_Scene.UpdateScene();
 }
 
@@ -176,7 +160,11 @@ void SimpleGame::SetupScene()
 {
 	m_RubikCube = m_Scene.CreateSceneObjectOfType<RgRubik>("Rubik Cube");
 
-	RSceneObject* GlobalLightInfo = m_Scene.CreateSceneObjectOfType<RSceneObject>();
+	RSceneObject* GlobalLightInfo = m_Scene.CreateSceneObjectOfType<RSceneObject>("DirectionalLight");
 	RDirectionalLightComponent* DirLightComponent = GlobalLightInfo->AddNewComponent<RDirectionalLightComponent>();
 	DirLightComponent->SetParameters({ RVec3(-0.5f, 1, -0.3f), RColor(0.5f, 0.5f, 0.5f) });
+
+	m_CameraOrbiter = m_Scene.CreateSceneObjectOfType<RSceneObject>("CameraOrbiter");
+	m_Camera->SetPosition(RVec3(0, 0, -500.0f));
+	m_Camera->AttachTo(m_CameraOrbiter);
 }

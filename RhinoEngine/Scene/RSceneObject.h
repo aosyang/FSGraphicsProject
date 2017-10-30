@@ -58,6 +58,8 @@ public:
 	/// Get position of scene object
 	RVec3 GetPosition() const;
 
+	RVec3 GetWorldPosition();
+
 	void SetScale(const RVec3& scale);
 
 	const RVec3& GetScale() const;

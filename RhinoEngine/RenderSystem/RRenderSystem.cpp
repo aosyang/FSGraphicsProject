@@ -505,7 +505,7 @@ void RRenderSystem::RenderFrame()
 		cbScene.viewMatrix = viewMatrix;
 		cbScene.projMatrix = projMatrix;
 		cbScene.viewProjMatrix = viewMatrix * projMatrix;
-		cbScene.cameraPos = m_RenderCamera->GetPosition();
+		cbScene.cameraPos = m_RenderCamera->GetWorldPosition();
 
 		RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
 		RConstantBuffers::cbScene.BindBuffer();
@@ -520,7 +520,7 @@ void RRenderSystem::RenderFrame()
 		cbLight.HighHemisphereAmbientColor = RVec4(0.9f, 1.0f, 1.0f, AmbientIntensity);
 		cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, AmbientIntensity);
 
-		cbLight.CameraPos = m_RenderCamera->GetPosition();
+		cbLight.CameraPos = m_RenderCamera->GetWorldPosition();
 
 		// Setup global lights
 		for (auto Light : m_RegisteredLights)

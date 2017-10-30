@@ -107,6 +107,7 @@ public:
 	void GetTranslation(float& x, float& y, float& z) const;
 
 	RVec3 RotateVector(const RVec3& vec) const;
+	RVec3 Transform(const RVec3& vec) const;
 
 	RMatrix4 Inverse() const;
 

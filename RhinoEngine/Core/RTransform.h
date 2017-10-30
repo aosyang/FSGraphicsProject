@@ -39,6 +39,7 @@ public:
 	void Attach(RTransform* NodeParent);
 	void Detach();
 
+	bool IsCacheDirty() const;
 	void NotifyChildrenMatricesChanged();
 
 	static RTransform Combine(RTransform* lhs, RTransform* rhs);
@@ -83,3 +84,9 @@ FORCEINLINE void RTransform::TranslateLocal(const RVec3& t)
 	Position += Rotation * t;
 	bIsCachedMatrixDirty = true;
 }
+
+FORCEINLINE bool RTransform::IsCacheDirty() const
+{
+	return bIsCachedMatrixDirty;
+}
+
