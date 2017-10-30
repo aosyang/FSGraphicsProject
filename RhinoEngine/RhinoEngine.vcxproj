@@ -98,6 +98,7 @@
   <ItemGroup>
     <ClCompile Include="Collision\RCollision.cpp" />
     <ClCompile Include="Core\RAabb.cpp" />
+    <ClCompile Include="Core\RColor.cpp" />
     <ClCompile Include="Core\RDebugMenu.cpp" />
     <ClCompile Include="Core\REngine.cpp" />
     <ClCompile Include="Core\RInput.cpp" />

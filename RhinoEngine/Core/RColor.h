@@ -3,6 +3,7 @@
 //
 // 
 //=============================================================================
+#pragma once
 
 class RColor
 {
@@ -29,4 +30,14 @@ public:
 		r = rhs.r; g = rhs.g; b = rhs.b; a = rhs.a;
 		return *this;
 	}
+
+	// Predefined colors
+	static RColor Red;
+	static RColor Green;
+	static RColor Blue;
+	static RColor Cyan;
+	static RColor Magenta;
+	static RColor Yellow;
+	static RColor Black;
+	static RColor White;
 };

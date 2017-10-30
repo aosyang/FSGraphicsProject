@@ -14,8 +14,9 @@ public:
 	void Initialize(int maxVertexCount = 65536);
 	void Release();
 
-	void SetColor(const RColor& color);
+	void SetPrimitiveColor(const RColor& color);
 	void DrawLine(const RVec3& start, const RVec3& end);
+	void DrawLine(const RVec3& start, const RVec3& end, const RColor& color);
 	void DrawLine(const RVec3& start, const RVec3& end, const RColor& color1, const RColor& color2);
 	void DrawAabb(const RAabb& aabb);
 	void DrawAabb(const RAabb& aabb, const RColor& color);
@@ -45,5 +46,32 @@ private:
 };
 
 #define GDebugRenderer RDebugRenderer::Instance()
+
+
+FORCEINLINE void RDebugRenderer::DrawLine(const RVec3& start, const RVec3& end)
+{
+	DrawLine(start, end, m_PrimitiveColor, m_PrimitiveColor);
+}
+
+FORCEINLINE void RDebugRenderer::DrawLine(const RVec3& start, const RVec3& end, const RColor& color)
+{
+	DrawLine(start, end, color, color);
+}
+
+FORCEINLINE void RDebugRenderer::DrawAabb(const RAabb& aabb)
+{
+	DrawAabb(aabb, m_PrimitiveColor);
+}
+
+FORCEINLINE void RDebugRenderer::DrawFrustum(const RFrustum& frustum)
+{
+	DrawFrustum(frustum, m_PrimitiveColor);
+}
+
+FORCEINLINE void RDebugRenderer::DrawSphere(const RVec3& center, float radius, int segment)
+{
+	DrawSphere(center, radius, m_PrimitiveColor, segment);
+}
+
 
 #endif

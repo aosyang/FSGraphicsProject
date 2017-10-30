@@ -33,14 +33,9 @@ void RDebugRenderer::Release()
 	m_PrimitiveMeshBuffer.Release();
 }
 
-void RDebugRenderer::SetColor(const RColor& color)
+void RDebugRenderer::SetPrimitiveColor(const RColor& color)
 {
 	m_PrimitiveColor = color;
-}
-
-void RDebugRenderer::DrawLine(const RVec3& start, const RVec3& end)
-{
-	DrawLine(start, end, m_PrimitiveColor, m_PrimitiveColor);
 }
 
 void RDebugRenderer::DrawLine(const RVec3& start, const RVec3& end, const RColor& color1, const RColor& color2)
@@ -49,11 +44,6 @@ void RDebugRenderer::DrawLine(const RVec3& start, const RVec3& end, const RColor
 	m_PrimitiveVertices.push_back({ RVec4(end), color2 });
 
 	m_bDirtyBuffer = true;
-}
-
-void RDebugRenderer::DrawAabb(const RAabb& aabb)
-{
-	DrawAabb(aabb, m_PrimitiveColor);
 }
 
 void RDebugRenderer::DrawAabb(const RAabb& aabb, const RColor& color)
@@ -89,11 +79,6 @@ void RDebugRenderer::DrawAabb(const RAabb& aabb, const RColor& color)
 	}
 }
 
-void RDebugRenderer::DrawFrustum(const RFrustum& frustum)
-{
-	DrawFrustum(frustum, m_PrimitiveColor);
-}
-
 void RDebugRenderer::DrawFrustum(const RFrustum& frustum, const RColor& color)
 {
 	int wiredCubeIdx[] =
@@ -112,11 +97,6 @@ void RDebugRenderer::DrawFrustum(const RFrustum& frustum, const RColor& color)
 		};
 		m_PrimitiveVertices.push_back(v);
 	}
-}
-
-void RDebugRenderer::DrawSphere(const RVec3& center, float radius, int segment)
-{
-	DrawSphere(center, radius, m_PrimitiveColor, segment);
 }
 
 void RDebugRenderer::DrawSphere(const RVec3& center, float radius, const RColor& color, int segment)
