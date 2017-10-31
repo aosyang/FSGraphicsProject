@@ -5,16 +5,18 @@
 //=============================================================================
 #include "RgRubik.h"
 
-#define FloatNearlyEquals(a,b)	(fabsf(a-b)<1.192092896e-06F)
+#define FloatNearlyEquals(a,b)	(fabsf((a)-(b))<0.00001f)
 
 const float BlockSpacing = 80.0f;
+const float CubeRotatingSpeed = 5.0f;
 
 static RMaterial RubikMaterials[7];
 
 // Compare if two quaternions are nearly equal
-bool QuaternionNearlyEquals(const RQuat& lhs, const RQuat& rhs)
+bool QuaternionsNearlyEqual(const RQuat& lhs, const RQuat& rhs)
 {
-	return (FloatNearlyEquals(lhs.w, rhs.w) && FloatNearlyEquals(lhs.x, rhs.x) && FloatNearlyEquals(lhs.y, rhs.y) && FloatNearlyEquals(lhs.z, rhs.z));
+	return (FloatNearlyEquals(lhs.w, rhs.w) && FloatNearlyEquals(lhs.x, rhs.x) && FloatNearlyEquals(lhs.y, rhs.y) && FloatNearlyEquals(lhs.z, rhs.z)) ||
+		   (FloatNearlyEquals(lhs.w, -rhs.w) && FloatNearlyEquals(lhs.x, -rhs.x) && FloatNearlyEquals(lhs.y, -rhs.y) && FloatNearlyEquals(lhs.z, -rhs.z));
 }
 
 float GetNearestSpacingValue(float f)
@@ -25,18 +27,34 @@ float GetNearestSpacingValue(float f)
 	return Fraction * BlockSpacing;
 }
 
+// All possible rotations of a single block in rubik cube game
+// Used to check and adjust block to closest rotation
 RQuat BlockRotations[] 
 {
-	RQuat::Euler(0, 0, 0),
-	RQuat::Euler(DEG_TO_RAD(90), 0, 0),
-	RQuat::Euler(DEG_TO_RAD(180), 0, 0),
-	RQuat::Euler(DEG_TO_RAD(270), 0, 0),
-	RQuat::Euler(0, DEG_TO_RAD(90), 0),
-	RQuat::Euler(0, DEG_TO_RAD(180), 0),
-	RQuat::Euler(0, DEG_TO_RAD(270), 0),
-	RQuat::Euler(0, 0, DEG_TO_RAD(90)),
-	RQuat::Euler(0, 0, DEG_TO_RAD(180)),
-	RQuat::Euler(0, 0, DEG_TO_RAD(270)),
+	RQuat(-1.000000f, 0.000000f, -0.000000f, 0.000000f),
+	RQuat(-0.707107f, -0.707107f, 0.000000f, 0.000000f),
+	RQuat(0.000000f, -1.000000f, 0.000000f, 0.000000f),
+	RQuat(0.707107f, -0.707107f, 0.000000f, 0.000000f),
+	RQuat(-0.707107f, 0.000000f, 0.707107f, 0.000000f),
+	RQuat(-0.500000f, -0.500000f, 0.500000f, -0.500000f),
+	RQuat(-0.000000f, -0.707107f, 0.000000f, -0.707107f),
+	RQuat(0.500000f, -0.500000f, -0.500000f, -0.500000f),
+	RQuat(0.000000f, 0.000000f, 1.000000f, 0.000000f),
+	RQuat(-0.000000f, 0.000000f, 0.707107f, -0.707107f),
+	RQuat(-0.000000f, 0.000000f, -0.000000f, -1.000000f),
+	RQuat(-0.000000f, -0.000000f, -0.707107f, -0.707107f),
+	RQuat(0.707107f, 0.000000f, 0.707107f, 0.000000f),
+	RQuat(0.500000f, 0.500000f, 0.500000f, -0.500000f),
+	RQuat(-0.000000f, 0.707107f, -0.000000f, -0.707107f),
+	RQuat(-0.500000f, 0.500000f, -0.500000f, -0.500000f),
+	RQuat(-0.707107f, 0.000000f, 0.000000f, -0.707107f),
+	RQuat(-0.500000f, -0.500000f, -0.500000f, -0.500000f),
+	RQuat(-0.000000f, -0.707107f, -0.707107f, 0.000000f),
+	RQuat(0.500000f, -0.500000f, -0.500000f, 0.500000f),
+	RQuat(-0.000000f, -0.707107f, 0.707107f, 0.000000f),
+	RQuat(0.500000f, -0.500000f, 0.500000f, -0.500000f),
+	RQuat(0.707107f, 0.000000f, 0.000000f, -0.707107f),
+	RQuat(0.500000f, 0.500000f, -0.500000f, -0.500000f), 
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -127,24 +145,31 @@ void RgCubeBlock::FixTransformInaccuracy()
 	RVec3 Position = m_NodeTransform.GetPosition();
 	RQuat Rotation = m_NodeTransform.GetRotation();
 
-	RQuat NR = Rotation;
-	NR.Normalize();
-
+	// Check all possible rotations and adjust to a closest one
 	for (int i = 0; i < ARRAYSIZE(BlockRotations); i++)
 	{
-		if (QuaternionNearlyEquals(Rotation, BlockRotations[i]))
+		if (QuaternionsNearlyEqual(Rotation, BlockRotations[i]))
 		{
 			Rotation = BlockRotations[i];
 			break;
 		}
 
-		if (i == ARRAYSIZE(BlockRotations))
+		// Not equals to any one, bad rotation!
+		if (i == ARRAYSIZE(BlockRotations) - 1)
 		{
 			// Shouldn't be here
+			RQuat NR = Rotation;
+			NR.Normalize();
+
+			RLogError("Rotation [%.4f %.4f %.4f %.4f] is not aligned to any of six directions!\n", Rotation.w, Rotation.x, Rotation.y, Rotation.z);
+			RLogError("Norm = %f\n", Rotation.Norm());
+			RLogError("Normalized rotation = [%.4f %.4f %.4f %.4f]\n", NR.w, NR.x, NR.y, NR.z);
+
 			assert(0);
 		}
 	}
 
+	// Adjust position to closest aligned ones
 	Position.SetX(GetNearestSpacingValue(Position.X()));
 	Position.SetY(GetNearestSpacingValue(Position.Y()));
 	Position.SetZ(GetNearestSpacingValue(Position.Z()));
@@ -167,6 +192,7 @@ void RgCubeBlock::SetupColors(int x, int y, int z)
 {
 	const float SideOffset = BlockSpacing * 0.5f;
 
+	// Create side pieces based on block's position
 	if (x == 2)
 	{
 		RgColorPiece* RightPiece = GetScene()->CreateSceneObjectOfType<RgColorPiece>();
@@ -258,7 +284,7 @@ void RgRubik::Update()
 
 	if (m_MoveAnimationRatio < 1.0f && m_CenterOfMove)
 	{
-		float DeltaTime = GEngine.GetTimer().DeltaTime() * 2.0f;
+		float DeltaTime = GEngine.GetTimer().DeltaTime() * CubeRotatingSpeed;
 		m_MoveAnimationRatio += DeltaTime;
 		if (m_MoveAnimationRatio >= 1.0f)
 		{

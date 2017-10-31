@@ -7,7 +7,7 @@
 #define _MATHHELPER_H
 
 
-#define FLT_EQUAL(a,b)			(fabsf(a-b)<FLT_EPSILON)
+#define FLT_EQUAL(a,b)			(fabsf((a)-(b))<FLT_EPSILON)
 #define FLT_EQUAL_ZERO(a)		(fabsf(a)<FLT_EPSILON)
 #define PI 3.1415926f
 #define DEG_TO_RAD(deg)			(PI/180.0f*(deg))
