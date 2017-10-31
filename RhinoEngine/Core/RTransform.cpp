@@ -114,6 +114,11 @@ void RTransform::Detach()
 	bIsCachedMatrixDirty = true;
 }
 
+RTransform* RTransform::GetParent() const
+{
+	return Parent;
+}
+
 void RTransform::NotifyChildrenMatricesChanged()
 {
 	for (auto Iter : Children)

@@ -70,7 +70,9 @@ RVec3 RSceneObject::GetPosition() const
 
 RVec3 RSceneObject::GetWorldPosition()
 {
-	return m_NodeTransform.GetMatrix().Transform(m_NodeTransform.GetPosition());
+	RTransform* Parent = m_NodeTransform.GetParent();
+
+	return Parent ? Parent->GetMatrix().Transform(m_NodeTransform.GetPosition()) : m_NodeTransform.GetPosition();
 }
 
 void RSceneObject::SetScale(const RVec3& scale)

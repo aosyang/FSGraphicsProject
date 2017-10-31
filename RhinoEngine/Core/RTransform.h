@@ -39,6 +39,8 @@ public:
 	void Attach(RTransform* NodeParent);
 	void Detach();
 
+	RTransform* GetParent() const;
+
 	bool IsCacheDirty() const;
 	void NotifyChildrenMatricesChanged();
 
