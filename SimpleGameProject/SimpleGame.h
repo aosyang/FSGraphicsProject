@@ -34,7 +34,9 @@ private:
 
 	RSkybox m_Skybox;
 
-	RgRubik* m_RubikCube;
+	RgRubik*		m_RubikCube;
 	RSceneObject*	m_CameraOrbiter;
+	bool			m_IsScramblingCube;
+	vector<UINT8>	m_ScrambleMoves;
 };
 

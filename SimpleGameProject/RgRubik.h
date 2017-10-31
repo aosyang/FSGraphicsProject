@@ -88,6 +88,7 @@ public:
 
 	void Update() override;
 
+	bool IsMoveInProcess() const;
 	void FinishCurrentMove();
 
 	void Rotate(ERubikSide Side, ERubikRotation Rotation);

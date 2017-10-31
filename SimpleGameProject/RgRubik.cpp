@@ -246,6 +246,7 @@ void RgCubeBlock::SetupColors(int x, int y, int z)
 RgRubik::RgRubik(RScene* InScene)
 	: Base(InScene),
 	  m_CenterOfMove(nullptr),
+	  m_MoveAnimationRatio(1.0f),
 	  m_FinishedMove(false)
 {
 	InitializeRubikMaterials();
@@ -295,6 +296,11 @@ void RgRubik::Update()
 		// Rotate center block
 		m_CenterOfMove->SetRotation(RQuat::Slerp(m_SourceRotation, m_TargetRotation, m_MoveAnimationRatio));
 	}
+}
+
+bool RgRubik::IsMoveInProcess() const
+{
+	return (m_MoveAnimationRatio < 1.0f || m_CenterOfMove != nullptr);
 }
 
 void RgRubik::FinishCurrentMove()

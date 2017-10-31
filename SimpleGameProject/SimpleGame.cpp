@@ -7,7 +7,8 @@
 #include "RgRubik.h"
 
 SimpleGame::SimpleGame()
-	: m_Camera(nullptr)
+	: m_Camera(nullptr),
+	  m_IsScramblingCube(false)
 {
 
 }
@@ -69,70 +70,123 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 
 	m_CameraOrbiter->SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0.0f));
 
-	if (RInput.IsKeyDown(VK_UP))
+	if (m_IsScramblingCube)
 	{
-		if (RInput.GetBufferedKeyState(VK_LEFT) == BKS_Pressed)
+		if (!m_RubikCube->IsMoveInProcess())
 		{
-			m_RubikCube->Rotate(ERubikSide::Top, ERubikRotation::CW);
-		}
-		else if (RInput.GetBufferedKeyState(VK_RIGHT) == BKS_Pressed)
-		{
-			m_RubikCube->Rotate(ERubikSide::Top, ERubikRotation::CCW);
-		}
-	}
+			UINT MoveNums = (UINT)m_ScrambleMoves.size();
 
-	if (RInput.IsKeyDown(VK_DOWN))
-	{
-		if (RInput.GetBufferedKeyState(VK_LEFT) == BKS_Pressed)
-		{
-			m_RubikCube->Rotate(ERubikSide::Bottom, ERubikRotation::CCW);
-		}
-		else if (RInput.GetBufferedKeyState(VK_RIGHT) == BKS_Pressed)
-		{
-			m_RubikCube->Rotate(ERubikSide::Bottom, ERubikRotation::CW);
-		}
-	}
+			if (MoveNums == 0)
+			{
+				m_IsScramblingCube = false;
+			}
+			else
+			{
+				UINT LastIndex = MoveNums - 1;
+				int Move = m_ScrambleMoves[LastIndex];
 
-	if (RInput.IsKeyDown(VK_LEFT))
-	{
-		if (RInput.GetBufferedKeyState(VK_UP) == BKS_Pressed)
-		{
-			m_RubikCube->Rotate(ERubikSide::West, ERubikRotation::CCW);
-		}
-		else if (RInput.GetBufferedKeyState(VK_DOWN) == BKS_Pressed)
-		{
-			m_RubikCube->Rotate(ERubikSide::West, ERubikRotation::CW);
-		}
-	}
+				ERubikRotation Rotation = (ERubikRotation)(Move % 2);
+				Move >>= 1;
+				ERubikSide Side = (ERubikSide)(Move % 6);
 
-	if (RInput.IsKeyDown(VK_RIGHT))
-	{
-		if (RInput.GetBufferedKeyState(VK_UP) == BKS_Pressed)
-		{
-			m_RubikCube->Rotate(ERubikSide::East, ERubikRotation::CW);
-		}
-		else if (RInput.GetBufferedKeyState(VK_DOWN) == BKS_Pressed)
-		{
-			m_RubikCube->Rotate(ERubikSide::East, ERubikRotation::CCW);
+				m_RubikCube->Rotate(Side, Rotation);
+				m_ScrambleMoves.pop_back();
+			}
 		}
 	}
+	else
+	{
+		if (RInput.GetBufferedKeyState(VK_SPACE) == BKS_Pressed)
+		{
+			m_IsScramblingCube = true;
 
-	if (RInput.GetBufferedKeyState('Z') == BKS_Pressed)
-	{
-		m_RubikCube->Rotate(ERubikSide::South, ERubikRotation::CCW);
-	}
-	else if (RInput.GetBufferedKeyState('X') == BKS_Pressed)
-	{
-		m_RubikCube->Rotate(ERubikSide::South, ERubikRotation::CW);
-	}
+			const int TotalMoveNums = 15;
+			UINT8 Last = 0;
 
-	if (RInput.GetBufferedKeyState('C') == BKS_Pressed)
-	{
-		m_RubikCube->Rotate(ERubikSide::North, ERubikRotation::CW);
-	}
-	else if (RInput.GetBufferedKeyState('V') == BKS_Pressed)
-	{
-		m_RubikCube->Rotate(ERubikSide::North, ERubikRotation::CCW);
+			m_ScrambleMoves.reserve(TotalMoveNums);
+			for (int i = 0; i < TotalMoveNums; i++)
+			{
+				UINT8 n = (UINT8)Math::RandRangedInt(0, 11);
+
+				if (i != 0)
+				{
+					// If a move happens to cancel the last one, try making a different move
+					while (((n >> 1) == (Last >> 1)) && (n % 2 != Last % 2))
+					{
+						n = (UINT8)Math::RandRangedInt(0, 11);
+					}
+				}
+
+				m_ScrambleMoves.push_back(n);
+				Last = n;
+			}
+		}
+
+		if (RInput.IsKeyDown(VK_UP))
+		{
+			if (RInput.GetBufferedKeyState(VK_LEFT) == BKS_Pressed)
+			{
+				m_RubikCube->Rotate(ERubikSide::Top, ERubikRotation::CW);
+			}
+			else if (RInput.GetBufferedKeyState(VK_RIGHT) == BKS_Pressed)
+			{
+				m_RubikCube->Rotate(ERubikSide::Top, ERubikRotation::CCW);
+			}
+		}
+
+		if (RInput.IsKeyDown(VK_DOWN))
+		{
+			if (RInput.GetBufferedKeyState(VK_LEFT) == BKS_Pressed)
+			{
+				m_RubikCube->Rotate(ERubikSide::Bottom, ERubikRotation::CCW);
+			}
+			else if (RInput.GetBufferedKeyState(VK_RIGHT) == BKS_Pressed)
+			{
+				m_RubikCube->Rotate(ERubikSide::Bottom, ERubikRotation::CW);
+			}
+		}
+
+		if (RInput.IsKeyDown(VK_LEFT))
+		{
+			if (RInput.GetBufferedKeyState(VK_UP) == BKS_Pressed)
+			{
+				m_RubikCube->Rotate(ERubikSide::West, ERubikRotation::CCW);
+			}
+			else if (RInput.GetBufferedKeyState(VK_DOWN) == BKS_Pressed)
+			{
+				m_RubikCube->Rotate(ERubikSide::West, ERubikRotation::CW);
+			}
+		}
+
+		if (RInput.IsKeyDown(VK_RIGHT))
+		{
+			if (RInput.GetBufferedKeyState(VK_UP) == BKS_Pressed)
+			{
+				m_RubikCube->Rotate(ERubikSide::East, ERubikRotation::CW);
+			}
+			else if (RInput.GetBufferedKeyState(VK_DOWN) == BKS_Pressed)
+			{
+				m_RubikCube->Rotate(ERubikSide::East, ERubikRotation::CCW);
+			}
+		}
+
+		if (RInput.GetBufferedKeyState('Z') == BKS_Pressed)
+		{
+			m_RubikCube->Rotate(ERubikSide::South, ERubikRotation::CCW);
+		}
+		else if (RInput.GetBufferedKeyState('X') == BKS_Pressed)
+		{
+			m_RubikCube->Rotate(ERubikSide::South, ERubikRotation::CW);
+		}
+
+		if (RInput.GetBufferedKeyState('C') == BKS_Pressed)
+		{
+			m_RubikCube->Rotate(ERubikSide::North, ERubikRotation::CW);
+		}
+		else if (RInput.GetBufferedKeyState('V') == BKS_Pressed)
+		{
+			m_RubikCube->Rotate(ERubikSide::North, ERubikRotation::CCW);
+		}
 	}
 
 	m_Scene.UpdateScene();

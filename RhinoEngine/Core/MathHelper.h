@@ -15,16 +15,25 @@
 
 namespace Math
 {
-	// Returns random float in [0, 1).
+	// Returns random float in [0, 1].
 	FORCEINLINE float RandF()
 	{
 		return (float)(rand()) / (float)RAND_MAX;
 	}
 
-	// Returns random float in [a, b).
+	// Returns random float in [a, b].
 	FORCEINLINE float RandRangedF(float a, float b)
 	{
 		return a + RandF()*(b - a);
+	}
+
+	// Returns random integer in [a, b]
+	FORCEINLINE int RandRangedInt(int a, int b)
+	{
+		float f = RandF();
+		if (f == 1.0f) f = 0.0f;
+		int d = (int)(f * (b - a + 1));
+		return a + d;
 	}
 
 	template<typename T>
