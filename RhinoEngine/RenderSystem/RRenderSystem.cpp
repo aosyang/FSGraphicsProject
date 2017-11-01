@@ -26,6 +26,7 @@ RRenderSystem::~RRenderSystem()
 {
 	// Should have unregistered all components by now
 	assert(m_RegisteredRenderMeshComponents.size() == 0);
+	assert(m_RegisteredLights.size() == 0);
 }
 
 bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, bool enable4xMsaa, bool enableGammaCorrection)
@@ -552,9 +553,14 @@ void RRenderSystem::RenderFrame()
 		RConstantBuffers::cbMaterial.UpdateBufferData(&cbMaterial);
 		RConstantBuffers::cbMaterial.BindBuffer();
 
+		RenderViewInfo View
+		{
+			m_RenderCamera->GetFrustum()
+		};
+
 		for (auto MeshComponent : m_RegisteredRenderMeshComponents)
 		{
-			MeshComponent->Render();
+			MeshComponent->Render(View);
 		}
 	}
 

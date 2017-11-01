@@ -155,17 +155,18 @@ void RDebugRenderer::Render()
 		m_bDirtyBuffer = false;
 	}
 
-	//RRenderer.Clear(false);
+	if (m_PrimitiveMeshBuffer.GetVertexCount() != 0)
+	{
+		SHADER_OBJECT_BUFFER cbObject;
+		cbObject.worldMatrix = RMatrix4::IDENTITY;
 
-	SHADER_OBJECT_BUFFER cbObject;
-	cbObject.worldMatrix = RMatrix4::IDENTITY;
+		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
+		RConstantBuffers::cbPerObject.BindBuffer();
 
-	RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
-	RConstantBuffers::cbPerObject.BindBuffer();
-
-	m_ColorShader->Bind();
-	GRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);
-	m_PrimitiveMeshBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+		m_ColorShader->Bind();
+		GRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);
+		m_PrimitiveMeshBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+	}
 }
 
 void RDebugRenderer::Reset()

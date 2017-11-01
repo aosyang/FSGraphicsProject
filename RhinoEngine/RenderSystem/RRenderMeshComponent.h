@@ -15,6 +15,11 @@ struct PendingAssignedMaterial
 	RMaterial	Material;
 };
 
+struct RenderViewInfo
+{
+	RFrustum&&	Frustum;
+};
+
 class RRenderMeshComponent : public RSceneComponentBase
 {
 	typedef RSceneComponentBase Base;
@@ -27,7 +32,7 @@ public:
 	virtual void Update() override;
 
 	/// Render the component
-	void Render() const;
+	void Render(const RenderViewInfo& View) const;
 
 	/// Set mesh resource for the component to render
 	void SetMesh(const RMesh* Mesh);

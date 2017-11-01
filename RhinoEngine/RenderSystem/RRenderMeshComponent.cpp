@@ -38,58 +38,63 @@ void RRenderMeshComponent::Update()
 	}
 }
 
-void RRenderMeshComponent::Render() const
+void RRenderMeshComponent::Render(const RenderViewInfo& View) const
 {
 	if (m_Mesh && m_Mesh->IsLoaded() && !m_PostponeLoadMaterials)
 	{
-		// Set up world matrix in constant buffer
-		SHADER_OBJECT_BUFFER cbObject;
-		cbObject.worldMatrix = GetOwner()->GetTransformMatrix();
-
-		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
-		RConstantBuffers::cbPerObject.BindBuffer();
-
-		const UINT32 NumMeshElements = (UINT32)m_Mesh->GetMeshElements().size();
-		const UINT32 NumMaterials = (UINT32)m_Materials.size();
-
-		for (UINT32 i = 0; i < NumMeshElements; i++)
+		const RMatrix4& Matrix = GetOwner()->GetTransformMatrix();
+		RAabb MeshAabb = m_Mesh->GetLocalSpaceAabb().GetTransformedAabb(Matrix);
+		if (RCollision::TestAabbInsideFrustum(View.Frustum, MeshAabb))
 		{
-			RShader* shader = nullptr;
+			// Set up world matrix in constant buffer
+			SHADER_OBJECT_BUFFER cbObject;
+			cbObject.worldMatrix = Matrix;
 
-			if (i < NumMaterials)
+			RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
+			RConstantBuffers::cbPerObject.BindBuffer();
+
+			const UINT32 NumMeshElements = (UINT32)m_Mesh->GetMeshElements().size();
+			const UINT32 NumMaterials = (UINT32)m_Materials.size();
+
+			for (UINT32 i = 0; i < NumMeshElements; i++)
 			{
-				shader = m_Materials[i].Shader;
+				RShader* shader = nullptr;
+
+				if (i < NumMaterials)
+				{
+					shader = m_Materials[i].Shader;
+				}
+
+				assert(shader);
+
+				const RMeshElement& MeshElement = m_Mesh->GetMeshElements()[i];
+				int flag = MeshElement.GetFlag();
+
+				int shaderFeatureMask = 0;
+				if ((flag & MEF_Skinned) && !GEngine.IsEditor())
+				{
+					shaderFeatureMask |= SFM_Skinned;
+				}
+
+				if (GRenderer.IsUsingDeferredShading())
+				{
+					shaderFeatureMask |= SFM_Deferred;
+				}
+
+				shader->Bind(shaderFeatureMask);
+
+				ID3D11ShaderResourceView* NullShaderResourceView[] = { nullptr };
+
+				for (int t = 0; t < m_Materials[i].TextureNum; t++)
+				{
+					RTexture* texture = m_Materials[i].Textures[t];
+					GRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, texture ? texture->GetPtrSRV() : NullShaderResourceView);
+
+					GRenderer.SetSamplerState(t, SamplerState_Texture);
+				}
+
+				m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			}
-
-			assert(shader);
-
-			const RMeshElement& MeshElement = m_Mesh->GetMeshElements()[i];
-			int flag = MeshElement.GetFlag();
-
-			int shaderFeatureMask = 0;
-			if ((flag & MEF_Skinned) && !GEngine.IsEditor())
-			{
-				shaderFeatureMask |= SFM_Skinned;
-			}
-
-			if (GRenderer.IsUsingDeferredShading())
-			{
-				shaderFeatureMask |= SFM_Deferred;
-			}
-
-			shader->Bind(shaderFeatureMask);
-
-			ID3D11ShaderResourceView* NullShaderResourceView[] = { nullptr };
-
-			for (int t = 0; t < m_Materials[i].TextureNum; t++)
-			{
-				RTexture* texture = m_Materials[i].Textures[t];
-				GRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, texture ? texture->GetPtrSRV() : NullShaderResourceView);
-
-				GRenderer.SetSamplerState(t, SamplerState_Texture);
-			}
-
-			m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		}
 	}
 }

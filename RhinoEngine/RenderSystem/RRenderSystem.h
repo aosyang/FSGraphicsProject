@@ -34,6 +34,13 @@ enum SamplerState
 	SamplerStateCount,
 };
 
+struct RenderStats
+{
+	UINT DrawCalls;
+
+	void Reset() { DrawCalls = 0; }
+};
+
 class RRenderSystem : public RSingleton<RRenderSystem>
 {
 	friend class RSingleton<RRenderSystem>;
@@ -80,6 +87,8 @@ public:
 
 	void SetRenderCamera(RCamera* Camera);
 	RCamera* GetRenderCamera() const;
+
+	RenderStats	Stats;
 
 	/// Render current frame
 	void RenderFrame();

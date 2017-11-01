@@ -38,7 +38,20 @@ public:
 
 	void Draw(D3D11_PRIMITIVE_TOPOLOGY topology) const;
 	void DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology) const;
+
+	UINT GetVertexCount() const;
+	UINT GetIndexCount() const;
 };
+
+FORCEINLINE UINT RMeshRenderBuffer::GetVertexCount() const
+{
+	return m_VertexCount;
+}
+
+FORCEINLINE UINT RMeshRenderBuffer::GetIndexCount() const
+{
+	return m_IndexCount;
+}
 
 class RMeshElement
 {

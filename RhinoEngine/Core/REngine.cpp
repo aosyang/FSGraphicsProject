@@ -156,6 +156,7 @@ void REngine::RunOneFrame(bool update_input)
 
 	GScriptSystem.UpdateScriptableObjects();
 
+	GRenderer.Stats.Reset();
 	if (m_UseCustomRenderingPipeline)
 	{
 		m_Application->RenderScene();
