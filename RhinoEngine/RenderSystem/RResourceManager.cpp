@@ -145,7 +145,7 @@ void RResourceManager::LoadAllResources()
 				}
 				else if (lowerExt == ".rmesh")
 				{
-					string fbxFilename = resName.substr(0, resName.find_last_of('.') + 1) + string("fbx");
+					string fbxFilename = RFileUtil::ReplaceExtension(resName, "fbx");
 					LoadFbxMesh(fbxFilename.data());
 				}
 			}
@@ -153,7 +153,7 @@ void RResourceManager::LoadAllResources()
 			{
 				if (FindFileData.cFileName[0] != '.')
 				{
-					dir_queue.push(string(FindFileData.cFileName) + "/");
+					dir_queue.push(dir_name + string(FindFileData.cFileName) + "/");
 				}
 			}
 
