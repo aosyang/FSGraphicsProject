@@ -43,6 +43,7 @@ enum class EPieceColor : UINT8
 
 class RgCubeBlock;
 
+// The color piece on one side of each block
 class RgColorPiece : public RSceneObject
 {
 	DECLARE_SCENE_OBJECT(RSceneObject)
@@ -57,6 +58,7 @@ protected:
 	RRenderMeshComponent* MeshComponent;
 };
 
+// The small block that can be rotated freely
 class RgCubeBlock : public RSceneObject
 {
 	DECLARE_SCENE_OBJECT(RSceneObject)
@@ -68,6 +70,7 @@ public:
 	void AttachToCenterBlock(RgCubeBlock* CenterBlock);
 	void DetachFromCenterBlock();
 
+	// Eliminate floating point inaccuracy after rotating the block
 	void FixTransformInaccuracy();
 
 protected:
@@ -108,7 +111,7 @@ protected:
 	RQuat					m_SourceRotation;
 	RQuat					m_TargetRotation;
 
-	float					m_MoveAnimationRatio;
+	float					m_MoveAnimationProgress;
 	bool					m_FinishedMove;
 
 	ERubikSide				m_LastMoveSide;

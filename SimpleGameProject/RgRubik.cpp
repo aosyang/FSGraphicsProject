@@ -12,6 +12,12 @@ const float CubeRotatingSpeed = 5.0f;
 
 static RMaterial RubikMaterials[7];
 
+float EaseInOut(float x)
+{
+	float sq = x * x;
+	return sq / (2.0f * (sq - x) + 1.0f);
+}
+
 // Compare if two quaternions are nearly equal
 bool QuaternionsNearlyEqual(const RQuat& lhs, const RQuat& rhs)
 {
@@ -246,7 +252,7 @@ void RgCubeBlock::SetupColors(int x, int y, int z)
 RgRubik::RgRubik(RScene* InScene)
 	: Base(InScene),
 	  m_CenterOfMove(nullptr),
-	  m_MoveAnimationRatio(1.0f),
+	  m_MoveAnimationProgress(1.0f),
 	  m_FinishedMove(false)
 {
 	InitializeRubikMaterials();
@@ -283,24 +289,25 @@ void RgRubik::Update()
 		FinishCurrentMove();
 	}
 
-	if (m_MoveAnimationRatio < 1.0f && m_CenterOfMove)
+	if (m_MoveAnimationProgress < 1.0f && m_CenterOfMove)
 	{
 		float DeltaTime = GEngine.GetTimer().DeltaTime() * CubeRotatingSpeed;
-		m_MoveAnimationRatio += DeltaTime;
-		if (m_MoveAnimationRatio >= 1.0f)
+		m_MoveAnimationProgress += DeltaTime;
+		if (m_MoveAnimationProgress >= 1.0f)
 		{
-			m_MoveAnimationRatio = 1.0f;
+			m_MoveAnimationProgress = 1.0f;
 			m_FinishedMove = true;
 		}
 
 		// Rotate center block
-		m_CenterOfMove->SetRotation(RQuat::Slerp(m_SourceRotation, m_TargetRotation, m_MoveAnimationRatio));
+		float t = EaseInOut(m_MoveAnimationProgress);
+		m_CenterOfMove->SetRotation(RQuat::Slerp(m_SourceRotation, m_TargetRotation, t));
 	}
 }
 
 bool RgRubik::IsMoveInProcess() const
 {
-	return (m_MoveAnimationRatio < 1.0f || m_CenterOfMove != nullptr);
+	return (m_MoveAnimationProgress < 1.0f || m_CenterOfMove != nullptr);
 }
 
 void RgRubik::FinishCurrentMove()
@@ -411,5 +418,5 @@ void RgRubik::Rotate(ERubikSide Side, ERubikRotation Rotation)
 	m_SourceRotation = m_CenterOfMove->GetTransform()->GetRotation();
 	m_TargetRotation = m_SourceRotation * RQuat::Euler(Rots[(int)Side] * (Rotation == ERubikRotation::CW ? 1.0f : -1.0f));
 
-	m_MoveAnimationRatio = 0.0f;
+	m_MoveAnimationProgress = 0.0f;
 }
