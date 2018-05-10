@@ -14,7 +14,7 @@ class RCamera : public RSceneObject
 	typedef RSceneObject Base;
 	friend class RScene;
 public:
-	SceneObjectType GetType() const { return SO_Camera; }
+	ESceneObjectType GetType() const { return ESceneObjectType::Camera; }
 
 	const RMatrix4& GetViewMatrix();
 	const RMatrix4& GetProjectionMatrix();

@@ -119,8 +119,11 @@ namespace EngineManagedWrapper
 		{
 			switch (sel->GetType())
 			{
-			case SO_MeshObject:
+			case ESceneObjectType::MeshObject:
 				return gcnew EngineManagedWrapper::ManagedMeshObject(sel);
+				break;
+
+			default:
 				break;
 			}
 		}

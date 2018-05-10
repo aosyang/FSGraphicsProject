@@ -214,7 +214,7 @@ void RScene::SaveToFile(const char* filename)
 			elem_obj->SetAttribute("Script", (*iter)->GetScript().c_str());
 		}
 
-		if ((*iter)->GetType() == SO_MeshObject)
+		if ((*iter)->GetType() == ESceneObjectType::MeshObject)
 		{
 			elem_obj->SetAttribute("Type", "MeshObject");
 
@@ -288,7 +288,7 @@ RVec3 RScene::TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec)
 
 	for (vector<RSceneObject*>::iterator iter = m_SceneObjects.begin(); iter != m_SceneObjects.end(); iter++)
 	{
-		if ((*iter)->GetType() == SO_MeshObject)
+		if ((*iter)->GetType() == ESceneObjectType::MeshObject)
 		{
 			RSMeshObject* meshObj = (RSMeshObject*)(*iter);
 

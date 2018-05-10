@@ -9,11 +9,11 @@
 class RScene;
 class RSceneComponentBase;
 
-enum SceneObjectType
+enum class ESceneObjectType : UINT8
 {
-	SO_None,
-	SO_MeshObject,
-	SO_Camera,
+	None,
+	MeshObject,
+	Camera,
 };
 
 #define DECLARE_SCENE_OBJECT(base)	typedef base Base; friend class RScene;
@@ -34,7 +34,7 @@ public:
 	/// Get the scene which this object belongs to
 	RScene* GetScene() const				{ return m_Scene; }
 
-	virtual SceneObjectType GetType() const { return SO_None; }
+	virtual ESceneObjectType GetType() const { return ESceneObjectType::None; }
 	virtual RSceneObject* Clone() const		{ return nullptr; }
 
 	RTransform* GetTransform();

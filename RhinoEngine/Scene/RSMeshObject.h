@@ -19,7 +19,7 @@ class RSMeshObject : public RSceneObject
 	typedef RSceneObject Base;
 	friend class RScene;
 public:
-	SceneObjectType GetType() const override { return SO_MeshObject; }
+	ESceneObjectType GetType() const override { return ESceneObjectType::MeshObject; }
 	RSceneObject* Clone() const override;
 
 	void SetMesh(RMesh* mesh);
