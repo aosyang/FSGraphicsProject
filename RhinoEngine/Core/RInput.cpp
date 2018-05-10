@@ -91,36 +91,41 @@ void RInputSystem::HideCursor()
 	::ShowCursor(FALSE);
 }
 
-void RInputSystem::GetCursorPos(int& x, int& y)
+void RInputSystem::GetCursorPosition(int& x, int& y) const
 {
 	x = m_CursorPos.x;
 	y = m_CursorPos.y;
 }
 
-void RInputSystem::GetCursorRelPos(int& dx, int& dy)
+void RInputSystem::GetRelativeCursorPosition(int& dx, int& dy) const
 {
 	dx = m_CursorPos.x - m_CursorPosLastFrame.x;
 	dy = m_CursorPos.y - m_CursorPosLastFrame.y;
 }
 
-RInput_BufferedKeyState RInputSystem::GetBufferedKeyState(int keycode)
+EBufferedKeyState RInputSystem::GetBufferedKeyState(int KeyCode) const
 {
-	if (m_bKeyDown[keycode])
+	if (m_bKeyDown[KeyCode])
 	{
-		return m_bKeyDownLastFrame[keycode] ? BKS_KeyDown : BKS_Pressed;
+		return m_bKeyDownLastFrame[KeyCode] ? EBufferedKeyState::KeyDown : EBufferedKeyState::Pressed;
 	}
 	else
 	{
-		return m_bKeyDownLastFrame[keycode] ? BKS_Released : BKS_KeyUp;
+		return m_bKeyDownLastFrame[KeyCode] ? EBufferedKeyState::Released : EBufferedKeyState::KeyUp;
 	}
 }
 
-bool RInputSystem::IsKeyDown(int keycode)
+bool RInputSystem::IsKeyDown(int KeyCode) const
 {
-	return m_bKeyDown[keycode];
+	return m_bKeyDown[KeyCode];
 }
 
-void RInputSystem::_SetKeyDown(int keycode, bool keydown)
+void RInputSystem::SetKeyDownState(int KeyCode, bool bIsKeyDown)
 {
-	m_bKeyDown[keycode] = keydown;
+	m_bKeyDown[KeyCode] = bIsKeyDown;
+}
+
+void RKeyStateModifier::NotifyKeyDownStateChanged(int KeyCode, bool bIsKeyDown)
+{
+	RInput.SetKeyDownState(KeyCode, bIsKeyDown);
 }

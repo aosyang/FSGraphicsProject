@@ -130,7 +130,7 @@ void RDebugMenu::Render()
 
 bool RDebugMenu::IsKeyDownOrRepeat(int keycode)
 {
-	if (RInput.GetBufferedKeyState(keycode) == BKS_Pressed)
+	if (RInput.GetBufferedKeyState(keycode) == EBufferedKeyState::Pressed)
 	{
 		m_KeyRepeatTime = GEngine.GetTimer().TotalTime() + 0.4f;
 		return true;

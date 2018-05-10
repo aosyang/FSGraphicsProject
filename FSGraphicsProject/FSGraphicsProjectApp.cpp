@@ -341,13 +341,13 @@ bool FSGraphicsProjectApp::Initialize()
 
 void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 {
-	if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Pressed)
+	if (RInput.GetBufferedKeyState(VK_RBUTTON) == EBufferedKeyState::Pressed)
 	{
 		RInput.HideCursor();
 		RInput.LockCursor();
 	}
 
-	if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Released)
+	if (RInput.GetBufferedKeyState(VK_RBUTTON) == EBufferedKeyState::Released)
 	{
 		RInput.ShowCursor();
 		RInput.UnlockCursor();
@@ -356,7 +356,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	if (RInput.IsKeyDown(VK_RBUTTON))
 	{
 		int dx, dy;
-		RInput.GetCursorRelPos(dx, dy);
+		RInput.GetRelativeCursorPosition(dx, dy);
 		if (dx || dy)
 		{
 			m_CamYaw += (float)dx / 200.0f;
@@ -380,35 +380,35 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 
 	// Toggle lights
-	if (RInput.GetBufferedKeyState('F') == BKS_Pressed)
+	if (RInput.GetBufferedKeyState('F') == EBufferedKeyState::Pressed)
 		m_EnableLights[2] = !m_EnableLights[2];
 
-	if (RInput.GetBufferedKeyState('1') == BKS_Pressed)
+	if (RInput.GetBufferedKeyState('1') == EBufferedKeyState::Pressed)
 		m_EnableLights[0] = !m_EnableLights[0];
 
-	if (RInput.GetBufferedKeyState('2') == BKS_Pressed)
+	if (RInput.GetBufferedKeyState('2') == EBufferedKeyState::Pressed)
 		m_EnableLights[1] = !m_EnableLights[1];
 
-	if (RInput.GetBufferedKeyState('4') == BKS_Pressed)
+	if (RInput.GetBufferedKeyState('4') == EBufferedKeyState::Pressed)
 		m_EnabledPostProcessor = 1;
 
-	if (RInput.GetBufferedKeyState('5') == BKS_Pressed)
+	if (RInput.GetBufferedKeyState('5') == EBufferedKeyState::Pressed)
 		m_EnabledPostProcessor = 2;
 
-	if (RInput.GetBufferedKeyState('6') == BKS_Pressed)
+	if (RInput.GetBufferedKeyState('6') == EBufferedKeyState::Pressed)
 		m_EnabledPostProcessor = 0;
 
-	if (RInput.GetBufferedKeyState('P') == BKS_Pressed)
+	if (RInput.GetBufferedKeyState('P') == EBufferedKeyState::Pressed)
 		m_RenderCollisionWireframe = !m_RenderCollisionWireframe;
 
-	if (RInput.GetBufferedKeyState('X') == BKS_Pressed)
+	if (RInput.GetBufferedKeyState('X') == EBufferedKeyState::Pressed)
 	{
 		m_CurrentAnim++;
 		m_CurrentAnim %= m_CharacterAnimations.size();
 		m_CharacterAnimation = m_CharacterAnimations[m_CurrentAnim];
 	}
 
-	if (RInput.GetBufferedKeyState('Z') == BKS_Pressed)
+	if (RInput.GetBufferedKeyState('Z') == EBufferedKeyState::Pressed)
 	{
 		m_CurrentAnim--;
 		if (m_CurrentAnim < 0)
@@ -416,10 +416,10 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		m_CharacterAnimation = m_CharacterAnimations[m_CurrentAnim];
 	}
 
-	if (RInput.GetBufferedKeyState(VK_SPACE) == BKS_Pressed)
+	if (RInput.GetBufferedKeyState(VK_SPACE) == EBufferedKeyState::Pressed)
 		m_CharacterYVel = 4.0f;
 
-	if (RInput.GetBufferedKeyState('R') == BKS_Pressed)
+	if (RInput.GetBufferedKeyState('R') == EBufferedKeyState::Pressed)
 		m_CharacterObj->SetPosition(RVec3(-1100.0f, 50.0f, 0.0f));
 
 	if (RInput.IsKeyDown(VK_LEFT))
@@ -460,7 +460,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 	static bool toggleMovingSun = false;
 
-	if (RInput.GetBufferedKeyState('U') == BKS_Pressed)
+	if (RInput.GetBufferedKeyState('U') == EBufferedKeyState::Pressed)
 	{
 		toggleMovingSun = !toggleMovingSun;
 	}
@@ -473,7 +473,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		m_SunVec = RVec3(sinf(ct) * 0.5f, cosf(ct) * 0.5f, 0.25f).GetNormalized() * 1000.0f;
 	}
 
-	if (RInput.GetBufferedKeyState('I') == BKS_Pressed)
+	if (RInput.GetBufferedKeyState('I') == EBufferedKeyState::Pressed)
 	{
 		m_MaterialSpecular = RVec4(1.0f, 1.0f, 1.0f, Math::RandRangedF(1.0f, 512.0f));
 	}
@@ -481,7 +481,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	static RFrustum frustum = m_Camera->GetFrustum();
 	static bool freezeFrustum = false;
 
-	if (RInput.GetBufferedKeyState('O') == BKS_Pressed)
+	if (RInput.GetBufferedKeyState('O') == EBufferedKeyState::Pressed)
 	{
 		freezeFrustum = !freezeFrustum;
 	}
@@ -757,12 +757,12 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	//GDebugRenderer.DrawAabb(m_TachikomaObj->GetAabb());
 
 
-	if (RInput.GetBufferedKeyState(VK_OEM_PLUS) == BKS_Pressed)
+	if (RInput.GetBufferedKeyState(VK_OEM_PLUS) == EBufferedKeyState::Pressed)
 	{
 		m_MeshInstanceCount += 2;
 	}
 
-	if (RInput.GetBufferedKeyState(VK_OEM_MINUS) == BKS_Pressed)
+	if (RInput.GetBufferedKeyState(VK_OEM_MINUS) == EBufferedKeyState::Pressed)
 	{
 		m_MeshInstanceCount -= 2;
 		if (m_MeshInstanceCount <= 0)
@@ -826,7 +826,7 @@ void FSGraphicsProjectApp::RenderScene()
 		else
 		{
 			static int shadowIndex = 0;
-			if (RInput.GetBufferedKeyState(VK_TAB) == BKS_Pressed)
+			if (RInput.GetBufferedKeyState(VK_TAB) == EBufferedKeyState::Pressed)
 			{
 				shadowIndex++;
 				shadowIndex %= 3;

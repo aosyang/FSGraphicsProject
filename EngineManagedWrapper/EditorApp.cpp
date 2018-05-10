@@ -91,23 +91,23 @@ namespace EngineManagedWrapper
 
 		RECT rwRect = GEngine.GetWindowRectInfo();
 		int mx, my;
-		RInput.GetCursorPos(mx, my);
+		RInput.GetCursorPosition(mx, my);
 
 		if (mx >= rwRect.left && mx <= rwRect.right &&
 			my >= rwRect.top && my <= rwRect.bottom)
 		{
-			if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Pressed)
+			if (RInput.GetBufferedKeyState(VK_RBUTTON) == EBufferedKeyState::Pressed)
 			{
 				RInput.HideCursor();
 				RInput.LockCursor();
 			}
 
-			if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Pressed)
+			if (RInput.GetBufferedKeyState(VK_LBUTTON) == EBufferedKeyState::Pressed)
 			{
 				RECT rect = GEngine.GetWindowRectInfo();
 				int cur_x, cur_y;
 
-				RInput.GetCursorPos(cur_x, cur_y);
+				RInput.GetCursorPosition(cur_x, cur_y);
 				float fx = float(cur_x - rect.left) / float(rect.right - rect.left),
 					fy = float(cur_y - rect.top) / float(rect.bottom - rect.top);
 
@@ -117,7 +117,7 @@ namespace EngineManagedWrapper
 			if (RInput.IsKeyDown(VK_RBUTTON))
 			{
 				int dx, dy;
-				RInput.GetCursorRelPos(dx, dy);
+				RInput.GetRelativeCursorPosition(dx, dy);
 				if (dx || dy)
 				{
 					m_CamYaw += (float)dx / 200.0f;
@@ -141,13 +141,13 @@ namespace EngineManagedWrapper
 			}
 		}
 
-		if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Released)
+		if (RInput.GetBufferedKeyState(VK_RBUTTON) == EBufferedKeyState::Released)
 		{
 			RInput.ShowCursor();
 			RInput.UnlockCursor();
 		}
 
-		if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Released)
+		if (RInput.GetBufferedKeyState(VK_LBUTTON) == EBufferedKeyState::Released)
 		{
 			m_MouseControlMode = MouseControlMode::None;
 		}
@@ -157,7 +157,7 @@ namespace EngineManagedWrapper
 			if (m_SelectedObject)
 			{
 				int mdx, mdy;
-				RInput.GetCursorRelPos(mdx, mdy);
+				RInput.GetRelativeCursorPosition(mdx, mdy);
 
 				RVec3 world_x = RVec3(1, 0, 0);
 				RVec3 world_y = RVec3(0, 1, 0);
@@ -168,7 +168,7 @@ namespace EngineManagedWrapper
 
 				float move_scale = GRenderer.GetClientHeight() / 500.0f;
 
-				if (RInput.GetBufferedKeyState(VK_LBUTTON) == BKS_Pressed &&
+				if (RInput.GetBufferedKeyState(VK_LBUTTON) == EBufferedKeyState::Pressed &&
 					RInput.IsKeyDown(VK_LCONTROL))
 				{
 					m_SelectedObject = m_SelectedObject->Clone();
@@ -478,7 +478,7 @@ namespace EngineManagedWrapper
 
 		if (m_MouseControlMode != MouseControlMode::None)
 		{
-			RInput.GetCursorPos(m_MouseDownX, m_MouseDownY);
+			RInput.GetCursorPosition(m_MouseDownX, m_MouseDownY);
 		}
 	}
 

@@ -44,13 +44,13 @@ bool SimpleGame::Initialize()
 
 void SimpleGame::UpdateScene(const RTimer& timer)
 {
-	if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Pressed)
+	if (RInput.GetBufferedKeyState(VK_RBUTTON) == EBufferedKeyState::Pressed)
 	{
 		RInput.HideCursor();
 		RInput.LockCursor();
 	}
 
-	if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Released)
+	if (RInput.GetBufferedKeyState(VK_RBUTTON) == EBufferedKeyState::Released)
 	{
 		RInput.ShowCursor();
 		RInput.UnlockCursor();
@@ -59,7 +59,7 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 	if (RInput.IsKeyDown(VK_RBUTTON))
 	{
 		int dx, dy;
-		RInput.GetCursorRelPos(dx, dy);
+		RInput.GetRelativeCursorPosition(dx, dy);
 		if (dx || dy)
 		{
 			m_CamYaw += (float)dx / 200.0f;
@@ -96,7 +96,7 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 	}
 	else
 	{
-		if (RInput.GetBufferedKeyState(VK_SPACE) == BKS_Pressed)
+		if (RInput.GetBufferedKeyState(VK_SPACE) == EBufferedKeyState::Pressed)
 		{
 			m_IsScramblingCube = true;
 
@@ -124,11 +124,11 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 
 		if (RInput.IsKeyDown(VK_UP))
 		{
-			if (RInput.GetBufferedKeyState(VK_LEFT) == BKS_Pressed)
+			if (RInput.GetBufferedKeyState(VK_LEFT) == EBufferedKeyState::Pressed)
 			{
 				m_RubikCube->Rotate(ERubikSide::Top, ERubikRotation::CW);
 			}
-			else if (RInput.GetBufferedKeyState(VK_RIGHT) == BKS_Pressed)
+			else if (RInput.GetBufferedKeyState(VK_RIGHT) == EBufferedKeyState::Pressed)
 			{
 				m_RubikCube->Rotate(ERubikSide::Top, ERubikRotation::CCW);
 			}
@@ -136,11 +136,11 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 
 		if (RInput.IsKeyDown(VK_DOWN))
 		{
-			if (RInput.GetBufferedKeyState(VK_LEFT) == BKS_Pressed)
+			if (RInput.GetBufferedKeyState(VK_LEFT) == EBufferedKeyState::Pressed)
 			{
 				m_RubikCube->Rotate(ERubikSide::Bottom, ERubikRotation::CCW);
 			}
-			else if (RInput.GetBufferedKeyState(VK_RIGHT) == BKS_Pressed)
+			else if (RInput.GetBufferedKeyState(VK_RIGHT) == EBufferedKeyState::Pressed)
 			{
 				m_RubikCube->Rotate(ERubikSide::Bottom, ERubikRotation::CW);
 			}
@@ -148,11 +148,11 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 
 		if (RInput.IsKeyDown(VK_LEFT))
 		{
-			if (RInput.GetBufferedKeyState(VK_UP) == BKS_Pressed)
+			if (RInput.GetBufferedKeyState(VK_UP) == EBufferedKeyState::Pressed)
 			{
 				m_RubikCube->Rotate(ERubikSide::West, ERubikRotation::CCW);
 			}
-			else if (RInput.GetBufferedKeyState(VK_DOWN) == BKS_Pressed)
+			else if (RInput.GetBufferedKeyState(VK_DOWN) == EBufferedKeyState::Pressed)
 			{
 				m_RubikCube->Rotate(ERubikSide::West, ERubikRotation::CW);
 			}
@@ -160,30 +160,30 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 
 		if (RInput.IsKeyDown(VK_RIGHT))
 		{
-			if (RInput.GetBufferedKeyState(VK_UP) == BKS_Pressed)
+			if (RInput.GetBufferedKeyState(VK_UP) == EBufferedKeyState::Pressed)
 			{
 				m_RubikCube->Rotate(ERubikSide::East, ERubikRotation::CW);
 			}
-			else if (RInput.GetBufferedKeyState(VK_DOWN) == BKS_Pressed)
+			else if (RInput.GetBufferedKeyState(VK_DOWN) == EBufferedKeyState::Pressed)
 			{
 				m_RubikCube->Rotate(ERubikSide::East, ERubikRotation::CCW);
 			}
 		}
 
-		if (RInput.GetBufferedKeyState('Z') == BKS_Pressed)
+		if (RInput.GetBufferedKeyState('Z') == EBufferedKeyState::Pressed)
 		{
 			m_RubikCube->Rotate(ERubikSide::South, ERubikRotation::CCW);
 		}
-		else if (RInput.GetBufferedKeyState('X') == BKS_Pressed)
+		else if (RInput.GetBufferedKeyState('X') == EBufferedKeyState::Pressed)
 		{
 			m_RubikCube->Rotate(ERubikSide::South, ERubikRotation::CW);
 		}
 
-		if (RInput.GetBufferedKeyState('C') == BKS_Pressed)
+		if (RInput.GetBufferedKeyState('C') == EBufferedKeyState::Pressed)
 		{
 			m_RubikCube->Rotate(ERubikSide::North, ERubikRotation::CW);
 		}
-		else if (RInput.GetBufferedKeyState('V') == BKS_Pressed)
+		else if (RInput.GetBufferedKeyState('V') == EBufferedKeyState::Pressed)
 		{
 			m_RubikCube->Rotate(ERubikSide::North, ERubikRotation::CCW);
 		}

@@ -365,7 +365,7 @@ void RRenderSystem::Present()
 {
 	assert(m_SwapChain);
 
-	HR(m_SwapChain->Present(1, 0));
+	HR(m_SwapChain->Present(0, 0));
 }
 
 void RRenderSystem::SetRenderTargets(UINT numViews, ID3D11RenderTargetView* const* renderTargetView, ID3D11DepthStencilView* depthStencilView)

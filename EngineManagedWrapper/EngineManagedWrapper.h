@@ -20,8 +20,8 @@ namespace EngineManagedWrapper {
 
 	public:
 		RhinoEngineWrapper();
-		~RhinoEngineWrapper();
-		!RhinoEngineWrapper();
+		~RhinoEngineWrapper();		// destructor
+		!RhinoEngineWrapper();		// finalizer
 
 		bool Initialize(IntPtr hWnd);
 		void RunOneFrame();

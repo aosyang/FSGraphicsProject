@@ -14,6 +14,8 @@ using namespace System::Runtime::InteropServices;
 
 namespace EngineManagedWrapper
 {
+	RKeyStateModifier g_KeyStateModifier;
+
 	const char* ManagedStringRefToConstCharPtr(String^ str)
 	{
 		IntPtr pNativeStr = Marshal::StringToHGlobalAnsi(str);
@@ -99,12 +101,12 @@ namespace EngineManagedWrapper
 
 	void RhinoEngineWrapper::OnKeyDown(int keycode)
 	{
-		RInput._SetKeyDown(keycode, true);
+		g_KeyStateModifier.NotifyKeyDownStateChanged(keycode, true);
 	}
 
 	void RhinoEngineWrapper::OnKeyUp(int keycode)
 	{
-		RInput._SetKeyDown(keycode, false);
+		g_KeyStateModifier.NotifyKeyDownStateChanged(keycode, true);
 	}
 
 	void RhinoEngineWrapper::RunScreenToCameraRayPicking(float x, float y)

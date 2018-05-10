@@ -8,41 +8,43 @@
 
 #include "RSingleton.h"
 
-enum RInput_BufferedKeyState
+class RKeyStateModifier;
+
+enum class EBufferedKeyState : UINT8
 {
-	BKS_KeyUp,
-	BKS_KeyDown,
-	BKS_Pressed,
-	BKS_Released,
+	KeyDown,
+	KeyUp,
+	Pressed,
+	Released,
 };
 
-#define MAX_KEY_NUM 0xFF
+const int MAX_KEY_NUM = 0xFF;
 
+// The input system of the engine
 class RInputSystem : public RSingleton<RInputSystem>
 {
 	friend class RSingleton<RInputSystem>;
 	friend class REngine;
+	friend class RKeyStateModifier;
 	friend LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 public:
 	// Initialize the input system
 	bool Initialize();
 
-	// Freeze cursor position
+	// Freeze the position of mouse cursor so it can't move
 	void LockCursor();
 
-	// Unfreeze cursor position
+	// Unfreeze the position of mouse cursor
 	void UnlockCursor();
 
 	void ShowCursor();
 	void HideCursor();
 
-	void GetCursorPos(int& x, int& y);
-	void GetCursorRelPos(int& dx, int& dy);
+	void GetCursorPosition(int& x, int& y) const;
+	void GetRelativeCursorPosition(int& dx, int& dy) const;
 
-	RInput_BufferedKeyState GetBufferedKeyState(int keycode);
-	bool IsKeyDown(int keycode);
-
-	void _SetKeyDown(int keycode, bool keydown);
+	EBufferedKeyState GetBufferedKeyState(int KeyCode) const;
+	bool IsKeyDown(int KeyCode) const;
 
 protected:
 	RInputSystem();
@@ -51,6 +53,10 @@ protected:
 	// Update input device states
 	//   - Called by REngine once per frame
 	void _UpdateKeyStates();
+
+	// Set a new 'key down' state for a key
+	// Called by low-level key event handlers
+	void SetKeyDownState(int KeyCode, bool bIsKeyDown);
 
 private:
 	bool	m_bKeyDown[MAX_KEY_NUM];
@@ -61,6 +67,14 @@ private:
 
 	bool	m_bCursorLocked;
 	POINT	m_CursorLockingPos;
+};
+
+// A utility class to modify 'key down' state of the input system
+class RKeyStateModifier
+{
+public:
+	// Modify 'key down' state inside the input system
+	void NotifyKeyDownStateChanged(int KeyCode, bool bIsKeyDown);
 };
 
 #define RInput RInputSystem::Instance()

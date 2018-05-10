@@ -124,7 +124,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	RConstantBuffers::cbMaterial.UpdateBufferData(&cbMaterial);
 	RConstantBuffers::cbMaterial.BindBuffer();
 
-	if (RInput.GetBufferedKeyState('P') == BKS_Pressed)
+	if (RInput.GetBufferedKeyState('P') == EBufferedKeyState::Pressed)
 		m_DrawHitBound = !m_DrawHitBound;
 
 	SHADER_GLOBAL_BUFFER cbScreen;
@@ -139,7 +139,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 	if (m_Player)
 	{
-		if (RInput.GetBufferedKeyState('R') == BKS_Pressed)
+		if (RInput.GetBufferedKeyState('R') == EBufferedKeyState::Pressed)
 		{
 			// Reset all characters' position
 			m_Player->SetPosition(RVec3(0, 100.0f, 0));
@@ -173,12 +173,12 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 				m_Player->SetBehavior(BHV_Idle);
 			}
 
-			if (RInput.GetBufferedKeyState(VK_SPACE) == BKS_Pressed)
+			if (RInput.GetBufferedKeyState(VK_SPACE) == EBufferedKeyState::Pressed)
 			{
 				m_Player->SetBehavior(BHV_SpinAttack);
 			}
 
-			if (RInput.GetBufferedKeyState('J') == BKS_Pressed)
+			if (RInput.GetBufferedKeyState('J') == EBufferedKeyState::Pressed)
 			{
 				m_Player->SetBehavior(BHV_Punch);
 			}
@@ -188,13 +188,13 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			m_Player->GetBehavior() == BHV_Idle ||
 			m_Player->GetBehavior() == BHV_Kick)
 		{
-			if (RInput.GetBufferedKeyState('K') == BKS_Pressed)
+			if (RInput.GetBufferedKeyState('K') == EBufferedKeyState::Pressed)
 			{
 				m_Player->SetBehavior(BHV_Kick);
 			}
 		}
 
-		if (RInput.GetBufferedKeyState('C') == BKS_Pressed)
+		if (RInput.GetBufferedKeyState('C') == EBufferedKeyState::Pressed)
 			m_Player->SetBehavior(BHV_HitDown);
 
 		m_Player->UpdateMovement(timer, moveVec);

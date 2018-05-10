@@ -116,13 +116,13 @@ bool DeferredShadingApp::Initialize()
 
 void DeferredShadingApp::UpdateScene(const RTimer& timer)
 {
-	if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Pressed)
+	if (RInput.GetBufferedKeyState(VK_RBUTTON) == EBufferedKeyState::Pressed)
 	{
 		RInput.HideCursor();
 		RInput.LockCursor();
 	}
 
-	if (RInput.GetBufferedKeyState(VK_RBUTTON) == BKS_Released)
+	if (RInput.GetBufferedKeyState(VK_RBUTTON) == EBufferedKeyState::Released)
 	{
 		RInput.ShowCursor();
 		RInput.UnlockCursor();
@@ -131,7 +131,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 	if (RInput.IsKeyDown(VK_RBUTTON))
 	{
 		int dx, dy;
-		RInput.GetCursorRelPos(dx, dy);
+		RInput.GetRelativeCursorPosition(dx, dy);
 		if (dx || dy)
 		{
 			m_CamYaw += (float)dx / 200.0f;
@@ -207,7 +207,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 
 	m_TotalTime = timer.TotalTime();
 
-	if (RInput.GetBufferedKeyState(VK_F5) == BKS_Pressed)
+	if (RInput.GetBufferedKeyState(VK_F5) == EBufferedKeyState::Pressed)
 		m_DebugMenu.SetEnabled(!m_DebugMenu.GetEnabled());
 	m_DebugMenu.Update();
 }
