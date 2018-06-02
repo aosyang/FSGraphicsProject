@@ -53,7 +53,7 @@ struct RFrustum
 };
 
 /// Result of testing geometry against a plane
-enum class PlaneSpace
+enum class EPlaneSpace : UINT8
 {
 	Front,
 	Back,
@@ -62,8 +62,8 @@ enum class PlaneSpace
 
 namespace RCollision
 {
-	PlaneSpace TestSphereToPlane(const RPlane& plane, const RSphere& sphere);
-	PlaneSpace TestAabbToPlane(const RPlane& plane, const RAabb& aabb);
+	EPlaneSpace TestSphereToPlane(const RPlane& plane, const RSphere& sphere);
+	EPlaneSpace TestAabbToPlane(const RPlane& plane, const RAabb& aabb);
 	bool TestAabbInsideFrustum(const RFrustum& frustum, const RAabb& aabb);
 	bool TestSphereWithCapsule(const RSphere& sphere, const RCapsule& capsule);
 };

@@ -44,6 +44,7 @@ namespace Math
 
 	FORCEINLINE float Lerp(float a, float b, float t)			{ return a + (b - a) * t; }
 
+	// Restrict a value to a given range [min, max] 
 	FORCEINLINE float Clamp(float a, float min, float max)		{ return (a < min) ? min : (a > max) ? max : a; }
 }
 

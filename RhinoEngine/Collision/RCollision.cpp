@@ -17,18 +17,18 @@ RPlane::RPlane(const RVec3& va, const RVec3& vb, const RVec3& vc)
 
 namespace RCollision
 {
-	PlaneSpace TestSphereToPlane(const RPlane& plane, const RSphere& sphere)
+	EPlaneSpace TestSphereToPlane(const RPlane& plane, const RSphere& sphere)
 	{
 		float dist = RVec3::Dot(sphere.center, plane.normal) - plane.offset;
 		if (dist > sphere.radius)
-			return PlaneSpace::Front;
+			return EPlaneSpace::Front;
 		else if (dist < -sphere.radius)
-			return PlaneSpace::Back;
+			return EPlaneSpace::Back;
 		else
-			return PlaneSpace::Intersecting;
+			return EPlaneSpace::Intersecting;
 	}
 
-	PlaneSpace TestAabbToPlane(const RPlane& plane, const RAabb& aabb)
+	EPlaneSpace TestAabbToPlane(const RPlane& plane, const RAabb& aabb)
 	{
 		RSphere s;
 		s.center = (aabb.pMax + aabb.pMin) * 0.5f;
@@ -42,7 +42,7 @@ namespace RCollision
 	{
 		for (int i = 0; i < 6; i++)
 		{
-			if (TestAabbToPlane(frustum.planes[i], aabb) == PlaneSpace::Back)
+			if (TestAabbToPlane(frustum.planes[i], aabb) == EPlaneSpace::Back)
 				return false;
 		}
 

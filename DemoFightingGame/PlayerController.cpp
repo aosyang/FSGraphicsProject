@@ -80,10 +80,7 @@ float LerpDegreeAngle(float from, float to, float t)
 		from += 360.0f;
 	}
 
-	if (t < 0) t = 0;
-	if (t > 1) t = 1;
-
-	return from + (to - from) * t;
+	return from + (to - from) * Math::Clamp(t, 0.0f, 1.0f);
 }
 
 void PlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVec)
