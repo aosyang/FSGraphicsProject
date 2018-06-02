@@ -20,13 +20,13 @@ public:
 	const RMatrix4& GetProjectionMatrix();
 	RFrustum GetFrustum() const;
 
-	void SetupView(float fov, float aspect, float _near, float _far);
-	void SetAspectRatio(float aspect) { m_Aspect = aspect; m_DirtyProjMatrix = true; }
+	void SetupView(float InFov, float InAspectRatio, float InNearZ, float InFarZ);
+	void SetAspectRatio(float aspect) { m_Aspect = aspect; m_bIsProjectionMatrixDirty = true; }
 
-	float GetFOV() const { return m_FOV; }
+	float GetFOV() const { return m_Fov; }
 	float GetAspectRatio() const { return m_Aspect; }
-	float GetNearPlane() const { return m_Near; }
-	float GetFarPlane() const { return m_Far; }
+	float GetNearPlane() const { return m_NearZ; }
+	float GetFarPlane() const { return m_FarZ; }
 
 protected:
 	RCamera(RScene* InScene);
@@ -36,11 +36,11 @@ private:
 	RMatrix4	m_ViewMatrix;
 	RMatrix4	m_ProjectionMatrix;
 
-	float		m_FOV;
-	float		m_Aspect;
-	float		m_Near, m_Far;
+	float		m_Fov;					// Field of view
+	float		m_Aspect;				// Aspect ratio
+	float		m_NearZ, m_FarZ;
 
-	bool		m_DirtyProjMatrix;
+	bool		m_bIsProjectionMatrixDirty;
 };
 
 #endif

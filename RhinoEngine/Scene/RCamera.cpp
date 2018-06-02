@@ -9,12 +9,17 @@
 
 RCamera::RCamera(RScene* InScene)
 	: Base(InScene),
-	  m_DirtyProjMatrix(true)
+	  m_bIsProjectionMatrixDirty(true)
 {
 	if (GRenderer.GetRenderCamera() == nullptr)
 	{
 		GRenderer.SetRenderCamera(this);
 	}
+
+	m_Fov = 65.0f;
+	m_Aspect = GRenderer.AspectRatio();
+	m_NearZ = 1.0f;
+	m_FarZ = 10000.0f;
 }
 
 RCamera::~RCamera()
@@ -33,10 +38,10 @@ const RMatrix4& RCamera::GetViewMatrix()
 
 const RMatrix4& RCamera::GetProjectionMatrix()
 {
-	if (m_DirtyProjMatrix)
+	if (m_bIsProjectionMatrixDirty)
 	{
-		m_ProjectionMatrix = RMatrix4::CreatePerspectiveProjectionLH(m_FOV, m_Aspect, m_Near, m_Far);
-		m_DirtyProjMatrix = false;
+		m_ProjectionMatrix = RMatrix4::CreatePerspectiveProjectionLH(m_Fov, m_Aspect, m_NearZ, m_FarZ);
+		m_bIsProjectionMatrixDirty = false;
 	}
 
 	return m_ProjectionMatrix;
@@ -46,11 +51,11 @@ RFrustum RCamera::GetFrustum() const
 {
 	RFrustum frustum;
 
-	RVec3 nc = m_NodeTransform.GetPosition() + m_NodeTransform.GetForward() * m_Near;
-	RVec3 fc = m_NodeTransform.GetPosition() + m_NodeTransform.GetForward() * m_Far;
+	RVec3 nc = m_NodeTransform.GetPosition() + m_NodeTransform.GetForward() * m_NearZ;
+	RVec3 fc = m_NodeTransform.GetPosition() + m_NodeTransform.GetForward() * m_FarZ;
 
-	float hNear = 2.0f * tanf(DEG_TO_RAD(m_FOV) / 2.0f) * m_Near;
-	float hFar = 2.0f * tanf(DEG_TO_RAD(m_FOV) / 2.0f) * m_Far;
+	float hNear = 2.0f * tanf(DEG_TO_RAD(m_Fov) / 2.0f) * m_NearZ;
+	float hFar = 2.0f * tanf(DEG_TO_RAD(m_Fov) / 2.0f) * m_FarZ;
 	float wNear = hNear * m_Aspect;
 	float wFar = hFar * m_Aspect;
 	frustum.corners[FC_FTL] = fc + m_NodeTransform.GetUp() * (hFar * 0.5f) - m_NodeTransform.GetRight() * (wFar * 0.5f);
@@ -67,11 +72,11 @@ RFrustum RCamera::GetFrustum() const
 	return frustum;
 }
 
-void RCamera::SetupView(float fov, float aspect, float _near, float _far)
+void RCamera::SetupView(float InFov, float InAspectRatio, float InNearZ, float InFarZ)
 {
-	m_FOV = fov;
-	m_Aspect = aspect;
-	m_Near = _near;
-	m_Far = _far;
-	m_DirtyProjMatrix = true;
+	m_Fov = InFov;
+	m_Aspect = InAspectRatio;
+	m_NearZ = InNearZ;
+	m_FarZ = InFarZ;
+	m_bIsProjectionMatrixDirty = true;
 }

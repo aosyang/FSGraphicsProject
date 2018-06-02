@@ -33,7 +33,6 @@ bool SimpleGame::Initialize()
 
 	m_Camera = m_Scene.CreateSceneObjectOfType<RCamera>("UserCamera");
 
-	// TODO: if projection is forgotten to set properly, need to make sure user gets some feedbacks
 	m_Camera->SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
 	m_Camera->SetPosition(RVec3(0, 0, -500.0f));
 
