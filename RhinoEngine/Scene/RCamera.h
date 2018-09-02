@@ -11,8 +11,7 @@
 
 class RCamera : public RSceneObject
 {
-	typedef RSceneObject Base;
-	friend class RScene;
+	DECLARE_SCENE_OBJECT(RSceneObject);
 public:
 	ESceneObjectType GetType() const { return ESceneObjectType::Camera; }
 

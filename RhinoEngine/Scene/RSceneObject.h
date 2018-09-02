@@ -16,7 +16,17 @@ enum class ESceneObjectType : UINT8
 	Camera,
 };
 
-#define DECLARE_SCENE_OBJECT(base)	typedef base Base; friend class RScene;
+#define DECLARE_SCENE_OBJECT(base)\
+	typedef base Base; friend class RScene;\
+	\
+	static int _RuntimeTypeId;\
+	public:\
+	static int _StaticGetRuntimeTypeId() { if (_RuntimeTypeId == 0) { _RuntimeTypeId = RSceneObject::MakeUniqueRuntimeTypeId(); } return _RuntimeTypeId; }\
+	virtual int GetRuntimeTypeId() override { return _StaticGetRuntimeTypeId(); }\
+	private:
+
+#define IMPLEMENT_SCENE_OBJECT(type)\
+	int type::_RuntimeTypeId = 0
 
 /// Base object that can be placed in a scene
 class RSceneObject
@@ -24,6 +34,8 @@ class RSceneObject
 	friend class RScene;
 public:
 	virtual void Release();
+
+	virtual int GetRuntimeTypeId() { return 0; }
 
 	/// Set name of scene object
 	void SetName(const string& name)		{ m_Name = name; }
@@ -116,6 +128,12 @@ protected:
 	/// Update all components on this scene object
 	void UpdateComponents();
 
+	/// Create a unique runtime type id for scene object types
+	static int MakeUniqueRuntimeTypeId()
+	{
+		return ++NextUniqueRuntimeTypeId;
+	}
+
 protected:
 	string			m_Name;
 	RTransform		m_NodeTransform;
@@ -125,6 +143,8 @@ protected:
 
 	/// Components of this scene object
 	vector<RSceneComponentBase*>	SceneComponents;
+
+	static int NextUniqueRuntimeTypeId;
 };
 
 

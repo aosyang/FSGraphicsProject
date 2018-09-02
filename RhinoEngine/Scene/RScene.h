@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _RSCENE_H
-#define _RSCENE_H
+#pragma once
 
 class RScene
 {
@@ -19,6 +18,7 @@ public:
 	/// Create a mesh object with mesh resource and add it to the scene
 	RSMeshObject* CreateMeshObject(RMesh* mesh);
 
+	/// Create a scene object in the scene
 	RSceneObject* CreateSceneObject(const char* name = "");
 
 	/// Create a object of class derived from scene object
@@ -30,6 +30,10 @@ public:
 
 	/// Find object in the scene by name
 	RSceneObject* FindObject(const char* name) const;
+
+	/// Find all objects in the scene of given type
+	template<typename T>
+	vector<T*> FindAllObjectsOfType() const;
 
 	/// Add an object to the scene
 	void DestroyObject(RSceneObject* obj);
@@ -64,4 +68,18 @@ T* RScene::CreateSceneObjectOfType(const char* name /*= ""*/)
 	return SceneObject;
 }
 
-#endif
+template<typename T>
+vector<T*> RScene::FindAllObjectsOfType() const
+{
+	vector<T*> Results;
+
+	for (auto SceneObject : m_SceneObjects)
+	{
+		if (SceneObject->GetRuntimeTypeId() == T::_StaticGetRuntimeTypeId())
+		{
+			Results.push_back(static_cast<T*>(SceneObject));
+		}
+	}
+
+	return Results;
+}

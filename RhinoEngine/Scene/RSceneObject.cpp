@@ -8,6 +8,8 @@
 
 #include "RSceneObject.h"
 
+int RSceneObject::NextUniqueRuntimeTypeId = 0;
+
 RSceneObject::RSceneObject(RScene* InScene)
 	: m_Scene(InScene)
 {

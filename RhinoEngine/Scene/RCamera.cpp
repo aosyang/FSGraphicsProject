@@ -7,6 +7,8 @@
 #include "Rhino.h"
 #include "RCamera.h"
 
+IMPLEMENT_SCENE_OBJECT(RCamera);
+
 RCamera::RCamera(RScene* InScene)
 	: Base(InScene),
 	  m_bIsProjectionMatrixDirty(true)

@@ -16,8 +16,7 @@ namespace tinyxml2
 
 class RSMeshObject : public RSceneObject
 {
-	typedef RSceneObject Base;
-	friend class RScene;
+	DECLARE_SCENE_OBJECT(RSceneObject);
 public:
 	ESceneObjectType GetType() const override { return ESceneObjectType::MeshObject; }
 	RSceneObject* Clone() const override;

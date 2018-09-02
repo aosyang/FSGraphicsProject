@@ -9,6 +9,8 @@
 
 #include "tinyxml2/tinyxml2.h"
 
+IMPLEMENT_SCENE_OBJECT(RSMeshObject);
+
 RSMeshObject::RSMeshObject(RScene* InScene)
 	: RSceneObject(InScene),
 	  m_Mesh(nullptr),

@@ -6,6 +6,8 @@
 
 #include "FTGPlayerController.h"
 
+IMPLEMENT_SCENE_OBJECT(FTGPlayerController);
+
 BehaviorInfo PlayerBehaviorInfo[] =
 {
 	{ PlayerAnim_Idle,			0.2f },
@@ -85,6 +87,8 @@ float LerpDegreeAngle(float from, float to, float t)
 
 void FTGPlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVec)
 {
+	GetScene()->FindAllObjectsOfType<FTGPlayerController>();
+
 	bool bCanMovePlayer = CanMovePlayerWithInput();
 	if (bCanMovePlayer)
 	{

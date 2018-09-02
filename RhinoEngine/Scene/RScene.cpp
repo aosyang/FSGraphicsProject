@@ -38,12 +38,7 @@ RSMeshObject* RScene::CreateMeshObject(RMesh* mesh)
 
 RSceneObject* RScene::CreateSceneObject(const char* name)
 {
-	RSceneObject* SceneObject = new RSceneObject(this);
-	SceneObject->SetName(name);
-
-	m_SceneObjects.push_back(SceneObject);
-
-	return SceneObject;
+	return CreateSceneObjectOfType<RSceneObject>(name);
 }
 
 RSceneObject* RScene::CloneObject(RSceneObject* obj)
