@@ -591,7 +591,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	{
 		cbLight.SpotlightCount = 1;
 		RVec4 spotlightPos = RVec4(m_Camera->GetPosition(), 2000.0f);
-		RVec4 spotlightDir = RVec4(m_Camera->GetTransformMatrix().GetForward(), 1.0f);
+		RVec4 spotlightDir = RVec4(m_Camera->GetForwardVector(), 1.0f);
 		RVec4 spotlightRatio = RVec4(0.97f, 0.9f, 0.0f, 0.0f);
 		cbLight.Spotlight[0].PosAndRadius = spotlightPos;
 		cbLight.Spotlight[0].Direction = spotlightDir;
@@ -648,7 +648,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	RConstantBuffers::cbGlobal.UpdateBufferData(&cbScreen);
 
 	// Update particle vertices
-	ParticleDepthComparer cmp(m_Camera->GetPosition(), m_Camera->GetTransformMatrix().GetForward());
+	ParticleDepthComparer cmp(m_Camera->GetPosition(), m_Camera->GetForwardVector());
 	std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
 	m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(RVertex::PARTICLE_VERTEX), PARTICLE_COUNT);
 
@@ -700,10 +700,10 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		worldOffset.SetY(m_CharacterYVel);
 
 		if (RInput.IsKeyDown(VK_UP))
-			worldOffset += m_CharacterObj->GetTransformMatrix().GetForward() * timer.DeltaTime() * 500.0f;
+			worldOffset += m_CharacterObj->GetForwardVector() * timer.DeltaTime() * 500.0f;
 
 		if (RInput.IsKeyDown(VK_DOWN))
-			worldOffset -= m_CharacterObj->GetTransformMatrix().GetForward() * timer.DeltaTime() * 500.0f;
+			worldOffset -= m_CharacterObj->GetForwardVector() * timer.DeltaTime() * 500.0f;
 
 		RAabb aabb;
 		aabb.Expand(RVec3(-50.0f, 0.0f, -50.0f));

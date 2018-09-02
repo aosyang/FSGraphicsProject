@@ -239,7 +239,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			m_Player->GetBehaviorTime() < 0.6f)
 		{
 			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() - m_Player->GetTransformMatrix().GetForward() * 50 + RVec3(0, 50, 0);
+			hit_sphere.center = m_Player->GetPosition() - m_Player->GetForwardVector() * 50 + RVec3(0, 50, 0);
 			hit_sphere.radius = 50.0f;
 			if (m_DrawHitBound)
 				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
@@ -250,7 +250,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 				{
 					RVec3 relVec = hit_sphere.center - m_AIPlayer->GetPosition();
 					relVec.SetY(0.0f);
-					RVec3 playerForward = -m_Player->GetTransformMatrix().GetForward();
+					RVec3 playerForward = -m_Player->GetForwardVector();
 					if (RVec3::Dot(playerForward, relVec) >= 0)
 						relVec = -playerForward;
 					relVec.Normalize();
@@ -266,7 +266,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			m_Player->GetBehaviorTime() < 0.3f)
 		{
 			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() - m_Player->GetTransformMatrix().GetForward() * 50 + RVec3(0, 100, 0);
+			hit_sphere.center = m_Player->GetPosition() - m_Player->GetForwardVector() * 50 + RVec3(0, 100, 0);
 			hit_sphere.radius = 20.0f;
 			if (m_DrawHitBound)
 				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
@@ -286,7 +286,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			m_Player->GetBehaviorTime() < 0.3f)
 		{
 			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() - m_Player->GetTransformMatrix().GetForward() * 50 + RVec3(0, 100, 0);
+			hit_sphere.center = m_Player->GetPosition() - m_Player->GetForwardVector() * 50 + RVec3(0, 100, 0);
 			hit_sphere.radius = 50.0f;
 			if (m_DrawHitBound)
 				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
@@ -306,7 +306,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			m_Player->GetBehaviorTime() < 0.3f)
 		{
 			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() - m_Player->GetTransformMatrix().GetForward() * 30 + RVec3(0, 100, 0);
+			hit_sphere.center = m_Player->GetPosition() - m_Player->GetForwardVector() * 30 + RVec3(0, 100, 0);
 			hit_sphere.radius = 50.0f;
 			if (m_DrawHitBound)
 				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
@@ -317,7 +317,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 				{
 					RVec3 relVec = hit_sphere.center - m_AIPlayer->GetPosition();
 					relVec.SetY(0.0f);
-					RVec3 playerForward = -m_Player->GetTransformMatrix().GetForward();
+					RVec3 playerForward = -m_Player->GetForwardVector();
 					if (RVec3::Dot(playerForward, relVec) >= 0)
 						relVec = -playerForward;
 					relVec.Normalize();

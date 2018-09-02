@@ -60,6 +60,15 @@ public:
 
 	RVec3 GetWorldPosition();
 
+	/// Get the forward vector of scene object
+	RVec3 GetForwardVector() const;
+
+	/// Get the right vector of scene object
+	RVec3 GetRightVector() const;
+
+	/// Get the up vector of scene object
+	RVec3 GetUpVector() const;
+
 	void SetScale(const RVec3& scale);
 
 	const RVec3& GetScale() const;

@@ -75,6 +75,21 @@ RVec3 RSceneObject::GetWorldPosition()
 	return Parent ? Parent->GetMatrix().Transform(m_NodeTransform.GetPosition()) : m_NodeTransform.GetPosition();
 }
 
+RVec3 RSceneObject::GetForwardVector() const
+{
+	return m_NodeTransform.GetForward();
+}
+
+RVec3 RSceneObject::GetRightVector() const
+{
+	return m_NodeTransform.GetRight();
+}
+
+RVec3 RSceneObject::GetUpVector() const
+{
+	return m_NodeTransform.GetUp();
+}
+
 void RSceneObject::SetScale(const RVec3& scale)
 {
 	m_NodeTransform.SetScale(scale);
