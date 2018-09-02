@@ -150,7 +150,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		
 		RVec3 moveVec(0, 0, 0);
 
-		RVec3 charRight = m_Camera->GetTransformMatrix().GetRight();
+		RVec3 charRight = m_Camera->GetRightVector();
 		RVec3 charForward = RVec3::Cross(charRight, RVec3(0, 1, 0));
 
 		if (m_Player->GetBehavior() == BHV_Running ||
@@ -199,22 +199,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 		m_Player->UpdateMovement(timer, moveVec);
 
-		RMatrix4 playerTranslation = RMatrix4::CreateTranslation(m_Player->GetTransformMatrix().GetTranslation());
-		RMatrix4 cameraTransform = RMatrix4::CreateTranslation(0.0f, 500.0f, 300.0f) * playerTranslation;
-
-		RAabb camAabb;
-		RVec3 lookTarget = m_Player->GetPosition() + RVec3(0, 125, 0);
-		camAabb.pMin = RVec3(-5, -5, -5) + lookTarget;
-		camAabb.pMax = RVec3(5, 5, 5) + lookTarget;
-
-		RVec3 camVec = cameraTransform.GetTranslation() - lookTarget;
-		camVec = m_Scene.TestMovingAabbWithScene(camAabb, camVec);
-
-		//m_Camera->SetTransform(cameraTransform);
-		static RVec3 actualCamVec;
-		actualCamVec = RVec3::Lerp(actualCamVec, camVec, 5.0f * timer.DeltaTime());
-		m_Camera->SetPosition(actualCamVec + lookTarget);
-		m_Camera->LookAt(lookTarget);
+		UpdateCameraPosition(timer.DeltaTime());
 
 		//playerAabb.pMin = RVec3(-50.0f, 0.0f, -50.0f) + m_Player->GetPosition();
 		//playerAabb.pMax = RVec3(50.0f, 150.0f, 50.0f) + m_Player->GetPosition();
@@ -337,11 +322,13 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		sprintf_s(msg_buf, 1024, "Player: (%f, %f, %f), rot: %f\n"
 								 "Blend From : %s\n"
 								 "Blend To   : %s\n"
-								 "Blend time : %f",
+								 "Blend time : %f\n"
+								 "%s",
 								 playerPos.X(), playerPos.Y(), playerPos.Z(), playerRot,
 								 blender.GetSourceAnimation() ? blender.GetSourceAnimation()->GetName().c_str() : "",
 								 blender.GetTargetAnimation() ? blender.GetTargetAnimation()->GetName().c_str() : "",
-								 blender.GetElapsedBlendTime());
+								 blender.GetElapsedBlendTime(),
+								 m_DrawHitBound ? "Draw debug hit shape" : "");
 		m_Text.SetText(msg_buf, RColor(0, 1, 0));
 	}
 
@@ -430,4 +417,28 @@ void FightingGameApp::OnResize(int width, int height)
 	{
 		m_Camera->SetAspectRatio((float)width / (float)height);
 	}
+}
+
+void FightingGameApp::UpdateCameraPosition(float DeltaTime)
+{
+	RVec3 PlayerPosition = m_Player ? m_Player->GetPosition() : RVec3(0, 0, 0);
+
+	RMatrix4 playerTranslation = RMatrix4::CreateTranslation(PlayerPosition);
+	RMatrix4 cameraTransform = RMatrix4::CreateTranslation(0.0f, 500.0f, 300.0f) * playerTranslation;
+
+	RAabb camAabb;
+	RVec3 lookTarget = PlayerPosition + RVec3(0, 125, 0);
+	camAabb.pMin = RVec3(-5, -5, -5) + lookTarget;
+	camAabb.pMax = RVec3(5, 5, 5) + lookTarget;
+
+	RVec3 camVec = cameraTransform.GetTranslation() - lookTarget;
+
+	// FIXME: The camera collision is not working properly
+	//camVec = m_Scene.TestMovingAabbWithScene(camAabb, camVec);
+
+	//m_Camera->SetTransform(cameraTransform);
+	static RVec3 actualCamVec;
+	actualCamVec = RVec3::Lerp(actualCamVec, camVec, 5.0f * DeltaTime);
+	m_Camera->SetPosition(actualCamVec + lookTarget);
+	m_Camera->LookAt(lookTarget);
 }

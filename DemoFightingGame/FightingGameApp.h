@@ -24,6 +24,10 @@ public:
 	TCHAR* WindowTitle() { return L"Fighting Game Demo"; }
 
 private:
+
+	void UpdateCameraPosition(float DeltaTime);
+
+private:
 	RScene				m_Scene;
 	RCamera*			m_Camera;
 	RShadowMap			m_ShadowMap;
