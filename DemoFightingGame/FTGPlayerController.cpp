@@ -4,7 +4,7 @@
 // 
 //=============================================================================
 
-#include "PlayerController.h"
+#include "FTGPlayerController.h"
 
 BehaviorInfo PlayerBehaviorInfo[] =
 {
@@ -19,13 +19,13 @@ BehaviorInfo PlayerBehaviorInfo[] =
 	{ PlayerAnim_GetUp,			0.0f },
 };
 
-PlayerController::PlayerController(RScene* InScene)
+FTGPlayerController::FTGPlayerController(RScene* InScene)
 	: Base(InScene), m_Rotation(0.0f), m_Behavior(BHV_Idle)
 {
 
 }
 
-void PlayerController::Cache()
+void FTGPlayerController::Cache()
 {
 	RMesh* playerMesh = RResourceManager::Instance().FindMesh("../Assets/unitychan/unitychan.fbx");
 	if (!playerMesh)
@@ -50,7 +50,7 @@ void PlayerController::Cache()
 	m_AnimBlender.Play(m_Animations[PlayerAnim_Idle]);
 }
 
-void PlayerController::PreUpdate(const RTimer& timer)
+void FTGPlayerController::PreUpdate(const RTimer& timer)
 {
 	m_AnimBlender.ProceedAnimation(timer.DeltaTime());
 
@@ -83,7 +83,7 @@ float LerpDegreeAngle(float from, float to, float t)
 	return from + (to - from) * Math::Clamp(t, 0.0f, 1.0f);
 }
 
-void PlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVec)
+void FTGPlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVec)
 {
 	bool bCanMovePlayer = CanMovePlayerWithInput();
 	if (bCanMovePlayer)
@@ -119,7 +119,7 @@ void PlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVec)
 	SetRotation(RQuat::Euler(0.0f, DEG_TO_RAD(m_Rotation), 0.0f));
 }
 
-void PlayerController::PostUpdate(const RTimer& timer)
+void FTGPlayerController::PostUpdate(const RTimer& timer)
 {
 	for (int i = 0; i < m_Mesh->GetBoneCount(); i++)
 	{
@@ -133,7 +133,7 @@ void PlayerController::PostUpdate(const RTimer& timer)
 	}
 }
 
-void PlayerController::Draw()
+void FTGPlayerController::Draw()
 {
 	RConstantBuffers::cbBoneMatrices.UpdateBufferData((SHADER_SKINNED_BUFFER*)&m_BoneMatrices);
 	RConstantBuffers::cbBoneMatrices.BindBuffer();
@@ -141,7 +141,7 @@ void PlayerController::Draw()
 	RSMeshObject::Draw();
 }
 
-void PlayerController::DrawDepthPass()
+void FTGPlayerController::DrawDepthPass()
 {
 	RConstantBuffers::cbBoneMatrices.UpdateBufferData((SHADER_SKINNED_BUFFER*)&m_BoneMatrices);
 	RConstantBuffers::cbBoneMatrices.BindBuffer();
@@ -149,7 +149,7 @@ void PlayerController::DrawDepthPass()
 	RSMeshObject::DrawDepthPass();
 }
 
-void PlayerController::SetBehavior(EPlayerBehavior behavior)
+void FTGPlayerController::SetBehavior(EPlayerBehavior behavior)
 {
 	switch (behavior)
 	{
@@ -191,7 +191,7 @@ void PlayerController::SetBehavior(EPlayerBehavior behavior)
 	}
 }
 
-float PlayerController::GetBehaviorTime()
+float FTGPlayerController::GetBehaviorTime()
 {
 	if (m_AnimBlender.GetSourceAnimation())
 	{
@@ -208,7 +208,7 @@ float PlayerController::GetBehaviorTime()
 	return 0.0f;
 }
 
-RAabb PlayerController::GetMovementCollisionShape() const
+RAabb FTGPlayerController::GetMovementCollisionShape() const
 {
 	RAabb playerAabb;
 	playerAabb.pMin = RVec3(-50.0f, 0.0f, -50.0f) + GetPosition();
@@ -217,12 +217,12 @@ RAabb PlayerController::GetMovementCollisionShape() const
 	return playerAabb;
 }
 
-RCapsule PlayerController::GetCollisionShape() const
+RCapsule FTGPlayerController::GetCollisionShape() const
 {
 	return RCapsule{ GetPosition() + RVec3(0, 40, 0), GetPosition() + RVec3(0, 110, 0), 40 };
 }
 
-RAnimation* PlayerController::LoadAnimation(const char* resPath, int flags)
+RAnimation* FTGPlayerController::LoadAnimation(const char* resPath, int flags)
 {
 	RMesh* mesh = RResourceManager::Instance().FindMesh(resPath);
 	if (!mesh)
@@ -253,7 +253,7 @@ RAnimation* PlayerController::LoadAnimation(const char* resPath, int flags)
 	return nullptr;
 }
 
-bool PlayerController::CanMovePlayerWithInput() const
+bool FTGPlayerController::CanMovePlayerWithInput() const
 {
 	return GetBehavior() == BHV_Running || GetBehavior() == BHV_Idle;
 }

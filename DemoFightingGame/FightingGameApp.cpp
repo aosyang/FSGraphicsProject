@@ -38,11 +38,11 @@ bool FightingGameApp::Initialize()
 	//	obj->SetScript("UpdateObject");
 	//}
 
-	m_Player = m_Scene.CreateSceneObjectOfType<PlayerController>();
+	m_Player = m_Scene.CreateSceneObjectOfType<FTGPlayerController>();
 	m_Player->SetPosition(RVec3(0, 100.0f, 0));
 	m_Player->Cache();
 
-	m_AIPlayer = m_Scene.CreateSceneObjectOfType<PlayerController>();
+	m_AIPlayer = m_Scene.CreateSceneObjectOfType<FTGPlayerController>();
 	m_AIPlayer->SetPosition(RVec3(-465, 50, -760));
 	m_AIPlayer->Cache();
 

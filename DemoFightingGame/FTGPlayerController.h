@@ -44,7 +44,7 @@ struct BehaviorInfo
 	float				blendTime;
 };
 
-class PlayerController : public RSMeshObject
+class FTGPlayerController : public RSMeshObject
 {
 	DECLARE_SCENE_OBJECT(RSMeshObject);
 public:
@@ -70,7 +70,7 @@ public:
 
 	RAnimationBlender& GetAnimationBlender() { return m_AnimBlender; }
 private:
-	PlayerController(RScene* InScene);
+	FTGPlayerController(RScene* InScene);
 
 	RAnimation* LoadAnimation(const char* resPath, int flags=0);
 
@@ -87,7 +87,7 @@ private:
 };
 
 
-FORCEINLINE EPlayerBehavior PlayerController::GetBehavior() const
+FORCEINLINE EPlayerBehavior FTGPlayerController::GetBehavior() const
 {
 	return m_Behavior;
 }

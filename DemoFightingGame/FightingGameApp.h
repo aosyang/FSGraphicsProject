@@ -8,7 +8,7 @@
 #define _FIGHTINGGAMEAPP_H
 
 #include "Rhino.h"
-#include "PlayerController.h"
+#include "FTGPlayerController.h"
 
 class FightingGameApp : public IApp
 {
@@ -28,8 +28,8 @@ private:
 	RCamera*			m_Camera;
 	RShadowMap			m_ShadowMap;
 
-	PlayerController*	m_Player;
-	PlayerController*	m_AIPlayer;
+	FTGPlayerController*	m_Player;
+	FTGPlayerController*	m_AIPlayer;
 
 	bool				m_DrawHitBound;
 	RText				m_Text;
