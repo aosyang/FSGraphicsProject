@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _PLAYERCONTROLLER_H
-#define _PLAYERCONTROLLER_H
+#pragma once
 
 #include "Rhino.h"
 
@@ -58,8 +57,12 @@ public:
 	void Draw() override;
 	void DrawDepthPass() override;
 
+	/// Set the player's rotation in yaw angles
 	void SetPlayerRotation(float rot) { m_Rotation = rot; }
 	float GetPlayerRotation() const { return m_Rotation; }
+
+	/// Set the player's rotation by a direction vector
+	void SetPlayerFacing(const RVec3& Direction);
 
 	void SetBehavior(EPlayerBehavior behavior);
 	EPlayerBehavior GetBehavior() const;
@@ -91,6 +94,3 @@ FORCEINLINE EPlayerBehavior FTGPlayerController::GetBehavior() const
 {
 	return m_Behavior;
 }
-
-
-#endif

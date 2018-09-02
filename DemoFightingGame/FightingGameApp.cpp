@@ -237,10 +237,11 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 					relVec.SetY(0.0f);
 					RVec3 playerForward = -m_Player->GetForwardVector();
 					if (RVec3::Dot(playerForward, relVec) >= 0)
+					{
 						relVec = -playerForward;
-					relVec.Normalize();
+					}
 
-					m_AIPlayer->SetPlayerRotation(RAD_TO_DEG(atan2f(-relVec.X(), -relVec.Z())));
+					m_AIPlayer->SetPlayerFacing(relVec);
 				}
 				m_AIPlayer->SetBehavior(BHV_HitDown);
 			}
@@ -304,10 +305,11 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 					relVec.SetY(0.0f);
 					RVec3 playerForward = -m_Player->GetForwardVector();
 					if (RVec3::Dot(playerForward, relVec) >= 0)
+					{
 						relVec = -playerForward;
-					relVec.Normalize();
+					}
 					
-					m_AIPlayer->SetPlayerRotation(RAD_TO_DEG(atan2f(-relVec.X(), -relVec.Z())));
+					m_AIPlayer->SetPlayerFacing(relVec);
 					m_AIPlayer->SetBehavior(BHV_HitDown);
 				}
 			}
@@ -382,23 +384,28 @@ void FightingGameApp::RenderScene()
 			m_Scene.Render(&frustum);
 		}
 
-		if (m_Player)
+		vector<FTGPlayerController*> PlayerControllers = m_Scene.FindAllObjectsOfType<FTGPlayerController>();
+
+		cbObject.worldMatrix = m_Player->GetTransformMatrix();
+		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
+		RConstantBuffers::cbPerObject.BindBuffer();
+		if (pass == 0)
 		{
-			cbObject.worldMatrix = m_Player->GetTransformMatrix();
-			RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
-			RConstantBuffers::cbPerObject.BindBuffer();
-			if (pass == 0)
+			for (auto PlayerController : PlayerControllers)
 			{
-				m_Player->DrawDepthPass();
-				m_AIPlayer->DrawDepthPass();
+				PlayerController->DrawDepthPass();
 			}
-			else
+		}
+		else
+		{
+			GRenderer.SetBlendState(Blend_AlphaBlending);
+
+			for (auto PlayerController : PlayerControllers)
 			{
-				GRenderer.SetBlendState(Blend_AlphaBlending);
-				m_Player->Draw();
-				m_AIPlayer->Draw();
-				GRenderer.SetBlendState(Blend_Opaque);
+				PlayerController->Draw();
 			}
+
+			GRenderer.SetBlendState(Blend_Opaque);
 		}
 	}
 

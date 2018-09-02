@@ -87,8 +87,6 @@ float LerpDegreeAngle(float from, float to, float t)
 
 void FTGPlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVec)
 {
-	GetScene()->FindAllObjectsOfType<FTGPlayerController>();
-
 	bool bCanMovePlayer = CanMovePlayerWithInput();
 	if (bCanMovePlayer)
 	{
@@ -151,6 +149,15 @@ void FTGPlayerController::DrawDepthPass()
 	RConstantBuffers::cbBoneMatrices.BindBuffer();
 
 	RSMeshObject::DrawDepthPass();
+}
+
+void FTGPlayerController::SetPlayerFacing(const RVec3& Direction)
+{
+	if (Direction.Magnitude() > 0.0f)
+	{
+		RVec3 NormalizedDir = Direction.GetNormalized();
+		SetPlayerRotation(RAD_TO_DEG(atan2f(-NormalizedDir.X(), -NormalizedDir.Z())));
+	}
 }
 
 void FTGPlayerController::SetBehavior(EPlayerBehavior behavior)
