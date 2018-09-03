@@ -72,6 +72,31 @@ bool RTransform::FromMatrix4(const RMatrix4& Matrix)
 	return Matrix.Decompose(Position, Rotation, Scale);
 }
 
+void RTransform::Translate(const RVec3& t, ETransformSpace Space)
+{
+	if (Space == ETransformSpace::World)
+	{
+		Position += t;
+	}
+	else  // Space == ETransformSpace::Local
+	{
+		Position += Rotation * t;
+	}
+
+	bIsCachedMatrixDirty = true;
+}
+
+RVec3 RTransform::GetTranslatedVector(const RVec3& t, ETransformSpace Space)
+{
+	if (Space == ETransformSpace::World)
+	{
+		return Position + t;
+	}
+
+	// Space == ETransformSpace::Local
+	return Position + Rotation * t;
+}
+
 void RTransform::LookAt(const RVec3& target, const RVec3& world_up /*= RVec3(0, 1, 0)*/)
 {
 	const RVec3& pos = Position;

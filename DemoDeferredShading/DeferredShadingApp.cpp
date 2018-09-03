@@ -158,7 +158,7 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 		moveVec += RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 
 	m_Camera->SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0.0f));
-	m_Camera->TranslateLocal(moveVec);
+	m_Camera->Translate(moveVec, ETransformSpace::Local);
 
 	// Update light constant buffer
 	SHADER_LIGHT_BUFFER cbLight;

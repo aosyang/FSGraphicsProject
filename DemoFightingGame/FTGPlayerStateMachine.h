@@ -8,6 +8,8 @@
 
 #include "FTGPlayerBehaviors.h"
 
+class FTGPlayerController;
+
 /// The behavior state machine of player
 class FTGPlayerStateMachine
 {
@@ -16,13 +18,16 @@ public:
 	~FTGPlayerStateMachine();
 
 	/// Initialize behavior assets
-	void InitAssets();
+	void Init(FTGPlayerController* Owner);
 
 	/// Cache all animation assets for a mesh
 	void CacheAnimations(RMesh* Mesh);
 
 	/// Update the state machine
 	void Update(float DeltaTime);
+
+	/// Get the owner of this state machine
+	FTGPlayerController* GetOwner() const;
 
 	/// Get enum of current behavior
 	EPlayerBehavior GetCurrentBehavior() const;
@@ -54,6 +59,9 @@ private:
 	FTGPlayerBehaviorBase* FindBehaviorInstance(EPlayerBehavior Behavior) const;
 
 private:
+	/// The owning player of this state machine
+	FTGPlayerController*			m_PlayerOwner;
+
 	/// Current behavior instance
 	FTGPlayerBehaviorBase*			m_CurrentBehaviorInstance;
 
@@ -67,6 +75,11 @@ private:
 	RAnimationBlender				m_AnimBlender;
 };
 
+
+FORCEINLINE FTGPlayerController* FTGPlayerStateMachine::GetOwner() const
+{
+	return m_PlayerOwner;
+}
 
 FORCEINLINE EPlayerBehavior FTGPlayerStateMachine::GetCurrentBehavior() const
 {

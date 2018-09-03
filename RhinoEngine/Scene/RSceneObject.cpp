@@ -107,14 +107,9 @@ void RSceneObject::LookAt(const RVec3& target, const RVec3& world_up /*= RVec3(0
 	m_NodeTransform.LookAt(target, world_up);
 }
 
-void RSceneObject::Translate(const RVec3& v)
+void RSceneObject::Translate(const RVec3& v, ETransformSpace Space)
 {
-	m_NodeTransform.Translate(v);
-}
-
-void RSceneObject::TranslateLocal(const RVec3& v)
-{
-	m_NodeTransform.TranslateLocal(v);
+	m_NodeTransform.Translate(v, Space);
 }
 
 void RSceneObject::AttachTo(RSceneObject* Parent)

@@ -27,6 +27,7 @@
 #include <iomanip>
 
 #include <vector>
+#include <list>
 #include <map>
 #include <queue>
 #include <string>

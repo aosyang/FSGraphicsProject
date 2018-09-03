@@ -6,6 +6,7 @@
 
 #include "FTGPlayerBehaviors.h"
 #include "FTGPlayerStateMachine.h"
+#include "FTGPlayerController.h"
 
 FTGPlayerBehaviorBase::FTGPlayerBehaviorBase()
 	: m_BehaviorEnum(BHV_Invalid)
@@ -18,6 +19,11 @@ FTGPlayerBehaviorBase::FTGPlayerBehaviorBase()
 bool FTGPlayerBehaviorBase::EvaluateForExecution(FTGPlayerStateMachine* StateMachine)
 {
 	return StateMachine->GetNextBehavior() == GetBehaviorEnum();
+}
+
+void FTGPlayerBehaviorBase::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
+{
+
 }
 
 void FTGPlayerBehaviorBase::NotifyBehaviorFinished(FTGPlayerStateMachine* StateMachine)
@@ -68,4 +74,56 @@ bool FTGPlayerBehavior_BackKick::EvaluateForExecution(FTGPlayerStateMachine* Sta
 void FTGPlayerBehavior_KnockedDown::OnBehaviorFinished(FTGPlayerStateMachine* StateMachine)
 {
 	StateMachine->SetNextBehavior(BHV_GetUp);
+}
+
+void FTGPlayerBehavior_Kick::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
+{
+	float BehaviorTime = StateMachine->GetCurrentBehaviorTime();
+	if (BehaviorTime > 0.1f && BehaviorTime < 0.3f)
+	{
+		FTGPlayerController* PlayerOwner = StateMachine->GetOwner();
+		if (PlayerOwner)
+		{
+			auto HitPlayers = PlayerOwner->TestSphereHitWithOtherPlayers(50.0f, RVec3(0, 100, -50));
+			for (auto HitPlayer : HitPlayers)
+			{
+				if (HitPlayer == PlayerOwner)
+				{
+					continue;
+				}
+
+				if (HitPlayer->GetBehavior() != BHV_KnockedDown &&
+					HitPlayer->GetBehavior() != BHV_Hit)
+				{
+					HitPlayer->SetBehavior(BHV_Hit);
+				}
+			}
+		}
+	}
+}
+
+void FTGPlayerBehavior_Punch::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
+{
+	float BehaviorTime = StateMachine->GetCurrentBehaviorTime();
+	if (BehaviorTime > 0.1f && BehaviorTime < 0.3f)
+	{
+		FTGPlayerController* PlayerOwner = StateMachine->GetOwner();
+		if (PlayerOwner)
+		{
+			auto HitPlayers = PlayerOwner->TestSphereHitWithOtherPlayers(20.0f, RVec3(0, 100, -50));
+			for (auto HitPlayer : HitPlayers)
+			{
+				if (HitPlayer == PlayerOwner)
+				{
+					continue;
+				}
+
+				if (HitPlayer->GetBehavior() != BHV_KnockedDown &&
+					HitPlayer->GetBehavior() != BHV_Hit)
+				{
+					HitPlayer->SetBehavior(BHV_Hit);
+				}
+			}
+		}
+	}
 }

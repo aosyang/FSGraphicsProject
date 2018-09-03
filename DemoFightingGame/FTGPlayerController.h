@@ -16,12 +16,15 @@ class FTGPlayerController : public RSMeshObject
 {
 	DECLARE_SCENE_OBJECT(RSMeshObject);
 public:
+	~FTGPlayerController();
+
 	void InitAssets();
 
 	void PreUpdate(const RTimer& timer);
-	const RVec3& GetRootOffset() const { return m_RootOffset; }
 	void UpdateMovement(const RTimer& timer, const RVec3 moveVec);
 	void PostUpdate(const RTimer& timer);
+
+	const RVec3& GetRootOffset() const;
 
 	void Draw() override;
 	void DrawDepthPass() override;
@@ -40,8 +43,14 @@ public:
 	RAabb GetMovementCollisionShape() const;
 	RCapsule GetCollisionShape() const;
 
+	/// Run a sphere shape hit test with other players
+	vector<FTGPlayerController*> TestSphereHitWithOtherPlayers(float Radius, const RVec3& LocalSpaceOffset);
+
 	/// Get the animation blender used for this player controller
 	RAnimationBlender& GetAnimBlender() { return m_StateMachine.GetAnimBlender(); }
+
+	static list<RSceneObject*>	ActivePlayerControllers;
+
 private:
 	FTGPlayerController(RScene* InScene);
 
@@ -55,6 +64,11 @@ private:
 	FTGPlayerStateMachine	m_StateMachine;
 };
 
+
+FORCEINLINE const RVec3& FTGPlayerController::GetRootOffset() const
+{
+	return m_RootOffset;
+}
 
 FORCEINLINE EPlayerBehavior FTGPlayerController::GetBehavior() const
 {

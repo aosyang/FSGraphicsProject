@@ -277,22 +277,25 @@ void RScene::SaveToFile(const char* filename)
 	doc->SaveFile(filename);
 }
 
-RVec3 RScene::TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec)
+RVec3 RScene::TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec, list<RSceneObject*> IgnoredObjects /*= list<RSceneObject*>()*/)
 {
 	RVec3 v = moveVec;
 
-	for (vector<RSceneObject*>::iterator iter = m_SceneObjects.begin(); iter != m_SceneObjects.end(); iter++)
+	for (auto SceneObject : m_SceneObjects)
 	{
-		if ((*iter)->GetType() == ESceneObjectType::MeshObject)
+		if (SceneObject->GetType() == ESceneObjectType::MeshObject)
 		{
-			RSMeshObject* meshObj = (RSMeshObject*)(*iter);
-
-			if (aabb.GetSweptAabb(v).TestIntersectionWithAabb(meshObj->GetAabb()))
+			if (std::find(IgnoredObjects.begin(), IgnoredObjects.end(), SceneObject) == IgnoredObjects.end())
 			{
-				for (int i = 0; i < meshObj->GetMeshElementCount(); i++)
+				RSMeshObject* meshObj = (RSMeshObject*)(SceneObject);
+
+				if (aabb.GetSweptAabb(v).TestIntersectionWithAabb(meshObj->GetAabb()))
 				{
-					RAabb elemAabb = meshObj->GetMeshElementAabb(i).GetTransformedAabb(meshObj->GetTransformMatrix());
-					v = aabb.TestDynamicCollisionWithAabb(v, elemAabb);
+					for (int i = 0; i < meshObj->GetMeshElementCount(); i++)
+					{
+						RAabb elemAabb = meshObj->GetMeshElementAabb(i).GetTransformedAabb(meshObj->GetTransformMatrix());
+						v = aabb.TestDynamicCollisionWithAabb(v, elemAabb);
+					}
 				}
 			}
 		}

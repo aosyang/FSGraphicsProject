@@ -89,10 +89,7 @@ public:
 	void LookAt(const RVec3& target, const RVec3& world_up = RVec3(0, 1, 0));
 
 	/// Move scene object in world space
-	void Translate(const RVec3& v);
-
-	/// Move scene object in local space
-	void TranslateLocal(const RVec3& v);
+	void Translate(const RVec3& v, ETransformSpace Space);
 
 	/// Attach to another object
 	void AttachTo(RSceneObject* Parent);

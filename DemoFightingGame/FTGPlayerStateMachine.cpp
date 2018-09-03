@@ -7,7 +7,8 @@
 #include "FTGPlayerStateMachine.h"
 
 FTGPlayerStateMachine::FTGPlayerStateMachine()
-	: m_NextBehavior(BHV_Invalid)
+	: m_PlayerOwner(nullptr)
+	, m_NextBehavior(BHV_Invalid)
 	, m_CurrentBehaviorInstance(nullptr)
 {
 }
@@ -17,8 +18,10 @@ FTGPlayerStateMachine::~FTGPlayerStateMachine()
 	ReleaseAssets();
 }
 
-void FTGPlayerStateMachine::InitAssets()
+void FTGPlayerStateMachine::Init(FTGPlayerController* Owner)
 {
+	m_PlayerOwner = Owner;
+
 	AllocateBehaviorInstance<FTGPlayerBehavior_Idle>();
 	AllocateBehaviorInstance<FTGPlayerBehavior_Run>();
 	AllocateBehaviorInstance<FTGPlayerBehavior_Punch>();
@@ -66,6 +69,11 @@ void FTGPlayerStateMachine::Update(float DeltaTime)
 				m_AnimBlender.Play(BehaviorInstance->GetAnimation());
 			}
 		}
+	}
+
+	if (m_CurrentBehaviorInstance)
+	{
+		m_CurrentBehaviorInstance->Update(this, DeltaTime);
 	}
 }
 

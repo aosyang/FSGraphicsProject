@@ -31,6 +31,8 @@ public:
 	FTGPlayerBehaviorBase();
 
 	virtual bool EvaluateForExecution(FTGPlayerStateMachine* StateMachine);
+	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime);
+
 	EPlayerBehavior GetBehaviorEnum() const;
 	RAnimation* GetAnimation() const;
 	float GetBlendInTime() const;
@@ -79,6 +81,8 @@ public:
 		m_BehaviorEnum = BHV_Punch;
 		LoadAnimationAsset("../Assets/unitychan/FUCM05_0001_M_CMN_LJAB.fbx", AnimBitFlag_HasRootMotion);
 	}
+
+	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
 };
 
 class FTGPlayerBehavior_Kick : public FTGPlayerBehaviorBase
@@ -89,6 +93,8 @@ public:
 		m_BehaviorEnum = BHV_Kick;
 		LoadAnimationAsset("../Assets/unitychan/FUCM_04_0001_RHiKick.fbx", AnimBitFlag_HasRootMotion);
 	}
+
+	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
 };
 
 class FTGPlayerBehavior_BackKick : public FTGPlayerBehaviorBase

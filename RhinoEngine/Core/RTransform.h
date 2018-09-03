@@ -8,6 +8,12 @@
 #include "RVector.h"
 #include "RQuat.h"
 
+enum class ETransformSpace : UINT8
+{
+	Local,
+	World,
+};
+
 class RTransform
 {
 public:
@@ -31,8 +37,8 @@ public:
 	RVec3 GetUp() const;
 	RVec3 GetRight() const;
 
-	void Translate(const RVec3& t);
-	void TranslateLocal(const RVec3& t);
+	void Translate(const RVec3& t, ETransformSpace Space);
+	RVec3 GetTranslatedVector(const RVec3& t, ETransformSpace Space);
 
 	void LookAt(const RVec3& target, const RVec3& world_up = RVec3(0, 1, 0));
 
@@ -73,18 +79,6 @@ FORCEINLINE RVec3 RTransform::GetUp() const
 FORCEINLINE RVec3 RTransform::GetRight() const
 {
 	return Rotation * RVec3(1, 0, 0);
-}
-
-FORCEINLINE void RTransform::Translate(const RVec3& t)
-{
-	Position += t;
-	bIsCachedMatrixDirty = true;
-}
-
-FORCEINLINE void RTransform::TranslateLocal(const RVec3& t)
-{
-	Position += Rotation * t;
-	bIsCachedMatrixDirty = true;
 }
 
 FORCEINLINE bool RTransform::IsCacheDirty() const

@@ -45,7 +45,7 @@ public:
 	/// Save scene to file on disk
 	void SaveToFile(const char* filename);
 
-	RVec3 TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec);
+	RVec3 TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec, list<RSceneObject*> IgnoredObjects = list<RSceneObject*>());
 	void Render(const RFrustum* pFrustum = nullptr);
 	void RenderDepthPass(const RFrustum* pFrustum = nullptr);
 

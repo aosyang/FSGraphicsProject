@@ -247,46 +247,6 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			}
 		}
 
-		if (m_Player->GetBehavior() == BHV_Punch &&
-			m_Player->GetBehaviorTime() > 0.1f &&
-			m_Player->GetBehaviorTime() < 0.3f)
-		{
-			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() - m_Player->GetForwardVector() * 50 + RVec3(0, 100, 0);
-			hit_sphere.radius = 20.0f;
-			if (m_DrawHitBound)
-				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
-
-			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
-			{
-				if (m_AIPlayer->GetBehavior() != BHV_KnockedDown &&
-					m_AIPlayer->GetBehavior() != BHV_Hit)
-				{
-					m_AIPlayer->SetBehavior(BHV_Hit);
-				}
-			}
-		}
-
-		if (m_Player->GetBehavior() == BHV_Kick &&
-			m_Player->GetBehaviorTime() > 0.1f &&
-			m_Player->GetBehaviorTime() < 0.3f)
-		{
-			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() - m_Player->GetForwardVector() * 50 + RVec3(0, 100, 0);
-			hit_sphere.radius = 50.0f;
-			if (m_DrawHitBound)
-				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
-
-			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
-			{
-				if (m_AIPlayer->GetBehavior() != BHV_KnockedDown &&
-					m_AIPlayer->GetBehavior() != BHV_Hit)
-				{
-					m_AIPlayer->SetBehavior(BHV_Hit);
-				}
-			}
-		}
-
 		if (m_Player->GetBehavior() == BHV_BackKick &&
 			m_Player->GetBehaviorTime() > 0.1f &&
 			m_Player->GetBehaviorTime() < 0.3f)
@@ -440,8 +400,7 @@ void FightingGameApp::UpdateCameraPosition(float DeltaTime)
 
 	RVec3 camVec = cameraTransform.GetTranslation() - lookTarget;
 
-	// FIXME: The camera collision is not working properly
-	//camVec = m_Scene.TestMovingAabbWithScene(camAabb, camVec);
+	camVec = m_Scene.TestMovingAabbWithScene(camAabb, camVec, FTGPlayerController::ActivePlayerControllers);
 
 	//m_Camera->SetTransform(cameraTransform);
 	static RVec3 actualCamVec;

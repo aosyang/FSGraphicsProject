@@ -28,7 +28,7 @@ static int ScriptFunc_MoveTo(lua_State* state)
 	{
 		RVec3 rel = (target - obj->GetPosition()).GetNormalized();
 		if (rel.SquaredMagitude() > 0.0f)
-			obj->Translate(rel);
+			obj->Translate(rel, ETransformSpace::World);
 	}
 
 	return 0;

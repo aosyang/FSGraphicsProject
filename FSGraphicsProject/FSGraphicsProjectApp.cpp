@@ -446,7 +446,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		if (m_RenderCollisionWireframe)
 			GDebugRenderer.DrawAabb(sceneMeshElements[i].GetAabb());
 	}
-	m_Camera->Translate(worldMoveVec);
+	m_Camera->Translate(worldMoveVec, ETransformSpace::World);
 	m_Camera->SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0.0f));
 
 	RMatrix4 viewMatrix = m_Camera->GetViewMatrix();
@@ -722,7 +722,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		if (fabs(worldOffset.Y()) < fabs(m_CharacterYVel))
 			m_CharacterYVel = 0.0f;
 
-		m_CharacterObj->Translate(worldOffset);
+		m_CharacterObj->Translate(worldOffset, ETransformSpace::World);
 		RVec3 invOffset = -animation->GetRootPosition(currTime);
 		RMatrix4 rootInversedTranslation = RMatrix4::CreateTranslation(invOffset);
 

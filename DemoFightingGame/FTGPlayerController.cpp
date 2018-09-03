@@ -8,11 +8,18 @@
 
 IMPLEMENT_SCENE_OBJECT(FTGPlayerController);
 
+std::list<RSceneObject*> FTGPlayerController::ActivePlayerControllers;
+
 FTGPlayerController::FTGPlayerController(RScene* InScene)
 	: Base(InScene)
 	, m_Rotation(0.0f)
 {
+	ActivePlayerControllers.push_back(this);
+}
 
+FTGPlayerController::~FTGPlayerController()
+{
+	ActivePlayerControllers.remove(this);
 }
 
 void FTGPlayerController::InitAssets()
@@ -20,7 +27,7 @@ void FTGPlayerController::InitAssets()
 	RMesh* playerMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/unitychan/unitychan.fbx", EResourceLoadMode::Immediate);
 	SetMesh(playerMesh);
 
-	m_StateMachine.InitAssets();
+	m_StateMachine.Init(this);
 	m_StateMachine.CacheAnimations(m_Mesh);
 }
 
@@ -78,9 +85,9 @@ void FTGPlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVe
 
 	worldMoveVec += (RVec4(GetRootOffset(), 0) * GetTransformMatrix()).ToVec3();
 	worldMoveVec -= StairOffset;
-	worldMoveVec = m_Scene->TestMovingAabbWithScene(playerAabb, worldMoveVec);
+	worldMoveVec = m_Scene->TestMovingAabbWithScene(playerAabb, worldMoveVec, ActivePlayerControllers);
 
-	Translate(worldMoveVec + StairOffset);
+	Translate(worldMoveVec + StairOffset, ETransformSpace::World);
 
 	SetRotation(RQuat::Euler(0.0f, DEG_TO_RAD(m_Rotation), 0.0f));
 }
@@ -185,6 +192,31 @@ RAabb FTGPlayerController::GetMovementCollisionShape() const
 RCapsule FTGPlayerController::GetCollisionShape() const
 {
 	return RCapsule{ GetPosition() + RVec3(0, 40, 0), GetPosition() + RVec3(0, 110, 0), 40 };
+}
+
+vector<FTGPlayerController*> FTGPlayerController::TestSphereHitWithOtherPlayers(float Radius, const RVec3& LocalSpaceOffset)
+{
+	RSphere HitSphere;
+	HitSphere.center = GetTransform()->GetTranslatedVector(LocalSpaceOffset, ETransformSpace::Local);
+	HitSphere.radius = Radius;
+
+	GDebugRenderer.DrawSphere(HitSphere.center, HitSphere.radius);
+
+	vector<FTGPlayerController*> Results;
+	for (auto PlayerController : m_Scene->FindAllObjectsOfType<FTGPlayerController>())
+	{
+		if (PlayerController == this)
+		{
+			continue;
+		}
+
+		if (RCollision::TestSphereWithCapsule(HitSphere, PlayerController->GetCollisionShape()))
+		{
+			Results.push_back(PlayerController);
+		}
+	}
+
+	return Results;
 }
 
 bool FTGPlayerController::CanMovePlayerWithInput() const
