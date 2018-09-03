@@ -155,6 +155,16 @@ void RMesh::CacheAnimation(RAnimation* anim)
 	m_AnimationNodeCache[anim] = nodeIdMap;
 }
 
+bool RMesh::HasCachedAnimation(RAnimation* anim) const
+{
+	if (anim)
+	{
+		return m_AnimationNodeCache.find(anim) != m_AnimationNodeCache.end();
+	}
+
+	return false;
+}
+
 int RMesh::GetCachedAnimationNodeId(RAnimation* anim, int boneId)
 {
 	if (!anim || !m_BoneIdToName.size())

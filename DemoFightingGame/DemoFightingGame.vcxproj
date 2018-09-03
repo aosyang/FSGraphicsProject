@@ -173,12 +173,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FightingGameApp.cpp" />
+    <ClCompile Include="FTGPlayerBehaviors.cpp" />
+    <ClCompile Include="FTGPlayerStateMachine.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="FTGPlayerController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FightingGameApp.h" />
+    <ClInclude Include="FTGPlayerBehaviors.h" />
     <ClInclude Include="FTGPlayerController.h" />
+    <ClInclude Include="FTGPlayerStateMachine.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DemoFightingGame.licenseheader" />

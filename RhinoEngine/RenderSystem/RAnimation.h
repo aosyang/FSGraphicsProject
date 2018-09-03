@@ -47,7 +47,10 @@ public:
 	void ProceedAnimation(float deltaTime);
 	void GetCurrentBlendedNodePose(int sourceNodeId, int targetNodeId, RMatrix4* matrix);
 	RVec3 GetCurrentRootOffset();
-	bool IsAnimationDone();
+
+	/// Check if animation has finished playing.
+	bool HasFinishedPlaying() const;
+
 	RAnimation* GetSourceAnimation() const;
 	float GetSourcePlaybackTime() const;
 	RAnimation* GetTargetAnimation() const;

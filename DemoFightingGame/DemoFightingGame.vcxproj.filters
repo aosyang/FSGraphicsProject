@@ -24,12 +24,24 @@
     <ClCompile Include="FTGPlayerController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FTGPlayerBehaviors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FTGPlayerStateMachine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FightingGameApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FTGPlayerController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FTGPlayerBehaviors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FTGPlayerStateMachine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

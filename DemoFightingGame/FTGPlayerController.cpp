@@ -1,5 +1,5 @@
 //=============================================================================
-// PlayerController.cpp by Shiyang Ao, 2016 All Rights Reserved.
+// FTGPlayerController.cpp by Shiyang Ao, 2016 All Rights Reserved.
 //
 // 
 //=============================================================================
@@ -8,66 +8,30 @@
 
 IMPLEMENT_SCENE_OBJECT(FTGPlayerController);
 
-BehaviorInfo PlayerBehaviorInfo[] =
-{
-	{ PlayerAnim_Idle,			0.2f },
-	{ PlayerAnim_Run,			0.2f },
-	{ PlayerAnim_Punch1,		0.0f },
-	{ PlayerAnim_Kick,			0.0f },
-	{ PlayerAnim_BackKick,		0.0f },
-	{ PlayerAnim_SpinAttack,	0.2f },
-	{ PlayerAnim_Hit,			0.0f },
-	{ PlayerAnim_Down,			0.0f },
-	{ PlayerAnim_GetUp,			0.0f },
-};
-
 FTGPlayerController::FTGPlayerController(RScene* InScene)
-	: Base(InScene), m_Rotation(0.0f), m_Behavior(BHV_Idle)
+	: Base(InScene)
+	, m_Rotation(0.0f)
 {
 
 }
 
-void FTGPlayerController::Cache()
+void FTGPlayerController::InitAssets()
 {
-	RMesh* playerMesh = RResourceManager::Instance().FindMesh("../Assets/unitychan/unitychan.fbx");
-	if (!playerMesh)
-		playerMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/unitychan/unitychan.fbx", EResourceLoadMode::Immediate);
+	RMesh* playerMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/unitychan/unitychan.fbx", EResourceLoadMode::Immediate);
 	SetMesh(playerMesh);
 
-	m_Animations[PlayerAnim_Idle]		= LoadAnimation("../Assets/unitychan/FUCM05_0000_Idle.fbx",					AnimBitFlag_Loop);
-	m_Animations[PlayerAnim_Run]		= LoadAnimation("../Assets/unitychan/FUCM_0012b_EH_RUN_LP_NoZ.fbx",			AnimBitFlag_Loop);
-	m_Animations[PlayerAnim_Punch1]		= LoadAnimation("../Assets/unitychan/FUCM05_0001_M_CMN_LJAB.fbx",			AnimBitFlag_HasRootMotion);
-	m_Animations[PlayerAnim_Kick]		= LoadAnimation("../Assets/unitychan/FUCM_04_0001_RHiKick.fbx",				AnimBitFlag_HasRootMotion);
-	m_Animations[PlayerAnim_BackKick]	= LoadAnimation("../Assets/unitychan/FUCM02_0004_CH01_AS_MAWAK.fbx",		AnimBitFlag_HasRootMotion);
-	m_Animations[PlayerAnim_SpinAttack] = LoadAnimation("../Assets/unitychan/FUCM02_0029_Cha01_STL01_ScrewK01.fbx",	AnimBitFlag_HasRootMotion);
-	m_Animations[PlayerAnim_Hit]		= LoadAnimation("../Assets/unitychan/unitychan_DAMAGED00.fbx",				AnimBitFlag_HasRootMotion);
-	m_Animations[PlayerAnim_Down]		= LoadAnimation("../Assets/unitychan/FUCM02_0025_MYA_TF_DOWN.fbx",			AnimBitFlag_HasRootMotion);
-	m_Animations[PlayerAnim_GetUp]		= LoadAnimation("../Assets/unitychan/FUCM03_0019_HeadSpring.fbx",			AnimBitFlag_HasRootMotion);
-
-	for (int i = 0; i < PlayerAnimCount; i++)
-	{
-		m_Mesh->CacheAnimation(m_Animations[i]);
-	}
-
-	m_AnimBlender.Play(m_Animations[PlayerAnim_Idle]);
+	m_StateMachine.InitAssets();
+	m_StateMachine.CacheAnimations(m_Mesh);
 }
 
 void FTGPlayerController::PreUpdate(const RTimer& timer)
 {
-	m_AnimBlender.ProceedAnimation(timer.DeltaTime());
+	m_StateMachine.Update(timer.DeltaTime());
 
-	m_RootOffset = m_AnimBlender.GetCurrentRootOffset();
+	m_RootOffset = GetAnimBlender().GetCurrentRootOffset();
 
-	if (m_Behavior == BHV_Idle || m_Behavior == BHV_Running)
-		m_RootOffset = RVec3(0, 0, 0);
-
-	if (m_AnimBlender.IsAnimationDone())
-	{
-		if (m_Behavior == BHV_HitDown)
-			SetBehavior(BHV_GetUp);
-		else
-			SetBehavior(BHV_Idle);
-	}
+	//if (m_Behavior == BHV_Idle || m_Behavior == BHV_Run)
+	//	m_RootOffset = RVec3(0, 0, 0);
 }
 
 float LerpDegreeAngle(float from, float to, float t)
@@ -127,9 +91,9 @@ void FTGPlayerController::PostUpdate(const RTimer& timer)
 	{
 		RMatrix4 matrix;
 
-		int sourceBoneId = m_Mesh->GetCachedAnimationNodeId(m_AnimBlender.GetSourceAnimation(), i);
-		int targetBondId = m_Mesh->GetCachedAnimationNodeId(m_AnimBlender.GetTargetAnimation(), i);
-		m_AnimBlender.GetCurrentBlendedNodePose(sourceBoneId, targetBondId, &matrix);
+		int sourceBoneId = m_Mesh->GetCachedAnimationNodeId(GetAnimBlender().GetSourceAnimation(), i);
+		int targetBondId = m_Mesh->GetCachedAnimationNodeId(GetAnimBlender().GetTargetAnimation(), i);
+		GetAnimBlender().GetCurrentBlendedNodePose(sourceBoneId, targetBondId, &matrix);
 
 		m_BoneMatrices[i] = m_Mesh->GetBoneInitInvMatrices(i) * matrix * GetTransformMatrix();
 	}
@@ -162,61 +126,51 @@ void FTGPlayerController::SetPlayerFacing(const RVec3& Direction)
 
 void FTGPlayerController::SetBehavior(EPlayerBehavior behavior)
 {
-	switch (behavior)
-	{
-	case BHV_Kick:
-		if (m_Behavior != BHV_Kick && m_Behavior != BHV_BackKick)
-		{
-			m_AnimBlender.Play(m_Animations[PlayerAnim_Kick]);
-			m_Behavior = BHV_Kick;
-		}
-		else if (m_Behavior == BHV_Kick && GetBehaviorTime() >= 0.5f)
-		{
-			m_AnimBlender.Play(m_Animations[PlayerAnim_BackKick]);
-			m_Behavior = BHV_BackKick;
-		}
-		break;
+	m_StateMachine.SetNextBehavior(behavior);
 
-	case BHV_Hit:
-		m_AnimBlender.Play(m_Animations[PlayerAnim_Hit]);
-		m_Behavior = BHV_Hit;
-		break;
+	//switch (behavior)
+	//{
+	//case BHV_Kick:
+	//	if (m_Behavior != BHV_Kick && m_Behavior != BHV_BackKick)
+	//	{
+	//		GetAnimBlender().Play(m_Animations[PlayerAnim_Kick]);
+	//		m_Behavior = BHV_Kick;
+	//	}
+	//	else if (m_Behavior == BHV_Kick && GetBehaviorTime() >= 0.3f)
+	//	{
+	//		GetAnimBlender().Play(m_Animations[PlayerAnim_BackKick]);
+	//		m_Behavior = BHV_BackKick;
+	//	}
+	//	break;
 
-	default:
-		if (m_Behavior != behavior)
-		{
-			const BehaviorInfo& CurrentBehavior = PlayerBehaviorInfo[behavior];
+	//case BHV_Hit:
+	//	GetAnimBlender().Play(m_Animations[PlayerAnim_Hit]);
+	//	m_Behavior = BHV_Hit;
+	//	break;
 
-			if (CurrentBehavior.blendTime > 0.0f)
-			{
-				m_AnimBlender.BlendTo(m_Animations[CurrentBehavior.anim],
-									  m_Animations[CurrentBehavior.anim]->GetStartTime(), 1.0f,
-									  CurrentBehavior.blendTime);
-			}
-			else
-			{
-				m_AnimBlender.Play(m_Animations[CurrentBehavior.anim]);
-			}
-			m_Behavior = behavior;
-		}
-	}
+	//default:
+	//	if (m_Behavior != behavior)
+	//	{
+	//		const BehaviorInfo& CurrentBehavior = PlayerBehaviorInfo[behavior];
+
+	//		if (CurrentBehavior.blendTime > 0.0f)
+	//		{
+	//			GetAnimBlender().BlendTo(m_Animations[CurrentBehavior.anim],
+	//								  m_Animations[CurrentBehavior.anim]->GetStartTime(), 1.0f,
+	//								  CurrentBehavior.blendTime);
+	//		}
+	//		else
+	//		{
+	//			GetAnimBlender().Play(m_Animations[CurrentBehavior.anim]);
+	//		}
+	//		m_Behavior = behavior;
+	//	}
+	//}
 }
 
 float FTGPlayerController::GetBehaviorTime()
 {
-	if (m_AnimBlender.GetSourceAnimation())
-	{
-		if (m_AnimBlender.GetTargetAnimation())
-		{
-			return m_AnimBlender.GetTargetPlaybackTime() / m_AnimBlender.GetTargetAnimation()->GetFrameRate();
-		}
-		else
-		{
-			return m_AnimBlender.GetSourcePlaybackTime() / m_AnimBlender.GetSourceAnimation()->GetFrameRate();
-		}
-	}
-
-	return 0.0f;
+	return m_StateMachine.GetCurrentBehaviorTime();
 }
 
 RAabb FTGPlayerController::GetMovementCollisionShape() const
@@ -233,38 +187,7 @@ RCapsule FTGPlayerController::GetCollisionShape() const
 	return RCapsule{ GetPosition() + RVec3(0, 40, 0), GetPosition() + RVec3(0, 110, 0), 40 };
 }
 
-RAnimation* FTGPlayerController::LoadAnimation(const char* resPath, int flags)
-{
-	RMesh* mesh = RResourceManager::Instance().FindMesh(resPath);
-	if (!mesh)
-		mesh = RResourceManager::Instance().LoadFbxMesh(resPath, EResourceLoadMode::Immediate);
-
-	if (mesh)
-	{
-		RAnimation* Animation = mesh->GetAnimation();
-		if (Animation)
-		{
-			Animation->SetBitFlags(flags);
-
-			string strResPath = string(resPath);
-			string filename = RFileUtil::GetFileNameInPath(strResPath);
-			Animation->SetName(filename);
-			return Animation;
-		}
-		else
-		{
-			RLogWarning("Unable to find animation data in mesh resource \'%s\'\n", resPath);
-		}
-	}
-	else
-	{
-		RLogWarning("Failed to load mesh resource \'%s\'\n", resPath);
-	}
-
-	return nullptr;
-}
-
 bool FTGPlayerController::CanMovePlayerWithInput() const
 {
-	return GetBehavior() == BHV_Running || GetBehavior() == BHV_Idle;
+	return m_StateMachine.GetCurrentBehavior() == BHV_Run || m_StateMachine.GetCurrentBehavior() == BHV_Idle;
 }

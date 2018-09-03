@@ -50,6 +50,7 @@ public:
 	int GetBoneCount() const;
 
 	void CacheAnimation(RAnimation* anim);
+	bool HasCachedAnimation(RAnimation* anim) const;
 	int GetCachedAnimationNodeId(RAnimation* anim, int boneId);
 
 private:

@@ -9,7 +9,8 @@
 
 
 RAnimationPlayer::RAnimationPlayer()
-	: IsAnimDone(false)
+	: Animation(nullptr)
+	, IsAnimDone(false)
 {
 }
 
@@ -64,7 +65,7 @@ void RAnimationPlayer::Proceed(float deltaTime)
 void RAnimationPlayer::Reset()
 {
 	IsAnimDone = false;
-	CurrentTime = Animation->GetStartTime();
+	CurrentTime = Animation ? Animation->GetStartTime() : 0.0f;
 }
 
 RAnimationBlender::RAnimationBlender()
@@ -180,10 +181,13 @@ RVec3 RAnimationBlender::GetCurrentRootOffset()
 	return RVec3::Zero();
 }
 
-bool RAnimationBlender::IsAnimationDone()
+bool RAnimationBlender::HasFinishedPlaying() const
 {
 	if (m_TargetAnimation.Animation)
+	{
 		return m_TargetAnimation.IsAnimDone;
+	}
+
 	return (m_SourceAnimation.Animation && m_SourceAnimation.IsAnimDone);
 }
 

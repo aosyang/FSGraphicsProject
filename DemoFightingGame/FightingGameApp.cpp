@@ -40,11 +40,11 @@ bool FightingGameApp::Initialize()
 
 	m_Player = m_Scene.CreateSceneObjectOfType<FTGPlayerController>();
 	m_Player->SetPosition(RVec3(0, 100.0f, 0));
-	m_Player->Cache();
+	m_Player->InitAssets();
 
 	m_AIPlayer = m_Scene.CreateSceneObjectOfType<FTGPlayerController>();
 	m_AIPlayer->SetPosition(RVec3(-465, 50, -760));
-	m_AIPlayer->Cache();
+	m_AIPlayer->InitAssets();
 
 	m_Text.Initialize(RResourceManager::Instance().LoadDDSTexture("../Assets/Fonts/Fixedsys_9c.DDS", EResourceLoadMode::Immediate), 16, 16);
 	return true;
@@ -153,7 +153,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		RVec3 charRight = m_Camera->GetRightVector();
 		RVec3 charForward = RVec3::Cross(charRight, RVec3(0, 1, 0));
 
-		if (m_Player->GetBehavior() == BHV_Running ||
+		if (m_Player->GetBehavior() == BHV_Run ||
 			m_Player->GetBehavior() == BHV_Idle)
 		{
 			if (RInput.IsKeyDown('W')) moveVec += charForward;
@@ -166,7 +166,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 				moveVec.Normalize();
 				moveVec *= timer.DeltaTime() * 500.0f;
 
-				m_Player->SetBehavior(BHV_Running);
+				m_Player->SetBehavior(BHV_Run);
 			}
 			else
 			{
@@ -184,7 +184,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			}
 		}
 
-		if (m_Player->GetBehavior() == BHV_Running ||
+		if (m_Player->GetBehavior() == BHV_Run ||
 			m_Player->GetBehavior() == BHV_Idle ||
 			m_Player->GetBehavior() == BHV_Kick)
 		{
@@ -195,7 +195,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		}
 
 		if (RInput.GetBufferedKeyState('C') == EBufferedKeyState::Pressed)
-			m_Player->SetBehavior(BHV_HitDown);
+			m_Player->SetBehavior(BHV_KnockedDown);
 
 		m_Player->UpdateMovement(timer, moveVec);
 
@@ -231,7 +231,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
 			{
-				if (m_AIPlayer->GetBehavior() != BHV_HitDown)
+				if (m_AIPlayer->GetBehavior() != BHV_KnockedDown)
 				{
 					RVec3 relVec = hit_sphere.center - m_AIPlayer->GetPosition();
 					relVec.SetY(0.0f);
@@ -243,7 +243,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 					m_AIPlayer->SetPlayerFacing(relVec);
 				}
-				m_AIPlayer->SetBehavior(BHV_HitDown);
+				m_AIPlayer->SetBehavior(BHV_KnockedDown);
 			}
 		}
 
@@ -259,7 +259,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
 			{
-				if (m_AIPlayer->GetBehavior() != BHV_HitDown &&
+				if (m_AIPlayer->GetBehavior() != BHV_KnockedDown &&
 					m_AIPlayer->GetBehavior() != BHV_Hit)
 				{
 					m_AIPlayer->SetBehavior(BHV_Hit);
@@ -279,7 +279,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
 			{
-				if (m_AIPlayer->GetBehavior() != BHV_HitDown &&
+				if (m_AIPlayer->GetBehavior() != BHV_KnockedDown &&
 					m_AIPlayer->GetBehavior() != BHV_Hit)
 				{
 					m_AIPlayer->SetBehavior(BHV_Hit);
@@ -299,7 +299,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
 			{
-				if (m_AIPlayer->GetBehavior() != BHV_HitDown)
+				if (m_AIPlayer->GetBehavior() != BHV_KnockedDown)
 				{
 					RVec3 relVec = hit_sphere.center - m_AIPlayer->GetPosition();
 					relVec.SetY(0.0f);
@@ -310,7 +310,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 					}
 					
 					m_AIPlayer->SetPlayerFacing(relVec);
-					m_AIPlayer->SetBehavior(BHV_HitDown);
+					m_AIPlayer->SetBehavior(BHV_KnockedDown);
 				}
 			}
 		}
@@ -320,7 +320,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		char msg_buf[1024];
 		RVec3 playerPos = m_Player->GetPosition();
 		float playerRot = m_Player->GetPlayerRotation();
-		RAnimationBlender& blender = m_Player->GetAnimationBlender();
+		RAnimationBlender& blender = m_Player->GetAnimBlender();
 		sprintf_s(msg_buf, 1024, "Player: (%f, %f, %f), rot: %f\n"
 								 "Blend From : %s\n"
 								 "Blend To   : %s\n"

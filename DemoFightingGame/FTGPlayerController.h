@@ -1,5 +1,5 @@
 //=============================================================================
-// PlayerController.h by Shiyang Ao, 2016 All Rights Reserved.
+// FTGPlayerController.h by Shiyang Ao, 2016 All Rights Reserved.
 //
 // 
 //=============================================================================
@@ -8,46 +8,15 @@
 
 #include "Rhino.h"
 
-enum EPlayerAnimation
-{
-	PlayerAnim_Idle,
-	PlayerAnim_Run,
-	PlayerAnim_Punch1,
-	PlayerAnim_Kick,
-	PlayerAnim_BackKick,
-	PlayerAnim_SpinAttack,
+#include "FTGPlayerStateMachine.h"
+#include "FTGPlayerBehaviors.h"
 
-	PlayerAnim_Hit,
-	PlayerAnim_Down,
-	PlayerAnim_GetUp,
-
-	PlayerAnimCount,
-};
-
-enum EPlayerBehavior
-{
-	BHV_Idle,
-	BHV_Running,
-	BHV_Punch,
-	BHV_Kick,
-	BHV_BackKick,
-	BHV_SpinAttack,
-	BHV_Hit,
-	BHV_HitDown,
-	BHV_GetUp,
-};
-
-struct BehaviorInfo
-{
-	EPlayerAnimation	anim;
-	float				blendTime;
-};
-
+/// Base fighting game player controller
 class FTGPlayerController : public RSMeshObject
 {
 	DECLARE_SCENE_OBJECT(RSMeshObject);
 public:
-	void Cache();
+	void InitAssets();
 
 	void PreUpdate(const RTimer& timer);
 	const RVec3& GetRootOffset() const { return m_RootOffset; }
@@ -71,26 +40,23 @@ public:
 	RAabb GetMovementCollisionShape() const;
 	RCapsule GetCollisionShape() const;
 
-	RAnimationBlender& GetAnimationBlender() { return m_AnimBlender; }
+	/// Get the animation blender used for this player controller
+	RAnimationBlender& GetAnimBlender() { return m_StateMachine.GetAnimBlender(); }
 private:
 	FTGPlayerController(RScene* InScene);
-
-	RAnimation* LoadAnimation(const char* resPath, int flags=0);
 
 	/// Can the player move with user input
 	bool CanMovePlayerWithInput() const;
 
 	float					m_Rotation;
-	RAnimation*				m_Animations[PlayerAnimCount];
-	RAnimationBlender		m_AnimBlender;
 	RVec3					m_RootOffset;
 	RMatrix4				m_BoneMatrices[MAX_BONE_COUNT];
 
-	EPlayerBehavior			m_Behavior;
+	FTGPlayerStateMachine	m_StateMachine;
 };
 
 
 FORCEINLINE EPlayerBehavior FTGPlayerController::GetBehavior() const
 {
-	return m_Behavior;
+	return m_StateMachine.GetCurrentBehavior();
 }
