@@ -106,7 +106,7 @@ namespace EngineManagedWrapper
 
 	void RhinoEngineWrapper::OnKeyUp(int keycode)
 	{
-		g_KeyStateModifier.NotifyKeyDownStateChanged(keycode, true);
+		g_KeyStateModifier.NotifyKeyDownStateChanged(keycode, false);
 	}
 
 	void RhinoEngineWrapper::RunScreenToCameraRayPicking(float x, float y)
