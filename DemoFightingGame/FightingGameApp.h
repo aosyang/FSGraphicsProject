@@ -35,7 +35,6 @@ private:
 	FTGPlayerController*	m_Player;
 	FTGPlayerController*	m_AIPlayer;
 
-	bool				m_DrawHitBound;
 	RText				m_Text;
 };
 

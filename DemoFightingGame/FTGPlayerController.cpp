@@ -10,6 +10,8 @@ IMPLEMENT_SCENE_OBJECT(FTGPlayerController);
 
 std::list<RSceneObject*> FTGPlayerController::ActivePlayerControllers;
 
+bool FTGPlayerController::DrawDebugHitShape = false;
+
 FTGPlayerController::FTGPlayerController(RScene* InScene)
 	: Base(InScene)
 	, m_Rotation(0.0f)
@@ -171,45 +173,6 @@ void FTGPlayerController::PerformSpinAttack()
 void FTGPlayerController::SetBehavior(EPlayerBehavior behavior)
 {
 	m_StateMachine.SetNextBehavior(behavior);
-
-	//switch (behavior)
-	//{
-	//case BHV_Kick:
-	//	if (m_Behavior != BHV_Kick && m_Behavior != BHV_BackKick)
-	//	{
-	//		GetAnimBlender().Play(m_Animations[PlayerAnim_Kick]);
-	//		m_Behavior = BHV_Kick;
-	//	}
-	//	else if (m_Behavior == BHV_Kick && GetBehaviorTime() >= 0.3f)
-	//	{
-	//		GetAnimBlender().Play(m_Animations[PlayerAnim_BackKick]);
-	//		m_Behavior = BHV_BackKick;
-	//	}
-	//	break;
-
-	//case BHV_Hit:
-	//	GetAnimBlender().Play(m_Animations[PlayerAnim_Hit]);
-	//	m_Behavior = BHV_Hit;
-	//	break;
-
-	//default:
-	//	if (m_Behavior != behavior)
-	//	{
-	//		const BehaviorInfo& CurrentBehavior = PlayerBehaviorInfo[behavior];
-
-	//		if (CurrentBehavior.blendTime > 0.0f)
-	//		{
-	//			GetAnimBlender().BlendTo(m_Animations[CurrentBehavior.anim],
-	//								  m_Animations[CurrentBehavior.anim]->GetStartTime(), 1.0f,
-	//								  CurrentBehavior.blendTime);
-	//		}
-	//		else
-	//		{
-	//			GetAnimBlender().Play(m_Animations[CurrentBehavior.anim]);
-	//		}
-	//		m_Behavior = behavior;
-	//	}
-	//}
 }
 
 float FTGPlayerController::GetBehaviorTime()
@@ -237,7 +200,10 @@ vector<FTGPlayerController*> FTGPlayerController::TestSphereHitWithOtherPlayers(
 	HitSphere.center = GetTransform()->GetTranslatedVector(LocalSpaceOffset, ETransformSpace::Local);
 	HitSphere.radius = Radius;
 
-	GDebugRenderer.DrawSphere(HitSphere.center, HitSphere.radius);
+	if (DrawDebugHitShape)
+	{
+		GDebugRenderer.DrawSphere(HitSphere.center, HitSphere.radius);
+	}
 
 	vector<FTGPlayerController*> Results;
 	for (auto PlayerController : m_Scene->FindAllObjectsOfType<FTGPlayerController>())

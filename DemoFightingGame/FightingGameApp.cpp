@@ -8,7 +8,6 @@
 
 FightingGameApp::FightingGameApp()
 	: m_Player(nullptr),
-	  m_DrawHitBound(false),
 	  m_Camera(nullptr)
 {
 
@@ -125,7 +124,9 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	RConstantBuffers::cbMaterial.BindBuffer();
 
 	if (RInput.GetBufferedKeyState('P') == EBufferedKeyState::Pressed)
-		m_DrawHitBound = !m_DrawHitBound;
+	{
+		FTGPlayerController::DrawDebugHitShape = !FTGPlayerController::DrawDebugHitShape;
+	}
 
 	SHADER_GLOBAL_BUFFER cbScreen;
 	ZeroMemory(&cbScreen, sizeof(cbScreen));
@@ -221,7 +222,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 								 blender.GetSourceAnimation() ? blender.GetSourceAnimation()->GetName().c_str() : "",
 								 blender.GetTargetAnimation() ? blender.GetTargetAnimation()->GetName().c_str() : "",
 								 blender.GetElapsedBlendTime(),
-								 m_DrawHitBound ? "Draw debug hit shape" : "");
+								 FTGPlayerController::DrawDebugHitShape ? "Draw debug hit shape" : "");
 		m_Text.SetText(msg_buf, RColor(0, 1, 0));
 	}
 

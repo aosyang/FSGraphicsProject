@@ -53,7 +53,11 @@ public:
 	/// Get the animation blender used for this player controller
 	RAnimationBlender& GetAnimBlender() { return m_StateMachine.GetAnimBlender(); }
 
+	/// Active player controller list
 	static list<RSceneObject*>	ActivePlayerControllers;
+
+	/// Whether to draw debug shape that represents player's hit
+	static bool DrawDebugHitShape;
 
 private:
 	FTGPlayerController(RScene* InScene);
