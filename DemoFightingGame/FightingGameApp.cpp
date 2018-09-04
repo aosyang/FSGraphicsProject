@@ -38,12 +38,18 @@ bool FightingGameApp::Initialize()
 	//}
 
 	m_Player = m_Scene.CreateSceneObjectOfType<FTGPlayerController>();
-	m_Player->SetPosition(RVec3(0, 100.0f, 0));
-	m_Player->InitAssets();
+	if (m_Player)
+	{
+		m_Player->SetPosition(RVec3(0, 100.0f, 0));
+		m_Player->InitAssets();
+	}
 
 	m_AIPlayer = m_Scene.CreateSceneObjectOfType<FTGPlayerController>();
-	m_AIPlayer->SetPosition(RVec3(-465, 50, -760));
-	m_AIPlayer->InitAssets();
+	if (m_AIPlayer)
+	{
+		m_AIPlayer->SetPosition(RVec3(-465, 50, -760));
+		m_AIPlayer->InitAssets();
+	}
 
 	m_Text.Initialize(RResourceManager::Instance().LoadDDSTexture("../Assets/Fonts/Fixedsys_9c.DDS", EResourceLoadMode::Immediate), 16, 16);
 	return true;
@@ -138,17 +144,22 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	RConstantBuffers::cbGlobal.UpdateBufferData(&cbScreen);
 	RConstantBuffers::cbGlobal.BindBuffer();
 
-	if (m_Player)
+	if (RInput.GetBufferedKeyState('R') == EBufferedKeyState::Pressed)
 	{
-		if (RInput.GetBufferedKeyState('R') == EBufferedKeyState::Pressed)
+		// Reset all characters' position
+		if (m_Player)
 		{
-			// Reset all characters' position
 			m_Player->SetPosition(RVec3(0, 100.0f, 0));
-			m_AIPlayer->SetPosition(RVec3(-465, 50, -760));
 		}
 
-		m_Player->PreUpdate(timer);
-		
+		if (m_AIPlayer)
+		{
+			m_AIPlayer->SetPosition(RVec3(-465, 50, -760));
+		}
+	}
+
+	if (m_Player)
+	{
 		RVec3 moveVec(0, 0, 0);
 
 		RVec3 charRight = m_Camera->GetRightVector();
@@ -162,10 +173,10 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		if (moveVec.SquaredMagitude() > 0.0f)
 		{
 			moveVec.Normalize();
-			moveVec *= timer.DeltaTime() * 600.0f;
+			moveVec *= 600.0f;
 		}
 
-		m_Player->UpdateMovement(timer, moveVec);
+		m_Player->SetMovementInput(moveVec);
 
 		if (RInput.GetBufferedKeyState(VK_SPACE) == EBufferedKeyState::Pressed)
 		{
@@ -187,7 +198,11 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			m_Player->SetBehavior(BHV_KnockedDown);
 		}
 
-		UpdateCameraPosition(timer.DeltaTime());
+		// Update all player controllers
+		for (auto PlayerController : FTGPlayerController::ActivePlayerControllers)
+		{
+			static_cast<FTGPlayerController*>(PlayerController)->UpdateController(timer.DeltaTime());
+		}
 
 		//playerAabb.pMin = RVec3(-50.0f, 0.0f, -50.0f) + m_Player->GetPosition();
 		//playerAabb.pMax = RVec3(50.0f, 150.0f, 50.0f) + m_Player->GetPosition();
@@ -206,31 +221,24 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		//GDebugRenderer.DrawSphere(cap.start, cap.radius, color);
 		//GDebugRenderer.DrawSphere(cap.end, cap.radius, color);
 
-
-		m_Player->PostUpdate(timer);
-
 		char msg_buf[1024];
 		RVec3 playerPos = m_Player->GetPosition();
 		float playerRot = m_Player->GetPlayerRotation();
 		RAnimationBlender& blender = m_Player->GetAnimBlender();
 		sprintf_s(msg_buf, 1024, "Player: (%f, %f, %f), rot: %f\n"
-								 "Blend From : %s\n"
-								 "Blend To   : %s\n"
-								 "Blend time : %f\n"
-								 "%s",
-								 playerPos.X(), playerPos.Y(), playerPos.Z(), playerRot,
-								 blender.GetSourceAnimation() ? blender.GetSourceAnimation()->GetName().c_str() : "",
-								 blender.GetTargetAnimation() ? blender.GetTargetAnimation()->GetName().c_str() : "",
-								 blender.GetElapsedBlendTime(),
-								 FTGPlayerController::DrawDebugHitShape ? "Draw debug hit shape" : "");
+			"Blend From : %s\n"
+			"Blend To   : %s\n"
+			"Blend time : %f\n"
+			"%s",
+			playerPos.X(), playerPos.Y(), playerPos.Z(), playerRot,
+			blender.GetSourceAnimation() ? blender.GetSourceAnimation()->GetName().c_str() : "",
+			blender.GetTargetAnimation() ? blender.GetTargetAnimation()->GetName().c_str() : "",
+			blender.GetElapsedBlendTime(),
+			FTGPlayerController::DrawDebugHitShape ? "Draw debug hit shape" : "");
 		m_Text.SetText(msg_buf, RColor(0, 1, 0));
 	}
 
-	// Update AI player
-	m_AIPlayer->PreUpdate(timer);
-	RVec3 moveVec = RVec3(0, 0, 0);
-	m_AIPlayer->UpdateMovement(timer, moveVec);
-	m_AIPlayer->PostUpdate(timer);
+	UpdateCameraPosition(timer.DeltaTime());
 }
 
 void FightingGameApp::RenderScene()

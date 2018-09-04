@@ -20,14 +20,18 @@ public:
 
 	void InitAssets();
 
-	void PreUpdate(const RTimer& timer);
-	void UpdateMovement(const RTimer& timer, const RVec3 moveVec);
-	void PostUpdate(const RTimer& timer);
+	void UpdateController(float DeltaTime);
+
+	void PreUpdate(float DeltaTime);
+	void UpdateMovement(float DeltaTime, const RVec3 moveVec);
+	void PostUpdate(float DeltaTime);
 
 	const RVec3& GetRootOffset() const;
 
 	void Draw() override;
 	void DrawDepthPass() override;
+
+	void SetMovementInput(const RVec3& Input);
 
 	/// Set the player's rotation in yaw angles
 	void SetPlayerRotation(float rot) { m_Rotation = rot; }
@@ -64,6 +68,8 @@ private:
 
 	/// Can the player move with user input
 	bool CanMovePlayerWithInput() const;
+
+	RVec3					m_MovementInput;
 
 	float					m_Rotation;
 	RVec3					m_RootOffset;

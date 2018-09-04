@@ -14,6 +14,7 @@ bool FTGPlayerController::DrawDebugHitShape = false;
 
 FTGPlayerController::FTGPlayerController(RScene* InScene)
 	: Base(InScene)
+	, m_MovementInput(0.0f, 0.0f, 0.0f)
 	, m_Rotation(0.0f)
 {
 	ActivePlayerControllers.push_back(this);
@@ -33,9 +34,16 @@ void FTGPlayerController::InitAssets()
 	m_StateMachine.CacheAnimations(m_Mesh);
 }
 
-void FTGPlayerController::PreUpdate(const RTimer& timer)
+void FTGPlayerController::UpdateController(float DeltaTime)
 {
-	m_StateMachine.Update(timer.DeltaTime());
+	PreUpdate(DeltaTime);
+	UpdateMovement(DeltaTime, m_MovementInput * DeltaTime);
+	PostUpdate(DeltaTime);
+}
+
+void FTGPlayerController::PreUpdate(float DeltaTime)
+{
+	m_StateMachine.Update(DeltaTime);
 
 	m_RootOffset = GetAnimBlender().GetCurrentRootOffset();
 
@@ -58,7 +66,7 @@ float LerpDegreeAngle(float from, float to, float t)
 	return from + (to - from) * Math::Clamp(t, 0.0f, 1.0f);
 }
 
-void FTGPlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVec)
+void FTGPlayerController::UpdateMovement(float DeltaTime, const RVec3 moveVec)
 {
 	bool bCanMovePlayer = CanMovePlayerWithInput();
 	if (bCanMovePlayer)
@@ -69,7 +77,7 @@ void FTGPlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVe
 		if (PlannarMoveVector.SquaredMagitude() > 0.0f)
 		{
 			PlannarMoveVector = PlannarMoveVector.GetNormalized();
-			m_Rotation = LerpDegreeAngle(m_Rotation, RAD_TO_DEG(atan2f(-PlannarMoveVector.X(), -PlannarMoveVector.Z())), 10.0f * timer.DeltaTime());
+			m_Rotation = LerpDegreeAngle(m_Rotation, RAD_TO_DEG(atan2f(-PlannarMoveVector.X(), -PlannarMoveVector.Z())), 10.0f * DeltaTime);
 
 			SetBehavior(BHV_Run);
 		}
@@ -89,7 +97,7 @@ void FTGPlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVe
 	RVec3 worldMoveVec = bCanMovePlayer ? moveVec : RVec3::Zero();
 
 	// Apply gravity
-	worldMoveVec += RVec3(0, -1000.0f * timer.DeltaTime(), 0);
+	worldMoveVec += RVec3(0, -1000.0f * DeltaTime, 0);
 
 	worldMoveVec += (RVec4(GetRootOffset(), 0) * GetTransformMatrix()).ToVec3();
 	worldMoveVec -= StairOffset;
@@ -100,7 +108,7 @@ void FTGPlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVe
 	SetRotation(RQuat::Euler(0.0f, DEG_TO_RAD(m_Rotation), 0.0f));
 }
 
-void FTGPlayerController::PostUpdate(const RTimer& timer)
+void FTGPlayerController::PostUpdate(float DeltaTime)
 {
 	for (int i = 0; i < m_Mesh->GetBoneCount(); i++)
 	{
@@ -128,6 +136,11 @@ void FTGPlayerController::DrawDepthPass()
 	RConstantBuffers::cbBoneMatrices.BindBuffer();
 
 	RSMeshObject::DrawDepthPass();
+}
+
+void FTGPlayerController::SetMovementInput(const RVec3& Input)
+{
+	m_MovementInput = Input;
 }
 
 void FTGPlayerController::SetPlayerFacing(const RVec3& Direction)
