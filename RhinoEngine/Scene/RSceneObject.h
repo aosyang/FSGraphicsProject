@@ -9,25 +9,6 @@
 class RScene;
 class RSceneComponentBase;
 
-enum class ESceneObjectType : UINT8
-{
-	None,
-	MeshObject,
-	Camera,
-};
-
-#define DECLARE_SCENE_OBJECT(base)\
-	typedef base Base; friend class RScene;\
-	\
-	static int _RuntimeTypeId;\
-	public:\
-	static int _StaticGetRuntimeTypeId() { if (_RuntimeTypeId == 0) { _RuntimeTypeId = RSceneObject::MakeUniqueRuntimeTypeId(); } return _RuntimeTypeId; }\
-	virtual int GetRuntimeTypeId() override { return _StaticGetRuntimeTypeId(); }\
-	private:
-
-#define IMPLEMENT_SCENE_OBJECT(type)\
-	int type::_RuntimeTypeId = 0
-
 /// Base object that can be placed in a scene
 class RSceneObject
 {
@@ -35,7 +16,7 @@ class RSceneObject
 public:
 	virtual void Release();
 
-	virtual int GetRuntimeTypeId() { return 0; }
+	virtual int GetRuntimeTypeId() const { return 0; }
 
 	/// Set name of scene object
 	void SetName(const string& name)		{ m_Name = name; }
@@ -46,7 +27,12 @@ public:
 	/// Get the scene which this object belongs to
 	RScene* GetScene() const				{ return m_Scene; }
 
-	virtual ESceneObjectType GetType() const { return ESceneObjectType::None; }
+	template<typename T>
+	bool IsType() const
+	{
+		return GetRuntimeTypeId() == T::_StaticGetRuntimeTypeId();
+	}
+
 	virtual RSceneObject* Clone() const		{ return nullptr; }
 
 	RTransform* GetTransform();
@@ -118,18 +104,18 @@ public:
 	/// Get split script strings in array form
 	const vector<string>& GetParsedScript();
 
+	/// Create a unique runtime type id for scene object types
+	static int MakeUniqueRuntimeTypeId()
+	{
+		return ++NextUniqueRuntimeTypeId;
+	}
+
 protected:
 	RSceneObject(RScene* InScene);
 	virtual ~RSceneObject();
 
 	/// Update all components on this scene object
 	void UpdateComponents();
-
-	/// Create a unique runtime type id for scene object types
-	static int MakeUniqueRuntimeTypeId()
-	{
-		return ++NextUniqueRuntimeTypeId;
-	}
 
 protected:
 	string			m_Name;
@@ -143,6 +129,25 @@ protected:
 
 	static int NextUniqueRuntimeTypeId;
 };
+
+struct RSceneObjectRuntimeTypeInfo
+{
+	RSceneObjectRuntimeTypeInfo();
+
+	int TypeId;
+};
+
+#define DECLARE_SCENE_OBJECT(base)\
+	typedef base Base; friend class RScene;\
+	\
+	static RSceneObjectRuntimeTypeInfo _RuntimeTypeInfo;\
+	public:\
+	static int _StaticGetRuntimeTypeId() { return _RuntimeTypeInfo.TypeId; }\
+	virtual int GetRuntimeTypeId() const override { return _StaticGetRuntimeTypeId(); }\
+	private:
+
+#define IMPLEMENT_SCENE_OBJECT(type)\
+	RSceneObjectRuntimeTypeInfo type::_RuntimeTypeInfo;
 
 
 template<typename T>

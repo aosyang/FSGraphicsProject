@@ -13,8 +13,6 @@ class RCamera : public RSceneObject
 {
 	DECLARE_SCENE_OBJECT(RSceneObject);
 public:
-	ESceneObjectType GetType() const { return ESceneObjectType::Camera; }
-
 	const RMatrix4& GetViewMatrix();
 	const RMatrix4& GetProjectionMatrix();
 	RFrustum GetFrustum() const;

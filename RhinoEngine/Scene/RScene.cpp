@@ -209,7 +209,7 @@ void RScene::SaveToFile(const char* filename)
 			elem_obj->SetAttribute("Script", (*iter)->GetScript().c_str());
 		}
 
-		if ((*iter)->GetType() == ESceneObjectType::MeshObject)
+		if ((*iter)->IsType<RSMeshObject>())
 		{
 			elem_obj->SetAttribute("Type", "MeshObject");
 
@@ -283,7 +283,7 @@ RVec3 RScene::TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec, l
 
 	for (auto SceneObject : m_SceneObjects)
 	{
-		if (SceneObject->GetType() == ESceneObjectType::MeshObject)
+		if (SceneObject->IsType<RSMeshObject>())
 		{
 			if (std::find(IgnoredObjects.begin(), IgnoredObjects.end(), SceneObject) == IgnoredObjects.end())
 			{

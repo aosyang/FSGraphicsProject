@@ -362,7 +362,7 @@ namespace EngineManagedWrapper
 
 	void EditorApp::SaveMeshMaterialFromSelection()
 	{
-		if (m_SelectedObject && m_SelectedObject->GetType() == ESceneObjectType::MeshObject)
+		if (m_SelectedObject && m_SelectedObject->IsType<RSMeshObject>())
 		{
 			((RSMeshObject*)m_SelectedObject)->SaveMaterialsToFile();
 		}
@@ -437,7 +437,7 @@ namespace EngineManagedWrapper
 				float t;
 				if (ray.TestAabbIntersection((*iter)->GetAabb(), &t))
 				{
-					if ((*iter)->GetType() == ESceneObjectType::MeshObject)
+					if ((*iter)->IsType<RSMeshObject>())
 					{
 						RSMeshObject* meshObj = static_cast<RSMeshObject*>(*iter);
 						for (int i = 0; i < meshObj->GetMeshElementCount(); i++)

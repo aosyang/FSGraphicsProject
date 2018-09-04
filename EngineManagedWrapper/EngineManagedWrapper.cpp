@@ -119,14 +119,9 @@ namespace EngineManagedWrapper
 		RSceneObject* sel = m_Application->GetSelection();
 		if (sel)
 		{
-			switch (sel->GetType())
+			if (sel->IsType<RSMeshObject>())
 			{
-			case ESceneObjectType::MeshObject:
 				return gcnew EngineManagedWrapper::ManagedMeshObject(sel);
-				break;
-
-			default:
-				break;
 			}
 		}
 

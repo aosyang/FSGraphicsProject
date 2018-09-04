@@ -160,3 +160,8 @@ void RSceneObject::UpdateComponents()
 		SceneComponent->Update();
 	}
 }
+
+RSceneObjectRuntimeTypeInfo::RSceneObjectRuntimeTypeInfo()
+{
+	TypeId = RSceneObject::MakeUniqueRuntimeTypeId();
+}
