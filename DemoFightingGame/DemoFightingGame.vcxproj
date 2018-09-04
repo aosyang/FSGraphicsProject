@@ -172,6 +172,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AIFighterLogic.cpp" />
     <ClCompile Include="FightingGameApp.cpp" />
     <ClCompile Include="FTGPlayerBehaviors.cpp" />
     <ClCompile Include="FTGPlayerStateMachine.cpp" />
@@ -179,6 +180,7 @@
     <ClCompile Include="FTGPlayerController.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AIFighterLogic.h" />
     <ClInclude Include="FightingGameApp.h" />
     <ClInclude Include="FTGPlayerBehaviors.h" />
     <ClInclude Include="FTGPlayerController.h" />

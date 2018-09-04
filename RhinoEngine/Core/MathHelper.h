@@ -15,6 +15,11 @@
 
 namespace Math
 {
+	FORCEINLINE float Square(float a)
+	{
+		return a * a;
+	}
+
 	// Returns random float in [0, 1].
 	FORCEINLINE float RandF()
 	{

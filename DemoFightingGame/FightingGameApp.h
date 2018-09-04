@@ -9,6 +9,9 @@
 
 #include "Rhino.h"
 #include "FTGPlayerController.h"
+#include "AIFighterLogic.h"
+
+const static int MaxNumAIs = 5;
 
 class FightingGameApp : public IApp
 {
@@ -33,7 +36,8 @@ private:
 	RShadowMap			m_ShadowMap;
 
 	FTGPlayerController*	m_Player;
-	FTGPlayerController*	m_AIPlayer;
+	FTGPlayerController*	m_AIPlayer[MaxNumAIs];
+	AIFighterLogic*			m_AILogic[MaxNumAIs];
 
 	RText				m_Text;
 };

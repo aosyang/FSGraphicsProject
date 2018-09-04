@@ -10,11 +10,19 @@ FightingGameApp::FightingGameApp()
 	: m_Player(nullptr),
 	  m_Camera(nullptr)
 {
-
+	ZeroMemory(m_AILogic, sizeof(AIFighterLogic*) * MaxNumAIs);
 }
 
 FightingGameApp::~FightingGameApp()
 {
+	for (int i = 0; i < MaxNumAIs; i++)
+	{
+		if (m_AILogic[i])
+		{
+			delete m_AILogic[i];
+		}
+	}
+
 	m_Scene.Release();
 }
 
@@ -44,11 +52,16 @@ bool FightingGameApp::Initialize()
 		m_Player->InitAssets();
 	}
 
-	m_AIPlayer = m_Scene.CreateSceneObjectOfType<FTGPlayerController>();
-	if (m_AIPlayer)
+	for (int i = 0; i < MaxNumAIs; i++)
 	{
-		m_AIPlayer->SetPosition(RVec3(-465, 50, -760));
-		m_AIPlayer->InitAssets();
+		m_AIPlayer[i] = m_Scene.CreateSceneObjectOfType<FTGPlayerController>();
+		if (m_AIPlayer[i])
+		{
+			m_AIPlayer[i]->SetPosition(RVec3(Math::RandRangedF(-800, 800), 50, Math::RandRangedF(-800, 800)));
+			m_AIPlayer[i]->InitAssets();
+
+			m_AILogic[i] = new AIFighterLogic(m_AIPlayer[i]);
+		}
 	}
 
 	m_Text.Initialize(RResourceManager::Instance().LoadDDSTexture("../Assets/Fonts/Fixedsys_9c.DDS", EResourceLoadMode::Immediate), 16, 16);
@@ -152,9 +165,12 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			m_Player->SetPosition(RVec3(0, 100.0f, 0));
 		}
 
-		if (m_AIPlayer)
+		for (int i = 0; i < MaxNumAIs; i++)
 		{
-			m_AIPlayer->SetPosition(RVec3(-465, 50, -760));
+			if (m_AIPlayer[i])
+			{
+				m_AIPlayer[i]->SetPosition(RVec3(Math::RandRangedF(-800, 800), 50, Math::RandRangedF(-800, 800)));
+			}
 		}
 	}
 
@@ -197,13 +213,24 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		{
 			m_Player->SetBehavior(BHV_KnockedDown);
 		}
+	}
 
-		// Update all player controllers
-		for (auto PlayerController : FTGPlayerController::ActivePlayerControllers)
+	for (int i = 0; i < MaxNumAIs; i++)
+	{
+		if (m_AILogic[i])
 		{
-			static_cast<FTGPlayerController*>(PlayerController)->UpdateController(timer.DeltaTime());
+			m_AILogic[i]->Update(timer.DeltaTime());
 		}
+	}
 
+	// Update all player controllers
+	for (auto PlayerController : FTGPlayerController::ActivePlayerControllers)
+	{
+		static_cast<FTGPlayerController*>(PlayerController)->UpdateController(timer.DeltaTime());
+	}
+
+	if (m_Player)
+	{
 		//playerAabb.pMin = RVec3(-50.0f, 0.0f, -50.0f) + m_Player->GetPosition();
 		//playerAabb.pMax = RVec3(50.0f, 150.0f, 50.0f) + m_Player->GetPosition();
 		//GDebugRenderer.DrawAabb(playerAabb);
