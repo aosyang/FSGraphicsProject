@@ -127,3 +127,73 @@ void FTGPlayerBehavior_Punch::Update(FTGPlayerStateMachine* StateMachine, float 
 		}
 	}
 }
+
+void FTGPlayerBehavior_BackKick::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
+{
+	float BehaviorTime = StateMachine->GetCurrentBehaviorTime();
+	if (BehaviorTime > 0.1f && BehaviorTime < 0.3f)
+	{
+		FTGPlayerController* PlayerOwner = StateMachine->GetOwner();
+		if (PlayerOwner)
+		{
+			auto HitPlayers = PlayerOwner->TestSphereHitWithOtherPlayers(50.0f, RVec3(0, 100, -30));
+			for (auto HitPlayer : HitPlayers)
+			{
+				if (HitPlayer == PlayerOwner)
+				{
+					continue;
+				}
+
+				if (HitPlayer->GetBehavior() != BHV_KnockedDown)
+				{
+					RVec3 HitCenter = PlayerOwner->GetTransform()->GetTranslatedVector(RVec3(0, 50, -50), ETransformSpace::Local);
+					RVec3 VictimToHitCenter = HitCenter - HitPlayer->GetPosition();
+					VictimToHitCenter.SetY(0.0f);
+					RVec3 AttackerForward = -PlayerOwner->GetForwardVector();
+					if (RVec3::Dot(AttackerForward, VictimToHitCenter) >= 0)
+					{
+						VictimToHitCenter = -AttackerForward;
+					}
+
+					HitPlayer->SetPlayerFacing(VictimToHitCenter);
+					HitPlayer->SetBehavior(BHV_KnockedDown);
+				}
+			}
+		}
+	}
+}
+
+void FTGPlayerBehavior_SpinAttack::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
+{
+	float BehaviorTime = StateMachine->GetCurrentBehaviorTime();
+	if (BehaviorTime > 0.3f && BehaviorTime < 0.6f)
+	{
+		FTGPlayerController* PlayerOwner = StateMachine->GetOwner();
+		if (PlayerOwner)
+		{
+			auto HitPlayers = PlayerOwner->TestSphereHitWithOtherPlayers(50.0f, RVec3(0, 50, -50));
+			for (auto HitPlayer : HitPlayers)
+			{
+				if (HitPlayer == PlayerOwner)
+				{
+					continue;
+				}
+
+				if (HitPlayer->GetBehavior() != BHV_KnockedDown)
+				{
+					RVec3 HitCenter = PlayerOwner->GetTransform()->GetTranslatedVector(RVec3(0, 50, -50), ETransformSpace::Local);
+					RVec3 VictimToHitCenter = HitCenter - HitPlayer->GetPosition();
+					VictimToHitCenter.SetY(0.0f);
+					RVec3 AttackerForward = -PlayerOwner->GetForwardVector();
+					if (RVec3::Dot(AttackerForward, VictimToHitCenter) >= 0)
+					{
+						VictimToHitCenter = -AttackerForward;
+					}
+
+					HitPlayer->SetPlayerFacing(VictimToHitCenter);
+				}
+				HitPlayer->SetBehavior(BHV_KnockedDown);
+			}
+		}
+	}
+}

@@ -24,7 +24,7 @@ bool FightingGameApp::Initialize()
 	//RResourceManager::Instance().LoadAllResources();
 
 	m_Scene.Initialize();
-	m_Scene.LoadFromFile("../Assets/ScriptTestMap.rmap");
+	m_Scene.LoadFromFile("../Assets/TestArena.rmap");
 
 	m_ShadowMap.Initialize(1024, 1024);
 	m_Camera = m_Scene.CreateSceneObjectOfType<RCamera>();
@@ -153,51 +153,38 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		RVec3 charRight = m_Camera->GetRightVector();
 		RVec3 charForward = RVec3::Cross(charRight, RVec3(0, 1, 0));
 
-		if (m_Player->GetBehavior() == BHV_Run ||
-			m_Player->GetBehavior() == BHV_Idle)
+		if (RInput.IsKeyDown('W')) moveVec += charForward;
+		if (RInput.IsKeyDown('S')) moveVec -= charForward;
+		if (RInput.IsKeyDown('A')) moveVec -= charRight;
+		if (RInput.IsKeyDown('D')) moveVec += charRight;
+
+		if (moveVec.SquaredMagitude() > 0.0f)
 		{
-			if (RInput.IsKeyDown('W')) moveVec += charForward;
-			if (RInput.IsKeyDown('S')) moveVec -= charForward;
-			if (RInput.IsKeyDown('A')) moveVec -= charRight;
-			if (RInput.IsKeyDown('D')) moveVec += charRight;
-
-			if (moveVec.SquaredMagitude() > 0.0f)
-			{
-				moveVec.Normalize();
-				moveVec *= timer.DeltaTime() * 500.0f;
-
-				m_Player->SetBehavior(BHV_Run);
-			}
-			else
-			{
-				m_Player->SetBehavior(BHV_Idle);
-			}
-
-			if (RInput.GetBufferedKeyState(VK_SPACE) == EBufferedKeyState::Pressed)
-			{
-				m_Player->SetBehavior(BHV_SpinAttack);
-			}
-
-			if (RInput.GetBufferedKeyState('J') == EBufferedKeyState::Pressed)
-			{
-				m_Player->SetBehavior(BHV_Punch);
-			}
+			moveVec.Normalize();
+			moveVec *= timer.DeltaTime() * 600.0f;
 		}
 
-		if (m_Player->GetBehavior() == BHV_Run ||
-			m_Player->GetBehavior() == BHV_Idle ||
-			m_Player->GetBehavior() == BHV_Kick)
+		m_Player->UpdateMovement(timer, moveVec);
+
+		if (RInput.GetBufferedKeyState(VK_SPACE) == EBufferedKeyState::Pressed)
 		{
-			if (RInput.GetBufferedKeyState('K') == EBufferedKeyState::Pressed)
-			{
-				m_Player->SetBehavior(BHV_Kick);
-			}
+			m_Player->PerformSpinAttack();
+		}
+
+		if (RInput.GetBufferedKeyState('J') == EBufferedKeyState::Pressed)
+		{
+			m_Player->PerformPunch();
+		}
+
+		if (RInput.GetBufferedKeyState('K') == EBufferedKeyState::Pressed)
+		{
+			m_Player->PerformKick();
 		}
 
 		if (RInput.GetBufferedKeyState('C') == EBufferedKeyState::Pressed)
+		{
 			m_Player->SetBehavior(BHV_KnockedDown);
-
-		m_Player->UpdateMovement(timer, moveVec);
+		}
 
 		UpdateCameraPosition(timer.DeltaTime());
 
@@ -218,62 +205,6 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		//GDebugRenderer.DrawSphere(cap.start, cap.radius, color);
 		//GDebugRenderer.DrawSphere(cap.end, cap.radius, color);
 
-
-		if (m_Player->GetBehavior() == BHV_SpinAttack &&
-			m_Player->GetBehaviorTime() > 0.3f &&
-			m_Player->GetBehaviorTime() < 0.6f)
-		{
-			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() - m_Player->GetForwardVector() * 50 + RVec3(0, 50, 0);
-			hit_sphere.radius = 50.0f;
-			if (m_DrawHitBound)
-				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
-
-			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
-			{
-				if (m_AIPlayer->GetBehavior() != BHV_KnockedDown)
-				{
-					RVec3 relVec = hit_sphere.center - m_AIPlayer->GetPosition();
-					relVec.SetY(0.0f);
-					RVec3 playerForward = -m_Player->GetForwardVector();
-					if (RVec3::Dot(playerForward, relVec) >= 0)
-					{
-						relVec = -playerForward;
-					}
-
-					m_AIPlayer->SetPlayerFacing(relVec);
-				}
-				m_AIPlayer->SetBehavior(BHV_KnockedDown);
-			}
-		}
-
-		if (m_Player->GetBehavior() == BHV_BackKick &&
-			m_Player->GetBehaviorTime() > 0.1f &&
-			m_Player->GetBehaviorTime() < 0.3f)
-		{
-			RSphere hit_sphere;
-			hit_sphere.center = m_Player->GetPosition() - m_Player->GetForwardVector() * 30 + RVec3(0, 100, 0);
-			hit_sphere.radius = 50.0f;
-			if (m_DrawHitBound)
-				GDebugRenderer.DrawSphere(hit_sphere.center, hit_sphere.radius);
-
-			if (RCollision::TestSphereWithCapsule(hit_sphere, m_AIPlayer->GetCollisionShape()))
-			{
-				if (m_AIPlayer->GetBehavior() != BHV_KnockedDown)
-				{
-					RVec3 relVec = hit_sphere.center - m_AIPlayer->GetPosition();
-					relVec.SetY(0.0f);
-					RVec3 playerForward = -m_Player->GetForwardVector();
-					if (RVec3::Dot(playerForward, relVec) >= 0)
-					{
-						relVec = -playerForward;
-					}
-					
-					m_AIPlayer->SetPlayerFacing(relVec);
-					m_AIPlayer->SetBehavior(BHV_KnockedDown);
-				}
-			}
-		}
 
 		m_Player->PostUpdate(timer);
 

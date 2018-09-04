@@ -68,6 +68,12 @@ void FTGPlayerController::UpdateMovement(const RTimer& timer, const RVec3 moveVe
 		{
 			PlannarMoveVector = PlannarMoveVector.GetNormalized();
 			m_Rotation = LerpDegreeAngle(m_Rotation, RAD_TO_DEG(atan2f(-PlannarMoveVector.X(), -PlannarMoveVector.Z())), 10.0f * timer.DeltaTime());
+
+			SetBehavior(BHV_Run);
+		}
+		else
+		{
+			SetBehavior(BHV_Idle);
 		}
 	}
 
@@ -128,6 +134,37 @@ void FTGPlayerController::SetPlayerFacing(const RVec3& Direction)
 	{
 		RVec3 NormalizedDir = Direction.GetNormalized();
 		SetPlayerRotation(RAD_TO_DEG(atan2f(-NormalizedDir.X(), -NormalizedDir.Z())));
+	}
+}
+
+void FTGPlayerController::PerformPunch()
+{
+	if (GetBehavior() == BHV_Idle || GetBehavior() == BHV_Run)
+	{
+		SetBehavior(BHV_Punch);
+	}
+}
+
+void FTGPlayerController::PerformKick()
+{
+	if (GetBehavior() == BHV_Idle || GetBehavior() == BHV_Run || GetBehavior() == BHV_Kick)
+	{
+		if (GetBehavior() == BHV_Kick)
+		{
+			SetBehavior(BHV_BackKick);
+		}
+		else
+		{
+			SetBehavior(BHV_Kick);
+		}
+	}
+}
+
+void FTGPlayerController::PerformSpinAttack()
+{
+	if (GetBehavior() == BHV_Idle || GetBehavior() == BHV_Run)
+	{
+		SetBehavior(BHV_SpinAttack);
 	}
 }
 

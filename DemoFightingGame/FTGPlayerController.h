@@ -36,6 +36,10 @@ public:
 	/// Set the player's rotation by a direction vector
 	void SetPlayerFacing(const RVec3& Direction);
 
+	void PerformPunch();
+	void PerformKick();
+	void PerformSpinAttack();
+
 	void SetBehavior(EPlayerBehavior behavior);
 	EPlayerBehavior GetBehavior() const;
 	float GetBehaviorTime();

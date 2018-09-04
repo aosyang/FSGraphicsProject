@@ -107,6 +107,7 @@ public:
 	}
 
 	virtual bool EvaluateForExecution(FTGPlayerStateMachine* StateMachine) override;
+	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
 };
 
 class FTGPlayerBehavior_SpinAttack : public FTGPlayerBehaviorBase
@@ -118,6 +119,8 @@ public:
 		m_BlendTime = 0.2f;
 		LoadAnimationAsset("../Assets/unitychan/FUCM02_0029_Cha01_STL01_ScrewK01.fbx", AnimBitFlag_HasRootMotion);
 	}
+
+	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
 };
 
 class FTGPlayerBehavior_Hit : public FTGPlayerBehaviorBase
