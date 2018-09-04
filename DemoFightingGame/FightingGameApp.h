@@ -30,6 +30,8 @@ private:
 
 	void UpdateCameraPosition(float DeltaTime);
 
+	void ResetPlayerPosition(FTGPlayerController* PlayerController);
+
 private:
 	RScene				m_Scene;
 	RCamera*			m_Camera;

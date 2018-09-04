@@ -142,9 +142,16 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	}
 
 	// Update all player controllers
-	for (auto PlayerController : FTGPlayerController::ActivePlayerControllers)
+	for (auto SceneObject : FTGPlayerController::ActivePlayerControllers)
 	{
-		static_cast<FTGPlayerController*>(PlayerController)->UpdateController(timer.DeltaTime());
+		FTGPlayerController* PlayerController = static_cast<FTGPlayerController*>(SceneObject);
+		PlayerController->UpdateController(timer.DeltaTime());
+
+		// Kill plane
+		if (PlayerController->GetWorldPosition().Y() < -2000.0f)
+		{
+			ResetPlayerPosition(PlayerController);
+		}
 	}
 
 	if (m_Player)
@@ -375,4 +382,9 @@ void FightingGameApp::UpdateCameraPosition(float DeltaTime)
 	actualCamVec = RVec3::Lerp(actualCamVec, camVec, 5.0f * DeltaTime);
 	m_Camera->SetPosition(actualCamVec + lookTarget);
 	m_Camera->LookAt(lookTarget);
+}
+
+void FightingGameApp::ResetPlayerPosition(FTGPlayerController* PlayerController)
+{
+	PlayerController->SetPosition(RVec3(Math::RandRangedF(-800, 800), 50, Math::RandRangedF(-800, 800)));
 }
