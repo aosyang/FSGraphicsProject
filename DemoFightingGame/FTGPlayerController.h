@@ -44,12 +44,18 @@ public:
 	void PerformKick();
 	void PerformSpinAttack();
 
+	void AddHitPlayerController(FTGPlayerController* HitTarget);
+	bool HasHitPlayerController(FTGPlayerController* HitTarget) const;
+	void ClearHitPlayerControllers();
+
 	void SetBehavior(EPlayerBehavior behavior);
 	EPlayerBehavior GetBehavior() const;
 	float GetBehaviorTime();
 
 	RAabb GetMovementCollisionShape() const;
 	RCapsule GetCollisionShape() const;
+
+	void SetAnimationDeviation(float Deviation);
 
 	/// Run a sphere shape hit test with other players
 	vector<FTGPlayerController*> TestSphereHitWithOtherPlayers(float Radius, const RVec3& LocalSpaceOffset);
@@ -76,6 +82,7 @@ private:
 	RMatrix4				m_BoneMatrices[MAX_BONE_COUNT];
 
 	FTGPlayerStateMachine	m_StateMachine;
+	vector<FTGPlayerController*> HitPlayerControllers;
 };
 
 

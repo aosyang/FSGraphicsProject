@@ -9,9 +9,10 @@
 #include "FTGPlayerController.h"
 
 FTGPlayerBehaviorBase::FTGPlayerBehaviorBase()
-	: m_BehaviorEnum(BHV_Invalid)
+	: m_BehaviorEnum(BHV_None)
 	, m_Animation(nullptr)
 	, m_BlendTime(0.0f)
+	, m_bAllowRerunSelf(false)
 {
 
 }
@@ -26,7 +27,16 @@ void FTGPlayerBehaviorBase::Update(FTGPlayerStateMachine* StateMachine, float De
 
 }
 
-void FTGPlayerBehaviorBase::NotifyBehaviorFinished(FTGPlayerStateMachine* StateMachine)
+void FTGPlayerBehaviorBase::NotifyBegin(FTGPlayerStateMachine* StateMachine)
+{
+	FTGPlayerController* OwnerPlayer = StateMachine->GetOwner();
+	if (OwnerPlayer)
+	{
+		OwnerPlayer->ClearHitPlayerControllers();
+	}
+}
+
+void FTGPlayerBehaviorBase::NotifyEnd(FTGPlayerStateMachine* StateMachine)
 {
 	OnBehaviorFinished(StateMachine);
 }
@@ -92,10 +102,16 @@ void FTGPlayerBehavior_Kick::Update(FTGPlayerStateMachine* StateMachine, float D
 					continue;
 				}
 
-				if (HitPlayer->GetBehavior() != BHV_KnockedDown &&
-					HitPlayer->GetBehavior() != BHV_Hit)
+				if (PlayerOwner->HasHitPlayerController(HitPlayer))
+				{
+					continue;
+				}
+
+				if (HitPlayer->GetBehavior() != BHV_KnockedDown)
 				{
 					HitPlayer->SetBehavior(BHV_Hit);
+
+					PlayerOwner->AddHitPlayerController(HitPlayer);
 				}
 			}
 		}
@@ -118,10 +134,16 @@ void FTGPlayerBehavior_Punch::Update(FTGPlayerStateMachine* StateMachine, float 
 					continue;
 				}
 
-				if (HitPlayer->GetBehavior() != BHV_KnockedDown &&
-					HitPlayer->GetBehavior() != BHV_Hit)
+				if (PlayerOwner->HasHitPlayerController(HitPlayer))
+				{
+					continue;
+				}
+
+				if (HitPlayer->GetBehavior() != BHV_KnockedDown)
 				{
 					HitPlayer->SetBehavior(BHV_Hit);
+
+					PlayerOwner->AddHitPlayerController(HitPlayer);
 				}
 			}
 		}
@@ -144,6 +166,11 @@ void FTGPlayerBehavior_BackKick::Update(FTGPlayerStateMachine* StateMachine, flo
 					continue;
 				}
 
+				if (PlayerOwner->HasHitPlayerController(HitPlayer))
+				{
+					continue;
+				}
+
 				if (HitPlayer->GetBehavior() != BHV_KnockedDown)
 				{
 					RVec3 HitCenter = PlayerOwner->GetTransform()->GetTranslatedVector(RVec3(0, 50, -50), ETransformSpace::Local);
@@ -157,6 +184,8 @@ void FTGPlayerBehavior_BackKick::Update(FTGPlayerStateMachine* StateMachine, flo
 
 					HitPlayer->SetPlayerFacing(VictimToHitCenter);
 					HitPlayer->SetBehavior(BHV_KnockedDown);
+
+					PlayerOwner->AddHitPlayerController(HitPlayer);
 				}
 			}
 		}
@@ -179,6 +208,11 @@ void FTGPlayerBehavior_SpinAttack::Update(FTGPlayerStateMachine* StateMachine, f
 					continue;
 				}
 
+				if (PlayerOwner->HasHitPlayerController(HitPlayer))
+				{
+					continue;
+				}
+
 				if (HitPlayer->GetBehavior() != BHV_KnockedDown)
 				{
 					RVec3 HitCenter = PlayerOwner->GetTransform()->GetTranslatedVector(RVec3(0, 50, -50), ETransformSpace::Local);
@@ -191,8 +225,10 @@ void FTGPlayerBehavior_SpinAttack::Update(FTGPlayerStateMachine* StateMachine, f
 					}
 
 					HitPlayer->SetPlayerFacing(VictimToHitCenter);
+					HitPlayer->SetBehavior(BHV_KnockedDown);
+					
+					PlayerOwner->AddHitPlayerController(HitPlayer);
 				}
-				HitPlayer->SetBehavior(BHV_KnockedDown);
 			}
 		}
 	}

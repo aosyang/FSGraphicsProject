@@ -59,6 +59,7 @@ bool FightingGameApp::Initialize()
 		{
 			m_AIPlayer[i]->SetPosition(RVec3(Math::RandRangedF(-800, 800), 50, Math::RandRangedF(-800, 800)));
 			m_AIPlayer[i]->InitAssets();
+			m_AIPlayer[i]->SetAnimationDeviation(Math::RandRangedF(0.8f, 1.2f));
 
 			m_AILogic[i] = new AIFighterLogic(m_AIPlayer[i]);
 		}

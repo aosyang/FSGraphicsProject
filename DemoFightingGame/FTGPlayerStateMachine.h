@@ -47,6 +47,12 @@ public:
 	/// Notify the state machine about completion of current animation
 	void NotifyAnimationFinished();
 
+	/// Set the deviation of animation playback
+	void SetAnimationDeviation(float Deviation);
+
+	/// Get the deviation of animation playback
+	float GetAnimationDeviation() const;
+
 private:
 	/// Allocate behavior instance asset
 	template<typename T>
@@ -71,6 +77,9 @@ private:
 	/// All behavior instances
 	vector<FTGPlayerBehaviorBase*>	m_BehaviorInstances;
 
+	/// The deviation of animation playback
+	float							m_AnimSpeedDeviation;
+
 	/// Animation blender
 	RAnimationBlender				m_AnimBlender;
 };
@@ -83,7 +92,7 @@ FORCEINLINE FTGPlayerController* FTGPlayerStateMachine::GetOwner() const
 
 FORCEINLINE EPlayerBehavior FTGPlayerStateMachine::GetCurrentBehavior() const
 {
-	return m_CurrentBehaviorInstance ? m_CurrentBehaviorInstance->GetBehaviorEnum() : BHV_Invalid;
+	return m_CurrentBehaviorInstance ? m_CurrentBehaviorInstance->GetBehaviorEnum() : BHV_None;
 }
 
 FORCEINLINE EPlayerBehavior FTGPlayerStateMachine::GetNextBehavior() const

@@ -20,9 +20,10 @@ enum EPlayerBehavior
 	BHV_KnockedDown,
 	BHV_GetUp,
 
-	BHV_Invalid,
+	BHV_None,
 };
 
+class FTGPlayerController;
 class FTGPlayerStateMachine;
 
 class FTGPlayerBehaviorBase
@@ -36,8 +37,10 @@ public:
 	EPlayerBehavior GetBehaviorEnum() const;
 	RAnimation* GetAnimation() const;
 	float GetBlendInTime() const;
+	bool DoesAllowRerunSelf() const;
 
-	void NotifyBehaviorFinished(FTGPlayerStateMachine* StateMachine);
+	void NotifyBegin(FTGPlayerStateMachine* StateMachine);
+	void NotifyEnd(FTGPlayerStateMachine* StateMachine);
 
 protected:
 	virtual void OnBehaviorFinished(FTGPlayerStateMachine* StateMachine);
@@ -49,6 +52,8 @@ protected:
 	RAnimation*		m_Animation;
 
 	float	m_BlendTime;
+
+	bool	m_bAllowRerunSelf;
 };
 
 class FTGPlayerBehavior_Idle : public FTGPlayerBehaviorBase
@@ -79,6 +84,7 @@ public:
 	FTGPlayerBehavior_Punch()
 	{
 		m_BehaviorEnum = BHV_Punch;
+		m_BlendTime = 0.1f;
 		LoadAnimationAsset("../Assets/unitychan/FUCM05_0001_M_CMN_LJAB.fbx", AnimBitFlag_HasRootMotion);
 	}
 
@@ -91,6 +97,7 @@ public:
 	FTGPlayerBehavior_Kick()
 	{
 		m_BehaviorEnum = BHV_Kick;
+		m_BlendTime = 0.1f;
 		LoadAnimationAsset("../Assets/unitychan/FUCM_04_0001_RHiKick.fbx", AnimBitFlag_HasRootMotion);
 	}
 
@@ -103,6 +110,7 @@ public:
 	FTGPlayerBehavior_BackKick()
 	{
 		m_BehaviorEnum = BHV_BackKick;
+		m_BlendTime = 0.1f;
 		LoadAnimationAsset("../Assets/unitychan/FUCM02_0004_CH01_AS_MAWAK.fbx", AnimBitFlag_HasRootMotion);
 	}
 
@@ -129,6 +137,8 @@ public:
 	FTGPlayerBehavior_Hit()
 	{
 		m_BehaviorEnum = BHV_Hit;
+		m_BlendTime = 0.1f;
+		m_bAllowRerunSelf = true;
 		LoadAnimationAsset("../Assets/unitychan/unitychan_DAMAGED00.fbx", AnimBitFlag_HasRootMotion);
 	}
 };
@@ -139,6 +149,7 @@ public:
 	FTGPlayerBehavior_KnockedDown()
 	{
 		m_BehaviorEnum = BHV_KnockedDown;
+		m_BlendTime = 0.1f;
 		LoadAnimationAsset("../Assets/unitychan/FUCM02_0025_MYA_TF_DOWN.fbx", AnimBitFlag_HasRootMotion);
 	}
 
@@ -152,6 +163,7 @@ public:
 	FTGPlayerBehavior_GetUp()
 	{
 		m_BehaviorEnum = BHV_GetUp;
+		m_BlendTime = 0.1f;
 		LoadAnimationAsset("../Assets/unitychan/FUCM03_0019_HeadSpring.fbx", AnimBitFlag_HasRootMotion);
 	}
 };
@@ -170,4 +182,9 @@ FORCEINLINE RAnimation* FTGPlayerBehaviorBase::GetAnimation() const
 FORCEINLINE float FTGPlayerBehaviorBase::GetBlendInTime() const
 {
 	return m_BlendTime;
+}
+
+FORCEINLINE bool FTGPlayerBehaviorBase::DoesAllowRerunSelf() const
+{
+	return m_bAllowRerunSelf;
 }

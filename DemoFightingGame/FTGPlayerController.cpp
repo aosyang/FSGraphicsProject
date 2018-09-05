@@ -140,15 +140,18 @@ void FTGPlayerController::DrawDepthPass()
 
 void FTGPlayerController::SetMovementInput(const RVec3& Input)
 {
-	m_MovementInput = Input;
+	m_MovementInput = Input * m_StateMachine.GetAnimationDeviation();
 }
 
 void FTGPlayerController::SetPlayerFacing(const RVec3& Direction)
 {
-	if (Direction.Magnitude() > 0.0f)
+	if (CanMovePlayerWithInput())
 	{
-		RVec3 NormalizedDir = Direction.GetNormalized();
-		SetPlayerRotation(RAD_TO_DEG(atan2f(-NormalizedDir.X(), -NormalizedDir.Z())));
+		if (Direction.Magnitude() > 0.0f)
+		{
+			RVec3 NormalizedDir = Direction.GetNormalized();
+			SetPlayerRotation(RAD_TO_DEG(atan2f(-NormalizedDir.X(), -NormalizedDir.Z())));
+		}
 	}
 }
 
@@ -183,6 +186,29 @@ void FTGPlayerController::PerformSpinAttack()
 	}
 }
 
+void FTGPlayerController::AddHitPlayerController(FTGPlayerController* HitTarget)
+{
+	HitPlayerControllers.push_back(HitTarget);
+}
+
+bool FTGPlayerController::HasHitPlayerController(FTGPlayerController* HitTarget) const
+{
+	for (auto PlayerController : HitPlayerControllers)
+	{
+		if (PlayerController == HitTarget)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void FTGPlayerController::ClearHitPlayerControllers()
+{
+	HitPlayerControllers.clear();
+}
+
 void FTGPlayerController::SetBehavior(EPlayerBehavior behavior)
 {
 	m_StateMachine.SetNextBehavior(behavior);
@@ -205,6 +231,11 @@ RAabb FTGPlayerController::GetMovementCollisionShape() const
 RCapsule FTGPlayerController::GetCollisionShape() const
 {
 	return RCapsule{ GetPosition() + RVec3(0, 40, 0), GetPosition() + RVec3(0, 110, 0), 40 };
+}
+
+void FTGPlayerController::SetAnimationDeviation(float Deviation)
+{
+	m_StateMachine.SetAnimationDeviation(Deviation);
 }
 
 vector<FTGPlayerController*> FTGPlayerController::TestSphereHitWithOtherPlayers(float Radius, const RVec3& LocalSpaceOffset)
