@@ -5,6 +5,7 @@
 //=============================================================================
 
 #include "FTGPlayerStateMachine.h"
+#include "FTGPlayerController.h"
 
 FTGPlayerStateMachine::FTGPlayerStateMachine()
 	: m_PlayerOwner(nullptr)
@@ -35,6 +36,12 @@ void FTGPlayerStateMachine::Init(FTGPlayerController* Owner)
 
 	m_CurrentBehaviorInstance = FindBehaviorInstance(BHV_Idle);
 	m_AnimBlender.Play(m_CurrentBehaviorInstance->GetAnimation());
+
+	RMesh* Mesh = Owner->GetMesh();
+	if (Mesh)
+	{
+		CacheAnimations(Mesh);
+	}
 }
 
 void FTGPlayerStateMachine::Update(float DeltaTime)

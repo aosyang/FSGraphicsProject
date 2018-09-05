@@ -20,9 +20,6 @@ public:
 	/// Initialize behavior assets
 	void Init(FTGPlayerController* Owner);
 
-	/// Cache all animation assets for a mesh
-	void CacheAnimations(RMesh* Mesh);
-
 	/// Update the state machine
 	void Update(float DeltaTime);
 
@@ -57,6 +54,9 @@ private:
 	/// Allocate behavior instance asset
 	template<typename T>
 	void AllocateBehaviorInstance();
+
+	/// Cache all animation assets for a mesh
+	void CacheAnimations(RMesh* Mesh);
 
 	/// Release behavior assets
 	void ReleaseAssets();

@@ -31,7 +31,6 @@ void FTGPlayerController::InitAssets()
 	SetMesh(playerMesh);
 
 	m_StateMachine.Init(this);
-	m_StateMachine.CacheAnimations(m_Mesh);
 }
 
 void FTGPlayerController::UpdateController(float DeltaTime)
