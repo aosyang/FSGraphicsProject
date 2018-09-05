@@ -20,6 +20,7 @@
 /FSGraphicsProject/[Rr]elease/
 /FSGraphicsProject/x64/
 /FSGraphicsProject/*.dll
+/SimpleGameProject/*.dll
 /RhinoEngine/[Dd]ebug/
 /RhinoEngine/[Rr]elease/
 /RhinoEngine/x64/
