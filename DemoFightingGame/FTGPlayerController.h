@@ -38,7 +38,7 @@ public:
 	float GetPlayerRotation() const { return m_Rotation; }
 
 	/// Set the player's rotation by a direction vector
-	void SetPlayerFacing(const RVec3& Direction);
+	void SetPlayerFacing(const RVec3& Direction, bool bCheckMoveAllowed = true);
 
 	void PerformPunch();
 	void PerformKick();

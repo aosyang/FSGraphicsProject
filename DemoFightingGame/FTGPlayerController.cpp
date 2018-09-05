@@ -142,15 +142,17 @@ void FTGPlayerController::SetMovementInput(const RVec3& Input)
 	m_MovementInput = Input * m_StateMachine.GetAnimationDeviation();
 }
 
-void FTGPlayerController::SetPlayerFacing(const RVec3& Direction)
+void FTGPlayerController::SetPlayerFacing(const RVec3& Direction, bool bCheckMoveAllowed /*= true*/)
 {
-	if (CanMovePlayerWithInput())
+	if (bCheckMoveAllowed && !CanMovePlayerWithInput())
 	{
-		if (Direction.Magnitude() > 0.0f)
-		{
-			RVec3 NormalizedDir = Direction.GetNormalized();
-			SetPlayerRotation(RAD_TO_DEG(atan2f(-NormalizedDir.X(), -NormalizedDir.Z())));
-		}
+		return;
+	}
+
+	if (Direction.Magnitude() > 0.0f)
+	{
+		RVec3 NormalizedDir = Direction.GetNormalized();
+		SetPlayerRotation(RAD_TO_DEG(atan2f(-NormalizedDir.X(), -NormalizedDir.Z())));
 	}
 }
 

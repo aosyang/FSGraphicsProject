@@ -182,7 +182,7 @@ void FTGPlayerBehavior_BackKick::Update(FTGPlayerStateMachine* StateMachine, flo
 						VictimToHitCenter = -AttackerForward;
 					}
 
-					HitPlayer->SetPlayerFacing(VictimToHitCenter);
+					HitPlayer->SetPlayerFacing(VictimToHitCenter, false);
 					HitPlayer->SetBehavior(BHV_KnockedDown);
 
 					PlayerOwner->AddHitPlayerController(HitPlayer);
@@ -224,7 +224,7 @@ void FTGPlayerBehavior_SpinAttack::Update(FTGPlayerStateMachine* StateMachine, f
 						VictimToHitCenter = -AttackerForward;
 					}
 
-					HitPlayer->SetPlayerFacing(VictimToHitCenter);
+					HitPlayer->SetPlayerFacing(VictimToHitCenter, false);
 					HitPlayer->SetBehavior(BHV_KnockedDown);
 					
 					PlayerOwner->AddHitPlayerController(HitPlayer);
