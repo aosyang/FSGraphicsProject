@@ -1,5 +1,9 @@
 <Scene>
     <SceneObject Type="MeshObject" Mesh="../Assets/cube.FBX">
-        <Transform>50.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 50.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000</Transform>
+        <Transform>
+            <Position>0.000000, 0.000000, 0.000000</Position>
+            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
+            <Scale>50.000000, 1.000000, 50.000000</Scale>
+        </Transform>
     </SceneObject>
 </Scene>
