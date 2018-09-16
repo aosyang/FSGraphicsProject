@@ -9,6 +9,9 @@
 
 #include "../tinyxml2/tinyxml2.h"
 
+// If set to 1, rotations are saved in degrees instead of radians
+#define SAVE_ROTATION_IN_DEGREES 0
+
 void RScene::Initialize()
 {
 }
@@ -88,21 +91,7 @@ void RScene::LoadFromFile(const char* filename)
 		tinyxml2::XMLElement* elem_obj = root->FirstChildElement("SceneObject");
 		while (elem_obj)
 		{
-			const char* name = elem_obj->Attribute("Name");
-			const char* script = elem_obj->Attribute("Script");
-
-			tinyxml2::XMLElement* elem_transform = elem_obj->FirstChildElement("Transform");
-			RMatrix4 matrix;
-			int n = 0;
-			stringstream ss(elem_transform->GetText());
-
-			while (ss >> ((float*)&matrix)[n++] && n < 16)
-			{
-				if (ss.peek() == ',')
-					ss.ignore();
-			}
-
-			RSceneObject* sceneObj = nullptr;
+			RSceneObject* NewSceneObject = nullptr;
 
 			string obj_type = elem_obj->Attribute("Type");
 			if (obj_type == "MeshObject")
@@ -115,25 +104,17 @@ void RScene::LoadFromFile(const char* filename)
 					mesh = RResourceManager::Instance().LoadFbxMesh(resPath, EResourceLoadMode::Immediate);
 				}
 
-				RSMeshObject* meshObj = CreateMeshObject(resPath);
-
-				// Decompose transform from matrix
-				RVec3 ObjectPosition;
-				RQuat ObjectRotation;
-				RVec3 ObjectScale;
-				matrix.Decompose(ObjectPosition, ObjectRotation, ObjectScale);
-
-				meshObj->SetTransform(ObjectPosition, ObjectRotation, ObjectScale);
-				sceneObj = meshObj;
+				RSMeshObject* MeshObject = CreateMeshObject(resPath);
+				NewSceneObject = MeshObject;
 
 				tinyxml2::XMLElement* elem_mat = elem_obj->FirstChildElement("Material");
 				vector<RMaterial> xmlMaterials;
 
 				if (elem_mat)
 				{
-					for (int i = 0; i < meshObj->GetMeshElementCount(); i++)
+					for (int i = 0; i < MeshObject->GetMeshElementCount(); i++)
 					{
-						xmlMaterials.push_back(*meshObj->GetMaterial(i));
+						xmlMaterials.push_back(*MeshObject->GetMaterial(i));
 					}
 				}
 
@@ -173,15 +154,42 @@ void RScene::LoadFromFile(const char* filename)
 
 				if (xmlMaterials.size())
 				{
-					meshObj->SetMaterial(xmlMaterials.data(), (int)xmlMaterials.size());
+					MeshObject->SetMaterial(xmlMaterials.data(), (int)xmlMaterials.size());
 				}
 			}
 
-			if (name)
-				sceneObj->SetName(name);
+			RVec3 ObjectPosition;
+			RQuat ObjectRotation;
+			RVec3 ObjectScale;
 
-			if (script)
-				sceneObj->SetScript(script);
+			if (!XmlReadObjectTransform(elem_obj, ObjectPosition, ObjectRotation, ObjectScale))
+			{
+				RMatrix4 Matrix;
+				
+				// Failed to read transform as separated components, fallback to reading transform as matrix
+				if (!XmlReadObjectTransformAsMatrix(elem_obj, Matrix))
+				{
+					// If transform element is not found, use identity matrix for the object's transform
+					Matrix = RMatrix4::IDENTITY;
+				}
+
+				// Decompose transform from matrix
+				Matrix.Decompose(ObjectPosition, ObjectRotation, ObjectScale);
+			}
+
+			NewSceneObject->SetTransform(ObjectPosition, ObjectRotation, ObjectScale);
+
+			const char* ObjectName = elem_obj->Attribute("Name");
+			if (ObjectName)
+			{
+				NewSceneObject->SetName(ObjectName);
+			}
+
+			const char* ObjectScript = elem_obj->Attribute("Script");
+			if (ObjectScript)
+			{
+				NewSceneObject->SetScript(ObjectScript);
+			}
 
 			elem_obj = elem_obj->NextSiblingElement();
 		}
@@ -195,25 +203,25 @@ void RScene::SaveToFile(const char* filename)
 	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
 	tinyxml2::XMLElement* elem_scene = doc->NewElement("Scene");
 
-	for (vector<RSceneObject*>::iterator iter = m_SceneObjects.begin(); iter != m_SceneObjects.end(); iter++)
+	for (auto* SceneObject : m_SceneObjects)
 	{
 		tinyxml2::XMLElement* elem_obj = doc->NewElement("SceneObject");
 
-		if ((*iter)->GetName() != "")
+		if (SceneObject->GetName() != "")
 		{
-			elem_obj->SetAttribute("Name", (*iter)->GetName().c_str());
+			elem_obj->SetAttribute("Name", SceneObject->GetName().c_str());
 		}
 
-		if ((*iter)->GetScript() != "")
+		if (SceneObject->GetScript() != "")
 		{
-			elem_obj->SetAttribute("Script", (*iter)->GetScript().c_str());
+			elem_obj->SetAttribute("Script", SceneObject->GetScript().c_str());
 		}
 
-		if ((*iter)->IsType<RSMeshObject>())
+		if (SceneObject->IsType<RSMeshObject>())
 		{
 			elem_obj->SetAttribute("Type", "MeshObject");
 
-			RSMeshObject* meshObj = (RSMeshObject*)(*iter);
+			RSMeshObject* meshObj = (RSMeshObject*)SceneObject;
 			RMesh* mesh = meshObj->GetMesh();
 			elem_obj->SetAttribute("Mesh", mesh->GetPath().c_str());
 
@@ -252,24 +260,7 @@ void RScene::SaveToFile(const char* filename)
 			}
 		}
 
-		// Save transformation
-		const RMatrix4& t = (*iter)->GetTransformMatrix();
-
-		tinyxml2::XMLElement* elem_trans = doc->NewElement("Transform");
-
-		char msg_buf[512];
-		sprintf_s(msg_buf, 512,
-					"%f, %f, %f, %f, "
-					"%f, %f, %f, %f, "
-					"%f, %f, %f, %f, "
-					"%f, %f, %f, %f",
-					t._m11, t._m12, t._m13, t._m14,
-					t._m21, t._m22, t._m23, t._m24, 
-					t._m31, t._m32, t._m33, t._m34, 
-					t._m41, t._m42, t._m43, t._m44 );
-
-		elem_trans->SetText(msg_buf);
-		elem_obj->InsertEndChild(elem_trans);
+		XmlWriteObjectTransform(elem_obj, SceneObject);
 		elem_scene->InsertEndChild(elem_obj);
 	}
 
@@ -345,4 +336,215 @@ void RScene::UpdateScene()
 vector<RSceneObject*>& RScene::GetSceneObjects()
 {
 	return m_SceneObjects;
+}
+
+bool RScene::XmlReadObjectTransform(tinyxml2::XMLElement* ObjectElement, RVec3& OutPosition, RQuat& OutRotation, RVec3& OutScale)
+{
+	if (ObjectElement)
+	{
+		tinyxml2::XMLElement* XmlElementTransform = ObjectElement->FirstChildElement("Transform");
+		if (XmlElementTransform)
+		{
+			int ElementNums = 0;
+
+			RVec3 Position(0.0f, 0.0f, 0.0f);
+			RQuat Rotation = RQuat::IDENTITY;
+			RVec3 Scale = RVec3(1.0f, 1.0f, 1.0f);
+
+			tinyxml2::XMLElement* XmlElementPosition = XmlElementTransform->FirstChildElement("Position");
+			if (XmlElementPosition)
+			{
+				float PosData[3];
+				stringstream StringStream(XmlElementPosition->GetText());
+
+				for (int n = 0; n < 3; n++)
+				{
+					StringStream >> PosData[n];
+
+					// Ignore remaining commas in the input string
+					if (StringStream.peek() == ',')
+					{
+						StringStream.ignore();
+					}
+				}
+
+				Position = RVec3(PosData);
+				ElementNums++;
+			}
+
+			tinyxml2::XMLElement* XmlElementRotation = XmlElementTransform->FirstChildElement("Rotation");
+			if (XmlElementRotation)
+			{
+				float RotData[3];
+				stringstream StringStream(XmlElementRotation->GetText());
+
+				for (int n = 0; n < 3; n++)
+				{
+					StringStream >> RotData[n];
+
+					// Ignore remaining commas in the input string
+					if (StringStream.peek() == ',')
+					{
+						StringStream.ignore();
+					}
+
+#if (SAVE_ROTATION_IN_DEGREES == 1)
+					RotData[n] = Math::DegreeToRadian(RotData[n]);
+#endif	// (SAVE_ROTATION_IN_DEGREES == 1)
+				}
+
+				Rotation = RQuat::Euler(RVec3(RotData));
+				ElementNums++;
+			}
+
+			tinyxml2::XMLElement* XmlElementScale = XmlElementTransform->FirstChildElement("Scale");
+			if (XmlElementScale)
+			{
+				float ScaleData[3];
+				stringstream StringStream(XmlElementScale->GetText());
+
+				for (int n = 0; n < 3; n++)
+				{
+					StringStream >> ScaleData[n];
+
+					// Ignore remaining commas in the input string
+					if (StringStream.peek() == ',')
+					{
+						StringStream.ignore();
+					}
+				}
+
+				Scale = RVec3(ScaleData);
+				ElementNums++;
+			}
+
+			if (ElementNums > 0)
+			{
+				OutPosition = Position;
+				OutRotation = Rotation;
+				OutScale = Scale;
+
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+void RScene::XmlWriteObjectTransform(tinyxml2::XMLElement* ObjectElement, RSceneObject* SceneObject)
+{
+	if (SceneObject && ObjectElement)
+	{
+		tinyxml2::XMLDocument* XmlDocument = ObjectElement->GetDocument();
+		if (XmlDocument)
+		{
+			tinyxml2::XMLElement* XmlElementTransform = XmlDocument->NewElement("Transform");
+			if (XmlElementTransform)
+			{
+				tinyxml2::XMLElement* XmlElementPosition = XmlDocument->NewElement("Position");
+				if (XmlElementPosition)
+				{
+					RVec3 Position = SceneObject->GetPosition();
+
+					char msg_buf[512];
+					sprintf_s(msg_buf, sizeof(msg_buf), "%f, %f, %f", Position.X(), Position.Y(), Position.Z());
+					XmlElementPosition->SetText(msg_buf);
+					XmlElementTransform->InsertEndChild(XmlElementPosition);
+				}
+
+				tinyxml2::XMLElement* XmlElementRotation = XmlDocument->NewElement("Rotation");
+				if (XmlElementRotation)
+				{
+					RVec3 EulerAngles = SceneObject->GetRotation().ToEuler();
+
+					char msg_buf[512];
+					sprintf_s(msg_buf, sizeof(msg_buf), "%f, %f, %f",
+#if (SAVE_ROTATION_IN_DEGREES == 0)
+						EulerAngles.X(), EulerAngles.Y(), EulerAngles.Z()
+#else
+						Math::RadianToDegree(EulerAngles.X()),
+						Math::RadianToDegree(EulerAngles.Y()),
+						Math::RadianToDegree(EulerAngles.Z())
+#endif	// (SAVE_ROTATION_IN_DEGREES == 1)
+					);
+					XmlElementRotation->SetText(msg_buf);
+					XmlElementTransform->InsertEndChild(XmlElementRotation);
+				}
+
+				tinyxml2::XMLElement* XmlElementScale = XmlDocument->NewElement("Scale");
+				if (XmlElementScale)
+				{
+					RVec3 Scale = SceneObject->GetScale();
+
+					char msg_buf[512];
+					sprintf_s(msg_buf, sizeof(msg_buf), "%f, %f, %f", Scale.X(), Scale.Y(), Scale.Z());
+					XmlElementScale->SetText(msg_buf);
+					XmlElementTransform->InsertEndChild(XmlElementScale);
+				}
+
+				ObjectElement->InsertEndChild(XmlElementTransform);
+			}
+		}
+	}
+}
+
+bool RScene::XmlReadObjectTransformAsMatrix(tinyxml2::XMLElement* ObjectElement, RMatrix4& OutMatrix)
+{
+	if (ObjectElement)
+	{
+		tinyxml2::XMLElement* XmlElementTransform = ObjectElement->FirstChildElement("Transform");
+		if (XmlElementTransform)
+		{
+			RMatrix4 Matrix;
+			stringstream StringStream(XmlElementTransform->GetText());
+
+			for (int n = 0; n < 16; n++)
+			{
+				StringStream >> ((float*)&Matrix)[n];
+
+				// Ignore remaining commas in the input string
+				if (StringStream.peek() == ',')
+				{
+					StringStream.ignore();
+				}
+			}
+
+			OutMatrix = Matrix;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void RScene::XmlWriteObjectTransformAsMatrix(tinyxml2::XMLElement* ObjectElement, RSceneObject* SceneObject)
+{
+	if (SceneObject && ObjectElement)
+	{
+		tinyxml2::XMLDocument* XmlDocument = ObjectElement->GetDocument();
+		if (XmlDocument)
+		{
+			tinyxml2::XMLElement* XmlElementTransform = XmlDocument->NewElement("Transform");
+			if (XmlElementTransform)
+			{
+				// Save transformation
+				const RMatrix4& t = SceneObject->GetTransformMatrix();
+
+				char msg_buf[512];
+				sprintf_s(msg_buf, sizeof(msg_buf),
+					"%f, %f, %f, %f, "
+					"%f, %f, %f, %f, "
+					"%f, %f, %f, %f, "
+					"%f, %f, %f, %f",
+					t._m11, t._m12, t._m13, t._m14,
+					t._m21, t._m22, t._m23, t._m24,
+					t._m31, t._m32, t._m33, t._m34,
+					t._m41, t._m42, t._m43, t._m44);
+
+				XmlElementTransform->SetText(msg_buf);
+				ObjectElement->InsertEndChild(XmlElementTransform);
+			}
+		}
+	}
 }

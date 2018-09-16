@@ -92,6 +92,11 @@ RVec3 RSceneObject::GetUpVector() const
 	return m_NodeTransform.GetUp();
 }
 
+const RQuat RSceneObject::GetRotation() const
+{
+	return m_NodeTransform.GetRotation();
+}
+
 void RSceneObject::SetScale(const RVec3& scale)
 {
 	m_NodeTransform.SetScale(scale);

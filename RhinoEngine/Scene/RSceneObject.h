@@ -67,8 +67,13 @@ public:
 	/// Get the up vector of scene object
 	RVec3 GetUpVector() const;
 
+	/// Get the rotation of scene object
+	const RQuat GetRotation() const;
+
+	/// Set the scale of scene object
 	void SetScale(const RVec3& scale);
 
+	/// Get the scale of scene object
 	const RVec3& GetScale() const;
 
 	/// Rotate scene object towards given target

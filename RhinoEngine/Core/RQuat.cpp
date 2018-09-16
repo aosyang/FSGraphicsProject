@@ -30,6 +30,35 @@ RMatrix3 RQuat::GetRotationMatrix() const
 	);
 }
 
+RVec3 RQuat::ToEuler() const
+{
+	// https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+
+	// roll (x-axis rotation)
+	float sinr = 2.0f * (w * x + y * z);
+	float cosr = 1.0f - 2.0f * (x * x + y * y);
+	float roll = atan2f(sinr, cosr);
+
+	// pitch (y-axis rotation)
+	float sinp = 2.0f * (w * y - z * x);
+	float pitch;
+	if (fabsf(sinp) >= 1.0f)
+	{
+		pitch = copysignf(PI / 2, sinp); // use 90 degrees if out of range
+	}
+	else
+	{
+		pitch = asinf(sinp);
+	}
+
+	// yaw (z-axis rotation)
+	float siny = 2.0f * (w * z + x * y);
+	float cosy = 1.0f - 2.0f * (y * y + z * z);
+	float yaw = atan2f(siny, cosy);
+
+	return RVec3(roll, pitch, yaw);
+}
+
 RQuat RQuat::Euler(float axis_x, float axis_y, float axis_z)
 {
 	float cr, cp, cy, sr, sp, sy, cpcy, spsy;

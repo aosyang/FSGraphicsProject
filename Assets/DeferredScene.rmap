@@ -1,18 +1,38 @@
 <Scene>
     <SceneObject Type="MeshObject" Mesh="../Assets/AO_Scene.FBX">
-        <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, -399.601349, 0.000000, 472.891449, 1.000000</Transform>
+        <Transform>
+            <Position>-399.601349, 0.000000, 472.891449</Position>
+            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
+            <Scale>1.000000, 1.000000, 1.000000</Scale>
+        </Transform>
     </SceneObject>
     <SceneObject Name="Ground" Type="MeshObject" Mesh="../Assets/city.fbx">
-        <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1552.000000, 1.000000</Transform>
+        <Transform>
+            <Position>0.000000, 0.000000, -1552.000000</Position>
+            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
+            <Scale>1.000000, 1.000000, 1.000000</Scale>
+        </Transform>
     </SceneObject>
     <SceneObject Name="EastWall" Type="MeshObject" Mesh="../Assets/city.fbx">
-        <Transform>-0.000000, -1.000000, -0.000000, 0.000000, 1.000000, -0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, -1558.369019, 796.001587, -1552.000000, 1.000000</Transform>
+        <Transform>
+            <Position>-1558.369019, 796.001587, -1552.000000</Position>
+            <Rotation>0.000000, 0.000000, -1.570796</Rotation>
+            <Scale>1.000000, 1.000000, 1.000000</Scale>
+        </Transform>
     </SceneObject>
     <SceneObject Name="Ceiling" Type="MeshObject" Mesh="../Assets/city.fbx">
-        <Transform>0.000003, 0.000000, 1.000004, 0.000000, 0.000000, -1.000002, 0.000000, 0.000000, 1.000003, 0.000000, -0.000003, 0.000000, -1090.473511, 994.328064, -480.841370, 1.000000</Transform>
+        <Transform>
+            <Position>-1090.473511, 994.328064, -480.841370</Position>
+            <Rotation>3.141593, -1.570451, 0.000000</Rotation>
+            <Scale>1.000003, 1.000002, 1.000004</Scale>
+        </Transform>
     </SceneObject>
     <SceneObject Name="NorthWall" Type="MeshObject" Mesh="../Assets/city.fbx">
-        <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, -0.000000, 1.000000, 0.000000, 0.000000, -1.000000, -0.000000, 0.000000, 0.000000, 1824.031006, -1876.959229, 1.000000</Transform>
+        <Transform>
+            <Position>0.000000, 1824.031006, -1876.959229</Position>
+            <Rotation>1.570796, 0.000000, 0.000000</Rotation>
+            <Scale>1.000000, 1.000000, 1.000000</Scale>
+        </Transform>
     </SceneObject>
     <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
         <Material Index="0">
@@ -20,18 +40,34 @@
                 <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
             </MeshElement>
         </Material>
-        <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 151.713776, 92.997810, 0.000000, 1.000000</Transform>
+        <Transform>
+            <Position>151.713776, 92.997810, 0.000000</Position>
+            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
+            <Scale>1.000000, 1.000000, 1.000000</Scale>
+        </Transform>
     </SceneObject>
     <SceneObject Name="Player" Type="MeshObject" Mesh="../Assets/tachikoma.fbx">
         <Material Index="0">
             <MeshElement Name="insideShape" Shader="Default"/>
         </Material>
-        <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 298.025269, 140.878616, -47.836910, 1.000000</Transform>
+        <Transform>
+            <Position>298.025269, 140.878616, -47.836910</Position>
+            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
+            <Scale>1.000000, 1.000000, 1.000000</Scale>
+        </Transform>
     </SceneObject>
     <SceneObject Type="MeshObject" Mesh="../Assets/Island.FBX">
-        <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 918.920105, -208.590515, 153.841202, 1.000000</Transform>
+        <Transform>
+            <Position>918.920105, -208.590515, 153.841202</Position>
+            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
+            <Scale>1.000000, 1.000000, 1.000000</Scale>
+        </Transform>
     </SceneObject>
     <SceneObject Type="MeshObject" Mesh="../Assets/Island.FBX">
-        <Transform>-0.828941, 0.451216, -0.330596, 0.000000, 0.559214, 0.654777, -0.508489, 0.000000, -0.012969, -0.606372, -0.795096, 0.000000, 0.000000, 326.575562, 0.000000, 1.000000</Transform>
+        <Transform>
+            <Position>0.000000, 326.575562, 0.000000</Position>
+            <Rotation>-2.572622, 0.336934, 2.643124</Rotation>
+            <Scale>1.000016, 1.000008, 1.000016</Scale>
+        </Transform>
     </SceneObject>
 </Scene>

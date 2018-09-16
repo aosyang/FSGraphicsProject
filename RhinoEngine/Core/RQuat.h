@@ -53,6 +53,7 @@ public:
 	FORCEINLINE void Normalize()							{ *this /= Norm(); }
 
 	RMatrix3 GetRotationMatrix() const;
+	RVec3 ToEuler() const;
 
 	static RQuat Euler(float axis_x, float axis_y, float axis_z);
 	static RQuat Euler(const RVec3& axis_angles);

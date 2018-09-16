@@ -9,7 +9,7 @@
 
 #define FLT_EQUAL(a,b)			(fabsf((a)-(b))<FLT_EPSILON)
 #define FLT_EQUAL_ZERO(a)		(fabsf(a)<FLT_EPSILON)
-#define PI 3.1415926f
+#define PI 3.14159265358979323846f
 #define DEG_TO_RAD(deg)			(PI/180.0f*(deg))
 #define RAD_TO_DEG(rad)			((rad)*180.0f/PI)
 
@@ -51,6 +51,9 @@ namespace Math
 
 	// Restrict a value to a given range [min, max] 
 	FORCEINLINE float Clamp(float a, float min, float max)		{ return (a < min) ? min : (a > max) ? max : a; }
+
+	FORCEINLINE float DegreeToRadian(float Degree)				{ return PI / 180.0f * Degree; }
+	FORCEINLINE float RadianToDegree(float Radian)				{ return 180.0f / PI * Radian; }
 }
 
 #endif

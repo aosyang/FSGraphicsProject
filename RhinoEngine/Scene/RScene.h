@@ -54,6 +54,12 @@ public:
 	vector<RSceneObject*>& GetSceneObjects();
 private:
 
+	bool XmlReadObjectTransform(tinyxml2::XMLElement* ObjectElement, RVec3& OutPosition, RQuat& OutRotation, RVec3& OutScale);
+	void XmlWriteObjectTransform(tinyxml2::XMLElement* ObjectElement, RSceneObject* SceneObject);
+
+	bool XmlReadObjectTransformAsMatrix(tinyxml2::XMLElement* ObjectElement, RMatrix4& OutMatrix);
+	void XmlWriteObjectTransformAsMatrix(tinyxml2::XMLElement* ObjectElement, RSceneObject* SceneObject);
+
 	vector<RSceneObject*>		m_SceneObjects;
 };
 
