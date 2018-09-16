@@ -154,7 +154,10 @@ void REngine::RunOneFrame(bool update_input)
 
 	m_Application->UpdateScene(m_Timer);
 
-	GScriptSystem.UpdateScriptableObjects();
+	if (!m_bIsEditor)
+	{
+		GScriptSystem.UpdateScriptableObjects();
+	}
 
 	GRenderer.Stats.Reset();
 	if (m_UseCustomRenderingPipeline)
