@@ -147,6 +147,16 @@ void RDebugRenderer::DrawSphere(const RVec3& center, float radius, const RColor&
 	}
 }
 
+void RDebugRenderer::DrawSphere(const RSphere& Sphere, int segment /*= 12*/)
+{
+	DrawSphere(Sphere.center, Sphere.radius, segment);
+}
+
+void RDebugRenderer::DrawSphere(const RSphere& Sphere, const RColor& color, int segment /*= 12*/)
+{
+	DrawSphere(Sphere.center, Sphere.radius, color, segment);
+}
+
 void RDebugRenderer::Render()
 {
 	if (m_bDirtyBuffer)
