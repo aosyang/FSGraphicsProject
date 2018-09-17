@@ -13,9 +13,35 @@ namespace ManagedEngineWrapper {
 		z = Position.Z();
 	}
 
-	FORCEINLINE void SetObjectPositionInFloat3(RSceneObject* SceneObject, float& x, float& y, float& z)
+	FORCEINLINE void SetObjectPositionInFloat3(RSceneObject* SceneObject, float x, float y, float z)
 	{
 		SceneObject->SetPosition(RVec3(x, y, z));
+	}
+
+	FORCEINLINE void GetObjectRotationInFloat3(RSceneObject* SceneObject, float& x, float& y, float& z)
+	{
+		RVec3 Euler = SceneObject->GetRotation().ToEuler();
+		x = RMath::RadianToDegree(Euler.X());
+		y = RMath::RadianToDegree(Euler.Y());
+		z = RMath::RadianToDegree(Euler.Z());
+	}
+
+	FORCEINLINE void SetObjectRotationInFloat3(RSceneObject* SceneObject, float x, float y, float z)
+	{
+		SceneObject->SetRotation(RQuat::Euler(RMath::DegreeToRadian(x), RMath::DegreeToRadian(y), RMath::DegreeToRadian(z)));
+	}
+
+	FORCEINLINE void GetObjectScaleInFloat3(RSceneObject* SceneObject, float& x, float& y, float& z)
+	{
+		RVec3 Scale = SceneObject->GetScale();
+		x = Scale.X();
+		y = Scale.Y();
+		z = Scale.Z();
+	}
+
+	FORCEINLINE void SetObjectScaleInFloat3(RSceneObject* SceneObject, float x, float y, float z)
+	{
+		SceneObject->SetScale(RVec3(x, y, z));
 	}
 
 #pragma managed(pop)
@@ -120,6 +146,34 @@ namespace ManagedEngineWrapper {
 		float x, y, z;
 		StringToFloat3(value, x, y, z);
 		SetObjectPositionInFloat3(m_SceneObject, x, y, z);
+	}
+
+	System::String^ ManagedSceneObject::Rotation::get()
+	{
+		float x, y, z;
+		GetObjectRotationInFloat3(m_SceneObject, x, y, z);
+		return Float3ToString(x, y, z);
+	}
+
+	void ManagedSceneObject::Rotation::set(String^ value)
+	{
+		float x, y, z;
+		StringToFloat3(value, x, y, z);
+		SetObjectRotationInFloat3(m_SceneObject, x, y, z);
+	}
+
+	System::String^ ManagedSceneObject::Scale::get()
+	{
+		float x, y, z;
+		GetObjectScaleInFloat3(m_SceneObject, x, y, z);
+		return Float3ToString(x, y, z);
+	}
+
+	void ManagedSceneObject::Scale::set(String^ value)
+	{
+		float x, y, z;
+		StringToFloat3(value, x, y, z);
+		SetObjectScaleInFloat3(m_SceneObject, x, y, z);
 	}
 
 }

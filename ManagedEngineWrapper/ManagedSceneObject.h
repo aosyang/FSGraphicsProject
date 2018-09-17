@@ -111,6 +111,7 @@ namespace ManagedEngineWrapper {
 
 		virtual bool IsValid();
 
+		/// Access the name of scene object
 		[Category("Scene Object")]
 		property String^ Name
 		{
@@ -118,8 +119,25 @@ namespace ManagedEngineWrapper {
 			void set(String^ value) { m_SceneObject->SetName(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer())); }
 		};
 
+		/// Access the position of scene object
 		[Category("Scene Object")]
 		property String^ Position
+		{
+			String^ get();
+			void set(String^ value);
+		};
+
+		/// Access the rotation of scene object
+		[Category("Scene Object")]
+		property String^ Rotation
+		{
+			String^ get();
+			void set(String^ value);
+		};
+
+		/// Access the scale of scene object
+		[Category("Scene Object")]
+		property String^ Scale
 		{
 			String^ get();
 			void set(String^ value);
