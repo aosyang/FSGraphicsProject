@@ -92,8 +92,8 @@ public:
 
 	static RVec2 Lerp(const RVec2& a, const RVec2& b, float t)
 	{
-		return RVec2(Math::Lerp(a.x, b.x, t),
-					 Math::Lerp(a.y, b.y, t));
+		return RVec2(RMath::Lerp(a.x, b.x, t),
+					 RMath::Lerp(a.y, b.y, t));
 	}
 };
 
@@ -198,9 +198,9 @@ public:
 
 	static RVec3 Lerp(const RVec3& a, const RVec3& b, float t)
 	{
-		return RVec3(Math::Lerp(a.x, b.x, t),
-					 Math::Lerp(a.y, b.y, t),
-					 Math::Lerp(a.z, b.z, t));
+		return RVec3(RMath::Lerp(a.x, b.x, t),
+					 RMath::Lerp(a.y, b.y, t),
+					 RMath::Lerp(a.z, b.z, t));
 	}
 
 private:
@@ -337,9 +337,9 @@ public:
 
 	static RVec3_SIMD Lerp(const RVec3_SIMD& a, const RVec3_SIMD& b, float t)
 	{
-		return RVec3_SIMD(Math::Lerp(a.X(), b.X(), t),
-						  Math::Lerp(a.Y(), b.Y(), t),
-						  Math::Lerp(a.Z(), b.Z(), t));
+		return RVec3_SIMD(RMath::Lerp(a.X(), b.X(), t),
+						  RMath::Lerp(a.Y(), b.Y(), t),
+						  RMath::Lerp(a.Z(), b.Z(), t));
 	}
 
 private:
@@ -401,10 +401,10 @@ public:
 
 	static RVec4 Lerp(const RVec4& a, const RVec4& b, float t)
 	{
-		return RVec4(Math::Lerp(a.x, b.x, t),
-					 Math::Lerp(a.y, b.y, t),
-					 Math::Lerp(a.z, b.z, t),
-					 Math::Lerp(a.w, b.w, t));
+		return RVec4(RMath::Lerp(a.x, b.x, t),
+					 RMath::Lerp(a.y, b.y, t),
+					 RMath::Lerp(a.z, b.z, t),
+					 RMath::Lerp(a.w, b.w, t));
 	}
 };
 

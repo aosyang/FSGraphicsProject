@@ -105,14 +105,14 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 			m_ScrambleMoves.reserve(TotalMoveNums);
 			for (int i = 0; i < TotalMoveNums; i++)
 			{
-				UINT8 n = (UINT8)Math::RandRangedInt(0, 11);
+				UINT8 n = (UINT8)RMath::RandRangedInt(0, 11);
 
 				if (i != 0)
 				{
 					// If a move happens to cancel the last one, try making a different move
 					while (((n >> 1) == (Last >> 1)) && (n % 2 != Last % 2))
 					{
-						n = (UINT8)Math::RandRangedInt(0, 11);
+						n = (UINT8)RMath::RandRangedInt(0, 11);
 					}
 				}
 

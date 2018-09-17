@@ -57,9 +57,9 @@ bool FightingGameApp::Initialize()
 		m_AIPlayer[i] = m_Scene.CreateSceneObjectOfType<FTGPlayerController>();
 		if (m_AIPlayer[i])
 		{
-			m_AIPlayer[i]->SetPosition(RVec3(Math::RandRangedF(-800, 800), 50, Math::RandRangedF(-800, 800)));
+			m_AIPlayer[i]->SetPosition(RVec3(RMath::RandRangedF(-800, 800), 50, RMath::RandRangedF(-800, 800)));
 			m_AIPlayer[i]->InitAssets();
-			m_AIPlayer[i]->SetAnimationDeviation(Math::RandRangedF(0.8f, 1.2f));
+			m_AIPlayer[i]->SetAnimationDeviation(RMath::RandRangedF(0.8f, 1.2f));
 
 			m_AILogic[i] = new AIFighterLogic(m_AIPlayer[i]);
 		}
@@ -88,7 +88,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		{
 			if (m_AIPlayer[i])
 			{
-				m_AIPlayer[i]->SetPosition(RVec3(Math::RandRangedF(-800, 800), 50, Math::RandRangedF(-800, 800)));
+				m_AIPlayer[i]->SetPosition(RVec3(RMath::RandRangedF(-800, 800), 50, RMath::RandRangedF(-800, 800)));
 			}
 		}
 	}
@@ -387,5 +387,5 @@ void FightingGameApp::UpdateCameraPosition(float DeltaTime)
 
 void FightingGameApp::ResetPlayerPosition(FTGPlayerController* PlayerController)
 {
-	PlayerController->SetPosition(RVec3(Math::RandRangedF(-800, 800), 50, Math::RandRangedF(-800, 800)));
+	PlayerController->SetPosition(RVec3(RMath::RandRangedF(-800, 800), 50, RMath::RandRangedF(-800, 800)));
 }

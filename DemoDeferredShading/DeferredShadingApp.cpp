@@ -64,12 +64,12 @@ bool DeferredShadingApp::Initialize()
 	int shadowCasterCount = 10;
 	for (int i = 0; i < MAX_LIGHT_COUNT; i++)
 	{
-		m_PointLights[i].pos = RVec3(Math::RandRangedF(-1500, 750), Math::RandRangedF(50, 100), Math::RandRangedF(-1850, 300));
-		m_PointLights[i].r = Math::RandRangedF(50, 200);
+		m_PointLights[i].pos = RVec3(RMath::RandRangedF(-1500, 750), RMath::RandRangedF(50, 100), RMath::RandRangedF(-1850, 300));
+		m_PointLights[i].r = RMath::RandRangedF(50, 200);
 		//m_PointLights[i].color = RColor(1, 1, 1);
-		m_PointLights[i].color = RColor(Math::RandF(), Math::RandF(), Math::RandF());
-		m_PointLights[i].sin_factor = RVec3(Math::RandRangedF(0, 1), 0, Math::RandRangedF(0, 1));
-		m_PointLights[i].sin_offset = RVec3(Math::RandRangedF(0, 5), 0, Math::RandRangedF(0, 5));
+		m_PointLights[i].color = RColor(RMath::RandF(), RMath::RandF(), RMath::RandF());
+		m_PointLights[i].sin_factor = RVec3(RMath::RandRangedF(0, 1), 0, RMath::RandRangedF(0, 1));
+		m_PointLights[i].sin_offset = RVec3(RMath::RandRangedF(0, 5), 0, RMath::RandRangedF(0, 5));
 		m_PointLights[i].castShadow = (i < shadowCasterCount);
 	}
 

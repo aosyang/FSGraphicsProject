@@ -389,7 +389,7 @@ bool RScene::XmlReadObjectTransform(tinyxml2::XMLElement* ObjectElement, RVec3& 
 					}
 
 #if (SAVE_ROTATION_IN_DEGREES == 1)
-					RotData[n] = Math::DegreeToRadian(RotData[n]);
+					RotData[n] = RMath::DegreeToRadian(RotData[n]);
 #endif	// (SAVE_ROTATION_IN_DEGREES == 1)
 				}
 
@@ -463,9 +463,9 @@ void RScene::XmlWriteObjectTransform(tinyxml2::XMLElement* ObjectElement, RScene
 #if (SAVE_ROTATION_IN_DEGREES == 0)
 						EulerAngles.X(), EulerAngles.Y(), EulerAngles.Z()
 #else
-						Math::RadianToDegree(EulerAngles.X()),
-						Math::RadianToDegree(EulerAngles.Y()),
-						Math::RadianToDegree(EulerAngles.Z())
+						RMath::RadianToDegree(EulerAngles.X()),
+						RMath::RadianToDegree(EulerAngles.Y()),
+						RMath::RadianToDegree(EulerAngles.Z())
 #endif	// (SAVE_ROTATION_IN_DEGREES == 1)
 					);
 					XmlElementRotation->SetText(msg_buf);

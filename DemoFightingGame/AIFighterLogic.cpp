@@ -45,7 +45,7 @@ void AIFighterLogic::Update(float DeltaTime)
 		RVec3 ToTarget = AttackTarget->GetWorldPosition() - ControlledPlayer->GetWorldPosition();
 		ToTarget.SetY(0.0f);
 
-		if (ToTarget.SquaredMagitude() > Math::Square(100.0f))
+		if (ToTarget.SquaredMagitude() > RMath::Square(100.0f))
 		{
 			ControlledPlayer->SetMovementInput(ToTarget.GetNormalized() * 600.0f);
 		}
@@ -53,7 +53,7 @@ void AIFighterLogic::Update(float DeltaTime)
 		{
 			// AI has reached its attack target, dice roll and decide what to do
 
-			int ActionIndex = Math::RandRangedInt(0, 7);
+			int ActionIndex = RMath::RandRangedInt(0, 7);
 			switch (ActionIndex)
 			{
 			case 0:
@@ -118,12 +118,12 @@ void AIFighterLogic::FindAttackTarget()
 
 			do 
 			{
-				int Index = Math::RandRangedInt(0, NumControllers - 1);
+				int Index = RMath::RandRangedInt(0, NumControllers - 1);
 				Target = PlayerControllers[Index];
 			} while (Target == ControlledPlayer);
 
 			AttackTarget = Target;
-			AttackTargetTimeOut = Math::RandRangedF(10.0f, 15.0f);
+			AttackTargetTimeOut = RMath::RandRangedF(10.0f, 15.0f);
 			return;
 		}
 	}

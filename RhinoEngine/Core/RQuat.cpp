@@ -96,7 +96,7 @@ RQuat RQuat::SlerpUnnormalized(const RQuat& a, const RQuat& b, float t)
 		dot = -dot;
 	}
 
-	dot = Math::Clamp(dot, -1, 1);
+	dot = RMath::Clamp(dot, -1, 1);
 	float Theta = acosf(dot);
 
 	float InvSinTheta = 1.0f / sinf(Theta);

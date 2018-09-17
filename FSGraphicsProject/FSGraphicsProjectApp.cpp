@@ -283,14 +283,14 @@ bool FSGraphicsProjectApp::Initialize()
 
 	for (int i = 0; i < PARTICLE_COUNT; i++)
 	{
-		float x = Math::RandRangedF(-2000.0f, 1000.0f),
-			  y = Math::RandRangedF(1000.0f, 1200.0f),
-			  z = Math::RandRangedF(-2000.0f, 1000.0f),
-			  w = Math::RandRangedF(500.0f, 750.0f);					// Particle radius
-		float ic = Math::RandRangedF(0.5f, 1.0f);						// Particle color
+		float x = RMath::RandRangedF(-2000.0f, 1000.0f),
+			  y = RMath::RandRangedF(1000.0f, 1200.0f),
+			  z = RMath::RandRangedF(-2000.0f, 1000.0f),
+			  w = RMath::RandRangedF(500.0f, 750.0f);					// Particle radius
+		float ic = RMath::RandRangedF(0.5f, 1.0f);						// Particle color
 		float offsetX = (rand() % 2 == 0) ? 0.0f : 0.5f;
 		float offsetY = (rand() % 2 == 0) ? 0.0f : 0.5f;
-		m_ParticleVert[i] = { RVec4(x, y, z, w), RVec4(ic, ic, ic, 1.0f), Math::RandRangedF(0.0f, PI * 2), RVec4(0.5f, 0.5f, offsetX, offsetY) };
+		m_ParticleVert[i] = { RVec4(x, y, z, w), RVec4(ic, ic, ic, 1.0f), RMath::RandRangedF(0.0f, PI * 2), RVec4(0.5f, 0.5f, offsetX, offsetY) };
 		m_ParticleAabb.ExpandBySphere(RVec3(x, y, z), w);
 	}
 
@@ -475,7 +475,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 	if (RInput.GetBufferedKeyState('I') == EBufferedKeyState::Pressed)
 	{
-		m_MaterialSpecular = RVec4(1.0f, 1.0f, 1.0f, Math::RandRangedF(1.0f, 512.0f));
+		m_MaterialSpecular = RVec4(1.0f, 1.0f, 1.0f, RMath::RandRangedF(1.0f, 512.0f));
 	}
 
 	static RFrustum frustum = m_Camera->GetFrustum();
@@ -607,10 +607,10 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 	RVec4 sPoints[4] =
 	{
-		RVec4(0, 0, Math::Lerp(camNear, camFar, shadowSplitPoints[0]), 1),
-		RVec4(0, 0, Math::Lerp(camNear, camFar, shadowSplitPoints[1]), 1),
-		RVec4(0, 0, Math::Lerp(camNear, camFar, shadowSplitPoints[2]), 1),
-		RVec4(0, 0, Math::Lerp(camNear, camFar, shadowSplitPoints[3]), 1),
+		RVec4(0, 0, RMath::Lerp(camNear, camFar, shadowSplitPoints[0]), 1),
+		RVec4(0, 0, RMath::Lerp(camNear, camFar, shadowSplitPoints[1]), 1),
+		RVec4(0, 0, RMath::Lerp(camNear, camFar, shadowSplitPoints[2]), 1),
+		RVec4(0, 0, RMath::Lerp(camNear, camFar, shadowSplitPoints[3]), 1),
 	};
 
 	for (int i = 1; i < 4; i++)

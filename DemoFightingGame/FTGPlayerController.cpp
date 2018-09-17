@@ -62,7 +62,7 @@ float LerpDegreeAngle(float from, float to, float t)
 		from += 360.0f;
 	}
 
-	return from + (to - from) * Math::Clamp(t, 0.0f, 1.0f);
+	return from + (to - from) * RMath::Clamp(t, 0.0f, 1.0f);
 }
 
 void FTGPlayerController::UpdateMovement(float DeltaTime, const RVec3 moveVec)
