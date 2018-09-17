@@ -482,7 +482,7 @@ namespace ManagedEngineWrapper
 		}
 	}
 
-	void EditorApp::DeleteSelection()
+	bool EditorApp::DeleteSelection()
 	{
 		if (m_SelectedObject)
 		{
@@ -491,7 +491,11 @@ namespace ManagedEngineWrapper
 			m_SelectedObject = nullptr;
 
 			// FIXME: We should notify editor to update property grid or we'll crash the editor
+
+			return true;
 		}
+
+		return false;
 	}
 #pragma managed
 }

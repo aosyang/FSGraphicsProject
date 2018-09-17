@@ -20,7 +20,7 @@ namespace ManagedInterface
 
         IManagedSceneObject GetSelection();
 
-        void DeleteSelection();
+        bool DeleteSelection();
         void LoadScene(String filename);
         void SaveScene(String filename);
 

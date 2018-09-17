@@ -37,7 +37,7 @@ namespace ManagedEngineWrapper {
 		
 		virtual IManagedSceneObject^ GetSelection();
 
-		virtual void DeleteSelection();
+		virtual bool DeleteSelection();
 		virtual void LoadScene(String^ filename);
 		virtual void SaveScene(String^ filename);
 

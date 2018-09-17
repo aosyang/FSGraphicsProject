@@ -65,7 +65,7 @@ namespace ManagedEngineWrapper
 
 		void RunScreenToCameraRayPicking(float x, float y);
 
-		void DeleteSelection();
+		bool DeleteSelection();
 	};
 #pragma managed
 }

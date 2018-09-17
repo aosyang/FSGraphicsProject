@@ -128,9 +128,9 @@ namespace ManagedEngineWrapper
 		return gcnew ManagedEngineWrapper::ManagedSceneObject(sel);
 	}
 
-	void RhinoEngineWrapper::DeleteSelection()
+	bool RhinoEngineWrapper::DeleteSelection()
 	{
-		m_Application->DeleteSelection();
+		return m_Application->DeleteSelection();
 	}
 
 	void RhinoEngineWrapper::LoadScene(String^ filename)

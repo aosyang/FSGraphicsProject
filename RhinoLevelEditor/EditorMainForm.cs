@@ -81,7 +81,13 @@ namespace RhinoLevelEditor
 
         private void deleteSelectionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            engineCanvas1.RhinoEngine.DeleteSelection();
+            if (engineCanvas1.Focused)
+            {
+                if (engineCanvas1.RhinoEngine.DeleteSelection())
+                {
+                    UpdatePropertyGrid();
+                }
+            }
         }
 
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
