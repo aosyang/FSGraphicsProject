@@ -143,9 +143,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EngineManagedWrapper\EngineManagedWrapper.vcxproj">
+    <ProjectReference Include="..\ManagedEngineWrapper\ManagedEngineWrapper.vcxproj">
       <Project>{c6dad121-6b25-4918-a315-3a062c68b740}</Project>
-      <Name>EngineManagedWrapper</Name>
+      <Name>ManagedEngineWrapper</Name>
     </ProjectReference>
     <ProjectReference Include="..\ManagedInterface\ManagedInterface.csproj">
       <Project>{b3abb3bd-8965-47f2-bc81-b7f109ec4f60}</Project>

@@ -7,7 +7,7 @@
 #include "Stdafx.h"
 #include "EditorApp.h"
 
-namespace EngineManagedWrapper
+namespace ManagedEngineWrapper
 {
 #pragma unmanaged
 	EditorApp::EditorApp()

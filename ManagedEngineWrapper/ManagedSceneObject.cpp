@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ManagedSceneObject.h"
 
-namespace EngineManagedWrapper {
+namespace ManagedEngineWrapper {
 
 #pragma managed(push, off)
 

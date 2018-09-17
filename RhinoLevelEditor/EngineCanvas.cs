@@ -37,7 +37,7 @@ namespace RhinoLevelEditor
                 Assembly EngineWrapperModule = null;
                 try
                 {
-                    EngineWrapperModule = Assembly.LoadFrom("EngineManagedWrapper.dll");
+                    EngineWrapperModule = Assembly.LoadFrom("ManagedEngineWrapper.dll");
                 }
                 catch (FileNotFoundException e)
                 {

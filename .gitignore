@@ -13,9 +13,9 @@
 /DemoFightingGame/[Rr]elease/
 /DemoFightingGame/x64/
 /DemoFightingGame/*.dll
-/EngineManagedWrapper/[Dd]ebug/
-/EngineManagedWrapper/[Rr]elease/
-/EngineManagedWrapper/x64/
+/ManagedEngineWrapper/[Dd]ebug/
+/ManagedEngineWrapper/[Rr]elease/
+/ManagedEngineWrapper/x64/
 /ManagedInterface/bin/
 /ManagedInterface/obj/
 /FSGraphicsProject/[Dd]ebug/

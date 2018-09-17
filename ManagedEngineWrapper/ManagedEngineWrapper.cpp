@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 
-#include "EngineManagedWrapper.h"
+#include "ManagedEngineWrapper.h"
 #include "EditorApp.h"
 #include "ManagedSceneObject.h"
 
@@ -12,7 +12,7 @@
 
 using namespace System::Runtime::InteropServices;
 
-namespace EngineManagedWrapper
+namespace ManagedEngineWrapper
 {
 	RKeyStateModifier g_KeyStateModifier;
 
@@ -121,11 +121,11 @@ namespace EngineManagedWrapper
 		{
 			if (sel->IsType<RSMeshObject>())
 			{
-				return gcnew EngineManagedWrapper::ManagedMeshObject(sel);
+				return gcnew ManagedEngineWrapper::ManagedMeshObject(sel);
 			}
 		}
 
-		return gcnew EngineManagedWrapper::ManagedSceneObject(sel);
+		return gcnew ManagedEngineWrapper::ManagedSceneObject(sel);
 	}
 
 	void RhinoEngineWrapper::DeleteSelection()

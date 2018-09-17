@@ -7,7 +7,7 @@
 #include "EditorAxis.h"
 
 
-namespace EngineManagedWrapper
+namespace ManagedEngineWrapper
 {
 #pragma unmanaged
 	class EditorApp : public IApp

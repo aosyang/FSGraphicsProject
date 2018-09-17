@@ -155,7 +155,7 @@
     <ClInclude Include="..\Shaders\SharedDefines.h" />
     <ClInclude Include="EditorApp.h" />
     <ClInclude Include="EditorAxis.h" />
-    <ClInclude Include="EngineManagedWrapper.h" />
+    <ClInclude Include="ManagedEngineWrapper.h" />
     <ClInclude Include="ManagedSceneObject.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Stdafx.h" />
@@ -164,7 +164,7 @@
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="EditorApp.cpp" />
     <ClCompile Include="EditorAxis.cpp" />
-    <ClCompile Include="EngineManagedWrapper.cpp" />
+    <ClCompile Include="ManagedEngineWrapper.cpp" />
     <ClCompile Include="ManagedSceneObject.cpp" />
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -189,9 +189,6 @@
     <ProjectReference Include="..\RhinoEngine\RhinoEngine.vcxproj">
       <Project>{609be637-9cc8-4aba-9308-3fcc5d0b43ec}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="EngineManagedWrapper.licenseheader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

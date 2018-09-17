@@ -9,7 +9,7 @@ using namespace ManagedInterface;
 
 class RSceneObject;
 
-namespace EngineManagedWrapper {
+namespace ManagedEngineWrapper {
 
 	public ref class ManagedMaterial
 	{

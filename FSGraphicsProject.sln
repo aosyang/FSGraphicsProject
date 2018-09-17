@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FSGraphicsProject", "FSGrap
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RhinoEngine", "RhinoEngine\RhinoEngine.vcxproj", "{609BE637-9CC8-4ABA-9308-3FCC5D0B43EC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EngineManagedWrapper", "EngineManagedWrapper\EngineManagedWrapper.vcxproj", "{C6DAD121-6B25-4918-A315-3A062C68B740}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EngineManagedWrapper", "ManagedEngineWrapper\ManagedEngineWrapper.vcxproj", "{C6DAD121-6B25-4918-A315-3A062C68B740}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RhinoLevelEditor", "RhinoLevelEditor\RhinoLevelEditor.csproj", "{99468E86-C455-4A4A-82BA-8AD298C0E9A8}"
 EndProject

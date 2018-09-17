@@ -8,7 +8,7 @@ using namespace ManagedInterface;
 
 class REngine;
 
-namespace EngineManagedWrapper {
+namespace ManagedEngineWrapper {
 
 	class EditorApp;
 	ref class ManagedSceneObject;
