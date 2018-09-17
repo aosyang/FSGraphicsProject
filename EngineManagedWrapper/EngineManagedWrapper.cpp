@@ -114,7 +114,7 @@ namespace EngineManagedWrapper
 		//m_Application->RunScreenToCameraRayPicking(x, y);
 	}
 
-	EngineManagedWrapper::ManagedSceneObject^ RhinoEngineWrapper::GetSelection()
+	IManagedSceneObject^ RhinoEngineWrapper::GetSelection()
 	{
 		RSceneObject* sel = m_Application->GetSelection();
 		if (sel)

@@ -183,6 +183,9 @@
     <Image Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ManagedInterface\ManagedInterface.csproj">
+      <Project>{b3abb3bd-8965-47f2-bc81-b7f109ec4f60}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\RhinoEngine\RhinoEngine.vcxproj">
       <Project>{609be637-9cc8-4aba-9308-3fcc5d0b43ec}</Project>
     </ProjectReference>

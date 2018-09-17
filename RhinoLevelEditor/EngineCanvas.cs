@@ -1,21 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using EngineManagedWrapper;
 using System.IO;
+using ManagedInterface;
+using System.Reflection;
 
 namespace RhinoLevelEditor
 {
     public partial class EngineCanvas : UserControl
     {
-        RhinoEngineWrapper Engine;
-        public RhinoEngineWrapper RhinoEngine
+        IManagedEngine Engine;
+        public IManagedEngine RhinoEngine
         {
             get { return Engine; }
         }
@@ -24,7 +18,14 @@ namespace RhinoLevelEditor
 
         public EngineCanvas()
         {
-            InitializeComponent();
+            try
+            {
+                InitializeComponent();
+            }
+            catch (FileNotFoundException e)
+            {
+                MessageBox.Show("Unable to open file: " + e.FileName);
+            }
         }
 
         public void Initialize()
@@ -33,8 +34,35 @@ namespace RhinoLevelEditor
             {
                 Application.Idle += HandleApplicationIdle;
 
-                Engine = new RhinoEngineWrapper();
-                Engine.Initialize(Handle);
+                Assembly EngineWrapperModule = null;
+                try
+                {
+                    EngineWrapperModule = Assembly.LoadFrom("EngineManagedWrapper.dll");
+                }
+                catch (FileNotFoundException e)
+                {
+
+                }
+
+                if (EngineWrapperModule != null)
+                {
+                    // Get all types of classes which inherits from IManagedEngine
+                    Type[] types = EngineWrapperModule.GetTypes();
+                    foreach (Type type in types)
+                    {
+                        if (!typeof(IManagedEngine).IsAssignableFrom(type))
+                        {
+                            continue;
+                        }
+
+                        Engine = EngineWrapperModule.CreateInstance(type.FullName) as IManagedEngine;
+                        if (Engine != null)
+                        {
+                            Engine.Initialize(Handle);
+                            break;
+                        }
+                    }
+                }
             }
         }
 
@@ -47,7 +75,10 @@ namespace RhinoLevelEditor
         {
             if (!DesignMode)
             {
-                Engine.RunOneFrame();
+                if (Engine != null)
+                {
+                    Engine.RunOneFrame();
+                }
             }
         }
 
@@ -56,7 +87,10 @@ namespace RhinoLevelEditor
             if (!DesignMode)
             {
                 Application.Idle -= HandleApplicationIdle;
-                Engine.Shutdown();
+                if (Engine != null)
+                {
+                    Engine.Shutdown();
+                }
             }
         }
 
@@ -66,7 +100,9 @@ namespace RhinoLevelEditor
             {
                 Control control = (Control)sender;
                 if (Engine != null)
+                {
                     Engine.Resize(control.Width, control.Height);
+                }
             }
         }
     }

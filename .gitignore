@@ -16,6 +16,8 @@
 /EngineManagedWrapper/[Dd]ebug/
 /EngineManagedWrapper/[Rr]elease/
 /EngineManagedWrapper/x64/
+/ManagedInterface/bin/
+/ManagedInterface/obj/
 /FSGraphicsProject/[Dd]ebug/
 /FSGraphicsProject/[Rr]elease/
 /FSGraphicsProject/x64/

@@ -5,6 +5,7 @@ using namespace System::Runtime::InteropServices;
 using namespace System::Collections::Generic;
 using namespace System::ComponentModel;
 using namespace System::Globalization;
+using namespace ManagedInterface;
 
 class RSceneObject;
 
@@ -101,14 +102,14 @@ namespace EngineManagedWrapper {
 		}
 	};
 
-	public ref class ManagedSceneObject
+	public ref class ManagedSceneObject : public IManagedSceneObject
 	{
 	protected:
 		RSceneObject*	m_SceneObject;
 	public:
 		ManagedSceneObject(RSceneObject* obj);
 
-		bool IsValid();
+		virtual bool IsValid();
 
 		[Category("Scene Object")]
 		property String^ Name

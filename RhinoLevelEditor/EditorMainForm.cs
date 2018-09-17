@@ -1,13 +1,5 @@
-﻿using EngineManagedWrapper;
+﻿using ManagedInterface;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace RhinoLevelEditor
@@ -67,7 +59,7 @@ namespace RhinoLevelEditor
 
         private void UpdatePropertyGrid()
         {
-            ManagedSceneObject go = engineCanvas1.RhinoEngine.GetSelection();
+            IManagedSceneObject go = engineCanvas1.RhinoEngine.GetSelection();
             if (go.IsValid())
                 propertyGrid1.SelectedObject = go;
             else

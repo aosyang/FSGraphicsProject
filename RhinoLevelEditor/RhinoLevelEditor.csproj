@@ -147,6 +147,10 @@
       <Project>{c6dad121-6b25-4918-a315-3a062c68b740}</Project>
       <Name>EngineManagedWrapper</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ManagedInterface\ManagedInterface.csproj">
+      <Project>{b3abb3bd-8965-47f2-bc81-b7f109ec4f60}</Project>
+      <Name>ManagedInterface</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -4,6 +4,7 @@
 
 using namespace System;
 using namespace System::Collections::Generic;
+using namespace ManagedInterface;
 
 class REngine;
 
@@ -12,7 +13,7 @@ namespace EngineManagedWrapper {
 	class EditorApp;
 	ref class ManagedSceneObject;
 
-	public ref class RhinoEngineWrapper
+	public ref class RhinoEngineWrapper : public IManagedEngine
 	{
 	private:
 		EditorApp*	m_Application;
@@ -23,24 +24,24 @@ namespace EngineManagedWrapper {
 		~RhinoEngineWrapper();		// destructor
 		!RhinoEngineWrapper();		// finalizer
 
-		bool Initialize(IntPtr hWnd);
-		void RunOneFrame();
-		void Shutdown();
-		void Resize(int width, int height);
+		virtual bool Initialize(IntPtr hWnd);
+		virtual void RunOneFrame();
+		virtual void Shutdown();
+		virtual void Resize(int width, int height);
 
-		List<String^>^ GetMeshNameList();
-		void UpdatePreviewMesh(String^ path, bool replace);
-		void OnKeyDown(int keycode);
-		void OnKeyUp(int keycode);
+		virtual List<String^>^ GetMeshNameList();
+		virtual void UpdatePreviewMesh(String^ path, bool replace);
+		virtual void OnKeyDown(int keycode);
+		virtual void OnKeyUp(int keycode);
 		void RunScreenToCameraRayPicking(float x, float y);
 		
-		ManagedSceneObject^ GetSelection();
+		virtual IManagedSceneObject^ GetSelection();
 
-		void DeleteSelection();
-		void LoadScene(String^ filename);
-		void SaveScene(String^ filename);
+		virtual void DeleteSelection();
+		virtual void LoadScene(String^ filename);
+		virtual void SaveScene(String^ filename);
 
-		void SaveMeshMaterialFromSelection();
-		void ExportAllAnimationsToBinaryFiles();
+		virtual void SaveMeshMaterialFromSelection();
+		virtual void ExportAllAnimationsToBinaryFiles();
 	};
 }
