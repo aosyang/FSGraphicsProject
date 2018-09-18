@@ -1,5 +1,6 @@
 ﻿using ManagedInterface;
 using System;
+using System.IO;
 using System.Windows.Forms;
 
 namespace RhinoLevelEditor
@@ -7,10 +8,30 @@ namespace RhinoLevelEditor
     public partial class EditorMainForm : Form
     {
         bool[] KeyState = new bool[255];
+        const String FormTitle = "Rhino Level Editor";
+        String OpenedMapPath;
 
         public EditorMainForm()
         {
             InitializeComponent();
+
+            RefreshFormTitle();
+        }
+
+        /// <summary>
+        /// Refresh the title of window form
+        /// </summary>
+        private void RefreshFormTitle()
+        {
+            String MapName = Path.GetFileName(OpenedMapPath);
+            if (MapName == null || MapName == "")
+            {
+                Text = FormTitle + " - Untitled";
+            }
+            else
+            {
+                Text = FormTitle + " - " + MapName;
+            }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -90,17 +111,6 @@ namespace RhinoLevelEditor
             }
         }
 
-        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog dlg = new SaveFileDialog();
-            dlg.Filter = "Map files (*.rmap)|*.rmap";
-
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                engineCanvas1.RhinoEngine.SaveScene(dlg.FileName);
-            }
-        }
-
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
@@ -108,8 +118,35 @@ namespace RhinoLevelEditor
 
             if (dlg.ShowDialog() == DialogResult.OK)
             {
+                OpenedMapPath = dlg.FileName;
                 engineCanvas1.RhinoEngine.LoadScene(dlg.FileName);
+                RefreshFormTitle();
                 UpdatePropertyGrid();
+            }
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (OpenedMapPath != null && OpenedMapPath != "")
+            {
+                engineCanvas1.RhinoEngine.SaveScene(OpenedMapPath);
+            }
+            else
+            {
+                saveAsToolStripMenuItem_Click(sender, e);
+            }
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog dlg = new SaveFileDialog();
+            dlg.Filter = "Map files (*.rmap)|*.rmap";
+
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                OpenedMapPath = dlg.FileName;
+                engineCanvas1.RhinoEngine.SaveScene(dlg.FileName);
+                RefreshFormTitle();
             }
         }
 
@@ -133,5 +170,6 @@ namespace RhinoLevelEditor
         {
             this.Close();
         }
+
     }
 }
