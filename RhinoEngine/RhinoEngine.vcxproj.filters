@@ -128,9 +128,6 @@
     <ClInclude Include="Scene\RSceneComponentBase.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="RenderSystem\RMeshComponent.h">
-      <Filter>RenderSystem</Filter>
-    </ClInclude>
     <ClInclude Include="RenderSystem\RResourceBase.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
@@ -246,9 +243,6 @@
       <Filter>Script</Filter>
     </ClCompile>
     <ClCompile Include="RenderSystem\RShaderConstantBuffer.cpp">
-      <Filter>RenderSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderSystem\RMeshComponent.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
     <ClCompile Include="Scene\RSceneComponentBase.cpp">
