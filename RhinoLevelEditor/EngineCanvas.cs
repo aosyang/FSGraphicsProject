@@ -41,7 +41,7 @@ namespace RhinoLevelEditor
                 }
                 catch (FileNotFoundException e)
                 {
-
+                    MessageBox.Show("Unable to load module: " + e.FileName);
                 }
 
                 if (EngineWrapperModule != null)

@@ -115,12 +115,12 @@ public:
 	DeferredShadingApp();
 	~DeferredShadingApp();
 
-	bool Initialize();
-	void UpdateScene(const RTimer& timer);
-	void RenderScene();
+	virtual bool Initialize() override;
+	virtual void UpdateScene(const RTimer& timer) override;
+	virtual void RenderScene() override;
 
-	void OnResize(int width, int height);
-	TCHAR* WindowTitle() { return L"Deferred Shading Demo"; }
+	virtual void OnResize(int width, int height) override;
+	virtual TCHAR* WindowTitle() override { return L"Deferred Shading Demo"; }
 
 private:
 	void CreateGBuffers();

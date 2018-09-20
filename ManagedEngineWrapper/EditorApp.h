@@ -49,10 +49,10 @@ namespace ManagedEngineWrapper
 		EditorApp();
 		~EditorApp();
 
-		bool Initialize();
+		virtual bool Initialize() override;
 
-		void UpdateScene(const RTimer& timer);
-		void RenderScene();
+		virtual void UpdateScene(const RTimer& timer) override;
+		virtual void RenderScene() override;
 
 		void AddMeshObjectToScene(const char* path);
 		void LoadScene(const char* filename);
