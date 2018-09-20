@@ -269,6 +269,9 @@
     <ClCompile Include="Core\RColor.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\RFileUtil.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="RenderSystem">

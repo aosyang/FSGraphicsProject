@@ -51,9 +51,7 @@ RShaderManager::~RShaderManager()
 void RShaderManager::LoadShaders(const char* path)
 {
 	// Set working directory to shader folder for compiling
-	char pWorkingPath[1024];
-	GetCurrentDirectoryA(1024, pWorkingPath);
-	SetCurrentDirectoryA(path);
+	RFileUtil::PushWorkingPath(path);
 
 	WIN32_FIND_DATAA FindFileData;
 	HANDLE hFind;
@@ -199,7 +197,7 @@ void RShaderManager::LoadShaders(const char* path)
 	}
 
 	// Restore working directory
-	SetCurrentDirectoryA(pWorkingPath);
+	RFileUtil::PopWorkingPath();
 }
 
 void RShaderManager::UnloadAllShaders()
