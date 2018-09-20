@@ -182,12 +182,11 @@ void RResourceManager::UnloadAllResources()
 
 void RResourceManager::UnloadSRVWrappers()
 {
-	map<ID3D11ShaderResourceView*, RTexture*>::iterator iter;
-	for (iter = m_WrapperTextureResources.begin(); iter != m_WrapperTextureResources.end(); iter++)
+	for (const auto& Iter : m_WrapperTextureResources)
 	{
 		// Delete wrapper textures without releasing shader resource view
-		iter->second->m_SRV = nullptr;
-		delete iter->second;
+		Iter.second->m_SRV = nullptr;
+		delete Iter.second;
 	}
 	m_WrapperTextureResources.clear();
 }
@@ -862,7 +861,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		for (UINT i = 0; i < indexData.size(); i++)
 		{
 			RVertex::MESH_LOADER_VERTEX& v = flatVertData[indexData[i]];
-			map<RVertex::MESH_LOADER_VERTEX, int>::iterator iterResult = meshVertIndexTable.find(v);
+			auto iterResult = meshVertIndexTable.find(v);
 			if (iterResult == meshVertIndexTable.end())
 			{
 				meshVertIndexTable[v] = index;
@@ -1072,11 +1071,12 @@ int strcasecmp(const char* str1, const char* str2)
 RTexture* RResourceManager::FindTexture(const char* resourcePath)
 {
 	unique_lock<mutex> lock(TextureResourcesMutex);
-	for (vector<RTexture*>::iterator iter = m_TextureResources.begin(); iter != m_TextureResources.end(); iter++)
+
+	for (auto Iter : m_TextureResources)
 	{
-		if (strcasecmp((*iter)->GetPath().data(), resourcePath) == 0)
+		if (strcasecmp(Iter->GetPath().data(), resourcePath) == 0)
 		{
-			return *iter;
+			return Iter;
 		}
 	}
 
@@ -1085,11 +1085,11 @@ RTexture* RResourceManager::FindTexture(const char* resourcePath)
 
 RMesh* RResourceManager::FindMesh(const char* resourcePath)
 {
-	for (vector<RMesh*>::iterator iter = m_MeshResources.begin(); iter != m_MeshResources.end(); iter++)
+	for (auto Iter : m_MeshResources)
 	{
-		if (strcasecmp((*iter)->GetPath().data(), resourcePath) == 0)
+		if (strcasecmp(Iter->GetPath().data(), resourcePath) == 0)
 		{
-			return *iter;
+			return Iter;
 		}
 	}
 

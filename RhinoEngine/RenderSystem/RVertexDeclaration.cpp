@@ -99,16 +99,14 @@ void RVertexDeclaration::Initialize()
 
 void RVertexDeclaration::Release()
 {
-	for (map<string, ID3D11InputLayout*>::iterator iter = m_InputLayouts.begin();
-		iter != m_InputLayouts.end(); iter++)
+	for (const auto& Iter : m_InputLayouts)
 	{
-		iter->second->Release();
+		Iter.second->Release();
 	}
 
-	for (map<int, ID3D11InputLayout*>::iterator iter = m_VertexComponentInputLayouts.begin();
-		 iter != m_VertexComponentInputLayouts.end(); iter++)
+	for (const auto& Iter : m_VertexComponentInputLayouts)
 	{
-		iter->second->Release();
+		Iter.second->Release();
 	}
 
 	m_InputLayouts.clear();
@@ -116,10 +114,10 @@ void RVertexDeclaration::Release()
 
 ID3D11InputLayout* RVertexDeclaration::GetInputLayout(const string& vertexTypeName) const
 {
-	map<string, ID3D11InputLayout*>::const_iterator iter = m_InputLayouts.find(vertexTypeName);
-	if (iter != m_InputLayouts.end())
+	auto Iter = m_InputLayouts.find(vertexTypeName);
+	if (Iter != m_InputLayouts.end())
 	{
-		return iter->second;
+		return Iter->second;
 	}
 
 	return nullptr;
@@ -132,8 +130,8 @@ ID3D11InputLayout* RVertexDeclaration::GetInputLayoutByVertexComponents(int vert
 	msg_buf += "\n";
 	RLog(msg_buf.data());
 
-	map<int, ID3D11InputLayout*>::const_iterator iter = m_VertexComponentInputLayouts.find(vertexComponents);
-	if (iter == m_VertexComponentInputLayouts.end())
+	auto Iter = m_VertexComponentInputLayouts.find(vertexComponents);
+	if (Iter == m_VertexComponentInputLayouts.end())
 	{
 		// Create input layout based on vertex component
 		static D3D11_INPUT_ELEMENT_DESC ComponentDescs[VertexComponent_Count] =
@@ -202,7 +200,7 @@ ID3D11InputLayout* RVertexDeclaration::GetInputLayoutByVertexComponents(int vert
 	}
 	else
 	{
-		return iter->second;
+		return Iter->second;
 	}
 }
 

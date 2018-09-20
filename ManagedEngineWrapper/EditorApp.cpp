@@ -432,25 +432,27 @@ namespace ManagedEngineWrapper
 			vector<RayPickingResult> rayPickingList;
 			float tmin = FLT_MAX;
 
-			for (vector<RSceneObject*>::iterator iter = m_Scene.GetSceneObjects().begin(); iter != m_Scene.GetSceneObjects().end(); iter++)
+			for (auto SceneObject : m_Scene.GetSceneObjects())
 			{
 				float t;
-				if (ray.TestAabbIntersection((*iter)->GetAabb(), &t))
+				if (ray.TestAabbIntersection(SceneObject->GetAabb(), &t))
 				{
-					if ((*iter)->IsType<RSMeshObject>())
+					if (SceneObject->IsType<RSMeshObject>())
 					{
-						RSMeshObject* meshObj = static_cast<RSMeshObject*>(*iter);
+						RSMeshObject* meshObj = static_cast<RSMeshObject*>(SceneObject);
 						for (int i = 0; i < meshObj->GetMeshElementCount(); i++)
 						{
 							if (ray.TestAabbIntersection(meshObj->GetMeshElementAabb(i).GetTransformedAabb(meshObj->GetTransformMatrix()), &t))
 							{
-								rayPickingList.push_back(RayPickingResult(t, *iter));
+								rayPickingList.push_back(RayPickingResult(t, SceneObject));
 								break;
 							}
 						}
 					}
 					else
-						rayPickingList.push_back(RayPickingResult(t, *iter));
+					{
+						rayPickingList.push_back(RayPickingResult(t, SceneObject));
+					}
 				}
 			}
 
@@ -461,7 +463,7 @@ namespace ManagedEngineWrapper
 			else
 			{
 				sort(rayPickingList.begin(), rayPickingList.end(), [](RayPickingResult a, RayPickingResult b){ return a.t < b.t; });
-				vector<RayPickingResult>::iterator iter = find(rayPickingList.begin(), rayPickingList.end(), m_SelectedObject);
+				auto iter = find(rayPickingList.begin(), rayPickingList.end(), m_SelectedObject);
 				if (iter != rayPickingList.end())
 				{
 					iter++;

@@ -75,19 +75,19 @@ void RScriptSystem::RegisterScriptableObject(RSceneObject* obj)
 
 void RScriptSystem::UnregisterScriptableObject(RSceneObject* obj)
 {
-	vector<RSceneObject*>::iterator iter = find(m_ScriptableObjects.begin(), m_ScriptableObjects.end(), obj);
+	auto iter = find(m_ScriptableObjects.begin(), m_ScriptableObjects.end(), obj);
 	if (iter != m_ScriptableObjects.end())
 		m_ScriptableObjects.erase(iter);
 }
 
 void RScriptSystem::UpdateScriptableObjects()
 {
-	for (vector<RSceneObject*>::iterator iter = m_ScriptableObjects.begin(); iter != m_ScriptableObjects.end(); iter++)
+	for (auto Iter : m_ScriptableObjects)
 	{
-		if ((*iter)->GetScript() == "")
+		if (Iter->GetScript() == "")
 			continue;
 
-		const vector<string>& parsedCmds = (*iter)->GetParsedScript();
+		const vector<string>& parsedCmds = Iter->GetParsedScript();
 		if (parsedCmds.empty())
 			continue;
 
@@ -96,7 +96,7 @@ void RScriptSystem::UpdateScriptableObjects()
 		lua_getglobal(m_LuaState, parsedCmds[0].c_str());
 		if (lua_isfunction(m_LuaState, -1))
 		{
-			lua_pushlightuserdata(m_LuaState, *iter);
+			lua_pushlightuserdata(m_LuaState, Iter);
 
 			int paramCount = 0;
 			for (UINT i = 0; i < parsedCmds.size() - 1; i++)

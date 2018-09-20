@@ -62,7 +62,7 @@ RSceneObject* RScene::FindObject(const char* name) const
 
 void RScene::DestroyObject(RSceneObject* obj)
 {
-	vector<RSceneObject*>::iterator iter = find(m_SceneObjects.begin(), m_SceneObjects.end(), obj);
+	auto iter = find(m_SceneObjects.begin(), m_SceneObjects.end(), obj);
 	if (iter != m_SceneObjects.end())
 	{
 		(*iter)->Release();
@@ -297,31 +297,31 @@ RVec3 RScene::TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec, l
 
 void RScene::Render(const RFrustum* pFrustum)
 {
-	for (vector<RSceneObject*>::iterator iter = m_SceneObjects.begin(); iter != m_SceneObjects.end(); iter++)
+	for (auto SceneObject : m_SceneObjects)
 	{
-		if (pFrustum && !RCollision::TestAabbInsideFrustum(*pFrustum, (*iter)->GetAabb()))
+		if (pFrustum && !RCollision::TestAabbInsideFrustum(*pFrustum, SceneObject->GetAabb()))
 			continue;
 
 		SHADER_OBJECT_BUFFER cbObject;
-		cbObject.worldMatrix = (*iter)->GetTransformMatrix();
+		cbObject.worldMatrix = SceneObject->GetTransformMatrix();
 		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 		RConstantBuffers::cbPerObject.BindBuffer();
-		(*iter)->Draw();
+		SceneObject->Draw();
 	}
 }
 
 void RScene::RenderDepthPass(const RFrustum* pFrustum)
 {
-	for (vector<RSceneObject*>::iterator iter = m_SceneObjects.begin(); iter != m_SceneObjects.end(); iter++)
+	for (auto SceneObject : m_SceneObjects)
 	{
-		if (pFrustum && !RCollision::TestAabbInsideFrustum(*pFrustum, (*iter)->GetAabb()))
+		if (pFrustum && !RCollision::TestAabbInsideFrustum(*pFrustum, SceneObject->GetAabb()))
 			continue;
 
 		SHADER_OBJECT_BUFFER cbObject;
-		cbObject.worldMatrix = (*iter)->GetTransformMatrix();
+		cbObject.worldMatrix = SceneObject->GetTransformMatrix();
 		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
 		RConstantBuffers::cbPerObject.BindBuffer();
-		(*iter)->DrawDepthPass();
+		SceneObject->DrawDepthPass();
 	}
 }
 

@@ -170,9 +170,9 @@ int RMesh::GetCachedAnimationNodeId(RAnimation* anim, int boneId)
 	if (!anim || !m_BoneIdToName.size())
 		return -1;
 
-	map<RAnimation*, vector<int>>::iterator iter = m_AnimationNodeCache.find(anim);
-	if (iter == m_AnimationNodeCache.end())
+	auto Iter = m_AnimationNodeCache.find(anim);
+	if (Iter == m_AnimationNodeCache.end())
 		return -1;
 
-	return iter->second[boneId];
+	return Iter->second[boneId];
 }

@@ -204,15 +204,14 @@ void RShaderManager::LoadShaders(const char* path)
 
 void RShaderManager::UnloadAllShaders()
 {
-	for (map<string, RShader>::iterator iter = m_Shaders.begin();
-		 iter != m_Shaders.end(); iter++)
+	for (auto Iter : m_Shaders)
 	{
-		SAFE_RELEASE(iter->second.VertexShader);
-		SAFE_RELEASE(iter->second.VertexShader_Skinned);
-		SAFE_RELEASE(iter->second.VertexShader_Instanced);
-		SAFE_RELEASE(iter->second.PixelShader);
-		SAFE_RELEASE(iter->second.PixelShader_Deferred);
-		SAFE_RELEASE(iter->second.GeometryShader);
+		SAFE_RELEASE(Iter.second.VertexShader);
+		SAFE_RELEASE(Iter.second.VertexShader_Skinned);
+		SAFE_RELEASE(Iter.second.VertexShader_Instanced);
+		SAFE_RELEASE(Iter.second.PixelShader);
+		SAFE_RELEASE(Iter.second.PixelShader_Deferred);
+		SAFE_RELEASE(Iter.second.GeometryShader);
 	}
 
 	m_Shaders.clear();
@@ -253,7 +252,7 @@ bool RShaderManager::AddShader(const char* shaderName,
 
 RShader* RShaderManager::GetShaderResource(const char* shaderName)
 {
-	map<string, RShader>::iterator iter = m_Shaders.find(shaderName);
+	auto iter = m_Shaders.find(shaderName);
 	if (iter != m_Shaders.end())
 		return &iter->second;
 	return nullptr;
@@ -261,7 +260,7 @@ RShader* RShaderManager::GetShaderResource(const char* shaderName)
 
 const string& RShaderManager::GetShaderName(const RShader* shader) const
 {
-	map<string, RShader>::const_iterator iter = m_Shaders.begin();
+	auto iter = m_Shaders.begin();
 	for (; iter != m_Shaders.end(); iter++)
 	{
 		if (iter->second == *shader)
