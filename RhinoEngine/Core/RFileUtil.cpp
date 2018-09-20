@@ -54,7 +54,8 @@ void RFileUtil::PushWorkingPath(const char* NewPath)
 	WorkingPathStack.push_back(string(pWorkingPath));
 
 	SetCurrentDirectoryA(NewPath);
-	RLog("New working path is: %s\n", NewPath);
+	GetCurrentDirectoryA(1024, pWorkingPath);
+	RLog("Working path has changed to: %s\n", pWorkingPath);
 }
 
 void RFileUtil::PopWorkingPath()
@@ -64,7 +65,7 @@ void RFileUtil::PopWorkingPath()
 	int NumPaths = (int)WorkingPathStack.size();
 	const string& PrevPath = WorkingPathStack[NumPaths - 1];
 	SetCurrentDirectoryA(PrevPath.c_str());
-	RLog("New working path is: %s\n", PrevPath.c_str());
+	RLog("Working path has changed to: %s\n", PrevPath.c_str());
 
 	WorkingPathStack.pop_back();
 }
