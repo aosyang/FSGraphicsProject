@@ -155,6 +155,9 @@
     <ClInclude Include="RenderSystem\ILight.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="RenderSystem\RPostProcessorManager.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -271,6 +274,9 @@
     </ClCompile>
     <ClCompile Include="Core\RFileUtil.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem\RPostProcessorManager.cpp">
+      <Filter>RenderSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

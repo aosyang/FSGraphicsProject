@@ -256,6 +256,18 @@ RShader* RShaderManager::GetShaderResource(const char* shaderName)
 	return nullptr;
 }
 
+ID3D11PixelShader* RShaderManager::CreatePixelShaderFromBytecode(const void* pBytecode, SIZE_T BytecodeSize)
+{
+	ID3D11PixelShader* OutputShader = nullptr;
+	if (FAILED(GRenderer.D3DDevice()->CreatePixelShader(pBytecode, BytecodeSize, 0, &OutputShader)))
+	{
+		RLogWarning("Failed to create pixel shader from bytecode!\n");
+		return nullptr;
+	}
+
+	return OutputShader;
+}
+
 const string& RShaderManager::GetShaderName(const RShader* shader) const
 {
 	auto iter = m_Shaders.begin();

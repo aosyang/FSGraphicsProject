@@ -8,7 +8,14 @@
 #define _FSGRAPHICSPROJECTAPP_H
 
 #include "Rhino.h"
-#include "RPostProcessor.h"
+
+enum EPostProcessingEffect
+{
+	PPE_GammaCorrection,
+	PPE_ColorEdgeDetection,
+
+	PPE_COUNT,
+};
 
 #define PARTICLE_COUNT 200
 
@@ -98,7 +105,7 @@ private:
 	ID3D11Texture2D*			m_RenderTargetDepthBuffer;
 	ID3D11DepthStencilView*		m_RenderTargetDepthView;
 
-	RPostProcessor				m_PostProcessor;
+	RPostProcessingEffect*		m_PostProcessingEffects[PPE_COUNT];
 	int							m_EnabledPostProcessor;
 
 	RVec3						m_SunVec;

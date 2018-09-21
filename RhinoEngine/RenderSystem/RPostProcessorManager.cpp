@@ -1,57 +1,63 @@
 //=============================================================================
-// RPostProcessor.cpp by Shiyang Ao, 2016 All Rights Reserved.
+// RPostProcessor.cpp by Shiyang Ao, 2018 All Rights Reserved.
 //
 // 
 //=============================================================================
 
-#include "RPostProcessor.h"
+#include "Rhino.h"
 
-#include "PostProcessor_DeferredComposition.csh"
-#include "DeferredPointLightPass.csh"
-#include "ScreenSpaceRayTracing.csh"
+#include "RPostProcessorManager.h"
+
+#include "Core/RVector.h"
+#include "RRenderSystem.h"
+#include "RShaderManager.h"
+#include "RVertexDeclaration.h"
+#include "d3dUtil.h"
+#include <d3d11.h>
 
 struct PP_QUAD
 {
 	RVec3 pos;
 };
 
-RPostProcessor::RPostProcessor()
-	: m_RTBuffer(nullptr), m_RTDepthBuffer(nullptr),
-	  m_RTView(nullptr), m_RTSRV(nullptr),
-	  m_RTDepthStencilView(nullptr)
+
+RPostProcessorManager::RPostProcessorManager()
+	: m_RTBuffer(nullptr)
+	, m_RTDepthBuffer(nullptr)
+	, m_RTView(nullptr)
+	, m_RTSRV(nullptr)
+	, m_RTDepthStencilView(nullptr)
 {
-	
+
 }
 
-void RPostProcessor::Initialize()
+void RPostProcessorManager::Initialize()
 {
 	// Create vertex shader for post processing
 	m_PPVertexShader = RShaderManager::Instance().GetShaderResource("PostProcessor")->VertexShader;
-	GRenderer.D3DDevice()->CreatePixelShader(PostProcessor_DeferredComposition, sizeof(PostProcessor_DeferredComposition), 0, &m_PPPixelShader[PPE_DeferredComposition]);
-	GRenderer.D3DDevice()->CreatePixelShader(DeferredPointLightPass, sizeof(DeferredPointLightPass), 0, &m_PPPixelShader[PPE_DeferredPointLightPass]);
-	GRenderer.D3DDevice()->CreatePixelShader(ScreenSpaceRayTracing, sizeof(ScreenSpaceRayTracing), 0, &m_PPPixelShader[PPE_ScreenSpaceRayTracing]);
 
 	// Find vertex declaration for screen quad
 	m_InputLayout = RVertexDeclaration::Instance().GetInputLayout(RVertex::SKYBOX_VERTEX::GetTypeName());
 
 	// Create vertex buffer for screen quad
-
-	PP_QUAD quad[] =
 	{
-		RVec3(-1.0f, -1.0f, 1.0f),
-		RVec3(-1.0f,  1.0f, 1.0f),
-		RVec3( 1.0f,  1.0f, 1.0f),
+		PP_QUAD quad[] =
+		{
+			RVec3(-1.0f, -1.0f, 1.0f),
+			RVec3(-1.0f,  1.0f, 1.0f),
+			RVec3(1.0f,  1.0f, 1.0f),
 
-		RVec3(-1.0f, -1.0f, 1.0f),
-		RVec3( 1.0f,  1.0f, 1.0f),
-		RVec3( 1.0f, -1.0f, 1.0f),
-	};
-	m_ScreenQuad.CreateVertexBuffer(quad, sizeof(PP_QUAD), 6, m_InputLayout);
+			RVec3(-1.0f, -1.0f, 1.0f),
+			RVec3(1.0f,  1.0f, 1.0f),
+			RVec3(1.0f, -1.0f, 1.0f),
+		};
+		m_ScreenQuad.CreateVertexBuffer(quad, sizeof(PP_QUAD), 6, m_InputLayout);
+	}
 
 	CreateRenderTargetResources();
 }
 
-void RPostProcessor::Release()
+void RPostProcessorManager::Release()
 {
 	m_ScreenQuad.Release();
 	SAFE_RELEASE(m_RTDepthBuffer);
@@ -59,13 +65,15 @@ void RPostProcessor::Release()
 	SAFE_RELEASE(m_RTBuffer);
 	SAFE_RELEASE(m_RTView);
 	SAFE_RELEASE(m_RTSRV);
-	for (int i = 0; i < PPE_COUNT; i++)
+
+	for (auto Iter : PostProcessingEffectList)
 	{
-		SAFE_RELEASE(m_PPPixelShader[i]);
+		SAFE_RELEASE(Iter.second->PixelShader);
+		delete Iter.second;
 	}
 }
 
-void RPostProcessor::RecreateLostResources()
+void RPostProcessorManager::RecreateLostResources()
 {
 	if (m_RTView)
 	{
@@ -79,25 +87,55 @@ void RPostProcessor::RecreateLostResources()
 	}
 }
 
-void RPostProcessor::SetupRenderTarget()
+RPostProcessingEffect* RPostProcessorManager::CreateEffect(const string& Name, const void* pBytecode, SIZE_T BytecodeSize)
 {
+	// Assume we don't have a post processing effect with the same name
+	assert(PostProcessingEffectList.find(Name) == PostProcessingEffectList.end());
+
+	ID3D11PixelShader* PixelShader = RShaderManager::Instance().CreatePixelShaderFromBytecode(pBytecode, BytecodeSize);
+	if (PixelShader)
+	{
+		RPostProcessingEffect* Effect = new RPostProcessingEffect(PixelShader);
+		PostProcessingEffectList[Name] = Effect;
+		return Effect;
+	}
+
+	RLogWarning("Failed to create post processing effect with name \"%s\"\n", Name.c_str());
+	return nullptr;
+}
+
+void RPostProcessorManager::SetupRenderTarget()
+{
+	// Prepare to draw onto render target buffers (color and depth-stencil)
 	GRenderer.SetRenderTargets(1, &m_RTView, m_RTDepthStencilView);
-	
+
+	// Set the size of viewport as full window buffer
 	D3D11_VIEWPORT vp = { 0.0f, 0.0f, (FLOAT)GRenderer.GetClientWidth(), (FLOAT)GRenderer.GetClientHeight(), 0.0f, 1.0f };
 	GRenderer.D3DImmediateContext()->RSSetViewports(1, &vp);
 }
 
-void RPostProcessor::Draw(PostProcessingEffect effect)
+void RPostProcessorManager::Draw(RPostProcessingEffect* Effect)
 {
-	GRenderer.SetPixelShader(m_PPPixelShader[effect]);
-	GRenderer.SetVertexShader(m_PPVertexShader);
-	GRenderer.SetGeometryShader(nullptr);
+	if (Effect)
+	{
+		GRenderer.SetPixelShader(Effect->PixelShader);
+		GRenderer.SetVertexShader(m_PPVertexShader);
+		GRenderer.SetGeometryShader(nullptr);
 
-	GRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
-	m_ScreenQuad.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		// Do not set shader resource view in deferred rendering
+		//GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_RTSRV);
+
+		GRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
+		m_ScreenQuad.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	}
 }
 
-void RPostProcessor::CreateRenderTargetResources()
+ID3D11ShaderResourceView* RPostProcessorManager::GetRenderTargetSRV() const
+{
+	return m_RTSRV;
+}
+
+void RPostProcessorManager::CreateRenderTargetResources()
 {
 	// Create render target
 	D3D11_TEXTURE2D_DESC renderTargetTextureDesc;

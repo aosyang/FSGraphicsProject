@@ -8,7 +8,15 @@
 #define _DEFERREDSHADINGAPP_H
 
 #include "Rhino.h"
-#include "RPostProcessor.h"
+
+enum EPostProcessingEffect
+{
+	PPE_DeferredComposition,
+	PPE_DeferredPointLightPass,
+	PPE_ScreenSpaceRayTracing,
+
+	PPE_COUNT,
+};
 
 struct DeferredRenderBuffer
 {
@@ -136,7 +144,7 @@ private:
 
 	RScene						m_Scene;
 
-	RPostProcessor				m_PostProcessor;
+	RPostProcessingEffect*		m_PostProcessingEffects[PPE_COUNT];
 	ID3D11RasterizerState*		m_RasterizerStates[RasterizerState_Count];
 
 	RShaderConstantBuffer<SHADER_DEFERRED_POINT_LIGHT_BUFFER, CBST_PS, 4>

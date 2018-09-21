@@ -21,15 +21,9 @@
     <ClCompile Include="FSGraphicsProjectApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RPostProcessor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FSGraphicsProjectApp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RPostProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Shaders\ConstBufferPS.h">

@@ -86,6 +86,7 @@ class RResourceBase;
 #include "RenderSystem/RTexture.h"
 #include "RenderSystem/RShadowMap.h"
 #include "RenderSystem/RRenderMeshComponent.h"
+#include "RenderSystem/RPostProcessorManager.h"
 
 #include "Core/RDebugMenu.h"
 #include "Core/REngine.h"

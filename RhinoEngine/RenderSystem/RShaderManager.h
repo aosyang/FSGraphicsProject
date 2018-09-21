@@ -52,6 +52,9 @@ public:
 
 	RShader* GetShaderResource(const char* shaderName);
 
+	/// Create a pixel shader from bytecode
+	ID3D11PixelShader* CreatePixelShaderFromBytecode(const void* pBytecode, SIZE_T BytecodeSize);
+
 private:
 	RShaderManager();
 	~RShaderManager();

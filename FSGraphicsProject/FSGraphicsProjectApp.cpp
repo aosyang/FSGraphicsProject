@@ -6,6 +6,8 @@
 
 #include "FSGraphicsProjectApp.h"
 
+#include "PostProcessor_GammaCorrection.csh"
+#include "PostProcessor_ColorEdgeDetection.csh"
 
 struct ParticleDepthComparer
 {
@@ -95,7 +97,6 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 
 	m_Skybox.Release();
 	m_Scene.Release();
-	m_PostProcessor.Release();
 }
 
 bool FSGraphicsProjectApp::Initialize()
@@ -108,7 +109,8 @@ bool FSGraphicsProjectApp::Initialize()
 	m_ParticleShader = RShaderManager::Instance().GetShaderResource("Particle");
 	m_RefractionShader = RShaderManager::Instance().GetShaderResource("Refraction");
 
-	m_PostProcessor.Initialize();
+	m_PostProcessingEffects[PPE_GammaCorrection] = GPostProcessorManager.CreateEffect("GammaCorrection", PostProcessor_GammaCorrection, sizeof(PostProcessor_GammaCorrection));
+	m_PostProcessingEffects[PPE_ColorEdgeDetection] = GPostProcessorManager.CreateEffect("ColorEdgeDetection", PostProcessor_ColorEdgeDetection, sizeof(PostProcessor_ColorEdgeDetection));
 
 	m_Camera = m_Scene.CreateSceneObjectOfType<RCamera>();
 	m_FbxMeshObj = m_Scene.CreateSceneObjectOfType<RSMeshObject>();
@@ -816,7 +818,7 @@ void FSGraphicsProjectApp::RenderScene()
 		{
 			if (m_EnabledPostProcessor)
 			{
-				m_PostProcessor.SetupRenderTarget();
+				GPostProcessorManager.SetupRenderTarget();
 			}
 			else
 			{
@@ -870,7 +872,12 @@ void FSGraphicsProjectApp::RenderScene()
 			GRenderer.SetRenderTargets();
 			GRenderer.Clear();
 
-			m_PostProcessor.Draw(m_EnabledPostProcessor == 1 ? PPE_GammaCorrection : PPE_ColorEdgeDetection);
+			// Set back buffer as the input sampler of post processor
+			ID3D11ShaderResourceView* RenderTargetSRV = GPostProcessorManager.GetRenderTargetSRV();
+			GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &RenderTargetSRV);
+
+			int EffectIndex = m_EnabledPostProcessor == 1 ? PPE_GammaCorrection : PPE_ColorEdgeDetection;
+			GPostProcessorManager.Draw(m_PostProcessingEffects[EffectIndex]);
 		}
 	}
 
@@ -880,8 +887,6 @@ void FSGraphicsProjectApp::RenderScene()
 
 void FSGraphicsProjectApp::OnResize(int width, int height)
 {
-	m_PostProcessor.RecreateLostResources();
-
 	if (m_Camera)
 	{
 		m_Camera->SetAspectRatio((float)width / (float)height);

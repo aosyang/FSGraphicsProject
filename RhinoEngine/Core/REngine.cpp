@@ -67,6 +67,8 @@ bool REngine::Initialize(HWND hWnd, int width, int height)
 	GScriptSystem.Initialize();
 	GScriptSystem.Start();
 
+	GPostProcessorManager.Initialize();
+
 	if (!m_Application->Initialize())
 		return false;
 
@@ -75,6 +77,8 @@ bool REngine::Initialize(HWND hWnd, int width, int height)
 
 void REngine::Shutdown()
 {
+	GPostProcessorManager.Release();
+
 	GScriptSystem.Shutdown();
 
 	// Release debug renderer
@@ -173,6 +177,7 @@ void REngine::RunOneFrame(bool update_input)
 void REngine::ResizeClientWindow(int width, int height)
 {
 	GRenderer.ResizeClient(width, height);
+	GPostProcessorManager.RecreateLostResources();
 	m_Application->OnResize(width, height);
 }
 

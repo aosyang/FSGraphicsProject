@@ -6,6 +6,9 @@
 
 #include "DeferredShadingApp.h"
 
+#include "PostProcessor_DeferredComposition.csh"
+#include "DeferredPointLightPass.csh"
+#include "ScreenSpaceRayTracing.csh"
 
 DeferredShadingApp::DeferredShadingApp()
 	: m_Camera(nullptr)
@@ -33,15 +36,15 @@ DeferredShadingApp::~DeferredShadingApp()
 	m_CubeDepthBuffer.Release();
 
 	m_Scene.Release();
-
-	m_PostProcessor.Release();
 }
 
 bool DeferredShadingApp::Initialize()
 {
 	srand((unsigned int)time(nullptr));
 
-	m_PostProcessor.Initialize();
+	m_PostProcessingEffects[PPE_DeferredComposition] = GPostProcessorManager.CreateEffect("DeferredComposition", PostProcessor_DeferredComposition, sizeof(PostProcessor_DeferredComposition));
+	m_PostProcessingEffects[PPE_DeferredPointLightPass] = GPostProcessorManager.CreateEffect("DeferredPointLightPass", DeferredPointLightPass, sizeof(DeferredPointLightPass));
+	m_PostProcessingEffects[PPE_ScreenSpaceRayTracing] = GPostProcessorManager.CreateEffect("ScreenSpaceRayTracing", ScreenSpaceRayTracing, sizeof(ScreenSpaceRayTracing));
 
 	m_Scene.Initialize();
 	m_Scene.LoadFromFile("../Assets/ScriptTestMap.rmap");
@@ -286,7 +289,7 @@ void DeferredShadingApp::RenderScene()
 
 		GRenderer.D3DImmediateContext()->PSSetShaderResources(0, DeferredBuffer_Count, gbufferSRV);
 
-		m_PostProcessor.Draw(PPE_DeferredComposition);
+		GPostProcessorManager.Draw(m_PostProcessingEffects[PPE_DeferredComposition]);
 
 		// Render lighting pass
 		GRenderer.SetBlendState(Blend_Additive);
@@ -406,7 +409,7 @@ void DeferredShadingApp::RenderScene()
 				m_cbDeferredPointLight.BindBuffer();
 
 				GRenderer.Clear(false, RColor(0, 0, 0), true);
-				m_PostProcessor.Draw(PPE_DeferredPointLightPass);
+				GPostProcessorManager.Draw(m_PostProcessingEffects[PPE_DeferredPointLightPass]);
 
 				if (m_EnablePointLightShadow && m_PointLights[i].castShadow)
 				{
@@ -430,7 +433,7 @@ void DeferredShadingApp::RenderScene()
 			GRenderer.D3DImmediateContext()->PSSetShaderResources(4, 1, m_EnvCube->GetPtrSRV());
 
 			GRenderer.Clear(false, RColor(0, 0, 0), true);
-			m_PostProcessor.Draw(PPE_ScreenSpaceRayTracing);
+			GPostProcessorManager.Draw(m_PostProcessingEffects[PPE_ScreenSpaceRayTracing]);
 		}
 
 		ID3D11ShaderResourceView* nullSRV[DeferredBuffer_Count] = { nullptr };

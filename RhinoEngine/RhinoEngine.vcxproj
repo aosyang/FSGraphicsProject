@@ -69,6 +69,7 @@
     <ClInclude Include="RenderSystem\ILight.h" />
     <ClInclude Include="RenderSystem\RDirectionalLightComponent.h" />
     <ClInclude Include="RenderSystem\RMaterial.h" />
+    <ClInclude Include="RenderSystem\RPostProcessorManager.h" />
     <ClInclude Include="RenderSystem\RRenderMeshComponent.h" />
     <ClInclude Include="RenderSystem\RResourceBase.h" />
     <ClInclude Include="RenderSystem\RAnimation.h" />
@@ -115,6 +116,9 @@
     <ClCompile Include="RenderSystem\RMaterial.cpp" />
     <ClCompile Include="RenderSystem\RMesh.cpp" />
     <ClCompile Include="RenderSystem\RMeshElement.cpp" />
+    <ClCompile Include="RenderSystem\RPostProcessorManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="RenderSystem\RRenderMeshComponent.cpp" />
     <ClCompile Include="RenderSystem\RRenderSystem.cpp" />
     <ClCompile Include="RenderSystem\RResourceBase.cpp" />
