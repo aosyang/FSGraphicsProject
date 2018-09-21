@@ -33,16 +33,16 @@ void RSkybox::CreateSkybox(RTexture* skyTexture)
 	m_SkyboxTexture = skyTexture;
 
 	// Create skybox buffer
-	RVertex::SKYBOX_VERTEX skyboxVertex[] = 
+	RVertexType::Position skyboxVertex[] = 
 	{
-		{ RVertex::Vec3Data(-0.5f, -0.5f, -0.5f) },
-		{ RVertex::Vec3Data(-0.5f,  0.5f, -0.5f) },
-		{ RVertex::Vec3Data( 0.5f,  0.5f, -0.5f) },
-		{ RVertex::Vec3Data( 0.5f, -0.5f, -0.5f) },
-		{ RVertex::Vec3Data(-0.5f, -0.5f,  0.5f) },
-		{ RVertex::Vec3Data(-0.5f,  0.5f,  0.5f) },
-		{ RVertex::Vec3Data( 0.5f,  0.5f,  0.5f) },
-		{ RVertex::Vec3Data( 0.5f, -0.5f,  0.5f) },
+		{ RVertexType::Vec3Data(-0.5f, -0.5f, -0.5f) },
+		{ RVertexType::Vec3Data(-0.5f,  0.5f, -0.5f) },
+		{ RVertexType::Vec3Data( 0.5f,  0.5f, -0.5f) },
+		{ RVertexType::Vec3Data( 0.5f, -0.5f, -0.5f) },
+		{ RVertexType::Vec3Data(-0.5f, -0.5f,  0.5f) },
+		{ RVertexType::Vec3Data(-0.5f,  0.5f,  0.5f) },
+		{ RVertexType::Vec3Data( 0.5f,  0.5f,  0.5f) },
+		{ RVertexType::Vec3Data( 0.5f, -0.5f,  0.5f) },
 	};
 
 	UINT32 skyboxIndex[] =
@@ -55,8 +55,8 @@ void RSkybox::CreateSkybox(RTexture* skyTexture)
 		0, 4, 7, 0, 7, 3,
 	};
 
-	m_SkyboxIL = RVertexDeclaration::Instance().GetInputLayout(RVertex::SKYBOX_VERTEX::GetTypeName());
-	m_SkyboxMesh.CreateVertexBuffer(skyboxVertex, sizeof(RVertex::SKYBOX_VERTEX), sizeof(skyboxVertex) / sizeof(RVertex::SKYBOX_VERTEX), m_SkyboxIL);
+	m_SkyboxIL = RVertexDeclaration::Instance().GetInputLayout<RVertexType::Position>();
+	m_SkyboxMesh.CreateVertexBuffer(skyboxVertex, sizeof(RVertexType::Position), sizeof(skyboxVertex) / sizeof(RVertexType::Position), m_SkyboxIL);
 	m_SkyboxMesh.CreateIndexBuffer(skyboxIndex, sizeof(UINT32), sizeof(skyboxIndex) / sizeof(UINT32));
 
 	m_SkyboxShader = RShaderManager::Instance().GetShaderResource("Skybox");

@@ -21,7 +21,7 @@ public:
 	virtual void Render();
 
 protected:
-	vector<RVertex::FONT_VERTEX>	m_Vertices;
+	vector<RVertexType::Font>	m_Vertices;
 	RMeshRenderBuffer				m_VertexBuffer;
 	RTexture*						m_FontTexture;
 	RShader*						m_FontShader;

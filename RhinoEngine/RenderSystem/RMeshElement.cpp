@@ -169,7 +169,7 @@ void RMeshElement::SetTriangles(const vector<UINT>& triIndices)
 	TriangleIndices = triIndices;
 }
 
-void RMeshElement::SetVertices(const vector<RVertex::MESH_LOADER_VERTEX>& vertices, int vertexComponentMask)
+void RMeshElement::SetVertices(const vector<RVertexType::MeshLoader>& vertices, int vertexComponentMask)
 {
 	m_VertexComponentMask = vertexComponentMask;
 
@@ -222,12 +222,12 @@ void RMeshElement::UpdateRenderBuffer()
 	for (size_t i = 0; i < PositionArray.size(); i++)
 	{
 		COPY_VERTEX_COMPONENT(VCM_BoneId,		BoneIdArray,		VBoneIds)
-		COPY_VERTEX_COMPONENT(VCM_BoneWeights,	BoneWeightArray,	RVertex::Vec4Data)
-		COPY_VERTEX_COMPONENT(VCM_Pos,			PositionArray,		RVertex::Vec3Data)
-		COPY_VERTEX_COMPONENT(VCM_UV0,			UV0Array,			RVertex::Vec2Data)
-		COPY_VERTEX_COMPONENT(VCM_Normal,		NormalArray,		RVertex::Vec3Data)
-		COPY_VERTEX_COMPONENT(VCM_Tangent,		TangentArray,		RVertex::Vec3Data)
-		COPY_VERTEX_COMPONENT(VCM_UV1,			UV1Array,			RVertex::Vec2Data)
+		COPY_VERTEX_COMPONENT(VCM_BoneWeights,	BoneWeightArray,	RVertexType::Vec4Data)
+		COPY_VERTEX_COMPONENT(VCM_Pos,			PositionArray,		RVertexType::Vec3Data)
+		COPY_VERTEX_COMPONENT(VCM_UV0,			UV0Array,			RVertexType::Vec2Data)
+		COPY_VERTEX_COMPONENT(VCM_Normal,		NormalArray,		RVertexType::Vec3Data)
+		COPY_VERTEX_COMPONENT(VCM_Tangent,		TangentArray,		RVertexType::Vec3Data)
+		COPY_VERTEX_COMPONENT(VCM_UV1,			UV1Array,			RVertexType::Vec2Data)
 	}
 #undef COPY_VERTEX_COMPONENT
 

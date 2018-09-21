@@ -44,7 +44,7 @@ private:
 	RShader*								m_ColorShader;
 
 	RColor									m_PrimitiveColor;
-	vector<RVertex::PRIMITIVE_VERTEX>		m_PrimitiveVertices;
+	vector<RVertexType::PositionColor>		m_PrimitiveVertices;
 	bool									m_bDirtyBuffer;
 };
 

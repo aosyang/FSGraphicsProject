@@ -33,8 +33,8 @@ void RText::Initialize(RTexture* fontTexture, UINT rows, UINT columns)
 		m_Columns = columns;
 	}
 
-	ID3D11InputLayout* pInputLayout = RVertexDeclaration::Instance().GetInputLayout(RVertex::FONT_VERTEX::GetTypeName());
-	m_VertexBuffer.CreateVertexBuffer(nullptr, sizeof(RVertex::FONT_VERTEX), 65536, pInputLayout, true);
+	ID3D11InputLayout* pInputLayout = RVertexDeclaration::Instance().GetInputLayout<RVertexType::Font>();
+	m_VertexBuffer.CreateVertexBuffer(nullptr, sizeof(RVertexType::Font), 65536, pInputLayout, true);
 
 	m_FontShader = RShaderManager::Instance().GetShaderResource("Font");
 }
@@ -85,15 +85,15 @@ void RText::AddText(const char* text, UINT start_x, UINT start_y, const RColor& 
 		float x1 = x0 + glyph_width;
 		float y1 = y0 + glyph_height;
 
-		RVertex::FONT_VERTEX v[6] =
+		RVertexType::Font v[6] =
 		{
-			{ RVertex::Vec4Data(x0, y0, 0, 1), fg, bg, RVertex::Vec2Data(u0, v0) },
-			{ RVertex::Vec4Data(x1, y0, 0, 1), fg, bg, RVertex::Vec2Data(u1, v0) },
-			{ RVertex::Vec4Data(x0, y1, 0, 1), fg, bg, RVertex::Vec2Data(u0, v1) },
+			{ RVertexType::Vec4Data(x0, y0, 0, 1), fg, bg, RVertexType::Vec2Data(u0, v0) },
+			{ RVertexType::Vec4Data(x1, y0, 0, 1), fg, bg, RVertexType::Vec2Data(u1, v0) },
+			{ RVertexType::Vec4Data(x0, y1, 0, 1), fg, bg, RVertexType::Vec2Data(u0, v1) },
 
-			{ RVertex::Vec4Data(x0, y1, 0, 1), fg, bg, RVertex::Vec2Data(u0, v1) },
-			{ RVertex::Vec4Data(x1, y0, 0, 1), fg, bg, RVertex::Vec2Data(u1, v0) },
-			{ RVertex::Vec4Data(x1, y1, 0, 1), fg, bg, RVertex::Vec2Data(u1, v1) },
+			{ RVertexType::Vec4Data(x0, y1, 0, 1), fg, bg, RVertexType::Vec2Data(u0, v1) },
+			{ RVertexType::Vec4Data(x1, y0, 0, 1), fg, bg, RVertexType::Vec2Data(u1, v0) },
+			{ RVertexType::Vec4Data(x1, y1, 0, 1), fg, bg, RVertexType::Vec2Data(u1, v1) },
 		};
 
 		for (int j = 0; j < 6; j++)
@@ -118,7 +118,7 @@ void RText::Render()
 {
 	if (m_bNeedUpdateBuffer)
 	{
-		m_VertexBuffer.UpdateDynamicVertexBuffer(m_Vertices.data(), sizeof(RVertex::FONT_VERTEX), (UINT)m_Vertices.size());
+		m_VertexBuffer.UpdateDynamicVertexBuffer(m_Vertices.data(), sizeof(RVertexType::Font), (UINT)m_Vertices.size());
 		m_bNeedUpdateBuffer = false;
 	}
 

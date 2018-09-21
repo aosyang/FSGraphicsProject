@@ -7,7 +7,7 @@
 #ifndef _RVERTEXDECLARATION_H
 #define _RVERTEXDECLARATION_H
 
-#define VERTEX_TYPE_BEGIN(v) struct v { static const char* GetTypeName() { return #v; }
+#define VERTEX_TYPE_BEGIN(v) struct v { static const char* GetVertexTypeName() { return #v; }
 #define VERTEX_TYPE_END };
 #define VERTEX_TYPE_DECLARE_LEXICOGRAPHICAL_COMPARE(v)	\
 		bool operator<(const v& rhs) const				\
@@ -58,7 +58,7 @@ enum EVertexComponents
 	VC_PosUV0NormalTangentUV1			= VCM_Pos | VCM_UV0 | VCM_Normal | VCM_Tangent | VCM_UV1,
 };
 
-namespace RVertex
+namespace RVertexType
 {
 	struct Vec2Data
 	{
@@ -98,7 +98,7 @@ namespace RVertex
 		}
 	};
 
-	VERTEX_TYPE_BEGIN(MESH_LOADER_VERTEX)
+	VERTEX_TYPE_BEGIN(MeshLoader)
 		Vec3Data pos;
 		Vec2Data uv0;
 		Vec2Data uv1;
@@ -106,10 +106,10 @@ namespace RVertex
 		Vec3Data tangent;
 		int boneId[4];
 		Vec4Data weight;
-	VERTEX_TYPE_DECLARE_LEXICOGRAPHICAL_COMPARE(MESH_LOADER_VERTEX)
+	VERTEX_TYPE_DECLARE_LEXICOGRAPHICAL_COMPARE(MeshLoader)
 	VERTEX_TYPE_END
 
-	VERTEX_TYPE_BEGIN(MESH_VERTEX)
+	VERTEX_TYPE_BEGIN(Mesh)
 		Vec3Data pos;
 		Vec2Data uv0;
 		Vec3Data normal;
@@ -117,25 +117,26 @@ namespace RVertex
 		Vec2Data uv1;
 	VERTEX_TYPE_END
 
-	VERTEX_TYPE_BEGIN(PRIMITIVE_VERTEX)
+	// Vec4 position and color
+	VERTEX_TYPE_BEGIN(PositionColor)
 		Vec4Data	pos;
 		RColor		color;
 	VERTEX_TYPE_END
 
-
-	VERTEX_TYPE_BEGIN(SKYBOX_VERTEX)
+	// Vec3 position only
+	VERTEX_TYPE_BEGIN(Position)
 		Vec3Data pos;
 	VERTEX_TYPE_END
 
 
-	VERTEX_TYPE_BEGIN(PARTICLE_VERTEX)
+	VERTEX_TYPE_BEGIN(Particle)
 		Vec4Data pos;
 		Vec4Data color;
 		float rot;
 		Vec4Data uvScaleOffset;
 	VERTEX_TYPE_END
 
-	VERTEX_TYPE_BEGIN(FONT_VERTEX)
+	VERTEX_TYPE_BEGIN(Font)
 		Vec4Data	pos;
 		RColor		color_fg;
 		RColor		color_bg;
@@ -152,15 +153,31 @@ public:
 	void Initialize();
 	void Release();
 
+	// Get input layout from vertex type name
 	ID3D11InputLayout* GetInputLayout(const string& vertexTypeName) const;
+
+	// Get input layout from vertex type
+	template<typename T>
+	ID3D11InputLayout* GetInputLayout() const;
+
+	// Get input layout from vertex component mask
 	ID3D11InputLayout* GetInputLayoutByVertexComponents(int vertexComponents);
+
+	// Get display string from vertex component mask
 	static string GetVertexComponentsString(int vertexComponents);
+
+	// Get byte size of vertex from component mask
 	static int GetVertexStride(int vertexComponents);
-	static void CopyVertexComponents(void* out, const RVertex::MESH_LOADER_VERTEX* in, int count, int vertexComponents);
+	static void CopyVertexComponents(void* out, const RVertexType::MeshLoader* in, int count, int vertexComponents);
 private:
 	map<string, ID3D11InputLayout*>		m_InputLayouts;
 	map<int, ID3D11InputLayout*>		m_VertexComponentInputLayouts;
 };
 
+template<typename T>
+ID3D11InputLayout* RVertexDeclaration::GetInputLayout() const
+{
+	return RVertexDeclaration::GetInputLayout(T::GetVertexTypeName());
+}
 
 #endif

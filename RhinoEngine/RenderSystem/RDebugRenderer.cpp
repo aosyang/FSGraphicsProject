@@ -24,8 +24,8 @@ RDebugRenderer::~RDebugRenderer()
 void RDebugRenderer::Initialize(int maxVertexCount)
 {
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
-	m_PrimitiveInputLayout = RVertexDeclaration::Instance().GetInputLayout(RVertex::PRIMITIVE_VERTEX::GetTypeName());
-	m_PrimitiveMeshBuffer.CreateVertexBuffer(nullptr, sizeof(RVertex::PRIMITIVE_VERTEX), maxVertexCount, m_PrimitiveInputLayout, true);
+	m_PrimitiveInputLayout = RVertexDeclaration::Instance().GetInputLayout<RVertexType::PositionColor>();
+	m_PrimitiveMeshBuffer.CreateVertexBuffer(nullptr, sizeof(RVertexType::PositionColor), maxVertexCount, m_PrimitiveInputLayout, true);
 }
 
 void RDebugRenderer::Release()
@@ -70,7 +70,7 @@ void RDebugRenderer::DrawAabb(const RAabb& aabb, const RColor& color)
 
 	for (int i = 0; i < 24; i++)
 	{
-		RVertex::PRIMITIVE_VERTEX v =
+		RVertexType::PositionColor v =
 		{
 			RVec4(cornerPoints[wiredCubeIdx[i]]),
 			RColor(0.0f, 1.0f, 0.0f),
@@ -90,7 +90,7 @@ void RDebugRenderer::DrawFrustum(const RFrustum& frustum, const RColor& color)
 
 	for (int i = 0; i < 24; i++)
 	{
-		RVertex::PRIMITIVE_VERTEX v =
+		RVertexType::PositionColor v =
 		{
 			RVec4(frustum.corners[wiredCubeIdx[i]]),
 			color,
@@ -115,8 +115,8 @@ void RDebugRenderer::DrawSphere(const RVec3& center, float radius, const RColor&
 			float x1 = sinf(2.0f * PI * i1 / segment) * r + center.X();
 			float z1 = cosf(2.0f * PI * i1 / segment) * r + center.Z();
 
-			RVertex::PRIMITIVE_VERTEX v0 = { RVec4(x0, y, z0), color };
-			RVertex::PRIMITIVE_VERTEX v1 = { RVec4(x1, y, z1), color };
+			RVertexType::PositionColor v0 = { RVec4(x0, y, z0), color };
+			RVertexType::PositionColor v1 = { RVec4(x1, y, z1), color };
 			m_PrimitiveVertices.push_back(v0);
 			m_PrimitiveVertices.push_back(v1);
 		}
@@ -139,8 +139,8 @@ void RDebugRenderer::DrawSphere(const RVec3& center, float radius, const RColor&
 			float x1 = sinf(2.0f * PI * i / segment) * r1 + center.X();
 			float z1 = cosf(2.0f * PI * i / segment) * r1 + center.Z();
 
-			RVertex::PRIMITIVE_VERTEX v0 = { RVec4(x0, y0, z0), color };
-			RVertex::PRIMITIVE_VERTEX v1 = { RVec4(x1, y1, z1), color };
+			RVertexType::PositionColor v0 = { RVec4(x0, y0, z0), color };
+			RVertexType::PositionColor v1 = { RVec4(x1, y1, z1), color };
 			m_PrimitiveVertices.push_back(v0);
 			m_PrimitiveVertices.push_back(v1);
 		}
@@ -161,7 +161,7 @@ void RDebugRenderer::Render()
 {
 	if (m_bDirtyBuffer)
 	{
-		m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(m_PrimitiveVertices.data(), sizeof(RVertex::PRIMITIVE_VERTEX), (UINT)m_PrimitiveVertices.size());
+		m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(m_PrimitiveVertices.data(), sizeof(RVertexType::PositionColor), (UINT)m_PrimitiveVertices.size());
 		m_bDirtyBuffer = false;
 	}
 

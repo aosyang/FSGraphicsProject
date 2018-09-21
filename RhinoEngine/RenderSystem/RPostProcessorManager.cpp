@@ -37,7 +37,7 @@ void RPostProcessorManager::Initialize()
 	m_PPVertexShader = RShaderManager::Instance().GetShaderResource("PostProcessor")->VertexShader;
 
 	// Find vertex declaration for screen quad
-	m_InputLayout = RVertexDeclaration::Instance().GetInputLayout(RVertex::SKYBOX_VERTEX::GetTypeName());
+	m_InputLayout = RVertexDeclaration::Instance().GetInputLayout<RVertexType::Position>();
 
 	// Create vertex buffer for screen quad
 	{

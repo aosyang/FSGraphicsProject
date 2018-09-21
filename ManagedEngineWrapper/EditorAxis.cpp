@@ -16,7 +16,7 @@ void EditorAxis::Create()
 {
 	for (int n = 0; n < 3; n++)
 	{
-		RVertex::PRIMITIVE_VERTEX axisVerts[] =
+		RVertexType::PositionColor axisVerts[] =
 		{
 			{ RVec4(-0.5f, -0.5f, -0.5f, 1.0f), RColor(1.0f, 0.0f, 0.0f) },
 			{ RVec4(-0.5f,  0.5f, -0.5f, 1.0f), RColor(1.0f, 0.0f, 0.0f) },
@@ -67,8 +67,8 @@ void EditorAxis::Create()
 			0, 7, 4, 0, 3, 7,
 		};
 
-		ID3D11InputLayout* pInputLayout = RVertexDeclaration::Instance().GetInputLayout(RVertex::PRIMITIVE_VERTEX::GetTypeName());
-		m_AxisMeshBuffer[n].CreateVertexBuffer(axisVerts, sizeof(RVertex::PRIMITIVE_VERTEX), sizeof(axisVerts) / sizeof(RVertex::PRIMITIVE_VERTEX), pInputLayout);
+		ID3D11InputLayout* pInputLayout = RVertexDeclaration::Instance().GetInputLayout<RVertexType::PositionColor>();
+		m_AxisMeshBuffer[n].CreateVertexBuffer(axisVerts, sizeof(RVertexType::PositionColor), sizeof(axisVerts) / sizeof(RVertexType::PositionColor), pInputLayout);
 		m_AxisMeshBuffer[n].CreateIndexBuffer(axisIndices, sizeof(UINT), sizeof(axisIndices) / sizeof(UINT));
 
 		for (int i = 0; i < 8; i++)
@@ -77,7 +77,7 @@ void EditorAxis::Create()
 		}
 	}
 
-	m_ColorInputLayout = RVertexDeclaration::Instance().GetInputLayout(RVertex::PRIMITIVE_VERTEX::GetTypeName());
+	m_ColorInputLayout = RVertexDeclaration::Instance().GetInputLayout<RVertexType::PositionColor>();
 }
 
 void EditorAxis::Release()

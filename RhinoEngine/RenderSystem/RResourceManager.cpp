@@ -421,9 +421,9 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		RLog("  Mesh element [%s]\n", node->GetName());
 		
 		FbxVector4* controlPointArray;
-		vector<RVertex::MESH_LOADER_VERTEX> vertData;
+		vector<RVertexType::MeshLoader> vertData;
 		vector<int> indexData;
-		vector<RVertex::MESH_LOADER_VERTEX> flatVertData;
+		vector<RVertexType::MeshLoader> flatVertData;
 		int VertexComponentMask = 0;
 
 		controlPointArray = mesh->GetControlPoints();
@@ -559,7 +559,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 				case FbxGeometryElement::eDirect:
 					for (int i = 0; i < controlPointCount; i++)
 					{
-						RVertex::Vec2Data& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
+						RVertexType::Vec2Data& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
 							
 						FbxVector2 uv = uvArray[i]->GetDirectArray().GetAt(i);
 
@@ -576,7 +576,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 				case FbxGeometryElement::eIndexToDirect:
 					for (int i = 0; i < controlPointCount; i++)
 					{
-						RVertex::Vec2Data& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
+						RVertexType::Vec2Data& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
 						
 						int index = uvArray[uvLayer]->GetIndexArray().GetAt(i);
 						FbxVector2 uv = uvArray[uvLayer]->GetDirectArray().GetAt(index);
@@ -691,7 +691,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 				triangle[idxVert] = idxPoly * 3 + idxVert;
 				int iv = mesh->GetPolygonVertex(idxPoly, idxVert);
 
-				RVertex::MESH_LOADER_VERTEX vertex = vertData[iv];
+				RVertexType::MeshLoader vertex = vertData[iv];
 				
 				if (hasPerPolygonVertexNormal)
 				{
@@ -759,7 +759,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 						FbxVector2 uv = uvArray[uvLayer]->GetDirectArray().GetAt(idxUV);
 
-						RVertex::Vec2Data& vertUV = uvLayer == 0 ? vertex.uv0 : vertex.uv1;
+						RVertexType::Vec2Data& vertUV = uvLayer == 0 ? vertex.uv0 : vertex.uv1;
 
 						vertUV.x = (float)uv[0];
 						vertUV.y = 1.0f - (float)uv[1];
@@ -854,13 +854,13 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		// Optimize mesh
 		RLog("Optimizing mesh...\n");
 
-		map<RVertex::MESH_LOADER_VERTEX, int> meshVertIndexTable;
-		vector<RVertex::MESH_LOADER_VERTEX> optimizedVertData;
+		map<RVertexType::MeshLoader, int> meshVertIndexTable;
+		vector<RVertexType::MeshLoader> optimizedVertData;
 		vector<UINT> optimizedIndexData;
 		UINT index = 0;
 		for (UINT i = 0; i < indexData.size(); i++)
 		{
-			RVertex::MESH_LOADER_VERTEX& v = flatVertData[indexData[i]];
+			RVertexType::MeshLoader& v = flatVertData[indexData[i]];
 			auto iterResult = meshVertIndexTable.find(v);
 			if (iterResult == meshVertIndexTable.end())
 			{

@@ -49,7 +49,7 @@ void RVertexDeclaration::Initialize()
 	};
 
 	GRenderer.D3DDevice()->CreateInputLayout(meshVertDesc, 5, RMeshVertexSignature, sizeof(RMeshVertexSignature), &pInputLayout);
-	m_InputLayouts.insert(make_pair(RVertex::MESH_VERTEX::GetTypeName(), pInputLayout));
+	m_InputLayouts.insert(make_pair(RVertexType::Mesh::GetVertexTypeName(), pInputLayout));
 
 
 	// Color primitive vertex
@@ -60,7 +60,7 @@ void RVertexDeclaration::Initialize()
 	};
 
 	GRenderer.D3DDevice()->CreateInputLayout(primitiveVertDesc, 2, RPrimitiveVertexSignature, sizeof(RPrimitiveVertexSignature), &pInputLayout);
-	m_InputLayouts.insert(make_pair(RVertex::PRIMITIVE_VERTEX::GetTypeName(), pInputLayout));
+	m_InputLayouts.insert(make_pair(RVertexType::PositionColor::GetVertexTypeName(), pInputLayout));
 
 
 	// Skybox vertex
@@ -70,7 +70,7 @@ void RVertexDeclaration::Initialize()
 	};
 
 	GRenderer.D3DDevice()->CreateInputLayout(skyboxVertDesc, 1, RSkyboxVertexSignature, sizeof(RSkyboxVertexSignature), &pInputLayout);
-	m_InputLayouts.insert(make_pair(RVertex::SKYBOX_VERTEX::GetTypeName(), pInputLayout));
+	m_InputLayouts.insert(make_pair(RVertexType::Position::GetVertexTypeName(), pInputLayout));
 
 
 	// Particle vertex
@@ -83,7 +83,7 @@ void RVertexDeclaration::Initialize()
 	};
 
 	GRenderer.D3DDevice()->CreateInputLayout(particleVertDesc, 4, RParticleVertexSignature, sizeof(RParticleVertexSignature), &pInputLayout);
-	m_InputLayouts.insert(make_pair(RVertex::PARTICLE_VERTEX::GetTypeName(), pInputLayout));
+	m_InputLayouts.insert(make_pair(RVertexType::Particle::GetVertexTypeName(), pInputLayout));
 
 	D3D11_INPUT_ELEMENT_DESC fontVertDesc[] =
 	{
@@ -94,7 +94,7 @@ void RVertexDeclaration::Initialize()
 	};
 
 	GRenderer.D3DDevice()->CreateInputLayout(fontVertDesc, 4, RFontVertexSignature, sizeof(RFontVertexSignature), &pInputLayout);
-	m_InputLayouts.insert(make_pair(RVertex::FONT_VERTEX::GetTypeName(), pInputLayout));
+	m_InputLayouts.insert(make_pair(RVertexType::Font::GetVertexTypeName(), pInputLayout));
 }
 
 void RVertexDeclaration::Release()
@@ -229,15 +229,15 @@ int RVertexDeclaration::GetVertexStride(int vertexComponents)
 	int stride = 0;
 
 	if (vertexComponents & VCM_Pos)
-		stride += sizeof(RVertex::Vec3Data);
+		stride += sizeof(RVertexType::Vec3Data);
 	if (vertexComponents & VCM_UV0)
-		stride += sizeof(RVertex::Vec2Data);
+		stride += sizeof(RVertexType::Vec2Data);
 	if (vertexComponents & VCM_UV1)
-		stride += sizeof(RVertex::Vec2Data);
+		stride += sizeof(RVertexType::Vec2Data);
 	if (vertexComponents & VCM_Normal)
-		stride += sizeof(RVertex::Vec3Data);
+		stride += sizeof(RVertexType::Vec3Data);
 	if (vertexComponents & VCM_Tangent)
-		stride += sizeof(RVertex::Vec3Data);
+		stride += sizeof(RVertexType::Vec3Data);
 	if (vertexComponents & VCM_BoneId)
 		stride += sizeof(int) * 4;
 	if (vertexComponents & VCM_BoneWeights)
@@ -246,7 +246,7 @@ int RVertexDeclaration::GetVertexStride(int vertexComponents)
 	return stride;
 }
 
-void RVertexDeclaration::CopyVertexComponents(void* out, const RVertex::MESH_LOADER_VERTEX* in, int count, int vertexComponents)
+void RVertexDeclaration::CopyVertexComponents(void* out, const RVertexType::MeshLoader* in, int count, int vertexComponents)
 {
 	struct VC_Info
 	{
@@ -256,13 +256,13 @@ void RVertexDeclaration::CopyVertexComponents(void* out, const RVertex::MESH_LOA
 
 	static VC_Info strides[VertexComponent_Count] =
 	{
-		{ GetVertexStride(VCM_BoneId),		offsetof(RVertex::MESH_LOADER_VERTEX, boneId) },
-		{ GetVertexStride(VCM_BoneWeights),	offsetof(RVertex::MESH_LOADER_VERTEX, weight) },
-		{ GetVertexStride(VCM_Pos),			offsetof(RVertex::MESH_LOADER_VERTEX, pos) },
-		{ GetVertexStride(VCM_UV0),			offsetof(RVertex::MESH_LOADER_VERTEX, uv0) },
-		{ GetVertexStride(VCM_Normal),		offsetof(RVertex::MESH_LOADER_VERTEX, normal) },
-		{ GetVertexStride(VCM_Tangent),		offsetof(RVertex::MESH_LOADER_VERTEX, tangent) },
-		{ GetVertexStride(VCM_UV1),			offsetof(RVertex::MESH_LOADER_VERTEX, uv1) },
+		{ GetVertexStride(VCM_BoneId),		offsetof(RVertexType::MeshLoader, boneId) },
+		{ GetVertexStride(VCM_BoneWeights),	offsetof(RVertexType::MeshLoader, weight) },
+		{ GetVertexStride(VCM_Pos),			offsetof(RVertexType::MeshLoader, pos) },
+		{ GetVertexStride(VCM_UV0),			offsetof(RVertexType::MeshLoader, uv0) },
+		{ GetVertexStride(VCM_Normal),		offsetof(RVertexType::MeshLoader, normal) },
+		{ GetVertexStride(VCM_Tangent),		offsetof(RVertexType::MeshLoader, tangent) },
+		{ GetVertexStride(VCM_UV1),			offsetof(RVertexType::MeshLoader, uv1) },
 	};
 
 	int offset = 0;

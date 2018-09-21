@@ -19,19 +19,19 @@ struct ParticleDepthComparer
 		CamDir = camDir;
 	}
 
-	bool operator()(const RVertex::PARTICLE_VERTEX &a, const RVertex::PARTICLE_VERTEX &b)
+	bool operator()(const RVertexType::Particle &a, const RVertexType::Particle &b)
 	{
 		//return dot(a.pos - CamPos, CamDir) > dot(b.pos - CamPos, CamDir);
 		return sqrDist(a.pos, CamPos) > sqrDist(b.pos, CamPos);
 	}
 
 	// Helper functions
-	static float dot(const RVertex::Vec4Data& a, const RVertex::Vec4Data& b)
+	static float dot(const RVertexType::Vec4Data& a, const RVertexType::Vec4Data& b)
 	{
 		return a.x * b.x + a.y * b.y + a.z * b.z;
 	}
 
-	static float sqrDist(const RVertex::Vec4Data& a, const RVertex::Vec4Data b)
+	static float sqrDist(const RVertexType::Vec4Data& a, const RVertexType::Vec4Data b)
 	{
 		float dx = b.x - a.x,
 			  dy = b.y - a.y,
@@ -121,7 +121,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_TransparentMesh = m_Scene.CreateSceneObjectOfType<RSMeshObject>();
 
 	// Create buffer for star mesh
-	RVertex::PRIMITIVE_VERTEX starVertex[12];
+	RVertexType::PositionColor starVertex[12];
 
 	for (int i = 0; i < 10; i++)
 	{
@@ -137,45 +137,45 @@ bool FSGraphicsProjectApp::Initialize()
 		0, 1, 10, 1, 2, 10, 2, 3, 10, 3, 4, 10, 4, 5, 10, 5, 6, 10, 6, 7, 10, 7, 8, 10, 8, 9, 10, 9, 0, 10,
 		1, 0, 11, 2, 1, 11, 3, 2, 11, 4, 3, 11, 5, 4, 11, 6, 5, 11, 7, 6, 11, 8, 7, 11, 9, 8, 11, 0, 9, 11, };
 
-	m_ColorPrimitiveIL = RVertexDeclaration::Instance().GetInputLayout(RVertex::PRIMITIVE_VERTEX::GetTypeName());
-	m_StarMesh.CreateVertexBuffer(starVertex, sizeof(RVertex::PRIMITIVE_VERTEX), 12, m_ColorPrimitiveIL);
+	m_ColorPrimitiveIL = RVertexDeclaration::Instance().GetInputLayout<RVertexType::PositionColor>();
+	m_StarMesh.CreateVertexBuffer(starVertex, sizeof(RVertexType::PositionColor), 12, m_ColorPrimitiveIL);
 	m_StarMesh.CreateIndexBuffer(starIndex, sizeof(UINT32), sizeof(starIndex) / sizeof(UINT32));
 
 	// Create buffer for bump cube
-	RVertex::MESH_VERTEX boxVertex[] = 
+	RVertexType::Mesh boxVertex[] = 
 	{
-		{ RVertex::Vec3Data(-1.0f, -1.0f, -1.0f), RVertex::Vec2Data(0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertex::Vec3Data(-1.0f,  1.0f, -1.0f), RVertex::Vec2Data(0.0f, 1.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertex::Vec3Data( 1.0f,  1.0f, -1.0f), RVertex::Vec2Data(1.0f, 1.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertex::Vec3Data( 1.0f, -1.0f, -1.0f), RVertex::Vec2Data(1.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data(-1.0f, -1.0f, -1.0f), RVertexType::Vec2Data(0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data(-1.0f,  1.0f, -1.0f), RVertexType::Vec2Data(0.0f, 1.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data( 1.0f,  1.0f, -1.0f), RVertexType::Vec2Data(1.0f, 1.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data( 1.0f, -1.0f, -1.0f), RVertexType::Vec2Data(1.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
 
-		{ RVertex::Vec3Data( 1.0f, -1.0f, -1.0f), RVertex::Vec2Data(0.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f) },
-		{ RVertex::Vec3Data( 1.0f,  1.0f, -1.0f), RVertex::Vec2Data(0.0f, 1.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f) },
-		{ RVertex::Vec3Data( 1.0f,  1.0f,  1.0f), RVertex::Vec2Data(1.0f, 1.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f) },
-		{ RVertex::Vec3Data( 1.0f, -1.0f,  1.0f), RVertex::Vec2Data(1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f) },
+		{ RVertexType::Vec3Data( 1.0f, -1.0f, -1.0f), RVertexType::Vec2Data(0.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f) },
+		{ RVertexType::Vec3Data( 1.0f,  1.0f, -1.0f), RVertexType::Vec2Data(0.0f, 1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f) },
+		{ RVertexType::Vec3Data( 1.0f,  1.0f,  1.0f), RVertexType::Vec2Data(1.0f, 1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f) },
+		{ RVertexType::Vec3Data( 1.0f, -1.0f,  1.0f), RVertexType::Vec2Data(1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f) },
 
-		{ RVertex::Vec3Data( 1.0f, -1.0f,  1.0f), RVertex::Vec2Data(0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f) },
-		{ RVertex::Vec3Data( 1.0f,  1.0f,  1.0f), RVertex::Vec2Data(0.0f, 1.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f) },
-		{ RVertex::Vec3Data(-1.0f,  1.0f,  1.0f), RVertex::Vec2Data(1.0f, 1.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f) },
-		{ RVertex::Vec3Data(-1.0f, -1.0f,  1.0f), RVertex::Vec2Data(1.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, 1.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data( 1.0f, -1.0f,  1.0f), RVertexType::Vec2Data(0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data( 1.0f,  1.0f,  1.0f), RVertexType::Vec2Data(0.0f, 1.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data(-1.0f,  1.0f,  1.0f), RVertexType::Vec2Data(1.0f, 1.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data(-1.0f, -1.0f,  1.0f), RVertexType::Vec2Data(1.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f) },
 
-		{ RVertex::Vec3Data(-1.0f, -1.0f,  1.0f), RVertex::Vec2Data(0.0f, 0.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f) },
-		{ RVertex::Vec3Data(-1.0f,  1.0f,  1.0f), RVertex::Vec2Data(0.0f, 1.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f) },
-		{ RVertex::Vec3Data(-1.0f,  1.0f, -1.0f), RVertex::Vec2Data(1.0f, 1.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f) },
-		{ RVertex::Vec3Data(-1.0f, -1.0f, -1.0f), RVertex::Vec2Data(1.0f, 0.0f), RVertex::Vec3Data(-1.0f, 0.0f, 0.0f), RVertex::Vec3Data(0.0f, 0.0f, -1.0f) },
+		{ RVertexType::Vec3Data(-1.0f, -1.0f,  1.0f), RVertexType::Vec2Data(0.0f, 0.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f) },
+		{ RVertexType::Vec3Data(-1.0f,  1.0f,  1.0f), RVertexType::Vec2Data(0.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f) },
+		{ RVertexType::Vec3Data(-1.0f,  1.0f, -1.0f), RVertexType::Vec2Data(1.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f) },
+		{ RVertexType::Vec3Data(-1.0f, -1.0f, -1.0f), RVertexType::Vec2Data(1.0f, 0.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f) },
 
-		{ RVertex::Vec3Data(-1.0f,  1.0f, -1.0f), RVertex::Vec2Data(0.0f, 0.0f), RVertex::Vec3Data(0.0f, 1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertex::Vec3Data(-1.0f,  1.0f,  1.0f), RVertex::Vec2Data(0.0f, 1.0f), RVertex::Vec3Data(0.0f, 1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertex::Vec3Data( 1.0f,  1.0f,  1.0f), RVertex::Vec2Data(1.0f, 1.0f), RVertex::Vec3Data(0.0f, 1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertex::Vec3Data( 1.0f,  1.0f, -1.0f), RVertex::Vec2Data(1.0f, 0.0f), RVertex::Vec3Data(0.0f, 1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data(-1.0f,  1.0f, -1.0f), RVertexType::Vec2Data(0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data(-1.0f,  1.0f,  1.0f), RVertexType::Vec2Data(0.0f, 1.0f), RVertexType::Vec3Data(0.0f, 1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data( 1.0f,  1.0f,  1.0f), RVertexType::Vec2Data(1.0f, 1.0f), RVertexType::Vec3Data(0.0f, 1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data( 1.0f,  1.0f, -1.0f), RVertexType::Vec2Data(1.0f, 0.0f), RVertexType::Vec3Data(0.0f, 1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
 
-		{ RVertex::Vec3Data(-1.0f, -1.0f,  1.0f), RVertex::Vec2Data(0.0f, 0.0f), RVertex::Vec3Data(0.0f, -1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertex::Vec3Data(-1.0f, -1.0f, -1.0f), RVertex::Vec2Data(0.0f, 1.0f), RVertex::Vec3Data(0.0f, -1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertex::Vec3Data( 1.0f, -1.0f, -1.0f), RVertex::Vec2Data(1.0f, 1.0f), RVertex::Vec3Data(0.0f, -1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertex::Vec3Data( 1.0f, -1.0f,  1.0f), RVertex::Vec2Data(1.0f, 0.0f), RVertex::Vec3Data(0.0f, -1.0f, 0.0f), RVertex::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data(-1.0f, -1.0f,  1.0f), RVertexType::Vec2Data(0.0f, 0.0f), RVertexType::Vec3Data(0.0f, -1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data(-1.0f, -1.0f, -1.0f), RVertexType::Vec2Data(0.0f, 1.0f), RVertexType::Vec3Data(0.0f, -1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data( 1.0f, -1.0f, -1.0f), RVertexType::Vec2Data(1.0f, 1.0f), RVertexType::Vec3Data(0.0f, -1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data( 1.0f, -1.0f,  1.0f), RVertexType::Vec2Data(1.0f, 0.0f), RVertexType::Vec3Data(0.0f, -1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
 	};
 
-	for (UINT32 i = 0; i < sizeof(boxVertex) / sizeof(RVertex::MESH_VERTEX); i++)
+	for (UINT32 i = 0; i < sizeof(boxVertex) / sizeof(RVertexType::Mesh); i++)
 	{
 		boxVertex[i].pos.x *= 100.0f;
 		boxVertex[i].pos.y *= 100.0f;
@@ -188,8 +188,8 @@ bool FSGraphicsProjectApp::Initialize()
 		12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23,
 	};
 
-	m_BumpLightingIL = RVertexDeclaration::Instance().GetInputLayout(RVertex::MESH_VERTEX::GetTypeName());
-	m_BumpCubeMesh.CreateVertexBuffer(boxVertex, sizeof(RVertex::MESH_VERTEX), 24, m_BumpLightingIL);
+	m_BumpLightingIL = RVertexDeclaration::Instance().GetInputLayout<RVertexType::Mesh>();
+	m_BumpCubeMesh.CreateVertexBuffer(boxVertex, sizeof(RVertexType::Mesh), 24, m_BumpLightingIL);
 	m_BumpCubeMesh.CreateIndexBuffer(boxIndex, sizeof(UINT32), 36);
 
 	m_cbInstance[0].Initialize();
@@ -280,8 +280,8 @@ bool FSGraphicsProjectApp::Initialize()
 		m_ShadowMap[i].Initialize(1024, 1024);
 	}
 
-	m_ParticleIL = RVertexDeclaration::Instance().GetInputLayout(RVertex::PARTICLE_VERTEX::GetTypeName());
-	m_ParticleBuffer.CreateVertexBuffer(nullptr, sizeof(RVertex::PARTICLE_VERTEX), PARTICLE_COUNT, m_ParticleIL, true);
+	m_ParticleIL = RVertexDeclaration::Instance().GetInputLayout<RVertexType::Particle>();
+	m_ParticleBuffer.CreateVertexBuffer(nullptr, sizeof(RVertexType::Particle), PARTICLE_COUNT, m_ParticleIL, true);
 
 	for (int i = 0; i < PARTICLE_COUNT; i++)
 	{
@@ -652,7 +652,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	// Update particle vertices
 	ParticleDepthComparer cmp(m_Camera->GetPosition(), m_Camera->GetForwardVector());
 	std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
-	m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(RVertex::PARTICLE_VERTEX), PARTICLE_COUNT);
+	m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(RVertexType::Particle), PARTICLE_COUNT);
 
 	ObjectDepthComparer objCmp(m_Camera->GetPosition());
 	std::sort(cbInstance[1].instancedWorldMatrix, cbInstance[1].instancedWorldMatrix + 125, objCmp);
@@ -853,7 +853,7 @@ void FSGraphicsProjectApp::RenderScene()
 
 			ParticleDepthComparer cmp(m_SunVec, -m_SunVec);
 			std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
-			m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(RVertex::PARTICLE_VERTEX), PARTICLE_COUNT);
+			m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(RVertexType::Particle), PARTICLE_COUNT);
 	
 			GRenderer.SetRenderTargets();
 		}

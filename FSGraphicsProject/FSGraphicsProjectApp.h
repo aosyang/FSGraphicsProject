@@ -93,7 +93,7 @@ private:
 	RMeshRenderBuffer			m_ParticleBuffer;
 	RShader*					m_ParticleShader;
 	ID3D11InputLayout*			m_ParticleIL;
-	RVertex::PARTICLE_VERTEX	m_ParticleVert[PARTICLE_COUNT];
+	RVertexType::Particle	m_ParticleVert[PARTICLE_COUNT];
 	RTexture*					m_ParticleDiffuseTexture;
 	RTexture*					m_ParticleNormalTexture;
 	ID3D11DepthStencilState*	m_DepthState[2];

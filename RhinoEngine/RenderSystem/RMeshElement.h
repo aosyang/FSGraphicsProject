@@ -63,7 +63,7 @@ public:
 	void Serialize(RSerializer& serializer);
 
 	void SetTriangles(const vector<UINT>& triIndices);
-	void SetVertices(const vector<RVertex::MESH_LOADER_VERTEX>& vertices, int vertexComponentMask);
+	void SetVertices(const vector<RVertexType::MeshLoader>& vertices, int vertexComponentMask);
 	void SetVertexComponentMask(int mask) { m_VertexComponentMask = mask; }
 	int GetVertexComponentMask() const { return m_VertexComponentMask; }
 	
@@ -82,13 +82,13 @@ public:
 	int GetFlag() const { return m_Flag; }
 
 	vector<UINT>				TriangleIndices;
-	vector<RVertex::Vec3Data>	PositionArray;
-	vector<RVertex::Vec2Data>	UV0Array;
-	vector<RVertex::Vec3Data>	NormalArray;
-	vector<RVertex::Vec3Data>	TangentArray;
-	vector<RVertex::Vec2Data>	UV1Array;
+	vector<RVertexType::Vec3Data>	PositionArray;
+	vector<RVertexType::Vec2Data>	UV0Array;
+	vector<RVertexType::Vec3Data>	NormalArray;
+	vector<RVertexType::Vec3Data>	TangentArray;
+	vector<RVertexType::Vec2Data>	UV1Array;
 	vector<VBoneIds>			BoneIdArray;
-	vector<RVertex::Vec4Data>	BoneWeightArray;
+	vector<RVertexType::Vec4Data>	BoneWeightArray;
 
 private:
 	string				m_Name;
