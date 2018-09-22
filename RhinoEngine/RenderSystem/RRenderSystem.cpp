@@ -183,14 +183,7 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 	D3D11_BLEND_DESC blendDesc;
 	ZeroMemory(&blendDesc, sizeof(blendDesc));
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	GRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_Opaque]);
-
-#if _DEBUG
-	{
-		char blendStateName[] = "Opaque";
-		m_BlendState[Blend_Opaque]->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(blendStateName) - 1, blendStateName);
-	}
-#endif
+	m_BlendState[Blend_Opaque] = CreateD3DBlendState(&blendDesc, "Opaque");
 
 	blendDesc.RenderTarget[0].BlendEnable = true;
 	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
@@ -200,37 +193,15 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	GRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_AlphaBlending]);
-
-#if _DEBUG
-	{
-		char blendStateName[] = "Alpha Blending";
-		m_BlendState[Blend_AlphaBlending]->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(blendStateName) - 1, blendStateName);
-	}
-#endif
+	m_BlendState[Blend_AlphaBlending] = CreateD3DBlendState(&blendDesc, "Alpha Blending");
 
 	blendDesc.AlphaToCoverageEnable = true;
-	GRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_AlphaToCoverage]);
-
-#if _DEBUG
-	{
-		char blendStateName[] = "Alpha To Coverage Blending";
-		m_BlendState[Blend_AlphaToCoverage]->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(blendStateName) - 1, blendStateName);
-	}
-#endif
+	m_BlendState[Blend_AlphaToCoverage] = CreateD3DBlendState(&blendDesc, "Alpha To Coverage Blending");
 
 	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
 	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
 	blendDesc.AlphaToCoverageEnable = false;
-	GRenderer.D3DDevice()->CreateBlendState(&blendDesc, &m_BlendState[Blend_Additive]);
-	
-#if _DEBUG
-	{
-		char blendStateName[] = "Additive Blending";
-		m_BlendState[Blend_Additive]->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(blendStateName) - 1, blendStateName);
-	}
-#endif
-
+	m_BlendState[Blend_Additive] = CreateD3DBlendState(&blendDesc, "Additive Blending");
 
 	m_CurrBlendState = Blend_Opaque;
 
@@ -614,4 +585,25 @@ void RRenderSystem::CreateDepthStencilBufferAndView()
 
 	DefaultDepthStencilView = m_DepthStencilView;
 	m_CurrentDepthStencilView = m_DepthStencilView;
+}
+
+ID3D11BlendState* RRenderSystem::CreateD3DBlendState(const D3D11_BLEND_DESC* Desc, char* DebugObjectName /*= nullptr*/)
+{
+	ID3D11BlendState* BlendState = nullptr;
+	if (FAILED(GRenderer.D3DDevice()->CreateBlendState(Desc, &BlendState)))
+	{
+		RLogWarning("Failed to create D3D11 blend state!\n");
+		return nullptr;
+	}
+
+	assert(BlendState);
+#if _DEBUG
+	if (DebugObjectName)
+	{
+		const UINT NameLength = (UINT)strlen(DebugObjectName);
+		BlendState->SetPrivateData(WKPDID_D3DDebugObjectName, NameLength, DebugObjectName);
+	}
+#endif	// _DEBUG
+
+	return BlendState;
 }

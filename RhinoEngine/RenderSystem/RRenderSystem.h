@@ -99,6 +99,8 @@ protected:
 	void CreateRenderTargetView();
 	void CreateDepthStencilBufferAndView();
 
+	ID3D11BlendState* CreateD3DBlendState(const D3D11_BLEND_DESC* Desc, char* DebugObjectName = nullptr);
+
 	int						m_ClientWidth, m_ClientHeight;
 	bool					m_Enable4xMsaa;
 	bool					m_UseGammaCorrection;
