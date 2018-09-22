@@ -35,6 +35,12 @@ public:
 	template<typename T>
 	vector<T*> FindAllObjectsOfType() const;
 
+	/// Generate a unique object name with the given name
+	string GenerateUniqueObjectName(const string& ObjectName);
+
+	/// Generate a unique object name for cloned object
+	string GenerateUniqueObjectNameForClone(const string& ObjectName);
+
 	/// Check if the name has been used by any object in the scene
 	bool DoesObjectNameExist(const string& Name) const;
 

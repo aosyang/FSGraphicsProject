@@ -171,7 +171,8 @@ namespace ManagedEngineWrapper
 				if (RInput.GetBufferedKeyState(VK_LBUTTON) == EBufferedKeyState::Pressed &&
 					RInput.IsKeyDown(VK_LCONTROL))
 				{
-					m_SelectedObject = m_SelectedObject->Clone();
+					RScene* Scene = m_SelectedObject->GetScene();
+					m_SelectedObject = Scene->CloneObject(m_SelectedObject);
 				}
 
 				RVec3 pos = m_SelectedObject->GetPosition();

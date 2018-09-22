@@ -46,7 +46,10 @@ RSceneObject* RScene::CreateSceneObject(const char* name)
 
 RSceneObject* RScene::CloneObject(RSceneObject* obj)
 {
-	return obj->Clone();
+	RSceneObject* NewObject = obj->Clone();
+	m_SceneObjects.push_back(NewObject);
+	NewObject->SetName(GenerateUniqueObjectNameForClone(obj->GetName()));
+	return NewObject;
 }
 
 RSceneObject* RScene::FindObject(const char* name) const
@@ -58,6 +61,53 @@ RSceneObject* RScene::FindObject(const char* name) const
 	}
 
 	return nullptr;
+}
+
+string RScene::GenerateUniqueObjectName(const string& ObjectName)
+{
+	string UniqueName;
+	int NameIndex = 0;
+	while (true)
+	{
+		UniqueName = ObjectName + "_" + to_string(NameIndex);
+		NameIndex++;
+
+		if (!DoesObjectNameExist(UniqueName))
+		{
+			break;
+		}
+	}
+
+	return UniqueName;
+}
+
+string RScene::GenerateUniqueObjectNameForClone(const string& ObjectName)
+{
+	size_t UnderScorePos = ObjectName.find_last_of('_');
+
+	// Object name doesn't contain under score, simply generate a unique name.
+	if (UnderScorePos != string::npos)
+	{
+		bool bHasDigitSuffix = true;
+
+		string Suffix = ObjectName.substr(UnderScorePos + 1);
+		for (size_t i = 0; i < Suffix.length(); i++)
+		{
+			if (!isdigit(Suffix[i]))
+			{
+				bHasDigitSuffix = false;
+				break;
+			}
+		}
+
+		if (bHasDigitSuffix)
+		{
+			string BaseName = ObjectName.substr(0, UnderScorePos);
+			return GenerateUniqueObjectName(BaseName);
+		}
+	}
+
+	return GenerateUniqueObjectName(ObjectName);
 }
 
 bool RScene::DoesObjectNameExist(const string& Name) const
