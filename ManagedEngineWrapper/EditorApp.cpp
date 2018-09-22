@@ -352,23 +352,8 @@ namespace ManagedEngineWrapper
 		string Filename = RFileUtil::GetFileNameInPath(path);
 		Filename = RFileUtil::StripExtension(Filename);
 
-		string ObjectName;
-
 		// Generate unique name in the scene
-		{
-			int NameIndex = 0;
-			while (true)
-			{
-				ObjectName = Filename + "_" + to_string(NameIndex);
-				NameIndex++;
-
-				if (!m_Scene.DoesObjectNameExist(ObjectName))
-				{
-					break;
-				}
-			}
-		}
-
+		string ObjectName = m_Scene.GenerateUniqueObjectName(Filename);
 		pObj->SetName(ObjectName);
 	}
 

@@ -156,6 +156,7 @@
     <ClInclude Include="EditorApp.h" />
     <ClInclude Include="EditorAxis.h" />
     <ClInclude Include="ManagedEngineWrapper.h" />
+    <ClInclude Include="ManagedMaterial.h" />
     <ClInclude Include="ManagedSceneObject.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Stdafx.h" />
