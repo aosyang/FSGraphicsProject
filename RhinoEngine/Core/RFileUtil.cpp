@@ -38,12 +38,40 @@ string RFileUtil::ReplaceExtension(const string& filename, const string& ext)
 		return filename + "." + ext;
 	}
 
+	// Make sure dot is after the last slash
 	if ((slash_pos != string::npos && pos > slash_pos) || slash_pos == string::npos)
 	{
 		return filename.substr(0, pos + 1) + ext;
 	}
 
 	return filename + "." + ext;
+}
+
+std::string RFileUtil::StripExtension(const string& filename)
+{
+	// Empty filename
+	if (filename.length() == 0)
+	{
+		return "";
+	}
+	
+	size_t slash_pos = filename.find_last_of("/\\");
+	size_t pos = filename.find_last_of('.');
+
+	// No extension
+	if (pos == string::npos)
+	{
+		return filename;
+	}
+
+	// Make sure dot is after the last slash
+	if ((slash_pos != string::npos && pos > slash_pos) || slash_pos == string::npos)
+	{
+		return filename.substr(0, pos);
+	}
+
+	// Otherwise, dot comes before slash. Filename contains not extension
+	return filename;
 }
 
 void RFileUtil::PushWorkingPath(const char* NewPath)

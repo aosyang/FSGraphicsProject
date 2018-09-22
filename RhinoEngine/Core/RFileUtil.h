@@ -14,6 +14,9 @@ public:
 	/// Replace extension in filename
 	static string ReplaceExtension(const string& filename, const string& ext);
 
+	/// Remove extension from filename
+	static string StripExtension(const string& filename);
+
 	/// Push a new path as working path and store current one
 	static void PushWorkingPath(const char* NewPath);
 

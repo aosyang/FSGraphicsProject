@@ -21,9 +21,9 @@ void RScene::Release()
 	DestroyAllObjects();
 }
 
-RSMeshObject* RScene::CreateMeshObject(const char* meshName)
+RSMeshObject* RScene::CreateMeshObject(const char* meshPath)
 {
-	RMesh* mesh = RResourceManager::Instance().FindMesh(meshName);
+	RMesh* mesh = RResourceManager::Instance().FindMesh(meshPath);
 	assert(mesh);
 
 	return CreateMeshObject(mesh);
@@ -58,6 +58,19 @@ RSceneObject* RScene::FindObject(const char* name) const
 	}
 
 	return nullptr;
+}
+
+bool RScene::DoesObjectNameExist(const string& Name) const
+{
+	for (auto SceneObject : m_SceneObjects)
+	{
+		if (SceneObject->GetName() == Name)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void RScene::DestroyObject(RSceneObject* obj)

@@ -341,6 +341,28 @@ namespace ManagedEngineWrapper
 
 		RVec3 pos = m_CameraMatrix.GetTranslation() + m_CameraMatrix.GetForward() * radius - center;
 		pObj->SetPosition(pos);
+
+		string Filename = RFileUtil::GetFileNameInPath(path);
+		Filename = RFileUtil::StripExtension(Filename);
+
+		string ObjectName;
+
+		// Generate unique name in the scene
+		{
+			int NameIndex = 0;
+			while (true)
+			{
+				ObjectName = Filename + "_" + to_string(NameIndex);
+				NameIndex++;
+
+				if (!m_Scene.DoesObjectNameExist(ObjectName))
+				{
+					break;
+				}
+			}
+		}
+
+		pObj->SetName(ObjectName);
 	}
 
 	void EditorApp::LoadScene(const char* filename)

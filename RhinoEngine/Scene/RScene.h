@@ -13,7 +13,7 @@ public:
 	void Release();
 
 	/// Create a mesh object with mesh file path and add it to the scene
-	RSMeshObject* CreateMeshObject(const char* meshName);
+	RSMeshObject* CreateMeshObject(const char* meshPath);
 
 	/// Create a mesh object with mesh resource and add it to the scene
 	RSMeshObject* CreateMeshObject(RMesh* mesh);
@@ -34,6 +34,9 @@ public:
 	/// Find all objects in the scene of given type
 	template<typename T>
 	vector<T*> FindAllObjectsOfType() const;
+
+	/// Check if the name has been used by any object in the scene
+	bool DoesObjectNameExist(const string& Name) const;
 
 	/// Add an object to the scene
 	void DestroyObject(RSceneObject* obj);
