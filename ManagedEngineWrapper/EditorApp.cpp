@@ -189,7 +189,8 @@ namespace ManagedEngineWrapper
 					}
 					else
 					{
-						pos.SetX(pos.X() + (RVec3::Dot(world_x, cam_right) * mdx - RVec3::Dot(world_x, cam_up) * mdy) * move_scale);
+						float x = pos.X() + (RVec3::Dot(world_x, cam_right) * mdx - RVec3::Dot(world_x, cam_up) * mdy) * move_scale;
+						pos.SetX(SnapTo(x, 1.0f));
 					}
 				}
 				else if (m_MouseControlMode == MouseControlMode::MoveY)
@@ -205,7 +206,8 @@ namespace ManagedEngineWrapper
 					}
 					else
 					{
-						pos.SetY(pos.Y() + (RVec3::Dot(world_y, cam_right) * mdx - RVec3::Dot(world_y, cam_up) * mdy) * move_scale);
+						float y = pos.Y() + (RVec3::Dot(world_y, cam_right) * mdx - RVec3::Dot(world_y, cam_up) * mdy) * move_scale;
+						pos.SetY(SnapTo(y, 1.0f));
 					}
 				}
 				else if (m_MouseControlMode == MouseControlMode::MoveZ)
@@ -221,7 +223,8 @@ namespace ManagedEngineWrapper
 					}
 					else
 					{
-						pos.SetZ(pos.Z() + (RVec3::Dot(world_z, cam_right) * mdx - RVec3::Dot(world_z, cam_up) * mdy) * move_scale);
+						float z = pos.Z() + (RVec3::Dot(world_z, cam_right) * mdx - RVec3::Dot(world_z, cam_up) * mdy) * move_scale;
+						pos.SetZ(SnapTo(z, 1.0f));
 					}
 				}
 				m_SelectedObject->SetPosition(pos);
@@ -340,6 +343,9 @@ namespace ManagedEngineWrapper
 		float radius = (aabb.pMax - center).Magnitude();
 
 		RVec3 pos = m_CameraMatrix.GetTranslation() + m_CameraMatrix.GetForward() * radius - center;
+		pos.SetX(SnapTo(pos.X(), 1.0f));
+		pos.SetY(SnapTo(pos.Y(), 1.0f));
+		pos.SetZ(SnapTo(pos.Z(), 1.0f));
 		pObj->SetPosition(pos);
 
 		string Filename = RFileUtil::GetFileNameInPath(path);
@@ -521,5 +527,11 @@ namespace ManagedEngineWrapper
 
 		return false;
 	}
+
+	float EditorApp::SnapTo(float Value, float Unit)
+	{
+		return Unit * int((Value + Unit * 0.5f) / Unit);
+	}
+
 #pragma managed
 }
