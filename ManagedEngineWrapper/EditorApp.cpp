@@ -108,8 +108,12 @@ namespace ManagedEngineWrapper
 				int cur_x, cur_y;
 
 				RInput.GetCursorPosition(cur_x, cur_y);
+
+				m_MouseDownX = cur_x;
+				m_MouseDownY = cur_y;
+
 				float fx = float(cur_x - rect.left) / float(rect.right - rect.left),
-					fy = float(cur_y - rect.top) / float(rect.bottom - rect.top);
+					  fy = float(cur_y - rect.top) / float(rect.bottom - rect.top);
 
 				RunScreenToCameraRayPicking(fx, fy);
 			}
@@ -177,57 +181,56 @@ namespace ManagedEngineWrapper
 
 				RVec3 pos = m_SelectedObject->GetPosition();
 
-				if (m_MouseControlMode == MouseControlMode::MoveX)
+				if (RInput.IsKeyDown(VK_LMENU))
 				{
-					if (RInput.IsKeyDown(VK_LMENU))
+					RQuat Rotation = m_SelectedObject->GetRotation();
+					RQuat DeltaRotation;
+					float Angle = SnapTo((float)mdx * 0.05f, PI/180.0f * 1.0f);
+
+					switch (m_MouseControlMode)
 					{
-						RMatrix4 transform = m_SelectedObject->GetTransformMatrix();
-						RVec3 pos = transform.GetTranslation();
-						transform.SetTranslation(RVec3(0, 0, 0));
-						transform *= RMatrix4::CreateXAxisRotation((float)mdx);
-						transform.SetTranslation(pos);
-						m_SelectedObject->SetTransform(transform);
+					case MouseControlMode::MoveX:
+						DeltaRotation = RQuat::Euler(Angle, 0, 0);
+						break;
+
+					case MouseControlMode::MoveY:
+						DeltaRotation = RQuat::Euler(0, Angle, 0);
+						break;
+
+					case MouseControlMode::MoveZ:
+						DeltaRotation = RQuat::Euler(0, 0, Angle);
+						break;
 					}
-					else
+
+					m_SelectedObject->SetRotation(Rotation * DeltaRotation);
+				}
+				else
+				{
+					switch (m_MouseControlMode)
 					{
-						float x = pos.X() + (RVec3::Dot(world_x, cam_right) * mdx - RVec3::Dot(world_x, cam_up) * mdy) * move_scale;
-						pos.SetX(SnapTo(x, 1.0f));
+					case MouseControlMode::MoveX:
+						{
+							float x = pos.X() + (RVec3::Dot(world_x, cam_right) * mdx - RVec3::Dot(world_x, cam_up) * mdy) * move_scale;
+							pos.SetX(SnapTo(x, 1.0f));
+						}
+						break;
+
+					case MouseControlMode::MoveY:
+						{
+							float y = pos.Y() + (RVec3::Dot(world_y, cam_right) * mdx - RVec3::Dot(world_y, cam_up) * mdy) * move_scale;
+							pos.SetY(SnapTo(y, 1.0f));
+						}
+						break;
+
+					case MouseControlMode::MoveZ:
+						{
+							float z = pos.Z() + (RVec3::Dot(world_z, cam_right) * mdx - RVec3::Dot(world_z, cam_up) * mdy) * move_scale;
+							pos.SetZ(SnapTo(z, 1.0f));
+						}
+						break;
 					}
 				}
-				else if (m_MouseControlMode == MouseControlMode::MoveY)
-				{
-					if (RInput.IsKeyDown(VK_LMENU))
-					{
-						RMatrix4 transform = m_SelectedObject->GetTransformMatrix();
-						RVec3 pos = transform.GetTranslation();
-						transform.SetTranslation(RVec3(0, 0, 0));
-						transform *= RMatrix4::CreateYAxisRotation((float)mdx);
-						transform.SetTranslation(pos);
-						m_SelectedObject->SetTransform(transform);
-					}
-					else
-					{
-						float y = pos.Y() + (RVec3::Dot(world_y, cam_right) * mdx - RVec3::Dot(world_y, cam_up) * mdy) * move_scale;
-						pos.SetY(SnapTo(y, 1.0f));
-					}
-				}
-				else if (m_MouseControlMode == MouseControlMode::MoveZ)
-				{
-					if (RInput.IsKeyDown(VK_LMENU))
-					{
-						RMatrix4 transform = m_SelectedObject->GetTransformMatrix();
-						RVec3 pos = transform.GetTranslation();
-						transform.SetTranslation(RVec3(0, 0, 0));
-						transform *= RMatrix4::CreateZAxisRotation((float)mdx);
-						transform.SetTranslation(pos);
-						m_SelectedObject->SetTransform(transform);
-					}
-					else
-					{
-						float z = pos.Z() + (RVec3::Dot(world_z, cam_right) * mdx - RVec3::Dot(world_z, cam_up) * mdy) * move_scale;
-						pos.SetZ(SnapTo(z, 1.0f));
-					}
-				}
+
 				m_SelectedObject->SetPosition(pos);
 			}
 		}
@@ -490,11 +493,6 @@ namespace ManagedEngineWrapper
 					m_SelectedObject = rayPickingList[0].obj;
 				}
 			}
-		}
-
-		if (m_MouseControlMode != MouseControlMode::None)
-		{
-			RInput.GetCursorPosition(m_MouseDownX, m_MouseDownY);
 		}
 	}
 
