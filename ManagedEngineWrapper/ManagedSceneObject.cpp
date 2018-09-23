@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ManagedSceneObject.h"
+#include "TypeUtils.h"
 
 namespace ManagedEngineWrapper {
 
@@ -52,17 +53,36 @@ namespace ManagedEngineWrapper {
 		
 	}
 
-	ManagedMaterialCollection::ManagedMaterialCollection(RSMeshObject* obj)
+	ManagedMaterialCollection::ManagedMaterialCollection(RSMeshObject* MeshObject)
 	{
-		for (int i = 0; i < obj->GetMeshElementCount(); i++)
+		if (MeshObject)
 		{
-			materials.Add(gcnew ManagedMaterial(obj->GetMaterial(i), obj->GetMesh()->GetMeshElements()[i].GetName().c_str()));
+			RMesh* Mesh = MeshObject->GetMesh();
+			if (Mesh)
+			{
+				int NumElements = MeshObject->GetMeshElementCount();
+				for (int i = 0; i < NumElements; i++)
+				{
+					RMaterial* Material = MeshObject->GetMaterial(i);
+					auto MeshElement = Mesh->GetMeshElements()[i];
+
+					materials.Add(gcnew ManagedMaterial(Material, MeshElement.GetName().c_str()));
+				}
+			}
 		}
 	}
 
 	ManagedSceneObject::ManagedSceneObject(RSceneObject* obj)
 		: m_SceneObject(obj)
 	{
+		// Bind position children value changed event
+		CachedPosition.PropertyChanged += gcnew PropertyChangedEventHandler(this, &ManagedSceneObject::OnPositionChanged);
+	}
+
+	ManagedSceneObject::~ManagedSceneObject()
+	{
+		// Unbind position children value changed event
+		CachedPosition.PropertyChanged -= gcnew PropertyChangedEventHandler(this, &ManagedSceneObject::OnPositionChanged);
 	}
 
 	bool ManagedSceneObject::IsValid()
@@ -70,20 +90,10 @@ namespace ManagedEngineWrapper {
 		return m_SceneObject != NULL;
 	}
 
-	String^ ManagedSceneObject::Float3ToString(float x, float y, float z)
+	void ManagedSceneObject::OnPositionChanged(Object^ value, PropertyChangedEventArgs^ args)
 	{
-		return String::Format(L"{0}, {1}, {2}", x, y, z);
-	}
-
-	void ManagedSceneObject::StringToFloat3(String^ str, float& x, float &y, float &z)
-	{
-		String^ delimStr = ",";
-		cli::array<Char>^ delimiter = delimStr->ToCharArray();
-		cli::array<String^>^ words = str->Split(delimiter);
-
-		x = (float)Convert::ToDouble(words[0]);
-		y = (float)Convert::ToDouble(words[1]);
-		z = (float)Convert::ToDouble(words[2]);
+		// Update position property via property so cached value is also updated
+		Position = static_cast<Vector3^>(value);
 	}
 
 	ManagedMeshObject::ManagedMeshObject(RSceneObject* obj)
@@ -109,12 +119,26 @@ namespace ManagedEngineWrapper {
 
 	List<ManagedMaterial^>^ ManagedMeshObject::Materials::get()
 	{
-		List<ManagedMaterial^>^ matList = gcnew List<ManagedMaterial^>();
-		for (int i = 0; i < GetMeshObject()->GetMeshElementCount(); i++)
+		List<ManagedMaterial^>^ MaterialList = gcnew List<ManagedMaterial^>();
+
+		RSMeshObject* MeshObject = GetMeshObject();
+		if (MeshObject)
 		{
-			matList->Add(gcnew ManagedMaterial(GetMeshObject()->GetMaterial(i), GetMeshObject()->GetMesh()->GetMeshElements()[i].GetName().c_str()));
+			int NumElements = MeshObject->GetMeshElementCount();
+			RMesh* Mesh = MeshObject->GetMesh();
+			if (Mesh)
+			{
+				for (int i = 0; i < NumElements; i++)
+				{
+					RMaterial* Material = MeshObject->GetMaterial(i);
+					auto MeshElement = Mesh->GetMeshElements()[i];
+
+					MaterialList->Add(gcnew ManagedMaterial(Material, MeshElement.GetName().c_str()));
+				}
+			}
 		}
-		return matList;
+
+		return MaterialList;
 	}
 
 	String^ ManagedMeshObject::VertexComponents::get()
@@ -123,42 +147,50 @@ namespace ManagedEngineWrapper {
 
 		if (MeshObject)
 		{
-			RMesh* mesh = MeshObject->GetMesh();
+			RMesh* Mesh = MeshObject->GetMesh();
+			int NumElements = MeshObject->GetMeshElementCount();
 
-			if (mesh && mesh->GetMeshElementCount())
+			if (Mesh && NumElements > 0)
 			{
-				return gcnew String(RVertexDeclaration::GetVertexComponentsString(mesh->GetMeshElements()[0].GetVertexComponentMask()).c_str());
+				auto MeshElement = Mesh->GetMeshElements()[0];
+				int VertexComponentMask = MeshElement.GetVertexComponentMask();
+				string VertexComponentsString = RVertexDeclaration::GetVertexComponentsString(VertexComponentMask);
+
+				return gcnew String(VertexComponentsString.c_str());
 			}
 		}
 
 		return gcnew String("");
 	}
 
-	System::String^ ManagedSceneObject::Position::get()
+	Vector3^ ManagedSceneObject::Position::get()
 	{
 		float x, y, z;
 		GetObjectPositionInFloat3(m_SceneObject, x, y, z);
-		return Float3ToString(x, y, z);
+		Vector3^ value = gcnew Vector3(x, y, z);
+
+		// Store cached value
+		CachedPosition = value;
+		return %CachedPosition;
 	}
 
-	void ManagedSceneObject::Position::set(String^ value)
+	void ManagedSceneObject::Position::set(Vector3^ value)
 	{
-		float x, y, z;
-		StringToFloat3(value, x, y, z);
-		SetObjectPositionInFloat3(m_SceneObject, x, y, z);
+		CachedPosition = value;
+		SetObjectPositionInFloat3(m_SceneObject, value->x, value->y, value->z);
 	}
 
 	System::String^ ManagedSceneObject::Rotation::get()
 	{
 		float x, y, z;
 		GetObjectRotationInFloat3(m_SceneObject, x, y, z);
-		return Float3ToString(x, y, z);
+		return TypeUtils::Float3ToString(x, y, z);
 	}
 
 	void ManagedSceneObject::Rotation::set(String^ value)
 	{
 		float x, y, z;
-		StringToFloat3(value, x, y, z);
+		TypeUtils::StringToFloat3(value, x, y, z);
 		SetObjectRotationInFloat3(m_SceneObject, x, y, z);
 	}
 
@@ -166,13 +198,13 @@ namespace ManagedEngineWrapper {
 	{
 		float x, y, z;
 		GetObjectScaleInFloat3(m_SceneObject, x, y, z);
-		return Float3ToString(x, y, z);
+		return TypeUtils::Float3ToString(x, y, z);
 	}
 
 	void ManagedSceneObject::Scale::set(String^ value)
 	{
 		float x, y, z;
-		StringToFloat3(value, x, y, z);
+		TypeUtils::StringToFloat3(value, x, y, z);
 		SetObjectScaleInFloat3(m_SceneObject, x, y, z);
 	}
 

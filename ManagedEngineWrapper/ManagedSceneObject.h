@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Vector3.h"
 #include "ManagedMaterial.h"
 
 using namespace System;
@@ -19,6 +20,7 @@ namespace ManagedEngineWrapper
 		RSceneObject*	m_SceneObject;
 	public:
 		ManagedSceneObject(RSceneObject* obj);
+		~ManagedSceneObject();
 
 		virtual bool IsValid();
 
@@ -32,10 +34,10 @@ namespace ManagedEngineWrapper
 
 		/// Access the position of scene object
 		[Category("Scene Object")]
-		property String^ Position
+		property Vector3^ Position
 		{
-			String^ get();
-			void set(String^ value);
+			Vector3^ get();
+			void set(Vector3^ value);
 		};
 
 		/// Access the rotation of scene object
@@ -62,8 +64,11 @@ namespace ManagedEngineWrapper
 		}
 
 	private:
-		String^ Float3ToString(float x, float y, float z);
-		void StringToFloat3(String^ str, float& x, float &y, float &z);
+		// The cached position property for handling OnPropertyChanged event
+		Vector3 CachedPosition;
+
+		// Position property changed event
+		void OnPositionChanged(Object^ value, PropertyChangedEventArgs^ args);
 	};
 
 	public ref class ManagedMeshObject : ManagedSceneObject

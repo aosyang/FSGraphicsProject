@@ -65,7 +65,7 @@ namespace ManagedEngineWrapper
 	{
 		List<ManagedMaterial^> materials;
 	public:
-		ManagedMaterialCollection(RSMeshObject* obj);
+		ManagedMaterialCollection(RSMeshObject* MeshObject);
 
 		int GetCount() { return materials.Count; }
 		ManagedMaterial^ GetMaterial(int i) { return materials[i]; }
@@ -102,6 +102,7 @@ namespace ManagedEngineWrapper
 
 				return str;
 			}
+
 			return ExpandableObjectConverter::ConvertTo(context, culture, value, destinationType);
 		}
 	};
