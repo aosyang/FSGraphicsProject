@@ -3,8 +3,7 @@
 //
 // Engine class
 //=============================================================================
-#ifndef _RENGINE_H
-#define _RENGINE_H
+#pragma once
 
 class REngine : public RSingleton<REngine>
 {
@@ -65,4 +64,3 @@ private:
 
 #define GEngine REngine::Instance()
 
-#endif

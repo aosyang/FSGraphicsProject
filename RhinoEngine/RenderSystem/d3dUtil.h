@@ -3,8 +3,7 @@
 //
 // Commonly used D3D macros
 //=============================================================================
-#ifndef _D3DUTIL_H
-#define _D3DUTIL_H
+#pragma once
 
 #if defined(DEBUG) || defined(_DEBUG)
 	#ifndef HR
@@ -33,4 +32,3 @@
 #define SAFE_DELETE_ARRAY(p)  { delete [](p); p = nullptr; }
 #define SAFE_DELETE(p)        { delete (p); p = nullptr;  }
 
-#endif

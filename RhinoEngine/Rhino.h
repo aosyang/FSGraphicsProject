@@ -3,8 +3,7 @@
 //
 // Rhino Engine main header file
 //=============================================================================
-#ifndef _RHINO_H
-#define _RHINO_H
+#pragma once
 
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
@@ -97,4 +96,3 @@ class RResourceBase;
 #include "Scene/RSkybox.h"
 #include "Scene/RScene.h"
 
-#endif

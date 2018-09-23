@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef RDEBUGRENDERER_H
-#define RDEBUGRENDERER_H
+#pragma once
 
 class RDebugRenderer : public RSingleton<RDebugRenderer>
 {
@@ -77,4 +76,3 @@ FORCEINLINE void RDebugRenderer::DrawSphere(const RVec3& center, float radius, i
 }
 
 
-#endif

@@ -3,8 +3,7 @@
 //
 // 
 //=============================================================================
-#ifndef _RSHADOWMAP_H
-#define _RSHADOWMAP_H
+#pragma once
 
 class RShadowMap
 {
@@ -47,4 +46,3 @@ private:
 	RFrustum					m_Frustum;
 };
 
-#endif

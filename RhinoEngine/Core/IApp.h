@@ -4,8 +4,7 @@
 // Engine application interface
 //=============================================================================
 
-#ifndef _IAPP_H
-#define _IAPP_H
+#pragma once
 
 class IApp
 {
@@ -20,4 +19,3 @@ public:
 	virtual TCHAR* WindowTitle() { return L"Rhino Engine"; }
 };
 
-#endif

@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _RSCRIPTSYSTEM_H
-#define _RSCRIPTSYSTEM_H
+#pragma once
 
 class RSceneObject;
 
@@ -42,4 +41,3 @@ private:
 
 #define GScriptSystem RScriptSystem::Instance()
 
-#endif

@@ -3,8 +3,7 @@
 //
 // 
 //=============================================================================
-#ifndef _RSKYBOX_H
-#define _RSKYBOX_H
+#pragma once
 
 struct RShader;
 
@@ -26,4 +25,3 @@ private:
 	RShader*					m_SkyboxShader;
 };
 
-#endif

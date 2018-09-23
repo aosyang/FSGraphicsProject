@@ -3,8 +3,7 @@
 //
 // 
 //=============================================================================
-#ifndef _RSMESHOBJECT_H
-#define _RSMESHOBJECT_H
+#pragma once
 
 #include "RSceneObject.h"
 
@@ -58,4 +57,3 @@ protected:
 	bool					m_bNeedUpdateMaterial;
 };
 
-#endif

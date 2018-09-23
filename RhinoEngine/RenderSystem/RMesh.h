@@ -3,8 +3,7 @@
 //
 // 
 //=============================================================================
-#ifndef _RMESH_H
-#define _RMESH_H
+#pragma once
 
 #include "RShaderManager.h"
 #include "RResourceBase.h"
@@ -82,4 +81,3 @@ FORCEINLINE int RMesh::GetMeshElementCount() const
 }
 
 
-#endif

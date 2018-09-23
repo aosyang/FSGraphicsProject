@@ -1,3 +1,8 @@
+//=============================================================================
+// ManagedSceneObject.cpp by Shiyang Ao, 2018 All Rights Reserved.
+//
+//
+//=============================================================================
 #include "stdafx.h"
 #include "ManagedSceneObject.h"
 #include "TypeUtils.h"

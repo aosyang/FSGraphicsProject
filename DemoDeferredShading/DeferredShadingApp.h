@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _DEFERREDSHADINGAPP_H
-#define _DEFERREDSHADINGAPP_H
+#pragma once
 
 #include "Rhino.h"
 
@@ -174,4 +173,3 @@ private:
 	RSkybox						m_Skybox;
 };
 
-#endif

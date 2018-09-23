@@ -1,4 +1,9 @@
-﻿using System;
+//=============================================================================
+// EngineCanvas.cs by Shiyang Ao, 2018 All Rights Reserved.
+//
+//
+//=============================================================================
+using System;
 using System.Windows.Forms;
 using System.IO;
 using ManagedInterface;

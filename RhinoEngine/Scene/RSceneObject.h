@@ -3,8 +3,7 @@
 //
 // 
 //=============================================================================
-#ifndef _RSCENEOBJECT_H
-#define _RSCENEOBJECT_H
+#pragma once
 
 class RScene;
 class RSceneComponentBase;
@@ -176,4 +175,3 @@ FORCEINLINE void RSceneObject::SetTransform(const RTransform& InTransform)
 	m_NodeTransform = InTransform;
 }
 
-#endif

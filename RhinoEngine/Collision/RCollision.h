@@ -3,8 +3,7 @@
 //
 // 
 //=============================================================================
-#ifndef _RCOLLISION_H
-#define _RCOLLISION_H
+#pragma once
 
 #include "../Core/RVector.h"
 
@@ -68,4 +67,3 @@ namespace RCollision
 	bool TestSphereWithCapsule(const RSphere& sphere, const RCapsule& capsule);
 };
 
-#endif

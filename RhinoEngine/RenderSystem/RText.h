@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _RTEXT_H
-#define _RTEXT_H
+#pragma once
 
 #include "Rhino.h"
 
@@ -29,4 +28,3 @@ protected:
 	bool							m_bNeedUpdateBuffer;
 };
 
-#endif

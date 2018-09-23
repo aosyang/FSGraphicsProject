@@ -3,8 +3,7 @@
 //
 // 
 //=============================================================================
-#ifndef _RMESHELEMENT_H
-#define _RMESHELEMENT_H
+#pragma once
 
 enum MeshElementFlag
 {
@@ -100,4 +99,3 @@ private:
 	int					m_VertexComponentMask;
 };
 
-#endif

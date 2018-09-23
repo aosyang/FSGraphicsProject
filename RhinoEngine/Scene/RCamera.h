@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _RCAMERA_H
-#define _RCAMERA_H
+#pragma once
 
 #include "RSceneObject.h"
 
@@ -40,4 +39,3 @@ private:
 	bool		m_bIsProjectionMatrixDirty;
 };
 
-#endif

@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _RVECTOR_H
-#define _RVECTOR_H
+#pragma once
 
 #include "MathHelper.h"
 #include <math.h>
@@ -408,4 +407,3 @@ public:
 	}
 };
 
-#endif

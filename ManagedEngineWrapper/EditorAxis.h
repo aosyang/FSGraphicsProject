@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _EDITORAXIS_H
-#define _EDITORAXIS_H
+#pragma once
 
 enum EAxis
 {
@@ -33,4 +32,3 @@ public:
 	const RAabb& GetAabb(int index) const;
 };
 
-#endif

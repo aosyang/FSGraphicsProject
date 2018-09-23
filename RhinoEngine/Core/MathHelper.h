@@ -3,8 +3,7 @@
 //
 // Math helper functions
 //=============================================================================
-#ifndef _MATHHELPER_H
-#define _MATHHELPER_H
+#pragma once
 
 
 #define FLT_EQUAL(a,b)			(fabsf((a)-(b))<FLT_EPSILON)
@@ -56,4 +55,3 @@ namespace RMath
 	FORCEINLINE float RadianToDegree(float Radian)				{ return 180.0f / PI * Radian; }
 }
 
-#endif

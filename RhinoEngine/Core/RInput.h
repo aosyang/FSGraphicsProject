@@ -3,8 +3,7 @@
 //
 // Input manager class
 //=============================================================================
-#ifndef _RINPUT_H
-#define _RINPUT_H
+#pragma once
 
 #include "RSingleton.h"
 
@@ -79,4 +78,3 @@ public:
 
 #define RInput RInputSystem::Instance()
 
-#endif

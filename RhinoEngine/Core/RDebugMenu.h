@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _RDEBUGMENU_H
-#define _RDEBUGMENU_H
+#pragma once
 
 class RDebugMenu : public RText
 {
@@ -61,4 +60,3 @@ private:
 	float					m_KeyRepeatTime;
 };
 
-#endif

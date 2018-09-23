@@ -3,8 +3,7 @@
 //
 // Render system class
 //=============================================================================
-#ifndef _RRENDERSYSTEM_H
-#define _RRENDERSYSTEM_H
+#pragma once
 
 #include "Core/RSingleton.h"
 #include "RRenderMeshComponent.h"
@@ -133,4 +132,3 @@ protected:
 
 #define GRenderer RRenderSystem::Instance()
 
-#endif

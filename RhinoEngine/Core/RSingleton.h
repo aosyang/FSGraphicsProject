@@ -3,8 +3,7 @@
 //
 // Singleton template
 //=============================================================================
-#ifndef _RSINGLETON_H
-#define _RSINGLETON_H
+#pragma once
 
 template <typename T>
 class RSingleton
@@ -22,4 +21,3 @@ public:
 	}
 };
 
-#endif

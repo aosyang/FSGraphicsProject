@@ -1,4 +1,9 @@
-﻿using ManagedInterface;
+//=============================================================================
+// EditorMainForm.cs by Shiyang Ao, 2018 All Rights Reserved.
+//
+//
+//=============================================================================
+using ManagedInterface;
 using System;
 using System.IO;
 using System.Windows.Forms;

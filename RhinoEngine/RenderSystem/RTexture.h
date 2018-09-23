@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _RTEXTURE_H
-#define _RTEXTURE_H
+#pragma once
 
 class RTexture : public RResourceBase
 {
@@ -25,4 +24,3 @@ private:
 	UINT						m_Width, m_Height;
 };
 
-#endif

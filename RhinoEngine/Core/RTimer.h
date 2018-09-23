@@ -3,8 +3,7 @@
 //
 // Timer class
 //=============================================================================
-#ifndef _RTIMER_H
-#define _RTIMER_H
+#pragma once
 
 class RTimer
 {
@@ -32,4 +31,3 @@ private:
 	bool		m_Stopped;
 };
 
-#endif

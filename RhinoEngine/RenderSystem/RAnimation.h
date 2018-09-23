@@ -3,8 +3,7 @@
 //
 // 
 //=============================================================================
-#ifndef _RANIMATION_H
-#define _RANIMATION_H
+#pragma once
 
 using namespace std;
 
@@ -156,4 +155,3 @@ FORCEINLINE bool RAnimation::IsLooping() const
 	return (GetBitFlags() & AnimBitFlag_Loop) != 0;
 }
 
-#endif

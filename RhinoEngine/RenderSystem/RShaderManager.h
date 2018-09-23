@@ -3,8 +3,7 @@
 //
 // 
 //=============================================================================
-#ifndef _RSHADERMANAGER_H
-#define _RSHADERMANAGER_H
+#pragma once
 
 enum EShaderFeatureMask
 {
@@ -74,4 +73,3 @@ FORCEINLINE const string& RShader::GetName() const
 }
 
 
-#endif

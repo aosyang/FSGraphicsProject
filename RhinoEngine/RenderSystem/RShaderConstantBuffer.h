@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _RSHADERCONSTANTBUFFER_H
-#define _RSHADERCONSTANTBUFFER_H
+#pragma once
 
 enum EConstantBufferShaderType
 {
@@ -105,4 +104,3 @@ FORCEINLINE void RConstantBuffers::Shutdown()
 	cbGlobal.Release();
 }
 
-#endif

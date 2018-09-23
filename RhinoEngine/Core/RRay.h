@@ -3,8 +3,7 @@
 //
 // 
 //=============================================================================
-#ifndef _RRAY_H
-#define _RRAY_H
+#pragma once
 
 #include "RVector.h"
 #include "RAabb.h"
@@ -24,4 +23,3 @@ public:
 	bool TestAabbIntersection(const RAabb& aabb, float* t = nullptr) const;
 };
 
-#endif

@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _RAABB_H
-#define _RAABB_H
+#pragma once
 
 #include "RVector.h"
 
@@ -68,4 +67,3 @@ public:
 	static RAabb Default;
 };
 
-#endif

@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _FIGHTINGGAMEAPP_H
-#define _FIGHTINGGAMEAPP_H
+#pragma once
 
 #include "Rhino.h"
 #include "FTGPlayerController.h"
@@ -44,4 +43,3 @@ private:
 	RText				m_Text;
 };
 
-#endif

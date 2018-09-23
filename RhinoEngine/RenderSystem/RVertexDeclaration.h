@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _RVERTEXDECLARATION_H
-#define _RVERTEXDECLARATION_H
+#pragma once
 
 #define VERTEX_TYPE_BEGIN(v) struct v { static const char* GetVertexTypeName() { return #v; }
 #define VERTEX_TYPE_END };
@@ -180,4 +179,3 @@ ID3D11InputLayout* RVertexDeclaration::GetInputLayout() const
 	return RVertexDeclaration::GetInputLayout(T::GetVertexTypeName());
 }
 
-#endif

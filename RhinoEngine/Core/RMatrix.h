@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _RMATRIX_H
-#define _RMATRIX_H
+#pragma once
 
 #include "RVector.h"
 #include <math.h>
@@ -265,4 +264,3 @@ FORCEINLINE RMatrix4 RMatrix4::CreateScale(float sx, float sy, float sz)
 	return mat;
 }
 
-#endif

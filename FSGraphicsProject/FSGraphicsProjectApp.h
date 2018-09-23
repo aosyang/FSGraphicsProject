@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _FSGRAPHICSPROJECTAPP_H
-#define _FSGRAPHICSPROJECTAPP_H
+#pragma once
 
 #include "Rhino.h"
 
@@ -121,4 +120,3 @@ private:
 	int							m_MeshInstanceCount;
 };
 
-#endif

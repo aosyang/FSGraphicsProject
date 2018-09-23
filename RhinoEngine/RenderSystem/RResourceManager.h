@@ -3,8 +3,7 @@
 //
 // 
 //=============================================================================
-#ifndef _RRESOURCEMANAGER_H
-#define _RRESOURCEMANAGER_H
+#pragma once
 
 struct RMaterial;
 
@@ -83,4 +82,3 @@ private:
 	LoaderThreadData					m_LoaderThreadData;
 };
 
-#endif

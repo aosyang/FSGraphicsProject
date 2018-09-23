@@ -4,8 +4,7 @@
 // 
 //=============================================================================
 
-#ifndef _RSERIALIZER_H
-#define _RSERIALIZER_H
+#pragma once
 
 enum class ESerializeMode : UINT8
 {
@@ -213,4 +212,3 @@ private:
 	ESerializeMode	m_Mode;
 };
 
-#endif
