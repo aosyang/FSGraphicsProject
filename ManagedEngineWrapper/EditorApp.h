@@ -14,8 +14,6 @@ namespace ManagedEngineWrapper
 	{
 	private:
 		RSkybox						m_Skybox;
-		ID3D11SamplerState*			m_SamplerState;
-		ID3D11SamplerState*			m_SamplerComparisonState;
 		float						m_CamYaw, m_CamPitch;
 
 		RScene						m_Scene;
