@@ -92,6 +92,8 @@ void REngine::Shutdown()
 
 	GRenderer.Shutdown();
 
+	RInput.Shutdown();
+
 	if (m_UseEngineRenderWindow)
 		DestroyRenderWindow();
 
@@ -153,6 +155,8 @@ void REngine::RunOneFrame(bool update_input)
 	{
 		RInput._UpdateKeyStates();
 	}
+
+	RInput.CheckAndExecuteKeyBindings();
 
 	m_Timer.Tick();
 

@@ -33,6 +33,48 @@ bool RInputSystem::Initialize()
 	return true;
 }
 
+void RInputSystem::Shutdown()
+{
+	KeyBindingDelegates.clear();
+}
+
+void RInputSystem::UnbindKeyStateEvents(int KeyCode, EBufferedKeyState KeyState)
+{
+	for (int Index = (int)KeyBindingDelegates.size() - 1; Index >= 0; Index--)
+	{
+		auto& KeyBindingDelegate = KeyBindingDelegates[Index];
+		if (KeyBindingDelegate->KeyCode == KeyCode && KeyBindingDelegate->KeyState == KeyState)
+		{
+			KeyBindingDelegates.erase(KeyBindingDelegates.begin() + Index);
+		}
+	}
+}
+
+void RInputSystem::UnbindAllKeyEvents(int KeyCode)
+{
+	for (int Index = (int)KeyBindingDelegates.size() - 1; Index >= 0; Index--)
+	{
+		auto& KeyBindingDelegate = KeyBindingDelegates[Index];
+		if (KeyBindingDelegate->KeyCode == KeyCode)
+		{
+			KeyBindingDelegates.erase(KeyBindingDelegates.begin() + Index);
+		}
+	}
+}
+
+void RInputSystem::CheckAndExecuteKeyBindings()
+{
+	for (auto& KeyBindingDelegate : KeyBindingDelegates)
+	{
+		RLog("Key state %d\n", GetBufferedKeyState(KeyBindingDelegate->KeyCode));
+
+		if (GetBufferedKeyState(KeyBindingDelegate->KeyCode) == KeyBindingDelegate->KeyState)
+		{
+			KeyBindingDelegate->Execute();
+		}
+	}
+}
+
 void RInputSystem::_UpdateKeyStates()
 {
 	// Update keyboard key states

@@ -38,6 +38,8 @@ bool SimpleGame::Initialize()
 
 	SetupScene();
 
+	RInput.BindKeyStateEvent(VK_SPACE, EBufferedKeyState::Pressed, this, &SimpleGame::ScrambleCube);
+
 	return true;
 }
 
@@ -95,32 +97,6 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 	}
 	else
 	{
-		if (RInput.GetBufferedKeyState(VK_SPACE) == EBufferedKeyState::Pressed)
-		{
-			m_IsScramblingCube = true;
-
-			const int TotalMoveNums = 15;
-			UINT8 Last = 0;
-
-			m_ScrambleMoves.reserve(TotalMoveNums);
-			for (int i = 0; i < TotalMoveNums; i++)
-			{
-				UINT8 n = (UINT8)RMath::RandRangedInt(0, 11);
-
-				if (i != 0)
-				{
-					// If a move happens to cancel the last one, try making a different move
-					while (((n >> 1) == (Last >> 1)) && (n % 2 != Last % 2))
-					{
-						n = (UINT8)RMath::RandRangedInt(0, 11);
-					}
-				}
-
-				m_ScrambleMoves.push_back(n);
-				Last = n;
-			}
-		}
-
 		if (RInput.IsKeyDown(VK_UP))
 		{
 			if (RInput.GetBufferedKeyState(VK_LEFT) == EBufferedKeyState::Pressed)
@@ -220,4 +196,33 @@ void SimpleGame::SetupScene()
 	m_CameraOrbiter = m_Scene.CreateSceneObjectOfType<RSceneObject>("CameraOrbiter");
 	m_Camera->SetPosition(RVec3(0, 0, -500.0f));
 	m_Camera->AttachTo(m_CameraOrbiter);
+}
+
+void SimpleGame::ScrambleCube()
+{
+	if (!m_IsScramblingCube)
+	{
+		m_IsScramblingCube = true;
+
+		const int TotalMoveNums = 15;
+		UINT8 Last = 0;
+
+		m_ScrambleMoves.reserve(TotalMoveNums);
+		for (int i = 0; i < TotalMoveNums; i++)
+		{
+			UINT8 n = (UINT8)RMath::RandRangedInt(0, 11);
+
+			if (i != 0)
+			{
+				// If a move happens to cancel the last one, try making a different move
+				while (((n >> 1) == (Last >> 1)) && (n % 2 != Last % 2))
+				{
+					n = (UINT8)RMath::RandRangedInt(0, 11);
+				}
+			}
+
+			m_ScrambleMoves.push_back(n);
+			Last = n;
+		}
+	}
 }

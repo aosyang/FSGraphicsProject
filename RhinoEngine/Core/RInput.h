@@ -30,6 +30,9 @@ public:
 	// Initialize the input system
 	bool Initialize();
 
+	// Shutdown the input system
+	void Shutdown();
+
 	// Freeze the position of mouse cursor so it can't move
 	void LockCursor();
 
@@ -45,6 +48,19 @@ public:
 	EBufferedKeyState GetBufferedKeyState(int KeyCode) const;
 	bool IsKeyDown(int KeyCode) const;
 
+	// Bind a class member function as a key event
+	template<typename T>
+	void BindKeyStateEvent(int KeyCode, EBufferedKeyState KeyState, T* Object, void(T::*Func)());
+
+	// Unbind all events from a key state
+	void UnbindKeyStateEvents(int KeyCode, EBufferedKeyState KeyState);
+
+	// Unbind all events from a key
+	void UnbindAllKeyEvents(int KeyCode);
+
+	// Check condition and execute all registered key binding delegates
+	void CheckAndExecuteKeyBindings();
+
 protected:
 	RInputSystem();
 	~RInputSystem();
@@ -58,7 +74,10 @@ protected:
 	void SetKeyDownState(int KeyCode, bool bIsKeyDown);
 
 private:
+	// Is key down this frame
 	bool	m_bKeyDown[MAX_KEY_NUM];
+
+	// Is key down last frame
 	bool	m_bKeyDownLastFrame[MAX_KEY_NUM];
 
 	POINT	m_CursorPos;
@@ -66,7 +85,47 @@ private:
 
 	bool	m_bCursorLocked;
 	POINT	m_CursorLockingPos;
+
+	struct RKeyBindingDelegate
+	{
+	public:
+		RKeyBindingDelegate(int InKeyCode, EBufferedKeyState InKeyState)
+			: KeyCode(InKeyCode)
+			, KeyState(InKeyState)
+		{}
+
+		virtual void Execute() {}
+
+		int					KeyCode;
+		EBufferedKeyState	KeyState;
+	};
+
+	vector<unique_ptr<RKeyBindingDelegate>> KeyBindingDelegates;
 };
+
+template<typename T>
+void RInputSystem::BindKeyStateEvent(int KeyCode, EBufferedKeyState KeyState, T* Object, void(T::*Func)())
+{
+	struct KeyEvent : public RKeyBindingDelegate
+	{
+	public:
+		KeyEvent(int InKeyCode, EBufferedKeyState InKeyState, T* InObject, void(T::*InFunc)())
+			: RKeyBindingDelegate(InKeyCode, InKeyState)
+			, Object(InObject)
+			, Func(InFunc)
+		{
+		}
+
+		virtual void Execute() override { if (Object) { (Object->*Func)(); } }
+
+	private:
+		T*					Object;
+		void(T::*Func)();
+	};
+
+	unique_ptr<KeyEvent> NewKeyEvent(new KeyEvent(KeyCode, KeyState, Object, Func));
+	KeyBindingDelegates.push_back(move(NewKeyEvent));
+}
 
 // A utility class to modify 'key down' state of the input system
 class RKeyStateModifier

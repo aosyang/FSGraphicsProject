@@ -25,6 +25,9 @@ public:
 private:
 	void SetupScene();
 
+	// Begin scrambling the cube. The cube faces will randomly rotate couple times.
+	void ScrambleCube();
+
 private:
 	RScene	m_Scene;
 

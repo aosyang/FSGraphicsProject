@@ -24,6 +24,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <memory>
 
 #include <vector>
 #include <list>
