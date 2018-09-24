@@ -142,6 +142,10 @@ namespace ManagedEngineWrapper
 					moveVec -= RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 				if (RInput.IsKeyDown('D'))
 					moveVec += RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+				if (RInput.IsKeyDown('Q'))
+					moveVec -= RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+				if (RInput.IsKeyDown('E'))
+					moveVec += RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 			}
 		}
 
