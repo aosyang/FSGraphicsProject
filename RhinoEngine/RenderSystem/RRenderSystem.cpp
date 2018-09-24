@@ -111,6 +111,11 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 		return false;
 	}
 
+#if _DEBUG
+	static const char DeviceContextName[] = "Device Context";
+	m_pD3DImmediateContext->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen(DeviceContextName), DeviceContextName);
+#endif
+
 	if (featureLevel != D3D_FEATURE_LEVEL_11_0)
 	{
 		MessageBox(0, L"Direct3D Feature Level 11 unsupported.", 0, MB_ICONERROR);
@@ -425,7 +430,6 @@ void RRenderSystem::UnregisterRenderMeshComponent(RRenderMeshComponent* Componen
 void RRenderSystem::RegisterLight(ILight* Light)
 {
 	auto Iter = find(m_RegisteredLights.begin(), m_RegisteredLights.end(), Light);
-
 	assert(Iter == m_RegisteredLights.end());
 
 	m_RegisteredLights.push_back(Light);
@@ -434,10 +438,25 @@ void RRenderSystem::RegisterLight(ILight* Light)
 void RRenderSystem::UnregisterLight(ILight* Light)
 {
 	auto Iter = find(m_RegisteredLights.begin(), m_RegisteredLights.end(), Light);
-
 	assert(Iter != m_RegisteredLights.end());
 
 	m_RegisteredLights.erase(Iter);
+}
+
+void RRenderSystem::RegisterShadowCaster(IShadowCaster* ShadowCaster)
+{
+	auto Iter = find(m_RegisteredShadowCasters.begin(), m_RegisteredShadowCasters.end(), ShadowCaster);
+	assert(Iter == m_RegisteredShadowCasters.end());
+
+	m_RegisteredShadowCasters.push_back(ShadowCaster);
+}
+
+void RRenderSystem::UnregisterShadowCaster(IShadowCaster* ShadowCaster)
+{
+	auto Iter = find(m_RegisteredShadowCasters.begin(), m_RegisteredShadowCasters.end(), ShadowCaster);
+	assert(Iter != m_RegisteredShadowCasters.end());
+
+	m_RegisteredShadowCasters.erase(Iter);
 }
 
 void RRenderSystem::SetRenderCamera(RCamera* Camera)
@@ -452,6 +471,43 @@ RCamera* RRenderSystem::GetRenderCamera() const
 
 void RRenderSystem::RenderFrame()
 {
+	// Prepare shadow map for each shadow caster
+	for (auto ShadowCaster : m_RegisteredShadowCasters)
+	{
+		if (ShadowCaster->CanCastShadow())
+		{
+			ShadowCaster->PrepareShadowPass();
+			Clear();
+
+			RenderViewInfo View
+			{
+				ShadowCaster->GetFrustum()
+			};
+
+			for (auto MeshComponent : m_RegisteredRenderMeshComponents)
+			{
+				MeshComponent->RenderDepthPass(View);
+			}
+
+			// Draw shadow frustum
+			//GDebugRenderer.DrawFrustum(ShadowCaster->GetFrustum(), RColor::Yellow);
+		}
+	}
+
+	// Restore default render targets
+	SetRenderTargets();
+
+	// Setup viewport
+	D3D11_VIEWPORT vp;
+	vp.TopLeftX = 0.0f;
+	vp.TopLeftY = 0.0f;
+	vp.Width = static_cast<float>(m_ClientWidth);
+	vp.Height = static_cast<float>(m_ClientHeight);
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+
+	m_pD3DImmediateContext->RSSetViewports(1, &vp);
+
 	Clear();
 
 	SHADER_GLOBAL_BUFFER cbGlobal;
@@ -479,6 +535,22 @@ void RRenderSystem::RenderFrame()
 		cbScene.viewProjMatrix = viewMatrix * projMatrix;
 		cbScene.cameraPos = m_RenderCamera->GetWorldPosition();
 
+		bool bHasShadowCaster = false;
+
+		for (auto ShadowCaster : m_RegisteredShadowCasters)
+		{
+			if (ShadowCaster->CanCastShadow())
+			{
+				ShadowCaster->PrepareRenderPass(&cbScene);
+
+				ID3D11ShaderResourceView* shadowMapSRV[] = { ShadowCaster->GetRTDepthSRV() };
+				GRenderer.D3DImmediateContext()->PSSetShaderResources(RShadowMap::ShaderResourceSlot(), 1, shadowMapSRV);
+
+				bHasShadowCaster = true;
+				break;
+			}
+		}
+
 		RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
 		RConstantBuffers::cbScene.BindBuffer();
 
@@ -493,6 +565,11 @@ void RRenderSystem::RenderFrame()
 		cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, AmbientIntensity);
 
 		cbLight.CameraPos = m_RenderCamera->GetWorldPosition();
+		if (bHasShadowCaster)
+		{
+			// Enable single directional light shadow
+			cbLight.CascadedShadowCount = 1;
+		}
 
 		// Setup global lights
 		for (auto Light : m_RegisteredLights)

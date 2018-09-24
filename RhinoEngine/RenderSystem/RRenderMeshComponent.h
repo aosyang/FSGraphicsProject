@@ -34,6 +34,9 @@ public:
 	/// Render the component
 	void Render(const RenderViewInfo& View) const;
 
+	/// Render the component in depth pass for shadow map
+	void RenderDepthPass(const RenderViewInfo& View) const;
+
 	/// Set mesh resource for the component to render
 	void SetMesh(const RMesh* Mesh);
 

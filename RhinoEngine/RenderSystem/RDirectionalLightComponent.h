@@ -7,6 +7,7 @@
 
 #include "Scene/RSceneComponentBase.h"
 #include "ILight.h"
+#include "RShadowMap.h"
 
 struct DirectionalLightParam
 {
@@ -14,7 +15,7 @@ struct DirectionalLightParam
 	RColor	Color;
 };
 
-class RDirectionalLightComponent : public RSceneComponentBase, public ILight
+class RDirectionalLightComponent : public RSceneComponentBase, public ILight, public IShadowCaster
 {
 	typedef RSceneComponentBase Base;
 public:
@@ -23,6 +24,14 @@ public:
 	static RDirectionalLightComponent* Create(RSceneObject* InOwner);
 
 	virtual ELightType GetLightType() override;
+
+	// Override IShadowCaster methods
+	virtual bool CanCastShadow() override;
+	virtual void PrepareShadowPass() override;
+	virtual void PrepareRenderPass(SHADER_SCENE_BUFFER* SceneConstBuffer) override;
+	virtual RFrustum GetFrustum() override;
+	virtual ID3D11ShaderResourceView* GetRTDepthSRV() override;
+	// End of IShadowCaster methods
 
 	void SetParameters(const DirectionalLightParam& Parameters);
 
@@ -34,6 +43,8 @@ private:
 
 	RVec3 m_Direction;
 	RColor m_Color;
+
+	RShadowMap	m_ShadowMap;
 };
 
 FORCEINLINE const RVec3& RDirectionalLightComponent::GetDirection() const

@@ -84,6 +84,9 @@ public:
 	void RegisterLight(ILight* Light);
 	void UnregisterLight(ILight* Light);
 
+	void RegisterShadowCaster(IShadowCaster* ShadowCaster);
+	void UnregisterShadowCaster(IShadowCaster* ShadowCaster);
+
 	void SetRenderCamera(RCamera* Camera);
 	RCamera* GetRenderCamera() const;
 
@@ -126,6 +129,7 @@ protected:
 
 	vector<RRenderMeshComponent*>	m_RegisteredRenderMeshComponents;
 	vector<ILight*>					m_RegisteredLights;
+	vector<IShadowCaster*>			m_RegisteredShadowCasters;
 
 	RCamera*				m_RenderCamera;			// Default camera will be used for frustum culling
 };

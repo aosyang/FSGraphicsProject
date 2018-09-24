@@ -99,6 +99,53 @@ void RRenderMeshComponent::Render(const RenderViewInfo& View) const
 	}
 }
 
+void RRenderMeshComponent::RenderDepthPass(const RenderViewInfo& View) const
+{
+	if (m_Mesh)
+	{
+		if (m_Mesh->IsLoaded())
+		{
+			const RMatrix4& Matrix = GetOwner()->GetTransformMatrix();
+			RAabb MeshAabb = m_Mesh->GetLocalSpaceAabb().GetTransformedAabb(Matrix);
+			if (RCollision::TestAabbInsideFrustum(View.Frustum, MeshAabb))
+			{
+				// Set up world matrix in constant buffer
+				SHADER_OBJECT_BUFFER cbObject;
+				cbObject.worldMatrix = Matrix;
+
+				RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
+				RConstantBuffers::cbPerObject.BindBuffer();
+
+				const UINT32 NumMeshElements = (UINT32)m_Mesh->GetMeshElements().size();
+				const UINT32 NumMaterials = (UINT32)m_Materials.size();
+
+				for (UINT32 i = 0; i < NumMeshElements; i++)
+				{
+					static RShader* DepthShader = RShaderManager::Instance().GetShaderResource("Depth");
+					assert(DepthShader);
+
+					const RMeshElement& MeshElement = m_Mesh->GetMeshElements()[i];
+					int flag = MeshElement.GetFlag();
+
+					int shaderFeatureMask = 0;
+					if ((flag & MEF_Skinned) && !GEngine.IsEditor())
+					{
+						shaderFeatureMask |= SFM_Skinned;
+					}
+
+					if (GRenderer.IsUsingDeferredShading())
+					{
+						shaderFeatureMask |= SFM_Deferred;
+					}
+
+					DepthShader->Bind(shaderFeatureMask);
+					m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				}
+			}
+		}
+	}
+}
+
 void RRenderMeshComponent::SetMesh(const RMesh* Mesh)
 {
 	m_Mesh = Mesh;
