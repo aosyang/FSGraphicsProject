@@ -5,9 +5,6 @@
 //=============================================================================
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ManagedInterface
 {
@@ -18,16 +15,24 @@ namespace ManagedInterface
         void RunOneFrame();
         void Resize(int Width, int Height);
 
-        List<String> GetMeshNameList();
-        void UpdatePreviewMesh(String path, bool replace);
+        /// <summary>
+        /// Get a list of mesh assets names
+        /// </summary>
+        /// <returns></returns>
+        List<string> GetMeshNameList();
+        void UpdatePreviewMesh(string path, bool replace);
+
+        List<IManagedSceneObject> GetSceneObjectsList();
+
         void OnKeyDown(int keycode);
         void OnKeyUp(int keycode);
 
         IManagedSceneObject GetSelection();
+        void SetSelection(IManagedSceneObject SelectedSceneObject);
 
         bool DeleteSelection();
-        void LoadScene(String filename);
-        void SaveScene(String filename);
+        void LoadScene(string filename);
+        void SaveScene(string filename);
 
         void SaveMeshMaterialFromSelection();
         void ExportAllAnimationsToBinaryFiles();

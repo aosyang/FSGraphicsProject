@@ -3,16 +3,19 @@
 //
 //
 //=============================================================================
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ManagedInterface
 {
     public interface IManagedSceneObject
     {
         bool IsValid();
+
+        /// <summary>
+        /// The readable name of scene object
+        /// </summary>
+        string DisplayName
+        {
+            get;
+        }
     }
 }

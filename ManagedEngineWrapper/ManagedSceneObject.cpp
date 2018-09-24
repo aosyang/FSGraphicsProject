@@ -7,7 +7,8 @@
 #include "ManagedSceneObject.h"
 #include "TypeUtils.h"
 
-namespace ManagedEngineWrapper {
+namespace ManagedEngineWrapper
+{
 
 #pragma managed(push, off)
 
@@ -52,30 +53,6 @@ namespace ManagedEngineWrapper {
 
 #pragma managed(pop)
 
-	ManagedMaterial::ManagedMaterial(RMaterial* mat, const char* elemName)
-		: material(mat), meshElementName(gcnew String(elemName))
-	{
-		
-	}
-
-	ManagedMaterialCollection::ManagedMaterialCollection(RSMeshObject* MeshObject)
-	{
-		if (MeshObject)
-		{
-			RMesh* Mesh = MeshObject->GetMesh();
-			if (Mesh)
-			{
-				int NumElements = MeshObject->GetMeshElementCount();
-				for (int i = 0; i < NumElements; i++)
-				{
-					RMaterial* Material = MeshObject->GetMaterial(i);
-					auto MeshElement = Mesh->GetMeshElements()[i];
-
-					materials.Add(gcnew ManagedMaterial(Material, MeshElement.GetName().c_str()));
-				}
-			}
-		}
-	}
 
 	ManagedSceneObject::ManagedSceneObject(RSceneObject* obj)
 		: m_SceneObject(obj)
@@ -93,6 +70,21 @@ namespace ManagedEngineWrapper {
 	bool ManagedSceneObject::IsValid()
 	{
 		return m_SceneObject != NULL;
+	}
+
+	RSceneObject* ManagedSceneObject::GetRawSceneObjectPtr()
+	{
+		return m_SceneObject;
+	}
+
+	String^ ManagedSceneObject::DisplayName::get()
+	{
+		if (Name != "")
+		{
+			return Name;
+		}
+
+		return "[Unnamed]";
 	}
 
 	void ManagedSceneObject::OnPositionChanged(Object^ value, PropertyChangedEventArgs^ args)
@@ -212,5 +204,4 @@ namespace ManagedEngineWrapper {
 		TypeUtils::StringToFloat3(value, x, y, z);
 		SetObjectScaleInFloat3(m_SceneObject, x, y, z);
 	}
-
 }

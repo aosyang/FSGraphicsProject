@@ -28,6 +28,7 @@ namespace ManagedEngineWrapper
 		~ManagedSceneObject();
 
 		virtual bool IsValid();
+		RSceneObject* GetRawSceneObjectPtr();
 
 		/// Access the name of scene object
 		[Category("Scene Object")]
@@ -36,6 +37,12 @@ namespace ManagedEngineWrapper
 			String^ get()           { return gcnew String(m_SceneObject->GetName().c_str()); }
 			void set(String^ value) { m_SceneObject->SetName(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer())); }
 		};
+
+		[Browsable(false)]
+		property String^ DisplayName
+		{
+			virtual String^ get();
+		}
 
 		/// Access the position of scene object
 		[Category("Scene Object")]

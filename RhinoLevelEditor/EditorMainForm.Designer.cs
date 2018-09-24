@@ -31,9 +31,12 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.btnReplaceMesh = new System.Windows.Forms.Button();
             this.btnAddMesh = new System.Windows.Forms.Button();
-            this.listMesh = new System.Windows.Forms.ListBox();
+            this.meshAssetsListBox = new System.Windows.Forms.ListBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.engineCanvas1 = new RhinoLevelEditor.EngineCanvas();
+            this.splitContainer_SceneView_and_Property = new System.Windows.Forms.SplitContainer();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.sceneObjectsListBox = new System.Windows.Forms.ListBox();
+            this.sceneObjectsSearchTextBox = new System.Windows.Forms.TextBox();
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -44,6 +47,7 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteSelectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,7 +55,7 @@
             this.saveMaterialToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.engineCanvas1 = new RhinoLevelEditor.EngineCanvas();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -60,6 +64,11 @@
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer_SceneView_and_Property)).BeginInit();
+            this.splitContainer_SceneView_and_Property.Panel1.SuspendLayout();
+            this.splitContainer_SceneView_and_Property.Panel2.SuspendLayout();
+            this.splitContainer_SceneView_and_Property.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -77,7 +86,7 @@
             // 
             this.splitContainer1.Panel1.Controls.Add(this.btnReplaceMesh);
             this.splitContainer1.Panel1.Controls.Add(this.btnAddMesh);
-            this.splitContainer1.Panel1.Controls.Add(this.listMesh);
+            this.splitContainer1.Panel1.Controls.Add(this.meshAssetsListBox);
             // 
             // splitContainer1.Panel2
             // 
@@ -113,18 +122,18 @@
             this.btnAddMesh.UseVisualStyleBackColor = true;
             this.btnAddMesh.Click += new System.EventHandler(this.btnAddMesh_Click);
             // 
-            // listMesh
+            // meshAssetsListBox
             // 
-            this.listMesh.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.meshAssetsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.listMesh.FormattingEnabled = true;
-            this.listMesh.Location = new System.Drawing.Point(2, 2);
-            this.listMesh.Margin = new System.Windows.Forms.Padding(2);
-            this.listMesh.Name = "listMesh";
-            this.listMesh.Size = new System.Drawing.Size(220, 654);
-            this.listMesh.TabIndex = 1;
-            this.listMesh.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listMesh_MouseDoubleClick);
+            this.meshAssetsListBox.FormattingEnabled = true;
+            this.meshAssetsListBox.Location = new System.Drawing.Point(2, 2);
+            this.meshAssetsListBox.Margin = new System.Windows.Forms.Padding(2);
+            this.meshAssetsListBox.Name = "meshAssetsListBox";
+            this.meshAssetsListBox.Size = new System.Drawing.Size(220, 654);
+            this.meshAssetsListBox.TabIndex = 1;
+            this.meshAssetsListBox.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listMesh_MouseDoubleClick);
             // 
             // splitContainer2
             // 
@@ -141,26 +150,59 @@
             // 
             // splitContainer2.Panel2
             // 
-            this.splitContainer2.Panel2.Controls.Add(this.propertyGrid1);
+            this.splitContainer2.Panel2.Controls.Add(this.splitContainer_SceneView_and_Property);
             this.splitContainer2.Size = new System.Drawing.Size(1136, 734);
-            this.splitContainer2.SplitterDistance = 789;
+            this.splitContainer2.SplitterDistance = 834;
             this.splitContainer2.SplitterWidth = 3;
             this.splitContainer2.TabIndex = 0;
             // 
-            // engineCanvas1
+            // splitContainer_SceneView_and_Property
             // 
-            this.engineCanvas1.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.engineCanvas1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.engineCanvas1.Location = new System.Drawing.Point(0, 0);
-            this.engineCanvas1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.engineCanvas1.Name = "engineCanvas1";
-            this.engineCanvas1.Size = new System.Drawing.Size(787, 732);
-            this.engineCanvas1.TabIndex = 2;
-            this.engineCanvas1.Load += new System.EventHandler(this.engineCanvas1_Load);
-            this.engineCanvas1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.engineCanvas1_KeyDown);
-            this.engineCanvas1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.engineCanvas1_KeyUp);
-            this.engineCanvas1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.engineCanvas1_MouseClick);
-            this.engineCanvas1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.engineCanvas1_MouseClick);
+            this.splitContainer_SceneView_and_Property.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer_SceneView_and_Property.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer_SceneView_and_Property.Name = "splitContainer_SceneView_and_Property";
+            this.splitContainer_SceneView_and_Property.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer_SceneView_and_Property.Panel1
+            // 
+            this.splitContainer_SceneView_and_Property.Panel1.Controls.Add(this.groupBox1);
+            // 
+            // splitContainer_SceneView_and_Property.Panel2
+            // 
+            this.splitContainer_SceneView_and_Property.Panel2.Controls.Add(this.propertyGrid1);
+            this.splitContainer_SceneView_and_Property.Size = new System.Drawing.Size(297, 732);
+            this.splitContainer_SceneView_and_Property.SplitterDistance = 366;
+            this.splitContainer_SceneView_and_Property.TabIndex = 1;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.sceneObjectsListBox);
+            this.groupBox1.Controls.Add(this.sceneObjectsSearchTextBox);
+            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox1.Location = new System.Drawing.Point(0, 0);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(297, 366);
+            this.groupBox1.TabIndex = 2;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Scene View";
+            // 
+            // sceneObjectsListBox
+            // 
+            this.sceneObjectsListBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.sceneObjectsListBox.FormattingEnabled = true;
+            this.sceneObjectsListBox.Location = new System.Drawing.Point(3, 36);
+            this.sceneObjectsListBox.Name = "sceneObjectsListBox";
+            this.sceneObjectsListBox.Size = new System.Drawing.Size(291, 327);
+            this.sceneObjectsListBox.TabIndex = 1;
+            this.sceneObjectsListBox.SelectedIndexChanged += new System.EventHandler(this.sceneObjectsListBox_SelectedIndexChanged);
+            // 
+            // sceneObjectsSearchTextBox
+            // 
+            this.sceneObjectsSearchTextBox.Dock = System.Windows.Forms.DockStyle.Top;
+            this.sceneObjectsSearchTextBox.Location = new System.Drawing.Point(3, 16);
+            this.sceneObjectsSearchTextBox.Name = "sceneObjectsSearchTextBox";
+            this.sceneObjectsSearchTextBox.Size = new System.Drawing.Size(291, 20);
+            this.sceneObjectsSearchTextBox.TabIndex = 0;
             // 
             // propertyGrid1
             // 
@@ -169,7 +211,7 @@
             this.propertyGrid1.Location = new System.Drawing.Point(0, 0);
             this.propertyGrid1.Margin = new System.Windows.Forms.Padding(2);
             this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(342, 732);
+            this.propertyGrid1.Size = new System.Drawing.Size(297, 362);
             this.propertyGrid1.TabIndex = 0;
             // 
             // statusStrip1
@@ -218,39 +260,44 @@
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.newToolStripMenuItem.Text = "&New map";
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.openToolStripMenuItem.Text = "&Open map...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(136, 6);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.saveToolStripMenuItem.Text = "&Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.saveAsToolStripMenuItem.Text = "Save &As...";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(136, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -299,10 +346,21 @@
             this.exportAnimToolStripMenuItem.Text = "&Export fbx animations to binary";
             this.exportAnimToolStripMenuItem.Click += new System.EventHandler(this.exportAnimToolStripMenuItem_Click);
             // 
-            // toolStripSeparator3
+            // engineCanvas1
             // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
+            this.engineCanvas1.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.engineCanvas1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.engineCanvas1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.engineCanvas1.Location = new System.Drawing.Point(0, 0);
+            this.engineCanvas1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.engineCanvas1.Name = "engineCanvas1";
+            this.engineCanvas1.Size = new System.Drawing.Size(832, 732);
+            this.engineCanvas1.TabIndex = 2;
+            this.engineCanvas1.Load += new System.EventHandler(this.engineCanvas1_Load);
+            this.engineCanvas1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.engineCanvas1_KeyDown);
+            this.engineCanvas1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.engineCanvas1_KeyUp);
+            this.engineCanvas1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.engineCanvas1_MouseClick);
+            this.engineCanvas1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.engineCanvas1_MouseClick);
             // 
             // EditorMainForm
             // 
@@ -324,6 +382,12 @@
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
+            this.splitContainer_SceneView_and_Property.Panel1.ResumeLayout(false);
+            this.splitContainer_SceneView_and_Property.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer_SceneView_and_Property)).EndInit();
+            this.splitContainer_SceneView_and_Property.ResumeLayout(false);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
@@ -336,7 +400,7 @@
         #endregion
 
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.ListBox listMesh;
+        private System.Windows.Forms.ListBox meshAssetsListBox;
         private System.Windows.Forms.Button btnAddMesh;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.MenuStrip menuStrip1;
@@ -359,6 +423,10 @@
         private System.Windows.Forms.Button btnReplaceMesh;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.SplitContainer splitContainer_SceneView_and_Property;
+        private System.Windows.Forms.ListBox sceneObjectsListBox;
+        private System.Windows.Forms.TextBox sceneObjectsSearchTextBox;
+        private System.Windows.Forms.GroupBox groupBox1;
     }
 }
 

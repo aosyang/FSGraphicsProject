@@ -168,6 +168,7 @@
     <ClCompile Include="EditorApp.cpp" />
     <ClCompile Include="EditorAxis.cpp" />
     <ClCompile Include="ManagedEngineWrapper.cpp" />
+    <ClCompile Include="ManagedMaterial.cpp" />
     <ClCompile Include="ManagedSceneObject.cpp" />
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

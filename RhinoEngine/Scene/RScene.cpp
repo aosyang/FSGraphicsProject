@@ -401,6 +401,11 @@ vector<RSceneObject*>& RScene::GetSceneObjects()
 	return m_SceneObjects;
 }
 
+const vector<RSceneObject*>& RScene::GetSceneObjects() const
+{
+	return m_SceneObjects;
+}
+
 bool RScene::XmlReadObjectTransform(tinyxml2::XMLElement* ObjectElement, RVec3& OutPosition, RQuat& OutRotation, RVec3& OutScale)
 {
 	if (ObjectElement)

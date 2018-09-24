@@ -54,11 +54,13 @@ namespace ManagedEngineWrapper
 		virtual void UpdateScene(const RTimer& timer) override;
 		virtual void RenderScene() override;
 
-		void AddMeshObjectToScene(const char* path);
+		RSceneObject* AddMeshObjectToScene(const char* MeshAssetPath);
 		void LoadScene(const char* filename);
 		void SaveScene(const char* filename);
 
 		RSceneObject* GetSelection();
+		void SetSelection(RSceneObject* SceneObject);
+		vector<RSceneObject*> GetSceneObjects() const;
 
 		void SaveMeshMaterialFromSelection();
 		void ExportAllAnimationsToBinaryFiles();

@@ -61,6 +61,7 @@ public:
 	void UpdateScene();
 
 	vector<RSceneObject*>& GetSceneObjects();
+	const vector<RSceneObject*>& GetSceneObjects() const;
 private:
 
 	bool XmlReadObjectTransform(tinyxml2::XMLElement* ObjectElement, RVec3& OutPosition, RQuat& OutRotation, RVec3& OutScale);

@@ -81,9 +81,9 @@ namespace ManagedEngineWrapper
 		List<String^>^ list = gcnew List<String^>();
 
 		const vector<RMesh*>& meshList = RResourceManager::Instance().GetMeshResources();
-		for (vector<RMesh*>::const_iterator iter = meshList.begin(); iter != meshList.end(); iter++)
+		for (auto Iter : meshList)
 		{
-			list->Add(gcnew String((*iter)->GetPath().data()));
+			list->Add(gcnew String(Iter->GetPath().data()));
 		}
 
 		return list;
@@ -92,7 +92,10 @@ namespace ManagedEngineWrapper
 	void RhinoEngineWrapper::UpdatePreviewMesh(String^ path, bool replace)
 	{
 		if (!replace)
+		{
 			m_Application->AddMeshObjectToScene(ManagedStringRefToConstCharPtr(path));
+			UpdateSceneObjectsList();
+		}
 		else
 		{
 			RSMeshObject* meshObj = static_cast<RSMeshObject*>(m_Application->GetSelection());
@@ -101,6 +104,11 @@ namespace ManagedEngineWrapper
 				meshObj->SetMesh(RResourceManager::Instance().FindMesh(ManagedStringRefToConstCharPtr(path)));
 			}
 		}
+	}
+
+	List<IManagedSceneObject^>^ RhinoEngineWrapper::GetSceneObjectsList()
+	{
+		return SceneObjectsList;
 	}
 
 	void RhinoEngineWrapper::OnKeyDown(int keycode)
@@ -123,13 +131,37 @@ namespace ManagedEngineWrapper
 		RSceneObject* sel = m_Application->GetSelection();
 		if (sel)
 		{
-			if (sel->IsType<RSMeshObject>())
+			if (!SceneObjectsList)
 			{
-				return gcnew ManagedEngineWrapper::ManagedMeshObject(sel);
+				UpdateSceneObjectsList();
+			}
+
+			for (int i = 0; i < SceneObjectsList->Count; i++)
+			{
+				auto SceneObject = safe_cast<ManagedSceneObject^>(SceneObjectsList[i]);
+				if (SceneObject->GetRawSceneObjectPtr() == sel)
+				{
+					return SceneObject;
+				}
 			}
 		}
 
 		return gcnew ManagedEngineWrapper::ManagedSceneObject(sel);
+	}
+
+	void RhinoEngineWrapper::SetSelection(IManagedSceneObject^ SelectedSceneObject)
+	{
+		if (SelectedSceneObject != nullptr)
+		{
+			ManagedSceneObject^ SceneObject = safe_cast<ManagedSceneObject^>(SelectedSceneObject);
+			if (SceneObject != nullptr)
+			{
+				m_Application->SetSelection(SceneObject->GetRawSceneObjectPtr());
+				return;
+			}
+		}
+
+		m_Application->SetSelection(nullptr);
 	}
 
 	bool RhinoEngineWrapper::DeleteSelection()
@@ -140,6 +172,7 @@ namespace ManagedEngineWrapper
 	void RhinoEngineWrapper::LoadScene(String^ filename)
 	{
 		m_Application->LoadScene(ManagedStringRefToConstCharPtr(filename));
+		UpdateSceneObjectsList();
 	}
 
 	void RhinoEngineWrapper::SaveScene(String^ filename)
@@ -156,4 +189,22 @@ namespace ManagedEngineWrapper
 	{
 		m_Application->ExportAllAnimationsToBinaryFiles();
 	}
+
+	void RhinoEngineWrapper::UpdateSceneObjectsList()
+	{
+		SceneObjectsList = gcnew List<IManagedSceneObject ^>();
+
+		for (auto SceneObject : m_Application->GetSceneObjects())
+		{
+			if (SceneObject->IsType<RSMeshObject>())
+			{
+				SceneObjectsList->Add(gcnew ManagedMeshObject(SceneObject));
+			}
+			else
+			{
+				SceneObjectsList->Add(gcnew ManagedSceneObject(SceneObject));
+			}
+		}
+	}
+
 }

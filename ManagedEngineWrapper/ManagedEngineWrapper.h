@@ -35,11 +35,15 @@ namespace ManagedEngineWrapper {
 
 		virtual List<String^>^ GetMeshNameList();
 		virtual void UpdatePreviewMesh(String^ path, bool replace);
+
+		virtual List<IManagedSceneObject^>^ GetSceneObjectsList();
+
 		virtual void OnKeyDown(int keycode);
 		virtual void OnKeyUp(int keycode);
 		void RunScreenToCameraRayPicking(float x, float y);
 		
 		virtual IManagedSceneObject^ GetSelection();
+		virtual void SetSelection(IManagedSceneObject^ SelectedSceneObject);
 
 		virtual bool DeleteSelection();
 		virtual void LoadScene(String^ filename);
@@ -47,5 +51,10 @@ namespace ManagedEngineWrapper {
 
 		virtual void SaveMeshMaterialFromSelection();
 		virtual void ExportAllAnimationsToBinaryFiles();
+
+	private:
+		void UpdateSceneObjectsList();
+
+		List<IManagedSceneObject^>^ SceneObjectsList;
 	};
 }

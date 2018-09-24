@@ -13,8 +13,9 @@ namespace RhinoLevelEditor
     public partial class EditorMainForm : Form
     {
         bool[] KeyState = new bool[255];
-        const String FormTitle = "Rhino Level Editor";
-        String OpenedMapPath;
+        const string FormTitle = "Rhino Level Editor";
+        string OpenedMapPath;
+        bool bUpdatingSceneObjectsList = false;
 
         public EditorMainForm()
         {
@@ -28,7 +29,7 @@ namespace RhinoLevelEditor
         /// </summary>
         private void RefreshFormTitle()
         {
-            String MapName = Path.GetFileName(OpenedMapPath);
+            string MapName = Path.GetFileName(OpenedMapPath);
             if (MapName == null || MapName == "")
             {
                 Text = FormTitle + " - Untitled";
@@ -48,12 +49,13 @@ namespace RhinoLevelEditor
         {
             engineCanvas1.Initialize();
             engineCanvas1.SetLogLabel(ref toolStripStatusLabel1);
-            listMesh.DataSource = engineCanvas1.RhinoEngine.GetMeshNameList();
+            meshAssetsListBox.DataSource = engineCanvas1.RhinoEngine.GetMeshNameList();
+            UpdateSceneObjectsList();
         }
 
         private void btnAddMesh_Click(object sender, EventArgs e)
         {
-            engineCanvas1.RhinoEngine.UpdatePreviewMesh(listMesh.SelectedItem.ToString(), false);
+            engineCanvas1.RhinoEngine.UpdatePreviewMesh(meshAssetsListBox.SelectedItem.ToString(), false);
         }
 
         private void engineCanvas1_KeyDown(object sender, KeyEventArgs e)
@@ -76,10 +78,11 @@ namespace RhinoLevelEditor
 
         private void listMesh_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            int index = this.listMesh.IndexFromPoint(e.Location);
+            int index = this.meshAssetsListBox.IndexFromPoint(e.Location);
             if (index != System.Windows.Forms.ListBox.NoMatches)
             {
-                engineCanvas1.RhinoEngine.UpdatePreviewMesh(listMesh.Items[index].ToString(), false);
+                engineCanvas1.RhinoEngine.UpdatePreviewMesh(meshAssetsListBox.Items[index].ToString(), false);
+                UpdateSceneObjectsList();
             }
         }
 
@@ -92,6 +95,27 @@ namespace RhinoLevelEditor
                 propertyGrid1.SelectedObject = null;
         }
 
+        private void UpdateSceneObjectsList()
+        {
+            bUpdatingSceneObjectsList = true;
+
+            sceneObjectsListBox.DataSource = engineCanvas1.RhinoEngine.GetSceneObjectsList();
+            sceneObjectsListBox.DisplayMember = "DisplayName";
+            sceneObjectsListBox.Refresh();
+
+            IManagedSceneObject Selection = engineCanvas1.RhinoEngine.GetSelection();
+            if (Selection.IsValid())
+            {
+                sceneObjectsListBox.SelectedItem = Selection;
+            }
+            else
+            {
+                sceneObjectsListBox.SelectedItem = null;
+            }
+
+            bUpdatingSceneObjectsList = false;
+        }
+
         private void engineCanvas1_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
@@ -102,6 +126,7 @@ namespace RhinoLevelEditor
                 //engineCanvas1.RhinoEngine.RunScreenToCameraRayPicking(x, y);
 
                 UpdatePropertyGrid();
+                UpdateSceneObjectsList();
             }
         }
 
@@ -127,6 +152,7 @@ namespace RhinoLevelEditor
                 engineCanvas1.RhinoEngine.LoadScene(dlg.FileName);
                 RefreshFormTitle();
                 UpdatePropertyGrid();
+                UpdateSceneObjectsList();
             }
         }
 
@@ -167,7 +193,7 @@ namespace RhinoLevelEditor
 
         private void btnReplaceMesh_Click(object sender, EventArgs e)
         {
-            engineCanvas1.RhinoEngine.UpdatePreviewMesh(listMesh.SelectedItem.ToString(), true);
+            engineCanvas1.RhinoEngine.UpdatePreviewMesh(meshAssetsListBox.SelectedItem.ToString(), true);
             UpdatePropertyGrid();
         }
 
@@ -176,5 +202,15 @@ namespace RhinoLevelEditor
             this.Close();
         }
 
+        private void sceneObjectsListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Avoid running the scene object selection during refreshing list box
+            if (!bUpdatingSceneObjectsList)
+            {
+                ListBox listBox = (ListBox)sender;
+                engineCanvas1.RhinoEngine.SetSelection((IManagedSceneObject)listBox.SelectedItem);
+                UpdatePropertyGrid();
+            }
+        }
     }
 }

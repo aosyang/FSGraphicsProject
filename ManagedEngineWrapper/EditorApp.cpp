@@ -343,9 +343,9 @@ namespace ManagedEngineWrapper
 		GDebugRenderer.Reset();
 	}
 
-	void EditorApp::AddMeshObjectToScene(const char* path)
+	RSceneObject* EditorApp::AddMeshObjectToScene(const char* MeshAssetPath)
 	{
-		RSMeshObject* pObj = m_Scene.CreateMeshObject(path);
+		RSMeshObject* pObj = m_Scene.CreateMeshObject(MeshAssetPath);
 		RAabb aabb = pObj->GetAabb();
 		RVec3 center = (aabb.pMin + aabb.pMax) * 0.5f;
 		float radius = (aabb.pMax - center).Magnitude();
@@ -356,12 +356,14 @@ namespace ManagedEngineWrapper
 		pos.SetZ(SnapTo(pos.Z(), 1.0f));
 		pObj->SetPosition(pos);
 
-		string Filename = RFileUtil::GetFileNameInPath(path);
-		Filename = RFileUtil::StripExtension(Filename);
+		string AssetName = RFileUtil::GetFileNameInPath(MeshAssetPath);
+		AssetName = RFileUtil::StripExtension(AssetName);
 
 		// Generate unique name in the scene
-		string ObjectName = m_Scene.GenerateUniqueObjectName(Filename);
+		const string ObjectName = m_Scene.GenerateUniqueObjectName(AssetName);
 		pObj->SetName(ObjectName);
+
+		return pObj;
 	}
 
 	void EditorApp::LoadScene(const char* filename)
@@ -379,6 +381,16 @@ namespace ManagedEngineWrapper
 	RSceneObject* EditorApp::GetSelection()
 	{
 		return m_SelectedObject;
+	}
+
+	void EditorApp::SetSelection(RSceneObject* SceneObject)
+	{
+		m_SelectedObject = SceneObject;
+	}
+
+	vector<RSceneObject*> EditorApp::GetSceneObjects() const
+	{
+		return m_Scene.GetSceneObjects();
 	}
 
 	void EditorApp::SaveMeshMaterialFromSelection()
