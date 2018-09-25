@@ -43,7 +43,7 @@ public:
 
 	float GetResourceTimestamp();
 protected:
-	RSMeshObject(RScene* InScene);
+	RSMeshObject(const RConstructingParams& Params);
 	~RSMeshObject();
 
 	/// Use default materials defined in mesh resource

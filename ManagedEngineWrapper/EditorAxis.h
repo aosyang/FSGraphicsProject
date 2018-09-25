@@ -23,7 +23,7 @@ public:
 	const RAabb& GetAabb(int index) const;
 
 protected:
-	EditorAxis(RScene* Scene);
+	EditorAxis(const RConstructingParams& Params);
 	virtual ~EditorAxis();
 
 	void Create();

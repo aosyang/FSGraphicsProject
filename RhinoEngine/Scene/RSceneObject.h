@@ -8,6 +8,29 @@
 class RScene;
 class RSceneComponentBase;
 
+/// Object creation flags
+const int CF_InternalObject		= 1 << 0;		// Object will not be manipulated by user directly
+const int CF_NoSerialization	= 1 << 1;		// Object will not be serialized
+
+/// Scene object constructing parameters
+struct RConstructingParams
+{
+	explicit RConstructingParams(const RConstructingParams& cpy)
+		: Scene(cpy.Scene)
+		, Flags(cpy.Flags)
+	{
+	}
+
+	explicit RConstructingParams(RScene* InScene = nullptr, int InFlags = 0)
+		: Scene(InScene)
+		, Flags(InFlags)
+	{
+	}
+
+	RScene* Scene;
+	int		Flags;
+};
+
 /// Base object that can be placed in a scene
 class RSceneObject
 {
@@ -100,6 +123,9 @@ public:
 	/// Get the visibility of scene object
 	bool IsVisible() const;
 
+	/// Check if scene object has flags
+	bool HasFlags(int FlagMasks) const;
+
 	/// Create a new component and add to this scene object
 	template<typename T>
 	T* AddNewComponent();
@@ -121,7 +147,7 @@ public:
 	}
 
 protected:
-	RSceneObject(RScene* InScene);
+	RSceneObject(const RConstructingParams& Params);
 	virtual ~RSceneObject();
 
 	/// Update all components on this scene object
@@ -134,6 +160,8 @@ protected:
 	bool			m_bVisible;
 	string			m_Script;
 	vector<string>	m_ParsedScript;
+
+	int				m_Flags;
 
 	/// Components of this scene object
 	vector<RSceneComponentBase*>	SceneComponents;
@@ -192,3 +220,7 @@ FORCEINLINE bool RSceneObject::IsVisible() const
 	return m_bVisible;
 }
 
+FORCEINLINE bool RSceneObject::HasFlags(int FlagMasks) const
+{
+	return (m_Flags & FlagMasks) != 0;
+}

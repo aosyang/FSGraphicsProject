@@ -69,8 +69,8 @@ RQuat BlockRotations[]
 
 IMPLEMENT_SCENE_OBJECT(RgColorPiece);
 
-RgColorPiece::RgColorPiece(RScene* InScene)
-	: Base(InScene)
+RgColorPiece::RgColorPiece(const RConstructingParams& Params)
+	: Base(Params)
 {
 	RMesh* CubeMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/RubikCube/RoundedCornerCube.fbx");
 
@@ -116,8 +116,8 @@ void InitializeRubikMaterials()
 
 IMPLEMENT_SCENE_OBJECT(RgCubeBlock);
 
-RgCubeBlock::RgCubeBlock(RScene* InScene)
-	: Base(InScene),
+RgCubeBlock::RgCubeBlock(const RConstructingParams& Params)
+	: Base(Params),
 	  m_Parent(nullptr)
 {
 	RMesh* CubeMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/RubikCube/RoundedCornerCube.fbx");
@@ -255,8 +255,8 @@ void RgCubeBlock::SetupColors(int x, int y, int z)
 
 IMPLEMENT_SCENE_OBJECT(RgRubik);
 
-RgRubik::RgRubik(RScene* InScene)
-	: Base(InScene),
+RgRubik::RgRubik(const RConstructingParams& Params)
+	: Base(Params),
 	  m_CenterOfMove(nullptr),
 	  m_MoveAnimationProgress(1.0f),
 	  m_FinishedMove(false)

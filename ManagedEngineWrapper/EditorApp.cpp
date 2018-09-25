@@ -51,7 +51,7 @@ namespace ManagedEngineWrapper
 		m_EditorAxis->SetVisible(false);
 
 		// Create editor camera
-		m_EditorCamera = m_Scene.CreateSceneObjectOfType<RCamera>("EditorCamera");
+		m_EditorCamera = m_Scene.CreateSceneObjectOfType<RCamera>("EditorCamera", CF_InternalObject|CF_NoSerialization);
 		m_EditorCamera->SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
 
 		RSceneObject* GlobalLightInfo = m_Scene.CreateSceneObjectOfType<RSceneObject>("DirectionalLight");
@@ -311,7 +311,7 @@ namespace ManagedEngineWrapper
 
 	vector<RSceneObject*> EditorApp::GetSceneObjects() const
 	{
-		return m_Scene.GetSceneObjects();
+		return m_Scene.EnumerateSceneObjects();
 	}
 
 	void EditorApp::SaveMeshMaterialFromSelection()
@@ -386,7 +386,7 @@ namespace ManagedEngineWrapper
 			vector<RayPickingResult> rayPickingList;
 			float tmin = FLT_MAX;
 
-			for (auto SceneObject : m_Scene.GetSceneObjects())
+			for (auto SceneObject : m_Scene.EnumerateSceneObjects())
 			{
 				float t;
 				if (ray.TestAabbIntersection(SceneObject->GetAabb(), &t))
@@ -437,7 +437,7 @@ namespace ManagedEngineWrapper
 	{
 		if (m_SelectedObject)
 		{
-			auto iter = std::find(m_Scene.GetSceneObjects().begin(), m_Scene.GetSceneObjects().end(), m_SelectedObject);
+			auto iter = std::find(m_Scene.EnumerateSceneObjects().begin(), m_Scene.EnumerateSceneObjects().end(), m_SelectedObject);
 			m_Scene.DestroyObject(*iter);
 			m_SelectedObject = nullptr;
 

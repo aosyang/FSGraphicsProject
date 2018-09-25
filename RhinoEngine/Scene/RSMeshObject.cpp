@@ -11,8 +11,8 @@
 
 IMPLEMENT_SCENE_OBJECT(RSMeshObject);
 
-RSMeshObject::RSMeshObject(RScene* InScene)
-	: RSceneObject(InScene),
+RSMeshObject::RSMeshObject(const RConstructingParams& Params)
+	: RSceneObject(Params),
 	  m_Mesh(nullptr),
 	  m_OverridingShader(nullptr),
 	  m_OverridingShaderFeatures(-1),

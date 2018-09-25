@@ -9,9 +9,9 @@
 
 IMPLEMENT_SCENE_OBJECT(RCamera);
 
-RCamera::RCamera(RScene* InScene)
-	: Base(InScene),
-	  m_bIsProjectionMatrixDirty(true)
+RCamera::RCamera(const RConstructingParams& Params)
+	: Base(Params)
+	, m_bIsProjectionMatrixDirty(true)
 {
 	if (GRenderer.GetRenderCamera() == nullptr)
 	{

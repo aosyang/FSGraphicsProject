@@ -26,7 +26,7 @@ public:
 	float GetFarPlane() const { return m_FarZ; }
 
 protected:
-	RCamera(RScene* InScene);
+	RCamera(const RConstructingParams& Params);
 	~RCamera();
 
 private:

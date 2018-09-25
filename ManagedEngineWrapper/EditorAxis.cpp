@@ -8,9 +8,11 @@
 #include "Rhino.h"
 #include "EditorAxis.h"
 
-EditorAxis::EditorAxis(RScene* Scene)
-	: RSceneObject(Scene)
+EditorAxis::EditorAxis(const RConstructingParams& Params)
+	: RSceneObject(RConstructingParams(Params.Scene, Params.Flags | (CF_InternalObject | CF_NoSerialization)))
 {
+	// Make editor axis invisible to user and never serialize it
+
 	Create();
 
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");

@@ -12,8 +12,8 @@ std::list<RSceneObject*> FTGPlayerController::ActivePlayerControllers;
 
 bool FTGPlayerController::DrawDebugHitShape = false;
 
-FTGPlayerController::FTGPlayerController(RScene* InScene)
-	: Base(InScene)
+FTGPlayerController::FTGPlayerController(const RConstructingParams& Params)
+	: Base(Params)
 	, m_MovementInput(0.0f, 0.0f, 0.0f)
 	, m_Rotation(0.0f)
 {

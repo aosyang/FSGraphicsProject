@@ -10,9 +10,10 @@
 
 int RSceneObject::NextUniqueRuntimeTypeId = 0;
 
-RSceneObject::RSceneObject(RScene* InScene)
-	: m_Scene(InScene)
+RSceneObject::RSceneObject(const RConstructingParams& Params)
+	: m_Scene(Params.Scene)
 	, m_bVisible(true)
+	, m_Flags(Params.Flags)
 {
 	GScriptSystem.RegisterScriptableObject(this);
 }

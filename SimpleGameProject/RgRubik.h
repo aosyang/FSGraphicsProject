@@ -53,7 +53,7 @@ public:
 	void SetColor(EPieceColor Color);
 
 protected:
-	RgColorPiece(RScene* InScene);
+	RgColorPiece(const RConstructingParams& Params);
 
 	RRenderMeshComponent* MeshComponent;
 };
@@ -74,7 +74,7 @@ public:
 	void FixTransformInaccuracy();
 
 protected:
-	RgCubeBlock(RScene* InScene);
+	RgCubeBlock(const RConstructingParams& Params);
 	~RgCubeBlock();
 
 	RgCubeBlock*	m_Parent;
@@ -97,7 +97,7 @@ public:
 	void Rotate(ERubikSide Side, ERubikRotation Rotation);
 
 protected:
-	RgRubik(RScene* InScene);
+	RgRubik(const RConstructingParams& Params);
 	~RgRubik();
 
 	union

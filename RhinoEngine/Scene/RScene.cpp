@@ -31,7 +31,7 @@ RSMeshObject* RScene::CreateMeshObject(const char* meshPath)
 
 RSMeshObject* RScene::CreateMeshObject(RMesh* mesh)
 {
-	RSMeshObject* meshObject = new RSMeshObject(this);
+	RSMeshObject* meshObject = new RSMeshObject(RConstructingParams(this));
 	meshObject->SetMesh(mesh);
 
 	m_SceneObjects.push_back(meshObject);
@@ -268,6 +268,11 @@ void RScene::SaveToFile(const char* filename)
 
 	for (auto* SceneObject : m_SceneObjects)
 	{
+		if (SceneObject->HasFlags(CF_NoSerialization))
+		{
+			continue;
+		}
+
 		tinyxml2::XMLElement* elem_obj = doc->NewElement("SceneObject");
 
 		if (SceneObject->GetName() != "")
@@ -410,14 +415,21 @@ void RScene::UpdateScene()
 	}
 }
 
-vector<RSceneObject*>& RScene::GetSceneObjects()
+vector<RSceneObject*> RScene::EnumerateSceneObjects() const
 {
-	return m_SceneObjects;
-}
+	vector<RSceneObject*> OutputObjects;
 
-const vector<RSceneObject*>& RScene::GetSceneObjects() const
-{
-	return m_SceneObjects;
+	for (auto& SceneObject : m_SceneObjects)
+	{
+		if (SceneObject->HasFlags(CF_InternalObject))
+		{
+			continue;
+		}
+
+		OutputObjects.push_back(SceneObject);
+	}
+
+	return OutputObjects;
 }
 
 bool RScene::XmlReadObjectTransform(tinyxml2::XMLElement* ObjectElement, RVec3& OutPosition, RQuat& OutRotation, RVec3& OutScale)

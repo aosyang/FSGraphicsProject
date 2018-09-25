@@ -70,7 +70,7 @@ public:
 	static bool DrawDebugHitShape;
 
 private:
-	FTGPlayerController(RScene* InScene);
+	FTGPlayerController(const RConstructingParams& Params);
 
 	/// Can the player move with user input
 	bool CanMovePlayerWithInput() const;

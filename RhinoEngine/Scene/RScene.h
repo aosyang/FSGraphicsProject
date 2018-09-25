@@ -23,7 +23,7 @@ public:
 
 	/// Create a object of class derived from scene object
 	template<typename T>
-	T* CreateSceneObjectOfType(const char* name = "");
+	T* CreateSceneObjectOfType(const char* name = "", int Flags = 0);
 
 	/// Clone an object in the scene
 	RSceneObject* CloneObject(RSceneObject* obj);
@@ -60,8 +60,7 @@ public:
 
 	void UpdateScene();
 
-	vector<RSceneObject*>& GetSceneObjects();
-	const vector<RSceneObject*>& GetSceneObjects() const;
+	vector<RSceneObject*> EnumerateSceneObjects() const;
 private:
 
 	bool XmlReadObjectTransform(tinyxml2::XMLElement* ObjectElement, RVec3& OutPosition, RQuat& OutRotation, RVec3& OutScale);
@@ -74,9 +73,9 @@ private:
 };
 
 template<typename T>
-T* RScene::CreateSceneObjectOfType(const char* name /*= ""*/)
+T* RScene::CreateSceneObjectOfType(const char* name /*= ""*/, int Flags /*= 0*/)
 {
-	T* SceneObject = new T(this);
+	T* SceneObject = new T(RConstructingParams(this, Flags));
 	SceneObject->SetName(name);
 
 	m_SceneObjects.push_back(SceneObject);
