@@ -437,7 +437,8 @@ namespace ManagedEngineWrapper
 	{
 		if (m_SelectedObject)
 		{
-			auto iter = std::find(m_Scene.EnumerateSceneObjects().begin(), m_Scene.EnumerateSceneObjects().end(), m_SelectedObject);
+			vector<RSceneObject*> SceneObjects = m_Scene.EnumerateSceneObjects();
+			auto iter = std::find(SceneObjects.begin(), SceneObjects.end(), m_SelectedObject);
 			m_Scene.DestroyObject(*iter);
 			m_SelectedObject = nullptr;
 
