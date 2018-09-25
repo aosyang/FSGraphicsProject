@@ -42,21 +42,22 @@ namespace ManagedEngineWrapper
 		}
 	};
 
-	public ref class ShaderConverter : ExpandableObjectConverter
+	// StringConverter provides GetStandardValues() method for a dropdown box
+	public ref class ShaderConverter : StringConverter
 	{
 	public:
-		bool CanConvertTo(ITypeDescriptorContext^ context, Type^ destinationType) override
+		virtual bool CanConvertTo(ITypeDescriptorContext^ context, Type^ destinationType) override
 		{
 			if (destinationType == ManagedShader::typeid)
 			{
 				return true;
 			}
 
-			return ExpandableObjectConverter::CanConvertTo(context, destinationType);
+			return StringConverter::CanConvertTo(context, destinationType);
 		}
 
 		/// Convert object type to string
-		Object^ ConvertTo(ITypeDescriptorContext^ context, CultureInfo^ culture, Object^ value, Type^ destinationType) override
+		virtual Object^ ConvertTo(ITypeDescriptorContext^ context, CultureInfo^ culture, Object^ value, Type^ destinationType) override
 		{
 			if (destinationType == String::typeid &&
 				value->GetType() == ManagedShader::typeid)
@@ -66,20 +67,20 @@ namespace ManagedEngineWrapper
 				return gcnew String(NativeShader->GetName().c_str());
 			}
 
-			return ExpandableObjectConverter::ConvertTo(context, culture, value, destinationType);
+			return StringConverter::ConvertTo(context, culture, value, destinationType);
 		}
 
-		bool CanConvertFrom(ITypeDescriptorContext^ context, Type^ sourceType) override
+		virtual bool CanConvertFrom(ITypeDescriptorContext^ context, Type^ sourceType) override
 		{
 			if (sourceType == String::typeid)
 			{
 				return true;
 			}
 
-			return ExpandableObjectConverter::CanConvertFrom(context, sourceType);
+			return StringConverter::CanConvertFrom(context, sourceType);
 		}
 
-		Object^ ConvertFrom(ITypeDescriptorContext^ context, CultureInfo^ culture, Object^ value) override
+		virtual Object^ ConvertFrom(ITypeDescriptorContext^ context, CultureInfo^ culture, Object^ value) override
 		{
 			if (value->GetType() == String::typeid)
 			{
@@ -90,7 +91,22 @@ namespace ManagedEngineWrapper
 				return gcnew ManagedShader(NativeShader);
 			}
 
-			return ExpandableObjectConverter::ConvertFrom(context, culture, value);
+			return StringConverter::ConvertFrom(context, culture, value);
+		}
+
+		virtual bool GetStandardValuesSupported(ITypeDescriptorContext^ context) override { return true; }
+		virtual bool GetStandardValuesExclusive(ITypeDescriptorContext^ context) override { return true; }
+
+		virtual StandardValuesCollection^ GetStandardValues(ITypeDescriptorContext^ context) override
+		{
+			List<String^>^ list = gcnew List<String ^>();
+			auto ShaderNameList = RShaderManager::Instance().EnumerateAllShaderNames();
+			for (const auto& Name : ShaderNameList)
+			{
+				list->Add(gcnew String(Name.c_str()));
+			}
+
+			return gcnew StandardValuesCollection(list);
 		}
 	};
 }

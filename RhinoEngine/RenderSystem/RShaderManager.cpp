@@ -256,6 +256,18 @@ RShader* RShaderManager::GetShaderResource(const char* shaderName)
 	return nullptr;
 }
 
+vector<string> RShaderManager::EnumerateAllShaderNames() const
+{
+	vector<string> NameList;
+
+	for (auto& ShaderData : m_Shaders)
+	{
+		NameList.push_back(ShaderData.first);
+	}
+
+	return NameList;
+}
+
 ID3D11PixelShader* RShaderManager::CreatePixelShaderFromBytecode(const void* pBytecode, SIZE_T BytecodeSize)
 {
 	ID3D11PixelShader* OutputShader = nullptr;

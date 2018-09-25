@@ -51,6 +51,9 @@ public:
 
 	RShader* GetShaderResource(const char* shaderName);
 
+	/// Get a list of all shader names
+	vector<string> EnumerateAllShaderNames() const;
+
 	/// Create a pixel shader from bytecode
 	ID3D11PixelShader* CreatePixelShaderFromBytecode(const void* pBytecode, SIZE_T BytecodeSize);
 
