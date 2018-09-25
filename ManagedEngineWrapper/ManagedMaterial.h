@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "ManagedShader.h"
+
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::ComponentModel;
@@ -19,6 +21,7 @@ namespace ManagedEngineWrapper
 	{
 		RMaterial* material;
 		String^ meshElementName;
+		ManagedShader ShaderWrapper;
 	public:
 		ManagedMaterial(RMaterial* mat, const char* elemName);
 
@@ -28,10 +31,19 @@ namespace ManagedEngineWrapper
 			void set(int value)		{ material->TextureNum = value; }
 		}
 
-		property String^ Shader
+		property ManagedShader^ Shader
 		{
-			String^ get()			{ return material->Shader ? gcnew String(material->Shader->GetName().c_str()) : gcnew String(""); }
-			void set(String^ value)	{ material->Shader = RShaderManager::Instance().GetShaderResource(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer())); }
+			ManagedShader^ get()
+			{
+				ShaderWrapper.SetInstance(material->Shader);
+				return %ShaderWrapper;
+			}
+
+			void set(ManagedShader^ value)
+			{
+				ShaderWrapper = value;
+				material->Shader = ShaderWrapper.GetInstance();
+			}
 		}
 
 #define DECLARE_TEXTURE_PROPERTY(n) \

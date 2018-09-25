@@ -158,6 +158,7 @@
     <ClInclude Include="ManagedEngineWrapper.h" />
     <ClInclude Include="ManagedMaterial.h" />
     <ClInclude Include="ManagedSceneObject.h" />
+    <ClInclude Include="ManagedShader.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="TypeUtils.h" />
