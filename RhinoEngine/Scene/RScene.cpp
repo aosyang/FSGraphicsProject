@@ -363,7 +363,14 @@ void RScene::Render(const RFrustum* pFrustum)
 	for (auto SceneObject : m_SceneObjects)
 	{
 		if (pFrustum && !RCollision::TestAabbInsideFrustum(*pFrustum, SceneObject->GetAabb()))
+		{
 			continue;
+		}
+
+		if (!SceneObject->IsVisible())
+		{
+			continue;
+		}
 
 		SHADER_OBJECT_BUFFER cbObject;
 		cbObject.worldMatrix = SceneObject->GetTransformMatrix();
@@ -378,7 +385,14 @@ void RScene::RenderDepthPass(const RFrustum* pFrustum)
 	for (auto SceneObject : m_SceneObjects)
 	{
 		if (pFrustum && !RCollision::TestAabbInsideFrustum(*pFrustum, SceneObject->GetAabb()))
+		{
 			continue;
+		}
+
+		if (!SceneObject->IsVisible())
+		{
+			continue;
+		}
 
 		SHADER_OBJECT_BUFFER cbObject;
 		cbObject.worldMatrix = SceneObject->GetTransformMatrix();

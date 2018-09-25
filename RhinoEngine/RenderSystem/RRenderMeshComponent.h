@@ -17,7 +17,7 @@ struct PendingAssignedMaterial
 
 struct RenderViewInfo
 {
-	RFrustum&&	Frustum;
+	RFrustum*	Frustum;
 };
 
 class RRenderMeshComponent : public RSceneComponentBase

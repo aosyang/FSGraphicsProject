@@ -12,6 +12,7 @@ int RSceneObject::NextUniqueRuntimeTypeId = 0;
 
 RSceneObject::RSceneObject(RScene* InScene)
 	: m_Scene(InScene)
+	, m_bVisible(true)
 {
 	GScriptSystem.RegisterScriptableObject(this);
 }

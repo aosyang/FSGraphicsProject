@@ -49,6 +49,11 @@ const RMatrix4& RCamera::GetProjectionMatrix()
 	return m_ProjectionMatrix;
 }
 
+RMatrix4 RCamera::GetViewProjMatrix()
+{
+	return GetViewMatrix() * GetProjectionMatrix();
+}
+
 RFrustum RCamera::GetFrustum() const
 {
 	RFrustum frustum;

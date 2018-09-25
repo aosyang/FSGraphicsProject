@@ -14,10 +14,11 @@ ID3D11DepthStencilView* RRenderSystem::DefaultDepthStencilView = nullptr;
 ID3D11RenderTargetView* RRenderSystem::DefaultRenderTargetView = nullptr;
 
 RRenderSystem::RRenderSystem()
-	: m_AdapterName(nullptr),
-	  m_RenderTargetViewNum(0),
-	  m_bIsUsingDeferredShading(false),
-	  m_RenderCamera(nullptr)
+	: m_AdapterName(nullptr)
+	, m_RenderTargetViewNum(0)
+	, m_bIsUsingDeferredShading(false)
+	, m_ActiveScene(nullptr)
+	, m_RenderCamera(nullptr)
 {
 }
 
@@ -459,6 +460,11 @@ void RRenderSystem::UnregisterShadowCaster(IShadowCaster* ShadowCaster)
 	m_RegisteredShadowCasters.erase(Iter);
 }
 
+void RRenderSystem::SetActiveScene(RScene* Scene)
+{
+	m_ActiveScene = Scene;
+}
+
 void RRenderSystem::SetRenderCamera(RCamera* Camera)
 {
 	m_RenderCamera = Camera;
@@ -471,6 +477,9 @@ RCamera* RRenderSystem::GetRenderCamera() const
 
 void RRenderSystem::RenderFrame()
 {
+	GRenderer.SetSamplerState(0, SamplerState_Texture);
+	GRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
+
 	// Prepare shadow map for each shadow caster
 	for (auto ShadowCaster : m_RegisteredShadowCasters)
 	{
@@ -479,14 +488,20 @@ void RRenderSystem::RenderFrame()
 			ShadowCaster->PrepareShadowPass();
 			Clear();
 
+			RFrustum Frustum = ShadowCaster->GetFrustum();
 			RenderViewInfo View
 			{
-				ShadowCaster->GetFrustum()
+				&Frustum
 			};
 
 			for (auto MeshComponent : m_RegisteredRenderMeshComponents)
 			{
 				MeshComponent->RenderDepthPass(View);
+			}
+
+			if (m_ActiveScene)
+			{
+				m_ActiveScene->RenderDepthPass(&Frustum);
 			}
 
 			// Draw shadow frustum
@@ -601,14 +616,20 @@ void RRenderSystem::RenderFrame()
 		RConstantBuffers::cbMaterial.UpdateBufferData(&cbMaterial);
 		RConstantBuffers::cbMaterial.BindBuffer();
 
+		RFrustum Frustum = m_RenderCamera->GetFrustum();
 		RenderViewInfo View
 		{
-			m_RenderCamera->GetFrustum()
+			&Frustum
 		};
 
 		for (auto MeshComponent : m_RegisteredRenderMeshComponents)
 		{
 			MeshComponent->Render(View);
+		}
+
+		if (m_ActiveScene)
+		{
+			m_ActiveScene->Render(&Frustum);
 		}
 	}
 

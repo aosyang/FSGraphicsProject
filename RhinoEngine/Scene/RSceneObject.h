@@ -94,6 +94,12 @@ public:
 
 	virtual void Update();
 
+	/// Set the visibility of scene object
+	void SetVisible(bool bVisible);
+
+	/// Get the visibility of scene object
+	bool IsVisible() const;
+
 	/// Create a new component and add to this scene object
 	template<typename T>
 	T* AddNewComponent();
@@ -125,6 +131,7 @@ protected:
 	string			m_Name;
 	RTransform		m_NodeTransform;
 	RScene*			m_Scene;
+	bool			m_bVisible;
 	string			m_Script;
 	vector<string>	m_ParsedScript;
 
@@ -173,5 +180,15 @@ FORCEINLINE void RSceneObject::SetTransform(const RVec3& InPosition, const RQuat
 FORCEINLINE void RSceneObject::SetTransform(const RTransform& InTransform)
 {
 	m_NodeTransform = InTransform;
+}
+
+FORCEINLINE void RSceneObject::SetVisible(bool bVisible)
+{
+	m_bVisible = bVisible;
+}
+
+FORCEINLINE bool RSceneObject::IsVisible() const
+{
+	return m_bVisible;
 }
 

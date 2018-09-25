@@ -14,6 +14,7 @@
 
 struct RShader;
 class RCamera;
+class RScene;
 
 enum BlendState
 {
@@ -87,6 +88,8 @@ public:
 	void RegisterShadowCaster(IShadowCaster* ShadowCaster);
 	void UnregisterShadowCaster(IShadowCaster* ShadowCaster);
 
+	void SetActiveScene(RScene* Scene);
+
 	void SetRenderCamera(RCamera* Camera);
 	RCamera* GetRenderCamera() const;
 
@@ -131,6 +134,7 @@ protected:
 	vector<ILight*>					m_RegisteredLights;
 	vector<IShadowCaster*>			m_RegisteredShadowCasters;
 
+	RScene*					m_ActiveScene;
 	RCamera*				m_RenderCamera;			// Default camera will be used for frustum culling
 };
 

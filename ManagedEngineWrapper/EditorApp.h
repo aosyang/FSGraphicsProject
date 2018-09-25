@@ -17,19 +17,16 @@ namespace ManagedEngineWrapper
 		float						m_CamYaw, m_CamPitch;
 
 		RScene						m_Scene;
+		RCamera*					m_EditorCamera;
 
 		RSceneObject*				m_SelectedObject;
 
 		RShader*					m_DefaultShader;
-		RMatrix4					m_CameraMatrix;
+
+		// For mouse picking from viewport
 		RMatrix4					m_InvViewProjMatrix;
-		float						m_CameraX, m_CameraY;
-		RVec3						m_MeshPos;
-		float						m_CamFov;
 
-		RShader*					m_ColorShader;
-
-		EditorAxis					m_EditorAxis;
+		EditorAxis*					m_EditorAxis;
 		int							m_MouseDownX, m_MouseDownY;
 		RMatrix4					m_AxisMatrix;
 
@@ -50,7 +47,9 @@ namespace ManagedEngineWrapper
 		virtual bool Initialize() override;
 
 		virtual void UpdateScene(const RTimer& timer) override;
-		virtual void RenderScene() override;
+		virtual void RenderScene() override {}
+
+		virtual void OnResize(int width, int height) override;
 
 		RSceneObject* AddMeshObjectToScene(const char* MeshAssetPath);
 		void LoadScene(const char* filename);

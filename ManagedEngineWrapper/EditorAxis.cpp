@@ -8,8 +8,17 @@
 #include "Rhino.h"
 #include "EditorAxis.h"
 
-EditorAxis::EditorAxis()
+EditorAxis::EditorAxis(RScene* Scene)
+	: RSceneObject(Scene)
 {
+	Create();
+
+	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
+}
+
+EditorAxis::~EditorAxis()
+{
+	Release();
 }
 
 void EditorAxis::Create()
@@ -83,14 +92,23 @@ void EditorAxis::Create()
 void EditorAxis::Release()
 {
 	for (int i = 0; i < 3; i++)
+	{
 		m_AxisMeshBuffer[i].Release();
+	}
 }
 
 void EditorAxis::Draw()
 {
-	GRenderer.D3DImmediateContext()->IASetInputLayout(m_ColorInputLayout);
-	for (int i = 0; i < 3; i++)
-		m_AxisMeshBuffer[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	if (m_ColorShader)
+	{
+		m_ColorShader->Bind();
+
+		GRenderer.D3DImmediateContext()->IASetInputLayout(m_ColorInputLayout);
+		for (int i = 0; i < 3; i++)
+		{
+			m_AxisMeshBuffer[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		}
+	}
 }
 
 const RAabb& EditorAxis::GetAabb(int index) const

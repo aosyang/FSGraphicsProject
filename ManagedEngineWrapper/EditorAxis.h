@@ -15,20 +15,25 @@ enum EAxis
 	AXIS_COUNT,
 };
 
-class EditorAxis
+class EditorAxis : public RSceneObject
 {
-private:
-	RMeshRenderBuffer				m_AxisMeshBuffer[AXIS_COUNT];
-	RAabb						m_AxisAabb[AXIS_COUNT];
-	ID3D11InputLayout*			m_ColorInputLayout;
-
+	friend RScene;
 public:
-	EditorAxis();
+	virtual void Draw() override;
+	const RAabb& GetAabb(int index) const;
+
+protected:
+	EditorAxis(RScene* Scene);
+	virtual ~EditorAxis();
 
 	void Create();
 	void Release();
 
-	void Draw();
-	const RAabb& GetAabb(int index) const;
+private:
+	RMeshRenderBuffer			m_AxisMeshBuffer[AXIS_COUNT];
+	RAabb						m_AxisAabb[AXIS_COUNT];
+	ID3D11InputLayout*			m_ColorInputLayout;
+
+	RShader*					m_ColorShader;
 };
 

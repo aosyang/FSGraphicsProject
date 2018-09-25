@@ -19,18 +19,16 @@ namespace ManagedEngineWrapper
 	{
 		m_Skybox.Release();
 		m_Scene.Release();
-
-		m_EditorAxis.Release();
 	}
 
 	bool EditorApp::Initialize()
 	{
 		GEngine.SetEditorMode(true);
+		GEngine.SetUseCustomRenderingPipeline(false);
 
 		m_Scene.Initialize();
 
 		m_DefaultShader = RShaderManager::Instance().GetShaderResource("Default");
-		m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 
 #if 1
 		RResourceManager::Instance().LoadAllResources();
@@ -45,14 +43,22 @@ namespace ManagedEngineWrapper
 
 		m_Skybox.CreateSkybox("../Assets/powderpeak.dds");
 
-		m_CamFov = 65.0f;
 		m_CamYaw = m_CamPitch = 0.0f;
-		m_CameraMatrix = RMatrix4::IDENTITY;
-		m_MeshPos = RVec3::Zero();
 		m_SelectedObject = nullptr;
 		m_MouseControlMode = MouseControlMode::None;
 
-		m_EditorAxis.Create();
+		m_EditorAxis = m_Scene.CreateSceneObjectOfType<EditorAxis>("EditorAxis");
+		m_EditorAxis->SetVisible(false);
+
+		// Create editor camera
+		m_EditorCamera = m_Scene.CreateSceneObjectOfType<RCamera>("EditorCamera");
+		m_EditorCamera->SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
+
+		RSceneObject* GlobalLightInfo = m_Scene.CreateSceneObjectOfType<RSceneObject>("DirectionalLight");
+		RDirectionalLightComponent* DirLightComponent = GlobalLightInfo->AddNewComponent<RDirectionalLightComponent>();
+		DirLightComponent->SetParameters({ RVec3(-0.5f, 1, -0.3f), RColor(0.5f, 0.5f, 0.5f) });
+
+		GRenderer.SetActiveScene(&m_Scene);
 
 		return true;
 	}
@@ -143,8 +149,8 @@ namespace ManagedEngineWrapper
 				RVec3 world_y = RVec3(0, 1, 0);
 				RVec3 world_z = RVec3(0, 0, 1);
 
-				RVec3 cam_right = m_CameraMatrix.GetRight();
-				RVec3 cam_up = m_CameraMatrix.GetUp();
+				RVec3 cam_right = m_EditorCamera->GetRightVector();
+				RVec3 cam_up = m_EditorCamera->GetUpVector();
 
 				float move_scale = GRenderer.GetClientHeight() / 500.0f;
 
@@ -211,15 +217,14 @@ namespace ManagedEngineWrapper
 			}
 		}
 
-		RVec3 camPos = m_CameraMatrix.GetTranslation();
-		m_CameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
-		m_CameraMatrix.SetTranslation(camPos + (RVec4(moveVec, 1.0f) * m_CameraMatrix).ToVec3());
+		m_EditorCamera->SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0));
+		m_EditorCamera->Translate(moveVec, ETransformSpace::Local);
 
-		RMatrix4 viewMatrix = m_CameraMatrix.FastInverse();
-		RMatrix4 projMatrix = RMatrix4::CreatePerspectiveProjectionLH(m_CamFov, GRenderer.AspectRatio(), 1.0f, 10000.0f);
-		RMatrix4 viewProjMatrix = viewMatrix * projMatrix;
+		//RVec3 camPos = m_CameraMatrix.GetTranslation();
+		//m_CameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
+		//m_CameraMatrix.SetTranslation(camPos + (RVec4(moveVec, 1.0f) * m_CameraMatrix).ToVec3());
 
-		m_InvViewProjMatrix = viewProjMatrix.Inverse();
+		m_InvViewProjMatrix = m_EditorCamera->GetViewProjMatrix().Inverse();
 
 		if (m_SelectedObject)
 		{
@@ -231,87 +236,32 @@ namespace ManagedEngineWrapper
 			GDebugRenderer.DrawLine(RVec3(pos.X(), pos.Y(), pos.Z() + 10000.0f), RVec3(pos.X(), pos.Y(), pos.Z() - 10000.0f));
 		}
 
-		// Update scene constant buffer
-		SHADER_SCENE_BUFFER cbScene;
-
-		cbScene.viewMatrix = viewMatrix;
-		cbScene.projMatrix = projMatrix;
-		cbScene.viewProjMatrix = viewProjMatrix;
-		cbScene.cameraPos = m_CameraMatrix.GetRow(3);
-
-		RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
-
-		// Update light constant buffer
-		SHADER_LIGHT_BUFFER cbLight;
-		ZeroMemory(&cbLight, sizeof(cbLight));
-
-		// Setup ambient color
-		cbLight.HighHemisphereAmbientColor = RVec4(1.0f, 1.0f, 1.0f, 1.0f);
-		cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 1.0f);
-
-		RConstantBuffers::cbLight.UpdateBufferData(&cbLight);
-
-		RConstantBuffers::cbPerObject.BindBuffer();
-		RConstantBuffers::cbScene.BindBuffer();
-		RConstantBuffers::cbLight.BindBuffer();
-
-		// Update screen buffer
-		SHADER_GLOBAL_BUFFER cbScreen;
-		ZeroMemory(&cbScreen, sizeof(cbScreen));
-
-		cbScreen.UseGammaCorrection = GRenderer.UsingGammaCorrection();
-
-		RConstantBuffers::cbGlobal.UpdateBufferData(&cbScreen);
-		RConstantBuffers::cbGlobal.BindBuffer();
-
-		GRenderer.SetSamplerState(0, SamplerState_Texture);
-		GRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
-	}
-
-	void EditorApp::RenderScene()
-	{
-		GRenderer.Clear();
-
-		// Update object constant buffer
-		SHADER_OBJECT_BUFFER cbObject;
-		cbObject.worldMatrix = RMatrix4::IDENTITY;
-
-		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
-
-		m_Skybox.Draw();
-
-		GRenderer.Clear(false);
-
-		m_Scene.Render();
-
-		cbObject.worldMatrix = RMatrix4::IDENTITY;
-		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
-
-		GDebugRenderer.Render();
-
-		GRenderer.Clear(false);
-
 		// Draw axises
 		if (m_SelectedObject)
 		{
-			m_ColorShader->Bind();
-
-			RVec3 cam_pos = m_CameraMatrix.GetTranslation();
+			RVec3 cam_pos = m_EditorCamera->GetPosition();
 			RVec3 obj_pos = m_SelectedObject->GetPosition();
 			float dist = (cam_pos - obj_pos).Magnitude();
 			dist = max(50.0f, min(100.0f, dist));
 			RVec3 axis_pos = cam_pos + (m_SelectedObject->GetPosition() - cam_pos).GetNormalized() * dist;
 
-			m_AxisMatrix = RMatrix4::CreateTranslation(axis_pos);
-			cbObject.worldMatrix = m_AxisMatrix;
+			m_EditorAxis->SetPosition(axis_pos);
+			m_AxisMatrix = m_EditorAxis->GetTransformMatrix();
 
-			RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
-
-			m_EditorAxis.Draw();
+			m_EditorAxis->SetVisible(true);
 		}
+		else
+		{
+			m_EditorAxis->SetVisible(false);
+		}
+	}
 
-		GRenderer.Present();
-		GDebugRenderer.Reset();
+	void EditorApp::OnResize(int width, int height)
+	{
+		if (m_EditorCamera)
+		{
+			m_EditorCamera->SetAspectRatio((float)width / (float)height);
+		}
 	}
 
 	RSceneObject* EditorApp::AddMeshObjectToScene(const char* MeshAssetPath)
@@ -321,7 +271,7 @@ namespace ManagedEngineWrapper
 		RVec3 center = (aabb.pMin + aabb.pMax) * 0.5f;
 		float radius = (aabb.pMax - center).Magnitude();
 
-		RVec3 pos = m_CameraMatrix.GetTranslation() + m_CameraMatrix.GetForward() * radius - center;
+		RVec3 pos = m_EditorCamera->GetPosition() + m_EditorCamera->GetForwardVector() * radius - center;
 		pos.SetX(SnapTo(pos.X(), 1.0f));
 		pos.SetY(SnapTo(pos.Y(), 1.0f));
 		pos.SetZ(SnapTo(pos.Z(), 1.0f));
@@ -392,7 +342,7 @@ namespace ManagedEngineWrapper
 		RVec3 farPoint = RVec3(2.0f * x - 1.0f, -2.0f * y + 1.0f, 1.0f);
 		RVec4 farPointVec4 = RVec4(farPoint) * m_InvViewProjMatrix;
 		RVec3 farPointWorld = (farPointVec4 / farPointVec4.w).ToVec3();
-		RVec3 camPos = m_CameraMatrix.GetTranslation();
+		RVec3 camPos = m_EditorCamera->GetPosition();
 
 		RRay ray(camPos, farPointWorld);
 		RRay axis_ray = ray;
@@ -404,15 +354,15 @@ namespace ManagedEngineWrapper
 
 		m_MouseControlMode = MouseControlMode::None;
 
-		if (m_SelectedObject && axis_ray.TestAabbIntersection(m_EditorAxis.GetAabb(AXIS_X)))
+		if (m_SelectedObject && axis_ray.TestAabbIntersection(m_EditorAxis->GetAabb(AXIS_X)))
 		{
 			m_MouseControlMode = MouseControlMode::MoveX;
 		}
-		else if (m_SelectedObject && axis_ray.TestAabbIntersection(m_EditorAxis.GetAabb(AXIS_Y)))
+		else if (m_SelectedObject && axis_ray.TestAabbIntersection(m_EditorAxis->GetAabb(AXIS_Y)))
 		{
 			m_MouseControlMode = MouseControlMode::MoveY;
 		}
-		else if (m_SelectedObject && axis_ray.TestAabbIntersection(m_EditorAxis.GetAabb(AXIS_Z)))
+		else if (m_SelectedObject && axis_ray.TestAabbIntersection(m_EditorAxis->GetAabb(AXIS_Z)))
 		{
 			m_MouseControlMode = MouseControlMode::MoveZ;
 		}

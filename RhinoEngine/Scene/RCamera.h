@@ -14,6 +14,7 @@ class RCamera : public RSceneObject
 public:
 	const RMatrix4& GetViewMatrix();
 	const RMatrix4& GetProjectionMatrix();
+	RMatrix4 GetViewProjMatrix();
 	RFrustum GetFrustum() const;
 
 	void SetupView(float InFov, float InAspectRatio, float InNearZ, float InFarZ);

@@ -44,7 +44,7 @@ void RRenderMeshComponent::Render(const RenderViewInfo& View) const
 	{
 		const RMatrix4& Matrix = GetOwner()->GetTransformMatrix();
 		RAabb MeshAabb = m_Mesh->GetLocalSpaceAabb().GetTransformedAabb(Matrix);
-		if (RCollision::TestAabbInsideFrustum(View.Frustum, MeshAabb))
+		if (RCollision::TestAabbInsideFrustum(*View.Frustum, MeshAabb))
 		{
 			// Set up world matrix in constant buffer
 			SHADER_OBJECT_BUFFER cbObject;
@@ -107,7 +107,7 @@ void RRenderMeshComponent::RenderDepthPass(const RenderViewInfo& View) const
 		{
 			const RMatrix4& Matrix = GetOwner()->GetTransformMatrix();
 			RAabb MeshAabb = m_Mesh->GetLocalSpaceAabb().GetTransformedAabb(Matrix);
-			if (RCollision::TestAabbInsideFrustum(View.Frustum, MeshAabb))
+			if (RCollision::TestAabbInsideFrustum(*View.Frustum, MeshAabb))
 			{
 				// Set up world matrix in constant buffer
 				SHADER_OBJECT_BUFFER cbObject;
