@@ -237,6 +237,7 @@ namespace ManagedEngineWrapper
 			RVec3 axis_pos = cam_pos + (m_SelectedObject->GetPosition() - cam_pos).GetNormalized() * dist;
 
 			m_EditorAxis->SetPosition(axis_pos);
+			m_EditorAxis->SetRotation(m_SelectedObject->GetRotation());
 			m_AxisMatrix = m_EditorAxis->GetTransformMatrix();
 
 			m_EditorAxis->SetVisible(true);
