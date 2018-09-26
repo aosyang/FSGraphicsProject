@@ -66,8 +66,6 @@ void RInputSystem::CheckAndExecuteKeyBindings()
 {
 	for (auto& KeyBindingDelegate : KeyBindingDelegates)
 	{
-		RLog("Key state %d\n", GetBufferedKeyState(KeyBindingDelegate->KeyCode));
-
 		if (GetBufferedKeyState(KeyBindingDelegate->KeyCode) == KeyBindingDelegate->KeyState)
 		{
 			KeyBindingDelegate->Execute();
