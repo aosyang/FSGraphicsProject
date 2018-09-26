@@ -480,64 +480,73 @@ void RRenderSystem::RenderFrame()
 	GRenderer.SetSamplerState(0, SamplerState_Texture);
 	GRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
 
-	// Prepare shadow map for each shadow caster
-	for (auto ShadowCaster : m_RegisteredShadowCasters)
-	{
-		if (ShadowCaster->CanCastShadow())
-		{
-			ShadowCaster->PrepareShadowPass();
-			Clear();
-
-			RFrustum Frustum = ShadowCaster->GetFrustum();
-			RenderViewInfo View
-			{
-				&Frustum
-			};
-
-			for (auto MeshComponent : m_RegisteredRenderMeshComponents)
-			{
-				MeshComponent->RenderDepthPass(View);
-			}
-
-			if (m_ActiveScene)
-			{
-				m_ActiveScene->RenderDepthPass(&Frustum);
-			}
-
-			// Draw shadow frustum
-			//GDebugRenderer.DrawFrustum(ShadowCaster->GetFrustum(), RColor::Yellow);
-		}
-	}
-
-	// Restore default render targets
-	SetRenderTargets();
-
-	// Setup viewport
-	D3D11_VIEWPORT vp;
-	vp.TopLeftX = 0.0f;
-	vp.TopLeftY = 0.0f;
-	vp.Width = static_cast<float>(m_ClientWidth);
-	vp.Height = static_cast<float>(m_ClientHeight);
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-
-	m_pD3DImmediateContext->RSSetViewports(1, &vp);
-
-	Clear();
-
-	SHADER_GLOBAL_BUFFER cbGlobal;
-	ZeroMemory(&cbGlobal, sizeof(cbGlobal));
-
-	cbGlobal.UseGammaCorrection = UsingGammaCorrection();
-
-	RConstantBuffers::cbGlobal.UpdateBufferData(&cbGlobal);
-	RConstantBuffers::cbGlobal.BindBuffer();
-
-	// Shadow map sampler state
-	SetSamplerState(2, SamplerState_ShadowDepthComparison);
-
 	if (m_RenderCamera)
 	{
+		// Prepare shadow map for each shadow caster
+		for (auto ShadowCaster : m_RegisteredShadowCasters)
+		{
+			if (ShadowCaster->CanCastShadow())
+			{
+				static const RColor FrustumColors[] = { RColor::Red, RColor::Green, RColor::Blue };
+
+				for (int i = 0; i < ShadowCaster->GetDepthPassesNum(); i++)
+				{
+					RFrustum CameraFrustum = m_RenderCamera->GetFrustum();
+					RenderViewInfo CameraView
+					{
+						&CameraFrustum
+					};
+
+					ShadowCaster->PrepareDepthPass(i, CameraView);
+					Clear();
+
+					RFrustum ShadowFrustum = ShadowCaster->GetFrustum(i);
+					RenderViewInfo ShadowView
+					{
+						&ShadowFrustum
+					};
+
+					for (auto MeshComponent : m_RegisteredRenderMeshComponents)
+					{
+						MeshComponent->RenderDepthPass(ShadowView);
+					}
+
+					// Render scene object in depth pass
+					if (m_ActiveScene)
+					{
+						m_ActiveScene->RenderDepthPass(&ShadowFrustum);
+					}
+
+					// Draw shadow frustum
+					//GDebugRenderer.DrawFrustum(ShadowFrustum, FrustumColors[i]);
+				}
+			}
+		}
+
+		// Restore default render targets
+		SetRenderTargets();
+
+		// Setup viewport
+		D3D11_VIEWPORT vp;
+		vp.TopLeftX = 0.0f;
+		vp.TopLeftY = 0.0f;
+		vp.Width = static_cast<float>(m_ClientWidth);
+		vp.Height = static_cast<float>(m_ClientHeight);
+		vp.MinDepth = 0.0f;
+		vp.MaxDepth = 1.0f;
+
+		m_pD3DImmediateContext->RSSetViewports(1, &vp);
+
+		Clear();
+
+		SHADER_GLOBAL_BUFFER cbGlobal;
+		ZeroMemory(&cbGlobal, sizeof(cbGlobal));
+
+		cbGlobal.UseGammaCorrection = UsingGammaCorrection();
+
+		RConstantBuffers::cbGlobal.UpdateBufferData(&cbGlobal);
+		RConstantBuffers::cbGlobal.BindBuffer();
+
 		RMatrix4 viewMatrix = m_RenderCamera->GetViewMatrix();
 		RMatrix4 projMatrix = m_RenderCamera->GetProjectionMatrix();
 
@@ -550,7 +559,8 @@ void RRenderSystem::RenderFrame()
 		cbScene.viewProjMatrix = viewMatrix * projMatrix;
 		cbScene.cameraPos = m_RenderCamera->GetWorldPosition();
 
-		bool bHasShadowCaster = false;
+		int CascadedShadowsNum = 0;
+		RVec4 ShadowDepths;
 
 		for (auto ShadowCaster : m_RegisteredShadowCasters)
 		{
@@ -558,10 +568,17 @@ void RRenderSystem::RenderFrame()
 			{
 				ShadowCaster->PrepareRenderPass(&cbScene);
 
-				ID3D11ShaderResourceView* shadowMapSRV[] = { ShadowCaster->GetRTDepthSRV() };
-				GRenderer.D3DImmediateContext()->PSSetShaderResources(RShadowMap::ShaderResourceSlot(), 1, shadowMapSRV);
+				ID3D11ShaderResourceView* shadowMapSRV[MAX_CASCADED_SHADOW_SPLITS_NUM] = { nullptr };
+				int NumDepthPasses = ShadowCaster->GetDepthPassesNum();
+				for (int i = 0; i < NumDepthPasses; i++)
+				{
+					shadowMapSRV[i] = ShadowCaster->GetRTDepthSRV(i);
+				}
 
-				bHasShadowCaster = true;
+				GRenderer.D3DImmediateContext()->PSSetShaderResources(RShadowMap::ShaderResourceSlot(), NumDepthPasses, shadowMapSRV);
+
+				CascadedShadowsNum = NumDepthPasses;
+				ShadowDepths = ShadowCaster->GetShadowDepth(m_RenderCamera);
 				break;
 			}
 		}
@@ -580,10 +597,10 @@ void RRenderSystem::RenderFrame()
 		cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, AmbientIntensity);
 
 		cbLight.CameraPos = m_RenderCamera->GetWorldPosition();
-		if (bHasShadowCaster)
+		cbLight.CascadedShadowDepth = ShadowDepths;
+		if (CascadedShadowsNum)
 		{
-			// Enable single directional light shadow
-			cbLight.CascadedShadowCount = 1;
+			cbLight.CascadedShadowCount = CascadedShadowsNum;
 		}
 
 		// Setup global lights
@@ -593,14 +610,14 @@ void RRenderSystem::RenderFrame()
 			{
 				int Index = cbLight.DirectionalLightCount;
 
-				if (Index < MAX_DIRECTIONAL_LIGHT)
+				if (Index < MAX_DIRECTIONAL_LIGHT - 1)
 				{
 					cbLight.DirectionalLightCount++;
 
 					RDirectionalLightComponent* DirLight = static_cast<RDirectionalLightComponent*>(Light);
-					cbLight.DirectionalLight[Index].Color = RVec4(&DirLight->GetColor().r);
+					cbLight.DirectionalLight[Index].Color = RVec4(&DirLight->GetLightColor().r);
 
-					RVec3 Dir = DirLight->GetDirection();
+					RVec3 Dir = DirLight->GetLightDirection();
 					cbLight.DirectionalLight[Index].Direction = Dir.GetNormalized();
 				}
 			}

@@ -9,14 +9,14 @@
 
 CONSTANT_BUFFER_BEGIN(SHADER_SCENE_BUFFER, b0)
 float4x4	viewMatrix;
-float4x4	cameraMatrix;			// Inverse view matrix
+float4x4	cameraMatrix;						// Inverse view matrix
 float4x4	projMatrix;
 float4x4	viewProjMatrix;
 float4x4	invProjMatrix;
 float4		cameraPos;
 float4x4	shadowViewProjMatrix[3];
 float4x4	shadowViewProjBiasedMatrix[3];
-int			cascadedShadowIndex;
+int			cascadedShadowIndex;				// Index of cascaded shadow map the depth pass is rendering for
 CONSTANT_BUFFER_END
 
 CONSTANT_BUFFER_BEGIN(SHADER_GLOBAL_BUFFER, b1)

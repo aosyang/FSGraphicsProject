@@ -139,6 +139,10 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 			float blend = saturate((depth - CascadedShadowDepth[2] * 0.99995) / 0.00005);
 			Final *= lerp(level2, 1.0f, blend);
 		}
+		else
+		{
+			Final *= float4(1, 1, 0, 1);
+		}
 	}
 #endif	// #if DEBUG_CASCADED_LEVELS == 1
 

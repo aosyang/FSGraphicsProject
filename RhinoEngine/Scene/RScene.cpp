@@ -24,6 +24,10 @@ void RScene::Release()
 RSMeshObject* RScene::CreateMeshObject(const char* meshPath)
 {
 	RMesh* mesh = RResourceManager::Instance().FindMesh(meshPath);
+	if (!mesh)
+	{
+		mesh = RResourceManager::Instance().LoadFbxMesh(meshPath, EResourceLoadMode::Immediate);
+	}
 	assert(mesh);
 
 	return CreateMeshObject(mesh);
