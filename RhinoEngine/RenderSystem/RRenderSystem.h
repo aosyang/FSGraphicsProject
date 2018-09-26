@@ -107,7 +107,7 @@ protected:
 
 	ID3D11BlendState* CreateD3DBlendState(const D3D11_BLEND_DESC* Desc, char* DebugObjectName = nullptr);
 
-	void UnbindShadowMapResourceViews();
+	void UnbindShadowMapShaderResourceViews();
 
 	int						m_ClientWidth, m_ClientHeight;
 	bool					m_Enable4xMsaa;
