@@ -24,9 +24,12 @@ namespace ManagedEngineWrapper
 			cli::array<Char>^ delimiter = delimStr->ToCharArray();
 			cli::array<String^>^ words = str->Split(delimiter);
 
-			x = (float)Convert::ToDouble(words[0]);
-			y = (float)Convert::ToDouble(words[1]);
-			z = (float)Convert::ToDouble(words[2]);
+			if (words->Length == 3)
+			{
+				x = (float)Convert::ToDouble(words[0]);
+				y = (float)Convert::ToDouble(words[1]);
+				z = (float)Convert::ToDouble(words[2]);
+			}
 		}
 	};
 }
