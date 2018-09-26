@@ -650,6 +650,9 @@ void RRenderSystem::RenderFrame()
 		}
 	}
 
+	// Unbind all shadow map SRVs for depth rendering in the next frame (or D3D11 would complain about it)
+	UnbindShadowMapShaderResourceViews();
+
 	GDebugRenderer.Render();
 	GDebugRenderer.Reset();
 
@@ -700,6 +703,12 @@ void RRenderSystem::CreateDepthStencilBufferAndView()
 
 	DefaultDepthStencilView = m_DepthStencilView;
 	m_CurrentDepthStencilView = m_DepthStencilView;
+}
+
+void RRenderSystem::UnbindShadowMapShaderResourceViews()
+{
+	ID3D11ShaderResourceView* EmptySRVs[3] = { nullptr };
+	GRenderer.D3DImmediateContext()->PSSetShaderResources(RShadowMap::ShaderResourceSlot(), 3, EmptySRVs);
 }
 
 ID3D11BlendState* RRenderSystem::CreateD3DBlendState(const D3D11_BLEND_DESC* Desc, char* DebugObjectName /*= nullptr*/)
