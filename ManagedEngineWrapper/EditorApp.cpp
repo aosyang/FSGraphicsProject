@@ -47,16 +47,7 @@ namespace ManagedEngineWrapper
 		m_SelectedObject = nullptr;
 		m_MouseControlMode = MouseControlMode::None;
 
-		m_EditorAxis = m_Scene.CreateSceneObjectOfType<EditorAxis>("EditorAxis");
-		m_EditorAxis->SetVisible(false);
-
-		// Create editor camera
-		m_EditorCamera = m_Scene.CreateSceneObjectOfType<RCamera>("EditorCamera", CF_InternalObject|CF_NoSerialization);
-		m_EditorCamera->SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
-
-		RSceneObject* GlobalLightInfo = m_Scene.CreateSceneObjectOfType<RSceneObject>("DirectionalLight");
-		RDirectionalLightComponent* DirLightComponent = GlobalLightInfo->AddNewComponent<RDirectionalLightComponent>();
-		DirLightComponent->SetParameters({ RVec3(-0.5f, 1, -0.3f), RColor(0.5f, 0.5f, 0.5f) });
+		CreateEditorObjects();
 
 		GRenderer.SetActiveScene(&m_Scene);
 
@@ -292,6 +283,8 @@ namespace ManagedEngineWrapper
 		m_SelectedObject = nullptr;
 		m_Scene.DestroyAllObjects();
 		m_Scene.LoadFromFile(filename);
+
+		CreateEditorObjects();
 	}
 
 	void EditorApp::SaveScene(const char* filename)
@@ -453,6 +446,20 @@ namespace ManagedEngineWrapper
 	float EditorApp::SnapTo(float Value, float Unit)
 	{
 		return Unit * int((Value + Unit * 0.5f) / Unit);
+	}
+
+	void EditorApp::CreateEditorObjects()
+	{
+		m_EditorAxis = m_Scene.CreateSceneObjectOfType<EditorAxis>("EditorAxis");
+		m_EditorAxis->SetVisible(false);
+
+		// Create editor camera
+		m_EditorCamera = m_Scene.CreateSceneObjectOfType<RCamera>("EditorCamera", CF_InternalObject | CF_NoSerialization);
+		m_EditorCamera->SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
+
+		RSceneObject* GlobalLightInfo = m_Scene.CreateSceneObjectOfType<RSceneObject>("DirectionalLight", CF_NoSerialization);
+		RDirectionalLightComponent* DirLightComponent = GlobalLightInfo->AddNewComponent<RDirectionalLightComponent>();
+		DirLightComponent->SetParameters({ RVec3(-0.5f, 1, -0.3f), RColor(0.5f, 0.5f, 0.5f) });
 	}
 
 #pragma managed

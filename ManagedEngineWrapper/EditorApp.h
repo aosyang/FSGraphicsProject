@@ -46,6 +46,8 @@ namespace ManagedEngineWrapper
 
 		virtual bool Initialize() override;
 
+		void CreateEditorObjects();
+
 		virtual void UpdateScene(const RTimer& timer) override;
 		virtual void RenderScene() override {}
 
