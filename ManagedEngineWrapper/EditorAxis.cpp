@@ -113,7 +113,7 @@ void EditorAxis::Draw()
 	}
 }
 
-const RAabb& EditorAxis::GetAabb(int index) const
+const RAabb& EditorAxis::GetLocalAabb(int index) const
 {
 	return m_AxisAabb[index];
 }

@@ -27,7 +27,12 @@ RRay RRay::Transform(const RMatrix4& mat) const
 	return RRay((RVec4(Origin, 1.0f) * mat).ToVec3(), (RVec4(Direction, 0.0f) * mat).ToVec3(), Distance);
 }
 
-bool RRay::TestAabbIntersection(const RAabb& aabb, float* t/*=nullptr*/) const
+RVec3 RRay::GetPointAtDistance(float PointDistance) const
+{
+	return Origin + Direction * PointDistance;
+}
+
+bool RRay::TestIntersectionWithAabb(const RAabb& aabb, float* t/*=nullptr*/) const
 {
 	if (!aabb.IsValid())
 		return false;
@@ -66,6 +71,32 @@ bool RRay::TestAabbIntersection(const RAabb& aabb, float* t/*=nullptr*/) const
 		if (t)
 			*t = tmin;
 		return true;
+	}
+
+	return false;
+}
+
+bool RRay::TestIntersectionWithPlane(const RPlane& Plane, float* t /*= nullptr*/) const
+{
+	float d = RVec3::Dot(Plane.normal, Direction);
+
+	// Note: in the case of checking (d > 0) or (d < 0), we only test intersection from one side of the plane
+	if (fabs(d) > 0.0f)
+	{
+		RVec3 p0 = Plane.normal * Plane.offset;
+		RVec3 p0l0 = p0 - Origin;
+		float r = RVec3::Dot(p0l0, Plane.normal) / d;
+		if (r >= 0.0f)
+		{
+			if (t)
+			{
+				*t = r;
+			}
+
+			return true;
+		}
+
+		return false;
 	}
 
 	return false;

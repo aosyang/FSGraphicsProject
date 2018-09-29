@@ -20,7 +20,9 @@ class EditorAxis : public RSceneObject
 	friend RScene;
 public:
 	virtual void Draw() override;
-	const RAabb& GetAabb(int index) const;
+
+	/// Get local AABB of axis
+	const RAabb& GetLocalAabb(int index) const;
 
 protected:
 	EditorAxis(const RConstructingParams& Params);

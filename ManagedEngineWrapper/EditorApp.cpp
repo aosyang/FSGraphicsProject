@@ -73,18 +73,8 @@ namespace ManagedEngineWrapper
 
 			if (RInput.GetBufferedKeyState(VK_LBUTTON) == EBufferedKeyState::Pressed)
 			{
-				RECT rect = GEngine.GetWindowRectInfo();
-				int cur_x, cur_y;
-
-				RInput.GetCursorPosition(cur_x, cur_y);
-
-				m_MouseDownX = cur_x;
-				m_MouseDownY = cur_y;
-
-				float fx = float(cur_x - rect.left) / float(rect.right - rect.left),
-					  fy = float(cur_y - rect.top) / float(rect.bottom - rect.top);
-
-				RunScreenToCameraRayPicking(fx, fy);
+				RVec2 CursorPoint = GetCursorPointInViewport();
+				RunScreenToCameraRayPicking(CursorPoint);
 			}
 
 			if (RInput.IsKeyDown(VK_RBUTTON))
@@ -179,28 +169,45 @@ namespace ManagedEngineWrapper
 				}
 				else
 				{
+					// Move scene object along selected axis
+
+					// TODO: Support local space later
+					RVec3 AxisVector = RVec3(0, 0, 0);
+
 					switch (m_MouseControlMode)
 					{
 					case MouseControlMode::MoveX:
-						{
-							float x = pos.X() + (RVec3::Dot(world_x, cam_right) * mdx - RVec3::Dot(world_x, cam_up) * mdy) * move_scale;
-							pos.SetX(SnapTo(x, 1.0f));
-						}
+						AxisVector = RVec3(1, 0, 0);
 						break;
 
 					case MouseControlMode::MoveY:
-						{
-							float y = pos.Y() + (RVec3::Dot(world_y, cam_right) * mdx - RVec3::Dot(world_y, cam_up) * mdy) * move_scale;
-							pos.SetY(SnapTo(y, 1.0f));
-						}
+						AxisVector = RVec3(0, 1, 0);
 						break;
 
 					case MouseControlMode::MoveZ:
-						{
-							float z = pos.Z() + (RVec3::Dot(world_z, cam_right) * mdx - RVec3::Dot(world_z, cam_up) * mdy) * move_scale;
-							pos.SetZ(SnapTo(z, 1.0f));
-						}
+						AxisVector = RVec3(0, 0, 1);
 						break;
+
+					default:
+						break;
+					}
+
+					if (AxisVector.SquaredMagitude() > FLT_EPSILON)
+					{
+						// Get the moving referencing plane and calculate a intersection point with the camera ray.
+						// The moving offset is the projected distance of intersection point and start moving on the moving axis.
+						RPlane Plane = GetAxisPlane(m_CursorStartPosition, AxisVector);
+						RVec2 CursorPoint = GetCursorPointInViewport();
+						RRay CameraRay = MakeRayFromViewportPoint(CursorPoint);
+						float Dist;
+
+						if (CameraRay.TestIntersectionWithPlane(Plane, &Dist))
+						{
+							RVec3 HitPoint = CameraRay.Origin + CameraRay.Direction * Dist;
+
+							float Offset = SnapTo(RVec3::Dot(HitPoint - m_CursorStartPosition, AxisVector), 1.0f);
+							pos = m_ObjectStartPosition + AxisVector * Offset;
+						}
 					}
 				}
 
@@ -237,7 +244,7 @@ namespace ManagedEngineWrapper
 			RVec3 axis_pos = cam_pos + (m_SelectedObject->GetPosition() - cam_pos).GetNormalized() * dist;
 
 			m_EditorAxis->SetPosition(axis_pos);
-			m_EditorAxis->SetRotation(m_SelectedObject->GetRotation());
+			//m_EditorAxis->SetRotation(m_SelectedObject->GetRotation());
 			m_AxisMatrix = m_EditorAxis->GetTransformMatrix();
 
 			m_EditorAxis->SetVisible(true);
@@ -331,36 +338,66 @@ namespace ManagedEngineWrapper
 		}
 	}
 
-	void EditorApp::RunScreenToCameraRayPicking(float x, float y)
+	void EditorApp::RunScreenToCameraRayPicking(const RVec2& Point)
 	{
-		RVec3 farPoint = RVec3(2.0f * x - 1.0f, -2.0f * y + 1.0f, 1.0f);
-		RVec4 farPointVec4 = RVec4(farPoint) * m_InvViewProjMatrix;
-		RVec3 farPointWorld = (farPointVec4 / farPointVec4.w).ToVec3();
-		RVec3 camPos = m_EditorCamera->GetPosition();
-
-		RRay ray(camPos, farPointWorld);
-		RRay axis_ray = ray;
+		RRay CameraRay = MakeRayFromViewportPoint(Point);
+		m_MouseControlMode = MouseControlMode::None;
 
 		if (m_SelectedObject)
 		{
-			axis_ray = ray.Transform(m_AxisMatrix.FastInverse());
+			// Transform camera ray to axis local space
+			RRay axis_ray = CameraRay.Transform(m_AxisMatrix.FastInverse());
+
+			if (axis_ray.TestIntersectionWithAabb(m_EditorAxis->GetLocalAabb(AXIS_X)))
+			{
+				m_MouseControlMode = MouseControlMode::MoveX;
+			}
+			else if (axis_ray.TestIntersectionWithAabb(m_EditorAxis->GetLocalAabb(AXIS_Y)))
+			{
+				m_MouseControlMode = MouseControlMode::MoveY;
+			}
+			else if (axis_ray.TestIntersectionWithAabb(m_EditorAxis->GetLocalAabb(AXIS_Z)))
+			{
+				m_MouseControlMode = MouseControlMode::MoveZ;
+			}
+
+			if (m_MouseControlMode != MouseControlMode::None)
+			{
+				// Since the axis may move along camera direction for scaling, the hit point is not always what we're looking for.
+				// We'll check ray intersection with axis planes for the actual start position.
+
+				RVec3 ObjectPosition = m_SelectedObject->GetWorldPosition();
+				RPlane AxisPlane;
+
+				switch (m_MouseControlMode)
+				{
+				case MouseControlMode::MoveX:
+					AxisPlane = GetAxisPlane(ObjectPosition, RVec3(1, 0, 0));
+					break;
+
+				case MouseControlMode::MoveY:
+					AxisPlane = GetAxisPlane(ObjectPosition, RVec3(0, 1, 0));
+					break;
+
+				case MouseControlMode::MoveZ:
+					AxisPlane = GetAxisPlane(ObjectPosition, RVec3(0, 0, 1));
+					break;
+
+				default:
+					break;
+				}
+
+				float Dist;
+				if (CameraRay.TestIntersectionWithPlane(AxisPlane, &Dist))
+				{
+					m_CursorStartPosition = CameraRay.GetPointAtDistance(Dist);
+				}
+
+				m_ObjectStartPosition = ObjectPosition;
+			}
 		}
 
-		m_MouseControlMode = MouseControlMode::None;
-
-		if (m_SelectedObject && axis_ray.TestAabbIntersection(m_EditorAxis->GetAabb(AXIS_X)))
-		{
-			m_MouseControlMode = MouseControlMode::MoveX;
-		}
-		else if (m_SelectedObject && axis_ray.TestAabbIntersection(m_EditorAxis->GetAabb(AXIS_Y)))
-		{
-			m_MouseControlMode = MouseControlMode::MoveY;
-		}
-		else if (m_SelectedObject && axis_ray.TestAabbIntersection(m_EditorAxis->GetAabb(AXIS_Z)))
-		{
-			m_MouseControlMode = MouseControlMode::MoveZ;
-		}
-		else
+		if (m_MouseControlMode == MouseControlMode::None)
 		{
 			struct RayPickingResult
 			{
@@ -383,14 +420,14 @@ namespace ManagedEngineWrapper
 			for (auto SceneObject : m_Scene.EnumerateSceneObjects())
 			{
 				float t;
-				if (ray.TestAabbIntersection(SceneObject->GetAabb(), &t))
+				if (CameraRay.TestIntersectionWithAabb(SceneObject->GetAabb(), &t))
 				{
 					if (SceneObject->IsType<RSMeshObject>())
 					{
 						RSMeshObject* meshObj = static_cast<RSMeshObject*>(SceneObject);
 						for (int i = 0; i < meshObj->GetMeshElementCount(); i++)
 						{
-							if (ray.TestAabbIntersection(meshObj->GetMeshElementAabb(i).GetTransformedAabb(meshObj->GetTransformMatrix()), &t))
+							if (CameraRay.TestIntersectionWithAabb(meshObj->GetMeshElementAabb(i).GetTransformedAabb(meshObj->GetTransformMatrix()), &t))
 							{
 								rayPickingList.push_back(RayPickingResult(t, SceneObject));
 								break;
@@ -447,6 +484,41 @@ namespace ManagedEngineWrapper
 	float EditorApp::SnapTo(float Value, float Unit)
 	{
 		return Unit * int((Value + Unit * 0.5f) / Unit);
+	}
+
+	RRay EditorApp::MakeRayFromViewportPoint(const RVec2& Point)
+	{
+		assert(m_EditorCamera != nullptr);
+
+		RVec4 FarPoint = RVec4(2.0f * Point.x - 1.0f, -2.0f * Point.y + 1.0f, 1.0f, 1.0f);
+		FarPoint = FarPoint * m_EditorCamera->GetViewProjMatrix().Inverse();
+		RVec3 FarPointWorld = FarPoint.ToVec3() / FarPoint.w;
+		RVec3 CameraPosition = m_EditorCamera->GetPosition();
+
+		return RRay(CameraPosition, FarPointWorld);
+	}
+
+	RVec2 EditorApp::GetCursorPointInViewport() const
+	{
+		RECT WindowRect = GEngine.GetWindowRectInfo();
+
+		int CurX, CurY;
+		RInput.GetCursorPosition(CurX, CurY);
+
+		// Mouse cursor relative position in viewport
+		return RVec2(
+			float(CurX - WindowRect.left) / float(WindowRect.right - WindowRect.left),
+			float(CurY - WindowRect.top) / float(WindowRect.bottom - WindowRect.top));
+	}
+
+	RPlane EditorApp::GetAxisPlane(const RVec3& Point, const RVec3& AxisDirection) const
+	{
+		RVec3 p0 = Point;
+		RVec3 p1 = Point + AxisDirection;
+		RVec3 SideVec = RVec3::Cross((m_EditorCamera->GetPosition() - Point).GetNormalized(), AxisDirection);
+		RVec3 p2 = Point + SideVec;
+
+		return RPlane(p0, p1, p2);
 	}
 
 	void EditorApp::CreateEditorObjects()

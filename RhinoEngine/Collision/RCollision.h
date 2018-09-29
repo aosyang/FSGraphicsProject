@@ -10,8 +10,8 @@
 /// 3D plane
 struct RPlane
 {
-	RVec3 normal;
-	float offset;
+	RVec3 normal;	// The normalized normal vector of the plane
+	float offset;	// Distance from the origin to the plane
 
 	RPlane() {}
 	RPlane(const RVec3& va, const RVec3& vb, const RVec3& vc);

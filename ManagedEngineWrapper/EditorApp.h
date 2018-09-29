@@ -27,8 +27,13 @@ namespace ManagedEngineWrapper
 		RMatrix4					m_InvViewProjMatrix;
 
 		EditorAxis*					m_EditorAxis;
-		int							m_MouseDownX, m_MouseDownY;
 		RMatrix4					m_AxisMatrix;
+
+		/// The cursor position in world space when object moving starts
+		RVec3						m_CursorStartPosition;
+
+		/// The object position in world space when object moving starts
+		RVec3						m_ObjectStartPosition;
 
 		enum class MouseControlMode
 		{
@@ -49,6 +54,7 @@ namespace ManagedEngineWrapper
 		void CreateEditorObjects();
 
 		virtual void UpdateScene(const RTimer& timer) override;
+
 		virtual void RenderScene() override {}
 
 		virtual void OnResize(int width, int height) override;
@@ -64,12 +70,21 @@ namespace ManagedEngineWrapper
 		void SaveMeshMaterialFromSelection();
 		void ExportAllAnimationsToBinaryFiles();
 
-		void RunScreenToCameraRayPicking(float x, float y);
+		void RunScreenToCameraRayPicking(const RVec2& Point);
 
 		bool DeleteSelection();
 
 	private:
 		float SnapTo(float Value, float Unit);
+
+		/// Make a ray from a point in the viewport. X and Y of the point are ranged in [0..1]
+		RRay MakeRayFromViewportPoint(const RVec2& Point);
+
+		/// Get the relative cursor point in the viewport
+		RVec2 GetCursorPointInViewport() const;
+
+		/// Get the plane facing camera from a given point and axis
+		RPlane GetAxisPlane(const RVec3& Point, const RVec3& AxisDirection) const;
 	};
 #pragma managed
 }
