@@ -205,15 +205,24 @@ void RMeshElement::UpdateRenderBuffer()
 {
 	m_RenderBuffer.Release();
 
-	int stride = RVertexDeclaration::GetVertexStride(m_VertexComponentMask);
-	ID3D11InputLayout* inputLayout = RVertexDeclaration::Instance().GetInputLayoutByVertexComponents(m_VertexComponentMask);
+	int VertexComponentMask = m_VertexComponentMask;
+
+	// TODO: For now, I'm rendering skeletal meshes without bone id and bone weights in the editor.
+	//		 This needs to be further changed once we have something like an animation editor.
+	if (GEngine.IsEditor())
+	{
+		VertexComponentMask &= ~(VCM_BoneId | VCM_BoneWeights);
+	}
+
+	int stride = RVertexDeclaration::GetVertexStride(VertexComponentMask);
+	ID3D11InputLayout* inputLayout = RVertexDeclaration::Instance().GetInputLayoutByVertexComponents(VertexComponentMask);
 
 	BYTE* compactVertexData = new BYTE[PositionArray.size() * stride];
 	
 	int offset = 0;
 
 #define COPY_VERTEX_COMPONENT(Mask, VArray, Type) \
-	if (m_VertexComponentMask & Mask) \
+	if (VertexComponentMask & Mask) \
 	{ \
 		memcpy(compactVertexData + offset, &VArray[i], sizeof(Type)); \
 		offset += sizeof(Type); \

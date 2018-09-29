@@ -240,7 +240,7 @@ void RSMeshObject::DrawDepthPass(bool instanced, int instanceCount)
 		int flag = m_Mesh->GetMeshElements()[i].GetFlag();
 		int shaderFeatureMask = 0;
 
-		if (flag & MEF_Skinned)
+		if ((flag & MEF_Skinned) && !GEngine.IsEditor())
 			shaderFeatureMask |= SFM_Skinned;
 		else if (instanced)
 			shaderFeatureMask |= SFM_Instanced;
