@@ -396,10 +396,13 @@ namespace ManagedEngineWrapper
 					break;
 				}
 
-				float Dist;
-				if (CameraRay.TestIntersectionWithPlane(AxisPlane, &Dist))
+				if (AxisPlane.IsValid())
 				{
-					m_CursorStartPosition = CameraRay.GetPointAtDistance(Dist);
+					float Dist;
+					if (CameraRay.TestIntersectionWithPlane(AxisPlane, &Dist))
+					{
+						m_CursorStartPosition = CameraRay.GetPointAtDistance(Dist);
+					}
 				}
 
 				m_ObjectStartPosition = ObjectPosition;

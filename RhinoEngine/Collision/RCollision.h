@@ -13,8 +13,11 @@ struct RPlane
 	RVec3 normal;	// The normalized normal vector of the plane
 	float offset;	// Distance from the origin to the plane
 
-	RPlane() {}
+	RPlane() : normal(0, 0, 0) {}
 	RPlane(const RVec3& va, const RVec3& vb, const RVec3& vc);
+
+	// Check if plane has a valid definition
+	bool IsValid() const;
 };
 
 struct RSphere
@@ -66,4 +69,9 @@ namespace RCollision
 	bool TestAabbInsideFrustum(const RFrustum& frustum, const RAabb& aabb);
 	bool TestSphereWithCapsule(const RSphere& sphere, const RCapsule& capsule);
 };
+
+FORCEINLINE bool RPlane::IsValid() const
+{
+	return normal.SquaredMagitude() > 0.0f;
+}
 
