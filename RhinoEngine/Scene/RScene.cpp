@@ -268,6 +268,7 @@ void RScene::LoadFromFile(const char* filename)
 void RScene::SaveToFile(const char* filename)
 {
 	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
+	doc->InsertEndChild(doc->NewDeclaration());
 	tinyxml2::XMLElement* elem_scene = doc->NewElement("Scene");
 
 	for (auto* SceneObject : m_SceneObjects)
