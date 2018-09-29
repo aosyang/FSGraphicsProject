@@ -20,6 +20,7 @@ public:
 	void SetupView(float InFov, float InAspectRatio, float InNearZ, float InFarZ);
 	void SetAspectRatio(float aspect) { m_Aspect = aspect; m_bIsProjectionMatrixDirty = true; }
 
+	/// Returns field of view in degrees
 	float GetFOV() const { return m_Fov; }
 	float GetAspectRatio() const { return m_Aspect; }
 	float GetNearPlane() const { return m_NearZ; }

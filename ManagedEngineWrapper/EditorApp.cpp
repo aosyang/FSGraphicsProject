@@ -128,15 +128,7 @@ namespace ManagedEngineWrapper
 					int mdx, mdy;
 					RInput.GetRelativeCursorPosition(mdx, mdy);
 
-					RVec3 world_x = RVec3(1, 0, 0);
-					RVec3 world_y = RVec3(0, 1, 0);
-					RVec3 world_z = RVec3(0, 0, 1);
-
-					RVec3 cam_right = m_EditorCamera->GetRightVector();
-					RVec3 cam_up = m_EditorCamera->GetUpVector();
-
-					float move_scale = GRenderer.GetClientHeight() / 500.0f;
-
+					// Hold ctrl key to clone objects
 					if (RInput.GetBufferedKeyState(VK_LBUTTON) == EBufferedKeyState::Pressed &&
 						RInput.IsKeyDown(VK_LCONTROL))
 					{
@@ -146,6 +138,7 @@ namespace ManagedEngineWrapper
 
 					RVec3 pos = m_SelectedObject->GetPosition();
 
+					// Hold alt key to rotate objects
 					if (RInput.IsKeyDown(VK_LMENU))
 					{
 						RQuat Rotation = m_SelectedObject->GetRotation();
@@ -273,7 +266,15 @@ namespace ManagedEngineWrapper
 		RVec3 center = (aabb.pMin + aabb.pMax) * 0.5f;
 		float radius = (aabb.pMax - center).Magnitude();
 
-		RVec3 pos = m_EditorCamera->GetPosition() + m_EditorCamera->GetForwardVector() * radius - center;
+		// Offset from center of the bound to object's origin
+		RVec3 Offset = pObj->GetWorldPosition() - center;
+
+		// Fit the object's aabb into vertical FOV of the camera
+		float HalfFov = m_EditorCamera->GetFOV() * 0.5f;
+		float Distance = radius / tanf(RMath::DegreeToRadian(HalfFov * 0.8f));
+
+		// Place the object in front of the camera, at a good distance
+		RVec3 pos = m_EditorCamera->GetPosition() + m_EditorCamera->GetForwardVector() * Distance + Offset;
 		pos.SetX(SnapTo(pos.X(), 1.0f));
 		pos.SetY(SnapTo(pos.Y(), 1.0f));
 		pos.SetZ(SnapTo(pos.Z(), 1.0f));
@@ -282,7 +283,7 @@ namespace ManagedEngineWrapper
 		string AssetName = RFileUtil::GetFileNameInPath(MeshAssetPath);
 		AssetName = RFileUtil::StripExtension(AssetName);
 
-		// Generate unique name in the scene
+		// Generate a unique name for the object
 		const string ObjectName = m_Scene.GenerateUniqueObjectName(AssetName);
 		pObj->SetName(ObjectName);
 
