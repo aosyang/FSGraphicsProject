@@ -40,6 +40,8 @@ namespace ManagedEngineWrapper {
 
 		virtual void OnKeyDown(int keycode);
 		virtual void OnKeyUp(int keycode);
+		virtual void SetInputEnabled(bool bEnabled);
+
 		void RunScreenToCameraRayPicking(float x, float y);
 		
 		virtual IManagedSceneObject^ GetSelection();

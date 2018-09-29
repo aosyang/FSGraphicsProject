@@ -57,7 +57,9 @@ namespace ManagedEngineWrapper
 	void RhinoEngineWrapper::RunOneFrame()
 	{
 		if (m_IsInitialized)
+		{
 			GEngine.RunOneFrame(true);
+		}
 	}
 
 	void RhinoEngineWrapper::Shutdown()
@@ -119,6 +121,11 @@ namespace ManagedEngineWrapper
 	void RhinoEngineWrapper::OnKeyUp(int keycode)
 	{
 		g_KeyStateModifier.NotifyKeyDownStateChanged(keycode, false);
+	}
+
+	void RhinoEngineWrapper::SetInputEnabled(bool bEnabled)
+	{
+		m_Application->SetInputEnabled(bEnabled);
 	}
 
 	void RhinoEngineWrapper::RunScreenToCameraRayPicking(float x, float y)

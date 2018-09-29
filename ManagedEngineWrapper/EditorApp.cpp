@@ -56,167 +56,170 @@ namespace ManagedEngineWrapper
 
 	void EditorApp::UpdateScene(const RTimer& timer)
 	{
-		RVec3 moveVec(0.0f, 0.0f, 0.0f);
-
-		RECT rwRect = GEngine.GetWindowRectInfo();
-		int mx, my;
-		RInput.GetCursorPosition(mx, my);
-
-		if (mx >= rwRect.left && mx <= rwRect.right &&
-			my >= rwRect.top && my <= rwRect.bottom)
+		if (m_bInputEnabled)
 		{
-			if (RInput.GetBufferedKeyState(VK_RBUTTON) == EBufferedKeyState::Pressed)
-			{
-				RInput.HideCursor();
-				RInput.LockCursor();
-			}
+			RVec3 moveVec(0.0f, 0.0f, 0.0f);
 
-			if (RInput.GetBufferedKeyState(VK_LBUTTON) == EBufferedKeyState::Pressed)
-			{
-				RVec2 CursorPoint = GetCursorPointInViewport();
-				RunScreenToCameraRayPicking(CursorPoint);
-			}
+			RECT rwRect = GEngine.GetWindowRectInfo();
+			int mx, my;
+			RInput.GetCursorPosition(mx, my);
 
-			if (RInput.IsKeyDown(VK_RBUTTON))
+			if (mx >= rwRect.left && mx <= rwRect.right &&
+				my >= rwRect.top && my <= rwRect.bottom)
 			{
-				int dx, dy;
-				RInput.GetRelativeCursorPosition(dx, dy);
-				if (dx || dy)
+				if (RInput.GetBufferedKeyState(VK_RBUTTON) == EBufferedKeyState::Pressed)
 				{
-					m_CamYaw += (float)dx / 200.0f;
-					m_CamPitch += (float)dy / 200.0f;
-					m_CamPitch = max(-PI / 2, min(PI / 2, m_CamPitch));
+					RInput.HideCursor();
+					RInput.LockCursor();
 				}
 
-
-				float camSpeed = 100.0f;
-				if (RInput.IsKeyDown(VK_LSHIFT))
-					camSpeed *= 10.0f;
-
-				if (RInput.IsKeyDown('W'))
-					moveVec += RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
-				if (RInput.IsKeyDown('S'))
-					moveVec -= RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
-				if (RInput.IsKeyDown('A'))
-					moveVec -= RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
-				if (RInput.IsKeyDown('D'))
-					moveVec += RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
-				if (RInput.IsKeyDown('Q'))
-					moveVec -= RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
-				if (RInput.IsKeyDown('E'))
-					moveVec += RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
-			}
-		}
-
-		if (RInput.GetBufferedKeyState(VK_RBUTTON) == EBufferedKeyState::Released)
-		{
-			RInput.ShowCursor();
-			RInput.UnlockCursor();
-		}
-
-		if (RInput.GetBufferedKeyState(VK_LBUTTON) == EBufferedKeyState::Released)
-		{
-			m_MouseControlMode = MouseControlMode::None;
-		}
-
-		if (m_MouseControlMode != MouseControlMode::None)
-		{
-			if (m_SelectedObject)
-			{
-				int mdx, mdy;
-				RInput.GetRelativeCursorPosition(mdx, mdy);
-
-				RVec3 world_x = RVec3(1, 0, 0);
-				RVec3 world_y = RVec3(0, 1, 0);
-				RVec3 world_z = RVec3(0, 0, 1);
-
-				RVec3 cam_right = m_EditorCamera->GetRightVector();
-				RVec3 cam_up = m_EditorCamera->GetUpVector();
-
-				float move_scale = GRenderer.GetClientHeight() / 500.0f;
-
-				if (RInput.GetBufferedKeyState(VK_LBUTTON) == EBufferedKeyState::Pressed &&
-					RInput.IsKeyDown(VK_LCONTROL))
+				if (RInput.GetBufferedKeyState(VK_LBUTTON) == EBufferedKeyState::Pressed)
 				{
-					RScene* Scene = m_SelectedObject->GetScene();
-					m_SelectedObject = Scene->CloneObject(m_SelectedObject);
+					RVec2 CursorPoint = GetCursorPointInViewport();
+					RunScreenToCameraRayPicking(CursorPoint);
 				}
 
-				RVec3 pos = m_SelectedObject->GetPosition();
-
-				if (RInput.IsKeyDown(VK_LMENU))
+				if (RInput.IsKeyDown(VK_RBUTTON))
 				{
-					RQuat Rotation = m_SelectedObject->GetRotation();
-					RQuat DeltaRotation;
-					float Angle = SnapTo((float)mdx * 0.05f, PI/180.0f * 1.0f);
-
-					switch (m_MouseControlMode)
+					int dx, dy;
+					RInput.GetRelativeCursorPosition(dx, dy);
+					if (dx || dy)
 					{
-					case MouseControlMode::MoveX:
-						DeltaRotation = RQuat::Euler(Angle, 0, 0);
-						break;
-
-					case MouseControlMode::MoveY:
-						DeltaRotation = RQuat::Euler(0, Angle, 0);
-						break;
-
-					case MouseControlMode::MoveZ:
-						DeltaRotation = RQuat::Euler(0, 0, Angle);
-						break;
+						m_CamYaw += (float)dx / 200.0f;
+						m_CamPitch += (float)dy / 200.0f;
+						m_CamPitch = max(-PI / 2, min(PI / 2, m_CamPitch));
 					}
 
-					m_SelectedObject->SetRotation(Rotation * DeltaRotation);
+
+					float camSpeed = 100.0f;
+					if (RInput.IsKeyDown(VK_LSHIFT))
+						camSpeed *= 10.0f;
+
+					if (RInput.IsKeyDown('W'))
+						moveVec += RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
+					if (RInput.IsKeyDown('S'))
+						moveVec -= RVec3(0.0f, 0.0f, 1.0f) * timer.DeltaTime() * camSpeed;
+					if (RInput.IsKeyDown('A'))
+						moveVec -= RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+					if (RInput.IsKeyDown('D'))
+						moveVec += RVec3(1.0f, 0.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+					if (RInput.IsKeyDown('Q'))
+						moveVec -= RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
+					if (RInput.IsKeyDown('E'))
+						moveVec += RVec3(0.0f, 1.0f, 0.0f) * timer.DeltaTime() * camSpeed;
 				}
-				else
+			}
+
+			if (RInput.GetBufferedKeyState(VK_RBUTTON) == EBufferedKeyState::Released)
+			{
+				RInput.ShowCursor();
+				RInput.UnlockCursor();
+			}
+
+			if (RInput.GetBufferedKeyState(VK_LBUTTON) == EBufferedKeyState::Released)
+			{
+				m_MouseControlMode = MouseControlMode::None;
+			}
+
+			if (m_MouseControlMode != MouseControlMode::None)
+			{
+				if (m_SelectedObject)
 				{
-					// Move scene object along selected axis
+					int mdx, mdy;
+					RInput.GetRelativeCursorPosition(mdx, mdy);
 
-					// TODO: Support local space later
-					RVec3 AxisVector = RVec3(0, 0, 0);
+					RVec3 world_x = RVec3(1, 0, 0);
+					RVec3 world_y = RVec3(0, 1, 0);
+					RVec3 world_z = RVec3(0, 0, 1);
 
-					switch (m_MouseControlMode)
+					RVec3 cam_right = m_EditorCamera->GetRightVector();
+					RVec3 cam_up = m_EditorCamera->GetUpVector();
+
+					float move_scale = GRenderer.GetClientHeight() / 500.0f;
+
+					if (RInput.GetBufferedKeyState(VK_LBUTTON) == EBufferedKeyState::Pressed &&
+						RInput.IsKeyDown(VK_LCONTROL))
 					{
-					case MouseControlMode::MoveX:
-						AxisVector = RVec3(1, 0, 0);
-						break;
-
-					case MouseControlMode::MoveY:
-						AxisVector = RVec3(0, 1, 0);
-						break;
-
-					case MouseControlMode::MoveZ:
-						AxisVector = RVec3(0, 0, 1);
-						break;
-
-					default:
-						break;
+						RScene* Scene = m_SelectedObject->GetScene();
+						m_SelectedObject = Scene->CloneObject(m_SelectedObject);
 					}
 
-					if (AxisVector.SquaredMagitude() > FLT_EPSILON)
-					{
-						// Get the moving referencing plane and calculate a intersection point with the camera ray.
-						// The moving offset is the projected distance of intersection point and start moving on the moving axis.
-						RPlane Plane = GetAxisPlane(m_CursorStartPosition, AxisVector);
-						RVec2 CursorPoint = GetCursorPointInViewport();
-						RRay CameraRay = MakeRayFromViewportPoint(CursorPoint);
-						float Dist;
+					RVec3 pos = m_SelectedObject->GetPosition();
 
-						if (CameraRay.TestIntersectionWithPlane(Plane, &Dist))
+					if (RInput.IsKeyDown(VK_LMENU))
+					{
+						RQuat Rotation = m_SelectedObject->GetRotation();
+						RQuat DeltaRotation;
+						float Angle = SnapTo((float)mdx * 0.05f, PI / 180.0f * 1.0f);
+
+						switch (m_MouseControlMode)
 						{
-							RVec3 HitPoint = CameraRay.Origin + CameraRay.Direction * Dist;
+						case MouseControlMode::MoveX:
+							DeltaRotation = RQuat::Euler(Angle, 0, 0);
+							break;
 
-							float Offset = SnapTo(RVec3::Dot(HitPoint - m_CursorStartPosition, AxisVector), 1.0f);
-							pos = m_ObjectStartPosition + AxisVector * Offset;
+						case MouseControlMode::MoveY:
+							DeltaRotation = RQuat::Euler(0, Angle, 0);
+							break;
+
+						case MouseControlMode::MoveZ:
+							DeltaRotation = RQuat::Euler(0, 0, Angle);
+							break;
+						}
+
+						m_SelectedObject->SetRotation(Rotation * DeltaRotation);
+					}
+					else
+					{
+						// Move scene object along selected axis
+
+						// TODO: Support local space later
+						RVec3 AxisVector = RVec3(0, 0, 0);
+
+						switch (m_MouseControlMode)
+						{
+						case MouseControlMode::MoveX:
+							AxisVector = RVec3(1, 0, 0);
+							break;
+
+						case MouseControlMode::MoveY:
+							AxisVector = RVec3(0, 1, 0);
+							break;
+
+						case MouseControlMode::MoveZ:
+							AxisVector = RVec3(0, 0, 1);
+							break;
+
+						default:
+							break;
+						}
+
+						if (AxisVector.SquaredMagitude() > FLT_EPSILON)
+						{
+							// Get the moving referencing plane and calculate a intersection point with the camera ray.
+							// The moving offset is the projected distance of intersection point and start moving on the moving axis.
+							RPlane Plane = GetAxisPlane(m_CursorStartPosition, AxisVector);
+							RVec2 CursorPoint = GetCursorPointInViewport();
+							RRay CameraRay = MakeRayFromViewportPoint(CursorPoint);
+							float Dist;
+
+							if (CameraRay.TestIntersectionWithPlane(Plane, &Dist))
+							{
+								RVec3 HitPoint = CameraRay.Origin + CameraRay.Direction * Dist;
+
+								float Offset = SnapTo(RVec3::Dot(HitPoint - m_CursorStartPosition, AxisVector), 1.0f);
+								pos = m_ObjectStartPosition + AxisVector * Offset;
+							}
 						}
 					}
+
+					m_SelectedObject->SetPosition(pos);
 				}
-
-				m_SelectedObject->SetPosition(pos);
 			}
-		}
 
-		m_EditorCamera->SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0));
-		m_EditorCamera->Translate(moveVec, ETransformSpace::Local);
+			m_EditorCamera->SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0));
+			m_EditorCamera->Translate(moveVec, ETransformSpace::Local);
+		}
 
 		//RVec3 camPos = m_CameraMatrix.GetTranslation();
 		//m_CameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
@@ -336,6 +339,11 @@ namespace ManagedEngineWrapper
 				//anim->SaveToFile(animFilename.c_str());
 			}
 		}
+	}
+
+	void EditorApp::SetInputEnabled(bool bEnabled)
+	{
+		m_bInputEnabled = bEnabled;
 	}
 
 	void EditorApp::RunScreenToCameraRayPicking(const RVec2& Point)

@@ -26,6 +26,7 @@ namespace ManagedInterface
 
         void OnKeyDown(int keycode);
         void OnKeyUp(int keycode);
+        void SetInputEnabled(bool bEnabled);
 
         IManagedSceneObject GetSelection();
         void SetSelection(IManagedSceneObject SelectedSceneObject);

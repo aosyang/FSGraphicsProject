@@ -26,10 +26,28 @@ namespace RhinoLevelEditor
             try
             {
                 InitializeComponent();
+                GotFocus += EngineCanvas_GotFocus;
+                LostFocus += EngineCanvas_LostFocus;
             }
             catch (FileNotFoundException e)
             {
                 MessageBox.Show("Unable to open file: " + e.FileName);
+            }
+        }
+
+        private void EngineCanvas_GotFocus(object sender, EventArgs e)
+        {
+            if (Engine != null)
+            {
+                Engine.SetInputEnabled(true);
+            }
+        }
+
+        private void EngineCanvas_LostFocus(object sender, EventArgs e)
+        {
+            if (Engine != null)
+            {
+                Engine.SetInputEnabled(false);
             }
         }
 

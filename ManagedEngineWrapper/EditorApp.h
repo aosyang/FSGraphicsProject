@@ -29,6 +29,8 @@ namespace ManagedEngineWrapper
 		EditorAxis*					m_EditorAxis;
 		RMatrix4					m_AxisMatrix;
 
+		bool						m_bInputEnabled;
+
 		/// The cursor position in world space when object moving starts
 		RVec3						m_CursorStartPosition;
 
@@ -70,6 +72,7 @@ namespace ManagedEngineWrapper
 		void SaveMeshMaterialFromSelection();
 		void ExportAllAnimationsToBinaryFiles();
 
+		void SetInputEnabled(bool bEnabled);
 		void RunScreenToCameraRayPicking(const RVec2& Point);
 
 		bool DeleteSelection();
