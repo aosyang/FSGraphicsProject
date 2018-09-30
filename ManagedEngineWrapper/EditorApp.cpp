@@ -214,6 +214,8 @@ namespace ManagedEngineWrapper
 			m_EditorCamera->Translate(moveVec, ETransformSpace::Local);
 		}
 
+		DrawGrid();
+
 		//RVec3 camPos = m_CameraMatrix.GetTranslation();
 		//m_CameraMatrix = RMatrix4::CreateXAxisRotation(m_CamPitch * 180 / PI) * RMatrix4::CreateYAxisRotation(m_CamYaw * 180 / PI);
 		//m_CameraMatrix.SetTranslation(camPos + (RVec4(moveVec, 1.0f) * m_CameraMatrix).ToVec3());
@@ -531,6 +533,29 @@ namespace ManagedEngineWrapper
 		RVec3 p2 = Point + SideVec;
 
 		return RPlane(p0, p1, p2);
+	}
+
+	void EditorApp::DrawGrid() const
+	{
+		static const int Size = 1000;
+		static const int Step = 50;
+		static const int BoldStep = 100;
+		static const RColor BoldColor = RColor(0.5f, 0.5f, 0.65f);
+		static const RColor LineColor = RColor(0.25f, 0.25f, 0.5f);
+
+		for (int t = -Size; t <= Size; t += Step)
+		{
+			RVec3 Start((float)t, 0, -(float)Size);
+			RVec3 End((float)t, 0, (float)Size);
+			GDebugRenderer.DrawLine(Start, End, (t % BoldStep == 0) ? BoldColor : LineColor);
+		}
+
+		for (int t = -Size; t <= Size; t += Step)
+		{
+			RVec3 Start((float)Size, 0, (float)t);
+			RVec3 End(-(float)Size, 0, (float)t);
+			GDebugRenderer.DrawLine(Start, End, (t % BoldStep == 0) ? BoldColor : LineColor);
+		}
 	}
 
 	void EditorApp::CreateEditorObjects()

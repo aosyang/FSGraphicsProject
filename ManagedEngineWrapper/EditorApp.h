@@ -88,6 +88,8 @@ namespace ManagedEngineWrapper
 
 		/// Get the plane facing camera from a given point and axis
 		RPlane GetAxisPlane(const RVec3& Point, const RVec3& AxisDirection) const;
+
+		void DrawGrid() const;
 	};
 #pragma managed
 }
