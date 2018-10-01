@@ -68,4 +68,21 @@ float3 Specular_BRDF(float alpha, float3 specularColor, float NdotV, float NdotL
 	return specular_D * specular_F * specular_G;
 }
 
+// Diffuse irradiance
+float3 Diffuse_IBL(TextureCube IrradianceTexture, float3 N)
+{
+	return MakeLinearColorFromGammaSpace(IrradianceTexture.Sample(Sampler, N)).rgb;
+}
+
+// Approximate specular image based lighting by sampling radiance map at lower mips 
+// according to roughness, then modulating by Fresnel term. 
+float3 Specular_IBL(TextureCube RadianceTexture, float3 N, float3 V, float lodBias)
+{
+	const static int NumRadianceMipLevels = 2;
+
+	float mip = lodBias * NumRadianceMipLevels;
+	float3 dir = reflect(-V, N);
+	return MakeLinearColorFromGammaSpace(RadianceTexture.SampleLevel(Sampler, dir, mip)).rgb;
+}
+
 #endif	// _BRDF_HLSLI

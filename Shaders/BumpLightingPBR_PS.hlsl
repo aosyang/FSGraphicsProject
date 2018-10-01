@@ -12,7 +12,8 @@
 Texture2D DiffuseTexture		: register(t0);
 Texture2D NormalTexture			: register(t1);
 Texture2D RoughnessMetallicAO	: register(t2);
-TextureCube CubeTexture			: register(t3);
+TextureCube RadianceEnv			: register(t3);
+TextureCube IrradianceEnv		: register(t4);
 
 struct OUTPUT_VERTEX
 {
@@ -53,7 +54,7 @@ OUTPUT_PIXEL main(OUTPUT_VERTEX Input) : SV_TARGET
 
 #else
 
-float3 CalculateLightBRDF(float3 lightDir, float3 lightColor, float3 viewDir, float3 normal, float NdotV, float roughness, float alpha, float c_diff, float c_spec)
+float3 CalculateLightBRDF(float3 lightDir, float3 lightColor, float3 viewDir, float3 normal, float NdotV, float roughness, float alpha, float3 c_diff, float3 c_spec)
 {
 	// Half vector of light direction and view direction
 	float3 H = normalize(lightDir + viewDir);
@@ -78,7 +79,8 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	float metallic = RMA.g;
 	float ambientOcclusion = RMA.b;
 
-	float3 albedo = MakeLinearColorFromGammaSpace(DiffuseTexture.Sample(Sampler, Input.UV)).rgb;
+	//float3 albedo = MakeLinearColorFromGammaSpace(DiffuseTexture.Sample(Sampler, Input.UV)).rgb;
+	float3 albedo = DiffuseTexture.Sample(Sampler, Input.UV).rgb;
 
 	static const float kSpecularCoefficient = 0.04;
 
@@ -115,9 +117,9 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 		float diffuse_factor = Diffuse_Burley(NdotL, NdotV, LdotH, roughness);
 		float3 specular = Specular_BRDF(alpha, c_spec, NdotV, NdotL, LdotH, NdotH);
 
-		float3 lightColor = DirectionalLight[id].Color;
+		float3 lightColor = DirectionalLight[id].Color.rgb;
 
-		Final.rgb += CalculateLightBRDF(lightDir, lightColor, viewDir, normal, NdotV, roughness, alpha, c_diff, c_spec);
+		Final.rgb += lit * CalculateLightBRDF(lightDir, lightColor, viewDir, normal, NdotV, roughness, alpha, c_diff, c_spec);
 	}
 
 	for (int ip = 0; ip < PointLightCount; ip++)
@@ -127,7 +129,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 		float attenuation = 1.0f - saturate(length(lightVec) / PointLight[ip].PosAndRadius.w);
 
-		float3 lightColor = PointLight[ip].Color;
+		float3 lightColor = PointLight[ip].Color.rgb;
 
 		Final.rgb += attenuation * CalculateLightBRDF(lightDir, lightColor, viewDir, normal, NdotV, roughness, alpha, c_diff, c_spec);
 	}
@@ -142,16 +144,19 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 		float coneAtt = 1.0f - saturate((Spotlight[is].ConeRatio.x - surfaceRatio) / (Spotlight[is].ConeRatio.x - Spotlight[is].ConeRatio.y));
 		float attenuation = radiusAtt * coneAtt;
 
-		float3 lightColor = Spotlight[is].Color;
+		float3 lightColor = Spotlight[is].Color.rgb;
 
 		Final.rgb += attenuation * CalculateLightBRDF(lightDir, lightColor, viewDir, normal, NdotV, roughness, alpha, c_diff, c_spec);
 	}
 
+	float3 diffuse_env = Diffuse_IBL(IrradianceEnv, normal);
+	Final.rgb += c_diff * diffuse_env;
+
+	float3 specular_env = Specular_IBL(RadianceEnv, normal, viewDir, roughness);
+	Final.rgb += c_spec * specular_env;
+
 	Final.a = 1.0f;
 	Final.a *= GlobalOpacity;
-
-	//float4 CubeMapSampleColor = MakeLinearColorFromGammaSpace(CubeTexture.Sample(Sampler, reflect(-viewDir, normal)));
-	//Final = lerp(Final, CubeMapSampleColor, 1.0f);
 
 	return Final;
 }
