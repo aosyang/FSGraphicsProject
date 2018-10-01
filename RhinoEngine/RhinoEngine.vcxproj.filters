@@ -278,6 +278,9 @@
     <ClCompile Include="RenderSystem\RPostProcessorManager.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
+    <ClCompile Include="Core\RLog.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="RenderSystem">

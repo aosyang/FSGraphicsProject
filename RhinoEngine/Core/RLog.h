@@ -7,10 +7,12 @@
 
 #include <stdio.h>
 
-#define LogBufSize 1024
+#define LogBufSize 16384
+
+extern char LogMsg[LogBufSize];
 
 /// Log with variable number of arguments
-#define RLog(...)				{ char LogMsg[LogBufSize]; sprintf_s(LogMsg, __VA_ARGS__); OutputDebugStringA(LogMsg); }
+#define RLog(...)				{ sprintf_s(LogMsg, __VA_ARGS__); OutputDebugStringA(LogMsg); }
 
 /// Log with warning prefix
 #define RLogWarning(...)		{ OutputDebugStringA("[Warning] "); RLog(__VA_ARGS__); }

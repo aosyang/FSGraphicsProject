@@ -104,6 +104,7 @@
     <ClCompile Include="Core\REngine.cpp" />
     <ClCompile Include="Core\RFileUtil.cpp" />
     <ClCompile Include="Core\RInput.cpp" />
+    <ClCompile Include="Core\RLog.cpp" />
     <ClCompile Include="Core\RMatrix.cpp" />
     <ClCompile Include="Core\RQuat.cpp" />
     <ClCompile Include="Core\RRay.cpp" />
