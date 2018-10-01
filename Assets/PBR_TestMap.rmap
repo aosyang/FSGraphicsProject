@@ -17,6 +17,15 @@
         </Transform>
     </SceneObject>
     <SceneObject Name="cube_1" Type="MeshObject" Mesh="../Assets/cube.FBX">
+        <Material Index="0">
+            <MeshElement Name="Box001" Shader="BumpLightingPBR">
+                <Texture Slot="0">../Assets/rustediron-streaks_basecolor.dds</Texture>
+                <Texture Slot="1">../Assets/rustediron-streaks_normal.dds</Texture>
+                <Texture Slot="2">../Assets/rustediron-streaks_RMA.dds</Texture>
+                <Texture Slot="3">../Assets/powderpeak.dds</Texture>
+                <Texture Slot="4">../Assets/powderpeak_irradiance.dds</Texture>
+            </MeshElement>
+        </Material>
         <Transform>
             <Position>0.000000, 0.000000, 800.000000</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>
