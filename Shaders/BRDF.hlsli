@@ -12,7 +12,7 @@ static const float EPSILON = 1e-6f;
 
 // Shlick's approximation of Fresnel
 // https://en.wikipedia.org/wiki/Schlick%27s_approximation
-float Fresnel_Shlick(float3 f0, float3 f90, float x)
+float3 Fresnel_Shlick(float3 f0, float3 f90, float x)
 {
 	return f0 + (f90 - f0) * pow(1.0f - x, 5.0f);
 }
@@ -60,7 +60,7 @@ float3 Specular_BRDF(float alpha, float3 specularColor, float NdotV, float NdotL
 	float specular_D = Specular_D_GGX(alpha, NdotH);
 
 	// Specular Fresnel
-	float specular_F = Fresnel_Shlick(specularColor, 1, LdotH);
+	float3 specular_F = Fresnel_Shlick(specularColor, 1, LdotH);
 
 	// Specular G (visibility) component
 	float specular_G = G_Shlick_Smith_Hable(alpha, LdotH);
