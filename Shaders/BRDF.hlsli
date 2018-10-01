@@ -78,7 +78,8 @@ float3 Diffuse_IBL(TextureCube IrradianceTexture, float3 N)
 // according to roughness, then modulating by Fresnel term. 
 float3 Specular_IBL(TextureCube RadianceTexture, float3 N, float3 V, float lodBias)
 {
-	const static int NumRadianceMipLevels = 2;
+	// TODO: Need to set mip levels from code when radiance texture is set
+	const static int NumRadianceMipLevels = 10;
 
 	float mip = lodBias * NumRadianceMipLevels;
 	float3 dir = reflect(-V, N);
