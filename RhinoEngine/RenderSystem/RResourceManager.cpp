@@ -497,6 +497,20 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 		// Tangent
 		FbxGeometryElementTangent* tangentArray = mesh->GetElementTangent();
+
+		// If the mesh doesn't have tangents, try generating one
+		if (!tangentArray)
+		{
+			// Hack: don't generate tangents if the mesh has UV for ambient occlusion
+			if (!mesh->GetElementUV(1))
+			{
+				if (mesh->GenerateTangentsData(0))
+				{
+					tangentArray = mesh->GetElementTangent();
+				}
+			}
+		}
+
 		bool hasPerPolygonVertexTangent = (tangentArray && tangentArray->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
 
 		if (tangentArray && !hasPerPolygonVertexTangent)
@@ -832,6 +846,11 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 				if (textureName.length() != 0)
 				{
+					if (!RFileUtil::CheckIsRelativePath(textureName))
+					{
+						textureName = RFileUtil::GetFileNameInPath(textureName);
+					}
+
 					string ddsFilename = RFileUtil::ReplaceExtension(textureName, "dds");
 					RTexture* texture = RResourceManager::Instance().FindTexture(ddsFilename.data());
 
@@ -1074,7 +1093,14 @@ RTexture* RResourceManager::FindTexture(const char* resourcePath)
 
 	for (auto Iter : m_TextureResources)
 	{
-		if (strcasecmp(Iter->GetPath().data(), resourcePath) == 0)
+		if (strcasecmp(Iter->GetPath().c_str(), resourcePath) == 0)
+		{
+			return Iter;
+		}
+
+		// If searching path contains file name only, also try matching file names
+		const string ResourceName = RFileUtil::GetFileNameInPath(Iter->GetPath());
+		if (strcasecmp(ResourceName.c_str(), resourcePath) == 0)
 		{
 			return Iter;
 		}
@@ -1087,7 +1113,14 @@ RMesh* RResourceManager::FindMesh(const char* resourcePath)
 {
 	for (auto Iter : m_MeshResources)
 	{
-		if (strcasecmp(Iter->GetPath().data(), resourcePath) == 0)
+		if (strcasecmp(Iter->GetPath().c_str(), resourcePath) == 0)
+		{
+			return Iter;
+		}
+
+		// If searching path contains file name only, also try matching file names
+		const string ResourceName = RFileUtil::GetFileNameInPath(Iter->GetPath());
+		if (strcasecmp(ResourceName.c_str(), resourcePath) == 0)
 		{
 			return Iter;
 		}

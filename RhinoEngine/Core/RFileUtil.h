@@ -17,6 +17,9 @@ public:
 	/// Remove extension from filename
 	static string StripExtension(const string& filename);
 
+	/// Check if a path is relative
+	static bool CheckIsRelativePath(const string& path);
+
 	/// Push a new path as working path and store current one
 	static void PushWorkingPath(const char* NewPath);
 

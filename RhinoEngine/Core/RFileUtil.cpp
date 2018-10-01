@@ -74,6 +74,11 @@ std::string RFileUtil::StripExtension(const string& filename)
 	return filename;
 }
 
+bool RFileUtil::CheckIsRelativePath(const string& path)
+{
+	return PathIsRelativeA(path.c_str()) == TRUE;
+}
+
 void RFileUtil::PushWorkingPath(const char* NewPath)
 {
 	char pWorkingPath[1024];
