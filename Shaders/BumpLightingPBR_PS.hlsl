@@ -107,16 +107,6 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 			lit = SampleCascadedShadowMap(Input.ShadowPosH, dot(DirectionalLight[id].Direction.xyz, normal), Input.PosH.z);
 		}
 
-		// Half vector of light direction and view direction
-		float3 H = normalize(lightDir + viewDir);
-		
-		float NdotL = saturate(dot(normal, lightDir));
-		float LdotH = saturate(dot(lightDir, H));
-		float NdotH = saturate(dot(normal, H));
-
-		float diffuse_factor = Diffuse_Burley(NdotL, NdotV, LdotH, roughness);
-		float3 specular = Specular_BRDF(alpha, c_spec, NdotV, NdotL, LdotH, NdotH);
-
 		float3 lightColor = DirectionalLight[id].Color.rgb;
 
 		Final.rgb += lit * CalculateLightBRDF(lightDir, lightColor, viewDir, normal, NdotV, roughness, alpha, c_diff, c_spec);
