@@ -313,6 +313,9 @@
     <None Include="..\Shaders\PixelShaderCommon.hlsli">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Shaders\BRDF.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\RMeshVertexSignature.hlsl">
@@ -400,6 +403,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="..\Shaders\BumpSpecularLighting_PS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\BumpLightingPBR_PS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\BumpLightingPBR_VS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
