@@ -15,6 +15,8 @@
 // FBX SDK
 #include <fbxsdk.h>
 
+#include "tinyxml2\tinyxml2.h"
+
 #define ENABLE_THREADED_LOADING 1
 #define EXPORT_FBX_AS_BINARY_MESH 1
 #define CONVERT_TO_LEFT_HANDED_MESH 1
@@ -1033,9 +1035,32 @@ void RResourceManager::ThreadLoadDDSTextureData(LoaderThreadTask* task)
 
 	RLog("Loading texture [%s]...\n", task->Filename.data());
 
-	ID3D11Resource* pResource;
+	bool bIsSRGBTexture = false;
 
-	HRESULT hr = DirectX::CreateDDSTextureFromFile(GRenderer.D3DDevice(), wszName, &pResource, &srv);
+	unique_ptr<tinyxml2::XMLDocument> XmlDoc(new tinyxml2::XMLDocument());
+	string MetaFileName = task->Filename + ".meta";
+	if (XmlDoc->LoadFile(MetaFileName.c_str()) == tinyxml2::XML_SUCCESS)
+	{
+		tinyxml2::XMLElement* MetaElem = XmlDoc->FirstChildElement("Metadata");
+		if (MetaElem)
+		{
+			static const char NameSRGB[] = "SRGB";
+			MetaElem->QueryBoolAttribute(NameSRGB, &bIsSRGBTexture);
+		}
+	}
+
+	ID3D11Resource* pResource;
+	HRESULT hr;
+	
+	if (bIsSRGBTexture)
+	{
+		hr = DirectX::CreateDDSTextureFromFileEx(GRenderer.D3DDevice(), wszName, 0, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, true, &pResource, &srv);
+	}
+	else
+	{
+		hr = DirectX::CreateDDSTextureFromFile(GRenderer.D3DDevice(), wszName, &pResource, &srv);
+	}
+
 	if (FAILED(hr))
 	{
 		RLog("*** Failed to load texture [%s] ***\n", task->Filename.data());

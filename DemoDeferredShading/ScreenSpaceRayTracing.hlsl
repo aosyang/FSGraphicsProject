@@ -253,7 +253,7 @@ float4 main(VertexOut pIn) : SV_TARGET
 		intersection = false;
 	}
 
-	float4 cubeReflection = MakeLinearColorFromGammaSpace(EnvTexture.Sample(Sampler, mul(rayDirectionVS, (float3x3)cameraMatrix)));
+	float4 cubeReflection = EnvTexture.Sample(Sampler, mul(rayDirectionVS, (float3x3)cameraMatrix));
 	float4 ssReflection = ScreenTexture.Sample(Sampler, hitPixel) * rDotV;
 	float ssr_amount = rDotV * (intersection ? 1.0f : 0.0f);
 	//return Final + ScreenTexture.Sample(Sampler, hitPixel) * rDotV * (intersection ? 1.0f : 0.0f);

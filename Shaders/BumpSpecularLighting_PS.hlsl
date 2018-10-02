@@ -91,7 +91,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 	Ambient.rgb = CalculateAmbientLight(normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor);
 
-	float4 Final = (Ambient + Diffuse) * MakeLinearColorFromGammaSpace(DiffuseTexture.Sample(Sampler, Input.UV)) + Specular;
+	float4 Final = (Ambient + Diffuse) * DiffuseTexture.Sample(Sampler, Input.UV) + Specular;
 	Final.a *= GlobalOpacity;
 	return Final;
 }

@@ -24,7 +24,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	float4 Final;
 	Final.rgb = Input.ColorFg.rgb * tex.rrr * tex.r + Input.ColorBg.rgb * (1.0 - tex.r);
 	Final.a = Input.ColorFg.a * tex.r + Input.ColorBg.a * (1.0 - tex.r);
-	Final = MakeLinearColorFromGammaSpace(Final);
+	Final = Final;
 	Final.a *= GlobalOpacity;
 	return Final;
 }

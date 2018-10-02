@@ -18,7 +18,7 @@ struct OUTPUT_VERTEX
 
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 {
-	float4 skyColor = MakeLinearColorFromGammaSpace(SkyTexture.Sample(Sampler, normalize(Input.PosL)));
+	float4 skyColor = SkyTexture.Sample(Sampler, normalize(Input.PosL));
 	float4 sunColor = float4(0, 0, 0, 1);
 
 #if 1

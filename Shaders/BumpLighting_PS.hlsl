@@ -36,7 +36,7 @@ struct OUTPUT_PIXEL
 OUTPUT_PIXEL main(OUTPUT_VERTEX Input) : SV_TARGET
 {
 	OUTPUT_PIXEL Out = (OUTPUT_PIXEL)0;
-	Out.Albedo = MakeLinearColorFromGammaSpace(DiffuseTexture.Sample(Sampler, Input.UV));
+	Out.Albedo = DiffuseTexture.Sample(Sampler, Input.UV);
 	Out.WorldPos = float4(Input.PosW, Input.PosH.z);
 
 	float3x3 TBN = CalculateTBNSpace(Input.NormalW, Input.TangentW);
@@ -115,7 +115,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 	Ambient.rgb = CalculateAmbientLight(normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor);
 
-	float4 Final = (Ambient + Diffuse) * MakeLinearColorFromGammaSpace(DiffuseTexture.Sample(Sampler, Input.UV)) + Specular;
+	float4 Final = (Ambient + Diffuse) * DiffuseTexture.Sample(Sampler, Input.UV) + Specular;
 	Final.a *= GlobalOpacity;
 	return Final;
 }

@@ -39,7 +39,7 @@ struct OUTPUT_PIXEL
 OUTPUT_PIXEL main(OUTPUT_VERTEX Input) : SV_TARGET
 {
 	OUTPUT_PIXEL Out = (OUTPUT_PIXEL)0;
-	Out.Albedo = MakeLinearColorFromGammaSpace(DiffuseTexture.Sample(Sampler, Input.UV));
+	Out.Albedo = DiffuseTexture.Sample(Sampler, Input.UV);
 	Out.WorldPos = float4(Input.PosW, Input.PosH.z);
 
 	float3x3 TBN = CalculateTBNSpace(Input.NormalW, Input.TangentW);
@@ -79,7 +79,6 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	float metallic = RMA.g;
 	float ambientOcclusion = RMA.b;
 
-	//float3 albedo = MakeLinearColorFromGammaSpace(DiffuseTexture.Sample(Sampler, Input.UV)).rgb;
 	float3 albedo = DiffuseTexture.Sample(Sampler, Input.UV).rgb;
 
 	static const float kSpecularCoefficient = 0.04;
