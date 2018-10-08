@@ -167,10 +167,9 @@ void RDebugRenderer::Render()
 
 	if (m_PrimitiveMeshBuffer.GetVertexCount() != 0)
 	{
-		SHADER_OBJECT_BUFFER cbObject;
-		cbObject.worldMatrix = RMatrix4::IDENTITY;
+		RConstantBuffers::cbPerObject.Data.worldMatrix = RMatrix4::IDENTITY;
 
-		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
+		RConstantBuffers::cbPerObject.UpdateBufferData();
 		RConstantBuffers::cbPerObject.BindBuffer();
 
 		m_ColorShader->Bind();

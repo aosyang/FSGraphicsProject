@@ -539,20 +539,20 @@ void RRenderSystem::RenderFrame()
 
 		Clear();
 
-		SHADER_GLOBAL_BUFFER cbGlobal;
-		ZeroMemory(&cbGlobal, sizeof(cbGlobal));
+		auto& cbGlobal = RConstantBuffers::cbGlobal.Data;
+		RConstantBuffers::cbGlobal.ClearData();
 
 		cbGlobal.UseGammaCorrection = UsingGammaCorrection();
 
-		RConstantBuffers::cbGlobal.UpdateBufferData(&cbGlobal);
+		RConstantBuffers::cbGlobal.UpdateBufferData();
 		RConstantBuffers::cbGlobal.BindBuffer();
 
 		RMatrix4 viewMatrix = m_RenderCamera->GetViewMatrix();
 		RMatrix4 projMatrix = m_RenderCamera->GetProjectionMatrix();
 
 		// Update scene constant buffer
-		SHADER_SCENE_BUFFER cbScene;
-		ZeroMemory(&cbScene, sizeof(cbScene));
+		auto& cbScene = RConstantBuffers::cbScene.Data;
+		RConstantBuffers::cbScene.ClearData();
 
 		cbScene.viewMatrix = viewMatrix;
 		cbScene.projMatrix = projMatrix;
@@ -566,7 +566,7 @@ void RRenderSystem::RenderFrame()
 		{
 			if (ShadowCaster->CanCastShadow())
 			{
-				ShadowCaster->PrepareRenderPass(&cbScene);
+				ShadowCaster->PrepareRenderPass();
 
 				ID3D11ShaderResourceView* shadowMapSRV[MAX_CASCADED_SHADOW_SPLITS_NUM] = { nullptr };
 				int NumDepthPasses = ShadowCaster->GetDepthPassesNum();
@@ -583,12 +583,12 @@ void RRenderSystem::RenderFrame()
 			}
 		}
 
-		RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
+		RConstantBuffers::cbScene.UpdateBufferData();
 		RConstantBuffers::cbScene.BindBuffer();
 
 		// Update light constant buffer
-		SHADER_LIGHT_BUFFER cbLight;
-		ZeroMemory(&cbLight, sizeof(cbLight));
+		auto& cbLight = RConstantBuffers::cbLight.Data;
+		RConstantBuffers::cbLight.ClearData();
 
 		const float AmbientIntensity = 0.5f;
 
@@ -623,14 +623,14 @@ void RRenderSystem::RenderFrame()
 			}
 		}
 
-		RConstantBuffers::cbLight.UpdateBufferData(&cbLight);
+		RConstantBuffers::cbLight.UpdateBufferData();
 		RConstantBuffers::cbLight.BindBuffer();
 
-		SHADER_MATERIAL_BUFFER cbMaterial;
+		auto& cbMaterial = RConstantBuffers::cbMaterial.Data;
 		cbMaterial.GlobalOpacity = 1.0f;
 		cbMaterial.SpecularColorAndPower = RVec4(1.0f, 1.0f, 1.0f, 32.0f);
 
-		RConstantBuffers::cbMaterial.UpdateBufferData(&cbMaterial);
+		RConstantBuffers::cbMaterial.UpdateBufferData();
 		RConstantBuffers::cbMaterial.BindBuffer();
 
 		RFrustum Frustum = m_RenderCamera->GetFrustum();

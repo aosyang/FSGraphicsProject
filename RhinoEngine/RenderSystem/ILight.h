@@ -32,7 +32,7 @@ public:
 	virtual void PrepareDepthPass(int PassIndex, const RenderViewInfo& View) = 0;
 
 	// Set up everything for view pass rendering
-	virtual void PrepareRenderPass(SHADER_SCENE_BUFFER* SceneConstBuffer) = 0;
+	virtual void PrepareRenderPass() = 0;
 
 	// Get the number of depth passes
 	virtual int GetDepthPassesNum() const = 0;

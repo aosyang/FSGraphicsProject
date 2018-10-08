@@ -47,10 +47,9 @@ void RRenderMeshComponent::Render(const RenderViewInfo& View) const
 		if (RCollision::TestAabbInsideFrustum(*View.Frustum, MeshAabb))
 		{
 			// Set up world matrix in constant buffer
-			SHADER_OBJECT_BUFFER cbObject;
-			cbObject.worldMatrix = Matrix;
+			RConstantBuffers::cbPerObject.Data.worldMatrix = Matrix;
 
-			RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
+			RConstantBuffers::cbPerObject.UpdateBufferData();
 			RConstantBuffers::cbPerObject.BindBuffer();
 
 			const UINT32 NumMeshElements = (UINT32)m_Mesh->GetMeshElements().size();
@@ -110,10 +109,9 @@ void RRenderMeshComponent::RenderDepthPass(const RenderViewInfo& View) const
 			if (RCollision::TestAabbInsideFrustum(*View.Frustum, MeshAabb))
 			{
 				// Set up world matrix in constant buffer
-				SHADER_OBJECT_BUFFER cbObject;
-				cbObject.worldMatrix = Matrix;
+				RConstantBuffers::cbPerObject.Data.worldMatrix = Matrix;
 
-				RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
+				RConstantBuffers::cbPerObject.UpdateBufferData();
 				RConstantBuffers::cbPerObject.BindBuffer();
 
 				const UINT32 NumMeshElements = (UINT32)m_Mesh->GetMeshElements().size();

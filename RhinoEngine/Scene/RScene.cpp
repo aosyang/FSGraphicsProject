@@ -382,9 +382,8 @@ void RScene::Render(const RFrustum* pFrustum)
 			continue;
 		}
 
-		SHADER_OBJECT_BUFFER cbObject;
-		cbObject.worldMatrix = SceneObject->GetTransformMatrix();
-		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
+		RConstantBuffers::cbPerObject.Data.worldMatrix = SceneObject->GetTransformMatrix();
+		RConstantBuffers::cbPerObject.UpdateBufferData();
 		RConstantBuffers::cbPerObject.BindBuffer();
 		SceneObject->Draw();
 	}
@@ -404,9 +403,8 @@ void RScene::RenderDepthPass(const RFrustum* pFrustum)
 			continue;
 		}
 
-		SHADER_OBJECT_BUFFER cbObject;
-		cbObject.worldMatrix = SceneObject->GetTransformMatrix();
-		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
+		RConstantBuffers::cbPerObject.Data.worldMatrix = SceneObject->GetTransformMatrix();
+		RConstantBuffers::cbPerObject.UpdateBufferData();
 		RConstantBuffers::cbPerObject.BindBuffer();
 		SceneObject->DrawDepthPass();
 	}

@@ -30,7 +30,7 @@ public:
 	// Override IShadowCaster methods
 	virtual bool CanCastShadow() override;
 	virtual void PrepareDepthPass(int PassIndex, const RenderViewInfo& View) override;
-	virtual void PrepareRenderPass(SHADER_SCENE_BUFFER* SceneConstBuffer) override;
+	virtual void PrepareRenderPass() override;
 	virtual int GetDepthPassesNum() const override;
 	virtual RVec4 GetShadowDepth(RCamera* ViewCamera) override;
 	virtual RFrustum GetFrustum(int PassIndex) override;

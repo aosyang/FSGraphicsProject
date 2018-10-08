@@ -123,7 +123,8 @@ void FTGPlayerController::PostUpdate(float DeltaTime)
 
 void FTGPlayerController::Draw()
 {
-	RConstantBuffers::cbBoneMatrices.UpdateBufferData((SHADER_SKINNED_BUFFER*)&m_BoneMatrices);
+	memcpy(&RConstantBuffers::cbBoneMatrices.Data.boneMatrix, m_BoneMatrices, sizeof(RMatrix4) * MAX_BONE_COUNT);
+	RConstantBuffers::cbBoneMatrices.UpdateBufferData();
 	RConstantBuffers::cbBoneMatrices.BindBuffer();
 
 	RSMeshObject::Draw();
@@ -131,7 +132,8 @@ void FTGPlayerController::Draw()
 
 void FTGPlayerController::DrawDepthPass()
 {
-	RConstantBuffers::cbBoneMatrices.UpdateBufferData((SHADER_SKINNED_BUFFER*)&m_BoneMatrices);
+	memcpy(&RConstantBuffers::cbBoneMatrices.Data.boneMatrix, m_BoneMatrices, sizeof(RMatrix4) * MAX_BONE_COUNT);
+	RConstantBuffers::cbBoneMatrices.UpdateBufferData();
 	RConstantBuffers::cbBoneMatrices.BindBuffer();
 
 	RSMeshObject::DrawDepthPass();

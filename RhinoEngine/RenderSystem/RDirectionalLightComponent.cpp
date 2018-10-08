@@ -55,8 +55,8 @@ bool RDirectionalLightComponent::CanCastShadow()
 
 void RDirectionalLightComponent::PrepareDepthPass(int PassIndex, const RenderViewInfo& View)
 {
-	SHADER_SCENE_BUFFER cbScene;
-	ZeroMemory(&cbScene, sizeof(cbScene));
+	auto& cbScene = RConstantBuffers::cbScene.Data;
+	RConstantBuffers::cbScene.ClearData();
 
 	float lightDistance[3] = { 1000.0f, 2000.0f, 2000.0f };
 	RColor frustumColor[3] = { RColor(1, 0, 0), RColor(0, 1, 0), RColor(0, 0, 1) };
@@ -109,7 +109,7 @@ void RDirectionalLightComponent::PrepareDepthPass(int PassIndex, const RenderVie
 	cbScene.cascadedShadowIndex = PassIndex;
 
 	// ShadowViewProjMatrix is required to render depth pass properly
-	RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
+	RConstantBuffers::cbScene.UpdateBufferData();
 	RConstantBuffers::cbScene.BindBuffer();
 
 	ID3D11ShaderResourceView* nullSRV[] = { nullptr };
@@ -118,14 +118,16 @@ void RDirectionalLightComponent::PrepareDepthPass(int PassIndex, const RenderVie
 	m_ShadowMap[PassIndex].SetupRenderTarget();
 }
 
-void RDirectionalLightComponent::PrepareRenderPass(SHADER_SCENE_BUFFER* SceneConstBuffer)
+void RDirectionalLightComponent::PrepareRenderPass()
 {
+	auto& cbScene = RConstantBuffers::cbScene.Data;
+
 	for (int i = 0; i < GetDepthPassesNum(); i++)
 	{
 		RMatrix4 shadowViewProjMatrix = m_ShadowMap[i].GetViewMatrix() * m_ShadowMap[i].GetProjectionMatrix();
-		SceneConstBuffer->shadowViewProjMatrix[i] = shadowViewProjMatrix;
+		cbScene.shadowViewProjMatrix[i] = shadowViewProjMatrix;
 		shadowViewProjMatrix *= ShadowBiasTransform;
-		SceneConstBuffer->shadowViewProjBiasedMatrix[i] = shadowViewProjMatrix;
+		cbScene.shadowViewProjBiasedMatrix[i] = shadowViewProjMatrix;
 	}
 }
 

@@ -13,10 +13,12 @@ enum EConstantBufferShaderType
 	CBST_GS	= 1 << 2,
 };
 
-template <typename T, int SHADER_TYPE, int SLOT>
+template <typename TStructType, int SHADER_TYPE, int SLOT>
 class RShaderConstantBuffer
 {
 public:
+	TStructType Data;
+
 	RShaderConstantBuffer()
 		: m_ConstBuffer(nullptr)
 	{}
@@ -25,7 +27,7 @@ public:
 	{
 		D3D11_BUFFER_DESC cbDesc;
 		ZeroMemory(&cbDesc, sizeof(cbDesc));
-		cbDesc.ByteWidth = sizeof(T);
+		cbDesc.ByteWidth = sizeof(TStructType);
 		cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		cbDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -33,9 +35,8 @@ public:
 		GRenderer.D3DDevice()->CreateBuffer(&cbDesc, NULL, &m_ConstBuffer);
 
 		// Initialize buffer values with zero
-		T buffer;
-		ZeroMemory(&buffer, sizeof(T));
-		UpdateBufferData(&buffer);
+		ClearData();
+		UpdateBufferData();
 		BindBuffer();
 	}
 
@@ -45,11 +46,11 @@ public:
 	}
 
 	/// Copy data to GPU buffer
-	void UpdateBufferData(const T* data)
+	void UpdateBufferData()
 	{
 		D3D11_MAPPED_SUBRESOURCE subres;
 		GRenderer.D3DImmediateContext()->Map(m_ConstBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
-		memcpy(subres.pData, data, sizeof(T));
+		memcpy(subres.pData, &Data, sizeof(TStructType));
 		GRenderer.D3DImmediateContext()->Unmap(m_ConstBuffer, 0);
 	}
 
@@ -62,6 +63,11 @@ public:
 			GRenderer.D3DImmediateContext()->PSSetConstantBuffers(SLOT, 1, &m_ConstBuffer);
 		if (SHADER_TYPE & CBST_GS)
 			GRenderer.D3DImmediateContext()->GSSetConstantBuffers(SLOT, 1, &m_ConstBuffer);
+	}
+
+	void ClearData()
+	{
+		ZeroMemory(&Data, sizeof(Data));
 	}
 
 private:

@@ -197,8 +197,8 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 void FightingGameApp::RenderScene()
 {
 	// Update light constant buffer
-	SHADER_LIGHT_BUFFER cbLight;
-	ZeroMemory(&cbLight, sizeof(cbLight));
+	auto& cbLight = RConstantBuffers::cbLight.Data;
+	RConstantBuffers::cbLight.ClearData();
 
 	// Setup ambient color
 	cbLight.HighHemisphereAmbientColor = RVec4(1.0f, 1.0f, 1.0f, 0.4f);
@@ -217,8 +217,8 @@ void FightingGameApp::RenderScene()
 
 
 	// Update scene constant buffer
-	SHADER_SCENE_BUFFER cbScene;
-	ZeroMemory(&cbScene, sizeof(cbScene));
+	auto& cbScene = RConstantBuffers::cbScene.Data;
+	RConstantBuffers::cbScene.ClearData();
 
 #if 1
 	cbScene.viewMatrix = m_Camera->GetViewMatrix();
@@ -253,29 +253,29 @@ void FightingGameApp::RenderScene()
 	shadowViewProjMatrix *= shadowTransform;
 	cbScene.shadowViewProjBiasedMatrix[0] = shadowViewProjMatrix;
 
-	RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
+	RConstantBuffers::cbScene.UpdateBufferData();
 	RConstantBuffers::cbScene.BindBuffer();
 
-	RConstantBuffers::cbLight.UpdateBufferData(&cbLight);
+	RConstantBuffers::cbLight.UpdateBufferData();
 	RConstantBuffers::cbLight.BindBuffer();
 
-	SHADER_MATERIAL_BUFFER cbMaterial;
-	ZeroMemory(&cbMaterial, sizeof(cbMaterial));
+	auto& cbMaterial = RConstantBuffers::cbMaterial.Data;
+	RConstantBuffers::cbMaterial.ClearData();
 
 	cbMaterial.SpecularColorAndPower = RVec4(1.0f, 1.0f, 1.0f, 512.0f);
 	cbMaterial.GlobalOpacity = 1.0f;
 
-	RConstantBuffers::cbMaterial.UpdateBufferData(&cbMaterial);
+	RConstantBuffers::cbMaterial.UpdateBufferData();
 	RConstantBuffers::cbMaterial.BindBuffer();
 
-	SHADER_GLOBAL_BUFFER cbScreen;
-	ZeroMemory(&cbScreen, sizeof(cbScreen));
+	auto& cbScreen = RConstantBuffers::cbGlobal.Data;
+	RConstantBuffers::cbGlobal.ClearData();
 
 	cbScreen.ScreenSize = RVec4((float)GRenderer.GetClientWidth(), (float)GRenderer.GetClientHeight(),
 		1.0f / (float)GRenderer.GetClientWidth(), 1.0f / (float)GRenderer.GetClientHeight());
 	cbScreen.UseGammaCorrection = GRenderer.UsingGammaCorrection();
 
-	RConstantBuffers::cbGlobal.UpdateBufferData(&cbScreen);
+	RConstantBuffers::cbGlobal.UpdateBufferData();
 	RConstantBuffers::cbGlobal.BindBuffer();
 
 
@@ -287,7 +287,7 @@ void FightingGameApp::RenderScene()
 	D3D11_VIEWPORT vp = { 0.0f, 0.0f, width, height, 0.0f, 1.0f };
 
 
-	SHADER_OBJECT_BUFFER cbObject;
+	auto& cbObject = RConstantBuffers::cbPerObject.Data;
 
 	for (int pass = 0; pass < 2; pass++)
 	{
@@ -323,7 +323,7 @@ void FightingGameApp::RenderScene()
 		vector<FTGPlayerController*> PlayerControllers = m_Scene.FindAllObjectsOfType<FTGPlayerController>();
 
 		cbObject.worldMatrix = m_Player->GetTransformMatrix();
-		RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
+		RConstantBuffers::cbPerObject.UpdateBufferData();
 		RConstantBuffers::cbPerObject.BindBuffer();
 		if (pass == 0)
 		{

@@ -42,7 +42,7 @@ private:
 	void CreateSceneRenderTargetView();
 	void SetPerObjectConstBuffer(const RMatrix4& world);
 	void RenderSinglePass(RenderPass pass);
-	void SetMaterialConstBuffer(SHADER_MATERIAL_BUFFER* buffer);
+	void UpdateAndBindMaterialConstBuffer();
 	RSphere CalculateFrustumBoundingSphere(const RFrustum& frustum, float start, float end);
 
 	bool						m_EnableLights[3];
@@ -108,8 +108,6 @@ private:
 	int							m_EnabledPostProcessor;
 
 	RVec3						m_SunVec;
-	SHADER_SCENE_BUFFER			cbScene;
-	SHADER_LIGHT_BUFFER			cbLight;
 	SHADER_INSTANCE_BUFFER		cbInstance[2];
 	RMatrix4					m_InstanceMatrices[MAX_INSTANCE_COUNT];
 

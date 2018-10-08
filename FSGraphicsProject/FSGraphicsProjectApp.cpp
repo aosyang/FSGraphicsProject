@@ -455,6 +455,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	RMatrix4 projMatrix = m_Camera->GetProjectionMatrix();
 
 	// Update scene constant buffer
+	auto& cbScene = RConstantBuffers::cbScene.Data;
 	cbScene.viewMatrix = viewMatrix;
 	cbScene.projMatrix = projMatrix;
 	cbScene.viewProjMatrix = viewMatrix * projMatrix;
@@ -566,7 +567,8 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	}
 
 	// Update light constant buffer
-	ZeroMemory(&cbLight, sizeof(cbLight));
+	auto& cbLight = RConstantBuffers::cbLight.Data;
+	RConstantBuffers::cbLight.ClearData();
 
 	// Setup ambient color
 	cbLight.HighHemisphereAmbientColor = RVec4(0.1f, 0.1f, 0.1f, 1.0f);
@@ -623,7 +625,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		//GDebugRenderer.DrawSphere(sPoints[i].ToVec3(), 50.0f);
 	}
 
-	RConstantBuffers::cbLight.UpdateBufferData(&cbLight);
+	RConstantBuffers::cbLight.UpdateBufferData();
 
 	// Update instance buffer
 	ZeroMemory(&cbInstance[0], sizeof(cbInstance[0]));
@@ -640,24 +642,25 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	}
 
 	// Update screen information
-	SHADER_GLOBAL_BUFFER cbScreen;
-	ZeroMemory(&cbScreen, sizeof(cbScreen));
+	auto& cbScreen = RConstantBuffers::cbGlobal.Data;
+	RConstantBuffers::cbGlobal.ClearData();
 
 	cbScreen.ScreenSize = RVec4((float)GRenderer.GetClientWidth(), (float)GRenderer.GetClientHeight(),
 								1.0f / (float)GRenderer.GetClientWidth(), 1.0f / (float)GRenderer.GetClientHeight());
 	cbScreen.UseGammaCorrection = GRenderer.UsingGammaCorrection() ? 1 : (m_EnabledPostProcessor == 1);
 
-	RConstantBuffers::cbGlobal.UpdateBufferData(&cbScreen);
+	RConstantBuffers::cbGlobal.UpdateBufferData();
 
 	// Update particle vertices
 	ParticleDepthComparer cmp(m_Camera->GetPosition(), m_Camera->GetForwardVector());
 	std::sort(m_ParticleVert, m_ParticleVert + PARTICLE_COUNT, cmp);
 	m_ParticleBuffer.UpdateDynamicVertexBuffer(&m_ParticleVert, sizeof(RVertexType::Particle), PARTICLE_COUNT);
 
+	auto& cbParticleInstance = m_cbInstance[1].Data;
 	ObjectDepthComparer objCmp(m_Camera->GetPosition());
-	std::sort(cbInstance[1].instancedWorldMatrix, cbInstance[1].instancedWorldMatrix + 125, objCmp);
+	std::sort(cbParticleInstance.instancedWorldMatrix, cbParticleInstance.instancedWorldMatrix + 125, objCmp);
 
-	m_cbInstance[1].UpdateBufferData(&cbInstance[1]);
+	m_cbInstance[1].UpdateBufferData();
 
 	RVec3 charPos = m_CharacterObj->GetTransformMatrix().GetTranslation();
 	RMatrix4 charMatrix = RMatrix4::CreateYAxisRotation(m_CharacterRot);
@@ -728,7 +731,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		RVec3 invOffset = -animation->GetRootPosition(currTime);
 		RMatrix4 rootInversedTranslation = RMatrix4::CreateTranslation(invOffset);
 
-		SHADER_SKINNED_BUFFER cbSkinned;
+		auto cbSkinned = RConstantBuffers::cbBoneMatrices.Data;
 		if (m_CharacterObj->GetMesh()->IsLoaded())
 		{
 			for (int i = 0; i < m_CharacterObj->GetMesh()->GetBoneCount(); i++)
@@ -748,7 +751,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 		GDebugRenderer.DrawLine(nodePos, nodePos + worldOffset * 10, RColor(1.0f, 0.0f, 0.0f), RColor(1.0f, 0.0f, 0.0f));
 
-		RConstantBuffers::cbBoneMatrices.UpdateBufferData(&cbSkinned);
+		RConstantBuffers::cbBoneMatrices.UpdateBufferData();
 		RConstantBuffers::cbBoneMatrices.BindBuffer();
 	}
 
@@ -792,8 +795,9 @@ void FSGraphicsProjectApp::RenderScene()
 	//=========================== Shadow Pass ===========================
 	for (int i = 0; i < 3; i++)
 	{
+		auto& cbScene = RConstantBuffers::cbScene.Data;
 		cbScene.cascadedShadowIndex = i;
-		RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
+		RConstantBuffers::cbScene.UpdateBufferData();
 		RConstantBuffers::cbScene.BindBuffer();
 
 		m_ShadowMap[i].SetupRenderTarget();
@@ -837,16 +841,18 @@ void FSGraphicsProjectApp::RenderScene()
 			RMatrix4 viewMatrix = m_ShadowMap[shadowIndex].GetViewMatrix();
 			RMatrix4 projMatrix = m_ShadowMap[shadowIndex].GetProjectionMatrix();
 
+			auto& cbScene = RConstantBuffers::cbScene.Data;
 			cbScene.viewMatrix = viewMatrix;
 			cbScene.projMatrix = projMatrix;
 			cbScene.viewProjMatrix = viewMatrix * projMatrix;
 			cbScene.cameraPos = m_SunVec;
 
-			RConstantBuffers::cbScene.UpdateBufferData(&cbScene);
+			RConstantBuffers::cbScene.UpdateBufferData();
 	
+			auto& cbLight = RConstantBuffers::cbLight.Data;
 			cbLight.CameraPos = m_SunVec;
 
-			RConstantBuffers::cbLight.UpdateBufferData(&cbLight);
+			RConstantBuffers::cbLight.UpdateBufferData();
 
 			RConstantBuffers::cbScene.BindBuffer();
 			RConstantBuffers::cbLight.BindBuffer();
@@ -948,10 +954,10 @@ void FSGraphicsProjectApp::CreateSceneRenderTargetView()
 
 void FSGraphicsProjectApp::SetPerObjectConstBuffer(const RMatrix4& world)
 {
-	SHADER_OBJECT_BUFFER cbObject;
+	auto& cbObject = RConstantBuffers::cbPerObject.Data;
 	cbObject.worldMatrix = world;
 
-	RConstantBuffers::cbPerObject.UpdateBufferData(&cbObject);
+	RConstantBuffers::cbPerObject.UpdateBufferData();
 }
 
 void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
@@ -967,12 +973,12 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	float loadingFadeInTime = 1.0f;
 
 	// Update material buffer
-	SHADER_MATERIAL_BUFFER cbMaterial;
-	ZeroMemory(&cbMaterial, sizeof(cbMaterial));
+	auto& cbMaterial = RConstantBuffers::cbMaterial.Data;
+	RConstantBuffers::cbMaterial.ClearData();
 
 	cbMaterial.SpecularColorAndPower = m_MaterialSpecular;
 	cbMaterial.GlobalOpacity = 1.0f;
-	SetMaterialConstBuffer(&cbMaterial);
+	UpdateAndBindMaterialConstBuffer();
 
 	GRenderer.SetBlendState(Blend_Opaque);
 
@@ -991,6 +997,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		GRenderer.Clear(false, RColor(0, 0, 0));
 	}
 
+	auto& cbScene = RConstantBuffers::cbScene.Data;
 	RFrustum cameraFrustum = (pass == ShadowPass) ? m_ShadowMap[cbScene.cascadedShadowIndex].GetFrustum() : m_Camera->GetFrustum();
 
 #if 1
@@ -1010,7 +1017,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	const RAabb meshAabb = m_FbxMeshObj->GetMesh()->GetLocalSpaceAabb();
 
 	int instanceCount = 0;
-	SHADER_INSTANCE_BUFFER cbMeshInstance;
+	auto& cbMeshInstance = m_cbInstance[2].Data;
 	ZeroMemory(&cbMeshInstance, sizeof(cbMeshInstance));
 
 	for (int x = -m_MeshInstanceCount / 2; x <= m_MeshInstanceCount / 2; x++)
@@ -1029,7 +1036,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			if (instanceCount >= MAX_INSTANCE_COUNT ||
 				((x == m_MeshInstanceCount / 2) && (z == m_MeshInstanceCount / 2)))
 			{
-				m_cbInstance[2].UpdateBufferData(&cbMeshInstance);
+				m_cbInstance[2].UpdateBufferData();
 				m_cbInstance[2].BindBuffer();
 
 				if (pass == ShadowPass)
@@ -1040,7 +1047,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 					if (opacity >= 0.0f && opacity <= 1.0f)
 					{
 						cbMaterial.GlobalOpacity = opacity;
-						SetMaterialConstBuffer(&cbMaterial);
+						UpdateAndBindMaterialConstBuffer();
 						GRenderer.SetBlendState(Blend_AlphaToCoverage);
 					}
 					else
@@ -1062,7 +1069,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	// Draw islands
 	SetPerObjectConstBuffer(m_IslandMeshObj->GetTransformMatrix());
 
-	SHADER_INSTANCE_BUFFER cbIslandInstance;
+	auto& cbIslandInstance = m_cbInstance[0].Data;
 	int islandInstanceCount = 0;
 
 	if (m_IslandMeshObj->GetMesh()->IsLoaded())
@@ -1076,7 +1083,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			cbIslandInstance.instancedWorldMatrix[islandInstanceCount] = m_InstanceMatrices[i];
 			islandInstanceCount++;
 		}
-		m_cbInstance[0].UpdateBufferData(&cbIslandInstance);
+		m_cbInstance[0].UpdateBufferData();
 		m_cbInstance[0].BindBuffer();
 	}
 
@@ -1088,7 +1095,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		if (opacity >= 0.0f && opacity <= 1.0f)
 		{
 			cbMaterial.GlobalOpacity = opacity;
-			SetMaterialConstBuffer(&cbMaterial);
+			UpdateAndBindMaterialConstBuffer();
 			GRenderer.SetBlendState(Blend_AlphaToCoverage);
 		}
 		else
@@ -1109,7 +1116,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		if (opacity >= 0.0f && opacity <= 1.0f)
 		{
 			cbMaterial.GlobalOpacity = opacity;
-			SetMaterialConstBuffer(&cbMaterial);
+			UpdateAndBindMaterialConstBuffer();
 			GRenderer.SetBlendState(Blend_AlphaToCoverage);
 			m_AOSceneObj->Draw();
 		}
@@ -1131,7 +1138,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	else
 	{
 		cbMaterial.GlobalOpacity = 1.0f;
-		SetMaterialConstBuffer(&cbMaterial);
+		UpdateAndBindMaterialConstBuffer();
 		GRenderer.SetBlendState(Blend_AlphaToCoverage);
 		m_BumpLightingShader->Bind();
 		GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_BumpBaseTexture->GetPtrSRV());
@@ -1152,14 +1159,14 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			if (opacity >= 0.0f && opacity <= 1.0f)
 			{
 				cbMaterial.GlobalOpacity = opacity;
-				SetMaterialConstBuffer(&cbMaterial);
+				UpdateAndBindMaterialConstBuffer();
 				GRenderer.SetBlendState(Blend_AlphaToCoverage);
 				m_CharacterObj->Draw();
 			}
 			else
 			{
 				cbMaterial.GlobalOpacity = 1.0f;
-				SetMaterialConstBuffer(&cbMaterial);
+				UpdateAndBindMaterialConstBuffer();
 				GRenderer.SetBlendState(Blend_AlphaBlending);
 				m_CharacterObj->Draw();
 			}
@@ -1178,14 +1185,14 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		if (opacity >= 0.0f && opacity <= 1.0f)
 		{
 			cbMaterial.GlobalOpacity = opacity * 0.25f;
-			SetMaterialConstBuffer(&cbMaterial);
+			UpdateAndBindMaterialConstBuffer();
 			GRenderer.SetBlendState(Blend_AlphaToCoverage);
 			m_TransparentMesh->Draw(true, 125);
 		}
 		else
 		{
 			cbMaterial.GlobalOpacity = 0.25f;
-			SetMaterialConstBuffer(&cbMaterial);
+			UpdateAndBindMaterialConstBuffer();
 			GRenderer.SetBlendState(Blend_AlphaBlending);
 			m_TransparentMesh->Draw(true, 125);
 		}
@@ -1204,7 +1211,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			if (opacity >= 0.0f && opacity <= 1.0f)
 			{
 				cbMaterial.GlobalOpacity = opacity;
-				SetMaterialConstBuffer(&cbMaterial);
+				UpdateAndBindMaterialConstBuffer();
 				GRenderer.SetBlendState(Blend_AlphaToCoverage);
 				m_TachikomaObj->Draw();
 			}
@@ -1246,9 +1253,9 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 8, nullSRV);
 }
 
-void FSGraphicsProjectApp::SetMaterialConstBuffer(SHADER_MATERIAL_BUFFER* buffer)
+void FSGraphicsProjectApp::UpdateAndBindMaterialConstBuffer()
 {
-	RConstantBuffers::cbMaterial.UpdateBufferData(buffer);
+	RConstantBuffers::cbMaterial.UpdateBufferData();
 	RConstantBuffers::cbMaterial.BindBuffer();
 }
 
