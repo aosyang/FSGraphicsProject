@@ -49,13 +49,13 @@ namespace RhinoLevelEditor
         {
             engineCanvas1.Initialize();
             engineCanvas1.SetLogLabel(ref toolStripStatusLabel1);
-            meshAssetsListBox.DataSource = engineCanvas1.RhinoEngine.GetMeshNameList();
+            listBox_MeshAssets.DataSource = engineCanvas1.RhinoEngine.GetMeshNameList();
             UpdateSceneObjectsList();
         }
 
         private void btnAddMesh_Click(object sender, EventArgs e)
         {
-            engineCanvas1.RhinoEngine.UpdatePreviewMesh(meshAssetsListBox.SelectedItem.ToString(), false);
+            engineCanvas1.RhinoEngine.UpdatePreviewMesh(listBox_MeshAssets.SelectedItem.ToString(), false);
         }
 
         private void engineCanvas1_KeyDown(object sender, KeyEventArgs e)
@@ -78,10 +78,10 @@ namespace RhinoLevelEditor
 
         private void listMesh_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            int index = this.meshAssetsListBox.IndexFromPoint(e.Location);
+            int index = this.listBox_MeshAssets.IndexFromPoint(e.Location);
             if (index != System.Windows.Forms.ListBox.NoMatches)
             {
-                engineCanvas1.RhinoEngine.UpdatePreviewMesh(meshAssetsListBox.Items[index].ToString(), false);
+                engineCanvas1.RhinoEngine.UpdatePreviewMesh(listBox_MeshAssets.Items[index].ToString(), false);
                 UpdateSceneObjectsList();
             }
         }
@@ -193,7 +193,7 @@ namespace RhinoLevelEditor
 
         private void btnReplaceMesh_Click(object sender, EventArgs e)
         {
-            engineCanvas1.RhinoEngine.UpdatePreviewMesh(meshAssetsListBox.SelectedItem.ToString(), true);
+            engineCanvas1.RhinoEngine.UpdatePreviewMesh(listBox_MeshAssets.SelectedItem.ToString(), true);
             UpdatePropertyGrid();
         }
 

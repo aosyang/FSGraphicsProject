@@ -31,8 +31,7 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.btnReplaceMesh = new System.Windows.Forms.Button();
             this.btnAddMesh = new System.Windows.Forms.Button();
-            this.meshAssetsListBox = new System.Windows.Forms.ListBox();
-            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.splitContainer_EngineCanvas = new System.Windows.Forms.SplitContainer();
             this.splitContainer_SceneView_and_Property = new System.Windows.Forms.SplitContainer();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.sceneObjectsListBox = new System.Windows.Forms.ListBox();
@@ -55,15 +54,18 @@
             this.saveMaterialToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.splitContainer_AssetView = new System.Windows.Forms.SplitContainer();
+            this.listView_AssetView = new System.Windows.Forms.ListView();
             this.engineCanvas1 = new RhinoLevelEditor.EngineCanvas();
+            this.listBox_MeshAssets = new System.Windows.Forms.ListBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
-            this.splitContainer2.Panel1.SuspendLayout();
-            this.splitContainer2.Panel2.SuspendLayout();
-            this.splitContainer2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer_EngineCanvas)).BeginInit();
+            this.splitContainer_EngineCanvas.Panel1.SuspendLayout();
+            this.splitContainer_EngineCanvas.Panel2.SuspendLayout();
+            this.splitContainer_EngineCanvas.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_SceneView_and_Property)).BeginInit();
             this.splitContainer_SceneView_and_Property.Panel1.SuspendLayout();
             this.splitContainer_SceneView_and_Property.Panel2.SuspendLayout();
@@ -71,28 +73,30 @@
             this.groupBox1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer_AssetView)).BeginInit();
+            this.splitContainer_AssetView.Panel1.SuspendLayout();
+            this.splitContainer_AssetView.Panel2.SuspendLayout();
+            this.splitContainer_AssetView.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer1
             // 
             this.splitContainer1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+            this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
             this.splitContainer1.Location = new System.Drawing.Point(0, 24);
             this.splitContainer1.Margin = new System.Windows.Forms.Padding(2);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.btnReplaceMesh);
-            this.splitContainer1.Panel1.Controls.Add(this.btnAddMesh);
-            this.splitContainer1.Panel1.Controls.Add(this.meshAssetsListBox);
+            this.splitContainer1.Panel1.Controls.Add(this.splitContainer_AssetView);
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
+            this.splitContainer1.Panel2.Controls.Add(this.splitContainer_SceneView_and_Property);
             this.splitContainer1.Size = new System.Drawing.Size(1364, 734);
-            this.splitContainer1.SplitterDistance = 225;
+            this.splitContainer1.SplitterDistance = 1088;
             this.splitContainer1.SplitterWidth = 3;
             this.splitContainer1.TabIndex = 1;
             // 
@@ -100,10 +104,10 @@
             // 
             this.btnReplaceMesh.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnReplaceMesh.Location = new System.Drawing.Point(2, 700);
+            this.btnReplaceMesh.Location = new System.Drawing.Point(2, 481);
             this.btnReplaceMesh.Margin = new System.Windows.Forms.Padding(2);
             this.btnReplaceMesh.Name = "btnReplaceMesh";
-            this.btnReplaceMesh.Size = new System.Drawing.Size(220, 24);
+            this.btnReplaceMesh.Size = new System.Drawing.Size(212, 24);
             this.btnReplaceMesh.TabIndex = 4;
             this.btnReplaceMesh.Text = "Replace Selection";
             this.btnReplaceMesh.UseVisualStyleBackColor = true;
@@ -113,48 +117,37 @@
             // 
             this.btnAddMesh.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAddMesh.Location = new System.Drawing.Point(2, 673);
+            this.btnAddMesh.Location = new System.Drawing.Point(2, 453);
             this.btnAddMesh.Margin = new System.Windows.Forms.Padding(2);
             this.btnAddMesh.Name = "btnAddMesh";
-            this.btnAddMesh.Size = new System.Drawing.Size(220, 24);
+            this.btnAddMesh.Size = new System.Drawing.Size(212, 24);
             this.btnAddMesh.TabIndex = 3;
             this.btnAddMesh.Text = "Add to Scene";
             this.btnAddMesh.UseVisualStyleBackColor = true;
             this.btnAddMesh.Click += new System.EventHandler(this.btnAddMesh_Click);
             // 
-            // meshAssetsListBox
+            // splitContainer_EngineCanvas
             // 
-            this.meshAssetsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.meshAssetsListBox.FormattingEnabled = true;
-            this.meshAssetsListBox.Location = new System.Drawing.Point(2, 2);
-            this.meshAssetsListBox.Margin = new System.Windows.Forms.Padding(2);
-            this.meshAssetsListBox.Name = "meshAssetsListBox";
-            this.meshAssetsListBox.Size = new System.Drawing.Size(220, 654);
-            this.meshAssetsListBox.TabIndex = 1;
-            this.meshAssetsListBox.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listMesh_MouseDoubleClick);
+            this.splitContainer_EngineCanvas.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.splitContainer_EngineCanvas.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer_EngineCanvas.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+            this.splitContainer_EngineCanvas.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer_EngineCanvas.Margin = new System.Windows.Forms.Padding(2);
+            this.splitContainer_EngineCanvas.Name = "splitContainer_EngineCanvas";
             // 
-            // splitContainer2
+            // splitContainer_EngineCanvas.Panel1
             // 
-            this.splitContainer2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
-            this.splitContainer2.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer2.Margin = new System.Windows.Forms.Padding(2);
-            this.splitContainer2.Name = "splitContainer2";
+            this.splitContainer_EngineCanvas.Panel1.Controls.Add(this.btnReplaceMesh);
+            this.splitContainer_EngineCanvas.Panel1.Controls.Add(this.listBox_MeshAssets);
+            this.splitContainer_EngineCanvas.Panel1.Controls.Add(this.btnAddMesh);
             // 
-            // splitContainer2.Panel1
+            // splitContainer_EngineCanvas.Panel2
             // 
-            this.splitContainer2.Panel1.Controls.Add(this.engineCanvas1);
-            // 
-            // splitContainer2.Panel2
-            // 
-            this.splitContainer2.Panel2.Controls.Add(this.splitContainer_SceneView_and_Property);
-            this.splitContainer2.Size = new System.Drawing.Size(1136, 734);
-            this.splitContainer2.SplitterDistance = 834;
-            this.splitContainer2.SplitterWidth = 3;
-            this.splitContainer2.TabIndex = 0;
+            this.splitContainer_EngineCanvas.Panel2.Controls.Add(this.engineCanvas1);
+            this.splitContainer_EngineCanvas.Size = new System.Drawing.Size(1086, 509);
+            this.splitContainer_EngineCanvas.SplitterDistance = 218;
+            this.splitContainer_EngineCanvas.SplitterWidth = 3;
+            this.splitContainer_EngineCanvas.TabIndex = 0;
             // 
             // splitContainer_SceneView_and_Property
             // 
@@ -170,7 +163,7 @@
             // splitContainer_SceneView_and_Property.Panel2
             // 
             this.splitContainer_SceneView_and_Property.Panel2.Controls.Add(this.propertyGrid1);
-            this.splitContainer_SceneView_and_Property.Size = new System.Drawing.Size(297, 732);
+            this.splitContainer_SceneView_and_Property.Size = new System.Drawing.Size(271, 732);
             this.splitContainer_SceneView_and_Property.SplitterDistance = 366;
             this.splitContainer_SceneView_and_Property.TabIndex = 1;
             // 
@@ -181,7 +174,7 @@
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(0, 0);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(297, 366);
+            this.groupBox1.Size = new System.Drawing.Size(271, 366);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Scene View";
@@ -192,7 +185,7 @@
             this.sceneObjectsListBox.FormattingEnabled = true;
             this.sceneObjectsListBox.Location = new System.Drawing.Point(3, 36);
             this.sceneObjectsListBox.Name = "sceneObjectsListBox";
-            this.sceneObjectsListBox.Size = new System.Drawing.Size(291, 327);
+            this.sceneObjectsListBox.Size = new System.Drawing.Size(265, 327);
             this.sceneObjectsListBox.TabIndex = 1;
             this.sceneObjectsListBox.SelectedIndexChanged += new System.EventHandler(this.sceneObjectsListBox_SelectedIndexChanged);
             // 
@@ -201,7 +194,7 @@
             this.sceneObjectsSearchTextBox.Dock = System.Windows.Forms.DockStyle.Top;
             this.sceneObjectsSearchTextBox.Location = new System.Drawing.Point(3, 16);
             this.sceneObjectsSearchTextBox.Name = "sceneObjectsSearchTextBox";
-            this.sceneObjectsSearchTextBox.Size = new System.Drawing.Size(291, 20);
+            this.sceneObjectsSearchTextBox.Size = new System.Drawing.Size(265, 20);
             this.sceneObjectsSearchTextBox.TabIndex = 0;
             // 
             // propertyGrid1
@@ -211,7 +204,7 @@
             this.propertyGrid1.Location = new System.Drawing.Point(0, 0);
             this.propertyGrid1.Margin = new System.Windows.Forms.Padding(2);
             this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(297, 362);
+            this.propertyGrid1.Size = new System.Drawing.Size(271, 362);
             this.propertyGrid1.TabIndex = 0;
             // 
             // statusStrip1
@@ -346,21 +339,63 @@
             this.exportAnimToolStripMenuItem.Text = "&Export fbx animations to binary";
             this.exportAnimToolStripMenuItem.Click += new System.EventHandler(this.exportAnimToolStripMenuItem_Click);
             // 
+            // splitContainer_AssetView
+            // 
+            this.splitContainer_AssetView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer_AssetView.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
+            this.splitContainer_AssetView.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer_AssetView.Name = "splitContainer_AssetView";
+            this.splitContainer_AssetView.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer_AssetView.Panel1
+            // 
+            this.splitContainer_AssetView.Panel1.Controls.Add(this.splitContainer_EngineCanvas);
+            // 
+            // splitContainer_AssetView.Panel2
+            // 
+            this.splitContainer_AssetView.Panel2.Controls.Add(this.listView_AssetView);
+            this.splitContainer_AssetView.Size = new System.Drawing.Size(1086, 732);
+            this.splitContainer_AssetView.SplitterDistance = 509;
+            this.splitContainer_AssetView.TabIndex = 1;
+            // 
+            // listView_AssetView
+            // 
+            this.listView_AssetView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView_AssetView.Location = new System.Drawing.Point(0, 0);
+            this.listView_AssetView.Name = "listView_AssetView";
+            this.listView_AssetView.Size = new System.Drawing.Size(1086, 219);
+            this.listView_AssetView.TabIndex = 0;
+            this.listView_AssetView.UseCompatibleStateImageBehavior = false;
+            // 
             // engineCanvas1
             // 
+            this.engineCanvas1.AutoScroll = true;
             this.engineCanvas1.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.engineCanvas1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.engineCanvas1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.engineCanvas1.Location = new System.Drawing.Point(0, 0);
             this.engineCanvas1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.engineCanvas1.Name = "engineCanvas1";
-            this.engineCanvas1.Size = new System.Drawing.Size(832, 732);
+            this.engineCanvas1.Size = new System.Drawing.Size(863, 507);
             this.engineCanvas1.TabIndex = 2;
             this.engineCanvas1.Load += new System.EventHandler(this.engineCanvas1_Load);
             this.engineCanvas1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.engineCanvas1_KeyDown);
             this.engineCanvas1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.engineCanvas1_KeyUp);
             this.engineCanvas1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.engineCanvas1_MouseClick);
             this.engineCanvas1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.engineCanvas1_MouseClick);
+            // 
+            // listBox_MeshAssets
+            // 
+            this.listBox_MeshAssets.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listBox_MeshAssets.FormattingEnabled = true;
+            this.listBox_MeshAssets.Location = new System.Drawing.Point(-1, 0);
+            this.listBox_MeshAssets.Margin = new System.Windows.Forms.Padding(2);
+            this.listBox_MeshAssets.Name = "listBox_MeshAssets";
+            this.listBox_MeshAssets.Size = new System.Drawing.Size(218, 446);
+            this.listBox_MeshAssets.TabIndex = 1;
+            this.listBox_MeshAssets.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listMesh_MouseDoubleClick);
             // 
             // EditorMainForm
             // 
@@ -378,10 +413,10 @@
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
-            this.splitContainer2.Panel1.ResumeLayout(false);
-            this.splitContainer2.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
-            this.splitContainer2.ResumeLayout(false);
+            this.splitContainer_EngineCanvas.Panel1.ResumeLayout(false);
+            this.splitContainer_EngineCanvas.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer_EngineCanvas)).EndInit();
+            this.splitContainer_EngineCanvas.ResumeLayout(false);
             this.splitContainer_SceneView_and_Property.Panel1.ResumeLayout(false);
             this.splitContainer_SceneView_and_Property.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_SceneView_and_Property)).EndInit();
@@ -392,6 +427,10 @@
             this.statusStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.splitContainer_AssetView.Panel1.ResumeLayout(false);
+            this.splitContainer_AssetView.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer_AssetView)).EndInit();
+            this.splitContainer_AssetView.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -400,7 +439,6 @@
         #endregion
 
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.ListBox meshAssetsListBox;
         private System.Windows.Forms.Button btnAddMesh;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.MenuStrip menuStrip1;
@@ -417,7 +455,7 @@
         private System.Windows.Forms.ToolStripMenuItem saveMaterialToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportAnimToolStripMenuItem;
-        private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.SplitContainer splitContainer_EngineCanvas;
         private EngineCanvas engineCanvas1;
         private System.Windows.Forms.PropertyGrid propertyGrid1;
         private System.Windows.Forms.Button btnReplaceMesh;
@@ -427,6 +465,9 @@
         private System.Windows.Forms.ListBox sceneObjectsListBox;
         private System.Windows.Forms.TextBox sceneObjectsSearchTextBox;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.SplitContainer splitContainer_AssetView;
+        private System.Windows.Forms.ListView listView_AssetView;
+        private System.Windows.Forms.ListBox listBox_MeshAssets;
     }
 }
 
