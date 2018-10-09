@@ -12,6 +12,12 @@
 // If set to 1, rotations are saved in degrees instead of radians
 #define SAVE_ROTATION_IN_DEGREES 0
 
+RScene::RScene()
+	: m_RenderCamera(nullptr)
+{
+
+}
+
 void RScene::Initialize()
 {
 }
@@ -339,6 +345,33 @@ void RScene::SaveToFile(const char* filename)
 
 	doc->InsertEndChild(elem_scene);
 	doc->SaveFile(filename);
+}
+
+void RScene::SetRenderCamera(RCamera* Camera)
+{
+	m_RenderCamera = Camera;
+}
+
+RCamera* RScene::GetRenderCamera() const
+{
+	return m_RenderCamera;
+}
+
+void RScene::NotifyCameraCreated(RCamera* Camera)
+{
+	// If new camera is the first one in the scene, use it as render camera
+	if (m_RenderCamera == nullptr)
+	{
+		m_RenderCamera = Camera;
+	}
+}
+
+void RScene::NotifyCameraDestroying(RCamera* Camera)
+{
+	if (m_RenderCamera == Camera)
+	{
+		m_RenderCamera = nullptr;
+	}
 }
 
 RVec3 RScene::TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec, list<RSceneObject*> IgnoredObjects /*= list<RSceneObject*>()*/)

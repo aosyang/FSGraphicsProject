@@ -5,6 +5,7 @@
 //=============================================================================
 using ManagedInterface;
 using System;
+using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
@@ -16,6 +17,9 @@ namespace RhinoLevelEditor
         const string FormTitle = "Rhino Level Editor";
         string OpenedMapPath;
         bool bUpdatingSceneObjectsList = false;
+
+        const int ThumbnailWidth = 128;
+        const int ThumbnailHeight = 128;
 
         public EditorMainForm()
         {
@@ -50,6 +54,24 @@ namespace RhinoLevelEditor
             engineCanvas1.Initialize();
             engineCanvas1.SetLogLabel(ref toolStripStatusLabel1);
             listBox_MeshAssets.DataSource = engineCanvas1.RhinoEngine.GetMeshNameList();
+
+            int Index = 0;
+            foreach (string MeshAssetPath in engineCanvas1.RhinoEngine.GetMeshNameList())
+            {
+                string FileName = Path.GetFileName(MeshAssetPath);
+                ListViewItem item = new ListViewItem(FileName, Index);
+
+                EngineAssetData AssetData = new EngineAssetData();
+                AssetData.Path = MeshAssetPath;
+
+                item.Tag = AssetData;
+                listView_AssetView.Items.Add(item);
+
+                Index++;
+            }
+
+            UpdateAssetListViewThumbnails();
+
             UpdateSceneObjectsList();
         }
 
@@ -114,6 +136,32 @@ namespace RhinoLevelEditor
             }
 
             bUpdatingSceneObjectsList = false;
+        }
+
+        /// <summary>
+        /// Update thumbnails of all assets in asset list view
+        /// </summary>
+        private void UpdateAssetListViewThumbnails()
+        {
+            ImageList LargeImageList = new ImageList();
+            LargeImageList.ImageSize = new Size(ThumbnailWidth, ThumbnailHeight);
+            LargeImageList.ColorDepth = ColorDepth.Depth32Bit;
+
+            foreach (ListViewItem Item in listView_AssetView.Items)
+            {
+                if (Item != null)
+                {
+                    EngineAssetData AssetData = Item.Tag as EngineAssetData;
+                    if (AssetData != null)
+                    {
+                        string AssetPath = AssetData.Path;
+                        Bitmap Image = engineCanvas1.RhinoEngine.GenerateMeshThumbnailBitmap(AssetPath, ThumbnailWidth, ThumbnailHeight);
+                        LargeImageList.Images.Add(Image);
+                    }
+                }
+            }
+
+            listView_AssetView.LargeImageList = LargeImageList;
         }
 
         private void engineCanvas1_MouseClick(object sender, MouseEventArgs e)
@@ -211,6 +259,11 @@ namespace RhinoLevelEditor
                 engineCanvas1.RhinoEngine.SetSelection((IManagedSceneObject)listBox.SelectedItem);
                 UpdatePropertyGrid();
             }
+        }
+
+        private void refreshAssetsPreviewsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            UpdateAssetListViewThumbnails();
         }
     }
 }

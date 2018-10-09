@@ -13,9 +13,9 @@ RCamera::RCamera(const RConstructingParams& Params)
 	: Base(Params)
 	, m_bIsProjectionMatrixDirty(true)
 {
-	if (GRenderer.GetRenderCamera() == nullptr)
+	if (Params.Scene)
 	{
-		GRenderer.SetRenderCamera(this);
+		Params.Scene->NotifyCameraCreated(this);
 	}
 
 	m_Fov = 65.0f;
@@ -26,9 +26,10 @@ RCamera::RCamera(const RConstructingParams& Params)
 
 RCamera::~RCamera()
 {
-	if (GRenderer.GetRenderCamera() == this)
+	RScene* Scene = GetScene();
+	if (Scene)
 	{
-		GRenderer.SetRenderCamera(nullptr);
+		Scene->NotifyCameraDestroying(this);
 	}
 }
 

@@ -89,9 +89,7 @@ public:
 	void UnregisterShadowCaster(IShadowCaster* ShadowCaster);
 
 	void SetActiveScene(RScene* Scene);
-
-	void SetRenderCamera(RCamera* Camera);
-	RCamera* GetRenderCamera() const;
+	RScene* GetActiveScene() const;
 
 	RenderStats	Stats;
 
@@ -138,7 +136,6 @@ protected:
 	vector<IShadowCaster*>			m_RegisteredShadowCasters;
 
 	RScene*					m_ActiveScene;
-	RCamera*				m_RenderCamera;			// Default camera will be used for frustum culling
 };
 
 #define GRenderer RRenderSystem::Instance()

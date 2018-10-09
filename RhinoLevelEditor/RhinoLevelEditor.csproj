@@ -82,6 +82,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EngineAssetData.cs" />
     <Compile Include="EngineCanvas.cs">
       <SubType>UserControl</SubType>
     </Compile>

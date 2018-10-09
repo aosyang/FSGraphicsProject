@@ -18,7 +18,6 @@ RRenderSystem::RRenderSystem()
 	, m_RenderTargetViewNum(0)
 	, m_bIsUsingDeferredShading(false)
 	, m_ActiveScene(nullptr)
-	, m_RenderCamera(nullptr)
 {
 }
 
@@ -465,14 +464,9 @@ void RRenderSystem::SetActiveScene(RScene* Scene)
 	m_ActiveScene = Scene;
 }
 
-void RRenderSystem::SetRenderCamera(RCamera* Camera)
+RScene* RRenderSystem::GetActiveScene() const
 {
-	m_RenderCamera = Camera;
-}
-
-RCamera* RRenderSystem::GetRenderCamera() const
-{
-	return m_RenderCamera;
+	return m_ActiveScene;
 }
 
 void RRenderSystem::RenderFrame()
@@ -480,7 +474,8 @@ void RRenderSystem::RenderFrame()
 	GRenderer.SetSamplerState(0, SamplerState_Texture);
 	GRenderer.SetSamplerState(2, SamplerState_ShadowDepthComparison);
 
-	if (m_RenderCamera)
+	RCamera* RenderCamera = m_ActiveScene ? m_ActiveScene->GetRenderCamera() : nullptr;
+	if (RenderCamera)
 	{
 		// Prepare shadow map for each shadow caster
 		for (auto ShadowCaster : m_RegisteredShadowCasters)
@@ -491,7 +486,7 @@ void RRenderSystem::RenderFrame()
 
 				for (int i = 0; i < ShadowCaster->GetDepthPassesNum(); i++)
 				{
-					RFrustum CameraFrustum = m_RenderCamera->GetFrustum();
+					RFrustum CameraFrustum = RenderCamera->GetFrustum();
 					RenderViewInfo CameraView
 					{
 						&CameraFrustum
@@ -547,8 +542,8 @@ void RRenderSystem::RenderFrame()
 		RConstantBuffers::cbGlobal.UpdateBufferData();
 		RConstantBuffers::cbGlobal.BindBuffer();
 
-		RMatrix4 viewMatrix = m_RenderCamera->GetViewMatrix();
-		RMatrix4 projMatrix = m_RenderCamera->GetProjectionMatrix();
+		RMatrix4 viewMatrix = RenderCamera->GetViewMatrix();
+		RMatrix4 projMatrix = RenderCamera->GetProjectionMatrix();
 
 		// Update scene constant buffer
 		auto& cbScene = RConstantBuffers::cbScene.Data;
@@ -557,7 +552,7 @@ void RRenderSystem::RenderFrame()
 		cbScene.viewMatrix = viewMatrix;
 		cbScene.projMatrix = projMatrix;
 		cbScene.viewProjMatrix = viewMatrix * projMatrix;
-		cbScene.cameraPos = m_RenderCamera->GetWorldPosition();
+		cbScene.cameraPos = RenderCamera->GetWorldPosition();
 
 		int CascadedShadowsNum = 0;
 		RVec4 ShadowDepths;
@@ -578,7 +573,7 @@ void RRenderSystem::RenderFrame()
 				GRenderer.D3DImmediateContext()->PSSetShaderResources(RShadowMap::ShaderResourceSlot(), NumDepthPasses, shadowMapSRV);
 
 				CascadedShadowsNum = NumDepthPasses;
-				ShadowDepths = ShadowCaster->GetShadowDepth(m_RenderCamera);
+				ShadowDepths = ShadowCaster->GetShadowDepth(RenderCamera);
 				break;
 			}
 		}
@@ -596,7 +591,7 @@ void RRenderSystem::RenderFrame()
 		cbLight.HighHemisphereAmbientColor = RVec4(0.9f, 1.0f, 1.0f, AmbientIntensity);
 		cbLight.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, AmbientIntensity);
 
-		cbLight.CameraPos = m_RenderCamera->GetWorldPosition();
+		cbLight.CameraPos = RenderCamera->GetWorldPosition();
 		cbLight.CascadedShadowDepth = ShadowDepths;
 		if (CascadedShadowsNum)
 		{
@@ -633,7 +628,7 @@ void RRenderSystem::RenderFrame()
 		RConstantBuffers::cbMaterial.UpdateBufferData();
 		RConstantBuffers::cbMaterial.BindBuffer();
 
-		RFrustum Frustum = m_RenderCamera->GetFrustum();
+		RFrustum Frustum = RenderCamera->GetFrustum();
 		RenderViewInfo View
 		{
 			&Frustum

@@ -9,6 +9,8 @@
 class RScene
 {
 public:
+	RScene();
+
 	void Initialize();
 	void Release();
 
@@ -54,6 +56,18 @@ public:
 	/// Save scene to file on disk
 	void SaveToFile(const char* filename);
 
+	/// Set current render camera for the scene
+	void SetRenderCamera(RCamera* Camera);
+
+	/// Get current render camera for the scene
+	RCamera* GetRenderCamera() const;
+
+	/// Notify the scene about creating a new camera
+	void NotifyCameraCreated(RCamera* Camera);
+
+	/// Notify the scene about destroying a camera
+	void NotifyCameraDestroying(RCamera* Camera);
+
 	RVec3 TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec, list<RSceneObject*> IgnoredObjects = list<RSceneObject*>());
 	void Render(const RFrustum* pFrustum = nullptr);
 	void RenderDepthPass(const RFrustum* pFrustum = nullptr);
@@ -70,6 +84,7 @@ private:
 	void XmlWriteObjectTransformAsMatrix(tinyxml2::XMLElement* ObjectElement, RSceneObject* SceneObject);
 
 	vector<RSceneObject*>		m_SceneObjects;
+	RCamera*					m_RenderCamera;			// Default camera will be used for frustum culling
 };
 
 template<typename T>

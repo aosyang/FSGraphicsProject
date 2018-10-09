@@ -8,6 +8,7 @@
 
 using namespace System;
 using namespace System::Collections::Generic;
+using namespace System::Drawing;
 using namespace ManagedInterface;
 
 class REngine;
@@ -34,6 +35,7 @@ namespace ManagedEngineWrapper {
 		virtual void Resize(int width, int height);
 
 		virtual List<String^>^ GetMeshNameList();
+		virtual Bitmap^ GenerateMeshThumbnailBitmap(String^ MeshName, int Width, int Height);
 		virtual void UpdatePreviewMesh(String^ path, bool replace);
 
 		virtual List<IManagedSceneObject^>^ GetSceneObjectsList();
@@ -56,6 +58,9 @@ namespace ManagedEngineWrapper {
 
 	private:
 		void UpdateSceneObjectsList();
+		
+		/// Render a thumbnail preview image for mesh asset
+		Bitmap^ RenderThumbnailForMesh(RMesh* MeshAsset, int Width, int Height);
 
 		List<IManagedSceneObject^>^ SceneObjectsList;
 	};

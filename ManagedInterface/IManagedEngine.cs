@@ -5,6 +5,7 @@
 //=============================================================================
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace ManagedInterface
 {
@@ -20,6 +21,7 @@ namespace ManagedInterface
         /// </summary>
         /// <returns></returns>
         List<string> GetMeshNameList();
+        Bitmap GenerateMeshThumbnailBitmap(string MeshName, int Width, int Height);
         void UpdatePreviewMesh(string path, bool replace);
 
         List<IManagedSceneObject> GetSceneObjectsList();
