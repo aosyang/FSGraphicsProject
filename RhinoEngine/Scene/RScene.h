@@ -46,8 +46,10 @@ public:
 	/// Check if the name has been used by any object in the scene
 	bool DoesObjectNameExist(const string& Name) const;
 
-	/// Add an object to the scene
+	/// Destroy a scene object
 	void DestroyObject(RSceneObject* obj);
+
+	/// Destroy all scene objects
 	void DestroyAllObjects();
 
 	/// Load scene from file on disk

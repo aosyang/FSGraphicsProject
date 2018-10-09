@@ -17,7 +17,7 @@ public:
 	RMatrix4 GetViewProjMatrix();
 	RFrustum GetFrustum() const;
 
-	void SetupView(float InFov, float InAspectRatio, float InNearZ, float InFarZ);
+	void SetupView(float InFov, float InAspectRatio, float InNearZ = 0.1f, float InFarZ = 5000.0f);
 	void SetAspectRatio(float aspect) { m_Aspect = aspect; m_bIsProjectionMatrixDirty = true; }
 
 	/// Returns field of view in degrees

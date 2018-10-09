@@ -299,7 +299,8 @@ namespace ManagedEngineWrapper
 			RSMeshObject* MeshObject = PreviewScene.CreateMeshObject(MeshAsset);
 			RCamera* Camera = PreviewScene.CreateSceneObjectOfType<RCamera>();
 
-			Camera->SetAspectRatio((float)Width / (float)Height);
+			float AspectRatio = (float)Width / (float)Height;
+			Camera->SetupView(45.0f, AspectRatio, 1.0f, 10000.0f);
 
 			RAabb aabb = MeshObject->GetAabb();
 			RVec3 center = (aabb.pMin + aabb.pMax) * 0.5f;

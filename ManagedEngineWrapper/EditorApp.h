@@ -75,9 +75,11 @@ namespace ManagedEngineWrapper
 		void SetInputEnabled(bool bEnabled);
 		void RunScreenToCameraRayPicking(const RVec2& Point);
 
+		/// Delete selected scene object
 		bool DeleteSelection();
 
 	private:
+		/// Helper function to snap a value to a unit
 		float SnapTo(float Value, float Unit);
 
 		/// Make a ray from a point in the viewport. X and Y of the point are ranged in [0..1]
@@ -89,6 +91,7 @@ namespace ManagedEngineWrapper
 		/// Get the plane facing camera from a given point and axis
 		RPlane GetAxisPlane(const RVec3& Point, const RVec3& AxisDirection) const;
 
+		/// Draw the unit grid in editor view
 		void DrawGrid() const;
 	};
 #pragma managed
