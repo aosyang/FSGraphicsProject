@@ -24,7 +24,9 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+
 #include <memory>
+#include <functional>
 
 #include <vector>
 #include <list>
@@ -42,6 +44,8 @@ using namespace std;
 #pragma comment(lib, "d3dcompiler.lib")
 
 #include "../lua5.3/lua.hpp"
+
+#include "Core/RDelegate.h"
 
 #include "Core/RVector.h"
 #include "Core/RQuat.h"

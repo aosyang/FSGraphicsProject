@@ -52,6 +52,7 @@
     <ClInclude Include="Core\RAabb.h" />
     <ClInclude Include="Core\RColor.h" />
     <ClInclude Include="Core\RDebugMenu.h" />
+    <ClInclude Include="Core\RDelegate.h" />
     <ClInclude Include="Core\REngine.h" />
     <ClInclude Include="Core\RFileUtil.h" />
     <ClInclude Include="Core\RInput.h" />

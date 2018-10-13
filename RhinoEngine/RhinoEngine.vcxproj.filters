@@ -158,6 +158,9 @@
     <ClInclude Include="RenderSystem\RPostProcessorManager.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="Core\RDelegate.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
