@@ -89,25 +89,25 @@ void RMeshRenderBuffer::UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSiz
 
 void RMeshRenderBuffer::Draw(D3D11_PRIMITIVE_TOPOLOGY topology) const
 {
-	UINT offset = 0;
+	if (m_VertexBuffer)
+	{
+		assert(m_InputLayout);
+		UINT offset = 0;
 
-	if (m_IndexBuffer)
-	{
-		assert(m_InputLayout);
-		GRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
-		GRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
-		GRenderer.D3DImmediateContext()->IASetIndexBuffer(m_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-		GRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
-		GRenderer.D3DImmediateContext()->DrawIndexed(m_IndexCount, 0, 0);
-		GRenderer.Stats.DrawCalls++;
-	}
-	else if (m_VertexBuffer)
-	{
-		assert(m_InputLayout);
 		GRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
 		GRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
 		GRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
-		GRenderer.D3DImmediateContext()->Draw(m_VertexCount, 0);
+		
+		if (m_IndexBuffer)
+		{
+			GRenderer.D3DImmediateContext()->IASetIndexBuffer(m_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+			GRenderer.D3DImmediateContext()->DrawIndexed(m_IndexCount, 0, 0);
+		}
+		else
+		{
+			GRenderer.D3DImmediateContext()->Draw(m_VertexCount, 0);
+		}
+
 		GRenderer.Stats.DrawCalls++;
 	}
 }
@@ -116,21 +116,25 @@ void RMeshRenderBuffer::DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOG
 {
 	UINT offset = 0;
 
-	if (m_IndexBuffer)
+	if (m_VertexBuffer)
 	{
-		GRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
-		GRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
-		GRenderer.D3DImmediateContext()->IASetIndexBuffer(m_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-		GRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
-		GRenderer.D3DImmediateContext()->DrawIndexedInstanced(m_IndexCount, instanceCount, 0, 0, 0);
-		GRenderer.Stats.DrawCalls++;
-	}
-	else if (m_VertexBuffer)
-	{
+		assert(m_InputLayout);
+		UINT offset = 0;
+		
 		GRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
 		GRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
 		GRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
-		GRenderer.D3DImmediateContext()->DrawInstanced(m_VertexCount, instanceCount, 0, 0);
+
+		if (m_IndexBuffer)
+		{
+			GRenderer.D3DImmediateContext()->IASetIndexBuffer(m_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+			GRenderer.D3DImmediateContext()->DrawIndexedInstanced(m_IndexCount, instanceCount, 0, 0, 0);
+		}
+		else
+		{
+			GRenderer.D3DImmediateContext()->DrawInstanced(m_VertexCount, instanceCount, 0, 0);
+		}
+
 		GRenderer.Stats.DrawCalls++;
 	}
 }
