@@ -23,9 +23,9 @@ enum EVertexComponent
 	VertexComponent_BoneId,
 	VertexComponent_BoneWeights,
 	VertexComponent_Pos,
-	VertexComponent_UV0,
 	VertexComponent_Normal,
 	VertexComponent_Tangent,
+	VertexComponent_UV0,
 	VertexComponent_UV1,
 
 	VertexComponent_Count,
@@ -42,9 +42,9 @@ enum EVertexComponentMask
 	VCM_BoneId							= 1 << VertexComponent_BoneId,
 	VCM_BoneWeights						= 1 << VertexComponent_BoneWeights,
 	VCM_Pos								= 1 << VertexComponent_Pos,
-	VCM_UV0								= 1 << VertexComponent_UV0,
 	VCM_Normal							= 1 << VertexComponent_Normal,
 	VCM_Tangent							= 1 << VertexComponent_Tangent,
+	VCM_UV0								= 1 << VertexComponent_UV0,
 	VCM_UV1								= 1 << VertexComponent_UV1,
 };
 
@@ -110,9 +110,9 @@ namespace RVertexType
 
 	VERTEX_TYPE_BEGIN(Mesh)
 		Vec3Data pos;
-		Vec2Data uv0;
 		Vec3Data normal;
 		Vec3Data tangent;
+		Vec2Data uv0;
 		Vec2Data uv1;
 	VERTEX_TYPE_END
 

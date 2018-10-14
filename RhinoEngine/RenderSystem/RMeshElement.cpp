@@ -237,9 +237,9 @@ void RMeshElement::UpdateRenderBuffer()
 		COPY_VERTEX_COMPONENT(VCM_BoneId,		BoneIdArray,		VBoneIds)
 		COPY_VERTEX_COMPONENT(VCM_BoneWeights,	BoneWeightArray,	RVertexType::Vec4Data)
 		COPY_VERTEX_COMPONENT(VCM_Pos,			PositionArray,		RVertexType::Vec3Data)
-		COPY_VERTEX_COMPONENT(VCM_UV0,			UV0Array,			RVertexType::Vec2Data)
 		COPY_VERTEX_COMPONENT(VCM_Normal,		NormalArray,		RVertexType::Vec3Data)
 		COPY_VERTEX_COMPONENT(VCM_Tangent,		TangentArray,		RVertexType::Vec3Data)
+		COPY_VERTEX_COMPONENT(VCM_UV0,			UV0Array,			RVertexType::Vec2Data)
 		COPY_VERTEX_COMPONENT(VCM_UV1,			UV1Array,			RVertexType::Vec2Data)
 	}
 #undef COPY_VERTEX_COMPONENT

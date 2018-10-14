@@ -530,16 +530,12 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		// Tangent
 		FbxGeometryElementTangent* tangentArray = mesh->GetElementTangent();
 
-		// If the mesh doesn't have tangents, try generating one
+		// If the mesh doesn't have tangents, try generating a set of them
 		if (!tangentArray)
 		{
-			// Hack: don't generate tangents if the mesh has UV for ambient occlusion
-			if (!mesh->GetElementUV(1))
+			if (mesh->GenerateTangentsData(0))
 			{
-				if (mesh->GenerateTangentsData(0))
-				{
-					tangentArray = mesh->GetElementTangent();
-				}
+				tangentArray = mesh->GetElementTangent();
 			}
 		}
 

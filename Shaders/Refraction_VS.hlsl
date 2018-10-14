@@ -8,8 +8,9 @@
 struct INPUT_VERTEX
 {
 	float3 PosL		: POSITION;
-	float2 UV		: TEXCOORD0;
 	float3 Normal	: NORMAL;
+	float3 Tangent	: TANGENT;
+	float2 UV		: TEXCOORD0;
 };
 
 struct OUTPUT_VERTEX
