@@ -85,8 +85,8 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 	float alpha = roughness * roughness;
 
-	float3 c_diff = lerp(albedo, float3(0, 0, 0), metallic);
-	float3 c_spec = lerp(kSpecularCoefficient, albedo, metallic);
+	float3 c_diff = lerp(albedo, float3(0, 0, 0), metallic) * ambientOcclusion;
+	float3 c_spec = lerp(kSpecularCoefficient, albedo, metallic) * ambientOcclusion;
 
 	float3x3 TBN = CalculateTBNSpace(Input.NormalW, Input.TangentW);
 
