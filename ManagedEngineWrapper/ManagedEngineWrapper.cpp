@@ -377,8 +377,8 @@ namespace ManagedEngineWrapper
 			RConstantBuffers::cbScene.BindBuffer();
 
 			RConstantBuffers::cbLight.ClearData();
-			RConstantBuffers::cbLight.Data.HighHemisphereAmbientColor = RVec4(0.1f, 0.1f, 0.1f, 1.0f);
-			RConstantBuffers::cbLight.Data.LowHemisphereAmbientColor = RVec4(0.2f, 0.2f, 0.2f, 1.0f);
+			RConstantBuffers::cbLight.Data.HighHemisphereAmbientColor = RVec4(0.4f, 0.4f, 0.4f, 1.0f);
+			RConstantBuffers::cbLight.Data.LowHemisphereAmbientColor = RVec4(0.1f, 0.1f, 0.1f, 1.0f);
 			RConstantBuffers::cbLight.UpdateBufferData();
 			RConstantBuffers::cbLight.BindBuffer();
 
