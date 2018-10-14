@@ -71,8 +71,8 @@ namespace ManagedEngineWrapper
 		[Category("Scene Object")]
 		property String^ Script
 		{
-			String^ get()			{ return gcnew String(m_SceneObject->GetScript().c_str()); }
-			void set(String^ value)	{ m_SceneObject->SetScript(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer())); }
+			String^ get();
+			void set(String^ value);
 		}
 
 	private:

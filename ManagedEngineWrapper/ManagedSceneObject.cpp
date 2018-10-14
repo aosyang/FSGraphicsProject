@@ -14,6 +14,12 @@ namespace ManagedEngineWrapper
 
 	FORCEINLINE void GetObjectPositionInFloat3(RSceneObject* SceneObject, float& x, float& y, float& z)
 	{
+		if (!SceneObject)
+		{
+			x = y = z = 0.0f;
+			return;
+		}
+
 		RVec3 Position = SceneObject->GetPosition();
 		x = Position.X();
 		y = Position.Y();
@@ -22,11 +28,20 @@ namespace ManagedEngineWrapper
 
 	FORCEINLINE void SetObjectPositionInFloat3(RSceneObject* SceneObject, float x, float y, float z)
 	{
-		SceneObject->SetPosition(RVec3(x, y, z));
+		if (SceneObject)
+		{
+			SceneObject->SetPosition(RVec3(x, y, z));
+		}
 	}
 
 	FORCEINLINE void GetObjectRotationInFloat3(RSceneObject* SceneObject, float& x, float& y, float& z)
 	{
+		if (!SceneObject)
+		{
+			x = y = z = 0.0f;
+			return;
+		}
+
 		RVec3 Euler = SceneObject->GetRotation().ToEuler();
 		x = RMath::RadianToDegree(Euler.X());
 		y = RMath::RadianToDegree(Euler.Y());
@@ -35,11 +50,20 @@ namespace ManagedEngineWrapper
 
 	FORCEINLINE void SetObjectRotationInFloat3(RSceneObject* SceneObject, float x, float y, float z)
 	{
-		SceneObject->SetRotation(RQuat::Euler(RMath::DegreeToRadian(x), RMath::DegreeToRadian(y), RMath::DegreeToRadian(z)));
+		if (SceneObject)
+		{
+			SceneObject->SetRotation(RQuat::Euler(RMath::DegreeToRadian(x), RMath::DegreeToRadian(y), RMath::DegreeToRadian(z)));
+		}
 	}
 
 	FORCEINLINE void GetObjectScaleInFloat3(RSceneObject* SceneObject, float& x, float& y, float& z)
 	{
+		if (!SceneObject)
+		{
+			x = y = z = 0.0f;
+			return;
+		}
+
 		RVec3 Scale = SceneObject->GetScale();
 		x = Scale.X();
 		y = Scale.Y();
@@ -48,7 +72,10 @@ namespace ManagedEngineWrapper
 
 	FORCEINLINE void SetObjectScaleInFloat3(RSceneObject* SceneObject, float x, float y, float z)
 	{
-		SceneObject->SetScale(RVec3(x, y, z));
+		if (SceneObject)
+		{
+			SceneObject->SetScale(RVec3(x, y, z));
+		}
 	}
 
 #pragma managed(pop)
@@ -204,4 +231,26 @@ namespace ManagedEngineWrapper
 		TypeUtils::StringToFloat3(value, x, y, z);
 		SetObjectScaleInFloat3(m_SceneObject, x, y, z);
 	}
+
+	System::String^ ManagedSceneObject::Script::get()
+	{
+		if (m_SceneObject)
+		{
+			const std::string& ScriptName = m_SceneObject->GetScript();
+			return gcnew String(ScriptName.c_str());
+		}
+
+		return gcnew String("");
+	}
+
+	void ManagedSceneObject::Script::set(String^ value)
+	{
+		if (m_SceneObject)
+		{
+			IntPtr AnsiStringPtr = Marshal::StringToHGlobalAnsi(value);
+			const char* ScriptName = static_cast<const char*>(AnsiStringPtr.ToPointer());
+			m_SceneObject->SetScript(ScriptName);
+		}
+	}
+
 }
