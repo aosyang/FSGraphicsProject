@@ -9,7 +9,6 @@
 
 namespace ManagedEngineWrapper
 {
-#pragma unmanaged
 	EditorApp::EditorApp()
 	{
 
@@ -497,9 +496,7 @@ namespace ManagedEngineWrapper
 
 	void EditorApp::SetOnAsyncResourceLoadedCallback(NativeAsyncResourceLoadedCallback Func)
 	{
-		OnAsyncResourceLoaded = Func;
-
-		auto AsyncResourceLoadedCallback = OnAsyncResourceLoaded;
+		auto AsyncResourceLoadedCallback = Func;
 		RResourceManager::Instance().OnResourceFinishedAsyncLoading.BindLambda([AsyncResourceLoadedCallback](RResourceBase* Resource)
 		{
 			if (AsyncResourceLoadedCallback != nullptr)
@@ -586,6 +583,4 @@ namespace ManagedEngineWrapper
 		RDirectionalLightComponent* DirLightComponent = GlobalLightInfo->AddNewComponent<RDirectionalLightComponent>();
 		DirLightComponent->SetParameters({ RVec3(-0.5f, 1, -0.3f), RColor(0.5f, 0.5f, 0.5f) });
 	}
-
-#pragma managed
 }

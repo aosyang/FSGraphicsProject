@@ -9,8 +9,6 @@
 
 namespace ManagedEngineWrapper
 {
-#pragma unmanaged
-
 	/// Signature of native OnAsyncResourceLoaded callback
 	typedef void(*NativeAsyncResourceLoadedCallback)(const char* ResourceName);
 
@@ -100,9 +98,5 @@ namespace ManagedEngineWrapper
 
 		/// Draw the unit grid in editor view
 		void DrawGrid() const;
-
-		/// Native callback function of async resource loaded event
-		NativeAsyncResourceLoadedCallback OnAsyncResourceLoaded;
 	};
-#pragma managed
 }
