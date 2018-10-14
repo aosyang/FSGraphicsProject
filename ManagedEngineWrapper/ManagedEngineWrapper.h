@@ -35,6 +35,7 @@ namespace ManagedEngineWrapper {
 		virtual void Resize(int width, int height);
 
 		virtual List<String^>^ GetMeshNameList();
+		virtual bool IsMeshAssetReady(String^ MeshName);
 		virtual Bitmap^ GenerateMeshThumbnailBitmap(String^ MeshName, int Width, int Height);
 		virtual void UpdatePreviewMesh(String^ path, bool replace);
 
@@ -56,6 +57,12 @@ namespace ManagedEngineWrapper {
 		virtual void SaveMeshMaterialFromSelection();
 		virtual void ExportAllAnimationsToBinaryFiles();
 
+		/// Wrapper function to convert resource name of OnAsyncResourceLoaded from native type to managed type
+		void OnAsyncResourceLoaded(const char* ResourceName);
+
+		/// Set the managed delegate for async resource loaded
+		virtual void SetAsyncResourceLoadedHandler(ManagedInterface::AsyncResourceLoadedHandler^ AsyncResourceLoaded);
+
 	private:
 		void UpdateSceneObjectsList();
 		
@@ -63,5 +70,8 @@ namespace ManagedEngineWrapper {
 		Bitmap^ RenderThumbnailForMesh(RMesh* MeshAsset, int Width, int Height);
 
 		List<IManagedSceneObject^>^ SceneObjectsList;
+
+		/// Managed delegate handler for async resource loaded
+		ManagedInterface::AsyncResourceLoadedHandler^ AsyncResourceLoadedCallback;
 	};
 }

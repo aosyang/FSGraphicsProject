@@ -495,6 +495,21 @@ namespace ManagedEngineWrapper
 		return false;
 	}
 
+	void EditorApp::SetOnAsyncResourceLoadedCallback(NativeAsyncResourceLoadedCallback Func)
+	{
+		OnAsyncResourceLoaded = Func;
+
+		auto AsyncResourceLoadedCallback = OnAsyncResourceLoaded;
+		RResourceManager::Instance().OnResourceFinishedAsyncLoading.BindLambda([AsyncResourceLoadedCallback](RResourceBase* Resource)
+		{
+			if (AsyncResourceLoadedCallback != nullptr)
+			{
+				const char* ResourcePath = Resource->GetPath().c_str();
+				(*AsyncResourceLoadedCallback)(ResourcePath);
+			}
+		});
+	}
+
 	float EditorApp::SnapTo(float Value, float Unit)
 	{
 		return Unit * int((Value + Unit * 0.5f) / Unit);

@@ -151,6 +151,9 @@ void REngine::Run()
 
 void REngine::RunOneFrame(bool update_input)
 {
+	// Update the resource manager
+	RResourceManager::Instance().Update();
+
 	if (update_input)
 	{
 		RInput._UpdateKeyStates();

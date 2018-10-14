@@ -10,6 +10,10 @@
 namespace ManagedEngineWrapper
 {
 #pragma unmanaged
+
+	/// Signature of native OnAsyncResourceLoaded callback
+	typedef void(*NativeAsyncResourceLoadedCallback)(const char* ResourceName);
+
 	class EditorApp : public IApp
 	{
 	private:
@@ -78,6 +82,9 @@ namespace ManagedEngineWrapper
 		/// Delete selected scene object
 		bool DeleteSelection();
 
+		/// Set the callback function for OnAsyncResourceLoaded event
+		void SetOnAsyncResourceLoadedCallback(NativeAsyncResourceLoadedCallback Func);
+
 	private:
 		/// Helper function to snap a value to a unit
 		float SnapTo(float Value, float Unit);
@@ -93,6 +100,9 @@ namespace ManagedEngineWrapper
 
 		/// Draw the unit grid in editor view
 		void DrawGrid() const;
+
+		/// Native callback function of async resource loaded event
+		NativeAsyncResourceLoadedCallback OnAsyncResourceLoaded;
 	};
 #pragma managed
 }

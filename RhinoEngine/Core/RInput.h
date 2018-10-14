@@ -88,7 +88,6 @@ private:
 
 	struct RKeyBindingDelegate
 	{
-	public:
 		RKeyBindingDelegate(int InKeyCode, EBufferedKeyState InKeyState)
 			: KeyCode(InKeyCode)
 			, KeyState(InKeyState)
@@ -108,7 +107,6 @@ void RInputSystem::BindKeyStateEvent(int KeyCode, EBufferedKeyState KeyState, T*
 {
 	struct KeyEvent : public RKeyBindingDelegate
 	{
-	public:
 		KeyEvent(int InKeyCode, EBufferedKeyState InKeyState, T* InObject, void(T::*InFunc)())
 			: RKeyBindingDelegate(InKeyCode, InKeyState)
 			, Object(InObject)

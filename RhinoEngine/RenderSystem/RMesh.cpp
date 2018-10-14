@@ -176,3 +176,26 @@ int RMesh::GetCachedAnimationNodeId(RAnimation* anim, int boneId)
 
 	return Iter->second[boneId];
 }
+
+vector<RResourceBase*> RMesh::EnumerateReferencedResources() const
+{
+	vector<RResourceBase*> ReferencedResources;
+
+	for (const auto& Material : m_Materials)
+	{
+		for (int i = 0; i < Material.TextureNum; i++)
+		{
+			RTexture* Texture = Material.Textures[i];
+			if (Texture != nullptr)
+			{
+				// Add unique resources to the list
+				if (find(ReferencedResources.begin(), ReferencedResources.end(), Texture) == ReferencedResources.end())
+				{
+					ReferencedResources.push_back(Texture);
+				}
+			}
+		}
+	}
+
+	return ReferencedResources;
+}

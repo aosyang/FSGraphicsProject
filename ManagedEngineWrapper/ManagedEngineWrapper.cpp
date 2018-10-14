@@ -20,6 +20,9 @@ namespace ManagedEngineWrapper
 {
 	RKeyStateModifier g_KeyStateModifier;
 
+	/// Wrapper delegate of async resource loaded callback
+	delegate void AsyncResourceLoadedWrapper(const char* ResourceName);
+
 	const char* ManagedStringRefToConstCharPtr(String^ str)
 	{
 		IntPtr pNativeStr = Marshal::StringToHGlobalAnsi(str);
@@ -89,6 +92,17 @@ namespace ManagedEngineWrapper
 		}
 
 		return list;
+	}
+
+	bool RhinoEngineWrapper::IsMeshAssetReady(String^ MeshName)
+	{
+		RMesh* MeshAsset = RResourceManager::Instance().FindMesh(ManagedStringRefToConstCharPtr(MeshName));
+		if (MeshAsset)
+		{
+			return MeshAsset->IsLoaded() && MeshAsset->AreReferencedResourcesLoaded();
+		}
+
+		return false;
 	}
 
 	Bitmap^ RhinoEngineWrapper::GenerateMeshThumbnailBitmap(String^ MeshName, int Width, int Height)
@@ -201,6 +215,27 @@ namespace ManagedEngineWrapper
 	void RhinoEngineWrapper::ExportAllAnimationsToBinaryFiles()
 	{
 		m_Application->ExportAllAnimationsToBinaryFiles();
+	}
+
+	void RhinoEngineWrapper::OnAsyncResourceLoaded(const char* ResourceName)
+	{
+		if (AsyncResourceLoadedCallback != nullptr)
+		{
+			// Convert resource name and call managed delegate
+			String^ ManagedResourceName = gcnew String(ResourceName);
+			AsyncResourceLoadedCallback(ManagedResourceName);
+		}
+	}
+
+	void RhinoEngineWrapper::SetAsyncResourceLoadedHandler(ManagedInterface::AsyncResourceLoadedHandler^ AsyncResourceLoaded)
+	{
+		// Save the managed delegate handle
+		AsyncResourceLoadedCallback = AsyncResourceLoaded;
+
+		// Make a new delegate and bind to async resource loaded event
+		AsyncResourceLoadedWrapper^ Callback = gcnew AsyncResourceLoadedWrapper(this, &RhinoEngineWrapper::OnAsyncResourceLoaded);
+		IntPtr pFunc = Marshal::GetFunctionPointerForDelegate(Callback);
+		m_Application->SetOnAsyncResourceLoadedCallback(static_cast<NativeAsyncResourceLoadedCallback>(pFunc.ToPointer()));
 	}
 
 	void RhinoEngineWrapper::UpdateSceneObjectsList()
@@ -400,5 +435,4 @@ namespace ManagedEngineWrapper
 
 		return nullptr;
 	}
-
 }

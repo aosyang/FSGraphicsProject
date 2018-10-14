@@ -70,6 +70,10 @@ namespace RhinoLevelEditor
                 Index++;
             }
 
+            // Register async resource loaded event
+            AsyncResourceLoadedHandler ResourceLoadedEvent = new AsyncResourceLoadedHandler(OnAsyncResourceLoaded);
+            engineCanvas1.RhinoEngine.SetAsyncResourceLoadedHandler(ResourceLoadedEvent);
+
             UpdateAssetListViewThumbnails();
 
             UpdateSceneObjectsList();
@@ -155,8 +159,18 @@ namespace RhinoLevelEditor
                     if (AssetData != null)
                     {
                         string AssetPath = AssetData.Path;
-                        Bitmap Image = engineCanvas1.RhinoEngine.GenerateMeshThumbnailBitmap(AssetPath, ThumbnailWidth, ThumbnailHeight);
-                        LargeImageList.Images.Add(Image);
+
+                        if (engineCanvas1.RhinoEngine.IsMeshAssetReady(AssetPath))
+                        {
+                            Bitmap Image = engineCanvas1.RhinoEngine.GenerateMeshThumbnailBitmap(AssetPath, ThumbnailWidth, ThumbnailHeight);
+                            LargeImageList.Images.Add(Image);
+                        }
+                        else
+                        {
+                            // Add place holder for deferred-updating thumbnails
+                            Bitmap Image = new Bitmap(ThumbnailWidth, ThumbnailHeight);
+                            LargeImageList.Images.Add(Image);
+                        }
                     }
                 }
             }
@@ -264,6 +278,35 @@ namespace RhinoLevelEditor
         private void refreshAssetsPreviewsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             UpdateAssetListViewThumbnails();
+        }
+
+        private void OnAsyncResourceLoaded(string ResourceName)
+        {
+            if (Path.GetExtension(ResourceName).ToLower() == ".fbx")
+            {
+                int Index = 0;
+
+                foreach (ListViewItem Item in listView_AssetView.Items)
+                {
+                    if (Item != null)
+                    {
+                        EngineAssetData AssetData = Item.Tag as EngineAssetData;
+
+                        if (AssetData.Path == ResourceName)
+                        {
+                            Bitmap Image = engineCanvas1.RhinoEngine.GenerateMeshThumbnailBitmap(ResourceName, ThumbnailWidth, ThumbnailHeight);
+                            listView_AssetView.LargeImageList.Images[Index] = Image;
+
+                            // Refresh a single item with thumbnail
+                            listView_AssetView.RedrawItems(Index, Index, false);
+
+                            break;
+                        }
+                    }
+
+                    Index++;
+                }
+            }
         }
     }
 }

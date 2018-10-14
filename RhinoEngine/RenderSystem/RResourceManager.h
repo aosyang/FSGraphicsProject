@@ -17,6 +17,7 @@ struct LoaderThreadTask
 {
 	string			Filename;
 	RResourceBase*	Resource;
+	bool			bIsAsync;
 };
 
 struct LoaderThreadData
@@ -45,6 +46,15 @@ public:
 	void LoadAllResources();
 	void UnloadAllResources();
 	void UnloadSRVWrappers();
+
+	/// Add a resource to pending notify list
+	void AddPendingNotifyResource(RResourceBase* Resource);
+
+	/// Delegate called when a resource has finished async loading
+	RDelegate<RResourceBase*> OnResourceFinishedAsyncLoading;
+
+	/// Update the resource manager every frame
+	void Update();
 
 	RMesh* LoadFbxMesh(const char* filename, EResourceLoadMode mode = EResourceLoadMode::Threaded);
 	RTexture* LoadDDSTexture(const char* filename, EResourceLoadMode mode = EResourceLoadMode::Threaded);
@@ -80,5 +90,7 @@ private:
 	bool								m_HasLoaderThreadQuit;
 	queue<LoaderThreadTask>				m_LoaderThreadTaskQueue;
 	LoaderThreadData					m_LoaderThreadData;
-};
 
+	/// A list of loaded resources waiting to notify their states
+	vector<RResourceBase*>				PendingNotifyResources;
+};

@@ -52,6 +52,9 @@ public:
 	bool HasCachedAnimation(RAnimation* anim) const;
 	int GetCachedAnimationNodeId(RAnimation* anim, int boneId);
 
+protected:
+	virtual vector<RResourceBase*> EnumerateReferencedResources() const override;
+
 private:
 	vector<RMeshElement>	m_MeshElements;
 

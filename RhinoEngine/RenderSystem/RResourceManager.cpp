@@ -23,6 +23,7 @@
 
 static mutex								m_TaskQueueMutex;
 static condition_variable					m_TaskQueueCondition;
+static mutex								m_PendingNotifyResourceMutex;
 
 static mutex	TextureResourcesMutex;
 
@@ -193,6 +194,34 @@ void RResourceManager::UnloadSRVWrappers()
 	m_WrapperTextureResources.clear();
 }
 
+void RResourceManager::AddPendingNotifyResource(RResourceBase* Resource)
+{
+	unique_lock<mutex> UniqueLock(m_PendingNotifyResourceMutex);
+
+	if (find(PendingNotifyResources.begin(), PendingNotifyResources.end(), Resource) == PendingNotifyResources.end())
+	{
+		PendingNotifyResources.push_back(Resource);
+	}
+}
+
+void RResourceManager::Update()
+{
+	unique_lock<mutex> UniqueLock(m_PendingNotifyResourceMutex);
+
+	for (int i = (int)PendingNotifyResources.size() - 1; i >= 0; i--)
+	{
+		RResourceBase* Resource = PendingNotifyResources[i];
+
+		if (Resource->IsLoaded() && Resource->AreReferencedResourcesLoaded())
+		{
+			OnResourceFinishedAsyncLoading.Execute(Resource);
+
+			auto Index = PendingNotifyResources.begin() + i;
+			PendingNotifyResources.erase(Index);
+		}
+	}
+}
+
 RMesh* RResourceManager::LoadFbxMesh(const char* filename, EResourceLoadMode mode)
 {
 	RMesh* pMesh = RResourceManager::FindMesh(filename);
@@ -203,13 +232,14 @@ RMesh* RResourceManager::LoadFbxMesh(const char* filename, EResourceLoadMode mod
 	pMesh->OnEnqueuedForLoading();
 	m_MeshResources.push_back(pMesh);
 
-	LoaderThreadTask task;
-	task.Filename = string(filename);
-	task.Resource = pMesh;
-
 #if (ENABLE_THREADED_LOADING == 0)
 	mode = EResourceLoadMode::Immediate;
 #endif
+
+	LoaderThreadTask task;
+	task.Filename = string(filename);
+	task.Resource = pMesh;
+	task.bIsAsync = (mode == EResourceLoadMode::Threaded);
 
 	if (mode == EResourceLoadMode::Immediate)
 	{
@@ -936,7 +966,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 	MeshResource->SetBoneInitInvMatrices(boneInitInvPose);
 
 	// Notify mesh has been loaded
-	MeshResource->OnLoadingFinished();
+	MeshResource->OnLoadingFinished(task->bIsAsync);
 
 #if EXPORT_FBX_AS_BINARY_MESH == 1
 	string rmeshName = RFileUtil::ReplaceExtension(task->Filename, "rmesh");
@@ -977,7 +1007,7 @@ bool RResourceManager::ThreadLoadRmeshData(LoaderThreadTask* task)
 	if (materials.size())
 		MeshResource->SetMaterials(materials.data(), (UINT)materials.size());
 
-	MeshResource->OnLoadingFinished();
+	MeshResource->OnLoadingFinished(task->bIsAsync);
 
 	return true;
 }
@@ -1088,7 +1118,7 @@ void RResourceManager::ThreadLoadDDSTextureData(LoaderThreadTask* task)
 	}
 
 	TextureResource->m_SRV = srv;
-	TextureResource->OnLoadingFinished();
+	TextureResource->OnLoadingFinished(task->bIsAsync);
 }
 
 // case-insensitive string comparison
@@ -1193,7 +1223,7 @@ RTexture* RResourceManager::WrapSRV(ID3D11ShaderResourceView* srv)
 		return m_WrapperTextureResources[srv];
 
 	RTexture* tex = new RTexture("[Internal]", srv);
-	tex->OnLoadingFinished();
+	tex->OnLoadingFinished(false);
 	m_WrapperTextureResources[srv] = tex;
 	return tex;
 }

@@ -20,6 +20,7 @@ enum ResourceType
 	RT_Texture,
 };
 
+/// Base resource class
 class RResourceBase
 {
 public:
@@ -33,14 +34,21 @@ public:
 	/// Check if resource has been fully loaded
 	bool IsLoaded() const					{ return m_State == RS_Loaded; }
 
+	/// Check if all referenced resources have been fully loaded
+	bool AreReferencedResourcesLoaded() const;
+
 	/// Callback when resource has been enqueued for loading
 	virtual void OnEnqueuedForLoading();
 
 	/// Callback when resource loading is complete
-	virtual void OnLoadingFinished();
+	virtual void OnLoadingFinished(bool bIsAsyncLoading);
 
 	/// Get the time when resource has been fully loaded
 	float GetResourceTimestamp()			{ return m_LoadingFinishTime; }
+
+protected:
+	/// Enumerate all resources been referenced directly by this resource
+	virtual vector<RResourceBase*> EnumerateReferencedResources() const;
 
 private:
 	ResourceState		m_State;

@@ -16,6 +16,21 @@ RResourceBase::RResourceBase(ResourceType type, string path)
 {
 }
 
+bool RResourceBase::AreReferencedResourcesLoaded() const
+{
+	auto ReferencedResources = EnumerateReferencedResources();
+
+	for (auto Resource : ReferencedResources)
+	{
+		if (!Resource->IsLoaded())
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 void RResourceBase::OnEnqueuedForLoading()
 {
 	assert(m_State == RS_Empty);
@@ -23,10 +38,22 @@ void RResourceBase::OnEnqueuedForLoading()
 	m_State = RS_EnqueuedForLoading;
 }
 
-void RResourceBase::OnLoadingFinished()
+void RResourceBase::OnLoadingFinished(bool bIsAsyncLoading)
 {
 	assert(m_State != RS_Loaded);
 
 	m_LoadingFinishTime = GEngine.GetTimer().TotalTime();
 	m_State = RS_Loaded;
+
+	// Notify event listeners when async loading is complete
+	if (bIsAsyncLoading)
+	{
+		RResourceManager::Instance().AddPendingNotifyResource(this);
+	}
+}
+
+vector<RResourceBase*> RResourceBase::EnumerateReferencedResources() const
+{
+	const static vector<RResourceBase*> EmptyResources;
+	return EmptyResources;
 }

@@ -9,6 +9,12 @@ using System.Drawing;
 
 namespace ManagedInterface
 {
+    /// <summary>
+    /// Managed delegate for OnResourceLoaded event
+    /// </summary>
+    /// <param name="ResourceName"></param>
+    public delegate void AsyncResourceLoadedHandler(string ResourceName);
+
     public interface IManagedEngine
     {
         bool Initialize(IntPtr hWnd);
@@ -21,6 +27,7 @@ namespace ManagedInterface
         /// </summary>
         /// <returns></returns>
         List<string> GetMeshNameList();
+        bool IsMeshAssetReady(string MeshName);
         Bitmap GenerateMeshThumbnailBitmap(string MeshName, int Width, int Height);
         void UpdatePreviewMesh(string path, bool replace);
 
@@ -39,5 +46,8 @@ namespace ManagedInterface
 
         void SaveMeshMaterialFromSelection();
         void ExportAllAnimationsToBinaryFiles();
+
+        /// Set the managed delegate for async resource loaded
+        void SetAsyncResourceLoadedHandler(AsyncResourceLoadedHandler AsyncResourceLoaded);
     }
 }
