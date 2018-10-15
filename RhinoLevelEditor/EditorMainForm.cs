@@ -76,7 +76,7 @@ namespace RhinoLevelEditor
 
             UpdateAssetListViewThumbnails();
 
-            UpdateSceneObjectsList();
+            RefreshSceneObjectsListBox();
         }
 
         private void btnAddMesh_Click(object sender, EventArgs e)
@@ -108,7 +108,7 @@ namespace RhinoLevelEditor
             if (index != System.Windows.Forms.ListBox.NoMatches)
             {
                 engineCanvas1.RhinoEngine.UpdatePreviewMesh(listBox_MeshAssets.Items[index].ToString(), false);
-                UpdateSceneObjectsList();
+                RefreshSceneObjectsListBox();
             }
         }
 
@@ -121,7 +121,10 @@ namespace RhinoLevelEditor
                 propertyGrid1.SelectedObject = null;
         }
 
-        private void UpdateSceneObjectsList()
+        /// <summary>
+        /// Refresh scene object list box content with active scene state
+        /// </summary>
+        private void RefreshSceneObjectsListBox()
         {
             bUpdatingSceneObjectsList = true;
 
@@ -188,7 +191,7 @@ namespace RhinoLevelEditor
                 //engineCanvas1.RhinoEngine.RunScreenToCameraRayPicking(x, y);
 
                 UpdatePropertyGrid();
-                UpdateSceneObjectsList();
+                RefreshSceneObjectsListBox();
             }
         }
 
@@ -199,6 +202,7 @@ namespace RhinoLevelEditor
                 if (engineCanvas1.RhinoEngine.DeleteSelection())
                 {
                     UpdatePropertyGrid();
+                    RefreshSceneObjectsListBox();
                 }
             }
         }
@@ -214,7 +218,7 @@ namespace RhinoLevelEditor
                 engineCanvas1.RhinoEngine.LoadScene(dlg.FileName);
                 RefreshFormTitle();
                 UpdatePropertyGrid();
-                UpdateSceneObjectsList();
+                RefreshSceneObjectsListBox();
             }
         }
 

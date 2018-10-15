@@ -193,7 +193,13 @@ namespace ManagedEngineWrapper
 
 	bool RhinoEngineWrapper::DeleteSelection()
 	{
-		return m_Application->DeleteSelection();
+		if (m_Application->DeleteSelection())
+		{
+			UpdateSceneObjectsList();
+			return true;
+		}
+
+		return false;
 	}
 
 	void RhinoEngineWrapper::LoadScene(String^ filename)
