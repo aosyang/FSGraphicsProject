@@ -206,12 +206,17 @@ void RScene::LoadFromFile(const char* filename)
 						while (elem_tex)
 						{
 							const char* textureName = elem_tex->GetText();
+							RTexture* texture = nullptr;
 
-							RTexture* texture = RResourceManager::Instance().FindTexture(textureName);
-
-							if (!texture)
+							if (textureName)
 							{
-								texture = RResourceManager::Instance().LoadDDSTexture(RResourceManager::GetResourcePath(textureName).data(), EResourceLoadMode::Immediate);
+								texture = RResourceManager::Instance().FindTexture(textureName);
+
+								if (!texture)
+								{
+									const string Path = RResourceManager::GetResourcePath(textureName);
+									texture = RResourceManager::Instance().LoadDDSTexture(Path.data(), EResourceLoadMode::Immediate);
+								}
 							}
 
 							material.Textures[material.TextureNum++] = texture;
