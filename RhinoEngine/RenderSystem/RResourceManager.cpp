@@ -482,105 +482,56 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 
 		// Fill normal data
 		FbxGeometryElementNormal* normalArray = mesh->GetElementNormal();
-		bool hasPerPolygonVertexNormal = (normalArray->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
-
-		switch (normalArray->GetMappingMode())
+		bool hasPerPolygonVertexNormal = false;
+		
+		if (normalArray)
 		{
-		case FbxGeometryElement::eByControlPoint:
-			switch (normalArray->GetReferenceMode())
+			hasPerPolygonVertexNormal = (normalArray->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
+
+			switch (normalArray->GetMappingMode())
 			{
-			case FbxGeometryElement::eDirect:
-				for (int i = 0; i < controlPointCount; i++)
+			case FbxGeometryElement::eByControlPoint:
+				switch (normalArray->GetReferenceMode())
 				{
-					FbxVector4 normal = normalArray->GetDirectArray().GetAt(i);
+				case FbxGeometryElement::eDirect:
+					for (int i = 0; i < controlPointCount; i++)
+					{
+						FbxVector4 normal = normalArray->GetDirectArray().GetAt(i);
 
-					vertData[i].normal.x = (float)normal[0];
-					vertData[i].normal.y = (float)normal[1];
-					vertData[i].normal.z = (float)normal[2];
+						vertData[i].normal.x = (float)normal[0];
+						vertData[i].normal.y = (float)normal[1];
+						vertData[i].normal.z = (float)normal[2];
 
 #if CONVERT_TO_LEFT_HANDED_MESH == 1
-					vertData[i].normal.z = -vertData[i].normal.z;
+						vertData[i].normal.z = -vertData[i].normal.z;
 #endif
 
-					VertexComponentMask |= VCM_Normal;
-				}
-				break;
+						VertexComponentMask |= VCM_Normal;
+					}
+					break;
 
-			case FbxGeometryElement::eIndexToDirect:
-				for (int i = 0; i < controlPointCount; i++)
-				{
-					int index = normalArray->GetIndexArray().GetAt(i);
-					FbxVector4 normal = normalArray->GetDirectArray().GetAt(index);
+				case FbxGeometryElement::eIndexToDirect:
+					for (int i = 0; i < controlPointCount; i++)
+					{
+						int index = normalArray->GetIndexArray().GetAt(i);
+						FbxVector4 normal = normalArray->GetDirectArray().GetAt(index);
 
-					vertData[i].normal.x = (float)normal[0];
-					vertData[i].normal.y = (float)normal[1];
-					vertData[i].normal.z = (float)normal[2];
+						vertData[i].normal.x = (float)normal[0];
+						vertData[i].normal.y = (float)normal[1];
+						vertData[i].normal.z = (float)normal[2];
 
 #if CONVERT_TO_LEFT_HANDED_MESH == 1
-					vertData[i].normal.z = -vertData[i].normal.z;
+						vertData[i].normal.z = -vertData[i].normal.z;
 #endif
 
-					VertexComponentMask |= VCM_Normal;
-				}
-				break;
-			}
-			break;
-		}
-
-		// Tangent
-		FbxGeometryElementTangent* tangentArray = mesh->GetElementTangent();
-
-		// If the mesh doesn't have tangents, try generating a set of them
-		if (!tangentArray)
-		{
-			if (mesh->GenerateTangentsData(0))
-			{
-				tangentArray = mesh->GetElementTangent();
-			}
-		}
-
-		bool hasPerPolygonVertexTangent = (tangentArray && tangentArray->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
-
-		if (tangentArray && !hasPerPolygonVertexTangent)
-		{
-			switch (tangentArray->GetReferenceMode())
-			{
-			case FbxGeometryElement::eDirect:
-				for (int i = 0; i < controlPointCount; i++)
-				{
-					FbxVector4 tangent = tangentArray->GetDirectArray().GetAt(i);
-
-					vertData[i].tangent.x = (float)tangent[0];
-					vertData[i].tangent.y = (float)tangent[1];
-					vertData[i].tangent.z = (float)tangent[2];
-				
-#if CONVERT_TO_LEFT_HANDED_MESH == 1
-					vertData[i].tangent.z = -vertData[i].tangent.z;
-#endif
-
-					VertexComponentMask |= VCM_Tangent;
-				}
-				break;
-
-			case FbxGeometryElement::eIndexToDirect:
-				for (int i = 0; i < controlPointCount; i++)
-				{
-					int index = tangentArray->GetIndexArray().GetAt(i);
-					FbxVector4 tangent = tangentArray->GetDirectArray().GetAt(index);
-
-					vertData[i].tangent.x = (float)tangent[0];
-					vertData[i].tangent.y = (float)tangent[1];
-					vertData[i].tangent.z = (float)tangent[2];
-
-#if CONVERT_TO_LEFT_HANDED_MESH == 1
-					vertData[i].tangent.z = -vertData[i].tangent.z;
-#endif
-
-					VertexComponentMask |= VCM_Tangent;
+						VertexComponentMask |= VCM_Normal;
+					}
+					break;
 				}
 				break;
 			}
 		}
+
 
 		FbxGeometryElementUV* uvArray[2] =
 		{
@@ -589,7 +540,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		};
 
 		bool hasPerPolygonVertexUV[2];
-		
+
 		for (int uvLayer = 0; uvLayer < 2; uvLayer++)
 		{
 			hasPerPolygonVertexUV[uvLayer] = uvArray[uvLayer] ? (uvArray[uvLayer]->GetMappingMode() == FbxGeometryElement::eByPolygonVertex) : false;
@@ -602,7 +553,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					for (int i = 0; i < controlPointCount; i++)
 					{
 						RVertexType::Vec2Data& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
-							
+
 						FbxVector2 uv = uvArray[i]->GetDirectArray().GetAt(i);
 
 						vertUV.x = (float)uv[0];
@@ -619,7 +570,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 					for (int i = 0; i < controlPointCount; i++)
 					{
 						RVertexType::Vec2Data& vertUV = uvLayer == 0 ? vertData[i].uv0 : vertData[i].uv1;
-						
+
 						int index = uvArray[uvLayer]->GetIndexArray().GetAt(i);
 						FbxVector2 uv = uvArray[uvLayer]->GetDirectArray().GetAt(index);
 
@@ -635,6 +586,70 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 				}
 			}
 		}
+
+		// Tangent
+		FbxGeometryElementTangent* tangentArray = mesh->GetElementTangent();
+
+		// If the mesh doesn't have tangents, try generating a set of them
+		if (!tangentArray)
+		{
+			// Normal and UV0 are required to generate tangents
+			if ((VertexComponentMask & (VCM_Normal | VCM_UV0)) != 0)
+			{
+				if (mesh->GenerateTangentsData(0))
+				{
+					tangentArray = mesh->GetElementTangent();
+				}
+			}
+		}
+
+		bool hasPerPolygonVertexTangent = false;
+		if (tangentArray)
+		{
+			hasPerPolygonVertexTangent = (tangentArray->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
+
+			if (!hasPerPolygonVertexTangent)
+			{
+				switch (tangentArray->GetReferenceMode())
+				{
+				case FbxGeometryElement::eDirect:
+					for (int i = 0; i < controlPointCount; i++)
+					{
+						FbxVector4 tangent = tangentArray->GetDirectArray().GetAt(i);
+
+						vertData[i].tangent.x = (float)tangent[0];
+						vertData[i].tangent.y = (float)tangent[1];
+						vertData[i].tangent.z = (float)tangent[2];
+
+#if CONVERT_TO_LEFT_HANDED_MESH == 1
+						vertData[i].tangent.z = -vertData[i].tangent.z;
+#endif
+
+						VertexComponentMask |= VCM_Tangent;
+					}
+					break;
+
+				case FbxGeometryElement::eIndexToDirect:
+					for (int i = 0; i < controlPointCount; i++)
+					{
+						int index = tangentArray->GetIndexArray().GetAt(i);
+						FbxVector4 tangent = tangentArray->GetDirectArray().GetAt(index);
+
+						vertData[i].tangent.x = (float)tangent[0];
+						vertData[i].tangent.y = (float)tangent[1];
+						vertData[i].tangent.z = (float)tangent[2];
+
+#if CONVERT_TO_LEFT_HANDED_MESH == 1
+						vertData[i].tangent.z = -vertData[i].tangent.z;
+#endif
+
+						VertexComponentMask |= VCM_Tangent;
+					}
+					break;
+				}
+			}
+		}
+
 
 		bool hasDeformer = (mesh->GetDeformer(0, FbxDeformer::eSkin) != NULL);
 		if (hasDeformer)
@@ -926,23 +941,29 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		if (hasDeformer)
 			VertexComponentMask &= ~VCM_UV1;
 
-		RMeshElement meshElem;
+		if (optimizedVertData.size() != 0 && optimizedIndexData.size() != 0)
+		{
+			RMeshElement meshElem;
 
-		meshElem.SetVertices(optimizedVertData, VertexComponentMask);
-		meshElem.SetTriangles(optimizedIndexData);
-		meshElem.UpdateRenderBuffer();
-		meshElem.SetName(node->GetName());
+			meshElem.SetVertices(optimizedVertData, VertexComponentMask);
+			meshElem.SetTriangles(optimizedIndexData);
+			meshElem.UpdateRenderBuffer();
+			meshElem.SetName(node->GetName());
 
-		UINT flag = 0;
-		if (hasDeformer)
-			flag |= MEF_Skinned;
+			UINT flag = 0;
+			if (hasDeformer)
+				flag |= MEF_Skinned;
 
-		meshElem.SetFlag(flag);
+			meshElem.SetFlag(flag);
+			meshElements.push_back(meshElem);
 
-		meshElements.push_back(meshElem);
-
-		RLog("Mesh loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
-			(int)optimizedVertData.size(), (int)optimizedIndexData.size() / 3, (int)flatVertData.size(), (int)indexData.size() / 3);
+			RLog("Mesh loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
+				(int)optimizedVertData.size(), (int)optimizedIndexData.size() / 3, (int)flatVertData.size(), (int)indexData.size() / 3);
+		}
+		else
+		{
+			RLogWarning("Mesh loader: Unable to add mesh element with index count %d, vertex count %d.\n", (int)optimizedIndexData.size(), (int)optimizedVertData.size());
+		}
 	}
 
 	lFbxScene->Destroy();
@@ -1142,18 +1163,21 @@ RTexture* RResourceManager::FindTexture(const char* resourcePath)
 {
 	unique_lock<mutex> lock(TextureResourcesMutex);
 
-	for (auto Iter : m_TextureResources)
+	if (resourcePath)
 	{
-		if (strcasecmp(Iter->GetPath().c_str(), resourcePath) == 0)
+		for (auto Iter : m_TextureResources)
 		{
-			return Iter;
-		}
+			if (strcasecmp(Iter->GetPath().c_str(), resourcePath) == 0)
+			{
+				return Iter;
+			}
 
-		// If searching path contains file name only, also try matching file names
-		const string ResourceName = RFileUtil::GetFileNameInPath(Iter->GetPath());
-		if (strcasecmp(ResourceName.c_str(), resourcePath) == 0)
-		{
-			return Iter;
+			// If searching path contains file name only, also try matching file names
+			const string ResourceName = RFileUtil::GetFileNameInPath(Iter->GetPath());
+			if (strcasecmp(ResourceName.c_str(), resourcePath) == 0)
+			{
+				return Iter;
+			}
 		}
 	}
 
