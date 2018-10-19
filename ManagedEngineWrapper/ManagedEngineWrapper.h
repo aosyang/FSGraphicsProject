@@ -18,6 +18,9 @@ namespace ManagedEngineWrapper {
 	class EditorApp;
 	ref class ManagedSceneObject;
 
+	/// Wrapper delegate of async resource loaded callback
+	delegate void AsyncResourceLoadedWrapper(const char* ResourceName);
+
 	public ref class RhinoEngineWrapper : public IManagedEngine
 	{
 	private:
@@ -73,5 +76,7 @@ namespace ManagedEngineWrapper {
 
 		/// Managed delegate handler for async resource loaded
 		ManagedInterface::AsyncResourceLoadedHandler^ AsyncResourceLoadedCallback;
+
+		AsyncResourceLoadedWrapper^ AsyncResourceLoadedWrapperDelegate;
 	};
 }

@@ -20,9 +20,6 @@ namespace ManagedEngineWrapper
 {
 	RKeyStateModifier g_KeyStateModifier;
 
-	/// Wrapper delegate of async resource loaded callback
-	delegate void AsyncResourceLoadedWrapper(const char* ResourceName);
-
 	const char* ManagedStringRefToConstCharPtr(String^ str)
 	{
 		IntPtr pNativeStr = Marshal::StringToHGlobalAnsi(str);
@@ -239,8 +236,8 @@ namespace ManagedEngineWrapper
 		AsyncResourceLoadedCallback = AsyncResourceLoaded;
 
 		// Make a new delegate and bind to async resource loaded event
-		AsyncResourceLoadedWrapper^ Callback = gcnew AsyncResourceLoadedWrapper(this, &RhinoEngineWrapper::OnAsyncResourceLoaded);
-		IntPtr pFunc = Marshal::GetFunctionPointerForDelegate(Callback);
+		AsyncResourceLoadedWrapperDelegate = gcnew AsyncResourceLoadedWrapper(this, &RhinoEngineWrapper::OnAsyncResourceLoaded);
+		IntPtr pFunc = Marshal::GetFunctionPointerForDelegate(AsyncResourceLoadedWrapperDelegate);
 		m_Application->SetOnAsyncResourceLoadedCallback(static_cast<NativeAsyncResourceLoadedCallback>(pFunc.ToPointer()));
 	}
 
