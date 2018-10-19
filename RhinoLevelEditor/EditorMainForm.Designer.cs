@@ -56,9 +56,9 @@
             this.deleteSelectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.saveMaterialToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.refreshAssetsPreviewsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.refreshAssetsPreviewsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -97,7 +97,7 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer_SceneView_and_Property);
             this.splitContainer1.Size = new System.Drawing.Size(1364, 734);
-            this.splitContainer1.SplitterDistance = 1090;
+            this.splitContainer1.SplitterDistance = 1091;
             this.splitContainer1.SplitterWidth = 3;
             this.splitContainer1.TabIndex = 1;
             // 
@@ -116,7 +116,7 @@
             // splitContainer_AssetView.Panel2
             // 
             this.splitContainer_AssetView.Panel2.Controls.Add(this.listView_AssetView);
-            this.splitContainer_AssetView.Size = new System.Drawing.Size(1088, 732);
+            this.splitContainer_AssetView.Size = new System.Drawing.Size(1089, 732);
             this.splitContainer_AssetView.SplitterDistance = 509;
             this.splitContainer_AssetView.TabIndex = 1;
             // 
@@ -138,7 +138,7 @@
             // splitContainer_EngineCanvas.Panel2
             // 
             this.splitContainer_EngineCanvas.Panel2.Controls.Add(this.engineCanvas1);
-            this.splitContainer_EngineCanvas.Size = new System.Drawing.Size(1088, 509);
+            this.splitContainer_EngineCanvas.Size = new System.Drawing.Size(1089, 509);
             this.splitContainer_EngineCanvas.SplitterDistance = 218;
             this.splitContainer_EngineCanvas.SplitterWidth = 3;
             this.splitContainer_EngineCanvas.TabIndex = 0;
@@ -191,7 +191,7 @@
             this.engineCanvas1.Location = new System.Drawing.Point(0, 0);
             this.engineCanvas1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.engineCanvas1.Name = "engineCanvas1";
-            this.engineCanvas1.Size = new System.Drawing.Size(865, 507);
+            this.engineCanvas1.Size = new System.Drawing.Size(866, 507);
             this.engineCanvas1.TabIndex = 2;
             this.engineCanvas1.Load += new System.EventHandler(this.engineCanvas1_Load);
             this.engineCanvas1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.engineCanvas1_KeyDown);
@@ -204,10 +204,11 @@
             this.listView_AssetView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_AssetView.Location = new System.Drawing.Point(0, 0);
             this.listView_AssetView.Name = "listView_AssetView";
-            this.listView_AssetView.Size = new System.Drawing.Size(1088, 219);
+            this.listView_AssetView.Size = new System.Drawing.Size(1089, 219);
             this.listView_AssetView.TabIndex = 0;
             this.listView_AssetView.TileSize = new System.Drawing.Size(256, 256);
             this.listView_AssetView.UseCompatibleStateImageBehavior = false;
+            this.listView_AssetView.DoubleClick += new System.EventHandler(this.listView_AssetView_DoubleClick);
             // 
             // splitContainer_SceneView_and_Property
             // 
@@ -223,7 +224,7 @@
             // splitContainer_SceneView_and_Property.Panel2
             // 
             this.splitContainer_SceneView_and_Property.Panel2.Controls.Add(this.propertyGrid1);
-            this.splitContainer_SceneView_and_Property.Size = new System.Drawing.Size(269, 732);
+            this.splitContainer_SceneView_and_Property.Size = new System.Drawing.Size(268, 732);
             this.splitContainer_SceneView_and_Property.SplitterDistance = 366;
             this.splitContainer_SceneView_and_Property.TabIndex = 1;
             // 
@@ -234,7 +235,7 @@
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(0, 0);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(269, 366);
+            this.groupBox1.Size = new System.Drawing.Size(268, 366);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Scene View";
@@ -245,7 +246,7 @@
             this.sceneObjectsListBox.FormattingEnabled = true;
             this.sceneObjectsListBox.Location = new System.Drawing.Point(3, 36);
             this.sceneObjectsListBox.Name = "sceneObjectsListBox";
-            this.sceneObjectsListBox.Size = new System.Drawing.Size(263, 327);
+            this.sceneObjectsListBox.Size = new System.Drawing.Size(262, 327);
             this.sceneObjectsListBox.TabIndex = 1;
             this.sceneObjectsListBox.SelectedIndexChanged += new System.EventHandler(this.sceneObjectsListBox_SelectedIndexChanged);
             // 
@@ -254,7 +255,7 @@
             this.sceneObjectsSearchTextBox.Dock = System.Windows.Forms.DockStyle.Top;
             this.sceneObjectsSearchTextBox.Location = new System.Drawing.Point(3, 16);
             this.sceneObjectsSearchTextBox.Name = "sceneObjectsSearchTextBox";
-            this.sceneObjectsSearchTextBox.Size = new System.Drawing.Size(263, 20);
+            this.sceneObjectsSearchTextBox.Size = new System.Drawing.Size(262, 20);
             this.sceneObjectsSearchTextBox.TabIndex = 0;
             // 
             // propertyGrid1
@@ -264,7 +265,7 @@
             this.propertyGrid1.Location = new System.Drawing.Point(0, 0);
             this.propertyGrid1.Margin = new System.Windows.Forms.Padding(2);
             this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(269, 362);
+            this.propertyGrid1.Size = new System.Drawing.Size(268, 362);
             this.propertyGrid1.TabIndex = 0;
             // 
             // statusStrip1
@@ -385,6 +386,13 @@
             this.saveMaterialToolStripMenuItem.Text = "Save object material to XML";
             this.saveMaterialToolStripMenuItem.Click += new System.EventHandler(this.saveMaterialToolStripMenuItem_Click);
             // 
+            // refreshAssetsPreviewsToolStripMenuItem
+            // 
+            this.refreshAssetsPreviewsToolStripMenuItem.Name = "refreshAssetsPreviewsToolStripMenuItem";
+            this.refreshAssetsPreviewsToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.refreshAssetsPreviewsToolStripMenuItem.Text = "Refresh Assets Previews";
+            this.refreshAssetsPreviewsToolStripMenuItem.Click += new System.EventHandler(this.refreshAssetsPreviewsToolStripMenuItem_Click);
+            // 
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -399,13 +407,6 @@
             this.exportAnimToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.exportAnimToolStripMenuItem.Text = "&Export fbx animations to binary";
             this.exportAnimToolStripMenuItem.Click += new System.EventHandler(this.exportAnimToolStripMenuItem_Click);
-            // 
-            // refreshAssetsPreviewsToolStripMenuItem
-            // 
-            this.refreshAssetsPreviewsToolStripMenuItem.Name = "refreshAssetsPreviewsToolStripMenuItem";
-            this.refreshAssetsPreviewsToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
-            this.refreshAssetsPreviewsToolStripMenuItem.Text = "Refresh Assets Previews";
-            this.refreshAssetsPreviewsToolStripMenuItem.Click += new System.EventHandler(this.refreshAssetsPreviewsToolStripMenuItem_Click);
             // 
             // EditorMainForm
             // 

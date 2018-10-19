@@ -312,5 +312,18 @@ namespace RhinoLevelEditor
                 }
             }
         }
+
+        private void listView_AssetView_DoubleClick(object sender, EventArgs e)
+        {
+            if (listView_AssetView.SelectedItems.Count > 0)
+            {
+                ListViewItem Item = listView_AssetView.SelectedItems[0];
+                EngineAssetData AssetData = Item.Tag as EngineAssetData;
+                if (AssetData != null)
+                {
+                    engineCanvas1.RhinoEngine.UpdatePreviewMesh(AssetData.Path, false);
+                }
+            }
+        }
     }
 }
