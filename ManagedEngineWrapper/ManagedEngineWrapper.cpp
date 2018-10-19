@@ -108,19 +108,23 @@ namespace ManagedEngineWrapper
 		return RenderThumbnailForMesh(MeshAsset, Width, Height);
 	}
 
-	void RhinoEngineWrapper::UpdatePreviewMesh(String^ path, bool replace)
+	void RhinoEngineWrapper::AddMeshObjectToScene(String^ MeshAssetPath)
 	{
-		if (!replace)
+		const char* NativePath = ManagedStringRefToConstCharPtr(MeshAssetPath);
+		m_Application->AddMeshObjectToScene(NativePath);
+		UpdateSceneObjectsList();
+	}
+
+	void RhinoEngineWrapper::ReplaceMeshAssetForSelection(String^ MeshAssetPath)
+	{
+		RSMeshObject* meshObj = static_cast<RSMeshObject*>(m_Application->GetSelection());
+		if (meshObj)
 		{
-			m_Application->AddMeshObjectToScene(ManagedStringRefToConstCharPtr(path));
-			UpdateSceneObjectsList();
-		}
-		else
-		{
-			RSMeshObject* meshObj = static_cast<RSMeshObject*>(m_Application->GetSelection());
-			if (meshObj)
+			const char* NativePath = ManagedStringRefToConstCharPtr(MeshAssetPath);
+			RMesh* MeshResource = RResourceManager::Instance().FindMesh(NativePath);
+			if (MeshResource)
 			{
-				meshObj->SetMesh(RResourceManager::Instance().FindMesh(ManagedStringRefToConstCharPtr(path)));
+				meshObj->SetMesh(MeshResource);
 			}
 		}
 	}

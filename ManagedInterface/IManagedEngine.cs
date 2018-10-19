@@ -29,7 +29,12 @@ namespace ManagedInterface
         List<string> GetMeshNameList();
         bool IsMeshAssetReady(string MeshName);
         Bitmap GenerateMeshThumbnailBitmap(string MeshName, int Width, int Height);
-        void UpdatePreviewMesh(string path, bool replace);
+
+        // Add a mesh object to scene with mesh asset
+        void AddMeshObjectToScene(string MeshAssetPath);
+
+        // Replace mesh asset for selected object
+        void ReplaceMeshAssetForSelection(string MeshAssetPath);
 
         List<IManagedSceneObject> GetSceneObjectsList();
 

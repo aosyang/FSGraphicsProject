@@ -81,7 +81,8 @@ namespace RhinoLevelEditor
 
         private void btnAddMesh_Click(object sender, EventArgs e)
         {
-            engineCanvas1.RhinoEngine.UpdatePreviewMesh(listBox_MeshAssets.SelectedItem.ToString(), false);
+            string MeshAssetPath = listBox_MeshAssets.SelectedItem.ToString();
+            engineCanvas1.RhinoEngine.AddMeshObjectToScene(MeshAssetPath);
         }
 
         private void engineCanvas1_KeyDown(object sender, KeyEventArgs e)
@@ -104,10 +105,11 @@ namespace RhinoLevelEditor
 
         private void listMesh_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            int index = this.listBox_MeshAssets.IndexFromPoint(e.Location);
-            if (index != System.Windows.Forms.ListBox.NoMatches)
+            int index = listBox_MeshAssets.IndexFromPoint(e.Location);
+            if (index != ListBox.NoMatches)
             {
-                engineCanvas1.RhinoEngine.UpdatePreviewMesh(listBox_MeshAssets.Items[index].ToString(), false);
+                string MeshAssetPath = listBox_MeshAssets.Items[index].ToString();
+                engineCanvas1.RhinoEngine.AddMeshObjectToScene(MeshAssetPath);
                 RefreshSceneObjectsListBox();
             }
         }
@@ -259,7 +261,8 @@ namespace RhinoLevelEditor
 
         private void btnReplaceMesh_Click(object sender, EventArgs e)
         {
-            engineCanvas1.RhinoEngine.UpdatePreviewMesh(listBox_MeshAssets.SelectedItem.ToString(), true);
+            string MeshAssetPath = listBox_MeshAssets.SelectedItem.ToString();
+            engineCanvas1.RhinoEngine.ReplaceMeshAssetForSelection(MeshAssetPath);
             UpdatePropertyGrid();
         }
 
@@ -321,7 +324,7 @@ namespace RhinoLevelEditor
                 EngineAssetData AssetData = Item.Tag as EngineAssetData;
                 if (AssetData != null)
                 {
-                    engineCanvas1.RhinoEngine.UpdatePreviewMesh(AssetData.Path, false);
+                    engineCanvas1.RhinoEngine.AddMeshObjectToScene(AssetData.Path);
                 }
             }
         }

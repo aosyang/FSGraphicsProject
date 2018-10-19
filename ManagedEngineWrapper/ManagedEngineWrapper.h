@@ -40,7 +40,8 @@ namespace ManagedEngineWrapper {
 		virtual List<String^>^ GetMeshNameList();
 		virtual bool IsMeshAssetReady(String^ MeshName);
 		virtual Bitmap^ GenerateMeshThumbnailBitmap(String^ MeshName, int Width, int Height);
-		virtual void UpdatePreviewMesh(String^ path, bool replace);
+		virtual void AddMeshObjectToScene(String^ MeshAssetPath);
+		virtual void ReplaceMeshAssetForSelection(String^ MeshAssetPath);
 
 		virtual List<IManagedSceneObject^>^ GetSceneObjectsList();
 
