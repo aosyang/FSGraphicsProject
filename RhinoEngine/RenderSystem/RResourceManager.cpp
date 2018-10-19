@@ -594,7 +594,7 @@ void RResourceManager::ThreadLoadFbxMeshData(LoaderThreadTask* task)
 		if (!tangentArray)
 		{
 			// Normal and UV0 are required to generate tangents
-			if ((VertexComponentMask & (VCM_Normal | VCM_UV0)) != 0)
+			if (normalArray && uvArray[0])
 			{
 				if (mesh->GenerateTangentsData(0))
 				{
