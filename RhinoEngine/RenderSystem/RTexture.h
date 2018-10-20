@@ -10,8 +10,10 @@ class RTexture : public RResourceBase
 {
 	friend class RResourceManager;
 public:
-	RTexture(string path);
-	RTexture(string path, ID3D11ShaderResourceView* srv);
+	RTexture(const string& Path);
+
+	/// Create texture from existing shader resource view
+	RTexture(ID3D11ShaderResourceView* srv);
 	~RTexture();
 
 	ID3D11ShaderResourceView* GetSRV() { return m_SRV; }
@@ -22,5 +24,7 @@ public:
 private:
 	ID3D11ShaderResourceView*	m_SRV;
 	UINT						m_Width, m_Height;
+
+	static const string			InternalTextureName;
 };
 

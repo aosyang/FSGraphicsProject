@@ -542,7 +542,7 @@ RTexture* RResourceManager::WrapSRV(ID3D11ShaderResourceView* srv)
 	if (m_WrapperTextureResources.find(srv) != m_WrapperTextureResources.end())
 		return m_WrapperTextureResources[srv];
 
-	RTexture* tex = new RTexture("[Internal]", srv);
+	RTexture* tex = new RTexture(srv);
 	tex->OnLoadingFinished(false);
 	m_WrapperTextureResources[srv] = tex;
 	return tex;
