@@ -94,13 +94,20 @@ bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const char* FileN
 	// Load bone information into an array
 	for (int IdxNode = 0; IdxNode < NumFbxNodes; IdxNode++)
 	{
-		FbxNode* node = lFbxScene->GetNode(IdxNode);
-		if (node->GetNodeAttribute() && node->GetNodeAttribute()->GetAttributeType() && node->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+		FbxNode* SkeletonNode = lFbxScene->GetNode(IdxNode);
+		if (SkeletonNode)
 		{
-			fbxBoneNodes.push_back(node);
-			meshBoneIdToName.push_back(node->GetName());
+			FbxNodeAttribute* NodeAttribute = SkeletonNode->GetNodeAttribute();
+			if (NodeAttribute)
+			{
+				if (NodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+				{
+					fbxBoneNodes.push_back(SkeletonNode);
+					meshBoneIdToName.push_back(SkeletonNode->GetName());
 
-			RLog("  FBX bone node: %s\n", node->GetName());
+					RLog("  FBX bone node: %s\n", SkeletonNode->GetName());
+				}
+			}
 		}
 	}
 
