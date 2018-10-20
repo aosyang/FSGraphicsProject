@@ -24,4 +24,7 @@ private:
 	/// Optimize mesh buffer by combining duplicated vertices
 	void OptimizeMesh(vector<UINT>& IndexData, vector<RVertexType::MeshLoader>& VertexData) const;
 
+	/// A helper function to convert fbx matrix to RMatrix4
+	void MatrixTransfer(RMatrix4* dest, const FbxAMatrix* src) const;
+
 };

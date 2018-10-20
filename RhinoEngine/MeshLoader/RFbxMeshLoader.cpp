@@ -10,18 +10,6 @@
 
 #define CONVERT_TO_LEFT_HANDED_MESH 1
 
-/// Convert fbx matrix to RMatrix4
-void MatrixTransfer(RMatrix4* dest, const FbxAMatrix* src)
-{
-	for (int y = 0; y < 4; y++)
-	{
-		for (int x = 0; x < 4; x++)
-		{
-			dest->m[y][x] = (float)src->Get(y, x);
-		}
-	}
-}
-
 bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const char* FileName)
 {
 	vector<RMeshElement> meshElements;
@@ -851,4 +839,15 @@ void RFbxMeshLoader::OptimizeMesh(vector<UINT>& IndexData, vector<RVertexType::M
 
 	IndexData = optimizedIndexData;
 	VertexData = optimizedVertData;
+}
+
+void RFbxMeshLoader::MatrixTransfer(RMatrix4* dest, const FbxAMatrix* src) const
+{
+	for (int y = 0; y < 4; y++)
+	{
+		for (int x = 0; x < 4; x++)
+		{
+			dest->m[y][x] = (float)src->Get(y, x);
+		}
+	}
 }
