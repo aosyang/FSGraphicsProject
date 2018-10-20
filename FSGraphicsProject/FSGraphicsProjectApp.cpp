@@ -144,35 +144,35 @@ bool FSGraphicsProjectApp::Initialize()
 	// Create buffer for bump cube
 	RVertexType::Mesh boxVertex[] = 
 	{
-		{ RVertexType::Vec3Data(-1.0f, -1.0f, -1.0f), RVertexType::Vec2Data(0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertexType::Vec3Data(-1.0f,  1.0f, -1.0f), RVertexType::Vec2Data(0.0f, 1.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertexType::Vec3Data( 1.0f,  1.0f, -1.0f), RVertexType::Vec2Data(1.0f, 1.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertexType::Vec3Data( 1.0f, -1.0f, -1.0f), RVertexType::Vec2Data(1.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data(-1.0f, -1.0f, -1.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(0.0f, 0.0f) },
+		{ RVertexType::Vec3Data(-1.0f,  1.0f, -1.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(0.0f, 1.0f) },
+		{ RVertexType::Vec3Data( 1.0f,  1.0f, -1.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(1.0f, 1.0f) },
+		{ RVertexType::Vec3Data( 1.0f, -1.0f, -1.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(1.0f, 0.0f) },
 
-		{ RVertexType::Vec3Data( 1.0f, -1.0f, -1.0f), RVertexType::Vec2Data(0.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f) },
-		{ RVertexType::Vec3Data( 1.0f,  1.0f, -1.0f), RVertexType::Vec2Data(0.0f, 1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f) },
-		{ RVertexType::Vec3Data( 1.0f,  1.0f,  1.0f), RVertexType::Vec2Data(1.0f, 1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f) },
-		{ RVertexType::Vec3Data( 1.0f, -1.0f,  1.0f), RVertexType::Vec2Data(1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f) },
+		{ RVertexType::Vec3Data( 1.0f, -1.0f, -1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec2Data(0.0f, 0.0f) },
+		{ RVertexType::Vec3Data( 1.0f,  1.0f, -1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec2Data(0.0f, 1.0f) },
+		{ RVertexType::Vec3Data( 1.0f,  1.0f,  1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec2Data(1.0f, 1.0f) },
+		{ RVertexType::Vec3Data( 1.0f, -1.0f,  1.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec2Data(1.0f, 0.0f) },
 
-		{ RVertexType::Vec3Data( 1.0f, -1.0f,  1.0f), RVertexType::Vec2Data(0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f) },
-		{ RVertexType::Vec3Data( 1.0f,  1.0f,  1.0f), RVertexType::Vec2Data(0.0f, 1.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f) },
-		{ RVertexType::Vec3Data(-1.0f,  1.0f,  1.0f), RVertexType::Vec2Data(1.0f, 1.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f) },
-		{ RVertexType::Vec3Data(-1.0f, -1.0f,  1.0f), RVertexType::Vec2Data(1.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data( 1.0f, -1.0f,  1.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(0.0f, 0.0f) },
+		{ RVertexType::Vec3Data( 1.0f,  1.0f,  1.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(0.0f, 1.0f) },
+		{ RVertexType::Vec3Data(-1.0f,  1.0f,  1.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(1.0f, 1.0f) },
+		{ RVertexType::Vec3Data(-1.0f, -1.0f,  1.0f), RVertexType::Vec3Data(0.0f, 0.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(1.0f, 0.0f) },
 
-		{ RVertexType::Vec3Data(-1.0f, -1.0f,  1.0f), RVertexType::Vec2Data(0.0f, 0.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f) },
-		{ RVertexType::Vec3Data(-1.0f,  1.0f,  1.0f), RVertexType::Vec2Data(0.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f) },
-		{ RVertexType::Vec3Data(-1.0f,  1.0f, -1.0f), RVertexType::Vec2Data(1.0f, 1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f) },
-		{ RVertexType::Vec3Data(-1.0f, -1.0f, -1.0f), RVertexType::Vec2Data(1.0f, 0.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f) },
+		{ RVertexType::Vec3Data(-1.0f, -1.0f,  1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec2Data(0.0f, 0.0f) },
+		{ RVertexType::Vec3Data(-1.0f,  1.0f,  1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec2Data(0.0f, 1.0f) },
+		{ RVertexType::Vec3Data(-1.0f,  1.0f, -1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec2Data(1.0f, 1.0f) },
+		{ RVertexType::Vec3Data(-1.0f, -1.0f, -1.0f), RVertexType::Vec3Data(-1.0f, 0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 0.0f, -1.0f), RVertexType::Vec2Data(1.0f, 0.0f) },
 
-		{ RVertexType::Vec3Data(-1.0f,  1.0f, -1.0f), RVertexType::Vec2Data(0.0f, 0.0f), RVertexType::Vec3Data(0.0f, 1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertexType::Vec3Data(-1.0f,  1.0f,  1.0f), RVertexType::Vec2Data(0.0f, 1.0f), RVertexType::Vec3Data(0.0f, 1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertexType::Vec3Data( 1.0f,  1.0f,  1.0f), RVertexType::Vec2Data(1.0f, 1.0f), RVertexType::Vec3Data(0.0f, 1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertexType::Vec3Data( 1.0f,  1.0f, -1.0f), RVertexType::Vec2Data(1.0f, 0.0f), RVertexType::Vec3Data(0.0f, 1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data(-1.0f,  1.0f, -1.0f), RVertexType::Vec3Data(0.0f, 1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(0.0f, 0.0f) },
+		{ RVertexType::Vec3Data(-1.0f,  1.0f,  1.0f), RVertexType::Vec3Data(0.0f, 1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(0.0f, 1.0f) },
+		{ RVertexType::Vec3Data( 1.0f,  1.0f,  1.0f), RVertexType::Vec3Data(0.0f, 1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(1.0f, 1.0f) },
+		{ RVertexType::Vec3Data( 1.0f,  1.0f, -1.0f), RVertexType::Vec3Data(0.0f, 1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(1.0f, 0.0f) },
 
-		{ RVertexType::Vec3Data(-1.0f, -1.0f,  1.0f), RVertexType::Vec2Data(0.0f, 0.0f), RVertexType::Vec3Data(0.0f, -1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertexType::Vec3Data(-1.0f, -1.0f, -1.0f), RVertexType::Vec2Data(0.0f, 1.0f), RVertexType::Vec3Data(0.0f, -1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertexType::Vec3Data( 1.0f, -1.0f, -1.0f), RVertexType::Vec2Data(1.0f, 1.0f), RVertexType::Vec3Data(0.0f, -1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
-		{ RVertexType::Vec3Data( 1.0f, -1.0f,  1.0f), RVertexType::Vec2Data(1.0f, 0.0f), RVertexType::Vec3Data(0.0f, -1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f) },
+		{ RVertexType::Vec3Data(-1.0f, -1.0f,  1.0f), RVertexType::Vec3Data(0.0f, -1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(0.0f, 0.0f) },
+		{ RVertexType::Vec3Data(-1.0f, -1.0f, -1.0f), RVertexType::Vec3Data(0.0f, -1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(0.0f, 1.0f) },
+		{ RVertexType::Vec3Data( 1.0f, -1.0f, -1.0f), RVertexType::Vec3Data(0.0f, -1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(1.0f, 1.0f) },
+		{ RVertexType::Vec3Data( 1.0f, -1.0f,  1.0f), RVertexType::Vec3Data(0.0f, -1.0f, 0.0f), RVertexType::Vec3Data(1.0f, 0.0f, 0.0f), RVertexType::Vec2Data(1.0f, 0.0f) },
 	};
 
 	for (UINT32 i = 0; i < sizeof(boxVertex) / sizeof(RVertexType::Mesh); i++)

@@ -104,7 +104,7 @@ void InitializeRubikMaterials()
 	for (int i = 0; i < 7; i++)
 	{
 		vector<RMaterial> Materials;
-		RMaterial::LoadFromXMLFile(MaterialFilenames[i], Materials);
+		RMaterial::LoadFromXmlFile(MaterialFilenames[i], Materials);
 		assert(Materials.size() >= 0);
 		RubikMaterials[i] = Materials[0];
 	}
