@@ -24,7 +24,7 @@ enum ResourceType
 class RResourceBase
 {
 public:
-	RResourceBase(ResourceType type, string path);
+	RResourceBase(ResourceType type, const string& path);
 	virtual ~RResourceBase() = 0 {}
 
 	ResourceState GetResourceState() const	{ return m_State; }

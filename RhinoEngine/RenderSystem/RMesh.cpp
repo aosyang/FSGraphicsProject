@@ -7,22 +7,22 @@
 #include "Rhino.h"
 #include "RMesh.h"
 
-RMesh::RMesh(string path)
-	: RResourceBase(RT_Mesh, path),
+RMesh::RMesh(const string& Path)
+	: RResourceBase(RT_Mesh, Path),
 	  m_Animation(nullptr)
 {
 }
 
-RMesh::RMesh(string path, const vector<RMeshElement>& meshElements, const vector<RMaterial>& materials)
-	: RResourceBase(RT_Mesh, path),
+RMesh::RMesh(const string& Path, const vector<RMeshElement>& meshElements, const vector<RMaterial>& materials)
+	: RResourceBase(RT_Mesh, Path),
 	  m_Animation(nullptr)
 {
 	m_MeshElements = meshElements;
 	m_Materials = materials;
 }
 
-RMesh::RMesh(string path, const RMeshElement* meshElements, int numElement, const RMaterial* materials, int numMaterial)
-	: RResourceBase(RT_Mesh, path),
+RMesh::RMesh(const string& Path, const RMeshElement* meshElements, int numElement, const RMaterial* materials, int numMaterial)
+	: RResourceBase(RT_Mesh, Path),
 	  m_Animation(nullptr)
 {
 	assert(meshElements && numElement);

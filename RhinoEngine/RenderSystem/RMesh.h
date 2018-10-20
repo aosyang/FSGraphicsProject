@@ -18,9 +18,9 @@ struct BoneMatrices
 class RMesh : public RResourceBase
 {
 public:
-	RMesh(string path);
-	RMesh(string path, const vector<RMeshElement>& meshElements, const vector<RMaterial>& materials);
-	RMesh(string path, const RMeshElement* meshElements, int numElement, const RMaterial* materials, int numMaterial);
+	RMesh(const string& Path);
+	RMesh(const string& Path, const vector<RMeshElement>& meshElements, const vector<RMaterial>& materials);
+	RMesh(const string& Path, const RMeshElement* meshElements, int numElement, const RMaterial* materials, int numMaterial);
 	~RMesh();
 
 	void Serialize(RSerializer& serializer);
@@ -56,16 +56,15 @@ protected:
 	virtual vector<RResourceBase*> EnumerateReferencedResources() const override;
 
 private:
-	vector<RMeshElement>	m_MeshElements;
+	vector<RMeshElement>			m_MeshElements;
 
-	vector<RMaterial>		m_Materials;
-	RAabb					m_Aabb;
+	vector<RMaterial>				m_Materials;
+	RAabb							m_Aabb;
 
-	RAnimation*				m_Animation;
-	vector<RMatrix4>		m_BoneInitInvMatrices;
-	vector<string>			m_BoneIdToName;
-	map<RAnimation*, vector<int>>
-							m_AnimationNodeCache;
+	RAnimation*						m_Animation;
+	vector<RMatrix4>				m_BoneInitInvMatrices;
+	vector<string>					m_BoneIdToName;
+	map<RAnimation*, vector<int>>	m_AnimationNodeCache;
 };
 
 FORCEINLINE const vector<RMaterial>& RMesh::GetMaterials() const
