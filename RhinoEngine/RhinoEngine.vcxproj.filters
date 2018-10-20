@@ -161,6 +161,9 @@
     <ClInclude Include="Core\RDelegate.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="MeshLoader\RFbxMeshLoader.h">
+      <Filter>MeshLoader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderSystem\RRenderSystem.cpp">
@@ -284,6 +287,9 @@
     <ClCompile Include="Core\RLog.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="MeshLoader\RFbxMeshLoader.cpp">
+      <Filter>MeshLoader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="RenderSystem">
@@ -309,6 +315,9 @@
     </Filter>
     <Filter Include="Script">
       <UniqueIdentifier>{9a32fefa-661f-4473-8236-775afe9e1814}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MeshLoader">
+      <UniqueIdentifier>{ebe406a4-e0a1-44f3-90fc-f06c48c400b9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
