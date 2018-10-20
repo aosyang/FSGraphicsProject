@@ -111,86 +111,8 @@ bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const char* FileN
 		}
 	}
 
-	// Load animation
-	RAnimation* animation = nullptr;
-
-	FbxArray<FbxString*> animStackNameArray;
-	lFbxScene->FillAnimStackNameArray(animStackNameArray);
-	if (animStackNameArray.GetCount() > 0)
-	{
-		FbxAnimStack* animStack = lFbxScene->FindMember<FbxAnimStack>(animStackNameArray[0]->Buffer());
-		FbxTakeInfo* takeInfo = lFbxScene->GetTakeInfo(*(animStackNameArray[0]));
-
-		FbxArrayDelete(animStackNameArray);
-
-		FbxTime::EMode				animTimeMode;
-		FbxTime						TimePerFrame, animStartTime, animEndTime;
-		float						animFrameRate;
-
-		TimePerFrame.SetTime(0, 0, 0, 1, 0, lFbxScene->GetGlobalSettings().GetTimeMode());
-		animTimeMode = lFbxScene->GetGlobalSettings().GetTimeMode();
-		animFrameRate = (float)TimePerFrame.GetFrameRate(animTimeMode);
-		animStartTime = takeInfo->mLocalTimeSpan.GetStart();
-		animEndTime = takeInfo->mLocalTimeSpan.GetStop();
-
-		int totalFrameCount = (int)(animEndTime.GetFrameCount(animTimeMode) - animStartTime.GetFrameCount(animTimeMode)) + 1;
-		animation = new RAnimation(
-			NumFbxNodes,
-			totalFrameCount,
-			(float)animStartTime.GetFrameCountPrecise(animTimeMode),
-			(float)animEndTime.GetFrameCountPrecise(animTimeMode),
-			animFrameRate);
-
-		map<string, int> nodeNameToId;
-
-		for (int FbxSceneNodeIndex = 0; FbxSceneNodeIndex < NumFbxNodes; FbxSceneNodeIndex++)
-		{
-			FbxNode* node = lFbxScene->GetNode(FbxSceneNodeIndex);
-
-			for (FbxTime CurrentFrameTime = animStartTime;
-				CurrentFrameTime <= animEndTime;
-				CurrentFrameTime += TimePerFrame)
-			{
-				RMatrix4 BoneTransform;
-				const char* BoneName = node->GetName();
-
-				// Evaluate bone transform in model space
-				FbxAMatrix FbxBoneTransform = node->EvaluateGlobalTransform(CurrentFrameTime);
-
-#if CONVERT_TO_LEFT_HANDED_MESH == 1
-				FbxVector4 FbxBoneRotation = FbxBoneTransform.GetR();
-				FbxBoneTransform[3][2] = -FbxBoneTransform[3][2];
-				FbxBoneRotation.Set(-FbxBoneRotation[0], -FbxBoneRotation[1], FbxBoneRotation[2]);
-				FbxBoneTransform.SetR(FbxBoneRotation);
-#endif
-				MatrixTransfer(&BoneTransform, &FbxBoneTransform);
-
-				// Precise frames number in fractions
-				float NumFramesAtCurrentTime = (float)CurrentFrameTime.GetFrameCountPrecise(animTimeMode);
-				float NumFramesAtStartTime = (float)animStartTime.GetFrameCountPrecise(animTimeMode);
-
-				int FrameIndex = (int)(NumFramesAtCurrentTime - NumFramesAtStartTime);
-				animation->AddNodePose(FbxSceneNodeIndex, FrameIndex, &BoneTransform);
-				animation->AddNodeNameToId(BoneName, FbxSceneNodeIndex);
-
-				nodeNameToId[BoneName] = FbxSceneNodeIndex;
-			}
-		}
-
-		for (int FbxSceneNodeIndex = 0; FbxSceneNodeIndex < NumFbxNodes; FbxSceneNodeIndex++)
-		{
-			FbxNode* node = lFbxScene->GetNode(FbxSceneNodeIndex);
-			FbxNode* parent = node->GetParent();
-			if (parent && nodeNameToId.find(parent->GetName()) != nodeNameToId.end())
-			{
-				animation->SetParentId(FbxSceneNodeIndex, nodeNameToId[parent->GetName()]);
-			}
-			else
-			{
-				animation->SetParentId(FbxSceneNodeIndex, -1);
-			}
-		}
-	}
+	// Load scene animation
+	RAnimation* animation = LoadFbxSceneAnimation(lFbxScene);
 
 	vector<RMatrix4> boneInitInvPose;
 
@@ -213,7 +135,7 @@ bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const char* FileN
 
 		FbxVector4* controlPointArray;
 		vector<RVertexType::MeshLoader> vertData;
-		vector<int> indexData;
+		vector<UINT> indexData;
 		vector<RVertexType::MeshLoader> flatVertData;
 		int VertexComponentMask = 0;
 
@@ -223,18 +145,18 @@ bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const char* FileN
 		vertData.resize(controlPointCount);
 
 		// Fill vertex data
-		for (int IdxLayer = 0; IdxLayer < controlPointCount; IdxLayer++)
+		for (int i = 0; i < controlPointCount; i++)
 		{
-			vertData[IdxLayer].pos.x = (float)controlPointArray[IdxLayer][0];
-			vertData[IdxLayer].pos.y = (float)controlPointArray[IdxLayer][1];
-			vertData[IdxLayer].pos.z = (float)controlPointArray[IdxLayer][2];
+			vertData[i].pos.x = (float)controlPointArray[i][0];
+			vertData[i].pos.y = (float)controlPointArray[i][1];
+			vertData[i].pos.z = (float)controlPointArray[i][2];
 
 #if CONVERT_TO_LEFT_HANDED_MESH == 1
-			vertData[IdxLayer].pos.z = -vertData[IdxLayer].pos.z;
+			vertData[i].pos.z = -vertData[i].pos.z;
 #endif
 
-			memset(vertData[IdxLayer].boneId, -1, sizeof(int) * 4);
-			memset(&vertData[IdxLayer].weight, 0, sizeof(float) * 4);
+			memset(vertData[i].boneId, -1, sizeof(int) * 4);
+			memset(&vertData[i].weight, 0, sizeof(float) * 4);
 
 			VertexComponentMask |= VCM_Pos;
 		}
@@ -627,40 +549,25 @@ bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const char* FileN
 		// Load materials from fbx node
 		LoadFbxMaterials(SceneNode, materials);
 
-		// Optimize mesh
-		RLog("Optimizing mesh...\n");
+		int OrignialNumVerts = (int)flatVertData.size();
+		int OriginalNumIndices = (int)indexData.size() / 3;
 
-		map<RVertexType::MeshLoader, int> meshVertIndexTable;
-		vector<RVertexType::MeshLoader> optimizedVertData;
-		vector<UINT> optimizedIndexData;
-		UINT index = 0;
-		for (UINT IdxLayer = 0; IdxLayer < indexData.size(); IdxLayer++)
-		{
-			RVertexType::MeshLoader& v = flatVertData[indexData[IdxLayer]];
-			auto iterResult = meshVertIndexTable.find(v);
-			if (iterResult == meshVertIndexTable.end())
-			{
-				meshVertIndexTable[v] = index;
-				optimizedVertData.push_back(v);
-				optimizedIndexData.push_back(index);
-				index++;
-			}
-			else
-			{
-				optimizedIndexData.push_back(iterResult->second);
-			}
-		}
+		// Optimize the mesh
+		OptimizeMesh(indexData, flatVertData);
+
+		int OptimizedNumVerts = (int)flatVertData.size();
+		int OptimizedNumIndices = (int)indexData.size() / 3;
 
 		// Hack: don't use uv1 on skinned mesh
 		if (hasDeformer)
 			VertexComponentMask &= ~VCM_UV1;
 
-		if (optimizedVertData.size() != 0 && optimizedIndexData.size() != 0)
+		if (flatVertData.size() != 0 && indexData.size() != 0)
 		{
 			RMeshElement meshElem;
 
-			meshElem.SetVertices(optimizedVertData, VertexComponentMask);
-			meshElem.SetTriangles(optimizedIndexData);
+			meshElem.SetVertices(flatVertData, VertexComponentMask);
+			meshElem.SetTriangles(indexData);
 			meshElem.UpdateRenderBuffer();
 			meshElem.SetName(SceneNode->GetName());
 
@@ -672,11 +579,12 @@ bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const char* FileN
 			meshElements.push_back(meshElem);
 
 			RLog("Mesh loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
-				(int)optimizedVertData.size(), (int)optimizedIndexData.size() / 3, (int)flatVertData.size(), (int)indexData.size() / 3);
+				OrignialNumVerts, OriginalNumIndices, OptimizedNumVerts, OptimizedNumIndices);
 		}
 		else
 		{
-			RLogWarning("Mesh loader: Unable to add mesh element with index count %d, vertex count %d.\n", (int)optimizedIndexData.size(), (int)optimizedVertData.size());
+			RLogWarning("Mesh loader: Unable to add mesh element with index count %d, vertex count %d.\n",
+				(int)indexData.size(), (int)flatVertData.size());
 		}
 	}
 
@@ -702,7 +610,94 @@ bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const std::string
 	return LoadMeshIntoResource(MeshResource, FileName.c_str());
 }
 
-void RFbxMeshLoader::LoadFbxMaterials(FbxNode* SceneNode, vector<RMaterial> &OutMaterials)
+RAnimation* RFbxMeshLoader::LoadFbxSceneAnimation(FbxScene* Scene) const
+{
+	RAnimation* animation = nullptr;
+
+	FbxArray<FbxString*> animStackNameArray;
+	Scene->FillAnimStackNameArray(animStackNameArray);
+	if (animStackNameArray.GetCount() > 0)
+	{
+		int NumFbxNodes = Scene->GetNodeCount();
+
+		FbxAnimStack* animStack = Scene->FindMember<FbxAnimStack>(animStackNameArray[0]->Buffer());
+		FbxTakeInfo* takeInfo = Scene->GetTakeInfo(*(animStackNameArray[0]));
+
+		FbxArrayDelete(animStackNameArray);
+
+		FbxTime::EMode				animTimeMode;
+		FbxTime						TimePerFrame, animStartTime, animEndTime;
+		float						animFrameRate;
+
+		TimePerFrame.SetTime(0, 0, 0, 1, 0, Scene->GetGlobalSettings().GetTimeMode());
+		animTimeMode = Scene->GetGlobalSettings().GetTimeMode();
+		animFrameRate = (float)TimePerFrame.GetFrameRate(animTimeMode);
+		animStartTime = takeInfo->mLocalTimeSpan.GetStart();
+		animEndTime = takeInfo->mLocalTimeSpan.GetStop();
+
+		int totalFrameCount = (int)(animEndTime.GetFrameCount(animTimeMode) - animStartTime.GetFrameCount(animTimeMode)) + 1;
+		animation = new RAnimation(
+			NumFbxNodes,
+			totalFrameCount,
+			(float)animStartTime.GetFrameCountPrecise(animTimeMode),
+			(float)animEndTime.GetFrameCountPrecise(animTimeMode),
+			animFrameRate);
+
+		map<string, int> nodeNameToId;
+
+		for (int FbxSceneNodeIndex = 0; FbxSceneNodeIndex < NumFbxNodes; FbxSceneNodeIndex++)
+		{
+			FbxNode* node = Scene->GetNode(FbxSceneNodeIndex);
+
+			for (FbxTime CurrentFrameTime = animStartTime;
+				CurrentFrameTime <= animEndTime;
+				CurrentFrameTime += TimePerFrame)
+			{
+				RMatrix4 BoneTransform;
+				const char* BoneName = node->GetName();
+
+				// Evaluate bone transform in model space
+				FbxAMatrix FbxBoneTransform = node->EvaluateGlobalTransform(CurrentFrameTime);
+
+#if CONVERT_TO_LEFT_HANDED_MESH == 1
+				FbxVector4 FbxBoneRotation = FbxBoneTransform.GetR();
+				FbxBoneTransform[3][2] = -FbxBoneTransform[3][2];
+				FbxBoneRotation.Set(-FbxBoneRotation[0], -FbxBoneRotation[1], FbxBoneRotation[2]);
+				FbxBoneTransform.SetR(FbxBoneRotation);
+#endif
+				MatrixTransfer(&BoneTransform, &FbxBoneTransform);
+
+				// Precise frames number in fractions
+				float NumFramesAtCurrentTime = (float)CurrentFrameTime.GetFrameCountPrecise(animTimeMode);
+				float NumFramesAtStartTime = (float)animStartTime.GetFrameCountPrecise(animTimeMode);
+
+				int FrameIndex = (int)(NumFramesAtCurrentTime - NumFramesAtStartTime);
+				animation->AddNodePose(FbxSceneNodeIndex, FrameIndex, &BoneTransform);
+				animation->AddNodeNameToId(BoneName, FbxSceneNodeIndex);
+
+				nodeNameToId[BoneName] = FbxSceneNodeIndex;
+			}
+		}
+
+		for (int FbxSceneNodeIndex = 0; FbxSceneNodeIndex < NumFbxNodes; FbxSceneNodeIndex++)
+		{
+			FbxNode* node = Scene->GetNode(FbxSceneNodeIndex);
+			FbxNode* parent = node->GetParent();
+			if (parent && nodeNameToId.find(parent->GetName()) != nodeNameToId.end())
+			{
+				animation->SetParentId(FbxSceneNodeIndex, nodeNameToId[parent->GetName()]);
+			}
+			else
+			{
+				animation->SetParentId(FbxSceneNodeIndex, -1);
+			}
+		}
+	}
+
+	return animation;
+}
+
+void RFbxMeshLoader::LoadFbxMaterials(FbxNode* SceneNode, vector<RMaterial>& OutMaterials) const
 {
 	int NumFbxMaterials = SceneNode->GetSrcObjectCount<FbxSurfaceMaterial>();
 
@@ -774,4 +769,37 @@ void RFbxMeshLoader::LoadFbxMaterials(FbxNode* SceneNode, vector<RMaterial> &Out
 	{
 		OutMaterials.push_back(RMaterial{ 0 });
 	}
+}
+
+void RFbxMeshLoader::OptimizeMesh(vector<UINT>& IndexData, vector<RVertexType::MeshLoader>& VertexData) const
+{
+	// Optimize mesh
+	RLog("Optimizing mesh...\n");
+
+	map<RVertexType::MeshLoader, int> meshVertIndexTable;
+	vector<RVertexType::MeshLoader> optimizedVertData;
+	vector<UINT> optimizedIndexData;
+	UINT Index = 0;
+
+	for (UINT i = 0; i < IndexData.size(); i++)
+	{
+		RVertexType::MeshLoader& v = VertexData[IndexData[i]];
+
+		// Search vertex in index table by running lexicographical comparison
+		auto iterResult = meshVertIndexTable.find(v);
+		if (iterResult == meshVertIndexTable.end())
+		{
+			meshVertIndexTable[v] = Index;
+			optimizedVertData.push_back(v);
+			optimizedIndexData.push_back(Index);
+			Index++;
+		}
+		else
+		{
+			optimizedIndexData.push_back(iterResult->second);
+		}
+	}
+
+	IndexData = optimizedIndexData;
+	VertexData = optimizedVertData;
 }

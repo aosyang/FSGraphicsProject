@@ -15,7 +15,13 @@ public:
 	bool LoadMeshIntoResource(RMesh* MeshResource, const std::string& FileName);
 
 private:
+	/// Load animation of the scene
+	RAnimation* LoadFbxSceneAnimation(FbxScene* Scene) const;
+
 	/// Load materials from fbx node
-	void LoadFbxMaterials(FbxNode* SceneNode, vector<RMaterial> &OutMaterials);
+	void LoadFbxMaterials(FbxNode* SceneNode, vector<RMaterial>& OutMaterials) const;
+
+	/// Optimize mesh buffer by combining duplicated vertices
+	void OptimizeMesh(vector<UINT>& IndexData, vector<RVertexType::MeshLoader>& VertexData) const;
 
 };
