@@ -135,8 +135,6 @@ bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const char* FileN
 
 		FbxVector4* controlPointArray;
 		vector<RVertexType::MeshLoader> vertData;
-		vector<UINT> indexData;
-		vector<RVertexType::MeshLoader> flatVertData;
 		int VertexComponentMask = 0;
 
 		controlPointArray = MeshNode->GetControlPoints();
@@ -410,6 +408,8 @@ bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const char* FileN
 			}
 		}
 
+		FbxArray<int> PolygonMaterialIds;
+
 		int NumLayers = MeshNode->GetLayerCount();
 		for (int IdxLayer = 0; IdxLayer < NumLayers; IdxLayer++)
 		{
@@ -422,15 +422,38 @@ bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const char* FileN
 					// Note: If index array is stored in a non-reference variable by accident,
 					//       it will get copied and cause a crash when releasing fbx scene. (Please, FBX SDK!!)
 					FbxLayerElementArrayTemplate<int>& IndexArray = Materials->GetIndexArray();
-					//int NumIndices = IndexArray.GetCount();
-					//for (int i = 0; i < NumIndices; i++)
-					//{
-					//	int Index = IndexArray[i];
-					//	int b = 0; b++;
-					//}
+					int NumIndices = IndexArray.GetCount();
+
+					IndexArray.CopyTo(PolygonMaterialIds);
+
+					// For now, we don't handle multiple layers
+					break;
 				}
 			}
 		}
+
+		FbxArray<int> UniqueArray;
+		int NumPolygonMaterials = -1;
+
+		// Get number of polygon materials
+		{
+			for (int i = 0; i < PolygonMaterialIds.GetCount(); i++)
+			{
+				UniqueArray.AddUnique(PolygonMaterialIds[i]);
+			}
+
+			NumPolygonMaterials = UniqueArray.GetCount();
+		}
+
+		if (NumPolygonMaterials <= 0)
+		{
+			NumPolygonMaterials = 1;
+		}
+
+		vector<vector<UINT>> SubmeshIndexArray;
+		SubmeshIndexArray.resize(NumPolygonMaterials);
+
+		vector<RVertexType::MeshLoader> flatVertData;
 
 		// Fill triangle data
 		int polyCount = MeshNode->GetPolygonCount();
@@ -534,58 +557,72 @@ bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const char* FileN
 				flatVertData.push_back(vertex);
 			}
 
+			int Index = 0;
+			if (idxPoly < PolygonMaterialIds.Size())
+			{
+				int MaterialId = PolygonMaterialIds[idxPoly];
+				Index = UniqueArray.Find(MaterialId);
+				assert(Index != -1);
+			}
+
 			// Change triangle clockwise if necessary
 #if CONVERT_TO_LEFT_HANDED_MESH == 1
-			indexData.push_back(triangle[0]);
-			indexData.push_back(triangle[2]);
-			indexData.push_back(triangle[1]);
+			SubmeshIndexArray[Index].push_back(triangle[0]);
+			SubmeshIndexArray[Index].push_back(triangle[2]);
+			SubmeshIndexArray[Index].push_back(triangle[1]);
 #else
-			indexData.push_back(triangle[0]);
-			indexData.push_back(triangle[1]);
-			indexData.push_back(triangle[2]);
+			SubmeshIndexArray[Index].push_back(triangle[0]);
+			SubmeshIndexArray[Index].push_back(triangle[1]);
+			SubmeshIndexArray[Index].push_back(triangle[2]);
 #endif
+		}
+
+		for (auto& IndexData : SubmeshIndexArray)
+		{
+			// Make copy of vertex array for optimization
+			auto VertexData = flatVertData;
+
+			int OrignialNumVerts = (int)VertexData.size();
+			int OriginalNumIndices = (int)IndexData.size() / 3;
+
+			// Optimize the mesh
+			OptimizeMesh(IndexData, VertexData);
+
+			int OptimizedNumVerts = (int)VertexData.size();
+			int OptimizedNumIndices = (int)IndexData.size() / 3;
+
+			// Hack: don't use uv1 on skinned mesh
+			if (hasDeformer)
+				VertexComponentMask &= ~VCM_UV1;
+
+			if (VertexData.size() != 0 && IndexData.size() != 0)
+			{
+				RMeshElement meshElem;
+
+				meshElem.SetVertices(VertexData, VertexComponentMask);
+				meshElem.SetTriangles(IndexData);
+				meshElem.UpdateRenderBuffer();
+				meshElem.SetName(SceneNode->GetName());
+
+				UINT flag = 0;
+				if (hasDeformer)
+					flag |= MEF_Skinned;
+
+				meshElem.SetFlag(flag);
+				meshElements.push_back(meshElem);
+
+				RLog("Mesh element loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
+					OptimizedNumVerts, OptimizedNumIndices, OrignialNumVerts, OriginalNumIndices);
+			}
+			else
+			{
+				RLogWarning("Mesh loader: Unable to add mesh element with index count %d, vertex count %d.\n",
+					(int)IndexData.size(), (int)VertexData.size());
+			}
 		}
 
 		// Load materials from fbx node
 		LoadFbxMaterials(SceneNode, materials);
-
-		int OrignialNumVerts = (int)flatVertData.size();
-		int OriginalNumIndices = (int)indexData.size() / 3;
-
-		// Optimize the mesh
-		OptimizeMesh(indexData, flatVertData);
-
-		int OptimizedNumVerts = (int)flatVertData.size();
-		int OptimizedNumIndices = (int)indexData.size() / 3;
-
-		// Hack: don't use uv1 on skinned mesh
-		if (hasDeformer)
-			VertexComponentMask &= ~VCM_UV1;
-
-		if (flatVertData.size() != 0 && indexData.size() != 0)
-		{
-			RMeshElement meshElem;
-
-			meshElem.SetVertices(flatVertData, VertexComponentMask);
-			meshElem.SetTriangles(indexData);
-			meshElem.UpdateRenderBuffer();
-			meshElem.SetName(SceneNode->GetName());
-
-			UINT flag = 0;
-			if (hasDeformer)
-				flag |= MEF_Skinned;
-
-			meshElem.SetFlag(flag);
-			meshElements.push_back(meshElem);
-
-			RLog("Mesh loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
-				OrignialNumVerts, OriginalNumIndices, OptimizedNumVerts, OptimizedNumIndices);
-		}
-		else
-		{
-			RLogWarning("Mesh loader: Unable to add mesh element with index count %d, vertex count %d.\n",
-				(int)indexData.size(), (int)flatVertData.size());
-		}
 	}
 
 	lFbxScene->Destroy();
@@ -593,7 +630,19 @@ bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const char* FileN
 
 	// If a material file .rmtl for the mesh exists, override materials from fbx
 	string mtlFilename = RFileUtil::ReplaceExtension(FileName, "rmtl");
-	RMaterial::LoadFromXMLFile(mtlFilename, materials);
+	vector<RMaterial> OverrideMaterials;
+	if (RMaterial::LoadFromXmlFile(mtlFilename, OverrideMaterials))
+	{
+		if (OverrideMaterials.size() >= materials.size())
+		{
+			materials = OverrideMaterials;
+		}
+		else
+		{
+			RLogWarning("Loading %d materials from .rmtl, expecting %d. Ignoring material overriding.\n",
+				(int)OverrideMaterials.size(), (int)materials.size());
+		}
+	}
 
 	MeshResource->SetMeshElements(meshElements.data(), (UINT)meshElements.size());
 	MeshResource->SetMaterials(materials.data(), (UINT)materials.size());

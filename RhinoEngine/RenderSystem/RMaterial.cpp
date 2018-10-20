@@ -54,7 +54,7 @@ void RMaterial::Serialize(RSerializer& serializer)
 	}
 }
 
-void RMaterial::LoadFromXMLFile(const string& Filename, vector<RMaterial>& OutMaterials)
+bool RMaterial::LoadFromXmlFile(const string& Filename, vector<RMaterial>& OutMaterials)
 {
 	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
 	if (doc->LoadFile(Filename.c_str()) == tinyxml2::XML_SUCCESS)
@@ -92,8 +92,11 @@ void RMaterial::LoadFromXMLFile(const string& Filename, vector<RMaterial>& OutMa
 		if (xmlMaterials.size())
 		{
 			OutMaterials = xmlMaterials;
+			return true;
 		}
 	}
 
 	delete doc;
+
+	return false;
 }

@@ -331,7 +331,7 @@ bool RResourceManager::ThreadLoadRmeshData(LoaderThreadTask* task)
 
 void RResourceManager::LoadMeshMaterials(const string& mtlFilename, vector<RMaterial>& materials)
 {
-	RMaterial::LoadFromXMLFile(mtlFilename, materials);
+	RMaterial::LoadFromXmlFile(mtlFilename, materials);
 }
 
 RTexture* RResourceManager::LoadDDSTexture(const char* filename, EResourceLoadMode mode)

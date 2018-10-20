@@ -17,5 +17,6 @@ struct RMaterial
 
 	void Serialize(RSerializer& serializer);
 
-	static void LoadFromXMLFile(const string& Filename, vector<RMaterial>& OutMaterials);
+	/// Load an array of materials from xml file
+	static bool LoadFromXmlFile(const string& Filename, vector<RMaterial>& OutMaterials);
 };
