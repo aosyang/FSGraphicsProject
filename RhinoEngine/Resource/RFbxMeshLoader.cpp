@@ -8,9 +8,24 @@
 
 #include "RFbxMeshLoader.h"
 
+#include <fbxsdk.h>
+
 #define CONVERT_TO_LEFT_HANDED_MESH 1
 
-bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const char* FileName)
+namespace
+{
+	/// Load animation of the scene
+	RAnimation* LoadFbxSceneAnimation(FbxScene* Scene);
+
+	/// Load materials from fbx node
+	void LoadFbxMaterials(FbxNode* SceneNode, vector<RMaterial>& OutMaterials);
+
+	/// A helper function to convert fbx matrix to RMatrix4
+	void MatrixTransfer(RMatrix4* dest, const FbxAMatrix* src);
+}
+
+
+bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* FileName)
 {
 	vector<RMeshElement> meshElements;
 	vector<RMaterial> materials;
@@ -642,170 +657,9 @@ bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const char* FileN
 	return true;
 }
 
-bool RFbxMeshLoader::LoadMeshIntoResource(RMesh* MeshResource, const std::string& FileName)
+bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const std::string& FileName)
 {
-	return LoadMeshIntoResource(MeshResource, FileName.c_str());
-}
-
-RAnimation* RFbxMeshLoader::LoadFbxSceneAnimation(FbxScene* Scene) const
-{
-	RAnimation* animation = nullptr;
-
-	FbxArray<FbxString*> animStackNameArray;
-	Scene->FillAnimStackNameArray(animStackNameArray);
-	if (animStackNameArray.GetCount() > 0)
-	{
-		int NumFbxNodes = Scene->GetNodeCount();
-
-		FbxAnimStack* animStack = Scene->FindMember<FbxAnimStack>(animStackNameArray[0]->Buffer());
-		FbxTakeInfo* takeInfo = Scene->GetTakeInfo(*(animStackNameArray[0]));
-
-		FbxArrayDelete(animStackNameArray);
-
-		FbxTime::EMode				animTimeMode;
-		FbxTime						TimePerFrame, animStartTime, animEndTime;
-		float						animFrameRate;
-
-		TimePerFrame.SetTime(0, 0, 0, 1, 0, Scene->GetGlobalSettings().GetTimeMode());
-		animTimeMode = Scene->GetGlobalSettings().GetTimeMode();
-		animFrameRate = (float)TimePerFrame.GetFrameRate(animTimeMode);
-		animStartTime = takeInfo->mLocalTimeSpan.GetStart();
-		animEndTime = takeInfo->mLocalTimeSpan.GetStop();
-
-		int totalFrameCount = (int)(animEndTime.GetFrameCount(animTimeMode) - animStartTime.GetFrameCount(animTimeMode)) + 1;
-		animation = new RAnimation(
-			NumFbxNodes,
-			totalFrameCount,
-			(float)animStartTime.GetFrameCountPrecise(animTimeMode),
-			(float)animEndTime.GetFrameCountPrecise(animTimeMode),
-			animFrameRate);
-
-		map<string, int> nodeNameToId;
-
-		for (int FbxSceneNodeIndex = 0; FbxSceneNodeIndex < NumFbxNodes; FbxSceneNodeIndex++)
-		{
-			FbxNode* node = Scene->GetNode(FbxSceneNodeIndex);
-
-			for (FbxTime CurrentFrameTime = animStartTime;
-				CurrentFrameTime <= animEndTime;
-				CurrentFrameTime += TimePerFrame)
-			{
-				RMatrix4 BoneTransform;
-				const char* BoneName = node->GetName();
-
-				// Evaluate bone transform in model space
-				FbxAMatrix FbxBoneTransform = node->EvaluateGlobalTransform(CurrentFrameTime);
-
-#if CONVERT_TO_LEFT_HANDED_MESH == 1
-				FbxVector4 FbxBoneRotation = FbxBoneTransform.GetR();
-				FbxBoneTransform[3][2] = -FbxBoneTransform[3][2];
-				FbxBoneRotation.Set(-FbxBoneRotation[0], -FbxBoneRotation[1], FbxBoneRotation[2]);
-				FbxBoneTransform.SetR(FbxBoneRotation);
-#endif
-				MatrixTransfer(&BoneTransform, &FbxBoneTransform);
-
-				// Precise frames number in fractions
-				float NumFramesAtCurrentTime = (float)CurrentFrameTime.GetFrameCountPrecise(animTimeMode);
-				float NumFramesAtStartTime = (float)animStartTime.GetFrameCountPrecise(animTimeMode);
-
-				int FrameIndex = (int)(NumFramesAtCurrentTime - NumFramesAtStartTime);
-				animation->AddNodePose(FbxSceneNodeIndex, FrameIndex, &BoneTransform);
-				animation->AddNodeNameToId(BoneName, FbxSceneNodeIndex);
-
-				nodeNameToId[BoneName] = FbxSceneNodeIndex;
-			}
-		}
-
-		for (int FbxSceneNodeIndex = 0; FbxSceneNodeIndex < NumFbxNodes; FbxSceneNodeIndex++)
-		{
-			FbxNode* node = Scene->GetNode(FbxSceneNodeIndex);
-			FbxNode* parent = node->GetParent();
-			if (parent && nodeNameToId.find(parent->GetName()) != nodeNameToId.end())
-			{
-				animation->SetParentId(FbxSceneNodeIndex, nodeNameToId[parent->GetName()]);
-			}
-			else
-			{
-				animation->SetParentId(FbxSceneNodeIndex, -1);
-			}
-		}
-	}
-
-	return animation;
-}
-
-void RFbxMeshLoader::LoadFbxMaterials(FbxNode* SceneNode, vector<RMaterial>& OutMaterials) const
-{
-	int NumFbxMaterials = SceneNode->GetSrcObjectCount<FbxSurfaceMaterial>();
-
-	for (int IdxMaterial = 0; IdxMaterial < NumFbxMaterials; IdxMaterial++)
-	{
-		RMaterial meshMaterial = { 0 };
-		FbxSurfaceMaterial* material = SceneNode->GetSrcObject<FbxSurfaceMaterial>(IdxMaterial);
-
-		const char* texType[] =
-		{
-			FbxSurfaceMaterial::sDiffuse,
-			FbxSurfaceMaterial::sNormalMap,
-			FbxSurfaceMaterial::sSpecular,
-		};
-
-		for (int idxTexProp = 0; idxTexProp < 3; idxTexProp++)
-		{
-			FbxProperty prop = material->FindProperty(texType[idxTexProp]);
-			int layeredTexCount = prop.GetSrcObjectCount<FbxLayeredTexture>();
-			string textureName;
-
-			for (int idxLayeredTex = 0; idxLayeredTex < layeredTexCount; idxLayeredTex++)
-			{
-				FbxLayeredTexture* layeredTex = FbxCast<FbxLayeredTexture>(prop.GetSrcObject<FbxLayeredTexture>(idxLayeredTex));
-				int texCount = layeredTex->GetSrcObjectCount<FbxTexture>();
-
-				for (int idxTex = 0; idxTex < texCount; idxTex++)
-				{
-					FbxFileTexture* texture = FbxCast<FbxFileTexture>(layeredTex->GetSrcObject<FbxTexture>(idxTex));
-					textureName = texture->GetFileName();
-				}
-			}
-
-			if (layeredTexCount == 0)
-			{
-				int texCount = prop.GetSrcObjectCount<FbxTexture>();
-
-				for (int idxTex = 0; idxTex < texCount; idxTex++)
-				{
-					FbxFileTexture* texture = FbxCast<FbxFileTexture>(prop.GetSrcObject<FbxTexture>(idxTex));
-					textureName = texture->GetFileName();
-				}
-			}
-
-			if (textureName.length() != 0)
-			{
-				if (!RFileUtil::CheckIsRelativePath(textureName))
-				{
-					textureName = RFileUtil::GetFileNameInPath(textureName);
-				}
-
-				string ddsFilename = RFileUtil::ReplaceExtension(textureName, "dds");
-				RTexture* texture = RResourceManager::Instance().FindResource<RTexture>(ddsFilename.data());
-
-				if (!texture)
-				{
-					texture = RResourceManager::Instance().LoadResource<RTexture>(RResourceManager::GetRelativePathToResource(ddsFilename).data(), EResourceLoadMode::Immediate);
-				}
-
-				meshMaterial.Textures[meshMaterial.TextureNum] = texture;
-				meshMaterial.TextureNum++;
-			}
-		}
-
-		OutMaterials.push_back(meshMaterial);
-	}
-
-	if (NumFbxMaterials == 0)
-	{
-		OutMaterials.push_back(RMaterial{ 0 });
-	}
+	return LoadDataForMeshResource(MeshResource, FileName.c_str());
 }
 
 void RFbxMeshLoader::OptimizeMesh(vector<UINT>& IndexData, vector<RVertexType::MeshLoader>& VertexData) const
@@ -841,13 +695,177 @@ void RFbxMeshLoader::OptimizeMesh(vector<UINT>& IndexData, vector<RVertexType::M
 	VertexData = optimizedVertData;
 }
 
-void RFbxMeshLoader::MatrixTransfer(RMatrix4* dest, const FbxAMatrix* src) const
+namespace
 {
-	for (int y = 0; y < 4; y++)
+	RAnimation* LoadFbxSceneAnimation(FbxScene* Scene)
 	{
-		for (int x = 0; x < 4; x++)
+		RAnimation* animation = nullptr;
+
+		FbxArray<FbxString*> animStackNameArray;
+		Scene->FillAnimStackNameArray(animStackNameArray);
+		if (animStackNameArray.GetCount() > 0)
 		{
-			dest->m[y][x] = (float)src->Get(y, x);
+			int NumFbxNodes = Scene->GetNodeCount();
+
+			FbxAnimStack* animStack = Scene->FindMember<FbxAnimStack>(animStackNameArray[0]->Buffer());
+			FbxTakeInfo* takeInfo = Scene->GetTakeInfo(*(animStackNameArray[0]));
+
+			FbxArrayDelete(animStackNameArray);
+
+			FbxTime::EMode				animTimeMode;
+			FbxTime						TimePerFrame, animStartTime, animEndTime;
+			float						animFrameRate;
+
+			TimePerFrame.SetTime(0, 0, 0, 1, 0, Scene->GetGlobalSettings().GetTimeMode());
+			animTimeMode = Scene->GetGlobalSettings().GetTimeMode();
+			animFrameRate = (float)TimePerFrame.GetFrameRate(animTimeMode);
+			animStartTime = takeInfo->mLocalTimeSpan.GetStart();
+			animEndTime = takeInfo->mLocalTimeSpan.GetStop();
+
+			int totalFrameCount = (int)(animEndTime.GetFrameCount(animTimeMode) - animStartTime.GetFrameCount(animTimeMode)) + 1;
+			animation = new RAnimation(
+				NumFbxNodes,
+				totalFrameCount,
+				(float)animStartTime.GetFrameCountPrecise(animTimeMode),
+				(float)animEndTime.GetFrameCountPrecise(animTimeMode),
+				animFrameRate);
+
+			map<string, int> nodeNameToId;
+
+			for (int FbxSceneNodeIndex = 0; FbxSceneNodeIndex < NumFbxNodes; FbxSceneNodeIndex++)
+			{
+				FbxNode* node = Scene->GetNode(FbxSceneNodeIndex);
+
+				for (FbxTime CurrentFrameTime = animStartTime;
+					CurrentFrameTime <= animEndTime;
+					CurrentFrameTime += TimePerFrame)
+				{
+					RMatrix4 BoneTransform;
+					const char* BoneName = node->GetName();
+
+					// Evaluate bone transform in model space
+					FbxAMatrix FbxBoneTransform = node->EvaluateGlobalTransform(CurrentFrameTime);
+
+#if CONVERT_TO_LEFT_HANDED_MESH == 1
+					FbxVector4 FbxBoneRotation = FbxBoneTransform.GetR();
+					FbxBoneTransform[3][2] = -FbxBoneTransform[3][2];
+					FbxBoneRotation.Set(-FbxBoneRotation[0], -FbxBoneRotation[1], FbxBoneRotation[2]);
+					FbxBoneTransform.SetR(FbxBoneRotation);
+#endif
+					MatrixTransfer(&BoneTransform, &FbxBoneTransform);
+
+					// Precise frames number in fractions
+					float NumFramesAtCurrentTime = (float)CurrentFrameTime.GetFrameCountPrecise(animTimeMode);
+					float NumFramesAtStartTime = (float)animStartTime.GetFrameCountPrecise(animTimeMode);
+
+					int FrameIndex = (int)(NumFramesAtCurrentTime - NumFramesAtStartTime);
+					animation->AddNodePose(FbxSceneNodeIndex, FrameIndex, &BoneTransform);
+					animation->AddNodeNameToId(BoneName, FbxSceneNodeIndex);
+
+					nodeNameToId[BoneName] = FbxSceneNodeIndex;
+				}
+			}
+
+			for (int FbxSceneNodeIndex = 0; FbxSceneNodeIndex < NumFbxNodes; FbxSceneNodeIndex++)
+			{
+				FbxNode* node = Scene->GetNode(FbxSceneNodeIndex);
+				FbxNode* parent = node->GetParent();
+				if (parent && nodeNameToId.find(parent->GetName()) != nodeNameToId.end())
+				{
+					animation->SetParentId(FbxSceneNodeIndex, nodeNameToId[parent->GetName()]);
+				}
+				else
+				{
+					animation->SetParentId(FbxSceneNodeIndex, -1);
+				}
+			}
+		}
+
+		return animation;
+	}
+
+	void LoadFbxMaterials(FbxNode* SceneNode, vector<RMaterial>& OutMaterials)
+	{
+		int NumFbxMaterials = SceneNode->GetSrcObjectCount<FbxSurfaceMaterial>();
+
+		for (int IdxMaterial = 0; IdxMaterial < NumFbxMaterials; IdxMaterial++)
+		{
+			RMaterial meshMaterial = { 0 };
+			FbxSurfaceMaterial* material = SceneNode->GetSrcObject<FbxSurfaceMaterial>(IdxMaterial);
+
+			const char* texType[] =
+			{
+				FbxSurfaceMaterial::sDiffuse,
+				FbxSurfaceMaterial::sNormalMap,
+				FbxSurfaceMaterial::sSpecular,
+			};
+
+			for (int idxTexProp = 0; idxTexProp < 3; idxTexProp++)
+			{
+				FbxProperty prop = material->FindProperty(texType[idxTexProp]);
+				int layeredTexCount = prop.GetSrcObjectCount<FbxLayeredTexture>();
+				string textureName;
+
+				for (int idxLayeredTex = 0; idxLayeredTex < layeredTexCount; idxLayeredTex++)
+				{
+					FbxLayeredTexture* layeredTex = FbxCast<FbxLayeredTexture>(prop.GetSrcObject<FbxLayeredTexture>(idxLayeredTex));
+					int texCount = layeredTex->GetSrcObjectCount<FbxTexture>();
+
+					for (int idxTex = 0; idxTex < texCount; idxTex++)
+					{
+						FbxFileTexture* texture = FbxCast<FbxFileTexture>(layeredTex->GetSrcObject<FbxTexture>(idxTex));
+						textureName = texture->GetFileName();
+					}
+				}
+
+				if (layeredTexCount == 0)
+				{
+					int texCount = prop.GetSrcObjectCount<FbxTexture>();
+
+					for (int idxTex = 0; idxTex < texCount; idxTex++)
+					{
+						FbxFileTexture* texture = FbxCast<FbxFileTexture>(prop.GetSrcObject<FbxTexture>(idxTex));
+						textureName = texture->GetFileName();
+					}
+				}
+
+				if (textureName.length() != 0)
+				{
+					if (!RFileUtil::CheckIsRelativePath(textureName))
+					{
+						textureName = RFileUtil::GetFileNameInPath(textureName);
+					}
+
+					string ddsFilename = RFileUtil::ReplaceExtension(textureName, "dds");
+					RTexture* texture = RResourceManager::Instance().FindResource<RTexture>(ddsFilename.data());
+
+					if (!texture)
+					{
+						texture = RResourceManager::Instance().LoadResource<RTexture>(RResourceManager::GetRelativePathToResource(ddsFilename).data(), EResourceLoadMode::Immediate);
+					}
+
+					meshMaterial.Textures[meshMaterial.TextureNum] = texture;
+					meshMaterial.TextureNum++;
+				}
+			}
+
+			OutMaterials.push_back(meshMaterial);
+		}
+
+		if (NumFbxMaterials == 0)
+		{
+			OutMaterials.push_back(RMaterial{ 0 });
+		}
+	}
+
+	void MatrixTransfer(RMatrix4* dest, const FbxAMatrix* src)
+	{
+		for (int y = 0; y < 4; y++)
+		{
+			for (int x = 0; x < 4; x++)
+			{
+				dest->m[y][x] = (float)src->Get(y, x);
+			}
 		}
 	}
 }

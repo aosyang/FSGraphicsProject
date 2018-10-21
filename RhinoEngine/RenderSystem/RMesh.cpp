@@ -218,7 +218,7 @@ bool RMesh::TryLoadAsFbxMesh(bool bIsAsyncLoading)
 {
 	std::unique_ptr<RFbxMeshLoader> FbxMeshLoader(new RFbxMeshLoader);
 
-	if (FbxMeshLoader->LoadMeshIntoResource(this, GetPath()))
+	if (FbxMeshLoader->LoadDataForMeshResource(this, GetPath()))
 	{
 		// Notify mesh has been loaded
 		OnLoadingFinished(bIsAsyncLoading);
