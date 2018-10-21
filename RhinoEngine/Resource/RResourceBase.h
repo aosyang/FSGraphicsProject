@@ -20,17 +20,6 @@ enum ResourceType
 	RT_Texture,
 };
 
-#define DECLARE_RESOURCE_TYPE(ResourceClass)									\
-	friend class RResourceManager;												\
-	static RResourceContainer<ResourceClass>* GetResourceContainer()			\
-	{																			\
-		static RResourceContainer<ResourceClass>* ResourceContainer = nullptr;	\
-		if (ResourceContainer == nullptr)										\
-		{																		\
-																				\
-		}																		\
-	}
-
 /// Base resource class
 class RResourceBase
 {

@@ -17,7 +17,6 @@ struct BoneMatrices
 
 class RMesh : public RResourceBase
 {
-	DECLARE_RESOURCE_TYPE(RMesh);
 public:
 	RMesh(const string& Path);
 	RMesh(const string& Path, const vector<RMeshElement>& meshElements, const vector<RMaterial>& materials);

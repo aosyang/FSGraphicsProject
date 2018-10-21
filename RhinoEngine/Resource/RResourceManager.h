@@ -68,14 +68,7 @@ public:
 	template<typename T>
 	T* FindResource(const char* Path);
 
-	/// Create a new resource container for resource type
-	template<typename T>
-	RResourceContainer<T>* CreateResourceContainer();
-
-	/// Get resource container for resource type
-	template<typename T>
-	RResourceContainer<T>& GetResourceContainer();
-
+	/// Get an array of all mesh resources
 	vector<RMesh*> GetMeshResources();
 
 	static const string& GetAssetsBasePath();
@@ -89,6 +82,14 @@ public:
 private:
 	RResourceManager() {}
 	~RResourceManager() {}
+
+	/// Create a new resource container for resource type
+	template<typename T>
+	RResourceContainer<T>* CreateResourceContainer();
+
+	/// Get resource container for resource type
+	template<typename T>
+	RResourceContainer<T>& GetResourceContainer();
 
 	static void LockTaskQueue();
 	static void UnlockTaskQueue();

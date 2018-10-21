@@ -8,7 +8,6 @@
 
 class RTexture : public RResourceBase
 {
-	DECLARE_RESOURCE_TYPE(RMesh);
 	friend class RResourceManager;
 public:
 	RTexture(const string& Path);

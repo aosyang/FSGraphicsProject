@@ -47,19 +47,9 @@ void ResourceLoaderThread(LoaderThreadData* data)
 		}
 
 		// Load resource in this task
-		switch (task.Resource->GetResourceType())
+		if (task.Resource->GetResourceState() == RS_EnqueuedForLoading)
 		{
-		case RT_Mesh:
 			task.Resource->LoadResourceData(true);
-			break;
-
-		case RT_Texture:
-			RTexture* pTexture = RResourceManager::Instance().FindResource<RTexture>(task.Filename.data());
-			if (!pTexture || pTexture->GetResourceState() == RS_EnqueuedForLoading)
-			{
-				task.Resource->LoadResourceData(true);
-			}
-			break;
 		}
 	}
 
