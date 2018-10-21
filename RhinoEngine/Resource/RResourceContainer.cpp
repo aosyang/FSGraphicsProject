@@ -29,20 +29,20 @@ public:
 class UniqueLockWrapperImpl : public UniqueLockWrapper
 {
 public:
-	UniqueLockWrapperImpl(MutexWrapper* Mutex)
-		: UniqueLock(static_cast<MutexWrapperImpl*>(Mutex)->Mutex)
+	UniqueLockWrapperImpl(unique_ptr<MutexWrapper>& Mutex)
+		: UniqueLock(static_cast<MutexWrapperImpl*>(Mutex.get())->Mutex)
 	{
 	}
 
 	unique_lock<mutex> UniqueLock;
 };
 
-MutexWrapper* MutexWrapper::Create()
+unique_ptr<MutexWrapper> MutexWrapper::Create()
 {
-	return new MutexWrapperImpl();
+	return move(unique_ptr<MutexWrapper>(new MutexWrapperImpl()));
 }
 
-unique_ptr<UniqueLockWrapper> UniqueLockWrapper::Create(MutexWrapper* Mutex)
+unique_ptr<UniqueLockWrapper> UniqueLockWrapper::Create(unique_ptr<MutexWrapper>& Mutex)
 {
 	return move(unique_ptr<UniqueLockWrapper>(new UniqueLockWrapperImpl(Mutex)));
 }
@@ -50,11 +50,6 @@ unique_ptr<UniqueLockWrapper> UniqueLockWrapper::Create(MutexWrapper* Mutex)
 RResourceContainerBase::RResourceContainerBase()
 {
 	ResourceMutex = MutexWrapper::Create();
-}
-
-RResourceContainerBase::~RResourceContainerBase()
-{
-	SAFE_DELETE(ResourceMutex);
 }
 
 void RResourceContainerBase::Lock()

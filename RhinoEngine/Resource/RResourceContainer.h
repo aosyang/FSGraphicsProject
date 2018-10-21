@@ -6,7 +6,10 @@
 
 #pragma once
 
-/// Wrapper class for std::mutex to avoid including mutex header
+// Note: Since std mutex header cannot be included in any public headers used by clr,
+//		 wrapper classes are used to hide mutex declarations.
+
+/// A wrapper class for std::mutex to avoid including mutex in engine public header files
 class MutexWrapper
 {
 public:
@@ -15,15 +18,16 @@ public:
 	virtual void Lock()		{}
 	virtual void Unlock()	{}
 
-	static MutexWrapper* Create();
+	static unique_ptr<MutexWrapper> Create();
 };
 
+/// A wrapper class for std::unique_lock to avoid including mutex in engine public header files
 class UniqueLockWrapper
 {
 public:
 	virtual ~UniqueLockWrapper() {}
 
-	static unique_ptr<UniqueLockWrapper> Create(MutexWrapper* Mutex);
+	static unique_ptr<UniqueLockWrapper> Create(unique_ptr<MutexWrapper>& Mutex);
 };
 
 /// Resource container interface
@@ -31,7 +35,7 @@ class RResourceContainerBase
 {
 public:
 	RResourceContainerBase();
-	virtual ~RResourceContainerBase();
+	virtual ~RResourceContainerBase() {}
 
 	virtual void ReleaseAllResources() {}
 
@@ -40,7 +44,7 @@ protected:
 	void Unlock();
 
 protected:
-	MutexWrapper*		ResourceMutex;
+	unique_ptr<MutexWrapper>	ResourceMutex;
 };
 
 template<typename T>
