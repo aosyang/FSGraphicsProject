@@ -26,9 +26,9 @@ void RMaterial::Serialize(RSerializer& serializer)
 		{
 			string textureName;
 			serializer.SerializeData(textureName);
-			Textures[i] = RResourceManager::Instance().FindTexture(textureName.c_str());
+			Textures[i] = RResourceManager::Instance().FindResource<RTexture>(textureName.c_str());
 			if (!Textures[i])
-				Textures[i] = RResourceManager::Instance().LoadDDSTexture(textureName.c_str(), EResourceLoadMode::Immediate);
+				Textures[i] = RResourceManager::Instance().LoadResource<RTexture>(textureName.c_str(), EResourceLoadMode::Immediate);
 		}
 
 		for (; i < 8; i++)
@@ -74,11 +74,11 @@ bool RMaterial::LoadFromXmlFile(const string& Filename, vector<RMaterial>& OutMa
 			{
 				const char* textureName = elem_tex->GetText();
 
-				RTexture* texture = RResourceManager::Instance().FindTexture(textureName);
+				RTexture* texture = RResourceManager::Instance().FindResource<RTexture>(textureName);
 
 				if (!texture)
 				{
-					texture = RResourceManager::Instance().LoadDDSTexture(RResourceManager::GetResourcePath(textureName).data(), EResourceLoadMode::Immediate);
+					texture = RResourceManager::Instance().LoadResource<RTexture>(RResourceManager::GetRelativePathToResource(textureName).data(), EResourceLoadMode::Immediate);
 				}
 
 				material.Textures[material.TextureNum++] = texture;

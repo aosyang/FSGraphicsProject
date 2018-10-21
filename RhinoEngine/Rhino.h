@@ -75,6 +75,8 @@ class RResourceBase;
 #include "../Shaders/ConstBufferVS.h"
 #include "../Shaders/ConstBufferPS.h"
 
+#include "Resource/RResourceManager.h"
+
 #include "RenderSystem/RVertexDeclaration.h"
 #include "RenderSystem/RRenderSystem.h"
 #include "RenderSystem/RDirectionalLightComponent.h"
@@ -83,7 +85,6 @@ class RResourceBase;
 #include "RenderSystem/RText.h"
 #include "RenderSystem/DDSTextureLoader.h"
 #include "RenderSystem/RAnimation.h"
-#include "RenderSystem/RResourceManager.h"
 #include "RenderSystem/RShaderManager.h"
 #include "RenderSystem/RShaderConstantBuffer.h"
 #include "RenderSystem/RMesh.h"

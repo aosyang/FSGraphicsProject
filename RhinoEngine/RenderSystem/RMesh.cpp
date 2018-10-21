@@ -6,6 +6,10 @@
 
 #include "Rhino.h"
 #include "RMesh.h"
+#include "Resource/RFbxMeshLoader.h"
+
+// Whether to export .fbx as .rmesh after loading
+#define EXPORT_FBX_AS_BINARY_MESH 1
 
 RMesh::RMesh(const string& Path)
 	: RResourceBase(RT_Mesh, Path),
@@ -66,6 +70,16 @@ void RMesh::Serialize(RSerializer& serializer)
 	{
 		UpdateAabb();
 	}
+}
+
+bool RMesh::LoadResourceData(bool bIsAsyncLoading)
+{
+	if (TryLoadAsRmesh(bIsAsyncLoading))
+	{
+		return true;
+	}
+
+	return TryLoadAsFbxMesh(bIsAsyncLoading);
 }
 
 const RMaterial& RMesh::GetMaterial(int index) const
@@ -198,4 +212,63 @@ vector<RResourceBase*> RMesh::EnumerateReferencedResources() const
 	}
 
 	return ReferencedResources;
+}
+
+bool RMesh::TryLoadAsFbxMesh(bool bIsAsyncLoading)
+{
+	std::unique_ptr<RFbxMeshLoader> FbxMeshLoader(new RFbxMeshLoader);
+
+	if (FbxMeshLoader->LoadMeshIntoResource(this, GetPath()))
+	{
+		// Notify mesh has been loaded
+		OnLoadingFinished(bIsAsyncLoading);
+
+#if EXPORT_FBX_AS_BINARY_MESH == 1
+		string rmeshName = RFileUtil::ReplaceExtension(GetPath(), "rmesh");
+		RSerializer serializer;
+		serializer.Open(rmeshName, ESerializeMode::Write);
+		if (serializer.IsOpen())
+		{
+			Serialize(serializer);
+			serializer.Close();
+		}
+#endif
+	}
+
+	return true;
+}
+
+bool RMesh::TryLoadAsRmesh(bool bIsAsyncLoading)
+{
+	vector<RMeshElement> meshElements;
+	vector<RMaterial> materials;
+
+	RLog("Loading mesh [%s]...\n", GetPath().data());
+
+	string rmeshName = RFileUtil::ReplaceExtension(GetPath(), "rmesh");
+
+	RSerializer serializer;
+	serializer.Open(rmeshName, ESerializeMode::Read);
+	if (!serializer.IsOpen())
+		return false;
+	Serialize(serializer);
+	serializer.Close();
+
+	//RAnimation* animation = new RAnimation();
+	//string animFilename = RFileUtil::ReplaceExt(task->Filename.size(), "ranim");
+
+	// Load material from file
+	{
+		string mtlFilename = RFileUtil::ReplaceExtension(GetPath(), "rmtl");
+		RMaterial::LoadFromXmlFile(mtlFilename, materials);
+
+		if (materials.size())
+		{
+			SetMaterials(materials.data(), (UINT)materials.size());
+		}
+	}
+
+	OnLoadingFinished(bIsAsyncLoading);
+
+	return true;
 }

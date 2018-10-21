@@ -6,7 +6,7 @@
 #pragma once
 
 #include "RShaderManager.h"
-#include "RResourceBase.h"
+#include "Resource/RResourceBase.h"
 #include "../../Shaders/ConstBufferVS.h"	// MAX_BONE_COUNT
 #include "RMaterial.h"
 
@@ -17,6 +17,7 @@ struct BoneMatrices
 
 class RMesh : public RResourceBase
 {
+	DECLARE_RESOURCE_TYPE(RMesh);
 public:
 	RMesh(const string& Path);
 	RMesh(const string& Path, const vector<RMeshElement>& meshElements, const vector<RMaterial>& materials);
@@ -24,6 +25,8 @@ public:
 	~RMesh();
 
 	void Serialize(RSerializer& serializer);
+
+	virtual bool LoadResourceData(bool bIsAsyncLoading) override;
 
 	const RMaterial& GetMaterial(int index) const;
 	const vector<RMaterial>& GetMaterials() const;
@@ -55,6 +58,8 @@ public:
 protected:
 	virtual vector<RResourceBase*> EnumerateReferencedResources() const override;
 
+	bool TryLoadAsFbxMesh(bool bIsAsyncLoading);
+	bool TryLoadAsRmesh(bool bIsAsyncLoading);
 private:
 	vector<RMeshElement>			m_MeshElements;
 

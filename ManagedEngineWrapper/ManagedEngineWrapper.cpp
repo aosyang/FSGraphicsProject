@@ -82,7 +82,7 @@ namespace ManagedEngineWrapper
 	{
 		List<String^>^ list = gcnew List<String^>();
 
-		const vector<RMesh*>& meshList = RResourceManager::Instance().GetMeshResources();
+		vector<RMesh*> meshList = RResourceManager::Instance().GetMeshResources();
 		for (auto Iter : meshList)
 		{
 			list->Add(gcnew String(Iter->GetPath().data()));
@@ -93,7 +93,7 @@ namespace ManagedEngineWrapper
 
 	bool RhinoEngineWrapper::IsMeshAssetReady(String^ MeshName)
 	{
-		RMesh* MeshAsset = RResourceManager::Instance().FindMesh(ManagedStringRefToConstCharPtr(MeshName));
+		RMesh* MeshAsset = RResourceManager::Instance().FindResource<RMesh>(ManagedStringRefToConstCharPtr(MeshName));
 		if (MeshAsset)
 		{
 			return MeshAsset->IsLoaded() && MeshAsset->AreReferencedResourcesLoaded();
@@ -104,7 +104,7 @@ namespace ManagedEngineWrapper
 
 	Bitmap^ RhinoEngineWrapper::GenerateMeshThumbnailBitmap(String^ MeshName, int Width, int Height)
 	{
-		RMesh* MeshAsset = RResourceManager::Instance().FindMesh(ManagedStringRefToConstCharPtr(MeshName));
+		RMesh* MeshAsset = RResourceManager::Instance().FindResource<RMesh>(ManagedStringRefToConstCharPtr(MeshName));
 		return RenderThumbnailForMesh(MeshAsset, Width, Height);
 	}
 
@@ -121,7 +121,7 @@ namespace ManagedEngineWrapper
 		if (meshObj)
 		{
 			const char* NativePath = ManagedStringRefToConstCharPtr(MeshAssetPath);
-			RMesh* MeshResource = RResourceManager::Instance().FindMesh(NativePath);
+			RMesh* MeshResource = RResourceManager::Instance().FindResource<RMesh>(NativePath);
 			if (MeshResource)
 			{
 				meshObj->SetMesh(MeshResource);

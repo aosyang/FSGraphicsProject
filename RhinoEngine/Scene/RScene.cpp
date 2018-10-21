@@ -33,10 +33,10 @@ void RScene::Release()
 
 RSMeshObject* RScene::CreateMeshObject(const char* meshPath)
 {
-	RMesh* mesh = RResourceManager::Instance().FindMesh(meshPath);
+	RMesh* mesh = RResourceManager::Instance().FindResource<RMesh>(meshPath);
 	if (!mesh)
 	{
-		mesh = RResourceManager::Instance().LoadFbxMesh(meshPath, EResourceLoadMode::Immediate);
+		mesh = RResourceManager::Instance().LoadResource<RMesh>(meshPath, EResourceLoadMode::Immediate);
 	}
 	assert(mesh);
 
@@ -174,11 +174,11 @@ void RScene::LoadFromFile(const char* filename)
 			if (obj_type == "MeshObject")
 			{
 				const char* resPath = elem_obj->Attribute("Mesh");
-				RMesh* mesh = RResourceManager::Instance().FindMesh(resPath);
+				RMesh* mesh = RResourceManager::Instance().FindResource<RMesh>(resPath);
 
 				if (!mesh)
 				{
-					mesh = RResourceManager::Instance().LoadFbxMesh(resPath, EResourceLoadMode::Immediate);
+					mesh = RResourceManager::Instance().LoadResource<RMesh>(resPath, EResourceLoadMode::Immediate);
 				}
 
 				RSMeshObject* MeshObject = CreateMeshObject(resPath);
@@ -214,12 +214,12 @@ void RScene::LoadFromFile(const char* filename)
 
 							if (textureName)
 							{
-								texture = RResourceManager::Instance().FindTexture(textureName);
+								texture = RResourceManager::Instance().FindResource<RTexture>(textureName);
 
 								if (!texture)
 								{
-									const string Path = RResourceManager::GetResourcePath(textureName);
-									texture = RResourceManager::Instance().LoadDDSTexture(Path.data(), EResourceLoadMode::Immediate);
+									const string Path = RResourceManager::GetRelativePathToResource(textureName);
+									texture = RResourceManager::Instance().LoadResource<RTexture>(Path.data(), EResourceLoadMode::Immediate);
 								}
 							}
 

@@ -17,7 +17,7 @@ RSkybox::RSkybox()
 void RSkybox::CreateSkybox(const char* skyTextureName)
 {
 	// Load skybox texture
-	RTexture* SkyTexture = RResourceManager::Instance().FindTexture(skyTextureName);
+	RTexture* SkyTexture = RResourceManager::Instance().FindResource<RTexture>(skyTextureName);
 
 	if (SkyTexture == nullptr)
 	{

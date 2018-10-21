@@ -72,7 +72,7 @@ IMPLEMENT_SCENE_OBJECT(RgColorPiece);
 RgColorPiece::RgColorPiece(const RConstructingParams& Params)
 	: Base(Params)
 {
-	RMesh* CubeMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/RubikCube/RoundedCornerCube.fbx");
+	RMesh* CubeMesh = RResourceManager::Instance().LoadResource<RMesh>("../Assets/RubikCube/RoundedCornerCube.fbx");
 
 	MeshComponent = AddNewComponent<RRenderMeshComponent>();
 	MeshComponent->SetMesh(CubeMesh);
@@ -120,7 +120,7 @@ RgCubeBlock::RgCubeBlock(const RConstructingParams& Params)
 	: Base(Params),
 	  m_Parent(nullptr)
 {
-	RMesh* CubeMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/RubikCube/RoundedCornerCube.fbx");
+	RMesh* CubeMesh = RResourceManager::Instance().LoadResource<RMesh>("../Assets/RubikCube/RoundedCornerCube.fbx");
 
 	RRenderMeshComponent* MeshComponent = AddNewComponent<RRenderMeshComponent>();
 	MeshComponent->SetMesh(CubeMesh);

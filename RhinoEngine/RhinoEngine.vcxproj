@@ -66,7 +66,6 @@
     <ClInclude Include="Core\RTimer.h" />
     <ClInclude Include="Core\RTransform.h" />
     <ClInclude Include="Core\RVector.h" />
-    <ClInclude Include="MeshLoader\RFbxMeshLoader.h" />
     <ClInclude Include="RenderSystem\d3dUtil.h" />
     <ClInclude Include="RenderSystem\DDSTextureLoader.h" />
     <ClInclude Include="RenderSystem\ILight.h" />
@@ -74,19 +73,21 @@
     <ClInclude Include="RenderSystem\RMaterial.h" />
     <ClInclude Include="RenderSystem\RPostProcessorManager.h" />
     <ClInclude Include="RenderSystem\RRenderMeshComponent.h" />
-    <ClInclude Include="RenderSystem\RResourceBase.h" />
     <ClInclude Include="RenderSystem\RAnimation.h" />
     <ClInclude Include="RenderSystem\RDebugRenderer.h" />
     <ClInclude Include="RenderSystem\RMesh.h" />
     <ClInclude Include="RenderSystem\RMeshElement.h" />
     <ClInclude Include="RenderSystem\RRenderSystem.h" />
-    <ClInclude Include="RenderSystem\RResourceManager.h" />
     <ClInclude Include="RenderSystem\RShaderConstantBuffer.h" />
     <ClInclude Include="RenderSystem\RShaderManager.h" />
     <ClInclude Include="RenderSystem\RShadowMap.h" />
     <ClInclude Include="RenderSystem\RText.h" />
     <ClInclude Include="RenderSystem\RTexture.h" />
     <ClInclude Include="RenderSystem\RVertexDeclaration.h" />
+    <ClInclude Include="Resource\RFbxMeshLoader.h" />
+    <ClInclude Include="Resource\RResourceBase.h" />
+    <ClInclude Include="Resource\RResourceContainer.h" />
+    <ClInclude Include="Resource\RResourceManager.h" />
     <ClInclude Include="Rhino.h" />
     <ClInclude Include="Scene\ISceneComponent.h" />
     <ClInclude Include="Scene\RCamera.h" />
@@ -113,7 +114,6 @@
     <ClCompile Include="Core\RScriptSystem.cpp" />
     <ClCompile Include="Core\RTimer.cpp" />
     <ClCompile Include="Core\RTransform.cpp" />
-    <ClCompile Include="MeshLoader\RFbxMeshLoader.cpp" />
     <ClCompile Include="RenderSystem\DDSTextureLoader.cpp" />
     <ClCompile Include="RenderSystem\RAnimation.cpp" />
     <ClCompile Include="RenderSystem\RDebugRenderer.cpp" />
@@ -126,14 +126,16 @@
     </ClCompile>
     <ClCompile Include="RenderSystem\RRenderMeshComponent.cpp" />
     <ClCompile Include="RenderSystem\RRenderSystem.cpp" />
-    <ClCompile Include="RenderSystem\RResourceBase.cpp" />
-    <ClCompile Include="RenderSystem\RResourceManager.cpp" />
     <ClCompile Include="RenderSystem\RShaderConstantBuffer.cpp" />
     <ClCompile Include="RenderSystem\RShaderManager.cpp" />
     <ClCompile Include="RenderSystem\RShadowMap.cpp" />
     <ClCompile Include="RenderSystem\RText.cpp" />
     <ClCompile Include="RenderSystem\RTexture.cpp" />
     <ClCompile Include="RenderSystem\RVertexDeclaration.cpp" />
+    <ClCompile Include="Resource\RFbxMeshLoader.cpp" />
+    <ClCompile Include="Resource\RResourceBase.cpp" />
+    <ClCompile Include="Resource\RResourceContainer.cpp" />
+    <ClCompile Include="Resource\RResourceManager.cpp" />
     <ClCompile Include="Rhino.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

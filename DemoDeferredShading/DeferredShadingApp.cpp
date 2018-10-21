@@ -112,7 +112,7 @@ bool DeferredShadingApp::Initialize()
 	m_AmbientIntensity = 0.2f;
 	m_LightRadius = 1.0f;
 
-	m_EnvCube = RResourceManager::Instance().LoadDDSTexture("../Assets/powderpeak.dds");
+	m_EnvCube = RResourceManager::Instance().LoadResource<RTexture>("../Assets/powderpeak.dds");
 	m_Skybox.CreateSkybox(RResourceManager::Instance().WrapSRV(m_CubeDepthBuffer.SRV));
 	//m_Skybox.CreateSkybox(m_EnvCube);
 

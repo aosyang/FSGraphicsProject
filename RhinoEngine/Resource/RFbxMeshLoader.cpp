@@ -787,11 +787,11 @@ void RFbxMeshLoader::LoadFbxMaterials(FbxNode* SceneNode, vector<RMaterial>& Out
 				}
 
 				string ddsFilename = RFileUtil::ReplaceExtension(textureName, "dds");
-				RTexture* texture = RResourceManager::Instance().FindTexture(ddsFilename.data());
+				RTexture* texture = RResourceManager::Instance().FindResource<RTexture>(ddsFilename.data());
 
 				if (!texture)
 				{
-					texture = RResourceManager::Instance().LoadDDSTexture(RResourceManager::GetResourcePath(ddsFilename).data(), EResourceLoadMode::Immediate);
+					texture = RResourceManager::Instance().LoadResource<RTexture>(RResourceManager::GetRelativePathToResource(ddsFilename).data(), EResourceLoadMode::Immediate);
 				}
 
 				meshMaterial.Textures[meshMaterial.TextureNum] = texture;

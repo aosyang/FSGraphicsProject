@@ -65,7 +65,7 @@ bool FightingGameApp::Initialize()
 		}
 	}
 
-	m_Text.Initialize(RResourceManager::Instance().LoadDDSTexture("../Assets/Fonts/Fixedsys_9c.DDS", EResourceLoadMode::Immediate), 16, 16);
+	m_Text.Initialize(RResourceManager::Instance().LoadResource<RTexture>("../Assets/Fonts/Fixedsys_9c.DDS", EResourceLoadMode::Immediate), 16, 16);
 	return true;
 }
 

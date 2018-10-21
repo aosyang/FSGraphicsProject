@@ -196,14 +196,14 @@ bool FSGraphicsProjectApp::Initialize()
 	m_cbInstance[1].Initialize();
 	m_cbInstance[2].Initialize();
 
-	m_BumpBaseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlate.dds");
-	m_BumpNormalTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/DiamondPlateNormal.dds");
-	RResourceManager::Instance().LoadDDSTexture("../Assets/powderpeak.dds");
+	m_BumpBaseTexture = RResourceManager::Instance().LoadResource<RTexture>("../Assets/DiamondPlate.dds");
+	m_BumpNormalTexture = RResourceManager::Instance().LoadResource<RTexture>("../Assets/DiamondPlateNormal.dds");
+	RResourceManager::Instance().LoadResource<RTexture>("../Assets/powderpeak.dds");
 
-	m_SceneMeshCity = RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx");
+	m_SceneMeshCity = RResourceManager::Instance().LoadResource<RMesh>("../Assets/city.fbx");
 	m_FbxMeshObj->SetMesh(m_SceneMeshCity);
 
-	m_MeshTachikoma = RResourceManager::Instance().LoadFbxMesh("../Assets/tachikoma.fbx");
+	m_MeshTachikoma = RResourceManager::Instance().LoadResource<RMesh>("../Assets/tachikoma.fbx");
 	m_TachikomaObj->SetMesh(m_MeshTachikoma);
 	m_TachikomaObj->SetPosition(RVec3(0.0f, 39.0f, 0.0f));
 
@@ -215,7 +215,7 @@ bool FSGraphicsProjectApp::Initialize()
 	m_TachikomaObj->SetMaterial(tachikomaMaterials, 1);
 
 
-	m_AOSceneMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/AO_Scene.fbx");
+	m_AOSceneMesh = RResourceManager::Instance().LoadResource<RMesh>("../Assets/AO_Scene.fbx");
 	m_AOSceneObj->SetMesh(m_AOSceneMesh);
 	m_AOSceneObj->SetPosition(RVec3(-500.0f, 0.0f, 500.0f));
 
@@ -238,16 +238,16 @@ bool FSGraphicsProjectApp::Initialize()
 
 	for (int i = 0; i < sizeof(animationNames) / sizeof(const char*); i++)
 	{
-		m_CharacterAnimations.push_back(RResourceManager::Instance().LoadFbxMesh(animationNames[i]));
+		m_CharacterAnimations.push_back(RResourceManager::Instance().LoadResource<RMesh>(animationNames[i]));
 	}
 
 	m_CharacterAnimation = m_CharacterAnimations[0];
-	m_CharacterObj->SetMesh(RResourceManager::Instance().LoadFbxMesh("../Assets/unitychan/unitychan.fbx"));
-	//m_CharacterAnimations[0] = m_CharacterAnimation = RResourceManager::Instance().LoadFbxMesh("../Assets/spin_combo.fbx");
+	m_CharacterObj->SetMesh(RResourceManager::Instance().LoadResource<RMesh>("../Assets/unitychan/unitychan.fbx"));
+	//m_CharacterAnimations[0] = m_CharacterAnimation = RResourceManager::Instance().LoadResource<RMesh>("../Assets/spin_combo.fbx");
 	//m_CharacterObj->SetMesh(m_CharacterAnimation);
 	m_CharacterObj->SetTransform(RMatrix4::CreateYAxisRotation(90) * RMatrix4::CreateTranslation(-1100.0f, 50.0f, 0.0f));
 
-	RMesh* sphereMesh = RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.fbx");
+	RMesh* sphereMesh = RResourceManager::Instance().LoadResource<RMesh>("../Assets/Sphere.fbx");
 
 	m_TransparentMesh->SetMesh(sphereMesh);
 	m_TransparentMesh->SetOverridingShader(RShaderManager::Instance().GetShaderResource("Lighting"));
@@ -264,7 +264,7 @@ bool FSGraphicsProjectApp::Initialize()
 		}
 	}
 
-	m_SceneMeshIsland = RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx");
+	m_SceneMeshIsland = RResourceManager::Instance().LoadResource<RMesh>("../Assets/Island.fbx");
 	m_IslandMeshObj->SetMesh(m_SceneMeshIsland);
 	m_IslandMeshObj->SetPosition(RVec3(0.0f, 0.0f, 500.0f));
 
@@ -296,8 +296,8 @@ bool FSGraphicsProjectApp::Initialize()
 		m_ParticleAabb.ExpandBySphere(RVec3(x, y, z), w);
 	}
 
-	m_ParticleDiffuseTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/smoke_diffuse.dds");
-	m_ParticleNormalTexture = RResourceManager::Instance().LoadDDSTexture("../Assets/smoke_normal.dds");
+	m_ParticleDiffuseTexture = RResourceManager::Instance().LoadResource<RTexture>("../Assets/smoke_diffuse.dds");
+	m_ParticleNormalTexture = RResourceManager::Instance().LoadResource<RTexture>("../Assets/smoke_normal.dds");
 
 	D3D11_DEPTH_STENCIL_DESC depthDesc;
 

@@ -20,6 +20,17 @@ enum ResourceType
 	RT_Texture,
 };
 
+#define DECLARE_RESOURCE_TYPE(ResourceClass)									\
+	friend class RResourceManager;												\
+	static RResourceContainer<ResourceClass>* GetResourceContainer()			\
+	{																			\
+		static RResourceContainer<ResourceClass>* ResourceContainer = nullptr;	\
+		if (ResourceContainer == nullptr)										\
+		{																		\
+																				\
+		}																		\
+	}
+
 /// Base resource class
 class RResourceBase
 {
@@ -33,6 +44,8 @@ public:
 
 	/// Check if resource has been fully loaded
 	bool IsLoaded() const					{ return m_State == RS_Loaded; }
+
+	virtual bool LoadResourceData(bool bIsAsyncLoading);
 
 	/// Check if all referenced resources have been fully loaded
 	bool AreReferencedResourcesLoaded() const;

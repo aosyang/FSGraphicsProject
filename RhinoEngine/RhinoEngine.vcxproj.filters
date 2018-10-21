@@ -41,9 +41,6 @@
     <ClInclude Include="RenderSystem\RMesh.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
-    <ClInclude Include="RenderSystem\RResourceManager.h">
-      <Filter>RenderSystem</Filter>
-    </ClInclude>
     <ClInclude Include="RenderSystem\RShaderManager.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
@@ -128,9 +125,6 @@
     <ClInclude Include="Scene\RSceneComponentBase.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="RenderSystem\RResourceBase.h">
-      <Filter>RenderSystem</Filter>
-    </ClInclude>
     <ClInclude Include="Core\RFileUtil.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -161,8 +155,17 @@
     <ClInclude Include="Core\RDelegate.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="MeshLoader\RFbxMeshLoader.h">
-      <Filter>MeshLoader</Filter>
+    <ClInclude Include="Resource\RFbxMeshLoader.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\RResourceBase.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\RResourceManager.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\RResourceContainer.h">
+      <Filter>Resource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -191,9 +194,6 @@
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="RenderSystem\RMesh.cpp">
-      <Filter>RenderSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderSystem\RResourceManager.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
     <ClCompile Include="RenderSystem\RShaderManager.cpp">
@@ -257,9 +257,6 @@
     <ClCompile Include="Scene\RSceneComponentBase.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="RenderSystem\RResourceBase.cpp">
-      <Filter>RenderSystem</Filter>
-    </ClCompile>
     <ClCompile Include="RenderSystem\RRenderMeshComponent.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
@@ -287,8 +284,17 @@
     <ClCompile Include="Core\RLog.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="MeshLoader\RFbxMeshLoader.cpp">
-      <Filter>MeshLoader</Filter>
+    <ClCompile Include="Resource\RFbxMeshLoader.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\RResourceBase.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\RResourceManager.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\RResourceContainer.cpp">
+      <Filter>Resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -316,8 +322,8 @@
     <Filter Include="Script">
       <UniqueIdentifier>{9a32fefa-661f-4473-8236-775afe9e1814}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MeshLoader">
-      <UniqueIdentifier>{ebe406a4-e0a1-44f3-90fc-f06c48c400b9}</UniqueIdentifier>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{5f4f62cb-6665-481f-ba97-1b07f80ecf42}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

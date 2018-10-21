@@ -8,6 +8,7 @@
 
 class RTexture : public RResourceBase
 {
+	DECLARE_RESOURCE_TYPE(RMesh);
 	friend class RResourceManager;
 public:
 	RTexture(const string& Path);
@@ -15,6 +16,8 @@ public:
 	/// Create texture from existing shader resource view
 	RTexture(ID3D11ShaderResourceView* srv);
 	~RTexture();
+
+	virtual bool LoadResourceData(bool bIsAsyncLoading) override;
 
 	ID3D11ShaderResourceView* GetSRV() { return m_SRV; }
 	ID3D11ShaderResourceView** GetPtrSRV() { return &m_SRV; }

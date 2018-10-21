@@ -50,7 +50,7 @@ void FTGPlayerBehaviorBase::OnBehaviorFinished(FTGPlayerStateMachine* StateMachi
 void FTGPlayerBehaviorBase::LoadAnimationAsset(const char* AssetPath, int flags /*= 0*/)
 {
 	assert(m_Animation == nullptr);
-	RMesh* mesh = RResourceManager::Instance().LoadFbxMesh(AssetPath, EResourceLoadMode::Immediate);
+	RMesh* mesh = RResourceManager::Instance().LoadResource<RMesh>(AssetPath, EResourceLoadMode::Immediate);
 
 	if (mesh)
 	{

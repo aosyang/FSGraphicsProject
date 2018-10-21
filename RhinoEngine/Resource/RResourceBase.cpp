@@ -8,11 +8,17 @@
 #include "RResourceBase.h"
 
 
-RResourceBase::RResourceBase(ResourceType type, const string& path) : m_State				(RS_Empty),
+RResourceBase::RResourceBase(ResourceType type, const string& path)
+	: m_State				(RS_Empty),
 	  m_Type				(type),
 	  m_ResourcePath		(path),
 	  m_LoadingFinishTime	(0.0f)
 {
+}
+
+bool RResourceBase::LoadResourceData(bool bIsAsyncLoading)
+{
+	return false;
 }
 
 bool RResourceBase::AreReferencedResourcesLoaded() const

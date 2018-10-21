@@ -51,7 +51,7 @@ namespace ManagedEngineWrapper
 		property String^ Texture##n \
 		{ \
 			String^ get()			{ return material->Textures[n] ? gcnew String(material->Textures[n]->GetPath().c_str()) : gcnew String(""); } \
-			void set(String^ value)	{ material->Textures[n] = value != "" ? RResourceManager::Instance().FindTexture(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer())) : nullptr; } \
+			void set(String^ value)	{ material->Textures[n] = value != "" ? RResourceManager::Instance().FindResource<RTexture>(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer())) : nullptr; } \
 		}
 
 		DECLARE_TEXTURE_PROPERTY(0)

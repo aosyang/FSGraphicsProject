@@ -32,12 +32,12 @@ namespace ManagedEngineWrapper
 #if 1
 		RResourceManager::Instance().LoadAllResources();
 #else
-		RResourceManager::Instance().LoadFbxMesh("../Assets/Sphere.fbx");
-		RResourceManager::Instance().LoadFbxMesh("../Assets/SpeedballPlayer.fbx");
-		RResourceManager::Instance().LoadFbxMesh("../Assets/AO_Scene.fbx");
-		RResourceManager::Instance().LoadFbxMesh("../Assets/tachikoma.fbx");
-		RResourceManager::Instance().LoadFbxMesh("../Assets/Island.fbx");
-		RResourceManager::Instance().LoadFbxMesh("../Assets/city.fbx");
+		RResourceManager::Instance().LoadResource<RMesh>("../Assets/Sphere.fbx");
+		RResourceManager::Instance().LoadResource<RMesh>("../Assets/SpeedballPlayer.fbx");
+		RResourceManager::Instance().LoadResource<RMesh>("../Assets/AO_Scene.fbx");
+		RResourceManager::Instance().LoadResource<RMesh>("../Assets/tachikoma.fbx");
+		RResourceManager::Instance().LoadResource<RMesh>("../Assets/Island.fbx");
+		RResourceManager::Instance().LoadResource<RMesh>("../Assets/city.fbx");
 #endif
 
 		m_Skybox.CreateSkybox("../Assets/powderpeak.dds");
@@ -330,7 +330,7 @@ namespace ManagedEngineWrapper
 
 	void EditorApp::ExportAllAnimationsToBinaryFiles()
 	{
-		const vector<RMesh*>& meshVec = RResourceManager::Instance().GetMeshResources();
+		vector<RMesh*> meshVec = RResourceManager::Instance().GetMeshResources();
 		for (UINT i = 0; i < meshVec.size(); i++)
 		{
 			RAnimation* anim = meshVec[i]->GetAnimation();

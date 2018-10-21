@@ -136,7 +136,7 @@ namespace ManagedEngineWrapper
 
 	void ManagedMeshObject::Asset::set(String^ value)
 	{
-		RMesh* mesh = RResourceManager::Instance().FindMesh(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer()));
+		RMesh* mesh = RResourceManager::Instance().FindResource<RMesh>(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer()));
 		if (mesh)
 			GetMeshObject()->SetMesh(mesh);
 	}
