@@ -56,12 +56,12 @@ void RMaterial::Serialize(RSerializer& serializer)
 
 bool RMaterial::LoadFromXmlFile(const string& Filename, vector<RMaterial>& OutMaterials)
 {
-	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
-	if (doc->LoadFile(Filename.c_str()) == tinyxml2::XML_SUCCESS)
+	unique_ptr<tinyxml2::XMLDocument> XmlDoc(new tinyxml2::XMLDocument());
+	if (XmlDoc->LoadFile(Filename.c_str()) == tinyxml2::XML_SUCCESS)
 	{
 		vector<RMaterial> xmlMaterials;
 
-		tinyxml2::XMLElement* root = doc->RootElement();
+		tinyxml2::XMLElement* root = XmlDoc->RootElement();
 		tinyxml2::XMLElement* elem = root->FirstChildElement("MeshElement");
 		while (elem)
 		{
@@ -95,8 +95,6 @@ bool RMaterial::LoadFromXmlFile(const string& Filename, vector<RMaterial>& OutMa
 			return true;
 		}
 	}
-
-	delete doc;
 
 	return false;
 }
