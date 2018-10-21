@@ -20,6 +20,10 @@ RScene::RScene()
 
 void RScene::Initialize()
 {
+	if (GRenderer.GetActiveScene() == nullptr)
+	{
+		GRenderer.SetActiveScene(this);
+	}
 }
 
 void RScene::Release()
