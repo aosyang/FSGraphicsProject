@@ -16,6 +16,9 @@ public:
 	RTexture(ID3D11ShaderResourceView* srv);
 	~RTexture();
 
+	/// Required by RResourceManager::RegisterResourceType
+	static vector<string> GetSupportedExtensions();
+
 	virtual bool LoadResourceData(bool bIsAsyncLoading) override;
 
 	ID3D11ShaderResourceView* GetSRV() { return m_SRV; }

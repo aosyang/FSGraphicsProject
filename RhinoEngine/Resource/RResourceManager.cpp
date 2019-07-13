@@ -59,6 +59,8 @@ void ResourceLoaderThread(LoaderThreadData* data)
 
 void RResourceManager::Initialize()
 {
+	RegisterResourceTypes();
+
 	// Create resource loader thread
 	m_ShouldQuitLoaderThread = false;
 	m_HasLoaderThreadQuit = false;
@@ -112,26 +114,7 @@ void RResourceManager::LoadAllResources()
 			if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
 			{
 				string resName = GetAssetsBasePath() + dir_name + FindFileData.cFileName;
-				
-				string lowerExt = resName.substr(resName.find_last_of('.'));
-				for (UINT i = 0; i < lowerExt.size(); i++)
-				{
-					lowerExt[i] = tolower(lowerExt[i]);
-				}
-
-				if (lowerExt == ".dds")
-				{
-					LoadResource<RTexture>(resName.data());
-				}
-				else if (lowerExt == ".fbx")
-				{
-					LoadResource<RMesh>(resName.data());
-				}
-				else if (lowerExt == ".rmesh")
-				{
-					string fbxFilename = RFileUtil::ReplaceExtension(resName, "fbx");
-					LoadResource<RMesh>(fbxFilename.data());
-				}
+				LoadResourceAutoDetectType(resName);
 			}
 			else
 			{
@@ -193,6 +176,34 @@ void RResourceManager::Update()
 			PendingNotifyResources.erase(Index);
 		}
 	}
+}
+
+void RResourceManager::RegisterResourceTypes()
+{
+	RegisterResourceType<RMesh>();
+	RegisterResourceType<RTexture>();
+}
+
+RResourceBase* RResourceManager::LoadResourceAutoDetectType(const string& Path, EResourceLoadMode mode)
+{
+	string FileExt = Path.substr(Path.find_last_of('.'));
+	for (UINT i = 0; i < FileExt.size(); i++)
+	{
+		FileExt[i] = tolower(FileExt[i]);
+	}
+
+	for (auto& LoaderData : ResourceLoaders)
+	{
+		for (auto& LoaderExt : LoaderData.SupportedExtensions)
+		{
+			if (LoaderExt == FileExt)
+			{
+				return LoaderData.ResourceLoader->Load(Path.c_str(), mode);
+			}
+		}
+	}
+
+	return nullptr;
 }
 
 void RResourceManager::LockTaskQueue()

@@ -26,6 +26,12 @@ RTexture::~RTexture()
 	SAFE_RELEASE(m_SRV);
 }
 
+vector<string> RTexture::GetSupportedExtensions()
+{
+	static const vector<string> TextureExts{ ".dds" };
+	return TextureExts;
+}
+
 bool RTexture::LoadResourceData(bool bIsAsyncLoading)
 {
 	ID3D11ShaderResourceView* srv;

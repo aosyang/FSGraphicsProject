@@ -83,6 +83,14 @@ private:
 	RResourceManager() {}
 	~RResourceManager() {}
 
+	void RegisterResourceTypes();
+
+	template<typename T>
+	void RegisterResourceType();
+
+	/// Load resource, detecting file type by registered extensions
+	RResourceBase* LoadResourceAutoDetectType(const string& Path, EResourceLoadMode mode = EResourceLoadMode::Threaded);
+
 	/// Create a new resource container for resource type
 	template<typename T>
 	RResourceContainer<T>* CreateResourceContainer();
@@ -99,6 +107,25 @@ private:
 
 	/// Registered resource containers for resource types
 	vector<RResourceContainerBase*>		ResourceContainers;
+
+	class IResourceLoader
+	{
+	public:
+		virtual RResourceBase* Load(const char*, EResourceLoadMode) = 0;
+	};
+
+	struct ResourceLoaderData
+	{
+		ResourceLoaderData(unique_ptr<IResourceLoader>& InLoaderFunc, const vector<string>& Exts)
+			: ResourceLoader(move(InLoaderFunc))
+			, SupportedExtensions(Exts)
+		{}
+
+		unique_ptr<IResourceLoader> ResourceLoader;
+		vector<string>				SupportedExtensions;
+	};
+
+	vector<ResourceLoaderData>	ResourceLoaders;
 
 	typedef map<ID3D11ShaderResourceView*, RTexture*> WrapperTextureMap;
 	WrapperTextureMap					m_WrapperTextureResources;
@@ -162,6 +189,23 @@ T* RResourceManager::FindResource(const char* Path)
 {
 	RResourceContainer<T>& ResourceContainer = GetResourceContainer<T>();
 	return ResourceContainer.Find(Path);
+}
+
+template<typename T>
+void RResourceManager::RegisterResourceType()
+{
+	// Functor class for template resource loader function
+	class ResourceTypeLoader : public IResourceLoader
+	{
+	public:
+		virtual RResourceBase* Load(const char* Path, EResourceLoadMode mode) override
+		{
+			return RResourceManager::Instance().LoadResource<T>(Path, mode);
+		}
+	};
+
+	unique_ptr<IResourceLoader> ResourceLoader(new ResourceTypeLoader());
+	ResourceLoaders.emplace_back(ResourceLoader, T::GetSupportedExtensions());
 }
 
 template<typename T>

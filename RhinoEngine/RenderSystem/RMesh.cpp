@@ -55,6 +55,12 @@ RMesh::~RMesh()
 	SAFE_DELETE(m_Animation);
 }
 
+vector<string> RMesh::GetSupportedExtensions()
+{
+	static const vector<string> MeshExts{ ".fbx"/*, ".rmesh"*/ };
+	return MeshExts;
+}
+
 void RMesh::Serialize(RSerializer& serializer)
 {
 	if (!serializer.EnsureHeader("RMSH", 4))

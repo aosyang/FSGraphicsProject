@@ -23,6 +23,9 @@ public:
 	RMesh(const string& Path, const RMeshElement* meshElements, int numElement, const RMaterial* materials, int numMaterial);
 	~RMesh();
 
+	/// Required by RResourceManager::RegisterResourceType
+	static vector<string> GetSupportedExtensions();
+
 	void Serialize(RSerializer& serializer);
 
 	virtual bool LoadResourceData(bool bIsAsyncLoading) override;
