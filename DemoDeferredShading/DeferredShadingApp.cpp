@@ -6,10 +6,6 @@
 
 #include "DeferredShadingApp.h"
 
-#include "PostProcessor_DeferredComposition.csh"
-#include "DeferredPointLightPass.csh"
-#include "ScreenSpaceRayTracing.csh"
-
 DeferredShadingApp::DeferredShadingApp()
 	: m_Camera(nullptr)
 {
@@ -42,9 +38,9 @@ bool DeferredShadingApp::Initialize()
 {
 	srand((unsigned int)time(nullptr));
 
-	m_PostProcessingEffects[PPE_DeferredComposition] = GPostProcessorManager.CreateEffect("DeferredComposition", PostProcessor_DeferredComposition, sizeof(PostProcessor_DeferredComposition));
-	m_PostProcessingEffects[PPE_DeferredPointLightPass] = GPostProcessorManager.CreateEffect("DeferredPointLightPass", DeferredPointLightPass, sizeof(DeferredPointLightPass));
-	m_PostProcessingEffects[PPE_ScreenSpaceRayTracing] = GPostProcessorManager.CreateEffect("ScreenSpaceRayTracing", ScreenSpaceRayTracing, sizeof(ScreenSpaceRayTracing));
+	m_PostProcessingEffects[PPE_DeferredComposition] = GPostProcessorManager.CreateEffectFromFile("DeferredComposition", "PostProcessor_DeferredComposition.hlsl");
+	m_PostProcessingEffects[PPE_DeferredPointLightPass] = GPostProcessorManager.CreateEffectFromFile("DeferredPointLightPass", "DeferredPointLightPass.hlsl");
+	m_PostProcessingEffects[PPE_ScreenSpaceRayTracing] = GPostProcessorManager.CreateEffectFromFile("ScreenSpaceRayTracing", "ScreenSpaceRayTracing.hlsl");
 
 	m_Scene.Initialize();
 	m_Scene.LoadFromFile("../Assets/ScriptTestMap.rmap");

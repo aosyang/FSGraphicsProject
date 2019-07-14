@@ -6,9 +6,6 @@
 
 #include "FSGraphicsProjectApp.h"
 
-#include "PostProcessor_GammaCorrection.csh"
-#include "PostProcessor_ColorEdgeDetection.csh"
-
 struct ParticleDepthComparer
 {
 	RVec4 CamPos, CamDir;
@@ -109,8 +106,8 @@ bool FSGraphicsProjectApp::Initialize()
 	m_ParticleShader = RShaderManager::Instance().GetShaderResource("Particle");
 	m_RefractionShader = RShaderManager::Instance().GetShaderResource("Refraction");
 
-	m_PostProcessingEffects[PPE_GammaCorrection] = GPostProcessorManager.CreateEffect("GammaCorrection", PostProcessor_GammaCorrection, sizeof(PostProcessor_GammaCorrection));
-	m_PostProcessingEffects[PPE_ColorEdgeDetection] = GPostProcessorManager.CreateEffect("ColorEdgeDetection", PostProcessor_ColorEdgeDetection, sizeof(PostProcessor_ColorEdgeDetection));
+	m_PostProcessingEffects[PPE_GammaCorrection] = GPostProcessorManager.CreateEffectFromFile("GammaCorrection", "PostProcessor_GammaCorrection.hlsl");
+	m_PostProcessingEffects[PPE_ColorEdgeDetection] = GPostProcessorManager.CreateEffectFromFile("ColorEdgeDetection", "PostProcessor_ColorEdgeDetection.hlsl");
 
 	m_Camera = m_Scene.CreateSceneObjectOfType<RCamera>();
 	m_FbxMeshObj = m_Scene.CreateSceneObjectOfType<RSMeshObject>();

@@ -90,7 +90,57 @@ void RPostProcessorManager::RecreateLostResources()
 	}
 }
 
-RPostProcessingEffect* RPostProcessorManager::CreateEffect(const string& Name, const void* pBytecode, SIZE_T BytecodeSize)
+RPostProcessingEffect* RPostProcessorManager::CreateEffectFromFile(const string& Name, const string& FileName, const char* EntryPoint /*= "main"*/, const char* ShaderProfile /*= "ps_4_0"*/)
+{
+	ifstream fin;
+	fin.open(FileName.c_str(), ios_base::binary);
+
+	if (fin.is_open())
+	{
+		fin.seekg(0, ios_base::end);
+		int fileSize = (int)fin.tellg();
+		unique_ptr<char[]> pBuffer(new char[fileSize]);
+
+		fin.seekg(0);
+		fin.read(pBuffer.get(), fileSize);
+		fin.close();
+
+#if defined(DEBUG) || defined(_DEBUG)
+		int shaderCompileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#else
+		int shaderCompileFlag = 0;
+#endif
+
+		ID3DBlob* pShaderCode = nullptr;
+		ID3DBlob* pErrorMsg = nullptr;
+		HRESULT hr = 0;
+		RPostProcessingEffect* Effect = nullptr;
+
+		// SharedDefines.h is located in 'Shaders' folder. We need to switch over the working path to compile shaders successfully.
+		RFileUtil::PushWorkingPath("../Shaders");
+
+		if (SUCCEEDED(hr = D3DCompile(pBuffer.get(), fileSize, FileName.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint, ShaderProfile, shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
+		{
+			Effect = CreateEffectFromBytecode(Name, pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize());
+		}
+		else
+		{
+			RLogError("A error occured while compiling shader %s:\n    %s\n", FileName.c_str(), (char*)pErrorMsg->GetBufferPointer());
+		}
+
+		RFileUtil::PopWorkingPath();
+
+		SAFE_RELEASE(pShaderCode);
+		SAFE_RELEASE(pErrorMsg);
+
+		return Effect;
+	}
+
+	RLogError("PostProcessManager: Unable to open \'%s\' while creating post process effect.\n", FileName.c_str());
+	return nullptr;
+}
+
+RPostProcessingEffect* RPostProcessorManager::CreateEffectFromBytecode(const string& Name, const void* pBytecode, SIZE_T BytecodeSize)
 {
 	// Assume we don't have a post processing effect with the same name
 	assert(PostProcessingEffectList.find(Name) == PostProcessingEffectList.end());

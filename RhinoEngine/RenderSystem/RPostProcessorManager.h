@@ -25,7 +25,8 @@ public:
 	void Release();
 	void RecreateLostResources();
 
-	RPostProcessingEffect* CreateEffect(const string& Name, const void* pBytecode, SIZE_T BytecodeSize);
+	RPostProcessingEffect* CreateEffectFromFile(const string& Name, const string& FileName, const char* EntryPoint = "main", const char* ShaderProfile = "ps_4_0");
+	RPostProcessingEffect* CreateEffectFromBytecode(const string& Name, const void* pBytecode, SIZE_T BytecodeSize);
 
 	void SetupRenderTarget();
 	void Draw(RPostProcessingEffect* Effect);

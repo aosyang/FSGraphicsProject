@@ -98,18 +98,14 @@ void RShaderManager::LoadShaders(const char* path)
 
 				fin.seekg(0);
 				fin.read(pBuffer, fileSize);
+				fin.close();
 
-				int shaderCompileFlag = 0;
 #if defined(DEBUG) || defined(_DEBUG)
-				shaderCompileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+				int shaderCompileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#else
+				int shaderCompileFlag = 0;
 #endif
 				HRESULT hr = 0;
-
-#define HANDLE_SHADER_COMPILE_ERROR() \
-	if (FAILED(hr)) \
-	{ \
-		RLog("%s\n", (char*)pErrorMsg->GetBufferPointer()); \
-	}
 
 				// Detect shader type by file name suffix
 				if (filename.find("_VS.hlsl") != string::npos)
@@ -121,7 +117,10 @@ void RShaderManager::LoadShaders(const char* path)
 						m_Shaders[shaderName].VertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 					}
-					HANDLE_SHADER_COMPILE_ERROR();
+					else
+					{
+						RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
+					}
 
 					if (strstr(pBuffer, "USE_SKINNING"))
 					{
@@ -136,7 +135,10 @@ void RShaderManager::LoadShaders(const char* path)
 							m_Shaders[shaderName].VertexShader_Skinned->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 						}
-						HANDLE_SHADER_COMPILE_ERROR();
+						else
+						{
+							RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
+						}
 					}
 					
 					if (strstr(pBuffer, "USE_INSTANCING"))
@@ -152,7 +154,10 @@ void RShaderManager::LoadShaders(const char* path)
 							m_Shaders[shaderName].VertexShader_Instanced->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 						}
-						HANDLE_SHADER_COMPILE_ERROR();
+						else
+						{
+							RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
+						}
 					}
 				}
 				else if (filename.find("_PS.hlsl") != string::npos)
@@ -164,7 +169,10 @@ void RShaderManager::LoadShaders(const char* path)
 						m_Shaders[shaderName].PixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 					}
-					HANDLE_SHADER_COMPILE_ERROR();
+					else
+					{
+						RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
+					}
 
 					if (strstr(pBuffer, "USE_DEFERRED_SHADING"))
 					{
@@ -179,7 +187,10 @@ void RShaderManager::LoadShaders(const char* path)
 							m_Shaders[shaderName].PixelShader_Deferred->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 						}
-						HANDLE_SHADER_COMPILE_ERROR();
+						else
+						{
+							RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
+						}
 					}
 				}
 				else if (filename.find("_GS.hlsl") != string::npos)
@@ -191,7 +202,10 @@ void RShaderManager::LoadShaders(const char* path)
 						m_Shaders[shaderName].GeometryShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 					}
-					HANDLE_SHADER_COMPILE_ERROR();
+					else
+					{
+						RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
+					}
 				}
 
 				delete[] pBuffer;
