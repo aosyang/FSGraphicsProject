@@ -32,6 +32,9 @@
 /lua5.3/[Dd]ebug/
 /lua5.3/[Rr]elease/
 /lua5.3/x64/
+/Build/*
+!/Build/Readme.txt
+
 *.sdf
 *.suo
 *.user
