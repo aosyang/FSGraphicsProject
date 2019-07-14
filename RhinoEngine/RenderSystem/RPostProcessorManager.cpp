@@ -34,7 +34,10 @@ RPostProcessorManager::RPostProcessorManager()
 void RPostProcessorManager::Initialize()
 {
 	// Create vertex shader for post processing
-	m_PPVertexShader = RShaderManager::Instance().GetShaderResource("PostProcessor")->VertexShader;
+	RShader* PostProcessorShader = RShaderManager::Instance().GetShaderResource("PostProcessor");
+	assert(PostProcessorShader);
+
+	m_PPVertexShader = PostProcessorShader->VertexShader;
 
 	// Find vertex declaration for screen quad
 	m_InputLayout = RVertexDeclaration::Instance().GetInputLayout<RVertexType::Position>();

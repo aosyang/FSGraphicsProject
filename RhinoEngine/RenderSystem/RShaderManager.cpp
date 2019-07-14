@@ -50,6 +50,12 @@ RShaderManager::~RShaderManager()
 
 void RShaderManager::LoadShaders(const char* path)
 {
+	if (PathFileExistsA(path) == FALSE)
+	{
+		RLogError("ShaderManager: Path \'%s\' does not exist while loading shaders.\n", path);
+		return;
+	}
+
 	// Set working directory to shader folder for compiling
 	RFileUtil::PushWorkingPath(path);
 
