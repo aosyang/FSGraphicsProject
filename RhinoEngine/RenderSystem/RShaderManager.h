@@ -34,9 +34,11 @@ class RShaderManager : public RSingleton<RShaderManager>
 	friend class RSingleton<RShaderManager>;
 	friend struct RShader;
 public:
+	/// Get the root path of the shader folder
+	static string GetShaderRootPath();
 
 	/// Recursively load all shaders in directory
-	void LoadShaders(const char* path);
+	void LoadShaders(const string& Path);
 
 	/// Unload all loaded shaders
 	void UnloadAllShaders();

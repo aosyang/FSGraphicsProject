@@ -7,6 +7,7 @@
 #include "Rhino.h"
 
 vector<string> RFileUtil::WorkingPathStack;
+const string RFileUtil::InvalidPath("<InvalidPath>");
 
 string RFileUtil::GetFileNameInPath(const string& path)
 {
@@ -79,14 +80,14 @@ bool RFileUtil::CheckIsRelativePath(const string& path)
 	return PathIsRelativeA(path.c_str()) == TRUE;
 }
 
-void RFileUtil::PushWorkingPath(const char* NewPath)
+void RFileUtil::PushWorkingPath(const string& NewPath)
 {
 	char pWorkingPath[1024];
 	GetCurrentDirectoryA(1024, pWorkingPath);
 
 	WorkingPathStack.push_back(string(pWorkingPath));
 
-	SetCurrentDirectoryA(NewPath);
+	SetCurrentDirectoryA(NewPath.c_str());
 	GetCurrentDirectoryA(1024, pWorkingPath);
 	RLog("Working path has changed to: %s\n", pWorkingPath);
 }
@@ -101,4 +102,12 @@ void RFileUtil::PopWorkingPath()
 	RLog("Working path has changed to: %s\n", PrevPath.c_str());
 
 	WorkingPathStack.pop_back();
+}
+
+string RFileUtil::GetFullPath(const string& Path)
+{
+	char FullPath[MAX_PATH + 1];
+	GetFullPathNameA(Path.c_str(), MAX_PATH, FullPath, nullptr);
+
+	return string(FullPath);
 }

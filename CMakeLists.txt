@@ -18,7 +18,6 @@ ENDIF()
 
 # Use Unicode character set (MSVC)
 ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:wchar_t")
 
 # Multi-processor compilation support (MSVC)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
@@ -33,6 +32,9 @@ LINK_DIRECTORIES(${FBX_LIB_DIR})
 ADD_DEFINITIONS(-DFBXSDK_SHARED)
 
 ADD_SUBDIRECTORY(RhinoEngine)
+ADD_SUBDIRECTORY(ManagedInterface)
+ADD_SUBDIRECTORY(ManagedEngineWrapper)
+ADD_SUBDIRECTORY(RhinoLevelEditor)
 ADD_SUBDIRECTORY(FSGraphicsProject)
 ADD_SUBDIRECTORY(SimpleGameProject)
 ADD_SUBDIRECTORY(DemoFightingGame)

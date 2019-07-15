@@ -21,10 +21,16 @@ public:
 	static bool CheckIsRelativePath(const string& path);
 
 	/// Push a new path as working path and store current one
-	static void PushWorkingPath(const char* NewPath);
+	static void PushWorkingPath(const string& NewPath);
 
 	/// Pop a stored path and make it current
 	static void PopWorkingPath();
+
+	/// Get full path of a relative path
+	static string GetFullPath(const string& Path);
+
+	/// Invalid path string
+	static const string InvalidPath;
 
 private:
 	static vector<string> WorkingPathStack;

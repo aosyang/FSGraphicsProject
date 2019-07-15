@@ -48,16 +48,32 @@ RShaderManager::~RShaderManager()
 
 }
 
-void RShaderManager::LoadShaders(const char* path)
+string RShaderManager::GetShaderRootPath()
 {
-	if (PathFileExistsA(path) == FALSE)
+	string Path("../Shaders");
+	if (PathFileExistsA(Path.c_str()) == FALSE)
 	{
-		RLogError("ShaderManager: Path \'%s\' does not exist while loading shaders.\n", path);
+		Path = string("../") + Path;
+		if (PathFileExistsA(Path.c_str()) == FALSE)
+		{
+			return RFileUtil::InvalidPath;
+		}
+	}
+
+	return RFileUtil::GetFullPath(Path);
+}
+
+void RShaderManager::LoadShaders(const string& Path)
+{
+	if (PathFileExistsA(Path.c_str()) == FALSE)
+	{
+		string FullPath = RFileUtil::GetFullPath(Path);
+		RLogError("ShaderManager: Path \'%s\' does not exist while loading shaders.\n", FullPath.c_str());
 		return;
 	}
 
 	// Set working directory to shader folder for compiling
-	RFileUtil::PushWorkingPath(path);
+	RFileUtil::PushWorkingPath(Path);
 
 	WIN32_FIND_DATAA FindFileData;
 	HANDLE hFind;

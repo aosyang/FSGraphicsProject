@@ -59,7 +59,7 @@ bool REngine::Initialize(HWND hWnd, int width, int height)
 	RResourceManager::Instance().Initialize();
 
 	// Initialize shaders
-	RShaderManager::Instance().LoadShaders("../Shaders");
+	RShaderManager::Instance().LoadShaders(RShaderManager::GetShaderRootPath());
 
 	// Initialize debug renderer
 	GDebugRenderer.Initialize();
