@@ -45,6 +45,7 @@ class RResourceManager : public RSingleton<RResourceManager>
 	friend void ResourceLoaderThread(LoaderThreadData* data);
 public:
 	void Initialize();
+
 	void Destroy();
 
 	void LoadAllResources();
@@ -103,7 +104,7 @@ private:
 	static void UnlockTaskQueue();
 	static void NotifyThreadTaskEnqueued();
 
-	static string						AssetBasePathName;
+	static string						AssetsBasePathName;
 
 	/// Registered resource containers for resource types
 	vector<RResourceContainerBase*>		ResourceContainers;

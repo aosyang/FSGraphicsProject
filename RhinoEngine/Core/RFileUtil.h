@@ -20,6 +20,9 @@ public:
 	/// Check if a path is relative
 	static bool CheckIsRelativePath(const string& path);
 
+	/// Check if a path exists
+	static bool CheckPathExists(const string& Path);
+
 	/// Push a new path as working path and store current one
 	static void PushWorkingPath(const string& NewPath);
 

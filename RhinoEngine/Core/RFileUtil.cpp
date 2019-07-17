@@ -80,6 +80,11 @@ bool RFileUtil::CheckIsRelativePath(const string& path)
 	return PathIsRelativeA(path.c_str()) == TRUE;
 }
 
+bool RFileUtil::CheckPathExists(const string& Path)
+{
+	return PathFileExistsA(Path.c_str()) == TRUE;
+}
+
 void RFileUtil::PushWorkingPath(const string& NewPath)
 {
 	char pWorkingPath[1024];

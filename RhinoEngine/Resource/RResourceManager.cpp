@@ -21,7 +21,7 @@ static mutex								m_PendingNotifyResourceMutex;
 
 static mutex	TextureResourcesMutex;
 
-string RResourceManager::AssetBasePathName = "../Assets/";
+string RResourceManager::AssetsBasePathName = "../Assets/";
 
 void ResourceLoaderThread(LoaderThreadData* data)
 {
@@ -60,6 +60,29 @@ void ResourceLoaderThread(LoaderThreadData* data)
 void RResourceManager::Initialize()
 {
 	RegisterResourceTypes();
+
+	// Check if assets folder exists at given path. If not, go to the upper folder and search for it again.
+	if (!RFileUtil::CheckPathExists(AssetsBasePathName))
+	{
+		vector<string> SearchedPaths;
+		SearchedPaths.push_back(AssetsBasePathName);
+
+		string FallbackPath = string("../") + AssetsBasePathName;
+		if (RFileUtil::CheckPathExists(FallbackPath))
+		{
+			AssetsBasePathName = FallbackPath;
+		}
+		else
+		{
+			SearchedPaths.push_back(FallbackPath);
+
+			RLogError("Assets folder does not exist in following searching paths:\n");
+			for (const string& Path : SearchedPaths)
+			{
+				RLog("    %s\n", RFileUtil::GetFullPath(Path).c_str());
+			}
+		}
+	}
 
 	// Create resource loader thread
 	m_ShouldQuitLoaderThread = false;
@@ -228,7 +251,7 @@ vector<RMesh*> RResourceManager::GetMeshResources()
 
 const string& RResourceManager::GetAssetsBasePath()
 {
-	return AssetBasePathName;
+	return AssetsBasePathName;
 }
 
 string RResourceManager::GetRelativePathToResource(const string& ResourcePath)
