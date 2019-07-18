@@ -1,5 +1,5 @@
 //=============================================================================
-// d3dUtil.h by Shiyang Ao, 2016 All Rights Reserved.
+// D3DUtil.h by Shiyang Ao, 2016 All Rights Reserved.
 //
 // Commonly used D3D macros
 //=============================================================================
