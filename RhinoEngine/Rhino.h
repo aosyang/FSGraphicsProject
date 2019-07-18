@@ -40,7 +40,7 @@ using namespace std;
 // DirectX 3D
 #include <d3d11.h>
 #include <d3dcompiler.h>
-#include "RenderSystem/d3dUtil.h"
+#include "RenderSystem/D3DUtil.h"
 #pragma comment(lib, "d3dcompiler.lib")
 
 #include "../lua5.3/lua.hpp"

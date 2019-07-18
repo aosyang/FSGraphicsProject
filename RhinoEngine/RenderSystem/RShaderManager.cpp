@@ -7,6 +7,7 @@
 #include "Rhino.h"
 
 #include "RShaderManager.h"
+#include "D3DCommonPrivate.h"
 
 const string RShaderManager::EmptyShaderName = "";
 
@@ -89,20 +90,34 @@ void RShaderManager::LoadShaders(const string& Path)
 			if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
 			{
 				string filename(FindFileData.cFileName);
-				string fileFullPath = filename;
-				ID3DBlob* pShaderCode = nullptr;
-				ID3DBlob* pErrorMsg = nullptr;
 
 				// Get actual shader name
 				string shaderName = filename.substr(0, filename.length() - 8);
 
-				if (m_Shaders.find(shaderName) == m_Shaders.end())
+				RShader* Shader = nullptr;
+				auto Iter = m_Shaders.find(shaderName);
+				if (Iter == m_Shaders.end())
 				{
-					m_Shaders[shaderName] = RShader();
+					auto PairIter = m_Shaders.emplace(shaderName, RShader{});
+					if (PairIter.second == true)
+					{
+						Shader = &PairIter.first->second;
+					}
+				}
+				else
+				{
+					Shader = &Iter->second;
+				}
+
+				if (!Shader)
+				{
+					RLogError("RShaderManager::LoadShaders - Failed to allocate a new shader!");
+					continue;
 				}
 
 				// Read shader text from .hlsl
 				ifstream fin;
+				string fileFullPath = filename;
 				fin.open(fileFullPath, ios_base::binary);
 
 				if (!fin.is_open())
@@ -122,15 +137,17 @@ void RShaderManager::LoadShaders(const string& Path)
 				int shaderCompileFlag = 0;
 #endif
 				HRESULT hr = 0;
+				ComPtr<ID3DBlob> pShaderCode;
+				ComPtr<ID3DBlob> pErrorMsg;
 
 				// Detect shader type by file name suffix
 				if (filename.find("_VS.hlsl") != string::npos)
 				{
 					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 					{
-						GRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader);
+						GRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &Shader->VertexShader);
 #ifdef _DEBUG
-						m_Shaders[shaderName].VertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
+						Shader->VertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 					}
 					else
@@ -146,9 +163,9 @@ void RShaderManager::LoadShaders(const string& Path)
 
 						if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), skinnedShaderMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 						{
-							GRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader_Skinned);
+							GRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &Shader->VertexShader_Skinned);
 #ifdef _DEBUG
-							m_Shaders[shaderName].VertexShader_Skinned->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
+							Shader->VertexShader_Skinned->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 						}
 						else
@@ -165,9 +182,9 @@ void RShaderManager::LoadShaders(const string& Path)
 
 						if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), instancedShaderMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 						{
-							GRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].VertexShader_Instanced);
+							GRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &Shader->VertexShader_Instanced);
 #ifdef _DEBUG
-							m_Shaders[shaderName].VertexShader_Instanced->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
+							Shader->VertexShader_Instanced->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 						}
 						else
@@ -180,9 +197,9 @@ void RShaderManager::LoadShaders(const string& Path)
 				{
 					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 					{
-						GRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].PixelShader);
+						GRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &Shader->PixelShader);
 #ifdef _DEBUG
-						m_Shaders[shaderName].PixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
+						Shader->PixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 					}
 					else
@@ -198,9 +215,9 @@ void RShaderManager::LoadShaders(const string& Path)
 
 						if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), deferredShaderMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 						{
-							GRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].PixelShader_Deferred);
+							GRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &Shader->PixelShader_Deferred);
 #ifdef _DEBUG
-							m_Shaders[shaderName].PixelShader_Deferred->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
+							Shader->PixelShader_Deferred->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 						}
 						else
@@ -213,9 +230,9 @@ void RShaderManager::LoadShaders(const string& Path)
 				{
 					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "gs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 					{
-						GRenderer.D3DDevice()->CreateGeometryShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &m_Shaders[shaderName].GeometryShader);
+						GRenderer.D3DDevice()->CreateGeometryShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &Shader->GeometryShader);
 #ifdef _DEBUG
-						m_Shaders[shaderName].GeometryShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
+						Shader->GeometryShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
 #endif
 					}
 					else
@@ -225,8 +242,6 @@ void RShaderManager::LoadShaders(const string& Path)
 				}
 
 				delete[] pBuffer;
-				SAFE_RELEASE(pShaderCode);
-				SAFE_RELEASE(pErrorMsg);
 			}
 
 		} while (FindNextFileA(hFind, &FindFileData) != 0);

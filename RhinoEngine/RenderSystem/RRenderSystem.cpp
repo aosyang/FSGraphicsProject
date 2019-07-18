@@ -6,9 +6,10 @@
 #include "Rhino.h"
 
 #include "RRenderSystem.h"
+
+#include "D3DCommonPrivate.h"
 #include "RDirectionalLightComponent.h"
 
-#include <comdef.h>
 
 ID3D11DepthStencilView* RRenderSystem::DefaultDepthStencilView = nullptr;
 ID3D11RenderTargetView* RRenderSystem::DefaultRenderTargetView = nullptr;

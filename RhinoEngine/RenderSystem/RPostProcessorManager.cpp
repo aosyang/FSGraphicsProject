@@ -8,12 +8,13 @@
 
 #include "RPostProcessorManager.h"
 
+#include "D3DCommonPrivate.h"
+
 #include "Core/RVector.h"
 #include "RRenderSystem.h"
 #include "RShaderManager.h"
 #include "RVertexDeclaration.h"
-#include "d3dUtil.h"
-#include <d3d11.h>
+
 
 struct PP_QUAD
 {
