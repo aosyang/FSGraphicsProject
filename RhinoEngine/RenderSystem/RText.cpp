@@ -23,7 +23,7 @@ void RText::Initialize(RTexture* fontTexture, UINT rows, UINT columns)
 {
 	if (!fontTexture)
 	{
-		m_FontTexture = RResourceManager::Instance().LoadResource<RTexture>("../Assets/Fonts/Fixedsys_9c.DDS", EResourceLoadMode::Immediate);
+		m_FontTexture = RResourceManager::Instance().LoadResource<RTexture>("/Fonts/Fixedsys_9c.DDS", EResourceLoadMode::Immediate);
 		m_Rows = m_Columns = 16;
 	}
 	else

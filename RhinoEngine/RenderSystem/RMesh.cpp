@@ -224,13 +224,13 @@ bool RMesh::TryLoadAsFbxMesh(bool bIsAsyncLoading)
 {
 	std::unique_ptr<RFbxMeshLoader> FbxMeshLoader(new RFbxMeshLoader);
 
-	if (FbxMeshLoader->LoadDataForMeshResource(this, GetPath()))
+	if (FbxMeshLoader->LoadDataForMeshResource(this, GetFileSystemPath()))
 	{
 		// Notify mesh has been loaded
 		OnLoadingFinished(bIsAsyncLoading);
 
 #if EXPORT_FBX_AS_BINARY_MESH == 1
-		string rmeshName = RFileUtil::ReplaceExtension(GetPath(), "rmesh");
+		string rmeshName = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmesh");
 		RSerializer serializer;
 		serializer.Open(rmeshName, ESerializeMode::Write);
 		if (serializer.IsOpen())
@@ -249,9 +249,9 @@ bool RMesh::TryLoadAsRmesh(bool bIsAsyncLoading)
 	vector<RMeshElement> meshElements;
 	vector<RMaterial> materials;
 
-	RLog("Loading mesh [%s]...\n", GetPath().data());
+	RLog("Loading mesh [%s]...\n", GetFileSystemPath().data());
 
-	string rmeshName = RFileUtil::ReplaceExtension(GetPath(), "rmesh");
+	string rmeshName = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmesh");
 
 	RSerializer serializer;
 	serializer.Open(rmeshName, ESerializeMode::Read);
@@ -265,7 +265,7 @@ bool RMesh::TryLoadAsRmesh(bool bIsAsyncLoading)
 
 	// Load material from file
 	{
-		string mtlFilename = RFileUtil::ReplaceExtension(GetPath(), "rmtl");
+		string mtlFilename = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmtl");
 		RMaterial::LoadFromXmlFile(mtlFilename, materials);
 
 		if (materials.size())

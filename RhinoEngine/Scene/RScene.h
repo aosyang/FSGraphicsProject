@@ -53,7 +53,7 @@ public:
 	void DestroyAllObjects();
 
 	/// Load scene from file on disk
-	void LoadFromFile(const char* filename);
+	void LoadFromFile(const string& MapAssetPath);
 
 	/// Save scene to file on disk
 	void SaveToFile(const char* filename);

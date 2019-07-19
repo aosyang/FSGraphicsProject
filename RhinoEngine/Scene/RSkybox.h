@@ -12,7 +12,7 @@ class RSkybox
 public:
 	RSkybox();
 
-	void CreateSkybox(const char* skyTextureName);
+	void CreateSkybox(const string& skyTextureName);
 	void CreateSkybox(RTexture* skyTexture);
 	void Release();
 

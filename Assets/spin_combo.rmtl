@@ -1,12 +1,12 @@
-<Material Mesh="../Assets/spin_combo.fbx">
+<Material Mesh="/spin_combo.fbx">
     <MeshElement Name="vanguard_visor" Shader="Default">
-        <Texture Slot="0">../Assets/vanguard_diffuse.dds</Texture>
-        <Texture Slot="1">../Assets/vanguard_normal.dds</Texture>
-        <Texture Slot="2">../Assets/vanguard_specular.dds</Texture>
+        <Texture Slot="0">/vanguard_diffuse.dds</Texture>
+        <Texture Slot="1">/vanguard_normal.dds</Texture>
+        <Texture Slot="2">/vanguard_specular.dds</Texture>
     </MeshElement>
     <MeshElement Name="vanguard_Mesh" Shader="Default">
-        <Texture Slot="0">../Assets/vanguard_diffuse.dds</Texture>
-        <Texture Slot="1">../Assets/vanguard_normal.dds</Texture>
-        <Texture Slot="2">../Assets/vanguard_specular.dds</Texture>
+        <Texture Slot="0">/vanguard_diffuse.dds</Texture>
+        <Texture Slot="1">/vanguard_normal.dds</Texture>
+        <Texture Slot="2">/vanguard_specular.dds</Texture>
     </MeshElement>
 </Material>

@@ -106,13 +106,13 @@ public:
 		{
 			for (auto Iter : Resources)
 			{
-				if (strcasecmp(Iter->GetPath().c_str(), Path) == 0)
+				if (strcasecmp(Iter->GetAssetPath().c_str(), Path) == 0)
 				{
 					return Iter;
 				}
 
 				// If searching path contains file name only, also try matching file names
-				const string ResourceName = RFileUtil::GetFileNameInPath(Iter->GetPath());
+				const string ResourceName = RFileUtil::GetFileNameInPath(Iter->GetAssetPath());
 				if (strcasecmp(ResourceName.c_str(), Path) == 0)
 				{
 					return Iter;

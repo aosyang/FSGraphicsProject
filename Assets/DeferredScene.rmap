@@ -1,43 +1,43 @@
 <Scene>
-    <SceneObject Type="MeshObject" Mesh="../Assets/AO_Scene.FBX">
+    <SceneObject Type="MeshObject" Mesh="/AO_Scene.FBX">
         <Transform>
             <Position>-399.601349, 0.000000, 472.891449</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="Ground" Type="MeshObject" Mesh="../Assets/city.fbx">
+    <SceneObject Name="Ground" Type="MeshObject" Mesh="/city.fbx">
         <Transform>
             <Position>0.000000, 0.000000, -1552.000000</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="EastWall" Type="MeshObject" Mesh="../Assets/city.fbx">
+    <SceneObject Name="EastWall" Type="MeshObject" Mesh="/city.fbx">
         <Transform>
             <Position>-1558.369019, 796.001587, -1552.000000</Position>
             <Rotation>0.000000, 0.000000, -1.570796</Rotation>
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="Ceiling" Type="MeshObject" Mesh="../Assets/city.fbx">
+    <SceneObject Name="Ceiling" Type="MeshObject" Mesh="/city.fbx">
         <Transform>
             <Position>-1090.473511, 994.328064, -480.841370</Position>
             <Rotation>3.141593, -1.570451, 0.000000</Rotation>
             <Scale>1.000003, 1.000002, 1.000004</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="NorthWall" Type="MeshObject" Mesh="../Assets/city.fbx">
+    <SceneObject Name="NorthWall" Type="MeshObject" Mesh="/city.fbx">
         <Transform>
             <Position>0.000000, 1824.031006, -1876.959229</Position>
             <Rotation>1.570796, 0.000000, 0.000000</Rotation>
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
+    <SceneObject Type="MeshObject" Mesh="/Sphere.FBX">
         <Material Index="0">
             <MeshElement Name="Sphere001" Shader="Default">
-                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
+                <Texture Slot="0">/DiamondPlate.DDS</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -46,7 +46,7 @@
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="Player" Type="MeshObject" Mesh="../Assets/tachikoma.fbx">
+    <SceneObject Name="Player" Type="MeshObject" Mesh="/tachikoma.fbx">
         <Material Index="0">
             <MeshElement Name="insideShape" Shader="Default"/>
         </Material>
@@ -56,14 +56,14 @@
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/Island.FBX">
+    <SceneObject Type="MeshObject" Mesh="/Island.FBX">
         <Transform>
             <Position>918.920105, -208.590515, 153.841202</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/Island.FBX">
+    <SceneObject Type="MeshObject" Mesh="/Island.FBX">
         <Transform>
             <Position>0.000000, 326.575562, 0.000000</Position>
             <Rotation>-2.572622, 0.336934, 2.643124</Rotation>

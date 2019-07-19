@@ -127,17 +127,17 @@ void RResourceManager::LoadAllResources()
 
 	do
 	{
-		string dir_name = dir_queue.front();
+		const string dir_name = dir_queue.front();
 		dir_queue.pop();
-		string resFindingPath = GetAssetsBasePath() + dir_name + "*.*";
-		hFind = FindFirstFileA(resFindingPath.data(), &FindFileData);
+		const string SearchingPath = GetAssetsBasePath() + dir_name + "*.*";
+		hFind = FindFirstFileA(SearchingPath.data(), &FindFileData);
 
 		do
 		{
 			if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
 			{
-				string resName = GetAssetsBasePath() + dir_name + FindFileData.cFileName;
-				LoadResourceAutoDetectType(resName);
+				const string FilePath = string("/") + dir_name + FindFileData.cFileName;
+				LoadResourceAutoDetectType(FilePath);
 			}
 			else
 			{

@@ -32,15 +32,15 @@ namespace ManagedEngineWrapper
 #if 1
 		RResourceManager::Instance().LoadAllResources();
 #else
-		RResourceManager::Instance().LoadResource<RMesh>("../Assets/Sphere.fbx");
-		RResourceManager::Instance().LoadResource<RMesh>("../Assets/SpeedballPlayer.fbx");
-		RResourceManager::Instance().LoadResource<RMesh>("../Assets/AO_Scene.fbx");
-		RResourceManager::Instance().LoadResource<RMesh>("../Assets/tachikoma.fbx");
-		RResourceManager::Instance().LoadResource<RMesh>("../Assets/Island.fbx");
-		RResourceManager::Instance().LoadResource<RMesh>("../Assets/city.fbx");
+		RResourceManager::Instance().LoadResource<RMesh>("/Sphere.fbx");
+		RResourceManager::Instance().LoadResource<RMesh>("/SpeedballPlayer.fbx");
+		RResourceManager::Instance().LoadResource<RMesh>("/AO_Scene.fbx");
+		RResourceManager::Instance().LoadResource<RMesh>("/tachikoma.fbx");
+		RResourceManager::Instance().LoadResource<RMesh>("/Island.fbx");
+		RResourceManager::Instance().LoadResource<RMesh>("/city.fbx");
 #endif
 
-		m_Skybox.CreateSkybox("../Assets/powderpeak.dds");
+		m_Skybox.CreateSkybox("/powderpeak.dds");
 
 		m_CamYaw = m_CamPitch = 0.0f;
 		m_SelectedObject = nullptr;
@@ -336,7 +336,7 @@ namespace ManagedEngineWrapper
 			RAnimation* anim = meshVec[i]->GetAnimation();
 			if (anim)
 			{
-				string animFilename = meshVec[i]->GetPath();
+				string animFilename = meshVec[i]->GetFileSystemPath();
 				animFilename = RFileUtil::ReplaceExtension(animFilename, "ranim");
 				//anim->SaveToFile(animFilename.c_str());
 			}
@@ -501,7 +501,7 @@ namespace ManagedEngineWrapper
 		{
 			if (AsyncResourceLoadedCallback != nullptr)
 			{
-				const char* ResourcePath = Resource->GetPath().c_str();
+				const char* ResourcePath = Resource->GetAssetPath().c_str();
 				(*AsyncResourceLoadedCallback)(ResourcePath);
 			}
 		});

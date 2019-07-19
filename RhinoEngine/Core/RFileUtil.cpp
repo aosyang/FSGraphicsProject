@@ -116,3 +116,38 @@ string RFileUtil::GetFullPath(const string& Path)
 
 	return string(FullPath);
 }
+
+string RFileUtil::CombinePath(const string& First, const string& Second)
+{
+	return RFileUtil::TrimTrailingSeperators(First) + "/" + RFileUtil::TrimLeadingSeperators(Second);
+}
+
+string RFileUtil::TrimLeadingSeperators(const string& Path)
+{
+	string TrimedPath(Path);
+	const static string Seperators("\\/");
+
+	// Trim leading slashes
+	size_t Pos = TrimedPath.find_first_not_of(Seperators);
+	if (Pos != string::npos)
+	{
+		TrimedPath = TrimedPath.substr(Pos);
+	}
+
+	return TrimedPath;
+}
+
+string RFileUtil::TrimTrailingSeperators(const string& Path)
+{
+	string TrimedPath(Path);
+	const static string Seperators("\\/");
+
+	// Trim trailing slashes
+	size_t Pos = TrimedPath.find_last_not_of(Seperators);
+	if (Pos != string::npos)
+	{
+		TrimedPath.resize(Pos + 1);
+	}
+
+	return TrimedPath;
+}

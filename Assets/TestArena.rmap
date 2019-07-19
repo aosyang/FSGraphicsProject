@@ -1,5 +1,5 @@
 <Scene>
-    <SceneObject Type="MeshObject" Mesh="../Assets/cube.FBX">
+    <SceneObject Type="MeshObject" Mesh="/cube.FBX">
         <Transform>
             <Position>0.000000, 0.000000, 0.000000</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>

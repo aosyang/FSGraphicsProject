@@ -27,7 +27,7 @@ bool SimpleGame::Initialize()
 	m_Scene.Initialize();
 
 	// Load texture for skybox
-	char SkyboxTextureName[] = "../Assets/powderpeak.dds";
+	const string SkyboxTextureName("/powderpeak.dds");
 	RResourceManager::Instance().LoadResource<RTexture>(SkyboxTextureName);
 	m_Skybox.CreateSkybox(SkyboxTextureName);
 

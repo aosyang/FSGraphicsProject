@@ -129,7 +129,7 @@ namespace ManagedEngineWrapper
 	{
 		RMesh* mesh = GetMeshObject()->GetMesh();
 		if (mesh)
-			return gcnew String(mesh->GetPath().c_str());
+			return gcnew String(mesh->GetAssetPath().c_str());
 		else
 			return gcnew String("");
 	}

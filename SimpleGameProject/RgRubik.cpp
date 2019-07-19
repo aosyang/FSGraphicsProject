@@ -72,7 +72,7 @@ IMPLEMENT_SCENE_OBJECT(RgColorPiece);
 RgColorPiece::RgColorPiece(const RConstructingParams& Params)
 	: Base(Params)
 {
-	RMesh* CubeMesh = RResourceManager::Instance().LoadResource<RMesh>("../Assets/RubikCube/RoundedCornerCube.fbx");
+	RMesh* CubeMesh = RResourceManager::Instance().LoadResource<RMesh>("/RubikCube/RoundedCornerCube.fbx");
 
 	MeshComponent = AddNewComponent<RRenderMeshComponent>();
 	MeshComponent->SetMesh(CubeMesh);
@@ -90,22 +90,22 @@ void RgColorPiece::SetColor(EPieceColor Color)
 
 void InitializeRubikMaterials()
 {
-	const string MaterialFilenames[] =
+	const string MaterialPaths[] =
 	{
-		"../Assets/RubikCube/Blue.rmtl",
-		"../Assets/RubikCube/Green.rmtl",
-		"../Assets/RubikCube/Red.rmtl",
-		"../Assets/RubikCube/Orange.rmtl",
-		"../Assets/RubikCube/White.rmtl",
-		"../Assets/RubikCube/Yellow.rmtl",
-		"../Assets/RubikCube/Black.rmtl",
+		"/RubikCube/Blue.rmtl",
+		"/RubikCube/Green.rmtl",
+		"/RubikCube/Red.rmtl",
+		"/RubikCube/Orange.rmtl",
+		"/RubikCube/White.rmtl",
+		"/RubikCube/Yellow.rmtl",
+		"/RubikCube/Black.rmtl",
 	};
 
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < ARRAYSIZE(MaterialPaths); i++)
 	{
 		vector<RMaterial> Materials;
-		RMaterial::LoadFromXmlFile(MaterialFilenames[i], Materials);
-		assert(Materials.size() >= 0);
+		RMaterial::LoadFromXmlFile(MaterialPaths[i], Materials);
+		assert(Materials.size() > 0);
 		RubikMaterials[i] = Materials[0];
 	}
 }
@@ -120,7 +120,7 @@ RgCubeBlock::RgCubeBlock(const RConstructingParams& Params)
 	: Base(Params),
 	  m_Parent(nullptr)
 {
-	RMesh* CubeMesh = RResourceManager::Instance().LoadResource<RMesh>("../Assets/RubikCube/RoundedCornerCube.fbx");
+	RMesh* CubeMesh = RResourceManager::Instance().LoadResource<RMesh>("/RubikCube/RoundedCornerCube.fbx");
 
 	RRenderMeshComponent* MeshComponent = AddNewComponent<RRenderMeshComponent>();
 	MeshComponent->SetMesh(CubeMesh);

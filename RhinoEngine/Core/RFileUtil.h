@@ -32,6 +32,12 @@ public:
 	/// Get full path of a relative path
 	static string GetFullPath(const string& Path);
 
+	static string CombinePath(const string& First, const string& Second);
+
+	static string TrimLeadingSeperators(const string& Path);
+
+	static string TrimTrailingSeperators(const string& Path);
+
 	/// Invalid path string
 	static const string InvalidPath;
 

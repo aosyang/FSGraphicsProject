@@ -63,7 +63,7 @@ public:
 	{
 		m_BehaviorEnum = BHV_Idle;
 		m_BlendTime = 0.2f;
-		LoadAnimationAsset("../Assets/unitychan/FUCM05_0000_Idle.fbx", AnimBitFlag_Loop);
+		LoadAnimationAsset("/unitychan/FUCM05_0000_Idle.fbx", AnimBitFlag_Loop);
 	}
 };
 
@@ -74,7 +74,7 @@ public:
 	{
 		m_BehaviorEnum = BHV_Run;
 		m_BlendTime = 0.2f;
-		LoadAnimationAsset("../Assets/unitychan/FUCM_0012b_EH_RUN_LP_NoZ.fbx", AnimBitFlag_Loop);
+		LoadAnimationAsset("/unitychan/FUCM_0012b_EH_RUN_LP_NoZ.fbx", AnimBitFlag_Loop);
 	}
 };
 
@@ -85,7 +85,7 @@ public:
 	{
 		m_BehaviorEnum = BHV_Punch;
 		m_BlendTime = 0.1f;
-		LoadAnimationAsset("../Assets/unitychan/FUCM05_0001_M_CMN_LJAB.fbx", AnimBitFlag_HasRootMotion);
+		LoadAnimationAsset("/unitychan/FUCM05_0001_M_CMN_LJAB.fbx", AnimBitFlag_HasRootMotion);
 	}
 
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
@@ -98,7 +98,7 @@ public:
 	{
 		m_BehaviorEnum = BHV_Kick;
 		m_BlendTime = 0.1f;
-		LoadAnimationAsset("../Assets/unitychan/FUCM_04_0001_RHiKick.fbx", AnimBitFlag_HasRootMotion);
+		LoadAnimationAsset("/unitychan/FUCM_04_0001_RHiKick.fbx", AnimBitFlag_HasRootMotion);
 	}
 
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
@@ -111,7 +111,7 @@ public:
 	{
 		m_BehaviorEnum = BHV_BackKick;
 		m_BlendTime = 0.1f;
-		LoadAnimationAsset("../Assets/unitychan/FUCM02_0004_CH01_AS_MAWAK.fbx", AnimBitFlag_HasRootMotion);
+		LoadAnimationAsset("/unitychan/FUCM02_0004_CH01_AS_MAWAK.fbx", AnimBitFlag_HasRootMotion);
 	}
 
 	virtual bool EvaluateForExecution(FTGPlayerStateMachine* StateMachine) override;
@@ -125,7 +125,7 @@ public:
 	{
 		m_BehaviorEnum = BHV_SpinAttack;
 		m_BlendTime = 0.2f;
-		LoadAnimationAsset("../Assets/unitychan/FUCM02_0029_Cha01_STL01_ScrewK01.fbx", AnimBitFlag_HasRootMotion);
+		LoadAnimationAsset("/unitychan/FUCM02_0029_Cha01_STL01_ScrewK01.fbx", AnimBitFlag_HasRootMotion);
 	}
 
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
@@ -139,7 +139,7 @@ public:
 		m_BehaviorEnum = BHV_Hit;
 		m_BlendTime = 0.1f;
 		m_bAllowRerunSelf = true;
-		LoadAnimationAsset("../Assets/unitychan/unitychan_DAMAGED00.fbx", AnimBitFlag_HasRootMotion);
+		LoadAnimationAsset("/unitychan/unitychan_DAMAGED00.fbx", AnimBitFlag_HasRootMotion);
 	}
 };
 
@@ -150,7 +150,7 @@ public:
 	{
 		m_BehaviorEnum = BHV_KnockedDown;
 		m_BlendTime = 0.1f;
-		LoadAnimationAsset("../Assets/unitychan/FUCM02_0025_MYA_TF_DOWN.fbx", AnimBitFlag_HasRootMotion);
+		LoadAnimationAsset("/unitychan/FUCM02_0025_MYA_TF_DOWN.fbx", AnimBitFlag_HasRootMotion);
 	}
 
 protected:
@@ -164,7 +164,7 @@ public:
 	{
 		m_BehaviorEnum = BHV_GetUp;
 		m_BlendTime = 0.1f;
-		LoadAnimationAsset("../Assets/unitychan/FUCM03_0019_HeadSpring.fbx", AnimBitFlag_HasRootMotion);
+		LoadAnimationAsset("/unitychan/FUCM03_0019_HeadSpring.fbx", AnimBitFlag_HasRootMotion);
 	}
 };
 

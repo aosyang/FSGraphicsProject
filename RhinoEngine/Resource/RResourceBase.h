@@ -29,7 +29,15 @@ public:
 
 	ResourceState GetResourceState() const	{ return m_State; }
 	ResourceType GetResourceType() const	{ return m_Type; }
-	const string& GetPath() const			{ return m_ResourcePath; }
+
+	/// Set the asset path of resource
+	void SetAssetPath(const string& InAssetPath);
+
+	/// Get the asset path of resource
+	const string& GetAssetPath() const;
+
+	/// Get a path of the resource used in the file system (eg. for serialization)
+	const string& GetFileSystemPath() const;
 
 	/// Check if resource has been fully loaded
 	bool IsLoaded() const					{ return m_State == RS_Loaded; }
@@ -55,6 +63,26 @@ protected:
 private:
 	ResourceState		m_State;
 	ResourceType		m_Type;
-	string				m_ResourcePath;
+
+	/// The asset path used to access the resource in the engine
+	string				m_AssetPath;
+
+	/// Path to the resource file in file system
+	string				m_FileSystemPath;
 	float				m_LoadingFinishTime;
 };
+
+FORCEINLINE void RResourceBase::SetAssetPath(const string& InAssetPath)
+{
+	m_AssetPath = InAssetPath;
+}
+
+FORCEINLINE const string& RResourceBase::GetAssetPath() const
+{
+	return m_AssetPath;
+}
+
+FORCEINLINE const string& RResourceBase::GetFileSystemPath() const
+{
+	return m_FileSystemPath;
+}

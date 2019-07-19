@@ -31,7 +31,7 @@ bool FightingGameApp::Initialize()
 	//RResourceManager::Instance().LoadAllResources();
 
 	m_Scene.Initialize();
-	m_Scene.LoadFromFile("../Assets/TestArena.rmap");
+	m_Scene.LoadFromFile("/TestArena.rmap");
 
 	m_ShadowMap.Initialize(1024, 1024);
 	m_Camera = m_Scene.CreateSceneObjectOfType<RCamera>();
@@ -65,7 +65,7 @@ bool FightingGameApp::Initialize()
 		}
 	}
 
-	m_Text.Initialize(RResourceManager::Instance().LoadResource<RTexture>("../Assets/Fonts/Fixedsys_9c.DDS", EResourceLoadMode::Immediate), 16, 16);
+	m_Text.Initialize(RResourceManager::Instance().LoadResource<RTexture>("/Fonts/Fixedsys_9c.DDS", EResourceLoadMode::Immediate), 16, 16);
 	return true;
 }
 

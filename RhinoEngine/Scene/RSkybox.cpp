@@ -14,14 +14,14 @@ RSkybox::RSkybox()
 
 }
 
-void RSkybox::CreateSkybox(const char* skyTextureName)
+void RSkybox::CreateSkybox(const string& skyTextureName)
 {
 	// Load skybox texture
 	RTexture* SkyTexture = RResourceManager::Instance().FindResource<RTexture>(skyTextureName);
 
 	if (SkyTexture == nullptr)
 	{
-		RLogWarning("Unable to find texture \'%s\' while creating skybox.\n", skyTextureName);
+		RLogWarning("Unable to find texture \'%s\' while creating skybox.\n", skyTextureName.c_str());
 		return;
 	}
 

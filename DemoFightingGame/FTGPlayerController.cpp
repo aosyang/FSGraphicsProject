@@ -27,7 +27,7 @@ FTGPlayerController::~FTGPlayerController()
 
 void FTGPlayerController::InitAssets()
 {
-	RMesh* playerMesh = RResourceManager::Instance().LoadResource<RMesh>("../Assets/unitychan/unitychan.fbx", EResourceLoadMode::Immediate);
+	RMesh* playerMesh = RResourceManager::Instance().LoadResource<RMesh>("/unitychan/unitychan.fbx", EResourceLoadMode::Immediate);
 	SetMesh(playerMesh);
 
 	m_StateMachine.Init(this);

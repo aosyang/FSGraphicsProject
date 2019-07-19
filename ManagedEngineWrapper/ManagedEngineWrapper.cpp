@@ -85,7 +85,7 @@ namespace ManagedEngineWrapper
 		vector<RMesh*> meshList = RResourceManager::Instance().GetMeshResources();
 		for (auto Iter : meshList)
 		{
-			list->Add(gcnew String(Iter->GetPath().data()));
+			list->Add(gcnew String(Iter->GetAssetPath().data()));
 		}
 
 		return list;
@@ -105,6 +105,8 @@ namespace ManagedEngineWrapper
 	Bitmap^ RhinoEngineWrapper::GenerateMeshThumbnailBitmap(String^ MeshName, int Width, int Height)
 	{
 		RMesh* MeshAsset = RResourceManager::Instance().FindResource<RMesh>(ManagedStringRefToConstCharPtr(MeshName));
+		assert(MeshAsset);
+
 		return RenderThumbnailForMesh(MeshAsset, Width, Height);
 	}
 

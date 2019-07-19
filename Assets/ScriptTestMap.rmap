@@ -1,36 +1,36 @@
 <Scene>
-    <SceneObject Script="RotateObject 1, 0, 0 50" Type="MeshObject" Mesh="../Assets/AO_Scene.FBX">
+    <SceneObject Script="RotateObject 1, 0, 0 50" Type="MeshObject" Mesh="/AO_Scene.FBX">
         <Transform>
             <Position>-399.601349, 0.000000, 472.891449</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/city.fbx">
+    <SceneObject Type="MeshObject" Mesh="/city.fbx">
         <Transform>
             <Position>-891.820007, 0.000000, 0.000000</Position>
             <Rotation>3.141593, 0.000000, 3.141593</Rotation>
             <Scale>1.000001, 1.000000, 1.000001</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/city.fbx">
+    <SceneObject Type="MeshObject" Mesh="/city.fbx">
         <Transform>
             <Position>-1653.895996, 1558.176392, 3.512743</Position>
             <Rotation>3.141593, 0.000000, 1.570797</Rotation>
             <Scale>1.000000, 1.000001, 1.000001</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/city.fbx">
+    <SceneObject Type="MeshObject" Mesh="/city.fbx">
         <Transform>
             <Position>-894.444275, 324.354279, -1876.959229</Position>
             <Rotation>1.570798, -0.000000, 3.141593</Rotation>
             <Scale>1.000002, 1.000002, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
+    <SceneObject Type="MeshObject" Mesh="/Sphere.FBX">
         <Material Index="0">
             <MeshElement Name="Sphere001" Shader="Default">
-                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
+                <Texture Slot="0">/DiamondPlate.DDS</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -39,7 +39,7 @@
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="Player" Script="RotateObject 0, 1, 0 100" Type="MeshObject" Mesh="../Assets/tachikoma.fbx">
+    <SceneObject Name="Player" Script="RotateObject 0, 1, 0 100" Type="MeshObject" Mesh="/tachikoma.fbx">
         <Material Index="0">
             <MeshElement Name="insideShape" Shader="Default"/>
         </Material>
@@ -49,14 +49,14 @@
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/Island.FBX">
+    <SceneObject Type="MeshObject" Mesh="/Island.FBX">
         <Transform>
             <Position>918.920105, -208.590515, 153.841202</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/stool.fbx">
+    <SceneObject Type="MeshObject" Mesh="/stool.fbx">
         <Material Index="0">
             <MeshElement Name="transform1" Shader="Default"/>
         </Material>
@@ -66,12 +66,12 @@
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Script="SwingObject -215, 950, -763 -215, -396, -763, 1" Type="MeshObject" Mesh="../Assets/stool.fbx">
+    <SceneObject Script="SwingObject -215, 950, -763 -215, -396, -763, 1" Type="MeshObject" Mesh="/stool.fbx">
         <Material Index="0">
             <MeshElement Name="transform1" Shader="BumpLighting">
-                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
-                <Texture Slot="1">../Assets/NoiseNormal.dds</Texture>
-                <Texture Slot="2">../Assets/powderpeak.dds</Texture>
+                <Texture Slot="0">/DiamondPlate.DDS</Texture>
+                <Texture Slot="1">/NoiseNormal.dds</Texture>
+                <Texture Slot="2">/powderpeak.dds</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -80,7 +80,7 @@
             <Scale>1.000000, 1.000002, 1.000002</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Script="SwingObject 200, 200, 0 -200, 200, 0 200" Type="MeshObject" Mesh="../Assets/gearmold.fbx">
+    <SceneObject Script="SwingObject 200, 200, 0 -200, 200, 0 200" Type="MeshObject" Mesh="/gearmold.fbx">
         <Material Index="0">
             <MeshElement Name="transform1" Shader="Default"/>
         </Material>
@@ -90,7 +90,7 @@
             <Scale>1.000000, 1.000002, 1.000002</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/wing1.fbx">
+    <SceneObject Type="MeshObject" Mesh="/wing1.fbx">
         <Material Index="0">
             <MeshElement Name="transform1" Shader="Default"/>
         </Material>
@@ -100,10 +100,10 @@
             <Scale>1.000002, 1.000000, 1.000002</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
+    <SceneObject Type="MeshObject" Mesh="/Sphere.FBX">
         <Material Index="0">
             <MeshElement Name="Sphere001" Shader="Default">
-                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
+                <Texture Slot="0">/DiamondPlate.DDS</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -112,10 +112,10 @@
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
+    <SceneObject Type="MeshObject" Mesh="/Sphere.FBX">
         <Material Index="0">
             <MeshElement Name="Sphere001" Shader="Lighting">
-                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
+                <Texture Slot="0">/DiamondPlate.DDS</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -124,10 +124,10 @@
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
+    <SceneObject Type="MeshObject" Mesh="/Sphere.FBX">
         <Material Index="0">
             <MeshElement Name="Sphere001" Shader="Default">
-                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
+                <Texture Slot="0">/DiamondPlate.DDS</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -136,10 +136,10 @@
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
+    <SceneObject Type="MeshObject" Mesh="/Sphere.FBX">
         <Material Index="0">
             <MeshElement Name="Sphere001" Shader="Default">
-                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
+                <Texture Slot="0">/DiamondPlate.DDS</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -148,10 +148,10 @@
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
+    <SceneObject Type="MeshObject" Mesh="/Sphere.FBX">
         <Material Index="0">
             <MeshElement Name="Sphere001" Shader="Default">
-                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
+                <Texture Slot="0">/DiamondPlate.DDS</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -160,10 +160,10 @@
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
+    <SceneObject Type="MeshObject" Mesh="/Sphere.FBX">
         <Material Index="0">
             <MeshElement Name="Sphere001" Shader="Default">
-                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
+                <Texture Slot="0">/DiamondPlate.DDS</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -172,18 +172,18 @@
             <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Script="RotateObject" Type="MeshObject" Mesh="../Assets/cube.FBX">
+    <SceneObject Script="RotateObject" Type="MeshObject" Mesh="/cube.FBX">
         <Transform>
             <Position>-1247.951050, 79.000000, 240.000000</Position>
             <Rotation>-1.570798, 0.000000, 0.000000</Rotation>
             <Scale>1.000000, 1.000001, 1.000001</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Script="RotateObject" Type="MeshObject" Mesh="../Assets/cube.FBX">
+    <SceneObject Script="RotateObject" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
             <MeshElement Name="Box001" Shader="BumpLighting">
-                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
-                <Texture Slot="1">../Assets/WaterDropNormal.dds</Texture>
+                <Texture Slot="0">/DiamondPlate.DDS</Texture>
+                <Texture Slot="1">/WaterDropNormal.dds</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -192,11 +192,11 @@
             <Scale>1.000000, 1.000001, 1.000001</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Script="RotateObject" Type="MeshObject" Mesh="../Assets/cube.FBX">
+    <SceneObject Script="RotateObject" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
             <MeshElement Name="Box001" Shader="BumpLighting">
-                <Texture Slot="0">../Assets/DiamondPlate.DDS</Texture>
-                <Texture Slot="1">../Assets/NoiseNormal.dds</Texture>
+                <Texture Slot="0">/DiamondPlate.DDS</Texture>
+                <Texture Slot="1">/NoiseNormal.dds</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -205,7 +205,7 @@
             <Scale>1.000000, 1.000001, 1.000001</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/cube.FBX">
+    <SceneObject Type="MeshObject" Mesh="/cube.FBX">
         <Transform>
             <Position>-1412.470215, 2.287222, 328.942352</Position>
             <Rotation>-1.570798, 0.000000, 0.000000</Rotation>

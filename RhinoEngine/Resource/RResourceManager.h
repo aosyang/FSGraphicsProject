@@ -18,8 +18,13 @@ namespace std
 
 struct LoaderThreadTask
 {
-	string			Filename;
+	/// The asset path for accessing the resource in the engine
+	string			AssetPath;
+
+	/// The resource object
 	RResourceBase*	Resource;
+
+	/// Whether this is an asynchronous loading  task
 	bool			bIsAsync;
 };
 
@@ -63,15 +68,16 @@ public:
 
 	/// Load resource from path
 	template<typename T>
-	T* LoadResource(const char* Path, EResourceLoadMode mode = EResourceLoadMode::Threaded);
+	T* LoadResource(const string& AssetPath, EResourceLoadMode mode = EResourceLoadMode::Threaded);
 
 	/// Find resource by path
 	template<typename T>
-	T* FindResource(const char* Path);
+	T* FindResource(const string& Path);
 
 	/// Get an array of all mesh resources
 	vector<RMesh*> GetMeshResources();
 
+	/// Root path of assets folder
 	static const string& GetAssetsBasePath();
 
 	/// Get relative path to resource from working directory
@@ -141,18 +147,18 @@ private:
 };
 
 template<typename T>
-T* RResourceManager::LoadResource(const char* Path, EResourceLoadMode mode)
+T* RResourceManager::LoadResource(const string& AssetPath, EResourceLoadMode mode)
 {
 	// Find resource in resource container
 	RResourceContainer<T>& ResourceContainer = GetResourceContainer<T>();
-	T* Resource = ResourceContainer.Find(Path);
+	T* Resource = ResourceContainer.Find(AssetPath);
 	if (Resource != nullptr)
 	{
 		// The resource has been already loaded. Return it now.
 		return Resource;
 	}
 
-	string RelativePath = GetRelativePathToResource(Path);
+	string RelativePath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), AssetPath);
 	Resource = new T(RelativePath);
 	Resource->OnEnqueuedForLoading();
 
@@ -163,9 +169,12 @@ T* RResourceManager::LoadResource(const char* Path, EResourceLoadMode mode)
 #endif
 
 	LoaderThreadTask task;
-	task.Filename = string(Path);
+	task.AssetPath = AssetPath;
 	task.Resource = Resource;
 	task.bIsAsync = (mode == EResourceLoadMode::Threaded);
+
+	// Assign to asset path
+	Resource->SetAssetPath(AssetPath);
 
 	if (mode == EResourceLoadMode::Immediate)
 	{
@@ -186,10 +195,10 @@ T* RResourceManager::LoadResource(const char* Path, EResourceLoadMode mode)
 }
 
 template<typename T>
-T* RResourceManager::FindResource(const char* Path)
+T* RResourceManager::FindResource(const string& Path)
 {
 	RResourceContainer<T>& ResourceContainer = GetResourceContainer<T>();
-	return ResourceContainer.Find(Path);
+	return ResourceContainer.Find(Path.c_str());
 }
 
 template<typename T>

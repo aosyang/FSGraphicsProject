@@ -48,7 +48,7 @@ void RMaterial::Serialize(RSerializer& serializer)
 		int i;
 		for (i = 0; i < TextureNum; i++)
 		{
-			string textureName = Textures[i]->GetPath();
+			string textureName = Textures[i]->GetFileSystemPath();
 			serializer.SerializeData(textureName);
 		}
 	}
@@ -56,8 +56,10 @@ void RMaterial::Serialize(RSerializer& serializer)
 
 bool RMaterial::LoadFromXmlFile(const string& Filename, vector<RMaterial>& OutMaterials)
 {
+	const string XmlPath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), Filename);
+
 	unique_ptr<tinyxml2::XMLDocument> XmlDoc(new tinyxml2::XMLDocument());
-	if (XmlDoc->LoadFile(Filename.c_str()) == tinyxml2::XML_SUCCESS)
+	if (XmlDoc->LoadFile(XmlPath.c_str()) == tinyxml2::XML_SUCCESS)
 	{
 		vector<RMaterial> xmlMaterials;
 

@@ -50,7 +50,7 @@ namespace ManagedEngineWrapper
 		[DisplayName("Texture Slot "#n)] \
 		property String^ Texture##n \
 		{ \
-			String^ get()			{ return material->Textures[n] ? gcnew String(material->Textures[n]->GetPath().c_str()) : gcnew String(""); } \
+			String^ get()			{ return material->Textures[n] ? gcnew String(material->Textures[n]->GetAssetPath().c_str()) : gcnew String(""); } \
 			void set(String^ value)	{ material->Textures[n] = value != "" ? RResourceManager::Instance().FindResource<RTexture>(static_cast<const char*>(Marshal::StringToHGlobalAnsi(value).ToPointer())) : nullptr; } \
 		}
 

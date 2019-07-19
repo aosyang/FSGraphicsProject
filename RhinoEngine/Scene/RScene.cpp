@@ -159,10 +159,12 @@ void RScene::DestroyAllObjects()
 	m_SceneObjects.clear();
 }
 
-void RScene::LoadFromFile(const char* filename)
+void RScene::LoadFromFile(const string& MapAssetPath)
 {
+	const string MapFilePath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), MapAssetPath);
+
 	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
-	if (doc->LoadFile(filename) == tinyxml2::XML_SUCCESS)
+	if (doc->LoadFile(MapFilePath.c_str()) == tinyxml2::XML_SUCCESS)
 	{
 		tinyxml2::XMLElement* root = doc->RootElement();
 		tinyxml2::XMLElement* elem_obj = root->FirstChildElement("SceneObject");
@@ -173,15 +175,15 @@ void RScene::LoadFromFile(const char* filename)
 			string obj_type = elem_obj->Attribute("Type");
 			if (obj_type == "MeshObject")
 			{
-				const char* resPath = elem_obj->Attribute("Mesh");
-				RMesh* mesh = RResourceManager::Instance().FindResource<RMesh>(resPath);
+				const char* ResourceFilePath = elem_obj->Attribute("Mesh");
+				RMesh* mesh = RResourceManager::Instance().FindResource<RMesh>(ResourceFilePath);
 
 				if (!mesh)
 				{
-					mesh = RResourceManager::Instance().LoadResource<RMesh>(resPath, EResourceLoadMode::Immediate);
+					mesh = RResourceManager::Instance().LoadResource<RMesh>(ResourceFilePath, EResourceLoadMode::Immediate);
 				}
 
-				RSMeshObject* MeshObject = CreateMeshObject(resPath);
+				RSMeshObject* MeshObject = CreateMeshObject(ResourceFilePath);
 				NewSceneObject = MeshObject;
 
 				tinyxml2::XMLElement* elem_mat = elem_obj->FirstChildElement("Material");
@@ -311,7 +313,7 @@ void RScene::SaveToFile(const char* filename)
 
 			RSMeshObject* meshObj = (RSMeshObject*)SceneObject;
 			RMesh* mesh = meshObj->GetMesh();
-			elem_obj->SetAttribute("Mesh", mesh->GetPath().c_str());
+			elem_obj->SetAttribute("Mesh", mesh->GetFileSystemPath().c_str());
 
 			// Save materials
 			for (int i = 0; i < meshObj->GetMeshElementCount(); i++)

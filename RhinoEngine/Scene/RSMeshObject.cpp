@@ -82,14 +82,14 @@ void RSMeshObject::SaveMaterialsToFile()
 	UpdateMaterialsFromResource();
 
 	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
-	doc->InsertEndChild(doc->NewComment((string("Mesh path: ") + m_Mesh->GetPath()).c_str()));
+	doc->InsertEndChild(doc->NewComment((string("Mesh path: ") + m_Mesh->GetFileSystemPath()).c_str()));
 
 	tinyxml2::XMLElement* elem_mat = doc->NewElement("Material");
 
 	SerializeMaterialsToXML(doc, elem_mat);
 	doc->InsertEndChild(elem_mat);
 
-	string filepath = m_Mesh->GetPath();
+	string filepath = m_Mesh->GetFileSystemPath();
 	filepath = filepath.substr(0, filepath.length() - 3);
 	filepath += "rmtl";
 
@@ -116,7 +116,7 @@ void RSMeshObject::SerializeMaterialsToXML(tinyxml2::XMLDocument* doc, tinyxml2:
 				string texturePath = "";
 
 				if (material.Textures[t])
-					texturePath = material.Textures[t]->GetPath();
+					texturePath = material.Textures[t]->GetFileSystemPath();
 
 				tinyxml2::XMLElement* elem_texture = doc->NewElement("Texture");
 				elem_texture->SetAttribute("Slot", t);

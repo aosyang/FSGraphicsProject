@@ -1,23 +1,23 @@
 <Scene>
-    <SceneObject Type="MeshObject" Mesh="../Assets/AO_Scene.FBX">
+    <SceneObject Type="MeshObject" Mesh="/AO_Scene.FBX">
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, -399.601349, 0.000000, 472.891449, 1.000000</Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/city.fbx">
+    <SceneObject Type="MeshObject" Mesh="/city.fbx">
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000</Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/city.fbx">
+    <SceneObject Type="MeshObject" Mesh="/city.fbx">
         <Transform>0.000000, -1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, -1558.368774, 796.001648, 0.000000, 1.000000</Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/city.fbx">
+    <SceneObject Type="MeshObject" Mesh="/city.fbx">
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, -1.000000, 0.000000, 0.000000, 0.000000, 324.354279, -1876.959229, 1.000000</Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/Sphere.FBX">
+    <SceneObject Type="MeshObject" Mesh="/Sphere.FBX">
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 151.713776, 92.997810, 0.000000, 1.000000</Transform>
     </SceneObject>
-    <SceneObject Name="Player" Type="MeshObject" Mesh="../Assets/tachikoma.fbx">
+    <SceneObject Name="Player" Type="MeshObject" Mesh="/tachikoma.fbx">
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 298.025269, 140.878616, -47.836910, 1.000000</Transform>
     </SceneObject>
-    <SceneObject Type="MeshObject" Mesh="../Assets/Island.FBX">
+    <SceneObject Type="MeshObject" Mesh="/Island.FBX">
         <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 918.920105, -208.590530, 153.841202, 1.000000</Transform>
     </SceneObject>
 </Scene>

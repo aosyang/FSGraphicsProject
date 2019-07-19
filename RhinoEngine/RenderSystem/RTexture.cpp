@@ -37,14 +37,14 @@ bool RTexture::LoadResourceData(bool bIsAsyncLoading)
 	ID3D11ShaderResourceView* srv;
 	size_t char_len;
 	wchar_t wszName[1024];
-	mbstowcs_s(&char_len, wszName, 1024, GetPath().data(), GetPath().size());
+	mbstowcs_s(&char_len, wszName, 1024, GetFileSystemPath().data(), GetFileSystemPath().size());
 
-	RLog("Loading texture [%s]...\n", GetPath().data());
+	RLog("Loading texture [%s]...\n", GetFileSystemPath().data());
 
 	bool bIsSRGBTexture = false;
 
 	unique_ptr<tinyxml2::XMLDocument> XmlDoc(new tinyxml2::XMLDocument());
-	string MetaFileName = GetPath() + ".meta";
+	string MetaFileName = GetFileSystemPath() + ".meta";
 	if (XmlDoc->LoadFile(MetaFileName.c_str()) == tinyxml2::XML_SUCCESS)
 	{
 		tinyxml2::XMLElement* MetaElem = XmlDoc->FirstChildElement("Metadata");
@@ -69,7 +69,7 @@ bool RTexture::LoadResourceData(bool bIsAsyncLoading)
 
 	if (FAILED(hr))
 	{
-		RLog("*** Failed to load texture [%s] ***\n", GetPath().data());
+		RLog("*** Failed to load texture [%s] ***\n", GetFileSystemPath().data());
 	}
 
 	if (pResource)

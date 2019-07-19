@@ -11,7 +11,7 @@
 RResourceBase::RResourceBase(ResourceType type, const string& path)
 	: m_State				(RS_Empty),
 	  m_Type				(type),
-	  m_ResourcePath		(path),
+	  m_FileSystemPath		(path),
 	  m_LoadingFinishTime	(0.0f)
 {
 }

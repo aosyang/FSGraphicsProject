@@ -43,7 +43,7 @@ bool DeferredShadingApp::Initialize()
 	m_PostProcessingEffects[PPE_ScreenSpaceRayTracing] = GPostProcessorManager.CreateEffectFromFile("ScreenSpaceRayTracing", "ScreenSpaceRayTracing.hlsl");
 
 	m_Scene.Initialize();
-	m_Scene.LoadFromFile("../Assets/ScriptTestMap.rmap");
+	m_Scene.LoadFromFile("/ScriptTestMap.rmap");
 
 	m_Camera = m_Scene.CreateSceneObjectOfType<RCamera>();
 	m_Camera->SetPosition(RVec3(-375, 1385, 1200));
@@ -108,7 +108,7 @@ bool DeferredShadingApp::Initialize()
 	m_AmbientIntensity = 0.2f;
 	m_LightRadius = 1.0f;
 
-	m_EnvCube = RResourceManager::Instance().LoadResource<RTexture>("../Assets/powderpeak.dds");
+	m_EnvCube = RResourceManager::Instance().LoadResource<RTexture>("/powderpeak.dds");
 	m_Skybox.CreateSkybox(RResourceManager::Instance().WrapSRV(m_CubeDepthBuffer.SRV));
 	//m_Skybox.CreateSkybox(m_EnvCube);
 
