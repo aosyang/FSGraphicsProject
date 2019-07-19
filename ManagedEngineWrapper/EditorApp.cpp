@@ -295,7 +295,24 @@ namespace ManagedEngineWrapper
 	{
 		m_SelectedObject = nullptr;
 		m_Scene.DestroyAllObjects();
-		m_Scene.LoadFromFile(filename);
+
+		// Check if file name is under base assets path by comparing their full path
+		const string FullPath = RFileUtil::GetFullPath(filename);
+		const string BaseAssetPath = RFileUtil::GetFullPath(RResourceManager::GetAssetsBasePath());
+		if (FullPath.find(BaseAssetPath) == 0)
+		{
+			string MapAssetPath = string("/") + FullPath.substr(BaseAssetPath.size());
+			m_Scene.LoadFromFile(MapAssetPath);
+		}
+		else
+		{
+			string ErrorMsg = string("Unable to open map file:\n");
+			ErrorMsg += FullPath;
+			ErrorMsg += string("\n\nPlease select a map from current base assets path: ");
+			ErrorMsg += BaseAssetPath;
+
+			MessageBoxA(NULL, ErrorMsg.c_str(), "Load Map Error", MB_ICONWARNING);
+		}
 
 		CreateEditorObjects();
 	}
