@@ -48,7 +48,7 @@ void RMaterial::Serialize(RSerializer& serializer)
 		int i;
 		for (i = 0; i < TextureNum; i++)
 		{
-			string textureName = Textures[i]->GetFileSystemPath();
+			string textureName = Textures[i]->GetAssetPath();
 			serializer.SerializeData(textureName);
 		}
 	}
@@ -74,13 +74,12 @@ bool RMaterial::LoadFromXmlFile(const string& Filename, vector<RMaterial>& OutMa
 			tinyxml2::XMLElement* elem_tex = elem->FirstChildElement();
 			while (elem_tex)
 			{
-				const char* textureName = elem_tex->GetText();
-
+				string textureName = elem_tex->GetText();
 				RTexture* texture = RResourceManager::Instance().FindResource<RTexture>(textureName);
 
 				if (!texture)
 				{
-					texture = RResourceManager::Instance().LoadResource<RTexture>(RResourceManager::GetRelativePathToResource(textureName).data(), EResourceLoadMode::Immediate);
+					texture = RResourceManager::Instance().LoadResource<RTexture>(textureName, EResourceLoadMode::Immediate);
 				}
 
 				material.Textures[material.TextureNum++] = texture;

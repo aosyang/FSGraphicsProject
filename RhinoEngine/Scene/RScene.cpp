@@ -220,8 +220,8 @@ void RScene::LoadFromFile(const string& MapAssetPath)
 
 								if (!texture)
 								{
-									const string Path = RResourceManager::GetRelativePathToResource(textureName);
-									texture = RResourceManager::Instance().LoadResource<RTexture>(Path.data(), EResourceLoadMode::Immediate);
+									const string Path(textureName);
+									texture = RResourceManager::Instance().LoadResource<RTexture>(Path, EResourceLoadMode::Immediate);
 								}
 							}
 
@@ -313,7 +313,7 @@ void RScene::SaveToFile(const char* filename)
 
 			RSMeshObject* meshObj = (RSMeshObject*)SceneObject;
 			RMesh* mesh = meshObj->GetMesh();
-			elem_obj->SetAttribute("Mesh", mesh->GetFileSystemPath().c_str());
+			elem_obj->SetAttribute("Mesh", mesh->GetAssetPath().c_str());
 
 			// Save materials
 			for (int i = 0; i < meshObj->GetMeshElementCount(); i++)

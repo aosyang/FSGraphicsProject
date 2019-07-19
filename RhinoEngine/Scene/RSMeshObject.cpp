@@ -116,7 +116,7 @@ void RSMeshObject::SerializeMaterialsToXML(tinyxml2::XMLDocument* doc, tinyxml2:
 				string texturePath = "";
 
 				if (material.Textures[t])
-					texturePath = material.Textures[t]->GetFileSystemPath();
+					texturePath = material.Textures[t]->GetAssetPath();
 
 				tinyxml2::XMLElement* elem_texture = doc->NewElement("Texture");
 				elem_texture->SetAttribute("Slot", t);

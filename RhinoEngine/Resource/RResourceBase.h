@@ -74,6 +74,7 @@ private:
 
 FORCEINLINE void RResourceBase::SetAssetPath(const string& InAssetPath)
 {
+	assert(InAssetPath.find("..") == string::npos);
 	m_AssetPath = InAssetPath;
 }
 

@@ -837,11 +837,11 @@ namespace
 					}
 
 					string ddsFilename = RFileUtil::ReplaceExtension(textureName, "dds");
-					RTexture* texture = RResourceManager::Instance().FindResource<RTexture>(ddsFilename.data());
+					RTexture* texture = RResourceManager::Instance().FindResource<RTexture>(ddsFilename);
 
 					if (!texture)
 					{
-						texture = RResourceManager::Instance().LoadResource<RTexture>(RResourceManager::GetRelativePathToResource(ddsFilename).data(), EResourceLoadMode::Immediate);
+						texture = RResourceManager::Instance().LoadResource<RTexture>(ddsFilename, EResourceLoadMode::Immediate);
 					}
 
 					meshMaterial.Textures[meshMaterial.TextureNum] = texture;
