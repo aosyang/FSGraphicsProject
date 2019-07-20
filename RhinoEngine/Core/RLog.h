@@ -5,17 +5,27 @@
 //=============================================================================
 #pragma once
 
-#include <stdio.h>
+/// A helper class that outputs logs to multiple targets
+class RLogOutputTargets : public RSingleton<RLogOutputTargets>
+{
+	friend class RSingleton<RLogOutputTargets>;
+public:
+	void Print(const char* Format, ...);
 
-#define LogBufSize 16384
+private:
+	RLogOutputTargets();
 
-extern char LogMsg[LogBufSize];
+	void OutputInternal(const char* Buffer);
+};
+
+#define GLogOutputTargets RLogOutputTargets::Instance()
+
 
 /// Log with variable number of arguments
-#define RLog(...)				{ sprintf_s(LogMsg, __VA_ARGS__); OutputDebugStringA(LogMsg); }
+#define RLog(...)				{ GLogOutputTargets.Print(__VA_ARGS__); }
 
 /// Log with warning prefix
-#define RLogWarning(...)		{ OutputDebugStringA("[Warning] "); RLog(__VA_ARGS__); }
+#define RLogWarning(...)		{ GLogOutputTargets.Print("[Warning] "); RLog(__VA_ARGS__); }
 
 /// Log with error prefix
-#define RLogError(...)			{ OutputDebugStringA("***Error*** "); RLog(__VA_ARGS__); }
+#define RLogError(...)			{ GLogOutputTargets.Print("***Error*** "); RLog(__VA_ARGS__); }
