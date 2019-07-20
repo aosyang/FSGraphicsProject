@@ -17,21 +17,18 @@ SimpleGame::SimpleGame()
 SimpleGame::~SimpleGame()
 {
 	m_Skybox.Release();
-	m_Scene.Release();
 }
 
 bool SimpleGame::Initialize()
 {
 	m_CamYaw = m_CamPitch = 0.0f;
 
-	m_Scene.Initialize();
-
 	// Load texture for skybox
 	const string SkyboxTextureName("/powderpeak.dds");
 	RResourceManager::Instance().LoadResource<RTexture>(SkyboxTextureName);
 	m_Skybox.CreateSkybox(SkyboxTextureName);
 
-	m_Camera = m_Scene.CreateSceneObjectOfType<RCamera>("UserCamera");
+	m_Camera = GSceneManager.DefaultScene()->CreateSceneObjectOfType<RCamera>("UserCamera");
 
 	m_Camera->SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
 	m_Camera->SetPosition(RVec3(0, 0, -500.0f));
@@ -163,8 +160,6 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 			m_RubikCube->Rotate(ERubikSide::North, ERubikRotation::CCW);
 		}
 	}
-
-	m_Scene.UpdateScene();
 }
 
 void SimpleGame::RenderScene()
@@ -187,13 +182,15 @@ TCHAR* SimpleGame::WindowTitle()
 
 void SimpleGame::SetupScene()
 {
-	m_RubikCube = m_Scene.CreateSceneObjectOfType<RgRubik>("Rubik Cube");
+	RScene* DefaultScene = GSceneManager.DefaultScene();
 
-	RSceneObject* GlobalLightInfo = m_Scene.CreateSceneObjectOfType<RSceneObject>("DirectionalLight");
+	m_RubikCube = DefaultScene->CreateSceneObjectOfType<RgRubik>("Rubik Cube");
+
+	RSceneObject* GlobalLightInfo = DefaultScene->CreateSceneObjectOfType<RSceneObject>("DirectionalLight");
 	RDirectionalLightComponent* DirLightComponent = GlobalLightInfo->AddNewComponent<RDirectionalLightComponent>();
 	DirLightComponent->SetParameters({ RVec3(-0.5f, 1, -0.3f), RColor(0.5f, 0.5f, 0.5f) });
 
-	m_CameraOrbiter = m_Scene.CreateSceneObjectOfType<RSceneObject>("CameraOrbiter");
+	m_CameraOrbiter = DefaultScene->CreateSceneObjectOfType<RSceneObject>("CameraOrbiter");
 	m_Camera->SetPosition(RVec3(0, 0, -500.0f));
 	m_Camera->AttachTo(m_CameraOrbiter);
 }

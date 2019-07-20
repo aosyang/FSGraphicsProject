@@ -6,6 +6,7 @@
 #include "Rhino.h"
 
 #include "REngine.h"
+#include "Scene/RSceneManager.h"
 
 static TCHAR szWindowClass[] = _T("rhinoapp");
 
@@ -68,6 +69,7 @@ bool REngine::Initialize(HWND hWnd, int width, int height)
 	GScriptSystem.Start();
 
 	GPostProcessorManager.Initialize();
+	GSceneManager.Initialize();
 
 	if (!m_Application->Initialize())
 		return false;
@@ -77,6 +79,7 @@ bool REngine::Initialize(HWND hWnd, int width, int height)
 
 void REngine::Shutdown()
 {
+	GSceneManager.Shutdown();
 	GPostProcessorManager.Release();
 
 	GScriptSystem.Shutdown();
@@ -164,6 +167,9 @@ void REngine::RunOneFrame(bool update_input)
 	m_Timer.Tick();
 
 	m_Application->UpdateScene(m_Timer);
+
+	// Update all registered scenes with their objects
+	GSceneManager.Update(m_Timer.DeltaTime());
 
 	if (!m_bIsEditor)
 	{

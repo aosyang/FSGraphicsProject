@@ -141,8 +141,6 @@ private:
 	RCamera*					m_Camera;
 	float						m_CamPitch, m_CamYaw;
 
-	RScene						m_Scene;
-
 	RPostProcessingEffect*		m_PostProcessingEffects[PPE_COUNT];
 	ID3D11RasterizerState*		m_RasterizerStates[RasterizerState_Count];
 

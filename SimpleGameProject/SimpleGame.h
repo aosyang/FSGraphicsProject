@@ -29,8 +29,6 @@ private:
 	void ScrambleCube();
 
 private:
-	RScene	m_Scene;
-
 	float m_CamYaw;
 	float m_CamPitch;
 	RCamera* m_Camera;

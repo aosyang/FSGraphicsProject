@@ -96,6 +96,7 @@ class RResourceBase;
 #include "Core/RDebugMenu.h"
 #include "Core/REngine.h"
 
+#include "Scene/RSceneManager.h"
 #include "Scene/RSceneObject.h"
 #include "Scene/RCamera.h"
 #include "Scene/RSMeshObject.h"

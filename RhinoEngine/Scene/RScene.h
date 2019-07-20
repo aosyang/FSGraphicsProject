@@ -6,6 +6,9 @@
 
 #pragma once
 
+class RSceneObject;
+class RSMeshObject;
+
 class RScene
 {
 public:
@@ -74,16 +77,10 @@ public:
 	void Render(const RFrustum* pFrustum = nullptr);
 	void RenderDepthPass(const RFrustum* pFrustum = nullptr);
 
-	void UpdateScene();
+	void UpdateScene(float DeltaTime);
 
 	vector<RSceneObject*> EnumerateSceneObjects() const;
 private:
-
-	bool XmlReadObjectTransform(tinyxml2::XMLElement* ObjectElement, RVec3& OutPosition, RQuat& OutRotation, RVec3& OutScale);
-	void XmlWriteObjectTransform(tinyxml2::XMLElement* ObjectElement, RSceneObject* SceneObject);
-
-	bool XmlReadObjectTransformAsMatrix(tinyxml2::XMLElement* ObjectElement, RMatrix4& OutMatrix);
-	void XmlWriteObjectTransformAsMatrix(tinyxml2::XMLElement* ObjectElement, RSceneObject* SceneObject);
 
 	vector<RSceneObject*>		m_SceneObjects;
 	RCamera*					m_RenderCamera;			// Default camera will be used for frustum culling

@@ -9,8 +9,223 @@
 
 #include "../tinyxml2/tinyxml2.h"
 
-// If set to 1, rotations are saved in degrees instead of radians
+// If set to 1, rotations saved in local files are in degrees instead of radians
 #define SAVE_ROTATION_IN_DEGREES 0
+
+// XML helper functions
+namespace
+{
+	bool XmlReadObjectTransform(tinyxml2::XMLElement* ObjectElement, RVec3& OutPosition, RQuat& OutRotation, RVec3& OutScale)
+	{
+		if (ObjectElement)
+		{
+			tinyxml2::XMLElement* XmlElementTransform = ObjectElement->FirstChildElement("Transform");
+			if (XmlElementTransform)
+			{
+				int ElementNums = 0;
+
+				RVec3 Position(0.0f, 0.0f, 0.0f);
+				RQuat Rotation = RQuat::IDENTITY;
+				RVec3 Scale = RVec3(1.0f, 1.0f, 1.0f);
+
+				tinyxml2::XMLElement* XmlElementPosition = XmlElementTransform->FirstChildElement("Position");
+				if (XmlElementPosition)
+				{
+					float PosData[3];
+					stringstream StringStream(XmlElementPosition->GetText());
+
+					for (int n = 0; n < 3; n++)
+					{
+						StringStream >> PosData[n];
+
+						// Ignore remaining commas in the input string
+						if (StringStream.peek() == ',')
+						{
+							StringStream.ignore();
+						}
+					}
+
+					Position = RVec3(PosData);
+					ElementNums++;
+				}
+
+				tinyxml2::XMLElement* XmlElementRotation = XmlElementTransform->FirstChildElement("Rotation");
+				if (XmlElementRotation)
+				{
+					float RotData[3];
+					stringstream StringStream(XmlElementRotation->GetText());
+
+					for (int n = 0; n < 3; n++)
+					{
+						StringStream >> RotData[n];
+
+						// Ignore remaining commas in the input string
+						if (StringStream.peek() == ',')
+						{
+							StringStream.ignore();
+						}
+
+#if (SAVE_ROTATION_IN_DEGREES == 1)
+						RotData[n] = RMath::DegreeToRadian(RotData[n]);
+#endif	// (SAVE_ROTATION_IN_DEGREES == 1)
+					}
+
+					Rotation = RQuat::Euler(RVec3(RotData));
+					ElementNums++;
+				}
+
+				tinyxml2::XMLElement* XmlElementScale = XmlElementTransform->FirstChildElement("Scale");
+				if (XmlElementScale)
+				{
+					float ScaleData[3];
+					stringstream StringStream(XmlElementScale->GetText());
+
+					for (int n = 0; n < 3; n++)
+					{
+						StringStream >> ScaleData[n];
+
+						// Ignore remaining commas in the input string
+						if (StringStream.peek() == ',')
+						{
+							StringStream.ignore();
+						}
+					}
+
+					Scale = RVec3(ScaleData);
+					ElementNums++;
+				}
+
+				if (ElementNums > 0)
+				{
+					OutPosition = Position;
+					OutRotation = Rotation;
+					OutScale = Scale;
+
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	void XmlWriteObjectTransform(tinyxml2::XMLElement* ObjectElement, RSceneObject* SceneObject)
+	{
+		if (SceneObject && ObjectElement)
+		{
+			tinyxml2::XMLDocument* XmlDocument = ObjectElement->GetDocument();
+			if (XmlDocument)
+			{
+				tinyxml2::XMLElement* XmlElementTransform = XmlDocument->NewElement("Transform");
+				if (XmlElementTransform)
+				{
+					tinyxml2::XMLElement* XmlElementPosition = XmlDocument->NewElement("Position");
+					if (XmlElementPosition)
+					{
+						RVec3 Position = SceneObject->GetPosition();
+
+						char msg_buf[512];
+						sprintf_s(msg_buf, sizeof(msg_buf), "%f, %f, %f", Position.X(), Position.Y(), Position.Z());
+						XmlElementPosition->SetText(msg_buf);
+						XmlElementTransform->InsertEndChild(XmlElementPosition);
+					}
+
+					tinyxml2::XMLElement* XmlElementRotation = XmlDocument->NewElement("Rotation");
+					if (XmlElementRotation)
+					{
+						RVec3 EulerAngles = SceneObject->GetRotation().ToEuler();
+
+						char msg_buf[512];
+						sprintf_s(msg_buf, sizeof(msg_buf), "%f, %f, %f",
+#if (SAVE_ROTATION_IN_DEGREES == 1)
+							RMath::RadianToDegree(EulerAngles.X()),
+							RMath::RadianToDegree(EulerAngles.Y()),
+							RMath::RadianToDegree(EulerAngles.Z())
+#else
+							EulerAngles.X(), EulerAngles.Y(), EulerAngles.Z()
+#endif	// (SAVE_ROTATION_IN_DEGREES == 1)
+						);
+						XmlElementRotation->SetText(msg_buf);
+						XmlElementTransform->InsertEndChild(XmlElementRotation);
+					}
+
+					tinyxml2::XMLElement* XmlElementScale = XmlDocument->NewElement("Scale");
+					if (XmlElementScale)
+					{
+						RVec3 Scale = SceneObject->GetScale();
+
+						char msg_buf[512];
+						sprintf_s(msg_buf, sizeof(msg_buf), "%f, %f, %f", Scale.X(), Scale.Y(), Scale.Z());
+						XmlElementScale->SetText(msg_buf);
+						XmlElementTransform->InsertEndChild(XmlElementScale);
+					}
+
+					ObjectElement->InsertEndChild(XmlElementTransform);
+				}
+			}
+		}
+	}
+
+	bool XmlReadObjectTransformAsMatrix(tinyxml2::XMLElement* ObjectElement, RMatrix4& OutMatrix)
+	{
+		if (ObjectElement)
+		{
+			tinyxml2::XMLElement* XmlElementTransform = ObjectElement->FirstChildElement("Transform");
+			if (XmlElementTransform)
+			{
+				RMatrix4 Matrix;
+				stringstream StringStream(XmlElementTransform->GetText());
+
+				for (int n = 0; n < 16; n++)
+				{
+					StringStream >> ((float*)&Matrix)[n];
+
+					// Ignore remaining commas in the input string
+					if (StringStream.peek() == ',')
+					{
+						StringStream.ignore();
+					}
+				}
+
+				OutMatrix = Matrix;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	void XmlWriteObjectTransformAsMatrix(tinyxml2::XMLElement* ObjectElement, RSceneObject* SceneObject)
+	{
+		if (SceneObject && ObjectElement)
+		{
+			tinyxml2::XMLDocument* XmlDocument = ObjectElement->GetDocument();
+			if (XmlDocument)
+			{
+				tinyxml2::XMLElement* XmlElementTransform = XmlDocument->NewElement("Transform");
+				if (XmlElementTransform)
+				{
+					// Save transformation
+					const RMatrix4& t = SceneObject->GetTransformMatrix();
+
+					char msg_buf[512];
+					sprintf_s(msg_buf, sizeof(msg_buf),
+						"%f, %f, %f, %f, "
+						"%f, %f, %f, %f, "
+						"%f, %f, %f, %f, "
+						"%f, %f, %f, %f",
+						t._m11, t._m12, t._m13, t._m14,
+						t._m21, t._m22, t._m23, t._m24,
+						t._m31, t._m32, t._m33, t._m34,
+						t._m41, t._m42, t._m43, t._m44);
+
+					XmlElementTransform->SetText(msg_buf);
+					ObjectElement->InsertEndChild(XmlElementTransform);
+				}
+			}
+		}
+	}
+}
 
 RScene::RScene()
 	: m_RenderCamera(nullptr)
@@ -454,7 +669,7 @@ void RScene::RenderDepthPass(const RFrustum* pFrustum)
 	}
 }
 
-void RScene::UpdateScene()
+void RScene::UpdateScene(float DeltaTime)
 {
 	for (RSceneObject* SceneObject : m_SceneObjects)
 	{
@@ -477,215 +692,4 @@ vector<RSceneObject*> RScene::EnumerateSceneObjects() const
 	}
 
 	return OutputObjects;
-}
-
-bool RScene::XmlReadObjectTransform(tinyxml2::XMLElement* ObjectElement, RVec3& OutPosition, RQuat& OutRotation, RVec3& OutScale)
-{
-	if (ObjectElement)
-	{
-		tinyxml2::XMLElement* XmlElementTransform = ObjectElement->FirstChildElement("Transform");
-		if (XmlElementTransform)
-		{
-			int ElementNums = 0;
-
-			RVec3 Position(0.0f, 0.0f, 0.0f);
-			RQuat Rotation = RQuat::IDENTITY;
-			RVec3 Scale = RVec3(1.0f, 1.0f, 1.0f);
-
-			tinyxml2::XMLElement* XmlElementPosition = XmlElementTransform->FirstChildElement("Position");
-			if (XmlElementPosition)
-			{
-				float PosData[3];
-				stringstream StringStream(XmlElementPosition->GetText());
-
-				for (int n = 0; n < 3; n++)
-				{
-					StringStream >> PosData[n];
-
-					// Ignore remaining commas in the input string
-					if (StringStream.peek() == ',')
-					{
-						StringStream.ignore();
-					}
-				}
-
-				Position = RVec3(PosData);
-				ElementNums++;
-			}
-
-			tinyxml2::XMLElement* XmlElementRotation = XmlElementTransform->FirstChildElement("Rotation");
-			if (XmlElementRotation)
-			{
-				float RotData[3];
-				stringstream StringStream(XmlElementRotation->GetText());
-
-				for (int n = 0; n < 3; n++)
-				{
-					StringStream >> RotData[n];
-
-					// Ignore remaining commas in the input string
-					if (StringStream.peek() == ',')
-					{
-						StringStream.ignore();
-					}
-
-#if (SAVE_ROTATION_IN_DEGREES == 1)
-					RotData[n] = RMath::DegreeToRadian(RotData[n]);
-#endif	// (SAVE_ROTATION_IN_DEGREES == 1)
-				}
-
-				Rotation = RQuat::Euler(RVec3(RotData));
-				ElementNums++;
-			}
-
-			tinyxml2::XMLElement* XmlElementScale = XmlElementTransform->FirstChildElement("Scale");
-			if (XmlElementScale)
-			{
-				float ScaleData[3];
-				stringstream StringStream(XmlElementScale->GetText());
-
-				for (int n = 0; n < 3; n++)
-				{
-					StringStream >> ScaleData[n];
-
-					// Ignore remaining commas in the input string
-					if (StringStream.peek() == ',')
-					{
-						StringStream.ignore();
-					}
-				}
-
-				Scale = RVec3(ScaleData);
-				ElementNums++;
-			}
-
-			if (ElementNums > 0)
-			{
-				OutPosition = Position;
-				OutRotation = Rotation;
-				OutScale = Scale;
-
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-void RScene::XmlWriteObjectTransform(tinyxml2::XMLElement* ObjectElement, RSceneObject* SceneObject)
-{
-	if (SceneObject && ObjectElement)
-	{
-		tinyxml2::XMLDocument* XmlDocument = ObjectElement->GetDocument();
-		if (XmlDocument)
-		{
-			tinyxml2::XMLElement* XmlElementTransform = XmlDocument->NewElement("Transform");
-			if (XmlElementTransform)
-			{
-				tinyxml2::XMLElement* XmlElementPosition = XmlDocument->NewElement("Position");
-				if (XmlElementPosition)
-				{
-					RVec3 Position = SceneObject->GetPosition();
-
-					char msg_buf[512];
-					sprintf_s(msg_buf, sizeof(msg_buf), "%f, %f, %f", Position.X(), Position.Y(), Position.Z());
-					XmlElementPosition->SetText(msg_buf);
-					XmlElementTransform->InsertEndChild(XmlElementPosition);
-				}
-
-				tinyxml2::XMLElement* XmlElementRotation = XmlDocument->NewElement("Rotation");
-				if (XmlElementRotation)
-				{
-					RVec3 EulerAngles = SceneObject->GetRotation().ToEuler();
-
-					char msg_buf[512];
-					sprintf_s(msg_buf, sizeof(msg_buf), "%f, %f, %f",
-#if (SAVE_ROTATION_IN_DEGREES == 0)
-						EulerAngles.X(), EulerAngles.Y(), EulerAngles.Z()
-#else
-						RMath::RadianToDegree(EulerAngles.X()),
-						RMath::RadianToDegree(EulerAngles.Y()),
-						RMath::RadianToDegree(EulerAngles.Z())
-#endif	// (SAVE_ROTATION_IN_DEGREES == 1)
-					);
-					XmlElementRotation->SetText(msg_buf);
-					XmlElementTransform->InsertEndChild(XmlElementRotation);
-				}
-
-				tinyxml2::XMLElement* XmlElementScale = XmlDocument->NewElement("Scale");
-				if (XmlElementScale)
-				{
-					RVec3 Scale = SceneObject->GetScale();
-
-					char msg_buf[512];
-					sprintf_s(msg_buf, sizeof(msg_buf), "%f, %f, %f", Scale.X(), Scale.Y(), Scale.Z());
-					XmlElementScale->SetText(msg_buf);
-					XmlElementTransform->InsertEndChild(XmlElementScale);
-				}
-
-				ObjectElement->InsertEndChild(XmlElementTransform);
-			}
-		}
-	}
-}
-
-bool RScene::XmlReadObjectTransformAsMatrix(tinyxml2::XMLElement* ObjectElement, RMatrix4& OutMatrix)
-{
-	if (ObjectElement)
-	{
-		tinyxml2::XMLElement* XmlElementTransform = ObjectElement->FirstChildElement("Transform");
-		if (XmlElementTransform)
-		{
-			RMatrix4 Matrix;
-			stringstream StringStream(XmlElementTransform->GetText());
-
-			for (int n = 0; n < 16; n++)
-			{
-				StringStream >> ((float*)&Matrix)[n];
-
-				// Ignore remaining commas in the input string
-				if (StringStream.peek() == ',')
-				{
-					StringStream.ignore();
-				}
-			}
-
-			OutMatrix = Matrix;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-void RScene::XmlWriteObjectTransformAsMatrix(tinyxml2::XMLElement* ObjectElement, RSceneObject* SceneObject)
-{
-	if (SceneObject && ObjectElement)
-	{
-		tinyxml2::XMLDocument* XmlDocument = ObjectElement->GetDocument();
-		if (XmlDocument)
-		{
-			tinyxml2::XMLElement* XmlElementTransform = XmlDocument->NewElement("Transform");
-			if (XmlElementTransform)
-			{
-				// Save transformation
-				const RMatrix4& t = SceneObject->GetTransformMatrix();
-
-				char msg_buf[512];
-				sprintf_s(msg_buf, sizeof(msg_buf),
-					"%f, %f, %f, %f, "
-					"%f, %f, %f, %f, "
-					"%f, %f, %f, %f, "
-					"%f, %f, %f, %f",
-					t._m11, t._m12, t._m13, t._m14,
-					t._m21, t._m22, t._m23, t._m24,
-					t._m31, t._m32, t._m33, t._m34,
-					t._m41, t._m42, t._m43, t._m44);
-
-				XmlElementTransform->SetText(msg_buf);
-				ObjectElement->InsertEndChild(XmlElementTransform);
-			}
-		}
-	}
 }

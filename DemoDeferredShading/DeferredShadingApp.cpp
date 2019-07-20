@@ -30,8 +30,6 @@ DeferredShadingApp::~DeferredShadingApp()
 	m_ScenePassBuffer.Release();
 	m_DepthBuffer.Release();
 	m_CubeDepthBuffer.Release();
-
-	m_Scene.Release();
 }
 
 bool DeferredShadingApp::Initialize()
@@ -42,10 +40,10 @@ bool DeferredShadingApp::Initialize()
 	m_PostProcessingEffects[PPE_DeferredPointLightPass] = GPostProcessorManager.CreateEffectFromFile("DeferredPointLightPass", "DeferredPointLightPass.hlsl");
 	m_PostProcessingEffects[PPE_ScreenSpaceRayTracing] = GPostProcessorManager.CreateEffectFromFile("ScreenSpaceRayTracing", "ScreenSpaceRayTracing.hlsl");
 
-	m_Scene.Initialize();
-	m_Scene.LoadFromFile("/ScriptTestMap.rmap");
+	RScene* DefaultScene = GSceneManager.DefaultScene();
+	DefaultScene->LoadFromFile("/ScriptTestMap.rmap");
 
-	m_Camera = m_Scene.CreateSceneObjectOfType<RCamera>();
+	m_Camera = DefaultScene->CreateSceneObjectOfType<RCamera>();
 	m_Camera->SetPosition(RVec3(-375, 1385, 1200));
 	m_Camera->SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
 	m_CamPitch = 0.65f;
@@ -215,6 +213,8 @@ void DeferredShadingApp::UpdateScene(const RTimer& timer)
 
 void DeferredShadingApp::RenderScene()
 {
+	RScene* DefaultScene = GSceneManager.DefaultScene();
+
 	RMatrix4 viewMatrix = m_Camera->GetViewMatrix();
 	RMatrix4 projMatrix = m_Camera->GetProjectionMatrix();
 
@@ -269,7 +269,7 @@ void DeferredShadingApp::RenderScene()
 	{
 		GRenderer.SetUsingDefferedShading(true);
 
-		m_Scene.Render(&frustum);
+		DefaultScene->Render(&frustum);
 
 		GRenderer.SetUsingDefferedShading(false);
 
@@ -439,7 +439,7 @@ void DeferredShadingApp::RenderScene()
 	}
 	else
 	{
-		m_Scene.Render(&frustum);
+		DefaultScene->Render(&frustum);
 	}
 
 	GRenderer.Clear(false, RColor(0, 0, 0));
@@ -615,14 +615,16 @@ CubeDepthBuffer DeferredShadingApp::CreateCubeDepthBuffer()
 
 void DeferredShadingApp::RenderPointLightCubemapDepth(const RVec3& position, float radius)
 {
+	RScene* DefaultScene = GSceneManager.DefaultScene();
+
 	static RCamera* cubeCameras[6]
 	{
-		m_Scene.CreateSceneObjectOfType<RCamera>(),
-		m_Scene.CreateSceneObjectOfType<RCamera>(),
-		m_Scene.CreateSceneObjectOfType<RCamera>(),
-		m_Scene.CreateSceneObjectOfType<RCamera>(),
-		m_Scene.CreateSceneObjectOfType<RCamera>(),
-		m_Scene.CreateSceneObjectOfType<RCamera>(),
+		DefaultScene->CreateSceneObjectOfType<RCamera>(),
+		DefaultScene->CreateSceneObjectOfType<RCamera>(),
+		DefaultScene->CreateSceneObjectOfType<RCamera>(),
+		DefaultScene->CreateSceneObjectOfType<RCamera>(),
+		DefaultScene->CreateSceneObjectOfType<RCamera>(),
+		DefaultScene->CreateSceneObjectOfType<RCamera>(),
 	};
 
 	RVec3 targets[6] =
@@ -674,6 +676,6 @@ void DeferredShadingApp::RenderPointLightCubemapDepth(const RVec3& position, flo
 		RConstantBuffers::cbScene.BindBuffer();
 
 		RFrustum frustum = cubeCameras[i]->GetFrustum();
-		m_Scene.RenderDepthPass(&frustum);
+		DefaultScene->RenderDepthPass(&frustum);
 	}
 }
