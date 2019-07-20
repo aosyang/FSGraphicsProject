@@ -2,17 +2,26 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 
 PROJECT(RhinoLevelEditor VERSION 0.1.0 LANGUAGES CSharp)
 
+INCLUDE(CSharpUtilities)
+
 # Recursively find all .cpp and .h files
 FILE(GLOB SRC
 	 "*.cs"
 	 "*.h"
+	 "*.resx"
+	 "*.settings"
 )
 
+CSHARP_SET_WINDOWS_FORMS_PROPERTIES(${SRC})
+SET_SOURCE_FILES_PROPERTIES(EngineCanvas.cs PROPERTIES VS_CSHARP_SubType "UserControl")
+
 INCLUDE_DIRECTORIES(${RHINO_ENGINE_INCLUDE_DIR})
-ADD_EXECUTABLE(RhinoLevelEditor WIN32 ${SRC})
-ADD_DEPENDENCIES(RhinoLevelEditor RhinoEngine ManagedInterface ManagedEngineWrapper)
+ADD_EXECUTABLE(RhinoLevelEditor App.config ${SRC})
+ADD_DEPENDENCIES(RhinoLevelEditor ManagedInterface ManagedEngineWrapper)
 SET_TARGET_PROPERTIES(RhinoLevelEditor PROPERTIES COMMON_LANGUAGE_RUNTIME "")
 SET_TARGET_PROPERTIES(RhinoLevelEditor PROPERTIES VS_DOTNET_REFERENCES "System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml")
+SET_TARGET_PROPERTIES(RhinoLevelEditor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.5.2")
+SET_TARGET_PROPERTIES(RhinoLevelEditor PROPERTIES VS_GLOBAL_ROOTNAMESPACE RhinoLevelEditor)
 
 # Copy libfbxsdk.dll to the executable directory
 ADD_CUSTOM_COMMAND(TARGET RhinoLevelEditor
