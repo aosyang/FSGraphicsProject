@@ -10,7 +10,7 @@
 
 class RCamera : public RSceneObject
 {
-	DECLARE_SCENE_OBJECT(RSceneObject);
+	DECLARE_SCENE_OBJECT(RCamera, RSceneObject);
 public:
 	const RMatrix4& GetViewMatrix();
 	const RMatrix4& GetProjectionMatrix();

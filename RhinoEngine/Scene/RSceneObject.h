@@ -5,8 +5,29 @@
 //=============================================================================
 #pragma once
 
+#include "ISceneComponent.h"
+
 class RScene;
-class RSceneComponentBase;
+
+/// Runtime type info for scene object classes
+struct RSceneObjectRuntimeTypeInfo
+{
+	RSceneObjectRuntimeTypeInfo(const char* ClassName);
+
+	/// Type id from hashed class name string
+	size_t TypeId;
+};
+
+#define DECLARE_SCENE_OBJECT(type, base)\
+		typedef base Base; friend class RScene;\
+	public:\
+		static size_t _StaticGetRuntimeTypeId() { static RSceneObjectRuntimeTypeInfo _RuntimeTypeInfo(#type); return _RuntimeTypeInfo.TypeId; }\
+		virtual size_t GetRuntimeTypeId() const override { return type::_StaticGetRuntimeTypeId(); }\
+	private:
+
+// Note: Implementation is not being used currently
+#define IMPLEMENT_SCENE_OBJECT(type)
+
 
 /// Object creation flags
 const int CF_InternalObject		= 1 << 0;		// Object will not be manipulated by user directly
@@ -38,7 +59,16 @@ class RSceneObject
 public:
 	virtual void Release();
 
-	virtual int GetRuntimeTypeId() const { return 0; }
+	/// Returns runtime type id for the class
+	virtual size_t GetRuntimeTypeId() const { return 0; }
+
+	/// Dynamic-cast to another scene object type. Returns nullptr if types don't match
+	/// TODO: Need inheritance support
+	template<typename T>
+	T* CastTo() { return IsType<T>() ? static_cast<T*>(this) : nullptr; }
+
+	template<typename T>
+	const T* CastTo() const { return IsType<T>() ? static_cast<const T*>(this) : nullptr; }
 
 	/// Set name of scene object
 	void SetName(const string& name)		{ m_Name = name; }
@@ -164,35 +194,15 @@ protected:
 	int				m_Flags;
 
 	/// Components of this scene object
-	vector<unique_ptr<RSceneComponentBase>>	SceneComponents;
+	vector<unique_ptr<ISceneComponent>>	SceneComponents;
 
 	static int NextUniqueRuntimeTypeId;
 };
 
-struct RSceneObjectRuntimeTypeInfo
-{
-	RSceneObjectRuntimeTypeInfo();
-
-	int TypeId;
-};
-
-#define DECLARE_SCENE_OBJECT(base)\
-	typedef base Base; friend class RScene;\
-	\
-	static RSceneObjectRuntimeTypeInfo _RuntimeTypeInfo;\
-	public:\
-	static int _StaticGetRuntimeTypeId() { return _RuntimeTypeInfo.TypeId; }\
-	virtual int GetRuntimeTypeId() const override { return _StaticGetRuntimeTypeId(); }\
-	private:
-
-#define IMPLEMENT_SCENE_OBJECT(type)\
-	RSceneObjectRuntimeTypeInfo type::_RuntimeTypeInfo;
-
-
 template<typename T>
 FORCEINLINE T* RSceneObject::AddNewComponent()
 {
-	SceneComponents.push_back(move(T::CreateComponentUnique(this)));
+	SceneComponents.push_back(move(T::_CreateComponentUnique(this)));
 	return static_cast<T*>(SceneComponents.back().get());
 }
 

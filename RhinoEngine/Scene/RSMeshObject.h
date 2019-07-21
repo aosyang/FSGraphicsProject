@@ -15,7 +15,7 @@ namespace tinyxml2
 
 class RSMeshObject : public RSceneObject
 {
-	DECLARE_SCENE_OBJECT(RSceneObject);
+	DECLARE_SCENE_OBJECT(RSMeshObject, RSceneObject);
 public:
 	RSceneObject* Clone() const override;
 

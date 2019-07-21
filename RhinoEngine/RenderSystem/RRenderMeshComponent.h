@@ -22,12 +22,9 @@ struct RenderViewInfo
 
 class RRenderMeshComponent : public RSceneComponentBase
 {
-	typedef RSceneComponentBase Base;
+	DECLARE_SCENE_COMPONENT(RRenderMeshComponent, RSceneComponentBase);
 public:
 	virtual ~RRenderMeshComponent() override;
-
-	/// Static creator function
-	static unique_ptr<RRenderMeshComponent> CreateComponentUnique(RSceneObject* InOwner);
 
 	virtual void Update(float DeltaTime) override;
 

@@ -43,11 +43,6 @@ RDirectionalLightComponent::~RDirectionalLightComponent()
 	GRenderer.UnregisterLight(this);
 }
 
-unique_ptr<RDirectionalLightComponent> RDirectionalLightComponent::CreateComponentUnique(RSceneObject* InOwner)
-{
-	return unique_ptr<RDirectionalLightComponent>(new RDirectionalLightComponent(InOwner));
-}
-
 ELightType RDirectionalLightComponent::GetLightType()
 {
 	return ELightType::DirectionalLight;

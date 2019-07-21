@@ -14,7 +14,7 @@
 /// Base fighting game player controller
 class FTGPlayerController : public RSMeshObject
 {
-	DECLARE_SCENE_OBJECT(RSMeshObject);
+	DECLARE_SCENE_OBJECT(FTGPlayerController, RSMeshObject);
 public:
 	~FTGPlayerController();
 

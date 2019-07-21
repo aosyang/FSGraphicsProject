@@ -7,8 +7,10 @@
 #include "FightingGameApp.h"
 
 FightingGameApp::FightingGameApp()
-	: m_Player(nullptr),
-	  m_Camera(nullptr)
+	: m_Player(nullptr)
+	, m_Camera(nullptr)
+	, m_FreeFlyMode(false)
+	, m_FreeFlyCameraControl(nullptr)
 {
 
 }
@@ -30,6 +32,7 @@ bool FightingGameApp::Initialize()
 	m_Camera = DefaultScene->CreateSceneObjectOfType<RCamera>();
 	m_Camera->SetTransform(RVec3(407.023712f, 339.007507f, 876.396484f), RQuat::Euler(0.09f, 3.88659930f, 0.0f));
 	m_Camera->SetupView(45.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
+	m_FreeFlyCameraControl = m_Camera->AddNewComponent<RFreeFlyCameraControl>();
 
 	//RSceneObject* player = DefaultScene->FindObject("Player");
 	//for (UINT i = 0; i < DefaultScene->GetSceneObjects().size(); i++)
@@ -56,6 +59,7 @@ bool FightingGameApp::Initialize()
 			// Make each AI play animation at a slightly different speed
 			m_AIPlayer[i]->SetAnimationDeviation(RMath::RandRangedF(0.8f, 1.2f));
 
+			// Create AI combat logic component
 			m_AIPlayer[i]->AddNewComponent<AIFighterLogic>();
 		}
 	}
@@ -88,46 +92,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		}
 	}
 
-	if (m_Player)
-	{
-		RVec3 moveVec(0, 0, 0);
-
-		RVec3 charRight = m_Camera->GetRightVector();
-		RVec3 charForward = RVec3::Cross(charRight, RVec3(0, 1, 0));
-
-		if (RInput.IsKeyDown('W')) moveVec += charForward;
-		if (RInput.IsKeyDown('S')) moveVec -= charForward;
-		if (RInput.IsKeyDown('A')) moveVec -= charRight;
-		if (RInput.IsKeyDown('D')) moveVec += charRight;
-
-		if (moveVec.SquaredMagitude() > 0.0f)
-		{
-			moveVec.Normalize();
-			moveVec *= 600.0f;
-		}
-
-		m_Player->SetMovementInput(moveVec);
-
-		if (RInput.GetBufferedKeyState(VK_SPACE) == EBufferedKeyState::Pressed)
-		{
-			m_Player->PerformSpinAttack();
-		}
-
-		if (RInput.GetBufferedKeyState('J') == EBufferedKeyState::Pressed)
-		{
-			m_Player->PerformPunch();
-		}
-
-		if (RInput.GetBufferedKeyState('K') == EBufferedKeyState::Pressed)
-		{
-			m_Player->PerformKick();
-		}
-
-		if (RInput.GetBufferedKeyState('C') == EBufferedKeyState::Pressed)
-		{
-			m_Player->SetBehavior(BHV_KnockedDown);
-		}
-	}
+	UpdateUserInput();
 
 	// Update all player controllers
 	for (auto SceneObject : FTGPlayerController::ActivePlayerControllers)
@@ -326,8 +291,69 @@ void FightingGameApp::OnResize(int width, int height)
 	}
 }
 
+void FightingGameApp::UpdateUserInput()
+{
+	if (RInput.GetBufferedKeyState(VK_TAB) == EBufferedKeyState::Pressed)
+	{
+		m_FreeFlyMode = !m_FreeFlyMode;
+		if (m_FreeFlyCameraControl)
+		{
+			m_FreeFlyCameraControl->SetEnabled(m_FreeFlyMode);
+		}
+	}
+
+	if (!m_FreeFlyMode || !m_FreeFlyCameraControl)
+	{
+		if (m_Player)
+		{
+			RVec3 moveVec(0, 0, 0);
+
+			RVec3 charRight = m_Camera->GetRightVector();
+			RVec3 charForward = RVec3::Cross(charRight, RVec3(0, 1, 0));
+
+			if (RInput.IsKeyDown('W')) moveVec += charForward;
+			if (RInput.IsKeyDown('S')) moveVec -= charForward;
+			if (RInput.IsKeyDown('A')) moveVec -= charRight;
+			if (RInput.IsKeyDown('D')) moveVec += charRight;
+
+			if (moveVec.SquaredMagitude() > 0.0f)
+			{
+				moveVec.Normalize();
+				moveVec *= 600.0f;
+			}
+
+			m_Player->SetMovementInput(moveVec);
+
+			if (RInput.GetBufferedKeyState(VK_SPACE) == EBufferedKeyState::Pressed)
+			{
+				m_Player->PerformSpinAttack();
+			}
+
+			if (RInput.GetBufferedKeyState('J') == EBufferedKeyState::Pressed)
+			{
+				m_Player->PerformPunch();
+			}
+
+			if (RInput.GetBufferedKeyState('K') == EBufferedKeyState::Pressed)
+			{
+				m_Player->PerformKick();
+			}
+
+			if (RInput.GetBufferedKeyState('C') == EBufferedKeyState::Pressed)
+			{
+				m_Player->SetBehavior(BHV_KnockedDown);
+			}
+		}
+	}
+}
+
 void FightingGameApp::UpdateCameraPosition(float DeltaTime)
 {
+	if (m_FreeFlyMode)
+	{
+		return;
+	}
+
 	RVec3 PlayerPosition = m_Player ? m_Player->GetPosition() : RVec3(0, 0, 0);
 
 	RMatrix4 playerTranslation = RMatrix4::CreateTranslation(PlayerPosition);

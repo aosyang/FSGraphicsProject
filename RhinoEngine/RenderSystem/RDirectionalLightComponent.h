@@ -19,11 +19,9 @@ struct DirectionalLightParam
 
 class RDirectionalLightComponent : public RSceneComponentBase, public ILight, public IShadowCaster
 {
-	typedef RSceneComponentBase Base;
+	DECLARE_SCENE_COMPONENT(RDirectionalLightComponent, RSceneComponentBase);
 public:
 	virtual ~RDirectionalLightComponent() override;
-
-	static unique_ptr<RDirectionalLightComponent> CreateComponentUnique(RSceneObject* InOwner);
 
 	virtual ELightType GetLightType() override;
 

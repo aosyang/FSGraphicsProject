@@ -12,13 +12,7 @@ AIFighterLogic::AIFighterLogic(RSceneObject* InOwner)
 	, bIsWaiting(false)
 	, WaitTime(0.0f)
 {
-	// TODO: Should verify if owner pointer is a type of player
-	ControlledPlayer = static_cast<FTGPlayerController*>(InOwner);
-}
-
-unique_ptr<AIFighterLogic> AIFighterLogic::CreateComponentUnique(RSceneObject* InOwner)
-{
-	return unique_ptr<AIFighterLogic>(new AIFighterLogic(InOwner));
+	ControlledPlayer = InOwner->CastTo<FTGPlayerController>();
 }
 
 void AIFighterLogic::Update(float DeltaTime)

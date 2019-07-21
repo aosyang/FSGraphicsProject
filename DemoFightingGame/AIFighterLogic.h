@@ -11,14 +11,11 @@
 // AI combat logic class
 class AIFighterLogic : public RSceneComponentBase
 {
-	typedef RSceneComponentBase Base;
+	DECLARE_SCENE_COMPONENT(AIFighterLogic, RSceneComponentBase);
 public:
 	AIFighterLogic(RSceneObject* InOwner);
 
-	/// Static creator function
-	static unique_ptr<AIFighterLogic> CreateComponentUnique(RSceneObject* InOwner);
-
-	/// Overrides RSceneComponentBase
+	/// Overrides ISceneComponent
 	virtual void Update(float DeltaTime) override;
 
 private:

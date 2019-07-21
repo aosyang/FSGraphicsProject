@@ -10,4 +10,6 @@ class ISceneComponent
 {
 public:
 	virtual ~ISceneComponent() {}
+
+	virtual void Update(float DeltaTime) = 0;
 };

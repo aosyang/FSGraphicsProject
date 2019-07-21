@@ -46,7 +46,7 @@ class RgCubeBlock;
 // The color piece on one side of each block
 class RgColorPiece : public RSceneObject
 {
-	DECLARE_SCENE_OBJECT(RSceneObject)
+	DECLARE_SCENE_OBJECT(RgColorPiece, RSceneObject);
 public:
 	void Update(float DeltaTime) override;
 
@@ -61,7 +61,7 @@ protected:
 // The small block that can be rotated freely
 class RgCubeBlock : public RSceneObject
 {
-	DECLARE_SCENE_OBJECT(RSceneObject)
+	DECLARE_SCENE_OBJECT(RgCubeBlock, RSceneObject);
 public:
 	void Update(float DeltaTime) override;
 
@@ -86,7 +86,7 @@ protected:
 
 class RgRubik : public RSceneObject
 {
-	DECLARE_SCENE_OBJECT(RSceneObject)
+	DECLARE_SCENE_OBJECT(RgRubik, RSceneObject);
 public:
 
 	void Update(float DeltaTime) override;

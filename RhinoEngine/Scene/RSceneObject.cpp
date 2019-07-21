@@ -163,7 +163,8 @@ void RSceneObject::UpdateComponents(float DeltaTime)
 	}
 }
 
-RSceneObjectRuntimeTypeInfo::RSceneObjectRuntimeTypeInfo()
+RSceneObjectRuntimeTypeInfo::RSceneObjectRuntimeTypeInfo(const char* ClassName)
 {
-	TypeId = RSceneObject::MakeUniqueRuntimeTypeId();
+	TypeId = hash<string>{}(string(ClassName));
+	RLog("Class \'%s\' has type id %zu\n", ClassName, TypeId);
 }

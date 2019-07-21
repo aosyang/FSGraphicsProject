@@ -7,6 +7,8 @@
 #pragma once
 
 #include "Rhino.h"
+#include "RhinoGameUtils.h"
+
 #include "FTGPlayerController.h"
 #include "AIFighterLogic.h"
 
@@ -27,17 +29,21 @@ public:
 
 private:
 
+	void UpdateUserInput();
+
 	void UpdateCameraPosition(float DeltaTime);
 
 	void ResetPlayerPosition(FTGPlayerController* PlayerController);
 
 private:
-	RCamera*			m_Camera;
-	RShadowMap			m_ShadowMap;
+	RCamera*				m_Camera;
+	RShadowMap				m_ShadowMap;
 
 	FTGPlayerController*	m_Player;
 	FTGPlayerController*	m_AIPlayer[MaxNumAIs];
 
-	RText				m_Text;
+	RText					m_Text;
+	bool					m_FreeFlyMode;
+	RFreeFlyCameraControl*	m_FreeFlyCameraControl;
 };
 
