@@ -20,13 +20,12 @@ RRenderMeshComponent::~RRenderMeshComponent()
 	GRenderer.UnregisterRenderMeshComponent(this);
 }
 
-RRenderMeshComponent* RRenderMeshComponent::Create(RSceneObject* InOwner)
+unique_ptr<RRenderMeshComponent> RRenderMeshComponent::CreateComponentUnique(RSceneObject* InOwner)
 {
-	RRenderMeshComponent* RenderMeshComponent = new RRenderMeshComponent(InOwner);
-	return RenderMeshComponent;
+	return unique_ptr<RRenderMeshComponent>(new RRenderMeshComponent(InOwner));
 }
 
-void RRenderMeshComponent::Update()
+void RRenderMeshComponent::Update(float DeltaTime)
 {
 	if (m_PostponeLoadMaterials)
 	{

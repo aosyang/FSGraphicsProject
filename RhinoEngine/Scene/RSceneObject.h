@@ -115,7 +115,7 @@ public:
 	virtual void Draw() {}
 	virtual void DrawDepthPass() {}
 
-	virtual void Update();
+	virtual void Update(float DeltaTime);
 
 	/// Set the visibility of scene object
 	void SetVisible(bool bVisible);
@@ -151,7 +151,7 @@ protected:
 	virtual ~RSceneObject();
 
 	/// Update all components on this scene object
-	void UpdateComponents();
+	void UpdateComponents(float DeltaTime);
 
 protected:
 	string			m_Name;
@@ -164,7 +164,7 @@ protected:
 	int				m_Flags;
 
 	/// Components of this scene object
-	vector<RSceneComponentBase*>	SceneComponents;
+	vector<unique_ptr<RSceneComponentBase>>	SceneComponents;
 
 	static int NextUniqueRuntimeTypeId;
 };
@@ -192,10 +192,8 @@ struct RSceneObjectRuntimeTypeInfo
 template<typename T>
 FORCEINLINE T* RSceneObject::AddNewComponent()
 {
-	T* NewComponent = T::Create(this);
-	SceneComponents.push_back(NewComponent);
-
-	return NewComponent;
+	SceneComponents.push_back(move(T::CreateComponentUnique(this)));
+	return static_cast<T*>(SceneComponents.back().get());
 }
 
 FORCEINLINE void RSceneObject::SetTransform(const RVec3& InPosition, const RQuat& InRotation, const RVec3& InScale /*= RVec3(1, 1, 1)*/)

@@ -28,8 +28,15 @@ RSMeshObject::~RSMeshObject()
 
 RSceneObject* RSMeshObject::Clone() const
 {
-	RSMeshObject* pClone = new RSMeshObject(*this);
-	return pClone;
+	if (m_Scene)
+	{
+		RSMeshObject* pClone = m_Scene->CreateMeshObject(m_Mesh);
+		pClone->m_Name = m_Scene->GenerateUniqueObjectNameForClone(m_Name);
+
+		return pClone;
+	}
+
+	return nullptr;
 }
 
 void RSMeshObject::SetMesh(RMesh* mesh)

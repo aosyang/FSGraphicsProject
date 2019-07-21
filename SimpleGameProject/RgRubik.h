@@ -48,7 +48,7 @@ class RgColorPiece : public RSceneObject
 {
 	DECLARE_SCENE_OBJECT(RSceneObject)
 public:
-	void Update() override;
+	void Update(float DeltaTime) override;
 
 	void SetColor(EPieceColor Color);
 
@@ -63,7 +63,7 @@ class RgCubeBlock : public RSceneObject
 {
 	DECLARE_SCENE_OBJECT(RSceneObject)
 public:
-	void Update() override;
+	void Update(float DeltaTime) override;
 
 	void SetupColors(int x, int y, int z);
 
@@ -89,7 +89,7 @@ class RgRubik : public RSceneObject
 	DECLARE_SCENE_OBJECT(RSceneObject)
 public:
 
-	void Update() override;
+	void Update(float DeltaTime) override;
 
 	bool IsMoveInProcess() const;
 	void FinishCurrentMove();

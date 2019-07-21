@@ -6,13 +6,19 @@
 
 #include "AIFighterLogic.h"
 
-AIFighterLogic::AIFighterLogic(FTGPlayerController* PlayerController)
-	: ControlledPlayer(PlayerController)
+AIFighterLogic::AIFighterLogic(RSceneObject* InOwner)
+	: Base(InOwner)
 	, AttackTarget(nullptr)
 	, bIsWaiting(false)
 	, WaitTime(0.0f)
 {
+	// TODO: Should verify if owner pointer is a type of player
+	ControlledPlayer = static_cast<FTGPlayerController*>(InOwner);
+}
 
+unique_ptr<AIFighterLogic> AIFighterLogic::CreateComponentUnique(RSceneObject* InOwner)
+{
+	return unique_ptr<AIFighterLogic>(new AIFighterLogic(InOwner));
 }
 
 void AIFighterLogic::Update(float DeltaTime)

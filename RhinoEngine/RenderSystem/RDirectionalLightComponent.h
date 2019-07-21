@@ -23,7 +23,7 @@ class RDirectionalLightComponent : public RSceneComponentBase, public ILight, pu
 public:
 	virtual ~RDirectionalLightComponent() override;
 
-	static RDirectionalLightComponent* Create(RSceneObject* InOwner);
+	static unique_ptr<RDirectionalLightComponent> CreateComponentUnique(RSceneObject* InOwner);
 
 	virtual ELightType GetLightType() override;
 

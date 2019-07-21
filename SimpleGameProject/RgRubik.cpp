@@ -78,9 +78,9 @@ RgColorPiece::RgColorPiece(const RConstructingParams& Params)
 	MeshComponent->SetMesh(CubeMesh);
 }
 
-void RgColorPiece::Update()
+void RgColorPiece::Update(float DeltaTime)
 {
-	Base::Update();
+	Base::Update(DeltaTime);
 }
 
 void RgColorPiece::SetColor(EPieceColor Color)
@@ -188,7 +188,7 @@ void RgCubeBlock::FixTransformInaccuracy()
 	m_NodeTransform = RTransform(Position, Rotation);
 }
 
-void RgCubeBlock::Update()
+void RgCubeBlock::Update(float DeltaTime)
 {
 	// Update transform based on parent
 	if (m_Parent)
@@ -196,7 +196,7 @@ void RgCubeBlock::Update()
 		m_NodeTransform = RTransform::Combine(&m_LocalTransform, m_Parent->GetTransform());
 	}
 
-	Base::Update();
+	Base::Update(DeltaTime);
 }
 
 void RgCubeBlock::SetupColors(int x, int y, int z)
@@ -285,9 +285,9 @@ RgRubik::~RgRubik()
 {
 }
 
-void RgRubik::Update()
+void RgRubik::Update(float DeltaTime)
 {
-	Base::Update();
+	Base::Update(DeltaTime);
 
 	if (m_FinishedMove)
 	{

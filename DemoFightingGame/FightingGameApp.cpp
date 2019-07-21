@@ -10,42 +10,35 @@ FightingGameApp::FightingGameApp()
 	: m_Player(nullptr),
 	  m_Camera(nullptr)
 {
-	ZeroMemory(m_AILogic, sizeof(AIFighterLogic*) * MaxNumAIs);
+
 }
 
 FightingGameApp::~FightingGameApp()
 {
-	for (int i = 0; i < MaxNumAIs; i++)
-	{
-		if (m_AILogic[i])
-		{
-			delete m_AILogic[i];
-		}
-	}
-
-	m_Scene.Release();
 }
 
 bool FightingGameApp::Initialize()
 {
 	//RResourceManager::Instance().LoadAllResources();
 
-	m_Scene.Initialize();
-	m_Scene.LoadFromFile("/TestArena.rmap");
+	RScene* DefaultScene = GSceneManager.DefaultScene();
+
+	DefaultScene->Initialize();
+	DefaultScene->LoadFromFile("/TestArena.rmap");
 
 	m_ShadowMap.Initialize(1024, 1024);
-	m_Camera = m_Scene.CreateSceneObjectOfType<RCamera>();
+	m_Camera = DefaultScene->CreateSceneObjectOfType<RCamera>();
 	m_Camera->SetTransform(RVec3(407.023712f, 339.007507f, 876.396484f), RQuat::Euler(0.09f, 3.88659930f, 0.0f));
-	m_Camera->SetupView(65.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
+	m_Camera->SetupView(45.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
 
-	//RSceneObject* player = m_Scene.FindObject("Player");
-	//for (UINT i = 0; i < m_Scene.GetSceneObjects().size(); i++)
+	//RSceneObject* player = DefaultScene->FindObject("Player");
+	//for (UINT i = 0; i < DefaultScene->GetSceneObjects().size(); i++)
 	//{
-	//	RSceneObject* obj = m_Scene.GetSceneObjects()[i];
+	//	RSceneObject* obj = DefaultScene->GetSceneObjects()[i];
 	//	obj->SetScript("UpdateObject");
 	//}
 
-	m_Player = m_Scene.CreateSceneObjectOfType<FTGPlayerController>();
+	m_Player = DefaultScene->CreateSceneObjectOfType<FTGPlayerController>();
 	if (m_Player)
 	{
 		m_Player->SetPosition(RVec3(0, 100.0f, 0));
@@ -54,14 +47,16 @@ bool FightingGameApp::Initialize()
 
 	for (int i = 0; i < MaxNumAIs; i++)
 	{
-		m_AIPlayer[i] = m_Scene.CreateSceneObjectOfType<FTGPlayerController>();
+		m_AIPlayer[i] = DefaultScene->CreateSceneObjectOfType<FTGPlayerController>();
 		if (m_AIPlayer[i])
 		{
 			m_AIPlayer[i]->SetPosition(RVec3(RMath::RandRangedF(-800, 800), 50, RMath::RandRangedF(-800, 800)));
 			m_AIPlayer[i]->InitAssets();
+
+			// Make each AI play animation at a slightly different speed
 			m_AIPlayer[i]->SetAnimationDeviation(RMath::RandRangedF(0.8f, 1.2f));
 
-			m_AILogic[i] = new AIFighterLogic(m_AIPlayer[i]);
+			m_AIPlayer[i]->AddNewComponent<AIFighterLogic>();
 		}
 	}
 
@@ -131,14 +126,6 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		if (RInput.GetBufferedKeyState('C') == EBufferedKeyState::Pressed)
 		{
 			m_Player->SetBehavior(BHV_KnockedDown);
-		}
-	}
-
-	for (int i = 0; i < MaxNumAIs; i++)
-	{
-		if (m_AILogic[i])
-		{
-			m_AILogic[i]->Update(timer.DeltaTime());
 		}
 	}
 
@@ -288,6 +275,7 @@ void FightingGameApp::RenderScene()
 
 
 	auto& cbObject = RConstantBuffers::cbPerObject.Data;
+	RScene* DefaultScene = GSceneManager.DefaultScene();
 
 	for (int pass = 0; pass < 2; pass++)
 	{
@@ -312,36 +300,12 @@ void FightingGameApp::RenderScene()
 		if (pass == 0)
 		{
 			RFrustum frustum = m_ShadowMap.GetFrustum();
-			m_Scene.RenderDepthPass(&frustum);
+			DefaultScene->RenderDepthPass(&frustum);
 		}
 		else
 		{
 			RFrustum frustum = m_Camera->GetFrustum();
-			m_Scene.Render(&frustum);
-		}
-
-		vector<FTGPlayerController*> PlayerControllers = m_Scene.FindAllObjectsOfType<FTGPlayerController>();
-
-		cbObject.worldMatrix = m_Player->GetTransformMatrix();
-		RConstantBuffers::cbPerObject.UpdateBufferData();
-		RConstantBuffers::cbPerObject.BindBuffer();
-		if (pass == 0)
-		{
-			for (auto PlayerController : PlayerControllers)
-			{
-				PlayerController->DrawDepthPass();
-			}
-		}
-		else
-		{
-			GRenderer.SetBlendState(Blend_AlphaBlending);
-
-			for (auto PlayerController : PlayerControllers)
-			{
-				PlayerController->Draw();
-			}
-
-			GRenderer.SetBlendState(Blend_Opaque);
+			DefaultScene->Render(&frustum);
 		}
 	}
 
@@ -367,19 +331,26 @@ void FightingGameApp::UpdateCameraPosition(float DeltaTime)
 	RVec3 PlayerPosition = m_Player ? m_Player->GetPosition() : RVec3(0, 0, 0);
 
 	RMatrix4 playerTranslation = RMatrix4::CreateTranslation(PlayerPosition);
-	RMatrix4 cameraTransform = RMatrix4::CreateTranslation(0.0f, 500.0f, 300.0f) * playerTranslation;
 
-	RAabb camAabb;
+	// Make camera's world transform from a local transform
+	static const RVec3 CameraOffset = RVec3(0.0f, 5.0f, 3.0f) * 175.0f;
+	RMatrix4 cameraTransform = RMatrix4::CreateTranslation(CameraOffset) * playerTranslation;
+
+	// Player mesh has its origin at feet. We offset the look target up by half of player's height.
 	RVec3 lookTarget = PlayerPosition + RVec3(0, 125, 0);
+
+	// Camera bounding box used for level collision
+	RAabb camAabb;
 	camAabb.pMin = RVec3(-5, -5, -5) + lookTarget;
 	camAabb.pMax = RVec3(5, 5, 5) + lookTarget;
 
 	RVec3 camVec = cameraTransform.GetTranslation() - lookTarget;
+	RScene* DefaultScene = GSceneManager.DefaultScene();
 
-	camVec = m_Scene.TestMovingAabbWithScene(camAabb, camVec, FTGPlayerController::ActivePlayerControllers);
+	camVec = DefaultScene->TestMovingAabbWithScene(camAabb, camVec, FTGPlayerController::ActivePlayerControllers);
 
 	//m_Camera->SetTransform(cameraTransform);
-	static RVec3 actualCamVec;
+	static RVec3 actualCamVec = m_Camera->GetWorldPosition();
 	actualCamVec = RVec3::Lerp(actualCamVec, camVec, 5.0f * DeltaTime);
 	m_Camera->SetPosition(actualCamVec + lookTarget);
 	m_Camera->LookAt(lookTarget);

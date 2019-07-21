@@ -17,7 +17,7 @@ public:
 	/// Get the scene object which is owning this component
 	RSceneObject* GetOwner() const;
 
-	virtual void Update() {}
+	virtual void Update(float DeltaTime) {}
 
 private:
 	/// The scene object owning this component

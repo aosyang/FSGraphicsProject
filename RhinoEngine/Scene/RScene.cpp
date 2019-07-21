@@ -673,7 +673,7 @@ void RScene::UpdateScene(float DeltaTime)
 {
 	for (RSceneObject* SceneObject : m_SceneObjects)
 	{
-		SceneObject->Update();
+		SceneObject->Update(DeltaTime);
 	}
 }
 

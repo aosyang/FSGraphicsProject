@@ -123,15 +123,22 @@ void FTGPlayerController::PostUpdate(float DeltaTime)
 
 void FTGPlayerController::Draw()
 {
+	// TODO: blend state should be set by material
+	GRenderer.SetBlendState(Blend_AlphaBlending);
+
+	// Copy bone transforms to constant buffer
 	memcpy(&RConstantBuffers::cbBoneMatrices.Data.boneMatrix, m_BoneMatrices, sizeof(RMatrix4) * MAX_BONE_COUNT);
 	RConstantBuffers::cbBoneMatrices.UpdateBufferData();
 	RConstantBuffers::cbBoneMatrices.BindBuffer();
 
 	RSMeshObject::Draw();
+
+	GRenderer.SetBlendState(Blend_Opaque);
 }
 
 void FTGPlayerController::DrawDepthPass()
 {
+	// Copy bone transforms to constant buffer
 	memcpy(&RConstantBuffers::cbBoneMatrices.Data.boneMatrix, m_BoneMatrices, sizeof(RMatrix4) * MAX_BONE_COUNT);
 	RConstantBuffers::cbBoneMatrices.UpdateBufferData();
 	RConstantBuffers::cbBoneMatrices.BindBuffer();

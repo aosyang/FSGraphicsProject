@@ -27,9 +27,9 @@ public:
 	virtual ~RRenderMeshComponent() override;
 
 	/// Static creator function
-	static RRenderMeshComponent* Create(RSceneObject* InOwner);
+	static unique_ptr<RRenderMeshComponent> CreateComponentUnique(RSceneObject* InOwner);
 
-	virtual void Update() override;
+	virtual void Update(float DeltaTime) override;
 
 	/// Render the component
 	void Render(const RenderViewInfo& View) const;

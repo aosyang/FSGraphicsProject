@@ -8,12 +8,18 @@
 
 #include "FTGPlayerController.h"
 
-class AIFighterLogic
+// AI combat logic class
+class AIFighterLogic : public RSceneComponentBase
 {
+	typedef RSceneComponentBase Base;
 public:
-	AIFighterLogic(FTGPlayerController* PlayerController);
+	AIFighterLogic(RSceneObject* InOwner);
 
-	void Update(float DeltaTime);
+	/// Static creator function
+	static unique_ptr<AIFighterLogic> CreateComponentUnique(RSceneObject* InOwner);
+
+	/// Overrides RSceneComponentBase
+	virtual void Update(float DeltaTime) override;
 
 private:
 	/// Order the AI to wait

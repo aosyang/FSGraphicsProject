@@ -32,13 +32,11 @@ private:
 	void ResetPlayerPosition(FTGPlayerController* PlayerController);
 
 private:
-	RScene				m_Scene;
 	RCamera*			m_Camera;
 	RShadowMap			m_ShadowMap;
 
 	FTGPlayerController*	m_Player;
 	FTGPlayerController*	m_AIPlayer[MaxNumAIs];
-	AIFighterLogic*			m_AILogic[MaxNumAIs];
 
 	RText				m_Text;
 };

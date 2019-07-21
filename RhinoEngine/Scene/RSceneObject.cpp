@@ -25,11 +25,6 @@ RSceneObject::~RSceneObject()
 
 void RSceneObject::Release()
 {
-	for (auto iter = SceneComponents.begin(); iter != SceneComponents.end(); iter++)
-	{
-		delete *iter;
-	}
-
 	SceneComponents.clear();
 }
 
@@ -129,14 +124,14 @@ void RSceneObject::DetachFromParent()
 	m_NodeTransform.Detach();
 }
 
-void RSceneObject::Update()
+void RSceneObject::Update(float DeltaTime)
 {
 	if (m_NodeTransform.IsCacheDirty())
 	{
 		m_NodeTransform.NotifyChildrenMatricesChanged();
 	}
 
-	UpdateComponents();
+	UpdateComponents(DeltaTime);
 }
 
 const vector<string>& RSceneObject::GetParsedScript()
@@ -160,11 +155,11 @@ const vector<string>& RSceneObject::GetParsedScript()
 	return m_ParsedScript;
 }
 
-void RSceneObject::UpdateComponents()
+void RSceneObject::UpdateComponents(float DeltaTime)
 {
-	for (RSceneComponentBase* SceneComponent : SceneComponents)
+	for (auto& SceneComponent : SceneComponents)
 	{
-		SceneComponent->Update();
+		SceneComponent->Update(DeltaTime);
 	}
 }
 
