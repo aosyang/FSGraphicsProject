@@ -104,7 +104,8 @@ void InitializeRubikMaterials()
 	for (int i = 0; i < ARRAYSIZE(MaterialPaths); i++)
 	{
 		vector<RMaterial> Materials;
-		RMaterial::LoadFromXmlFile(MaterialPaths[i], Materials);
+		const string XmlPath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), MaterialPaths[i]);
+		RMaterial::LoadFromXmlFile(XmlPath, Materials);
 		assert(Materials.size() > 0);
 		RubikMaterials[i] = Materials[0];
 	}

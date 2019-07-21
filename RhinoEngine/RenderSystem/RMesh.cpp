@@ -251,10 +251,10 @@ bool RMesh::TryLoadAsRmesh(bool bIsAsyncLoading)
 
 	RLog("Loading mesh [%s]...\n", GetFileSystemPath().data());
 
-	string rmeshName = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmesh");
+	const string BinaryMeshPath = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmesh");
 
 	RSerializer serializer;
-	serializer.Open(rmeshName, ESerializeMode::Read);
+	serializer.Open(BinaryMeshPath, ESerializeMode::Read);
 	if (!serializer.IsOpen())
 		return false;
 	Serialize(serializer);
