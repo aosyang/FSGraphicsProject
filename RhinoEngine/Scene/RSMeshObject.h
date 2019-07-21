@@ -34,8 +34,9 @@ public:
 	const RAabb& GetAabb() override;
 	const RAabb& GetMeshElementAabb(int index) const;
 
-	void Draw() override;
-	void DrawDepthPass() override;
+	// Overrides RSceneObject render methods
+	virtual void Draw() override;
+	virtual void DrawDepthPass() override;
 
 	void Draw(bool instanced, int instanceCount);
 	void DrawDepthPass(bool instanced, int instanceCount);

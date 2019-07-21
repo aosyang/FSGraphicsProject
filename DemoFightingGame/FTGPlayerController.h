@@ -28,8 +28,9 @@ public:
 
 	const RVec3& GetRootOffset() const;
 
-	void Draw() override;
-	void DrawDepthPass() override;
+	// Overrides RSceneObject render methods
+	virtual void Draw() override;
+	virtual void DrawDepthPass() override;
 
 	void SetMovementInput(const RVec3& Input);
 

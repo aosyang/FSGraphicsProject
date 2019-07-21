@@ -164,10 +164,12 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 		return;
 
 	UpdateMaterialsFromResource();
+	const auto& MeshElements = m_Mesh->GetMeshElements();
 
-	for (UINT32 i = 0; i < m_Mesh->GetMeshElements().size(); i++)
+	for (UINT32 i = 0; i < MeshElements.size(); i++)
 	{
 		RShader* shader = nullptr;
+		const RMeshElement& MeshElement = MeshElements[i];
 
 		if (m_OverridingShader)
 			shader = m_OverridingShader;
@@ -176,7 +178,7 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 
 		if (shader)
 		{
-			int flag = m_Mesh->GetMeshElements()[i].GetFlag();
+			int flag = MeshElement.GetFlag();
 
 			int shaderFeatureMask = 0;
 			if ((flag & MEF_Skinned) && !GEngine.IsEditor())
@@ -197,27 +199,33 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 			// Hack: for shaders bound separately, consider textures loaded from mesh
 			if (m_OverridingShader)
 			{
-				for (int t = 0; t < m_Mesh->GetMaterial(i).TextureNum; t++)
+				const RMaterial& OverrideMaterial = m_Mesh->GetMaterial(i);
+				for (int t = 0; t < OverrideMaterial.TextureNum; t++)
 				{
-					GRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, m_Mesh->GetMaterial(i).Textures[t]->GetPtrSRV());
+					GRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, OverrideMaterial.Textures[t]->GetPtrSRV());
 				}
 			}
 			else
 			{
 				ID3D11ShaderResourceView* NullShaderResourceView[] = { nullptr };
+				const RMaterial& Material = m_Materials[i];
 
-				for (int t = 0; t < m_Materials[i].TextureNum; t++)
+				for (int t = 0; t < Material.TextureNum; t++)
 				{
-					RTexture* texture = m_Materials[i].Textures[t];
-					GRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, texture ? texture->GetPtrSRV() : NullShaderResourceView);
+					RTexture* Texture = Material.Textures[t];
+					GRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, Texture ? Texture->GetPtrSRV() : NullShaderResourceView);
 				}
 			}
 		}
 
 		if (instanced)
-			m_Mesh->GetMeshElements()[i].DrawInstanced(instanceCount, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		{
+			MeshElement.DrawInstanced(instanceCount, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		}
 		else
-			m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		{
+			MeshElement.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		}
 	}
 }
 
@@ -232,12 +240,14 @@ void RSMeshObject::DrawDepthPass(bool instanced, int instanceCount)
 		return;
 
 	static RShader* DefaultShader = RShaderManager::Instance().GetShaderResource("Depth");
+	const auto& MeshElements = m_Mesh->GetMeshElements();
 
-	for (UINT32 i = 0; i < m_Mesh->GetMeshElements().size(); i++)
+	for (UINT32 i = 0; i < MeshElements.size(); i++)
 	{
 		RShader* shader = DefaultShader;
+		const RMeshElement& MeshElement = MeshElements[i];
 
-		int flag = m_Mesh->GetMeshElements()[i].GetFlag();
+		int flag = MeshElement.GetFlag();
 		int shaderFeatureMask = 0;
 
 		if ((flag & MEF_Skinned) && !GEngine.IsEditor())
@@ -248,9 +258,13 @@ void RSMeshObject::DrawDepthPass(bool instanced, int instanceCount)
 		shader->Bind(shaderFeatureMask);
 
 		if (instanced)
-			m_Mesh->GetMeshElements()[i].DrawInstanced(instanceCount, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		{
+			MeshElement.DrawInstanced(instanceCount, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		}
 		else
-			m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		{
+			MeshElement.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		}
 	}
 }
 
@@ -260,10 +274,13 @@ void RSMeshObject::DrawWithShader(RShader* shader, bool instanced, int instanceC
 		return;
 
 	//RRenderer.D3DImmediateContext()->IASetInputLayout(m_Mesh->GetInputLayout());
+	const auto& MeshElements = m_Mesh->GetMeshElements();
 
-	for (UINT32 i = 0; i < m_Mesh->GetMeshElements().size(); i++)
+	for (UINT32 i = 0; i < MeshElements.size(); i++)
 	{
-		int flag = m_Mesh->GetMeshElements()[i].GetFlag();
+		const RMeshElement& MeshElement = MeshElements[i];
+		
+		int flag = MeshElement.GetFlag();
 		int shaderFeatureMask = 0;
 
 		if (flag & MEF_Skinned)
@@ -277,9 +294,13 @@ void RSMeshObject::DrawWithShader(RShader* shader, bool instanced, int instanceC
 		shader->Bind(shaderFeatureMask);
 
 		if (instanced)
-			m_Mesh->GetMeshElements()[i].DrawInstanced(instanceCount, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		{
+			MeshElement.DrawInstanced(instanceCount, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		}
 		else
-			m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		{
+			MeshElement.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		}
 	}
 }
 
@@ -299,8 +320,11 @@ void RSMeshObject::UpdateMaterialsFromResource()
 
 		for (unsigned int i = 0; i < m_Materials.size(); i++)
 		{
-			if (m_Materials[i].Shader == nullptr)
-				m_Materials[i].Shader = RShaderManager::Instance().GetShaderResource("Default");
+			RMaterial& Material = m_Materials[i];
+			if (Material.Shader == nullptr)
+			{
+				Material.Shader = RShaderManager::Instance().GetShaderResource("Default");
+			}
 		}
 
 		m_bNeedUpdateMaterial = false;
