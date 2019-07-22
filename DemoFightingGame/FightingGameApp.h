@@ -11,6 +11,7 @@
 
 #include "FTGPlayerController.h"
 #include "AIFighterLogic.h"
+#include "RVoxelizer.h"
 
 const static int MaxNumAIs = 5;
 
@@ -45,5 +46,7 @@ private:
 	RText					m_Text;
 	bool					m_FreeFlyMode;
 	RFreeFlyCameraControl*	m_FreeFlyCameraControl;
+
+	RVoxelizer				m_Voxelizer;
 };
 

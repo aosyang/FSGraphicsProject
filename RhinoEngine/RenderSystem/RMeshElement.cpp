@@ -80,7 +80,9 @@ void RMeshRenderBuffer::CreateIndexBuffer(void* data, UINT indexTypeSize, UINT i
 void RMeshRenderBuffer::UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount)
 {
 	D3D11_MAPPED_SUBRESOURCE subres;
-	GRenderer.D3DImmediateContext()->Map(m_VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+	HRESULT hr = GRenderer.D3DImmediateContext()->Map(m_VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+	assert(SUCCEEDED(hr));
+
 	memcpy(subres.pData, data, vertexTypeSize * vertexCount);
 	GRenderer.D3DImmediateContext()->Unmap(m_VertexBuffer, 0);
 

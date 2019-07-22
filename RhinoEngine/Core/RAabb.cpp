@@ -12,9 +12,21 @@
 RAabb RAabb::Default;
 
 RAabb::RAabb()
-	:pMin(FLT_MAX, FLT_MAX, FLT_MAX),
-	 pMax(-FLT_MAX, -FLT_MAX, -FLT_MAX)
+	: pMin(FLT_MAX, FLT_MAX, FLT_MAX)
+	, pMax(-FLT_MAX, -FLT_MAX, -FLT_MAX)
 {
+}
+
+RAabb::RAabb(const RAabb& Other)
+	: pMin(Other.pMin)
+	, pMax(Other.pMax)
+{
+}
+
+void RAabb::Reset()
+{
+	pMin = RVec3(FLT_MAX, FLT_MAX, FLT_MAX);
+	pMax = RVec3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 }
 
 bool RAabb::IsValid() const

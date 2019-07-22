@@ -12,7 +12,8 @@ RDebugRenderer::RDebugRenderer()
 	: m_PrimitiveInputLayout	(nullptr),
 	  m_ColorShader				(nullptr),
 	  m_PrimitiveColor			(0.0f, 1.0f, 0.0f),
-	  m_bDirtyBuffer			(true)
+	  m_bDirtyBuffer			(true),
+	  m_MaxNumVertices			(0)
 {
 }
 
@@ -26,6 +27,7 @@ void RDebugRenderer::Initialize(int maxVertexCount)
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 	m_PrimitiveInputLayout = RVertexDeclaration::Instance().GetInputLayout<RVertexType::PositionColor>();
 	m_PrimitiveMeshBuffer.CreateVertexBuffer(nullptr, sizeof(RVertexType::PositionColor), maxVertexCount, m_PrimitiveInputLayout, true);
+	m_MaxNumVertices = maxVertexCount;
 }
 
 void RDebugRenderer::Release()
@@ -73,7 +75,7 @@ void RDebugRenderer::DrawAabb(const RAabb& aabb, const RColor& color)
 		RVertexType::PositionColor v =
 		{
 			RVec4(cornerPoints[wiredCubeIdx[i]]),
-			RColor(0.0f, 1.0f, 0.0f),
+			color,
 		};
 		m_PrimitiveVertices.push_back(v);
 	}
@@ -159,14 +161,14 @@ void RDebugRenderer::DrawSphere(const RSphere& Sphere, const RColor& color, int 
 
 void RDebugRenderer::Render()
 {
-	if (m_bDirtyBuffer)
-	{
-		m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(m_PrimitiveVertices.data(), sizeof(RVertexType::PositionColor), (UINT)m_PrimitiveVertices.size());
-		m_bDirtyBuffer = false;
-	}
+	assert(m_MaxNumVertices > 0);
 
-	if (m_PrimitiveMeshBuffer.GetVertexCount() != 0)
+	UINT NumVertices = (UINT)m_PrimitiveVertices.size();
+	UINT VertexTypeSize = sizeof(RVertexType::PositionColor);
+
+	if (NumVertices > m_MaxNumVertices)
 	{
+		// Render vertex numbers exceeded max number allowed, go for multiple draw calls
 		RConstantBuffers::cbPerObject.Data.worldMatrix = RMatrix4::IDENTITY;
 
 		RConstantBuffers::cbPerObject.UpdateBufferData();
@@ -174,7 +176,36 @@ void RDebugRenderer::Render()
 
 		m_ColorShader->Bind();
 		GRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);
-		m_PrimitiveMeshBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+
+		UINT StartIndex = 0;
+
+		while (StartIndex < NumVertices)
+		{
+			m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(&m_PrimitiveVertices[StartIndex], VertexTypeSize, RMath::Min(NumVertices - StartIndex, m_MaxNumVertices));
+			m_PrimitiveMeshBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+
+			StartIndex += m_MaxNumVertices;
+		}
+	}
+	else
+	{
+		if (m_bDirtyBuffer)
+		{
+			m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(m_PrimitiveVertices.data(), VertexTypeSize, NumVertices);
+			m_bDirtyBuffer = false;
+		}
+
+		if (m_PrimitiveMeshBuffer.GetVertexCount() != 0)
+		{
+			RConstantBuffers::cbPerObject.Data.worldMatrix = RMatrix4::IDENTITY;
+
+			RConstantBuffers::cbPerObject.UpdateBufferData();
+			RConstantBuffers::cbPerObject.BindBuffer();
+
+			m_ColorShader->Bind();
+			GRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);
+			m_PrimitiveMeshBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+		}
 	}
 }
 

@@ -15,6 +15,8 @@ public:
 	RVec3 pMax;
 
 	RAabb();
+	RAabb(const RAabb& Other);
+
 	inline void Expand(const RVec3& p)
 	{
 		if (p.X() < pMin.X()) pMin.SetX(p.X());
@@ -36,6 +38,15 @@ public:
 		return *this;
 	}
 
+	RAabb& operator=(RAabb&& rhs)
+	{
+		this->pMin = rhs.pMin;
+		this->pMax = rhs.pMax;
+		rhs.Reset();
+
+		return *this;
+	}
+
 	inline void Expand(const RAabb& aabb)
 	{
 		Expand(aabb.pMin);
@@ -52,7 +63,15 @@ public:
 		if (center.Z() + radius > pMax.Z()) pMax.SetZ(center.Z() + radius);
 	}
 
+	void Reset();
+
 	bool IsValid() const;
+
+	/// Get the center point of bounding box
+	RVec3 GetCenter() const;
+
+	/// Get the size of bounding box in local space
+	RVec3 GetLocalDimension() const;
 
 	RAabb GetTransformedAabb(const RMatrix4& m) const;
 	RAabb GetSweptAabb(const RVec3& moveVec) const;
@@ -67,3 +86,12 @@ public:
 	static RAabb Default;
 };
 
+FORCEINLINE RVec3 RAabb::GetCenter() const
+{
+	return (pMax + pMin) / 2.0f;
+}
+
+FORCEINLINE RVec3 RAabb::GetLocalDimension() const
+{
+	return pMax - pMin;
+}

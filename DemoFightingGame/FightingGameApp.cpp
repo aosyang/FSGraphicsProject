@@ -27,6 +27,8 @@ bool FightingGameApp::Initialize()
 
 	DefaultScene->Initialize();
 	DefaultScene->LoadFromFile("/TestArena.rmap");
+	
+	m_Voxelizer.Initialize(DefaultScene);
 
 	m_ShadowMap.Initialize(1024, 1024);
 	m_Camera = DefaultScene->CreateSceneObjectOfType<RCamera>();
@@ -144,6 +146,8 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	}
 
 	UpdateCameraPosition(timer.DeltaTime());
+
+	m_Voxelizer.Render();
 }
 
 void FightingGameApp::RenderScene()

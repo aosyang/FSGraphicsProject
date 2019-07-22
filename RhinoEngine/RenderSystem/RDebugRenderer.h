@@ -10,7 +10,7 @@ class RDebugRenderer : public RSingleton<RDebugRenderer>
 {
 	friend class RSingleton<RDebugRenderer>;
 public:
-	void Initialize(int maxVertexCount = 65536);
+	void Initialize(int maxVertexCount = 1048576);
 	void Release();
 
 	void SetPrimitiveColor(const RColor& color);
@@ -45,6 +45,7 @@ private:
 	RColor									m_PrimitiveColor;
 	vector<RVertexType::PositionColor>		m_PrimitiveVertices;
 	bool									m_bDirtyBuffer;
+	UINT									m_MaxNumVertices;
 };
 
 #define GDebugRenderer RDebugRenderer::Instance()
