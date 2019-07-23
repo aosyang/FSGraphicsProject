@@ -15,7 +15,7 @@
             </MeshElement>
         </Material>
         <Transform>
-            <Position>700.000000, 121.000000, 0.000000</Position>
+            <Position>700.000000, 120.000000, 0.000000</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>
             <Scale>5.000000, 2.000000, 5.000000</Scale>
         </Transform>
@@ -28,7 +28,7 @@
             </MeshElement>
         </Material>
         <Transform>
-            <Position>-700.000000, 121.000000, 0.000000</Position>
+            <Position>-700.000000, 120.000000, 0.000000</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>
             <Scale>5.000000, 2.000000, 5.000000</Scale>
         </Transform>
@@ -59,13 +59,6 @@
             <Scale>5.000000, 2.000000, 5.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="cube_3" Type="MeshObject" Mesh="/cube.FBX">
-        <Transform>
-            <Position>-700.000000, 400.000000, -700.000000</Position>
-            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
-            <Scale>5.000000, 2.000000, 5.000000</Scale>
-        </Transform>
-    </SceneObject>
     <SceneObject Name="cube_4" Type="MeshObject" Mesh="/cube.FBX">
         <Transform>
             <Position>-1400.000000, 200.000000, -700.000000</Position>
@@ -73,11 +66,43 @@
             <Scale>5.000000, 2.000000, 5.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="cube_4" Type="MeshObject" Mesh="/cube.FBX">
+    <SceneObject Name="cube_5" Type="MeshObject" Mesh="/cube.FBX">
+        <Material Index="0">
+            <MeshElement Name="Box001" Shader="BumpLighting">
+                <Texture Slot="0">/Grey.DDS</Texture>
+                <Texture Slot="1">/DiamondPlateNormal.dds</Texture>
+            </MeshElement>
+        </Material>
         <Transform>
-            <Position>-1400.000000, 200.000000, -700.000000</Position>
+            <Position>980.000000, 80.000000, -120.000000</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>
-            <Scale>5.000000, 2.000000, 5.000000</Scale>
+            <Scale>2.000000, 2.000000, 2.000000</Scale>
+        </Transform>
+    </SceneObject>
+    <SceneObject Name="cube_6" Type="MeshObject" Mesh="/cube.FBX">
+        <Material Index="0">
+            <MeshElement Name="Box001" Shader="BumpLighting">
+                <Texture Slot="0">/Grey.DDS</Texture>
+                <Texture Slot="1">/DiamondPlateNormal.dds</Texture>
+            </MeshElement>
+        </Material>
+        <Transform>
+            <Position>980.000000, 40.000000, 40.000000</Position>
+            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
+            <Scale>2.000000, 2.000000, 2.000000</Scale>
+        </Transform>
+    </SceneObject>
+    <SceneObject Name="cube_7" Type="MeshObject" Mesh="/cube.FBX">
+        <Material Index="0">
+            <MeshElement Name="Box001" Shader="BumpLighting">
+                <Texture Slot="0">/Grey.DDS</Texture>
+                <Texture Slot="1">/DiamondPlateNormal.dds</Texture>
+            </MeshElement>
+        </Material>
+        <Transform>
+            <Position>980.000000, 0.000000, 200.000000</Position>
+            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
+            <Scale>2.000000, 2.000000, 2.000000</Scale>
         </Transform>
     </SceneObject>
 </Scene>

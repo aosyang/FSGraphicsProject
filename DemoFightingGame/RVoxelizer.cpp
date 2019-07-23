@@ -10,11 +10,21 @@
 #include "Core/RAabb.h"
 #include "RenderSystem/RDebugRenderer.h"
 
-RVoxelizer::RVoxelizer()
-	: CellDimension(100.0f, 50.0f, 100.0f)
-	, MinTraversableHeight(200.0f)
+RVec3 RVoxelizer::NeighbourOffset[4] =
 {
+	RVec3(1, 0, 0),
+	RVec3(0, 0, 1),
+	RVec3(-1, 0, 0),
+	RVec3(0, 0, -1),
+};
 
+
+RVoxelizer::RVoxelizer()
+	: CellDimension(50.0f, 20.0f, 50.0f)
+	, MinTraversableHeight(200.0f)
+	, MaxStepHeight(50.0f)
+{
+	MaxStepNumCells = (int)floor(MaxStepHeight / CellDimension.Y());
 }
 
 void RVoxelizer::Initialize(RScene* Scene)
@@ -37,7 +47,7 @@ void RVoxelizer::Initialize(RScene* Scene)
 
 	RLog("Total cell dimensions - X: %d, Y: %d, Z: %d\n", CellNumX, CellNumY, CellNumZ);
 
-	RVec3 SceneCenterPoint = SceneBounds.GetCenter();
+	SceneCenterPoint = SceneBounds.GetCenter();
 
 	// Create heightfield
 	{
@@ -53,7 +63,7 @@ void RVoxelizer::Initialize(RScene* Scene)
 				Column.x = x;
 				Column.z = z;
 
-				HeightfieldSpan Span;
+				HeightfieldSolidSpan Span;
 				bool bIsLastCellSolid = false;
 
 				// Search for all spans in a column, bottom-up
@@ -96,7 +106,7 @@ void RVoxelizer::Initialize(RScene* Scene)
 						if (bIsLastCellSolid)
 						{
 							Span.CellRowEnd = y - 1;
-							Column.Spans.push_back(Span);
+							Column.SolidSpans.push_back(Span);
 						}
 					}
 
@@ -107,33 +117,88 @@ void RVoxelizer::Initialize(RScene* Scene)
 				if (bIsLastCellSolid)
 				{
 					Span.CellRowEnd = CellNumY - 1;
-					Column.Spans.push_back(Span);
+					Column.SolidSpans.push_back(Span);
 				}
 
 				// Evaluate traversable flag for each span
-				for (size_t i = 0; i < Column.Spans.size(); i++)
+				for (size_t i = 0; i < Column.SolidSpans.size(); i++)
 				{
-					if (i < Column.Spans.size() - 1)
+					if (i < Column.SolidSpans.size() - 1)
 					{
 						// Measure empty spaces between spans for traversable
-						HeightfieldSpan& ThisSpan = Column.Spans[i];
-						HeightfieldSpan& NextSpan = Column.Spans[i + 1];
+						HeightfieldSolidSpan& ThisSpan = Column.SolidSpans[i];
+						HeightfieldSolidSpan& NextSpan = Column.SolidSpans[i + 1];
 						int NumEmptyCells = NextSpan.CellRowStart - ThisSpan.CellRowEnd - 1;
 						ThisSpan.bTraversable = (CellDimension.Y() * NumEmptyCells >= MinTraversableHeight);
+
+						if (ThisSpan.bTraversable)
+						{
+							HeightfieldOpenSpan OpenSpan;
+							OpenSpan.CellRowStart = ThisSpan.CellRowEnd + 1;
+							OpenSpan.CellRowEnd = NextSpan.CellRowStart;
+							Column.OpenSpans.push_back(OpenSpan);
+						}
 					}
 					else
 					{
 						// Check if top spans are traversable by their distance to the up boundary
-						HeightfieldSpan& ThisSpan = Column.Spans[i];
+						HeightfieldSolidSpan& ThisSpan = Column.SolidSpans[i];
 						int NumEmptyCells = CellNumY - ThisSpan.CellRowEnd - 1;
-						ThisSpan.bTraversable = (CellDimension.Y() * NumEmptyCells >= MinTraversableHeight);
+						ThisSpan.bTraversable = true; //(CellDimension.Y() * NumEmptyCells >= MinTraversableHeight);
+
+						if (ThisSpan.bTraversable)
+						{
+							HeightfieldOpenSpan OpenSpan;
+							OpenSpan.CellRowStart = ThisSpan.CellRowEnd + 1;
+							OpenSpan.CellRowEnd = INT_MAX;
+							Column.OpenSpans.push_back(OpenSpan);
+						}
 					}
 				}
 
 				// Create bounds for each span
-				for (auto& IterSpan : Column.Spans)
+				for (auto& IterSpan : Column.SolidSpans)
 				{
 					IterSpan.Bounds = CreateBoundsForSpan(IterSpan, x, z);
+				}
+			}
+		}
+
+		for (int x = 0; x < CellNumX; x++)
+		{
+			for (int z = 0; z < CellNumZ; z++)
+			{
+				int Index = x * CellNumZ + z;
+				auto& Column = Heightfield[Index];
+
+				for (auto& ThisOpenSpan : Column.OpenSpans)
+				{
+					for (int NeighbourLinkIndex = 0; NeighbourLinkIndex < 4; NeighbourLinkIndex++)
+					{
+						// Neighbour coordinates
+						const int n_x = x + (int)NeighbourOffset[NeighbourLinkIndex].X();
+						const int n_z = z + (int)NeighbourOffset[NeighbourLinkIndex].Z();
+
+						if (n_x >= 0 && n_x < CellNumX &&
+							n_z >= 0 && n_z < CellNumZ)
+						{
+							int NeighbourIndex = n_x * CellNumZ + n_z;
+							int NeighbourOpenSpanIndex = 0;
+
+							// Find linked neighbour open spans
+							for (const auto& NeighbourOpenSpan : Heightfield[NeighbourIndex].OpenSpans)
+							{
+								if (abs(NeighbourOpenSpan.CellRowStart - ThisOpenSpan.CellRowStart) <= MaxStepNumCells &&
+									NeighbourOpenSpan.CellRowEnd >= ThisOpenSpan.CellRowEnd)
+								{
+									ThisOpenSpan.NeighbourLink[NeighbourLinkIndex] = NeighbourOpenSpanIndex;
+									break;
+								}
+
+								NeighbourOpenSpanIndex++;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -145,34 +210,58 @@ void RVoxelizer::Render()
 	GDebugRenderer.DrawAabb(SceneBounds);
 	for (const auto& Column : Heightfield)
 	{
-		for (const auto& Span : Column.Spans)
+		for (const auto& Span : Column.SolidSpans)
 		{
 			GDebugRenderer.DrawAabb(Span.Bounds, Span.bTraversable ? RColor::Green : RColor::Red);
+		}
+
+		for (const auto& OpenSpan : Column.OpenSpans)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				int NeighbourLinkIndex = OpenSpan.NeighbourLink[i];
+				if (NeighbourLinkIndex != -1)
+				{
+					const int n_x = Column.x + (int)NeighbourOffset[i].X();
+					const int n_z = Column.z + (int)NeighbourOffset[i].Z();
+
+					if (n_x >= 0 && n_x < CellNumX &&
+						n_z >= 0 && n_z < CellNumZ)
+					{
+						int NeighbourIndex = n_x * CellNumZ + n_z;
+						int NeighbourStart = Heightfield[NeighbourIndex].OpenSpans[NeighbourLinkIndex].CellRowStart;
+
+						RVec3 Start = GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z);
+						RVec3 End = GetCellCenter(n_x, NeighbourStart, n_z);
+
+						GDebugRenderer.DrawLine(Start, End, RColor(1.0f, 0.5f, 0.5f));
+					}
+				}
+			}
 		}
 	}
 }
 
-RAabb RVoxelizer::CreateBoundsForSpan(const HeightfieldSpan& Span, int x, int z)
+RAabb RVoxelizer::CreateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z)
 {
 	RAabb Result;
-	RVec3 SceneCenterPoint = SceneBounds.GetCenter();
 	float Scale = 1.0f;
 
 	int y = Span.CellRowStart;
-	RVec3 CellCenter = RVec3(
-		SceneCenterPoint.X() + (-0.5f * (CellNumX - 1) + x) * CellDimension.X(),
-		SceneCenterPoint.Y() + (-0.5f * (CellNumY - 1) + y) * CellDimension.Y(),
-		SceneCenterPoint.Z() + (-0.5f * (CellNumZ - 1) + z) * CellDimension.Z()
-	);
+	RVec3 CellCenter = GetCellCenter(x, y, z);
 	Result.pMin = CellCenter - CellDimension * 0.4f * Scale;
 
 	y = Span.CellRowEnd;
-	CellCenter = RVec3(
+	CellCenter = GetCellCenter(x, y, z);
+	Result.pMax = CellCenter + CellDimension * 0.4f * Scale;
+	return Result;
+}
+
+RVec3 RVoxelizer::GetCellCenter(int x, int y, int z)
+{
+	return RVec3(
 		SceneCenterPoint.X() + (-0.5f * (CellNumX - 1) + x) * CellDimension.X(),
 		SceneCenterPoint.Y() + (-0.5f * (CellNumY - 1) + y) * CellDimension.Y(),
 		SceneCenterPoint.Z() + (-0.5f * (CellNumZ - 1) + z) * CellDimension.Z()
 	);
-
-	Result.pMax = CellCenter + CellDimension * 0.4f * Scale;
-	return Result;
 }
