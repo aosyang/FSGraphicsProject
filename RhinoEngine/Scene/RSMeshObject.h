@@ -17,7 +17,7 @@ class RSMeshObject : public RSceneObject
 {
 	DECLARE_SCENE_OBJECT(RSMeshObject, RSceneObject);
 public:
-	RSceneObject* Clone() const override;
+	RSceneObject* Clone() override;
 
 	void SetMesh(RMesh* mesh);
 	RMesh* GetMesh() const;
@@ -48,7 +48,7 @@ protected:
 	~RSMeshObject();
 
 	/// Use default materials defined in mesh resource
-	void UpdateMaterialsFromResource();
+	void SetupMaterialsFromMeshResource();
 
 	RMesh*					m_Mesh;
 	vector<RMaterial>		m_Materials;

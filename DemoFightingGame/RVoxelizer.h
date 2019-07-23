@@ -14,25 +14,15 @@ struct CellData
 	RVec3 Center;
 };
 
-enum class ESpanType : UINT8
-{
-	Solid,
-	Open,
-};
-
 struct HeightfieldSpan
 {
 	HeightfieldSpan()
 		: bTraversable(false)
-		, Type(ESpanType::Solid)
 		, CellRowStart(0)
 		, CellRowEnd(0)
 	{}
 
 	bool bTraversable;
-
-	// Whether the span represents solid space or open space
-	ESpanType Type;
 	int CellRowStart;
 	int CellRowEnd;
 	RAabb Bounds;
@@ -40,7 +30,10 @@ struct HeightfieldSpan
 
 struct HeightfieldData
 {
+	// Grid position
 	int x, z;
+
+	// A list of solid spans in this column
 	vector<HeightfieldSpan> Spans;
 };
 
@@ -59,11 +52,11 @@ private:
 private:
 	RAabb					SceneBounds;
 	RVec3					CellDimension;
+	float					MinTraversableHeight;
 
 	int CellNumX;
 	int CellNumY;
 	int CellNumZ;
 
-	vector<CellData>		Cells;
 	vector<HeightfieldData>	Heightfield;
 };

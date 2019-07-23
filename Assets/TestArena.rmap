@@ -52,4 +52,32 @@
             <Scale>3.000000, 3.000000, 3.000000</Scale>
         </Transform>
     </SceneObject>
+    <SceneObject Name="cube_3" Type="MeshObject" Mesh="/cube.FBX">
+        <Transform>
+            <Position>-700.000000, 400.000000, -700.000000</Position>
+            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
+            <Scale>5.000000, 2.000000, 5.000000</Scale>
+        </Transform>
+    </SceneObject>
+    <SceneObject Name="cube_3" Type="MeshObject" Mesh="/cube.FBX">
+        <Transform>
+            <Position>-700.000000, 400.000000, -700.000000</Position>
+            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
+            <Scale>5.000000, 2.000000, 5.000000</Scale>
+        </Transform>
+    </SceneObject>
+    <SceneObject Name="cube_4" Type="MeshObject" Mesh="/cube.FBX">
+        <Transform>
+            <Position>-1400.000000, 200.000000, -700.000000</Position>
+            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
+            <Scale>5.000000, 2.000000, 5.000000</Scale>
+        </Transform>
+    </SceneObject>
+    <SceneObject Name="cube_4" Type="MeshObject" Mesh="/cube.FBX">
+        <Transform>
+            <Position>-1400.000000, 200.000000, -700.000000</Position>
+            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
+            <Scale>5.000000, 2.000000, 5.000000</Scale>
+        </Transform>
+    </SceneObject>
 </Scene>

@@ -277,7 +277,6 @@ RSceneObject* RScene::CloneObject(RSceneObject* obj)
 {
 	RSceneObject* NewObject = obj->Clone();
 	m_SceneObjects.push_back(NewObject);
-	NewObject->SetName(GenerateUniqueObjectNameForClone(obj->GetName()));
 	return NewObject;
 }
 

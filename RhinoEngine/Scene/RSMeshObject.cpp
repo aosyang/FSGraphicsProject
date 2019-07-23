@@ -26,12 +26,15 @@ RSMeshObject::~RSMeshObject()
 
 }
 
-RSceneObject* RSMeshObject::Clone() const
+RSceneObject* RSMeshObject::Clone()
 {
 	if (m_Scene)
 	{
 		RSMeshObject* pClone = m_Scene->CreateMeshObject(m_Mesh);
 		pClone->m_Name = m_Scene->GenerateUniqueObjectNameForClone(m_Name);
+		pClone->SetTransform(*GetTransform());
+		pClone->m_Materials = m_Materials;
+		pClone->m_bNeedUpdateMaterial = false;
 
 		return pClone;
 	}
@@ -71,7 +74,7 @@ void RSMeshObject::SetMaterial(RMaterial* materials, int materialNum)
 
 RMaterial* RSMeshObject::GetMaterial(int index)
 {
-	UpdateMaterialsFromResource();
+	SetupMaterialsFromMeshResource();
 
 	return &m_Materials[index];
 }
@@ -86,7 +89,7 @@ void RSMeshObject::SaveMaterialsToFile()
 		Sleep(10);
 	}
 
-	UpdateMaterialsFromResource();
+	SetupMaterialsFromMeshResource();
 
 	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
 	doc->InsertEndChild(doc->NewComment((string("Mesh path: ") + m_Mesh->GetFileSystemPath()).c_str()));
@@ -170,7 +173,7 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 	if (!m_Mesh || !m_Mesh->IsLoaded())
 		return;
 
-	UpdateMaterialsFromResource();
+	SetupMaterialsFromMeshResource();
 	const auto& MeshElements = m_Mesh->GetMeshElements();
 
 	for (UINT32 i = 0; i < MeshElements.size(); i++)
@@ -319,7 +322,7 @@ float RSMeshObject::GetResourceTimestamp()
 	return 0.0f;
 }
 
-void RSMeshObject::UpdateMaterialsFromResource()
+void RSMeshObject::SetupMaterialsFromMeshResource()
 {
 	if (m_bNeedUpdateMaterial)
 	{

@@ -85,7 +85,7 @@ public:
 		return GetRuntimeTypeId() == T::_StaticGetRuntimeTypeId();
 	}
 
-	virtual RSceneObject* Clone() const		{ return nullptr; }
+	virtual RSceneObject* Clone() 			{ return nullptr; }
 
 	RTransform* GetTransform();
 	const RMatrix4& GetTransformMatrix();
