@@ -8,13 +8,15 @@
 
 #include "Scene/RScene.h"
 
-struct CellData
+#define NUM_NEIGHBOUR_SPANS 4
+
+// 2D coordinate on x-z plane
+struct GridCoord
 {
-	bool bIsSolid;
-	RVec3 Center;
+	int x, z;
 };
 
-// A solid span represents spaces occupied by geometries
+// A span represents solid spaces occupied by any geometries
 struct HeightfieldSolidSpan
 {
 	HeightfieldSolidSpan()
@@ -29,13 +31,22 @@ struct HeightfieldSolidSpan
 	RAabb Bounds;
 };
 
+// A span represents a traversable area
 struct HeightfieldOpenSpan
 {
+	HeightfieldOpenSpan()
+	{
+		fill_n(NeighbourLink, NUM_NEIGHBOUR_SPANS, -1);
+	}
+
 	int CellRowStart;
 	int CellRowEnd;
 
+	// Whether the span is a border span (which does not have 8 valid neighbour spans including diagonal ones)
+	bool bBorder;
+
 	// Index to a neighbour open span this spawn is linked to
-	int NeighbourLink[4] = { -1, -1, -1, -1 };
+	int NeighbourLink[NUM_NEIGHBOUR_SPANS];
 };
 
 struct HeightfieldData
@@ -62,6 +73,10 @@ public:
 private:
 	RAabb CreateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z);
 
+	// Returns if a character can navigate between given open spans
+	bool IsValidNeighbourSpan(const HeightfieldOpenSpan& ThisOpenSpan, const HeightfieldOpenSpan& NeighbourOpenSpan) const;
+
+	// Returns center location of a cell
 	RVec3 GetCellCenter(int x, int y, int z);
 
 private:
@@ -69,6 +84,7 @@ private:
 	RVec3					SceneCenterPoint;
 	RVec3					CellDimension;
 	float					MinTraversableHeight;
+	int						MinTraversableNumCells;
 
 	/// The max distance a character can step up
 	float					MaxStepHeight;
@@ -80,5 +96,5 @@ private:
 
 	vector<HeightfieldData>	Heightfield;
 
-	static RVec3			NeighbourOffset[4];
+	static const GridCoord	NeighbourOffset[];
 };

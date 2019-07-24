@@ -10,12 +10,19 @@
 #include "Core/RAabb.h"
 #include "RenderSystem/RDebugRenderer.h"
 
-RVec3 RVoxelizer::NeighbourOffset[4] =
+const GridCoord RVoxelizer::NeighbourOffset[8] =
 {
-	RVec3(1, 0, 0),
-	RVec3(0, 0, 1),
-	RVec3(-1, 0, 0),
-	RVec3(0, 0, -1),
+	// Direct neighbour grids
+	{-1,  0 },
+	{ 0,  1 },
+	{ 1,  0 },
+	{ 0, -1 },
+
+	// Diagonal grids
+	{-1,  1 },
+	{ 1,  1 },
+	{ 1, -1 },
+	{-1, -1 },
 };
 
 
@@ -24,6 +31,7 @@ RVoxelizer::RVoxelizer()
 	, MinTraversableHeight(200.0f)
 	, MaxStepHeight(50.0f)
 {
+	MinTraversableNumCells = (int)ceil(MinTraversableHeight / CellDimension.Y());
 	MaxStepNumCells = (int)floor(MaxStepHeight / CellDimension.Y());
 }
 
@@ -151,7 +159,11 @@ void RVoxelizer::Initialize(RScene* Scene)
 							HeightfieldOpenSpan OpenSpan;
 							OpenSpan.CellRowStart = ThisSpan.CellRowEnd + 1;
 							OpenSpan.CellRowEnd = INT_MAX;
-							Column.OpenSpans.push_back(OpenSpan);
+
+							if (OpenSpan.CellRowStart < CellNumY)
+							{
+								Column.OpenSpans.push_back(OpenSpan);
+							}
 						}
 					}
 				}
@@ -173,32 +185,53 @@ void RVoxelizer::Initialize(RScene* Scene)
 
 				for (auto& ThisOpenSpan : Column.OpenSpans)
 				{
-					for (int NeighbourLinkIndex = 0; NeighbourLinkIndex < 4; NeighbourLinkIndex++)
+					int NumValidNeighbours = 0;
+					for (int NeighbourLinkIndex = 0; NeighbourLinkIndex < 8; NeighbourLinkIndex++)
 					{
 						// Neighbour coordinates
-						const int n_x = x + (int)NeighbourOffset[NeighbourLinkIndex].X();
-						const int n_z = z + (int)NeighbourOffset[NeighbourLinkIndex].Z();
+						const int n_x = x + NeighbourOffset[NeighbourLinkIndex].x;
+						const int n_z = z + NeighbourOffset[NeighbourLinkIndex].z;
 
 						if (n_x >= 0 && n_x < CellNumX &&
 							n_z >= 0 && n_z < CellNumZ)
 						{
 							int NeighbourIndex = n_x * CellNumZ + n_z;
-							int NeighbourOpenSpanIndex = 0;
 
-							// Find linked neighbour open spans
-							for (const auto& NeighbourOpenSpan : Heightfield[NeighbourIndex].OpenSpans)
+							if (NeighbourLinkIndex < NUM_NEIGHBOUR_SPANS)
 							{
-								if (abs(NeighbourOpenSpan.CellRowStart - ThisOpenSpan.CellRowStart) <= MaxStepNumCells &&
-									NeighbourOpenSpan.CellRowEnd >= ThisOpenSpan.CellRowEnd)
-								{
-									ThisOpenSpan.NeighbourLink[NeighbourLinkIndex] = NeighbourOpenSpanIndex;
-									break;
-								}
+								// Check direct neighbours and add valid ones to the neighbour link list
+								int NeighbourOpenSpanIndex = 0;
 
-								NeighbourOpenSpanIndex++;
+								// Find linked neighbour open spans
+								for (const auto& NeighbourOpenSpan : Heightfield[NeighbourIndex].OpenSpans)
+								{
+									if (IsValidNeighbourSpan(ThisOpenSpan, NeighbourOpenSpan))
+									{
+										ThisOpenSpan.NeighbourLink[NeighbourLinkIndex] = NeighbourOpenSpanIndex;
+										NumValidNeighbours++;
+										break;
+									}
+
+									NeighbourOpenSpanIndex++;
+								}
+							}
+							else
+							{
+								// Diagonal neighbours are only used to check for border spans
+								for (const auto& NeighbourOpenSpan : Heightfield[NeighbourIndex].OpenSpans)
+								{
+									if (IsValidNeighbourSpan(ThisOpenSpan, NeighbourOpenSpan))
+									{
+										NumValidNeighbours++;
+										break;
+									}
+								}
 							}
 						}
 					}
+
+					// Span is a border if at least one of eight neighbours is not walkable from it
+					ThisOpenSpan.bBorder = (NumValidNeighbours < 8);
 				}
 			}
 		}
@@ -208,28 +241,53 @@ void RVoxelizer::Initialize(RScene* Scene)
 void RVoxelizer::Render()
 {
 	GDebugRenderer.DrawAabb(SceneBounds);
+
 	for (const auto& Column : Heightfield)
 	{
-		for (const auto& Span : Column.SolidSpans)
-		{
-			GDebugRenderer.DrawAabb(Span.Bounds, Span.bTraversable ? RColor::Green : RColor::Red);
-		}
+		// Draw solid spans
+		//for (const auto& Span : Column.SolidSpans)
+		//{
+		//	GDebugRenderer.DrawAabb(Span.Bounds, Span.bTraversable ? RColor::Green : RColor::Red);
+		//}
 
+		// Draw traversable areas
 		for (const auto& OpenSpan : Column.OpenSpans)
 		{
-			for (int i = 0; i < 4; i++)
+			if (OpenSpan.bBorder)
+			{
+				// Draw borders
+				//{
+				//	RVec3 Start = GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z);
+				//	RVec3 End = GetCellCenter(Column.x, RMath::Min(OpenSpan.CellRowEnd, CellNumY - 1), Column.z);
+				//	RColor Color(0.5, 0.5, 1.0f);
+
+				//	GDebugRenderer.DrawSphere(Start, 10.0f, Color, 3);
+				//	GDebugRenderer.DrawSphere(End, 10.0f, Color, 3);
+				//	GDebugRenderer.DrawLine(Start, End, Color);
+				//}
+
+				continue;
+			}
+
+			for (int i = 0; i < NUM_NEIGHBOUR_SPANS; i++)
 			{
 				int NeighbourLinkIndex = OpenSpan.NeighbourLink[i];
 				if (NeighbourLinkIndex != -1)
 				{
-					const int n_x = Column.x + (int)NeighbourOffset[i].X();
-					const int n_z = Column.z + (int)NeighbourOffset[i].Z();
+					const int n_x = Column.x + NeighbourOffset[i].x;
+					const int n_z = Column.z + NeighbourOffset[i].z;
 
 					if (n_x >= 0 && n_x < CellNumX &&
 						n_z >= 0 && n_z < CellNumZ)
 					{
 						int NeighbourIndex = n_x * CellNumZ + n_z;
-						int NeighbourStart = Heightfield[NeighbourIndex].OpenSpans[NeighbourLinkIndex].CellRowStart;
+						const HeightfieldOpenSpan& NeighbourOpenSpan = Heightfield[NeighbourIndex].OpenSpans[NeighbourLinkIndex];
+						if (NeighbourOpenSpan.bBorder)
+						{
+							continue;
+						}
+
+						int NeighbourStart = NeighbourOpenSpan.CellRowStart;
 
 						RVec3 Start = GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z);
 						RVec3 End = GetCellCenter(n_x, NeighbourStart, n_z);
@@ -257,8 +315,15 @@ RAabb RVoxelizer::CreateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, i
 	return Result;
 }
 
+bool RVoxelizer::IsValidNeighbourSpan(const HeightfieldOpenSpan& ThisOpenSpan, const HeightfieldOpenSpan& NeighbourOpenSpan) const
+{
+	return abs(NeighbourOpenSpan.CellRowStart - ThisOpenSpan.CellRowStart) <= MaxStepNumCells &&
+		   (NeighbourOpenSpan.CellRowEnd - ThisOpenSpan.CellRowStart) > MinTraversableNumCells;
+}
+
 RVec3 RVoxelizer::GetCellCenter(int x, int y, int z)
 {
+	assert(x >= 0 && x < CellNumX && y >= 0 && y < CellNumY && z >= 0 && z < CellNumZ);
 	return RVec3(
 		SceneCenterPoint.X() + (-0.5f * (CellNumX - 1) + x) * CellDimension.X(),
 		SceneCenterPoint.Y() + (-0.5f * (CellNumY - 1) + y) * CellDimension.Y(),
