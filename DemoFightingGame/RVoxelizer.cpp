@@ -62,185 +62,25 @@ void RVoxelizer::Initialize(RScene* Scene)
 		// Allocate heightfield cells by x-z grid
 		Heightfield.resize(CellNumX * CellNumZ);
 
-		for (int x = 0; x < CellNumX; x++)
-		{
-			for (int z = 0; z < CellNumZ; z++)
-			{
-				int Index = x * CellNumZ + z;
-				auto& Column = Heightfield[Index];
-				Column.x = x;
-				Column.z = z;
+		GenerateHeightfieldColumns(SceneObjects);
 
-				HeightfieldSolidSpan Span;
-				bool bIsLastCellSolid = false;
+		// Generate neighbour data after we have open spans for all columns 
+		GenerateOpenSpanNeighbourData();
 
-				// Search for all spans in a column, bottom-up
-				for (int y = 0; y < CellNumY; y++)
-				{
-					// Find center of a cell
-					RVec3 CellCenter = RVec3(
-						SceneCenterPoint.X() + (-0.5f * (CellNumX - 1) + x) * CellDimension.X(),
-						SceneCenterPoint.Y() + (-0.5f * (CellNumY - 1) + y) * CellDimension.Y(),
-						SceneCenterPoint.Z() + (-0.5f * (CellNumZ - 1) + z) * CellDimension.Z()
-					);
-
-					RAabb CellBound;
-					CellBound.pMax = CellCenter + CellDimension / 2.0f;
-					CellBound.pMin = CellCenter - CellDimension / 2.0f;
-
-					bool bIsSolidCell = false;
-
-					// Has any overlaps with scene meshes?
-					for (auto& SceneObj : SceneObjects)
-					{
-						if (SceneObj->GetAabb().TestIntersectionWithAabb(CellBound))
-						{
-							bIsSolidCell = true;
-							break;
-						}
-					}
-
-					if (bIsSolidCell)
-					{
-						// A new solid spawn. Finish last open span
-						if (!bIsLastCellSolid)
-						{
-							// Start a new solid span
-							Span.CellRowStart = y;
-						}
-					}
-					else // !bIsSolidCell
-					{
-						if (bIsLastCellSolid)
-						{
-							Span.CellRowEnd = y - 1;
-							Column.SolidSpans.push_back(Span);
-						}
-					}
-
-					bIsLastCellSolid = bIsSolidCell;
-				}
-
-				// Finish the last span
-				if (bIsLastCellSolid)
-				{
-					Span.CellRowEnd = CellNumY - 1;
-					Column.SolidSpans.push_back(Span);
-				}
-
-				// Evaluate traversable flag for each span
-				for (size_t i = 0; i < Column.SolidSpans.size(); i++)
-				{
-					if (i < Column.SolidSpans.size() - 1)
-					{
-						// Measure empty spaces between spans for traversable
-						HeightfieldSolidSpan& ThisSpan = Column.SolidSpans[i];
-						HeightfieldSolidSpan& NextSpan = Column.SolidSpans[i + 1];
-						int NumEmptyCells = NextSpan.CellRowStart - ThisSpan.CellRowEnd - 1;
-						ThisSpan.bTraversable = (CellDimension.Y() * NumEmptyCells >= MinTraversableHeight);
-
-						if (ThisSpan.bTraversable)
-						{
-							HeightfieldOpenSpan OpenSpan;
-							OpenSpan.CellRowStart = ThisSpan.CellRowEnd + 1;
-							OpenSpan.CellRowEnd = NextSpan.CellRowStart;
-							Column.OpenSpans.push_back(OpenSpan);
-						}
-					}
-					else
-					{
-						// Check if top spans are traversable by their distance to the up boundary
-						HeightfieldSolidSpan& ThisSpan = Column.SolidSpans[i];
-						int NumEmptyCells = CellNumY - ThisSpan.CellRowEnd - 1;
-						ThisSpan.bTraversable = true; //(CellDimension.Y() * NumEmptyCells >= MinTraversableHeight);
-
-						if (ThisSpan.bTraversable)
-						{
-							HeightfieldOpenSpan OpenSpan;
-							OpenSpan.CellRowStart = ThisSpan.CellRowEnd + 1;
-							OpenSpan.CellRowEnd = INT_MAX;
-
-							if (OpenSpan.CellRowStart < CellNumY)
-							{
-								Column.OpenSpans.push_back(OpenSpan);
-							}
-						}
-					}
-				}
-
-				// Create bounds for each span
-				for (auto& IterSpan : Column.SolidSpans)
-				{
-					IterSpan.Bounds = CreateBoundsForSpan(IterSpan, x, z);
-				}
-			}
-		}
-
-		for (int x = 0; x < CellNumX; x++)
-		{
-			for (int z = 0; z < CellNumZ; z++)
-			{
-				int Index = x * CellNumZ + z;
-				auto& Column = Heightfield[Index];
-
-				for (auto& ThisOpenSpan : Column.OpenSpans)
-				{
-					int NumValidNeighbours = 0;
-					for (int NeighbourLinkIndex = 0; NeighbourLinkIndex < 8; NeighbourLinkIndex++)
-					{
-						// Neighbour coordinates
-						const int n_x = x + NeighbourOffset[NeighbourLinkIndex].x;
-						const int n_z = z + NeighbourOffset[NeighbourLinkIndex].z;
-
-						if (n_x >= 0 && n_x < CellNumX &&
-							n_z >= 0 && n_z < CellNumZ)
-						{
-							int NeighbourIndex = n_x * CellNumZ + n_z;
-
-							if (NeighbourLinkIndex < NUM_NEIGHBOUR_SPANS)
-							{
-								// Check direct neighbours and add valid ones to the neighbour link list
-								int NeighbourOpenSpanIndex = 0;
-
-								// Find linked neighbour open spans
-								for (const auto& NeighbourOpenSpan : Heightfield[NeighbourIndex].OpenSpans)
-								{
-									if (IsValidNeighbourSpan(ThisOpenSpan, NeighbourOpenSpan))
-									{
-										ThisOpenSpan.NeighbourLink[NeighbourLinkIndex] = NeighbourOpenSpanIndex;
-										NumValidNeighbours++;
-										break;
-									}
-
-									NeighbourOpenSpanIndex++;
-								}
-							}
-							else
-							{
-								// Diagonal neighbours are only used to check for border spans
-								for (const auto& NeighbourOpenSpan : Heightfield[NeighbourIndex].OpenSpans)
-								{
-									if (IsValidNeighbourSpan(ThisOpenSpan, NeighbourOpenSpan))
-									{
-										NumValidNeighbours++;
-										break;
-									}
-								}
-							}
-						}
-					}
-
-					// Span is a border if at least one of eight neighbours is not walkable from it
-					ThisOpenSpan.bBorder = (NumValidNeighbours < 8);
-				}
-			}
-		}
+		GenerateDistanceField();
 	}
 }
 
 void RVoxelizer::Render()
 {
 	GDebugRenderer.DrawAabb(SceneBounds);
+
+	static float DebugDistanceField = MaxDistanceField;
+	DebugDistanceField -= 0.1f;
+	if (DebugDistanceField < 0.0f)
+	{
+		DebugDistanceField = MaxDistanceField;
+	}
 
 	for (const auto& Column : Heightfield)
 	{
@@ -253,6 +93,11 @@ void RVoxelizer::Render()
 		// Draw traversable areas
 		for (const auto& OpenSpan : Column.OpenSpans)
 		{
+			if (OpenSpan.DistanceField == ceilf(DebugDistanceField))
+			{
+				GDebugRenderer.DrawSphere(GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z), 10.0f, RColor::Green, 3);
+			}
+
 			if (OpenSpan.bBorder)
 			{
 				// Draw borders
@@ -296,6 +141,311 @@ void RVoxelizer::Render()
 					}
 				}
 			}
+		}
+	}
+}
+
+void RVoxelizer::GenerateHeightfieldColumns(const vector<RSceneObject*>& SceneObjects)
+{
+	for (int x = 0; x < CellNumX; x++)
+	{
+		for (int z = 0; z < CellNumZ; z++)
+		{
+			int Index = x * CellNumZ + z;
+			auto& Column = Heightfield[Index];
+			Column.x = x;
+			Column.z = z;
+
+			HeightfieldSolidSpan Span;
+			bool bIsLastCellSolid = false;
+
+			// Search for all spans in a column, bottom-up
+			for (int y = 0; y < CellNumY; y++)
+			{
+				// Find center of a cell
+				RVec3 CellCenter = GetCellCenter(x, y, z);
+
+				RAabb CellBound;
+				CellBound.pMax = CellCenter + CellDimension / 2.0f;
+				CellBound.pMin = CellCenter - CellDimension / 2.0f;
+
+				bool bIsSolidCell = false;
+
+				// Has any overlaps with scene meshes?
+				for (auto& SceneObj : SceneObjects)
+				{
+					if (SceneObj->GetAabb().TestIntersectionWithAabb(CellBound))
+					{
+						bIsSolidCell = true;
+						break;
+					}
+				}
+
+				if (bIsSolidCell)
+				{
+					// A new solid spawn. Finish last open span
+					if (!bIsLastCellSolid)
+					{
+						// Start a new solid span
+						Span.CellRowStart = y;
+					}
+				}
+				else // !bIsSolidCell
+				{
+					if (bIsLastCellSolid)
+					{
+						Span.CellRowEnd = y - 1;
+						Column.SolidSpans.push_back(Span);
+					}
+				}
+
+				bIsLastCellSolid = bIsSolidCell;
+			}
+
+			// Finish the last span
+			if (bIsLastCellSolid)
+			{
+				Span.CellRowEnd = CellNumY - 1;
+				Column.SolidSpans.push_back(Span);
+			}
+
+			// Evaluate traversable flag for each span
+			for (size_t i = 0; i < Column.SolidSpans.size(); i++)
+			{
+				if (i < Column.SolidSpans.size() - 1)
+				{
+					// Measure empty spaces between spans for traversable
+					HeightfieldSolidSpan& ThisSpan = Column.SolidSpans[i];
+					HeightfieldSolidSpan& NextSpan = Column.SolidSpans[i + 1];
+					int NumEmptyCells = NextSpan.CellRowStart - ThisSpan.CellRowEnd - 1;
+					ThisSpan.bTraversable = (CellDimension.Y() * NumEmptyCells >= MinTraversableHeight);
+
+					if (ThisSpan.bTraversable)
+					{
+						HeightfieldOpenSpan OpenSpan;
+						OpenSpan.CellRowStart = ThisSpan.CellRowEnd + 1;
+						OpenSpan.CellRowEnd = NextSpan.CellRowStart;
+						Column.OpenSpans.push_back(OpenSpan);
+					}
+				}
+				else
+				{
+					// Check if top spans are traversable by their distance to the up boundary
+					HeightfieldSolidSpan& ThisSpan = Column.SolidSpans[i];
+					int NumEmptyCells = CellNumY - ThisSpan.CellRowEnd - 1;
+					ThisSpan.bTraversable = true; //(CellDimension.Y() * NumEmptyCells >= MinTraversableHeight);
+
+					if (ThisSpan.bTraversable)
+					{
+						HeightfieldOpenSpan OpenSpan;
+						OpenSpan.CellRowStart = ThisSpan.CellRowEnd + 1;
+						OpenSpan.CellRowEnd = INT_MAX;
+
+						if (OpenSpan.CellRowStart < CellNumY)
+						{
+							Column.OpenSpans.push_back(OpenSpan);
+						}
+					}
+				}
+			}
+
+			// Create bounds for each span
+			for (auto& IterSpan : Column.SolidSpans)
+			{
+				IterSpan.Bounds = CreateBoundsForSpan(IterSpan, x, z);
+			}
+		}
+	}
+}
+
+void RVoxelizer::GenerateOpenSpanNeighbourData()
+{
+	for (int x = 0; x < CellNumX; x++)
+	{
+		for (int z = 0; z < CellNumZ; z++)
+		{
+			int Index = x * CellNumZ + z;
+			auto& Column = Heightfield[Index];
+
+			for (auto& ThisOpenSpan : Column.OpenSpans)
+			{
+				int NumValidNeighbours = 0;
+				for (int NeighbourLinkIndex = 0; NeighbourLinkIndex < 8; NeighbourLinkIndex++)
+				{
+					// Neighbour coordinates
+					const int n_x = x + NeighbourOffset[NeighbourLinkIndex].x;
+					const int n_z = z + NeighbourOffset[NeighbourLinkIndex].z;
+
+					if (n_x >= 0 && n_x < CellNumX &&
+						n_z >= 0 && n_z < CellNumZ)
+					{
+						int NeighbourIndex = n_x * CellNumZ + n_z;
+
+						if (NeighbourLinkIndex < NUM_NEIGHBOUR_SPANS)
+						{
+							// Check direct neighbours and add valid ones to the neighbour link list
+							int NeighbourOpenSpanIndex = 0;
+
+							// Find linked neighbour open spans
+							for (const auto& NeighbourOpenSpan : Heightfield[NeighbourIndex].OpenSpans)
+							{
+								if (IsValidNeighbourSpan(ThisOpenSpan, NeighbourOpenSpan))
+								{
+									ThisOpenSpan.NeighbourLink[NeighbourLinkIndex] = NeighbourOpenSpanIndex;
+									NumValidNeighbours++;
+									break;
+								}
+
+								NeighbourOpenSpanIndex++;
+							}
+						}
+						else
+						{
+							// Diagonal neighbours are only used to check for border spans
+							for (const auto& NeighbourOpenSpan : Heightfield[NeighbourIndex].OpenSpans)
+							{
+								if (IsValidNeighbourSpan(ThisOpenSpan, NeighbourOpenSpan))
+								{
+									NumValidNeighbours++;
+									break;
+								}
+							}
+						}
+					}
+				}
+
+				// Span is a border if at least one of eight neighbours is not walkable from it
+				ThisOpenSpan.bBorder = (NumValidNeighbours < 8);
+			}
+		}
+	}
+}
+
+void RVoxelizer::GenerateDistanceField()
+{
+	struct OpenSpanData
+	{
+		OpenSpanData(int InX, int InZ, int InSpanIndex, float InDistance)
+			: x(InX), z(InZ), span_idx(InSpanIndex), Distance(InDistance)
+		{}
+
+		bool operator==(const OpenSpanData& Rhs) const
+		{
+			return x == Rhs.x && z == Rhs.z && span_idx == Rhs.span_idx;
+		}
+
+		int x, z, span_idx;
+		float Distance;
+	};
+
+	// TODO: preallocate data with total open span count
+	queue<OpenSpanData> DistanceField;
+
+	// Collect all border open spans from heightfield
+	for (int x = 0; x < CellNumX; x++)
+	{
+		for (int z = 0; z < CellNumZ; z++)
+		{
+			int Index = x * CellNumZ + z;
+			auto& Column = Heightfield[Index];
+
+			// Index of the open span in its column
+			int IndexOpenSpan = 0;
+			for (auto& ThisOpenSpan : Column.OpenSpans)
+			{
+				if (ThisOpenSpan.bBorder)
+				{
+					DistanceField.emplace(x, z, IndexOpenSpan, 0.0f);
+				}
+				IndexOpenSpan++;
+			}
+		}
+	}
+
+	vector<OpenSpanData> FinishSpans;
+	int NumSpansProcessed = 0;
+
+	// Loop through all neighbour spans and add them to the end of the container
+	while (DistanceField.size() != 0)
+	{
+		// Get one element from the queue in the front
+		auto& ThisSpanData = DistanceField.front();
+		//RLog("Span: %d, %d\n", ThisSpanData.x, ThisSpanData.z);
+
+		int ColumnIndex = ThisSpanData.x * CellNumZ + ThisSpanData.z;
+		auto& Column = Heightfield[ColumnIndex];
+
+		for (int i = 0; i < 4; i++)
+		{
+			// Neighbour span index
+			int NeighbourSpanIndex = Column.OpenSpans[ThisSpanData.span_idx].NeighbourLink[i];
+			if (NeighbourSpanIndex != -1)
+			{
+				// New span data with the distance field
+				OpenSpanData NewSpan(
+					ThisSpanData.x + NeighbourOffset[i].x,
+					ThisSpanData.z + NeighbourOffset[i].z,
+					NeighbourSpanIndex,
+					ThisSpanData.Distance + 1.0f);
+
+				auto Iter = find(FinishSpans.begin(), FinishSpans.end(), ThisSpanData);
+				if (Iter == FinishSpans.end())
+				{
+					DistanceField.emplace(NewSpan);
+				}
+				else
+				{
+					// The span exists in finish list, update the distance if new one is smaller
+					if (NewSpan.Distance < Iter->Distance)
+					{
+						Iter->Distance = NewSpan.Distance;
+					}
+				}
+			}
+		}
+
+		// Find new spand data in finish list
+		auto Iter = find(FinishSpans.begin(), FinishSpans.end(), ThisSpanData);
+		if (Iter == FinishSpans.end())
+		{
+			FinishSpans.emplace_back(ThisSpanData);
+		}
+		else
+		{
+			// Update distance in finish list if newer one is smaller
+			if (ThisSpanData.Distance < Iter->Distance)
+			{
+				Iter->Distance = ThisSpanData.Distance;
+			}
+		}
+
+		DistanceField.pop();
+
+		// Output progress
+		{
+			NumSpansProcessed++;
+			if (NumSpansProcessed % 10 == 0)
+			{
+				RLog("Generating distance field. Remaining: %zu, FinishSpans: %zu\n", DistanceField.size(), FinishSpans.size());
+			}
+		}
+	}
+
+	MaxDistanceField = 0.0f;
+
+	// Copy distance values to open span array
+	for (const auto& Span : FinishSpans)
+	{
+		RLog("Span: %d, %d, %.2f\n", Span.x, Span.z, Span.Distance);
+
+		int ColumnIndex = Span.x * CellNumZ + Span.z;
+		auto& Column = Heightfield[ColumnIndex];
+
+		Column.OpenSpans[Span.span_idx].DistanceField = Span.Distance;
+
+		if (Span.Distance > MaxDistanceField)
+		{
+			MaxDistanceField = Span.Distance;
 		}
 	}
 }
