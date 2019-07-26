@@ -140,6 +140,8 @@ void RShaderManager::LoadShaders(const string& Path)
 				ComPtr<ID3DBlob> pShaderCode;
 				ComPtr<ID3DBlob> pErrorMsg;
 
+				RLog("Compiling shader %s\n", filename.c_str());
+
 				// Detect shader type by file name suffix
 				if (filename.find("_VS.hlsl") != string::npos)
 				{
