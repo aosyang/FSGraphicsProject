@@ -321,25 +321,50 @@ void RVoxelizer::GenerateOpenSpanNeighbourData()
 	}
 }
 
+template<class T>
+inline void HashCombine(size_t& HashValue, const T& Element)
+{
+	hash<T> Hash;
+	HashValue ^= Hash(Element) + 0x9e3779b9 + (HashValue << 6) + (HashValue >> 2);
+}
+
 void RVoxelizer::GenerateDistanceField()
 {
-	struct OpenSpanData
+	class OpenSpanKey
 	{
-		OpenSpanData(int InX, int InZ, int InSpanIndex, float InDistance)
-			: x(InX), z(InZ), span_idx(InSpanIndex), Distance(InDistance)
-		{}
-
-		bool operator==(const OpenSpanData& Rhs) const
+	public:
+		OpenSpanKey(int InX, int InZ, int InSpanIndex)
+			: x(InX), z(InZ), span_idx(InSpanIndex)
 		{
-			return x == Rhs.x && z == Rhs.z && span_idx == Rhs.span_idx;
+			HashValue = CalcHash();
+		}
+
+		bool operator<(const OpenSpanKey& Rhs) const
+		{
+			return HashValue < Rhs.HashValue;
 		}
 
 		int x, z, span_idx;
-		float Distance;
+
+	private:
+		size_t CalcHash() const
+		{
+			size_t Hash = 0;
+			HashCombine(Hash, x);
+			HashCombine(Hash, z);
+			HashCombine(Hash, span_idx);
+			return Hash;
+		}
+
+	private:
+		size_t HashValue;
 	};
 
 	// TODO: preallocate data with total open span count
-	queue<OpenSpanData> DistanceField;
+	queue<OpenSpanKey> PendingSpans;
+
+	// The result of each span and its distance field
+	map<OpenSpanKey, float> SpanDistanceMap;
 
 	// Collect all border open spans from heightfield
 	for (int x = 0; x < CellNumX; x++)
@@ -355,97 +380,87 @@ void RVoxelizer::GenerateDistanceField()
 			{
 				if (ThisOpenSpan.bBorder)
 				{
-					DistanceField.emplace(x, z, IndexOpenSpan, 0.0f);
+					OpenSpanKey NewKey(x, z, IndexOpenSpan);
+					PendingSpans.emplace(NewKey);
+					SpanDistanceMap[NewKey] = 0.0f;
 				}
 				IndexOpenSpan++;
 			}
 		}
 	}
 
-	vector<OpenSpanData> FinishSpans;
 	int NumSpansProcessed = 0;
 
 	// Loop through all neighbour spans and add them to the end of the container
-	while (DistanceField.size() != 0)
+	while (PendingSpans.size() != 0)
 	{
 		// Get one element from the queue in the front
-		auto& ThisSpanData = DistanceField.front();
+		const OpenSpanKey& ThisSpanKey = PendingSpans.front();
 		//RLog("Span: %d, %d\n", ThisSpanData.x, ThisSpanData.z);
 
-		int ColumnIndex = ThisSpanData.x * CellNumZ + ThisSpanData.z;
+		int ColumnIndex = ThisSpanKey.x * CellNumZ + ThisSpanKey.z;
 		auto& Column = Heightfield[ColumnIndex];
 
 		for (int i = 0; i < 4; i++)
 		{
-			// Neighbour span index
-			int NeighbourSpanIndex = Column.OpenSpans[ThisSpanData.span_idx].NeighbourLink[i];
+			int NeighbourSpanIndex = Column.OpenSpans[ThisSpanKey.span_idx].NeighbourLink[i];
 			if (NeighbourSpanIndex != -1)
 			{
 				// New span data with the distance field
-				OpenSpanData NewSpan(
-					ThisSpanData.x + NeighbourOffset[i].x,
-					ThisSpanData.z + NeighbourOffset[i].z,
-					NeighbourSpanIndex,
-					ThisSpanData.Distance + 1.0f);
+				OpenSpanKey NewKey(
+					ThisSpanKey.x + NeighbourOffset[i].x,
+					ThisSpanKey.z + NeighbourOffset[i].z,
+					NeighbourSpanIndex);
 
-				auto Iter = find(FinishSpans.begin(), FinishSpans.end(), ThisSpanData);
-				if (Iter == FinishSpans.end())
+				// Neighbour distance = current distance + 1
+				float NewDistance = SpanDistanceMap.find(ThisSpanKey)->second + 1.0f;
+
+				auto Iter = SpanDistanceMap.find(NewKey);
+
+				// If this neighbour is a new span, added it to the queue
+				if (Iter == SpanDistanceMap.end())
 				{
-					DistanceField.emplace(NewSpan);
+					PendingSpans.emplace(NewKey);
+					SpanDistanceMap[NewKey] = NewDistance;
 				}
 				else
 				{
-					// The span exists in finish list, update the distance if new one is smaller
-					if (NewSpan.Distance < Iter->Distance)
+					float OldDistance = SpanDistanceMap[NewKey];
+					if (NewDistance < OldDistance)
 					{
-						Iter->Distance = NewSpan.Distance;
+						SpanDistanceMap[NewKey] = NewDistance;
 					}
 				}
 			}
 		}
 
-		// Find new spand data in finish list
-		auto Iter = find(FinishSpans.begin(), FinishSpans.end(), ThisSpanData);
-		if (Iter == FinishSpans.end())
-		{
-			FinishSpans.emplace_back(ThisSpanData);
-		}
-		else
-		{
-			// Update distance in finish list if newer one is smaller
-			if (ThisSpanData.Distance < Iter->Distance)
-			{
-				Iter->Distance = ThisSpanData.Distance;
-			}
-		}
-
-		DistanceField.pop();
+		PendingSpans.pop();
 
 		// Output progress
-		{
-			NumSpansProcessed++;
-			if (NumSpansProcessed % 10 == 0)
-			{
-				RLog("Generating distance field. Remaining: %zu, FinishSpans: %zu\n", DistanceField.size(), FinishSpans.size());
-			}
-		}
+		//{
+		//	NumSpansProcessed++;
+		//	if (NumSpansProcessed % 10 == 0)
+		//	{
+		//		RLog("Generating distance field. Remaining: %zu, FinishSpans: %zu\n", PendingSpans.size(), SpanDistanceMap.size());
+		//	}
+		//}
 	}
 
 	MaxDistanceField = 0.0f;
 
 	// Copy distance values to open span array
-	for (const auto& Span : FinishSpans)
+	for (const auto& Span : SpanDistanceMap)
 	{
-		RLog("Span: %d, %d, %.2f\n", Span.x, Span.z, Span.Distance);
+		//RLog("Span: %d, %d, %.2f\n", Span.first.x, Span.first.z, Span.second);
 
-		int ColumnIndex = Span.x * CellNumZ + Span.z;
+		int ColumnIndex = Span.first.x * CellNumZ + Span.first.z;
 		auto& Column = Heightfield[ColumnIndex];
 
-		Column.OpenSpans[Span.span_idx].DistanceField = Span.Distance;
+		Column.OpenSpans[Span.first.span_idx].DistanceField = Span.second;
 
-		if (Span.Distance > MaxDistanceField)
+		if (Span.second > MaxDistanceField)
 		{
-			MaxDistanceField = Span.Distance;
+			MaxDistanceField = Span.second;
 		}
 	}
 }
