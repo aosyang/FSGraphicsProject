@@ -14,6 +14,7 @@ namespace ManagedInterface
     /// </summary>
     /// <param name="ResourceName"></param>
     public delegate void AsyncResourceLoadedHandler(string ResourceName);
+    public delegate void SceneObjectClonedHandler(string ObjectName);
 
     public interface IManagedEngine
     {
@@ -53,6 +54,8 @@ namespace ManagedInterface
         void ExportAllAnimationsToBinaryFiles();
 
         /// Set the managed delegate for async resource loaded
-        void SetAsyncResourceLoadedHandler(AsyncResourceLoadedHandler AsyncResourceLoaded);
+        void SetEventHandler_AsyncResourceLoaded(AsyncResourceLoadedHandler Handler);
+
+        void SetEventHandler_SceneObjectCloned(SceneObjectClonedHandler Handler);
     }
 }

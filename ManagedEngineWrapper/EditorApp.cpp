@@ -10,6 +10,7 @@
 namespace ManagedEngineWrapper
 {
 	EditorApp::EditorApp()
+		: SceneObjectClonedCallback(nullptr)
 	{
 
 	}
@@ -133,6 +134,12 @@ namespace ManagedEngineWrapper
 					{
 						RScene* Scene = m_SelectedObject->GetScene();
 						m_SelectedObject = Scene->CloneObject(m_SelectedObject);
+						assert(m_SelectedObject);
+
+						if (SceneObjectClonedCallback)
+						{
+							(*SceneObjectClonedCallback)(m_SelectedObject->GetName().c_str());
+						}
 					}
 
 					RVec3 pos = m_SelectedObject->GetPosition();
@@ -522,6 +529,11 @@ namespace ManagedEngineWrapper
 				(*AsyncResourceLoadedCallback)(ResourcePath);
 			}
 		});
+	}
+
+	void EditorApp::SetSceneObjectClonedCallback(NativeCallback_SceneObjectCloned Callback)
+	{
+		SceneObjectClonedCallback = Callback;
 	}
 
 	float EditorApp::SnapTo(float Value, float Unit)

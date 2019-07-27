@@ -82,6 +82,10 @@ public:
 	void UpdateScene(float DeltaTime);
 
 	vector<RSceneObject*> EnumerateSceneObjects() const;
+protected:
+
+	void AddSceneObjectInternal(RSceneObject* SceneObject);
+
 private:
 
 	vector<RSceneObject*>		m_SceneObjects;
@@ -94,7 +98,7 @@ T* RScene::CreateSceneObjectOfType(const char* name /*= ""*/, int Flags /*= 0*/)
 	T* SceneObject = new T(RConstructingParams(this, Flags));
 	SceneObject->SetName(name);
 
-	m_SceneObjects.push_back(SceneObject);
+	AddSceneObjectInternal(SceneObject);
 
 	return SceneObject;
 }

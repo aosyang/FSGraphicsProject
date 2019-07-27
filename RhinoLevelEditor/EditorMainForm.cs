@@ -72,7 +72,10 @@ namespace RhinoLevelEditor
 
             // Register async resource loaded event
             AsyncResourceLoadedHandler ResourceLoadedEvent = new AsyncResourceLoadedHandler(OnAsyncResourceLoaded);
-            engineCanvas1.RhinoEngine.SetAsyncResourceLoadedHandler(ResourceLoadedEvent);
+            engineCanvas1.RhinoEngine.SetEventHandler_AsyncResourceLoaded(ResourceLoadedEvent);
+
+            SceneObjectClonedHandler ObjectClonedEvent = new SceneObjectClonedHandler(OnSceneObjectCloned);
+            engineCanvas1.RhinoEngine.SetEventHandler_SceneObjectCloned(ObjectClonedEvent);
 
             UpdateAssetListViewThumbnails();
 
@@ -314,6 +317,16 @@ namespace RhinoLevelEditor
                     Index++;
                 }
             }
+        }
+
+        /// <summary>
+        /// Event called when a scene object has been cloned in editor
+        /// </summary>
+        /// <param name="ObjectName"></param>
+        private void OnSceneObjectCloned(string ObjectName)
+        {
+            UpdatePropertyGrid();
+            RefreshSceneObjectsListBox();
         }
 
         private void listView_AssetView_DoubleClick(object sender, EventArgs e)

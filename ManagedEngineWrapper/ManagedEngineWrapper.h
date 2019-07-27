@@ -20,6 +20,7 @@ namespace ManagedEngineWrapper {
 
 	/// Wrapper delegate of async resource loaded callback
 	delegate void AsyncResourceLoadedWrapper(const char* ResourceName);
+	delegate void SceneObjectClonedWrapper(const char* ObjectName);
 
 	public ref class RhinoEngineWrapper : public IManagedEngine
 	{
@@ -64,20 +65,28 @@ namespace ManagedEngineWrapper {
 		/// Wrapper function to convert resource name of OnAsyncResourceLoaded from native type to managed type
 		void OnAsyncResourceLoaded(const char* ResourceName);
 
+		void OnSceneObjectCloned(const char* ObjectName);
+
 		/// Set the managed delegate for async resource loaded
-		virtual void SetAsyncResourceLoadedHandler(ManagedInterface::AsyncResourceLoadedHandler^ AsyncResourceLoaded);
+		virtual void SetEventHandler_AsyncResourceLoaded(ManagedInterface::AsyncResourceLoadedHandler^ Handler);
+
+		virtual void SetEventHandler_SceneObjectCloned(ManagedInterface::SceneObjectClonedHandler^ Handler);
 
 	private:
+		/// Update managed scene object list. Must be called after objects creation/destruction.
 		void UpdateSceneObjectsList();
 		
 		/// Render a thumbnail preview image for mesh asset
 		Bitmap^ RenderThumbnailForMesh(RMesh* MeshAsset, int Width, int Height);
 
+		/// A list of managed scene objects in the scene
 		List<IManagedSceneObject^>^ SceneObjectsList;
 
 		/// Managed delegate handler for async resource loaded
 		ManagedInterface::AsyncResourceLoadedHandler^ AsyncResourceLoadedCallback;
+		ManagedInterface::SceneObjectClonedHandler^ SceneObjectClonedCallback;
 
 		AsyncResourceLoadedWrapper^ AsyncResourceLoadedWrapperDelegate;
+		SceneObjectClonedWrapper^ SceneObjectClonedWrapperDelegate;
 	};
 }

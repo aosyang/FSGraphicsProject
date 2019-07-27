@@ -236,15 +236,34 @@ namespace ManagedEngineWrapper
 		}
 	}
 
-	void RhinoEngineWrapper::SetAsyncResourceLoadedHandler(ManagedInterface::AsyncResourceLoadedHandler^ AsyncResourceLoaded)
+	void RhinoEngineWrapper::OnSceneObjectCloned(const char* ObjectName)
+	{
+		if (SceneObjectClonedCallback != nullptr)
+		{
+			UpdateSceneObjectsList();
+			String^ ManagedObjectName = gcnew String(ObjectName);
+			SceneObjectClonedCallback(ManagedObjectName);
+		}
+	}
+
+	void RhinoEngineWrapper::SetEventHandler_AsyncResourceLoaded(ManagedInterface::AsyncResourceLoadedHandler^ Handler)
 	{
 		// Save the managed delegate handle
-		AsyncResourceLoadedCallback = AsyncResourceLoaded;
+		AsyncResourceLoadedCallback = Handler;
 
 		// Make a new delegate and bind to async resource loaded event
 		AsyncResourceLoadedWrapperDelegate = gcnew AsyncResourceLoadedWrapper(this, &RhinoEngineWrapper::OnAsyncResourceLoaded);
 		IntPtr pFunc = Marshal::GetFunctionPointerForDelegate(AsyncResourceLoadedWrapperDelegate);
 		m_Application->SetOnAsyncResourceLoadedCallback(static_cast<NativeAsyncResourceLoadedCallback>(pFunc.ToPointer()));
+	}
+
+	void RhinoEngineWrapper::SetEventHandler_SceneObjectCloned(ManagedInterface::SceneObjectClonedHandler^ Handler)
+	{
+		SceneObjectClonedCallback = Handler;
+
+		SceneObjectClonedWrapperDelegate = gcnew SceneObjectClonedWrapper(this, &RhinoEngineWrapper::OnSceneObjectCloned);
+		IntPtr pFunc = Marshal::GetFunctionPointerForDelegate(SceneObjectClonedWrapperDelegate);
+		m_Application->SetSceneObjectClonedCallback(static_cast<NativeCallback_SceneObjectCloned>(pFunc.ToPointer()));
 	}
 
 	void RhinoEngineWrapper::UpdateSceneObjectsList()

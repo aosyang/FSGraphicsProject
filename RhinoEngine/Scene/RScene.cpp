@@ -263,7 +263,7 @@ RSMeshObject* RScene::CreateMeshObject(RMesh* mesh)
 	RSMeshObject* meshObject = new RSMeshObject(RConstructingParams(this));
 	meshObject->SetMesh(mesh);
 
-	m_SceneObjects.push_back(meshObject);
+	AddSceneObjectInternal(meshObject);
 
 	return meshObject;
 }
@@ -275,9 +275,7 @@ RSceneObject* RScene::CreateSceneObject(const char* name)
 
 RSceneObject* RScene::CloneObject(RSceneObject* obj)
 {
-	RSceneObject* NewObject = obj->Clone();
-	m_SceneObjects.push_back(NewObject);
-	return NewObject;
+	return obj->Clone();
 }
 
 RSceneObject* RScene::FindObject(const char* name) const
@@ -691,4 +689,10 @@ vector<RSceneObject*> RScene::EnumerateSceneObjects() const
 	}
 
 	return OutputObjects;
+}
+
+void RScene::AddSceneObjectInternal(RSceneObject* SceneObject)
+{
+	assert(find(m_SceneObjects.begin(), m_SceneObjects.end(), SceneObject) == m_SceneObjects.end());
+	m_SceneObjects.push_back(SceneObject);
 }
