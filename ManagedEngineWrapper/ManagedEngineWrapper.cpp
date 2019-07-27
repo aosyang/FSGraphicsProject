@@ -254,7 +254,7 @@ namespace ManagedEngineWrapper
 		// Make a new delegate and bind to async resource loaded event
 		AsyncResourceLoadedWrapperDelegate = gcnew AsyncResourceLoadedWrapper(this, &RhinoEngineWrapper::OnAsyncResourceLoaded);
 		IntPtr pFunc = Marshal::GetFunctionPointerForDelegate(AsyncResourceLoadedWrapperDelegate);
-		m_Application->SetOnAsyncResourceLoadedCallback(static_cast<NativeAsyncResourceLoadedCallback>(pFunc.ToPointer()));
+		m_Application->SetOnAsyncResourceLoadedCallback(static_cast<NativeCallback_AsyncResourceLoaded>(pFunc.ToPointer()));
 	}
 
 	void RhinoEngineWrapper::SetEventHandler_SceneObjectCloned(ManagedInterface::SceneObjectClonedHandler^ Handler)

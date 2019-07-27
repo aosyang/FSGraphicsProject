@@ -518,7 +518,7 @@ namespace ManagedEngineWrapper
 		return false;
 	}
 
-	void EditorApp::SetOnAsyncResourceLoadedCallback(NativeAsyncResourceLoadedCallback Func)
+	void EditorApp::SetOnAsyncResourceLoadedCallback(NativeCallback_AsyncResourceLoaded Func)
 	{
 		auto AsyncResourceLoadedCallback = Func;
 		RResourceManager::Instance().OnResourceFinishedAsyncLoading.BindLambda([AsyncResourceLoadedCallback](RResourceBase* Resource)
