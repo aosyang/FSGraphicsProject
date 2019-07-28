@@ -167,7 +167,7 @@ private:
 	HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key);
 	const HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key) const;
 
-	bool GetNeighbourSpan(const OpenSpanKey& Key, int OffsetIndex, OpenSpanKey& OutSpan) const;
+	OpenSpanKey GetNeighbourSpanByIndex(const OpenSpanKey& Key, int OffsetIndex) const;
 
 	// Returns center location of a cell
 	RVec3 GetCellCenter(int x, int y, int z) const;

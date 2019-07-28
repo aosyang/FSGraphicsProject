@@ -580,36 +580,25 @@ void RVoxelizer::GenerateRegions()
 				// o n o         o   o
 				// 
 
+				int OffsetIdx[2];
 				if (NeighbourIdx % 2 == 0)
 				{
-					OpenSpanKey DiagonalNeighbourKey(-1, -1, -1);
-					if (GetNeighbourSpan(NeighbourKey, 1, DiagonalNeighbourKey))
-					{
-						DiagonalRegionId = GetRegionId(DiagonalNeighbourKey);
-					}
-
-					if (DiagonalRegionId == -1)
-					{
-						if (GetNeighbourSpan(NeighbourKey, 3, DiagonalNeighbourKey))
-						{
-							DiagonalRegionId = GetRegionId(DiagonalNeighbourKey);
-						}
-					}
+					OffsetIdx[0] = 1;
+					OffsetIdx[1] = 3;
 				}
 				else
 				{
-					OpenSpanKey DiagonalNeighbourKey(-1, -1, -1);
-					if (GetNeighbourSpan(NeighbourKey, 0, DiagonalNeighbourKey))
+					OffsetIdx[0] = 0;
+					OffsetIdx[1] = 2;
+				}
+
+				for (int i = 0; i < 2; i++)
+				{
+					OpenSpanKey DiagonalNeighbourKey = GetNeighbourSpanByIndex(NeighbourKey, OffsetIdx[i]);
+					if (DiagonalNeighbourKey.IsValid())
 					{
 						DiagonalRegionId = GetRegionId(DiagonalNeighbourKey);
-					}
-
-					if (DiagonalRegionId == -1)
-					{
-						if (GetNeighbourSpan(NeighbourKey, 2, DiagonalNeighbourKey))
-						{
-							DiagonalRegionId = GetRegionId(DiagonalNeighbourKey);
-						}
+						break;
 					}
 				}
 			}
@@ -934,7 +923,7 @@ const HeightfieldOpenSpan& RVoxelizer::GetOpenSpanByKey(const OpenSpanKey& Key) 
 	return const_cast<RVoxelizer*>(this)->GetOpenSpanByKey(Key);
 }
 
-bool RVoxelizer::GetNeighbourSpan(const OpenSpanKey& Key, int OffsetIndex, OpenSpanKey& OutSpan) const
+OpenSpanKey RVoxelizer::GetNeighbourSpanByIndex(const OpenSpanKey& Key, int OffsetIndex) const
 {
 	auto& Span = GetOpenSpanByKey(Key);
 
@@ -942,14 +931,14 @@ bool RVoxelizer::GetNeighbourSpan(const OpenSpanKey& Key, int OffsetIndex, OpenS
 	int NeighbourSpanIdx = Span.NeighbourLink[OffsetIndex];
 	if (NeighbourSpanIdx != -1)
 	{
-		OutSpan = OpenSpanKey(
+		return OpenSpanKey(
 			Key.x + NeighbourOffset[OffsetIndex].x,
 			Key.z + NeighbourOffset[OffsetIndex].z,
 			NeighbourSpanIdx
 		);
-		return true;
 	}
-	return false;
+
+	return OpenSpanKey::Invalid;
 }
 
 RVec3 RVoxelizer::GetCellCenter(int x, int y, int z) const
