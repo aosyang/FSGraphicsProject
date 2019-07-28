@@ -35,7 +35,8 @@ struct HeightfieldSolidSpan
 struct HeightfieldOpenSpan
 {
 	HeightfieldOpenSpan()
-		: DistanceField(-1.0f)
+		: DistanceField(-1)
+		, RegionId(-1)
 	{
 		fill_n(NeighbourLink, NUM_NEIGHBOUR_SPANS, -1);
 	}
@@ -49,7 +50,9 @@ struct HeightfieldOpenSpan
 	// Index to a neighbour open span this spawn is linked to
 	int NeighbourLink[NUM_NEIGHBOUR_SPANS];
 
-	float DistanceField;
+	int DistanceField;
+
+	int RegionId;
 };
 
 struct HeightfieldData
@@ -76,9 +79,14 @@ public:
 private:
 	void GenerateHeightfieldColumns(const vector<RSceneObject*>& SceneObjects);
 
+	// Generate neighbour data after we have open spans for all columns 
 	void GenerateOpenSpanNeighbourData();
 
+	// Mark each area with its distance to a closest border span
 	void GenerateDistanceField();
+
+	// Divide all traversable areas into regions
+	void GenerateRegions();
 
 	RAabb CreateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z);
 
@@ -104,7 +112,7 @@ private:
 	int CellNumZ;
 
 	vector<HeightfieldData>	Heightfield;
-	float MaxDistanceField;
+	int MaxDistanceField;
 
 	static const GridCoord	NeighbourOffset[];
 };

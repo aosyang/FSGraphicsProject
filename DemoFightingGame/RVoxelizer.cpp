@@ -10,6 +10,54 @@
 #include "Core/RAabb.h"
 #include "RenderSystem/RDebugRenderer.h"
 
+
+namespace
+{
+	template<class T>
+	inline void HashCombine(size_t& HashValue, const T& Element)
+	{
+		hash<T> Hash;
+		HashValue ^= Hash(Element) + 0x9e3779b9 + (HashValue << 6) + (HashValue >> 2);
+	}
+
+	class OpenSpanKey
+	{
+	public:
+		OpenSpanKey(int InX, int InZ, int InSpanIndex)
+			: x(InX), z(InZ), span_idx(InSpanIndex)
+		{
+			HashValue = CalcHash();
+		}
+
+		bool operator<(const OpenSpanKey& Rhs) const
+		{
+			return HashValue < Rhs.HashValue;
+		}
+
+		int x, z, span_idx;
+
+	private:
+		size_t CalcHash() const
+		{
+			size_t Hash = 0;
+			HashCombine(Hash, x);
+			HashCombine(Hash, z);
+			HashCombine(Hash, span_idx);
+			return Hash;
+		}
+
+	private:
+		size_t HashValue;
+	};
+
+	// For debug rendering regions in different colors
+	vector<RColor> DebugRegionColors;
+
+	// For debug rendering the region map at various heightfield
+	vector<map<OpenSpanKey, int>> DebugRegionMaps;
+}
+
+
 const GridCoord RVoxelizer::NeighbourOffset[8] =
 {
 	// Direct neighbour grids
@@ -63,11 +111,22 @@ void RVoxelizer::Initialize(RScene* Scene)
 		Heightfield.resize(CellNumX * CellNumZ);
 
 		GenerateHeightfieldColumns(SceneObjects);
-
-		// Generate neighbour data after we have open spans for all columns 
 		GenerateOpenSpanNeighbourData();
-
 		GenerateDistanceField();
+		GenerateRegions();
+	}
+
+	// Generate randomized color for each region
+	{
+		DebugRegionColors.resize(20);
+		for (auto& Color : DebugRegionColors)
+		{
+			Color = RColor(
+				RMath::RandRangedF(0.5f, 1.0f),
+				RMath::RandRangedF(0.5f, 1.0f),
+				RMath::RandRangedF(0.5f, 1.0f)
+			);
+		}
 	}
 }
 
@@ -75,12 +134,33 @@ void RVoxelizer::Render()
 {
 	GDebugRenderer.DrawAabb(SceneBounds);
 
-	static float DebugDistanceField = MaxDistanceField;
-	DebugDistanceField -= 0.1f;
-	if (DebugDistanceField < 0.0f)
+	static int DebugDistanceField = MaxDistanceField;
+
+	// '[' key
+	if (RInput.GetBufferedKeyState(VK_OEM_4) == EBufferedKeyState::Pressed)
 	{
-		DebugDistanceField = MaxDistanceField;
+		DebugDistanceField++;
+		if (DebugDistanceField > MaxDistanceField)
+		{
+			DebugDistanceField = 0;
+		}
+
+		RLog("Drawing debug distance field %d\n", DebugDistanceField);
 	}
+
+	// ']' key
+	if (RInput.GetBufferedKeyState(VK_OEM_6) == EBufferedKeyState::Pressed)
+	{
+		DebugDistanceField--;
+		if (DebugDistanceField < 0)
+		{
+			DebugDistanceField = MaxDistanceField;
+		}
+
+		RLog("Drawing debug distance field %d\n", DebugDistanceField);
+	}
+
+	const auto& RegionMap = DebugRegionMaps[DebugDistanceField];
 
 	for (const auto& Column : Heightfield)
 	{
@@ -90,12 +170,24 @@ void RVoxelizer::Render()
 		//	GDebugRenderer.DrawAabb(Span.Bounds, Span.bTraversable ? RColor::Green : RColor::Red);
 		//}
 
+		int SpanIndex = 0;
+
 		// Draw traversable areas
 		for (const auto& OpenSpan : Column.OpenSpans)
 		{
-			if (OpenSpan.DistanceField == ceilf(DebugDistanceField))
+			if (OpenSpan.DistanceField >= DebugDistanceField)
 			{
-				GDebugRenderer.DrawSphere(GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z), 10.0f, RColor::Green, 3);
+				OpenSpanKey Key(Column.x, Column.z, SpanIndex);
+				auto Iter = RegionMap.find(Key);
+				if (Iter != RegionMap.end())
+				{
+					int RegionId = Iter->second;
+					if (RegionId != -1)
+					{
+						RVec3 CellPosition = GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z);
+						GDebugRenderer.DrawSphere(CellPosition, 25.0f, DebugRegionColors[RegionId], 4);
+					}
+				}
 			}
 
 			if (OpenSpan.bBorder)
@@ -110,37 +202,39 @@ void RVoxelizer::Render()
 				//	GDebugRenderer.DrawSphere(End, 10.0f, Color, 3);
 				//	GDebugRenderer.DrawLine(Start, End, Color);
 				//}
-
-				continue;
 			}
-
-			for (int i = 0; i < NUM_NEIGHBOUR_SPANS; i++)
+			else
 			{
-				int NeighbourLinkIndex = OpenSpan.NeighbourLink[i];
-				if (NeighbourLinkIndex != -1)
+				for (int i = 0; i < NUM_NEIGHBOUR_SPANS; i++)
 				{
-					const int n_x = Column.x + NeighbourOffset[i].x;
-					const int n_z = Column.z + NeighbourOffset[i].z;
-
-					if (n_x >= 0 && n_x < CellNumX &&
-						n_z >= 0 && n_z < CellNumZ)
+					int NeighbourLinkIndex = OpenSpan.NeighbourLink[i];
+					if (NeighbourLinkIndex != -1)
 					{
-						int NeighbourIndex = n_x * CellNumZ + n_z;
-						const HeightfieldOpenSpan& NeighbourOpenSpan = Heightfield[NeighbourIndex].OpenSpans[NeighbourLinkIndex];
-						if (NeighbourOpenSpan.bBorder)
+						const int n_x = Column.x + NeighbourOffset[i].x;
+						const int n_z = Column.z + NeighbourOffset[i].z;
+
+						if (n_x >= 0 && n_x < CellNumX &&
+							n_z >= 0 && n_z < CellNumZ)
 						{
-							continue;
+							int NeighbourIndex = n_x * CellNumZ + n_z;
+							const HeightfieldOpenSpan& NeighbourOpenSpan = Heightfield[NeighbourIndex].OpenSpans[NeighbourLinkIndex];
+							if (NeighbourOpenSpan.bBorder)
+							{
+								continue;
+							}
+
+							int NeighbourStart = NeighbourOpenSpan.CellRowStart;
+
+							RVec3 Start = GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z);
+							RVec3 End = GetCellCenter(n_x, NeighbourStart, n_z);
+
+							GDebugRenderer.DrawLine(Start, End, RColor(1.0f, 0.5f, 0.5f));
 						}
-
-						int NeighbourStart = NeighbourOpenSpan.CellRowStart;
-
-						RVec3 Start = GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z);
-						RVec3 End = GetCellCenter(n_x, NeighbourStart, n_z);
-
-						GDebugRenderer.DrawLine(Start, End, RColor(1.0f, 0.5f, 0.5f));
 					}
 				}
 			}
+
+			SpanIndex++;
 		}
 	}
 }
@@ -321,50 +415,13 @@ void RVoxelizer::GenerateOpenSpanNeighbourData()
 	}
 }
 
-template<class T>
-inline void HashCombine(size_t& HashValue, const T& Element)
-{
-	hash<T> Hash;
-	HashValue ^= Hash(Element) + 0x9e3779b9 + (HashValue << 6) + (HashValue >> 2);
-}
-
 void RVoxelizer::GenerateDistanceField()
 {
-	class OpenSpanKey
-	{
-	public:
-		OpenSpanKey(int InX, int InZ, int InSpanIndex)
-			: x(InX), z(InZ), span_idx(InSpanIndex)
-		{
-			HashValue = CalcHash();
-		}
-
-		bool operator<(const OpenSpanKey& Rhs) const
-		{
-			return HashValue < Rhs.HashValue;
-		}
-
-		int x, z, span_idx;
-
-	private:
-		size_t CalcHash() const
-		{
-			size_t Hash = 0;
-			HashCombine(Hash, x);
-			HashCombine(Hash, z);
-			HashCombine(Hash, span_idx);
-			return Hash;
-		}
-
-	private:
-		size_t HashValue;
-	};
-
 	// TODO: preallocate data with total open span count
 	queue<OpenSpanKey> PendingSpans;
 
 	// The result of each span and its distance field
-	map<OpenSpanKey, float> SpanDistanceMap;
+	map<OpenSpanKey, int> SpanDistanceMap;
 
 	// Collect all border open spans from heightfield
 	for (int x = 0; x < CellNumX; x++)
@@ -382,7 +439,7 @@ void RVoxelizer::GenerateDistanceField()
 				{
 					OpenSpanKey NewKey(x, z, IndexOpenSpan);
 					PendingSpans.emplace(NewKey);
-					SpanDistanceMap[NewKey] = 0.0f;
+					SpanDistanceMap[NewKey] = 0;
 				}
 				IndexOpenSpan++;
 			}
@@ -413,7 +470,7 @@ void RVoxelizer::GenerateDistanceField()
 					NeighbourSpanIndex);
 
 				// Neighbour distance = current distance + 1
-				float NewDistance = SpanDistanceMap.find(ThisSpanKey)->second + 1.0f;
+				int NewDistance = SpanDistanceMap.find(ThisSpanKey)->second + 1;
 
 				auto Iter = SpanDistanceMap.find(NewKey);
 
@@ -425,7 +482,7 @@ void RVoxelizer::GenerateDistanceField()
 				}
 				else
 				{
-					float OldDistance = SpanDistanceMap[NewKey];
+					int OldDistance = SpanDistanceMap[NewKey];
 					if (NewDistance < OldDistance)
 					{
 						SpanDistanceMap[NewKey] = NewDistance;
@@ -446,7 +503,7 @@ void RVoxelizer::GenerateDistanceField()
 		//}
 	}
 
-	MaxDistanceField = 0.0f;
+	MaxDistanceField = 0;
 
 	// Copy distance values to open span array
 	for (const auto& Span : SpanDistanceMap)
@@ -462,6 +519,215 @@ void RVoxelizer::GenerateDistanceField()
 		{
 			MaxDistanceField = Span.second;
 		}
+	}
+}
+
+void RVoxelizer::GenerateRegions()
+{
+	int NumRegions = 0;
+
+	typedef vector<OpenSpanKey> RegionType;
+
+	// All saved regions
+	vector<RegionType> Regions;
+	typedef RegionType::iterator RegionIterator;
+
+	typedef map<OpenSpanKey, int> RegionMapType;
+	RegionMapType RegionMap;
+
+	// Get a region id for a span key. Create a default region id for the key if the id doesn't exist
+	auto GetRegionId = [&RegionMap](const OpenSpanKey& Key) -> int {
+		auto Iter = RegionMap.find(Key);
+		if (Iter == RegionMap.end())
+		{
+			RegionMap[Key] = -1;
+			return -1;
+		}
+		else
+		{
+			return Iter->second;
+		}
+	};
+
+	auto SetRegionId = [&RegionMap](const OpenSpanKey& Key, int RegionId) -> void {
+		RegionMap[Key] = RegionId;
+	};
+
+	// Check if two spans are neighbours of each other
+	auto CheckAdjacency = [this](const OpenSpanKey& First, const OpenSpanKey& Second) -> bool {
+		int FirstIndex = First.x * this->CellNumZ + First.z;
+		int SecondIndex = Second.x * this->CellNumZ + Second.z;
+		for (auto& Span : this->Heightfield[FirstIndex].OpenSpans)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				int NeighbourSpanIndex = Span.NeighbourLink[i];
+				if (NeighbourSpanIndex == -1 || NeighbourSpanIndex != Second.span_idx)
+				{
+					continue;
+				}
+
+				if (First.x + NeighbourOffset[i].x == Second.x &&
+					First.z + NeighbourOffset[i].z == Second.z)
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	};
+
+	auto SetRegionIdFromAdjacency = [this, &RegionMap, &GetRegionId, &SetRegionId](const OpenSpanKey& Key) -> bool {
+		int Index = Key.x * this->CellNumZ + Key.z;
+		auto& Span = this->Heightfield[Index].OpenSpans[Key.span_idx];
+
+		for (int i = 0; i < 4; i++)
+		{
+			int NeighbourSpanIndex = Span.NeighbourLink[i];
+			if (NeighbourSpanIndex == -1)
+			{
+				continue;
+			}
+
+			OpenSpanKey NeighbourKey(
+				Key.x + NeighbourOffset[i].x,
+				Key.z + NeighbourOffset[i].z,
+				NeighbourSpanIndex);
+
+			int NeighbourRegionId = GetRegionId(NeighbourKey);
+			if (NeighbourRegionId != -1)
+			{
+				SetRegionId(Key, NeighbourRegionId);
+				return true;
+			}
+		}
+
+		return false;
+	};
+
+	DebugRegionMaps.resize(MaxDistanceField + 1);
+
+	for (int DistanceFieldIdx = MaxDistanceField; DistanceFieldIdx >= 0; DistanceFieldIdx--)
+	{
+		// New spans at this distance field from region dilation
+		vector<OpenSpanKey> DilationSpans;
+		vector<OpenSpanKey> IsolatedSpans;
+
+		for (int x = 0; x < CellNumX; x++)
+		{
+			for (int z = 0; z < CellNumZ; z++)
+			{
+				int Index = x * CellNumZ + z;
+				auto& Column = Heightfield[Index];
+
+				int SpanIndex = 0;
+
+				// Index of the open span in its column
+				for (auto& ThisOpenSpan : Column.OpenSpans)
+				{
+					if (ThisOpenSpan.DistanceField == DistanceFieldIdx)
+					{
+						// 1. At least one neighbour is from a previous distance field: Set region id to neighbour's region id
+						// 2. Neighbour has no direct connection to previous spans. Possibly:
+						//    - Span is connecting to one or more existing regions through other spans
+						//    - Span is forming a new region (if no connections are made to existing regions)
+
+						OpenSpanKey ThisKey(x, z, SpanIndex);
+						int ThisRegionId = GetRegionId(ThisKey);
+
+						for (int NeighbourIdx = 0; NeighbourIdx < 4; NeighbourIdx++)
+						{
+							int NeighbourSpanIndex = ThisOpenSpan.NeighbourLink[NeighbourIdx];
+							if (NeighbourSpanIndex == -1)
+							{
+								continue;
+							}
+
+							OpenSpanKey NeighbourKey(
+								x + NeighbourOffset[NeighbourIdx].x,
+								z + NeighbourOffset[NeighbourIdx].z,
+								NeighbourSpanIndex
+							);
+
+							int NeighbourRegionId = GetRegionId(NeighbourKey);
+							if (NeighbourRegionId != -1)
+							{
+								SetRegionId(ThisKey, NeighbourRegionId);
+								ThisRegionId = NeighbourRegionId;
+							}
+						}
+
+						if (ThisRegionId == -1)
+						{
+							// No connection to known regions so far, put it into a pending list
+							IsolatedSpans.push_back(ThisKey);
+						}
+						else
+						{
+							// This span is part of the dilation, add it to the dilation list
+							DilationSpans.push_back(ThisKey);
+						}
+
+						SetRegionId(ThisKey, ThisRegionId);
+					}
+
+					SpanIndex++;
+				}
+			}
+		}
+
+		// Before making new regions, let's try merging isolated spans into know regions
+		if (IsolatedSpans.size() > 0)
+		{
+			int MergedSpans;
+			do
+			{
+				MergedSpans = 0;
+				for (int i = (int)IsolatedSpans.size() - 1; i >= 0; i--)
+				{
+					OpenSpanKey& OtherSpan = IsolatedSpans[i];
+
+					if (SetRegionIdFromAdjacency(OtherSpan))
+					{
+						IsolatedSpans.erase(IsolatedSpans.begin() + i);
+						MergedSpans++;
+					}
+				}
+			} while (MergedSpans > 0);
+		}
+
+		// Make isolated spans into new regions
+		while (IsolatedSpans.size() > 0)
+		{
+			int NewRegion = NumRegions++;
+			RLog("Region id: %d\n", NewRegion);
+
+			// Assign new region to the span
+			OpenSpanKey Span = IsolatedSpans[0];
+			SetRegionId(Span, NewRegion);
+
+			// Remove first span
+			IsolatedSpans.erase(IsolatedSpans.begin());
+
+			int MergedSpans;
+			do 
+			{
+				MergedSpans = 0;
+				for (int i = (int)IsolatedSpans.size() - 1; i >= 0; i--)
+				{
+					OpenSpanKey& OtherSpan = IsolatedSpans[i];
+
+					if (SetRegionIdFromAdjacency(OtherSpan))
+					{
+						IsolatedSpans.erase(IsolatedSpans.begin() + i);
+						MergedSpans++;
+					}
+				}
+			} while (MergedSpans > 0);
+		}
+
+		DebugRegionMaps[DistanceFieldIdx] = RegionMap;
 	}
 }
 
