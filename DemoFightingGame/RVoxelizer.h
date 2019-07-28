@@ -155,11 +155,11 @@ private:
 	void GenerateRegionContours();
 
 	// Going in one direction and find a span at the edge of the region of a given span
-	OpenSpanKey FindRegionEdgeInDirection(const OpenSpanKey& Key, int DirectionIdx = 0);
+	OpenSpanKey FindRegionEdgeInDirection(const OpenSpanKey& Key, int DirectionIdx = 0) const;
 
 	void AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId);
 
-	RAabb CreateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z);
+	RAabb CalculateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z) const;
 
 	// Returns if a character can navigate between given open spans
 	bool IsValidNeighbourSpan(const HeightfieldOpenSpan& ThisOpenSpan, const HeightfieldOpenSpan& NeighbourOpenSpan) const;
@@ -170,7 +170,7 @@ private:
 	bool GetNeighbourSpan(const OpenSpanKey& Key, int OffsetIndex, OpenSpanKey& OutSpan) const;
 
 	// Returns center location of a cell
-	RVec3 GetCellCenter(int x, int y, int z);
+	RVec3 GetCellCenter(int x, int y, int z) const;
 
 private:
 	RAabb					SceneBounds;

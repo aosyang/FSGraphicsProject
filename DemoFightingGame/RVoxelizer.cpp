@@ -345,7 +345,7 @@ void RVoxelizer::GenerateHeightfieldColumns(const vector<RSceneObject*>& SceneOb
 			// Create bounds for each span
 			for (auto& IterSpan : Column.SolidSpans)
 			{
-				IterSpan.Bounds = CreateBoundsForSpan(IterSpan, x, z);
+				IterSpan.Bounds = CalculateBoundsForSpan(IterSpan, x, z);
 			}
 		}
 	}
@@ -840,7 +840,7 @@ void RVoxelizer::GenerateRegionContours()
 	}
 }
 
-OpenSpanKey RVoxelizer::FindRegionEdgeInDirection(const OpenSpanKey& Key, int DirectionIdx /*= 0*/)
+OpenSpanKey RVoxelizer::FindRegionEdgeInDirection(const OpenSpanKey& Key, int DirectionIdx /*= 0*/) const
 {
 	const HeightfieldOpenSpan* RegionSpan = &GetOpenSpanByKey(Key);
 
@@ -897,7 +897,7 @@ void RVoxelizer::AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId)
 	DebugRegionEdgePoints[RegionId].push_back(EdgePoint);
 }
 
-RAabb RVoxelizer::CreateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z)
+RAabb RVoxelizer::CalculateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z) const
 {
 	RAabb Result;
 	float Scale = 1.0f;
@@ -952,7 +952,7 @@ bool RVoxelizer::GetNeighbourSpan(const OpenSpanKey& Key, int OffsetIndex, OpenS
 	return false;
 }
 
-RVec3 RVoxelizer::GetCellCenter(int x, int y, int z)
+RVec3 RVoxelizer::GetCellCenter(int x, int y, int z) const
 {
 	assert(x >= 0 && x < CellNumX && y >= 0 && y < CellNumY && z >= 0 && z < CellNumZ);
 	return RVec3(
