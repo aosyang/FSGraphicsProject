@@ -18,8 +18,12 @@ namespace
 
 	// For debug rendering the region map at various heightfield
 	vector<map<OpenSpanKey, int>> DebugRegionMaps;
+
+	typedef vector<RVec3> EdgePoints;
+	vector<EdgePoints> DebugRegionEdgePoints;
 }
 
+const OpenSpanKey OpenSpanKey::Invalid(-1, -1, -1);
 
 const GridCoord RVoxelizer::NeighbourOffset[8] =
 {
@@ -77,6 +81,7 @@ void RVoxelizer::Initialize(RScene* Scene)
 		GenerateOpenSpanNeighbourData();
 		GenerateDistanceField();
 		GenerateRegions();
+		GenerateRegionContours();
 	}
 
 	// Generate randomized color for each region
@@ -121,6 +126,36 @@ void RVoxelizer::Render()
 		}
 
 		RLog("Drawing debug distance field %d\n", DebugDistanceField);
+	}
+
+	{
+		static int DebugDrawRegionId = 0;
+
+		if (RInput.GetBufferedKeyState(VK_OEM_PLUS) == EBufferedKeyState::Pressed)
+		{
+			DebugDrawRegionId++;
+			if (DebugDrawRegionId >= DebugRegionEdgePoints.size())
+			{
+				DebugDrawRegionId = 0;
+			}
+		}
+
+		if (RInput.GetBufferedKeyState(VK_OEM_MINUS) == EBufferedKeyState::Pressed)
+		{
+			DebugDrawRegionId--;
+			if (DebugDrawRegionId < 0)
+			{
+				DebugDrawRegionId = (int)DebugRegionEdgePoints.size() - 1;
+			}
+		}
+
+		const auto& RegionEdges = DebugRegionEdgePoints[DebugDrawRegionId];
+		for (int i = 0; i < RegionEdges.size(); i++)
+		{
+			const RVec3& p0 = RegionEdges[i];
+			const RVec3& p1 = RegionEdges[(i + 1) % RegionEdges.size()];
+			GDebugRenderer.DrawLine(p0, p1, RColor::Cyan);
+		}
 	}
 
 	const auto& RegionMap = DebugRegionMaps[DebugDistanceField];
@@ -684,7 +719,6 @@ void RVoxelizer::GenerateRegions()
 		while (IsolatedSpans.size() > 0)
 		{
 			int NewRegion = NumRegions++;
-			RLog("Region id: %d\n", NewRegion);
 
 			// Assign new region to the span
 			OpenSpanKey Span = IsolatedSpans[0];
@@ -712,13 +746,155 @@ void RVoxelizer::GenerateRegions()
 
 		DebugRegionMaps[DistanceFieldIdx] = RegionMap;
 	}
+
+	UniqueRegionIds.clear();
 	
 	// Assign final region ids to all spans
 	for (auto Iter : RegionMap)
 	{
 		auto& Span = GetOpenSpanByKey(Iter.first);
 		Span.RegionId = Iter.second;
+		UniqueRegionIds.insert(Span.RegionId);
 	}
+}
+
+void RVoxelizer::GenerateRegionContours()
+{
+	DebugRegionEdgePoints.resize(UniqueRegionIds.size());
+
+	for (const auto& RegionId : UniqueRegionIds)
+	{
+		// First, we need to find a span belong to a region
+		int x, z, SpanIdx;
+		bool bFoundSpanForRegion = false;
+
+		for (x = 0; x < CellNumX && !bFoundSpanForRegion; x++)
+		{
+			for (z = 0; z < CellNumZ && !bFoundSpanForRegion; z++)
+			{
+				int Index = x * CellNumZ + z;
+				const auto& Column = Heightfield[Index];
+
+				for (SpanIdx = 0; SpanIdx < Column.OpenSpans.size(); SpanIdx++)
+				{ 
+					const HeightfieldOpenSpan& Span = Column.OpenSpans[SpanIdx];
+
+					if (Span.RegionId == RegionId)
+					{
+						bFoundSpanForRegion = true;
+						break;
+					}
+				}
+			}
+		}
+
+		assert(bFoundSpanForRegion);
+		OpenSpanKey Key(x, z, SpanIdx);
+
+		int StartDirection = 0;
+		OpenSpanKey StartKey = FindRegionEdgeInDirection(Key, StartDirection);
+
+		OpenSpanKey CurrentKey(StartKey);
+		int CurrentDirection = StartDirection;
+
+		CurrentDirection++;
+		while (CurrentDirection >= 4) { CurrentDirection -= 4; }
+
+		RLog("Begin edge searching for region %d\n", RegionId);
+		do
+		{
+			const HeightfieldOpenSpan& CurrentSpan = GetOpenSpanByKey(CurrentKey);
+			if (CurrentSpan.NeighbourLink[CurrentDirection] == -1)
+			{
+				// No more neighbours in this direction, turn 90 to the right
+				AddEdge(CurrentKey, CurrentDirection, RegionId);
+				CurrentDirection++;
+				while (CurrentDirection >= 4) { CurrentDirection -= 4; }
+			}
+			else
+			{
+				// Is facing an edge?
+				OpenSpanKey NextKey(
+					CurrentKey.x + NeighbourOffset[CurrentDirection].x,
+					CurrentKey.z + NeighbourOffset[CurrentDirection].z,
+					CurrentSpan.NeighbourLink[CurrentDirection]
+				);
+
+				const HeightfieldOpenSpan& NextSpan = GetOpenSpanByKey(NextKey);
+				if (NextSpan.RegionId != CurrentSpan.RegionId)
+				{
+					// Region edge, turn 90 to the right
+					AddEdge(CurrentKey, CurrentDirection, RegionId);
+					CurrentDirection++;
+					while (CurrentDirection >= 4) { CurrentDirection -= 4; }
+				}
+				else
+				{
+					// Move forward and turn 90 to the left
+					CurrentKey = NextKey;
+					CurrentDirection--;
+					while (CurrentDirection < 0) { CurrentDirection += 4; }
+				}
+			}
+		} while (CurrentKey != StartKey || CurrentDirection != StartDirection);
+	}
+}
+
+OpenSpanKey RVoxelizer::FindRegionEdgeInDirection(const OpenSpanKey& Key, int DirectionIdx /*= 0*/)
+{
+	const HeightfieldOpenSpan* RegionSpan = &GetOpenSpanByKey(Key);
+
+	int CurrentSpanIdx = Key.span_idx;
+
+	// Move in one direction until we find an edge
+	int NextSpanIdx = RegionSpan->NeighbourLink[DirectionIdx];
+	int nx = Key.x, nz = Key.z;
+	while (NextSpanIdx != -1)
+	{
+		OpenSpanKey CurrentKey(nx, nz, CurrentSpanIdx);
+
+		nx += NeighbourOffset[DirectionIdx].x;
+		nz += NeighbourOffset[DirectionIdx].z;
+		OpenSpanKey NextKey(nx, nz, NextSpanIdx);
+		const HeightfieldOpenSpan& NextSpan = GetOpenSpanByKey(NextKey);
+		if (NextSpan.RegionId != RegionSpan->RegionId)
+		{
+			return CurrentKey;
+		}
+
+		RegionSpan = &NextSpan;
+		CurrentSpanIdx = NextSpanIdx;
+		NextSpanIdx = RegionSpan->NeighbourLink[DirectionIdx];
+	}
+
+	return OpenSpanKey(nx, nz, CurrentSpanIdx);
+}
+
+void RVoxelizer::AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId)
+{
+	RLog("Edge found! loc: (%d, %d), dir: %d\n", Key.x, Key.z, DirectionIdx);
+
+	assert(RegionId >= 0 && RegionId < DebugRegionEdgePoints.size());
+
+	RVec3 CenterPoint = GetCellCenter(Key.x, GetOpenSpanByKey(Key).CellRowStart, Key.z);
+	RVec3 Offset = CellDimension;
+	switch (DirectionIdx)
+	{
+	case 0:
+		Offset = Offset * RVec3(-.5f, 0, -.5f);
+		break;
+	case 1:
+		Offset = Offset * RVec3(-.5f, 0, .5f);
+		break;
+	case 2:
+		Offset = Offset * RVec3(.5f, 0, .5f);
+		break;
+	case 3:
+		Offset = Offset * RVec3(.5f, 0, -.5f);
+		break;
+	}
+	RVec3 EdgePoint = CenterPoint + Offset;
+	DebugRegionEdgePoints[RegionId].push_back(EdgePoint);
 }
 
 RAabb RVoxelizer::CreateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z)

@@ -85,12 +85,34 @@ public:
 		HashValue = CalcHash();
 	}
 
+	OpenSpanKey(const OpenSpanKey& Rhs)
+	{
+		x = Rhs.x; z = Rhs.z; span_idx = Rhs.span_idx; HashValue = Rhs.HashValue;
+	}
+
+	OpenSpanKey& operator=(const OpenSpanKey& Rhs)
+	{
+		x = Rhs.x; z = Rhs.z; span_idx = Rhs.span_idx; HashValue = Rhs.HashValue;
+		return *this;
+	}
+
+	bool operator!=(const OpenSpanKey& Rhs) const
+	{
+		return HashValue != Rhs.HashValue;
+	}
+
 	bool operator<(const OpenSpanKey& Rhs) const
 	{
 		return HashValue < Rhs.HashValue;
 	}
 
+	bool IsValid() const
+	{
+		return x >= 0;
+	}
+
 	int x, z, span_idx;
+	const static OpenSpanKey Invalid;
 
 private:
 	size_t CalcHash() const
@@ -129,6 +151,14 @@ private:
 	// Divide all traversable areas into regions
 	void GenerateRegions();
 
+	// Make region contours from cells
+	void GenerateRegionContours();
+
+	// Going in one direction and find a span at the edge of the region of a given span
+	OpenSpanKey FindRegionEdgeInDirection(const OpenSpanKey& Key, int DirectionIdx = 0);
+
+	void AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId);
+
 	RAabb CreateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z);
 
 	// Returns if a character can navigate between given open spans
@@ -159,6 +189,9 @@ private:
 
 	vector<HeightfieldData>	Heightfield;
 	int MaxDistanceField;
+
+	// Unique region ids
+	set<int> UniqueRegionIds;
 
 	static const GridCoord	NeighbourOffset[];
 };
