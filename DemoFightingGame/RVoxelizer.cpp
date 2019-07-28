@@ -38,7 +38,7 @@ const GridCoord RVoxelizer::NeighbourOffset[8] =
 
 
 RVoxelizer::RVoxelizer()
-	: CellDimension(50.0f, 20.0f, 50.0f)
+	: CellDimension(100.0f, 20.0f, 100.0f)
 	, MinTraversableHeight(200.0f)
 	, MaxStepHeight(50.0f)
 {
@@ -81,7 +81,7 @@ void RVoxelizer::Initialize(RScene* Scene)
 
 	// Generate randomized color for each region
 	{
-		DebugRegionColors.resize(20);
+		DebugRegionColors.resize(50);
 		for (auto& Color : DebugRegionColors)
 		{
 			Color = RColor(
@@ -148,51 +148,30 @@ void RVoxelizer::Render()
 					if (RegionId != -1)
 					{
 						RVec3 CellPosition = GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z);
-						GDebugRenderer.DrawSphere(CellPosition, 25.0f, DebugRegionColors[RegionId], 4);
+						GDebugRenderer.DrawSphere(CellPosition, CellDimension.X() * 0.5f, DebugRegionColors[RegionId], 4);
 					}
 				}
 			}
 
-			if (OpenSpan.bBorder)
+			for (int i = 0; i < NUM_NEIGHBOUR_SPANS; i++)
 			{
-				// Draw borders
-				//{
-				//	RVec3 Start = GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z);
-				//	RVec3 End = GetCellCenter(Column.x, RMath::Min(OpenSpan.CellRowEnd, CellNumY - 1), Column.z);
-				//	RColor Color(0.5, 0.5, 1.0f);
-
-				//	GDebugRenderer.DrawSphere(Start, 10.0f, Color, 3);
-				//	GDebugRenderer.DrawSphere(End, 10.0f, Color, 3);
-				//	GDebugRenderer.DrawLine(Start, End, Color);
-				//}
-			}
-			else
-			{
-				for (int i = 0; i < NUM_NEIGHBOUR_SPANS; i++)
+				int NeighbourLinkIndex = OpenSpan.NeighbourLink[i];
+				if (NeighbourLinkIndex != -1)
 				{
-					int NeighbourLinkIndex = OpenSpan.NeighbourLink[i];
-					if (NeighbourLinkIndex != -1)
+					const int n_x = Column.x + NeighbourOffset[i].x;
+					const int n_z = Column.z + NeighbourOffset[i].z;
+
+					if (n_x >= 0 && n_x < CellNumX &&
+						n_z >= 0 && n_z < CellNumZ)
 					{
-						const int n_x = Column.x + NeighbourOffset[i].x;
-						const int n_z = Column.z + NeighbourOffset[i].z;
+						int NeighbourIndex = n_x * CellNumZ + n_z;
+						const HeightfieldOpenSpan& NeighbourOpenSpan = Heightfield[NeighbourIndex].OpenSpans[NeighbourLinkIndex];
+						int NeighbourStart = NeighbourOpenSpan.CellRowStart;
 
-						if (n_x >= 0 && n_x < CellNumX &&
-							n_z >= 0 && n_z < CellNumZ)
-						{
-							int NeighbourIndex = n_x * CellNumZ + n_z;
-							const HeightfieldOpenSpan& NeighbourOpenSpan = Heightfield[NeighbourIndex].OpenSpans[NeighbourLinkIndex];
-							if (NeighbourOpenSpan.bBorder)
-							{
-								continue;
-							}
+						RVec3 Start = GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z);
+						RVec3 End = GetCellCenter(n_x, NeighbourStart, n_z);
 
-							int NeighbourStart = NeighbourOpenSpan.CellRowStart;
-
-							RVec3 Start = GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z);
-							RVec3 End = GetCellCenter(n_x, NeighbourStart, n_z);
-
-							GDebugRenderer.DrawLine(Start, End, RColor(1.0f, 0.5f, 0.5f));
-						}
+						GDebugRenderer.DrawLine(Start, End, RColor(1.0f, 0.5f, 0.5f));
 					}
 				}
 			}
@@ -222,19 +201,41 @@ void RVoxelizer::GenerateHeightfieldColumns(const vector<RSceneObject*>& SceneOb
 				// Find center of a cell
 				RVec3 CellCenter = GetCellCenter(x, y, z);
 
-				RAabb CellBound;
-				CellBound.pMax = CellCenter + CellDimension / 2.0f;
-				CellBound.pMin = CellCenter - CellDimension / 2.0f;
+				RAabb CellBounds;
+				CellBounds.pMax = CellCenter + CellDimension / 2.0f;
+				CellBounds.pMin = CellCenter - CellDimension / 2.0f;
 
 				bool bIsSolidCell = false;
 
 				// Has any overlaps with scene meshes?
 				for (auto& SceneObj : SceneObjects)
 				{
-					if (SceneObj->GetAabb().TestIntersectionWithAabb(CellBound))
+					const RAabb& ObjBounds = SceneObj->GetAabb();
+					if (ObjBounds.TestIntersectionWithAabb(CellBounds))
 					{
-						bIsSolidCell = true;
-						break;
+						// Mesh objects may contain per-element bounding box. In that case we're running overlapping test against mesh elements.
+						if (RSMeshObject* MeshObj = SceneObj->CastTo<RSMeshObject>())
+						{
+							for (int i = 0; i < MeshObj->GetMeshElementCount() && !bIsSolidCell; i++)
+							{
+								const RAabb& ElementBounds = MeshObj->GetMeshElementAabb(i);
+								const RAabb ElementWorldBounds = ElementBounds.GetTransformedAabb(MeshObj->GetTransformMatrix());
+
+								if (ElementWorldBounds.TestIntersectionWithAabb(CellBounds))
+								{
+									bIsSolidCell = true;
+								}
+							}
+						}
+						else
+						{
+							bIsSolidCell = true;
+						}
+
+						if (bIsSolidCell)
+						{
+							break;
+						}
 					}
 				}
 
