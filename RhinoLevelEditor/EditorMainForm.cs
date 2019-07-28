@@ -338,6 +338,7 @@ namespace RhinoLevelEditor
                 if (AssetData != null)
                 {
                     engineCanvas1.RhinoEngine.AddMeshObjectToScene(AssetData.Path);
+                    RefreshSceneObjectsListBox();
                 }
             }
         }
