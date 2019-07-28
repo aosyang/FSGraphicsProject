@@ -67,6 +67,47 @@ struct HeightfieldData
 	vector<HeightfieldOpenSpan> OpenSpans;
 };
 
+
+template<class T>
+inline void HashCombine(size_t& HashValue, const T& Element)
+{
+	hash<T> Hash;
+	HashValue ^= Hash(Element) + 0x9e3779b9 + (HashValue << 6) + (HashValue >> 2);
+}
+
+/// Key for a traversable span. Used for searching a span at a given location
+class OpenSpanKey
+{
+public:
+	OpenSpanKey(int InX, int InZ, int InSpanIndex)
+		: x(InX), z(InZ), span_idx(InSpanIndex)
+	{
+		HashValue = CalcHash();
+	}
+
+	bool operator<(const OpenSpanKey& Rhs) const
+	{
+		return HashValue < Rhs.HashValue;
+	}
+
+	int x, z, span_idx;
+
+private:
+	size_t CalcHash() const
+	{
+		size_t Hash = 0;
+		HashCombine(Hash, x);
+		HashCombine(Hash, z);
+		HashCombine(Hash, span_idx);
+		return Hash;
+	}
+
+private:
+	size_t HashValue;
+};
+
+
+/// Scene voxelizer
 class RVoxelizer
 {
 public:
@@ -92,6 +133,11 @@ private:
 
 	// Returns if a character can navigate between given open spans
 	bool IsValidNeighbourSpan(const HeightfieldOpenSpan& ThisOpenSpan, const HeightfieldOpenSpan& NeighbourOpenSpan) const;
+
+	HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key);
+	const HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key) const;
+
+	bool GetNeighbourSpan(const OpenSpanKey& Key, int OffsetIndex, OpenSpanKey& OutSpan) const;
 
 	// Returns center location of a cell
 	RVec3 GetCellCenter(int x, int y, int z);

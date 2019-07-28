@@ -13,43 +13,6 @@
 
 namespace
 {
-	template<class T>
-	inline void HashCombine(size_t& HashValue, const T& Element)
-	{
-		hash<T> Hash;
-		HashValue ^= Hash(Element) + 0x9e3779b9 + (HashValue << 6) + (HashValue >> 2);
-	}
-
-	class OpenSpanKey
-	{
-	public:
-		OpenSpanKey(int InX, int InZ, int InSpanIndex)
-			: x(InX), z(InZ), span_idx(InSpanIndex)
-		{
-			HashValue = CalcHash();
-		}
-
-		bool operator<(const OpenSpanKey& Rhs) const
-		{
-			return HashValue < Rhs.HashValue;
-		}
-
-		int x, z, span_idx;
-
-	private:
-		size_t CalcHash() const
-		{
-			size_t Hash = 0;
-			HashCombine(Hash, x);
-			HashCombine(Hash, z);
-			HashCombine(Hash, span_idx);
-			return Hash;
-		}
-
-	private:
-		size_t HashValue;
-	};
-
 	// For debug rendering regions in different colors
 	vector<RColor> DebugRegionColors;
 
@@ -553,47 +516,22 @@ void RVoxelizer::GenerateRegions()
 		RegionMap[Key] = RegionId;
 	};
 
-	// Check if two spans are neighbours of each other
-	auto CheckAdjacency = [this](const OpenSpanKey& First, const OpenSpanKey& Second) -> bool {
-		int FirstIndex = First.x * this->CellNumZ + First.z;
-		int SecondIndex = Second.x * this->CellNumZ + Second.z;
-		for (auto& Span : this->Heightfield[FirstIndex].OpenSpans)
-		{
-			for (int i = 0; i < 4; i++)
-			{
-				int NeighbourSpanIndex = Span.NeighbourLink[i];
-				if (NeighbourSpanIndex == -1 || NeighbourSpanIndex != Second.span_idx)
-				{
-					continue;
-				}
-
-				if (First.x + NeighbourOffset[i].x == Second.x &&
-					First.z + NeighbourOffset[i].z == Second.z)
-				{
-					return true;
-				}
-			}
-		}
-
-		return false;
-	};
-
+	// Find region id for a span from its adjacent spans
 	auto SetRegionIdFromAdjacency = [this, &RegionMap, &GetRegionId, &SetRegionId](const OpenSpanKey& Key) -> bool {
-		int Index = Key.x * this->CellNumZ + Key.z;
-		auto& Span = this->Heightfield[Index].OpenSpans[Key.span_idx];
-
-		for (int i = 0; i < 4; i++)
+		auto& Span = this->GetOpenSpanByKey(Key);
+		int DiagonalRegionId = -1;
+		for (int NeighbourIdx = 0; NeighbourIdx < 4; NeighbourIdx++)
 		{
-			int NeighbourSpanIndex = Span.NeighbourLink[i];
+			int NeighbourSpanIndex = Span.NeighbourLink[NeighbourIdx];
 			if (NeighbourSpanIndex == -1)
 			{
 				continue;
 			}
 
-			OpenSpanKey NeighbourKey(
-				Key.x + NeighbourOffset[i].x,
-				Key.z + NeighbourOffset[i].z,
-				NeighbourSpanIndex);
+			int nx = Key.x + NeighbourOffset[NeighbourIdx].x;
+			int nz = Key.z + NeighbourOffset[NeighbourIdx].z;
+
+			OpenSpanKey NeighbourKey(nx, nz, NeighbourSpanIndex);
 
 			int NeighbourRegionId = GetRegionId(NeighbourKey);
 			if (NeighbourRegionId != -1)
@@ -601,6 +539,57 @@ void RVoxelizer::GenerateRegions()
 				SetRegionId(Key, NeighbourRegionId);
 				return true;
 			}
+
+			if (DiagonalRegionId == -1)
+			{
+				// Diagonal searching pattern:
+				// (x: current span; n: neighbour span; o: diagonal span)
+				//
+				// o n o         o   o
+				//   x     and   n x n
+				// o n o         o   o
+				// 
+
+				if (NeighbourIdx % 2 == 0)
+				{
+					OpenSpanKey DiagonalNeighbourKey(-1, -1, -1);
+					if (GetNeighbourSpan(NeighbourKey, 1, DiagonalNeighbourKey))
+					{
+						DiagonalRegionId = GetRegionId(DiagonalNeighbourKey);
+					}
+
+					if (DiagonalRegionId == -1)
+					{
+						if (GetNeighbourSpan(NeighbourKey, 3, DiagonalNeighbourKey))
+						{
+							DiagonalRegionId = GetRegionId(DiagonalNeighbourKey);
+						}
+					}
+				}
+				else
+				{
+					OpenSpanKey DiagonalNeighbourKey(-1, -1, -1);
+					if (GetNeighbourSpan(NeighbourKey, 0, DiagonalNeighbourKey))
+					{
+						DiagonalRegionId = GetRegionId(DiagonalNeighbourKey);
+					}
+
+					if (DiagonalRegionId == -1)
+					{
+						if (GetNeighbourSpan(NeighbourKey, 2, DiagonalNeighbourKey))
+						{
+							DiagonalRegionId = GetRegionId(DiagonalNeighbourKey);
+						}
+					}
+				}
+			}
+		}
+
+		// Diagonal neighbours
+		if (DiagonalRegionId != -1)
+		{
+			SetRegionId(Key, DiagonalRegionId);
+			return true;
 		}
 
 		return false;
@@ -750,6 +739,40 @@ bool RVoxelizer::IsValidNeighbourSpan(const HeightfieldOpenSpan& ThisOpenSpan, c
 {
 	return abs(NeighbourOpenSpan.CellRowStart - ThisOpenSpan.CellRowStart) <= MaxStepNumCells &&
 		   (NeighbourOpenSpan.CellRowEnd - ThisOpenSpan.CellRowStart) > MinTraversableNumCells;
+}
+
+HeightfieldOpenSpan& RVoxelizer::GetOpenSpanByKey(const OpenSpanKey& Key)
+{
+	assert(Key.x >= 0 && Key.x < CellNumX && Key.z >= 0 && Key.z < CellNumZ);
+	int Index = Key.x * CellNumZ + Key.z;
+
+	auto& OpenSpans = Heightfield[Index].OpenSpans;
+	assert(Key.span_idx >= 0 && Key.span_idx < OpenSpans.size());
+
+	return OpenSpans[Key.span_idx];
+}
+
+const HeightfieldOpenSpan& RVoxelizer::GetOpenSpanByKey(const OpenSpanKey& Key) const
+{
+	return const_cast<RVoxelizer*>(this)->GetOpenSpanByKey(Key);
+}
+
+bool RVoxelizer::GetNeighbourSpan(const OpenSpanKey& Key, int OffsetIndex, OpenSpanKey& OutSpan) const
+{
+	auto& Span = GetOpenSpanByKey(Key);
+
+	assert(OffsetIndex >= 0 && OffsetIndex < NUM_NEIGHBOUR_SPANS);
+	int NeighbourSpanIdx = Span.NeighbourLink[OffsetIndex];
+	if (NeighbourSpanIdx != -1)
+	{
+		OutSpan = OpenSpanKey(
+			Key.x + NeighbourOffset[OffsetIndex].x,
+			Key.z + NeighbourOffset[OffsetIndex].z,
+			NeighbourSpanIdx
+		);
+		return true;
+	}
+	return false;
 }
 
 RVec3 RVoxelizer::GetCellCenter(int x, int y, int z)
