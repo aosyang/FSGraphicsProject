@@ -489,12 +489,6 @@ void RVoxelizer::GenerateRegions()
 {
 	int NumRegions = 0;
 
-	typedef vector<OpenSpanKey> RegionType;
-
-	// All saved regions
-	vector<RegionType> Regions;
-	typedef RegionType::iterator RegionIterator;
-
 	typedef map<OpenSpanKey, int> RegionMapType;
 	RegionMapType RegionMap;
 
@@ -599,8 +593,7 @@ void RVoxelizer::GenerateRegions()
 
 	for (int DistanceFieldIdx = MaxDistanceField; DistanceFieldIdx >= 0; DistanceFieldIdx--)
 	{
-		// New spans at this distance field from region dilation
-		vector<OpenSpanKey> DilationSpans;
+		// New spans that do not directly connect to any existing regions
 		vector<OpenSpanKey> IsolatedSpans;
 
 		for (int x = 0; x < CellNumX; x++)
@@ -642,8 +635,13 @@ void RVoxelizer::GenerateRegions()
 							int NeighbourRegionId = GetRegionId(NeighbourKey);
 							if (NeighbourRegionId != -1)
 							{
-								SetRegionId(ThisKey, NeighbourRegionId);
-								ThisRegionId = NeighbourRegionId;
+								// Only set region ids if a span is next to one from previous distance field.
+								// Note: This avoids one region expanding too fast, taking up spaces next to other regions.
+								if (GetOpenSpanByKey(NeighbourKey).DistanceField > DistanceFieldIdx)
+								{
+									SetRegionId(ThisKey, NeighbourRegionId);
+									ThisRegionId = NeighbourRegionId;
+								}
 							}
 						}
 
@@ -651,11 +649,6 @@ void RVoxelizer::GenerateRegions()
 						{
 							// No connection to known regions so far, put it into a pending list
 							IsolatedSpans.push_back(ThisKey);
-						}
-						else
-						{
-							// This span is part of the dilation, add it to the dilation list
-							DilationSpans.push_back(ThisKey);
 						}
 
 						SetRegionId(ThisKey, ThisRegionId);
@@ -717,6 +710,13 @@ void RVoxelizer::GenerateRegions()
 		}
 
 		DebugRegionMaps[DistanceFieldIdx] = RegionMap;
+	}
+	
+	// Assign final region ids to all spans
+	for (auto Iter : RegionMap)
+	{
+		auto& Span = GetOpenSpanByKey(Iter.first);
+		Span.RegionId = Iter.second;
 	}
 }
 
