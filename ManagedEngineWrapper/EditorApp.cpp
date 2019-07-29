@@ -506,8 +506,8 @@ namespace ManagedEngineWrapper
 		if (m_SelectedObject)
 		{
 			vector<RSceneObject*> SceneObjects = m_Scene.EnumerateSceneObjects();
-			auto iter = std::find(SceneObjects.begin(), SceneObjects.end(), m_SelectedObject);
-			m_Scene.DestroyObject(*iter);
+			assert(StdContains(SceneObjects, m_SelectedObject));
+			m_Scene.DestroyObject(m_SelectedObject);
 			m_SelectedObject = nullptr;
 
 			// FIXME: We should notify editor to update property grid or we'll crash the editor

@@ -123,18 +123,14 @@ void RTransform::Attach(RTransform* NodeParent)
 	Parent = NodeParent;
 
 	// Assume transform is not in parent's child list already
-	assert(find(Parent->Children.begin(), Parent->Children.end(), this) == Parent->Children.end());
+	assert(!StdContains(Parent->Children, this));
 	Parent->Children.push_back(this);
 	bIsCachedMatrixDirty = true;
 }
 
 void RTransform::Detach()
 {
-	auto Iter = find(Parent->Children.begin(), Parent->Children.end(), this);
-	if (Iter != Parent->Children.end())
-	{
-		Parent->Children.erase(Iter);
-	}
+	StdRemove(Parent->Children, this);
 	Parent = nullptr;
 	bIsCachedMatrixDirty = true;
 }

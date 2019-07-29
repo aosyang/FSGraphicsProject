@@ -605,7 +605,7 @@ RVec3 RScene::TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec, l
 	{
 		if (SceneObject->IsType<RSMeshObject>())
 		{
-			if (std::find(IgnoredObjects.begin(), IgnoredObjects.end(), SceneObject) == IgnoredObjects.end())
+			if (!StdContains(IgnoredObjects, SceneObject))
 			{
 				RSMeshObject* meshObj = (RSMeshObject*)(SceneObject);
 
@@ -693,6 +693,6 @@ vector<RSceneObject*> RScene::EnumerateSceneObjects() const
 
 void RScene::AddSceneObjectInternal(RSceneObject* SceneObject)
 {
-	assert(find(m_SceneObjects.begin(), m_SceneObjects.end(), SceneObject) == m_SceneObjects.end());
+	assert(!StdContains(m_SceneObjects, SceneObject));
 	m_SceneObjects.push_back(SceneObject);
 }

@@ -410,54 +410,37 @@ void RRenderSystem::SetGeometryShader(ID3D11GeometryShader* geometryShader)
 
 void RRenderSystem::RegisterRenderMeshComponent(RRenderMeshComponent* Component)
 {
-	auto Iter = find(m_RegisteredRenderMeshComponents.begin(), m_RegisteredRenderMeshComponents.end(), Component);
-
 	// Component must not be registered already
-	assert(Iter == m_RegisteredRenderMeshComponents.end());
-
+	assert(!StdContains(m_RegisteredRenderMeshComponents, Component));
 	m_RegisteredRenderMeshComponents.push_back(Component);
 }
 
 void RRenderSystem::UnregisterRenderMeshComponent(RRenderMeshComponent* Component)
 {
-	auto Iter = find(m_RegisteredRenderMeshComponents.begin(), m_RegisteredRenderMeshComponents.end(), Component);
-
 	// Shouldn't unregister a component which is not registered
-	assert(Iter != m_RegisteredRenderMeshComponents.end());
-
-	m_RegisteredRenderMeshComponents.erase(Iter);
+	StdRemoveChecked(m_RegisteredRenderMeshComponents, Component);
 }
 
 void RRenderSystem::RegisterLight(ILight* Light)
 {
-	auto Iter = find(m_RegisteredLights.begin(), m_RegisteredLights.end(), Light);
-	assert(Iter == m_RegisteredLights.end());
-
+	assert(!StdContains(m_RegisteredLights, Light));
 	m_RegisteredLights.push_back(Light);
 }
 
 void RRenderSystem::UnregisterLight(ILight* Light)
 {
-	auto Iter = find(m_RegisteredLights.begin(), m_RegisteredLights.end(), Light);
-	assert(Iter != m_RegisteredLights.end());
-
-	m_RegisteredLights.erase(Iter);
+	StdRemoveChecked(m_RegisteredLights, Light);
 }
 
 void RRenderSystem::RegisterShadowCaster(IShadowCaster* ShadowCaster)
 {
-	auto Iter = find(m_RegisteredShadowCasters.begin(), m_RegisteredShadowCasters.end(), ShadowCaster);
-	assert(Iter == m_RegisteredShadowCasters.end());
-
+	assert(!StdContains(m_RegisteredShadowCasters, ShadowCaster));
 	m_RegisteredShadowCasters.push_back(ShadowCaster);
 }
 
 void RRenderSystem::UnregisterShadowCaster(IShadowCaster* ShadowCaster)
 {
-	auto Iter = find(m_RegisteredShadowCasters.begin(), m_RegisteredShadowCasters.end(), ShadowCaster);
-	assert(Iter != m_RegisteredShadowCasters.end());
-
-	m_RegisteredShadowCasters.erase(Iter);
+	StdRemoveChecked(m_RegisteredShadowCasters, ShadowCaster);
 }
 
 void RRenderSystem::SetActiveScene(RScene* Scene)
