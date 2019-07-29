@@ -19,8 +19,79 @@ namespace
 	// For debug rendering the region map at various heightfield
 	vector<map<OpenSpanKey, int>> DebugRegionMaps;
 
-	typedef vector<RVec3> EdgePoints;
+	struct EdgePoint
+	{
+		RVec3 Point;
+		bool bIsMandatory;
+	};
+	typedef vector<EdgePoint> EdgePoints;
 	vector<EdgePoints> DebugRegionEdgePoints;
+
+	// Calculate squared distance from a point to a line segment
+	float SqrDistance_PointToLineSegment(const RVec3& p, const RVec3& a, const RVec3& b)
+	{
+		RVec3 ap = p - a;
+		RVec3 ab = b - a;
+		float f = RVec3::Dot(ap, ab) / RVec3::Dot(ab, ab);
+		if (f <= 0.0f)
+		{
+			return ap.SquaredMagitude();
+		}
+		else if (f >= 1.0f)
+		{
+			return (p - b).SquaredMagitude();
+		}
+		else
+		{
+			RVec3 q = a + ab * f;
+			return (p - q).SquaredMagitude();
+		}
+	}
+
+	// Simplify a list of edges with Douglas-Peucker algorithm
+	// Note: the last point does go into return value for easier making up a loop
+	vector<RVec3> SimplifyEdges(const vector<RVec3>& Edges)
+	{
+		assert(Edges.size() >= 2);
+
+		if (Edges.size() == 2)
+		{
+			return vector<RVec3>{ Edges[0] };
+		}
+
+		const RVec3& Start = Edges[0];
+		const RVec3& End = Edges[Edges.size() - 1];
+		float MaxSqrDist = 0.0f;
+		int MaxPointIdx = -1;
+
+		for (int i = 1; i < (int)Edges.size() - 1; i++)
+		{
+			float SqrDist = SqrDistance_PointToLineSegment(Edges[i], Start, End);
+			if (SqrDist > MaxSqrDist)
+			{
+				MaxSqrDist = SqrDist;
+				MaxPointIdx = i;
+			}
+		}
+
+		static const float Threshold = 80.0f;
+		if (MaxSqrDist <= Threshold * Threshold)
+		{
+			return vector<RVec3>{ Edges[0] };
+		}
+		else
+		{
+			auto Left = SimplifyEdges(vector<RVec3>(Edges.begin(), Edges.begin() + MaxPointIdx + 1));
+			auto Right = SimplifyEdges(vector<RVec3>(Edges.begin() + MaxPointIdx, Edges.end()));
+
+			vector<RVec3> Result;
+			Result.reserve(Left.size() + Right.size());
+			Result.insert(Result.end(), Left.begin(), Left.end());
+			Result.insert(Result.end(), Right.begin(), Right.end());
+
+			return Result;
+		}
+	}
 }
 
 const OpenSpanKey OpenSpanKey::Invalid(-1, -1, -1);
@@ -152,9 +223,14 @@ void RVoxelizer::Render()
 		const auto& RegionEdges = DebugRegionEdgePoints[DebugDrawRegionId];
 		for (int i = 0; i < RegionEdges.size(); i++)
 		{
-			const RVec3& p0 = RegionEdges[i];
-			const RVec3& p1 = RegionEdges[(i + 1) % RegionEdges.size()];
+			const RVec3& p0 = RegionEdges[i].Point;
+			const RVec3& p1 = RegionEdges[(i + 1) % RegionEdges.size()].Point;
 			GDebugRenderer.DrawLine(p0, p1, RColor::Cyan);
+
+			if (RegionEdges[i].bIsMandatory)
+			{
+				GDebugRenderer.DrawSphere(p0, 20.0f, RColor::Cyan, 8);
+			}
 		}
 	}
 
@@ -803,6 +879,7 @@ void RVoxelizer::GenerateRegionContours()
 
 		CurrentDirection++;
 		while (CurrentDirection >= 4) { CurrentDirection -= 4; }
+		int LastNeighbourRegionId = INT_MAX;
 
 		RLog("Begin edge searching for region %d\n", RegionId);
 		do
@@ -810,8 +887,12 @@ void RVoxelizer::GenerateRegionContours()
 			const HeightfieldOpenSpan& CurrentSpan = GetOpenSpanByKey(CurrentKey);
 			if (CurrentSpan.NeighbourLink[CurrentDirection] == -1)
 			{
+				// A mandatory point is a point shared by three or more regions including null regions
+				bool bMandatoryPoint = (LastNeighbourRegionId != INT_MAX && LastNeighbourRegionId != -1);
+
 				// No more neighbours in this direction, turn 90 to the right
-				AddEdge(CurrentKey, CurrentDirection, RegionId);
+				AddEdge(CurrentKey, CurrentDirection, RegionId, bMandatoryPoint);
+				LastNeighbourRegionId = -1;
 				CurrentDirection++;
 				while (CurrentDirection >= 4) { CurrentDirection -= 4; }
 			}
@@ -827,8 +908,12 @@ void RVoxelizer::GenerateRegionContours()
 				const HeightfieldOpenSpan& NextSpan = GetOpenSpanByKey(NextKey);
 				if (NextSpan.RegionId != CurrentSpan.RegionId)
 				{
+					// A mandatory point is a point shared by three or more regions including null regions
+					bool bMandatoryPoint = (LastNeighbourRegionId != INT_MAX && LastNeighbourRegionId != NextSpan.RegionId);
+					
 					// Region edge, turn 90 to the right
-					AddEdge(CurrentKey, CurrentDirection, RegionId);
+					AddEdge(CurrentKey, CurrentDirection, RegionId, bMandatoryPoint);
+					LastNeighbourRegionId = NextSpan.RegionId;
 					CurrentDirection++;
 					while (CurrentDirection >= 4) { CurrentDirection -= 4; }
 				}
@@ -841,6 +926,56 @@ void RVoxelizer::GenerateRegionContours()
 				}
 			}
 		} while (CurrentKey != StartKey || CurrentDirection != StartDirection);
+
+		// Simplify edges
+		EdgePoints& RegionEdges = DebugRegionEdgePoints[RegionId];
+
+		// Find a first mandatory point
+		int FirstIdx;
+		for (FirstIdx = 0; FirstIdx < (int)RegionEdges.size(); FirstIdx++)
+		{
+			if (RegionEdges[FirstIdx].bIsMandatory)
+			{
+				break;
+			}
+		}
+
+		if (FirstIdx != (int)RegionEdges.size())
+		{
+			int StartIdx = FirstIdx;
+			int EndIdx = -1;
+			vector<RVec3> SimplifiedPoints;
+
+			do
+			{
+				vector<RVec3> Points;
+				for (int i = 0; i < (int)RegionEdges.size(); i++)
+				{
+					int Idx = (StartIdx + i) % RegionEdges.size();
+					Points.push_back(RegionEdges[Idx].Point);
+					if (i != 0 && RegionEdges[Idx].bIsMandatory)
+					{
+						EndIdx = Idx;
+						break;
+					}
+				}
+
+				assert(EndIdx != -1);
+
+				vector<RVec3> Simplified = SimplifyEdges(Points);
+				SimplifiedPoints.insert(SimplifiedPoints.end(), Simplified.begin(), Simplified.end());
+				StartIdx = EndIdx;
+			} while (StartIdx != FirstIdx);
+
+			// For testing
+			vector<EdgePoint> NewEdgePoints;
+			for (const auto& p : SimplifiedPoints)
+			{
+				NewEdgePoints.push_back({ p, true });
+			}
+
+			RegionEdges = NewEdgePoints;
+		}
 	}
 }
 
@@ -874,7 +1009,7 @@ OpenSpanKey RVoxelizer::FindRegionEdgeInDirection(const OpenSpanKey& Key, int Di
 	return OpenSpanKey(nx, nz, CurrentSpanIdx);
 }
 
-void RVoxelizer::AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId)
+void RVoxelizer::AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMendatoryPoint)
 {
 	RLog("Edge found! loc: (%d, %d), dir: %d\n", Key.x, Key.z, DirectionIdx);
 
@@ -898,7 +1033,7 @@ void RVoxelizer::AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId)
 		break;
 	}
 	RVec3 EdgePoint = CenterPoint + Offset;
-	DebugRegionEdgePoints[RegionId].push_back(EdgePoint);
+	DebugRegionEdgePoints[RegionId].push_back({ EdgePoint, bMendatoryPoint });
 }
 
 RAabb RVoxelizer::CalculateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z) const

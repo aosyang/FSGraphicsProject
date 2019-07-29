@@ -162,7 +162,7 @@ private:
 	// Going in one direction and find a span at the edge of the region of a given span
 	OpenSpanKey FindRegionEdgeInDirection(const OpenSpanKey& Key, int DirectionIdx = 0) const;
 
-	void AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId);
+	void AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMendatoryPoint);
 
 	RAabb CalculateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z) const;
 
