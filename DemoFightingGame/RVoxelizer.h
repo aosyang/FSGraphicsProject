@@ -96,6 +96,11 @@ public:
 		return *this;
 	}
 
+	bool operator==(const OpenSpanKey& Rhs) const
+	{
+		return HashValue == Rhs.HashValue;
+	}
+
 	bool operator!=(const OpenSpanKey& Rhs) const
 	{
 		return HashValue != Rhs.HashValue;

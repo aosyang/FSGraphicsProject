@@ -47,6 +47,7 @@ using namespace std;
 #include "../lua5.3/lua.hpp"
 
 #include "Core/RDelegate.h"
+#include "Core/StdHelper.h"
 
 #include "Core/RVector.h"
 #include "Core/RQuat.h"

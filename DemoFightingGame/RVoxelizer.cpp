@@ -547,7 +547,7 @@ void RVoxelizer::GenerateRegions()
 	};
 
 	// Find region id for a span from its adjacent spans
-	auto SetRegionIdFromAdjacency = [this, &RegionMap, &GetRegionId, &SetRegionId](const OpenSpanKey& Key) -> bool {
+	auto SetRegionIdFromAdjacency = [this, &RegionMap, &GetRegionId, &SetRegionId](const OpenSpanKey& Key, const vector<OpenSpanKey>* IgnoredNeighbours = nullptr) -> bool {
 		auto& Span = this->GetOpenSpanByKey(Key);
 		int DiagonalRegionId = -1;
 		for (int NeighbourIdx = 0; NeighbourIdx < 4; NeighbourIdx++)
@@ -562,6 +562,10 @@ void RVoxelizer::GenerateRegions()
 			int nz = Key.z + NeighbourOffset[NeighbourIdx].z;
 
 			OpenSpanKey NeighbourKey(nx, nz, NeighbourSpanIndex);
+			if (IgnoredNeighbours && StdContains(*IgnoredNeighbours, NeighbourKey))
+			{
+				continue;
+			}
 
 			int NeighbourRegionId = GetRegionId(NeighbourKey);
 			if (NeighbourRegionId != -1)
@@ -595,6 +599,12 @@ void RVoxelizer::GenerateRegions()
 				for (int i = 0; i < 2; i++)
 				{
 					OpenSpanKey DiagonalNeighbourKey = GetNeighbourSpanByIndex(NeighbourKey, OffsetIdx[i]);
+
+					if (IgnoredNeighbours && StdContains(*IgnoredNeighbours, DiagonalNeighbourKey))
+					{
+						continue;
+					}
+
 					if (DiagonalNeighbourKey.IsValid())
 					{
 						DiagonalRegionId = GetRegionId(DiagonalNeighbourKey);
@@ -691,12 +701,17 @@ void RVoxelizer::GenerateRegions()
 			do
 			{
 				MergedSpans = 0;
+				vector<OpenSpanKey> IgnoredSpans;
 				for (int i = (int)IsolatedSpans.size() - 1; i >= 0; i--)
 				{
 					OpenSpanKey& OtherSpan = IsolatedSpans[i];
 
-					if (SetRegionIdFromAdjacency(OtherSpan))
+					if (SetRegionIdFromAdjacency(OtherSpan, &IgnoredSpans))
 					{
+						// Add this span to the ignore list so we limit the expansion to one span per iteration.
+						// This will help evenly divide long expansion spans into two regions.
+						IgnoredSpans.push_back(OtherSpan);
+
 						IsolatedSpans.erase(IsolatedSpans.begin() + i);
 						MergedSpans++;
 					}
