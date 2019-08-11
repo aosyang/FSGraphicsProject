@@ -950,8 +950,8 @@ void RVoxelizer::GenerateRegionContours()
 			}
 		}
 		
-		// Note: When a region is not sharing any edges with other regions, it doesn't have a mandatory edge point.
-		//		 In this case we'll use the first point for both start and end index.
+		// TODO: When a region is not sharing any edges with other regions, it doesn't have a mandatory edge point.
+		//		 In that case we need to simplify the edge list in a different way.
 
 		if (FirstIdx != (int)RegionEdges.size())
 		{
