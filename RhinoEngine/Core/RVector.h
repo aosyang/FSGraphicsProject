@@ -139,6 +139,8 @@ public:
 	FORCEINLINE RVec3& operator*=(float val)									{ x *= val; y *= val; z *= val; return *this; }
 	FORCEINLINE RVec3& operator/=(float val)									{ x /= val; y /= val; z /= val; return *this; }
 
+	FORCEINLINE bool operator!=(const RVec3& rhs) const							{ return x != rhs.x || y != rhs.y || z != rhs.z; }
+
 	FORCEINLINE float SquaredMagitude() const
 	{
 		return x*x + y*y + z*z;

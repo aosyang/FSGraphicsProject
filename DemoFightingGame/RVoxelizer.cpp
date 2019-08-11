@@ -28,10 +28,13 @@ namespace
 	vector<EdgePoints> DebugRegionEdgePoints;
 
 	// Calculate squared distance from a point to a line segment
-	float SqrDistance_PointToLineSegment(const RVec3& p, const RVec3& a, const RVec3& b)
+	float CalculateSquaredDistanceOfPointToLineSegment(const RVec3& p, const RVec3& a, const RVec3& b)
 	{
+		assert(a - b != RVec3::Zero());
+		
 		RVec3 ap = p - a;
 		RVec3 ab = b - a;
+
 		float f = RVec3::Dot(ap, ab) / RVec3::Dot(ab, ab);
 		if (f <= 0.0f)
 		{
@@ -66,7 +69,7 @@ namespace
 
 		for (int i = 1; i < (int)Edges.size() - 1; i++)
 		{
-			float SqrDist = SqrDistance_PointToLineSegment(Edges[i], Start, End);
+			float SqrDist = CalculateSquaredDistanceOfPointToLineSegment(Edges[i], Start, End);
 			if (SqrDist > MaxSqrDist)
 			{
 				MaxSqrDist = SqrDist;
@@ -77,10 +80,13 @@ namespace
 		static const float Threshold = 80.0f;
 		if (MaxSqrDist <= Threshold * Threshold)
 		{
+			// All distances from the line segment to points are smaller than the threshold. The edge list can be simplified as one edge.
 			return vector<RVec3>{ Edges[0] };
 		}
 		else
 		{
+			// Taking the point with a max distance to the line segment as a middle point,
+			// split the edges into two sublists and perform the algorithm on each of them.
 			auto Left = SimplifyEdges(vector<RVec3>(Edges.begin(), Edges.begin() + MaxPointIdx + 1));
 			auto Right = SimplifyEdges(vector<RVec3>(Edges.begin() + MaxPointIdx, Edges.end()));
 
@@ -230,6 +236,10 @@ void RVoxelizer::Render()
 			if (RegionEdges[i].bIsMandatory)
 			{
 				GDebugRenderer.DrawSphere(p0, 20.0f, RColor::Cyan, 8);
+			}
+			else
+			{
+				GDebugRenderer.DrawSphere(p0, 10.0f, RColor::Green, 8);
 			}
 		}
 	}
@@ -939,6 +949,9 @@ void RVoxelizer::GenerateRegionContours()
 				break;
 			}
 		}
+		
+		// Note: When a region is not sharing any edges with other regions, it doesn't have a mandatory edge point.
+		//		 In this case we'll use the first point for both start and end index.
 
 		if (FirstIdx != (int)RegionEdges.size())
 		{
@@ -949,7 +962,7 @@ void RVoxelizer::GenerateRegionContours()
 			do
 			{
 				vector<RVec3> Points;
-				for (int i = 0; i < (int)RegionEdges.size(); i++)
+				for (int i = 0; i <= (int)RegionEdges.size(); i++)
 				{
 					int Idx = (StartIdx + i) % RegionEdges.size();
 					Points.push_back(RegionEdges[Idx].Point);
@@ -1011,7 +1024,7 @@ OpenSpanKey RVoxelizer::FindRegionEdgeInDirection(const OpenSpanKey& Key, int Di
 
 void RVoxelizer::AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMendatoryPoint)
 {
-	RLog("Edge found! loc: (%d, %d), dir: %d\n", Key.x, Key.z, DirectionIdx);
+	//RLog("Edge found! loc: (%d, %d), dir: %d\n", Key.x, Key.z, DirectionIdx);
 
 	assert(RegionId >= 0 && RegionId < DebugRegionEdgePoints.size());
 
