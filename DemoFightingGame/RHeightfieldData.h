@@ -41,7 +41,7 @@ struct HeightfieldOpenSpan
 	int CellRowStart;
 	int CellRowEnd;
 
-	// Whether the span is a border span (which does not have 8 valid neighbour spans including diagonal ones)
+	// Whether the span is a border span (which has less than 8 valid neighbour spans including diagonal ones)
 	bool bBorder;
 
 	// Index to a neighbour open span this spawn is linked to

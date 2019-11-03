@@ -8,6 +8,7 @@
 
 class RSceneObject;
 class RSMeshObject;
+class RMesh;
 
 class RScene
 {
@@ -38,7 +39,7 @@ public:
 
 	/// Find all objects in the scene of given type
 	template<typename T>
-	vector<T*> FindAllObjectsOfType() const;
+	std::vector<T*> FindAllObjectsOfType() const;
 
 	/// Generate a unique object name with the given name
 	string GenerateUniqueObjectName(const string& ObjectName);

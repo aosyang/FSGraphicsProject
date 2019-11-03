@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <winerror.h>	// FORCEINLINE
+
 /// Check whether a given value exists in a container.
 /// Note: Requires operator '==' to be overloaded for the value type.
 template<typename T, typename V>

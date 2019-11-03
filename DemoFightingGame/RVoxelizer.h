@@ -6,78 +6,19 @@
 
 #pragma once
 
-#include "Scene/RScene.h"
 #include "RHeightfieldData.h"
+#include "RVoxelizerDataType.h"
+
+#include <vector>
+#include <set>
+
+class RScene;
+class RSceneObject;
 
 // 2D coordinate on x-z plane
 struct GridCoord
 {
 	int x, z;
-};
-
-template<class T>
-inline void HashCombine(size_t& HashValue, const T& Element)
-{
-	hash<T> Hash;
-	HashValue ^= Hash(Element) + 0x9e3779b9 + (HashValue << 6) + (HashValue >> 2);
-}
-
-/// Key for a traversable span. Used for searching a span at a given location
-class OpenSpanKey
-{
-public:
-	OpenSpanKey(int InX, int InZ, int InSpanIndex)
-		: x(InX), z(InZ), span_idx(InSpanIndex)
-	{
-		HashValue = CalcHash();
-	}
-
-	OpenSpanKey(const OpenSpanKey& Rhs)
-	{
-		x = Rhs.x; z = Rhs.z; span_idx = Rhs.span_idx; HashValue = Rhs.HashValue;
-	}
-
-	OpenSpanKey& operator=(const OpenSpanKey& Rhs)
-	{
-		x = Rhs.x; z = Rhs.z; span_idx = Rhs.span_idx; HashValue = Rhs.HashValue;
-		return *this;
-	}
-
-	bool operator==(const OpenSpanKey& Rhs) const
-	{
-		return HashValue == Rhs.HashValue;
-	}
-
-	bool operator!=(const OpenSpanKey& Rhs) const
-	{
-		return HashValue != Rhs.HashValue;
-	}
-
-	bool operator<(const OpenSpanKey& Rhs) const
-	{
-		return HashValue < Rhs.HashValue;
-	}
-
-	bool IsValid() const
-	{
-		return x >= 0;
-	}
-
-	int x, z, span_idx;
-	const static OpenSpanKey Invalid;
-
-private:
-	size_t CalcHash() const
-	{
-		size_t Hash = 0;
-		HashCombine(Hash, x);
-		HashCombine(Hash, z);
-		HashCombine(Hash, span_idx);
-		return Hash;
-	}
-
-private:
-	size_t HashValue;
 };
 
 
@@ -86,13 +27,22 @@ class RVoxelizer
 {
 public:
 	RVoxelizer();
+	~RVoxelizer();
 
 	void Initialize(RScene* Scene);
 
 	void Render();
 
+	HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key);
+	const HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key) const;
+
+	OpenSpanKey GetNeighbourSpanByIndex(const OpenSpanKey& Key, int OffsetIndex) const;
+
+	// Coordinates for all offsets of neightbours
+	static const GridCoord	NeighbourOffset[];
+
 private:
-	void GenerateHeightfieldColumns(const vector<RSceneObject*>& SceneObjects);
+	void GenerateHeightfieldColumns(const std::vector<RSceneObject*>& SceneObjects);
 
 	// Generate neighbour data after we have open spans for all columns 
 	void GenerateOpenSpanNeighbourData();
@@ -116,13 +66,14 @@ private:
 	// Returns if a character can navigate between given open spans
 	bool IsValidNeighbourSpan(const HeightfieldOpenSpan& ThisOpenSpan, const HeightfieldOpenSpan& NeighbourOpenSpan) const;
 
-	HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key);
-	const HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key) const;
-
-	OpenSpanKey GetNeighbourSpanByIndex(const OpenSpanKey& Key, int OffsetIndex) const;
-
 	// Returns center location of a cell
 	RVec3 GetCellCenter(int x, int y, int z) const;
+
+private:
+	void IncreaseDebugDistanceFieldLevel();
+	void DecreaseDebugDistanceFieldLevel();
+
+	int DebugDistanceField;
 
 private:
 	RAabb					SceneBounds;
@@ -143,7 +94,5 @@ private:
 	int MaxDistanceField;
 
 	// Unique region ids
-	set<int> UniqueRegionIds;
-
-	static const GridCoord	NeighbourOffset[];
+	std::set<int> UniqueRegionIds;
 };
