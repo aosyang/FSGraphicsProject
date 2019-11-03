@@ -152,7 +152,7 @@ void RVoxelizer::Initialize(RScene* Scene)
 	// Create heightfield
 	{
 		// Allocate heightfield cells by x-z grid
-		Heightfield.resize(CellNumX * CellNumZ);
+		Heightfield.Resize(CellNumX, CellNumZ);
 
 		GenerateHeightfieldColumns(SceneObjects);
 		GenerateOpenSpanNeighbourData();

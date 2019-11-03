@@ -7,66 +7,13 @@
 #pragma once
 
 #include "Scene/RScene.h"
-
-#define NUM_NEIGHBOUR_SPANS 4
+#include "RHeightfieldData.h"
 
 // 2D coordinate on x-z plane
 struct GridCoord
 {
 	int x, z;
 };
-
-// A span represents solid spaces occupied by any geometries
-struct HeightfieldSolidSpan
-{
-	HeightfieldSolidSpan()
-		: bTraversable(false)
-		, CellRowStart(0)
-		, CellRowEnd(0)
-	{}
-
-	bool bTraversable;
-	int CellRowStart;
-	int CellRowEnd;
-	RAabb Bounds;
-};
-
-// A span represents a traversable area
-struct HeightfieldOpenSpan
-{
-	HeightfieldOpenSpan()
-		: DistanceField(-1)
-		, RegionId(-1)
-	{
-		fill_n(NeighbourLink, NUM_NEIGHBOUR_SPANS, -1);
-	}
-
-	int CellRowStart;
-	int CellRowEnd;
-
-	// Whether the span is a border span (which does not have 8 valid neighbour spans including diagonal ones)
-	bool bBorder;
-
-	// Index to a neighbour open span this spawn is linked to
-	int NeighbourLink[NUM_NEIGHBOUR_SPANS];
-
-	int DistanceField;
-
-	int RegionId;
-};
-
-struct HeightfieldData
-{
-	// Grid position
-	int x, z;
-
-	// A list of solid spans in this column
-	vector<HeightfieldSolidSpan> SolidSpans;
-
-	// A list of open spans in this column
-	vector<HeightfieldOpenSpan> OpenSpans;
-};
-
 
 template<class T>
 inline void HashCombine(size_t& HashValue, const T& Element)
@@ -192,7 +139,7 @@ private:
 	int CellNumY;
 	int CellNumZ;
 
-	vector<HeightfieldData>	Heightfield;
+	RHeightfieldData		Heightfield;
 	int MaxDistanceField;
 
 	// Unique region ids

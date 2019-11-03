@@ -7,7 +7,9 @@
 #pragma once
 
 #include "RVector.h"
+#include "RMatrix.h"
 
+// Axis-aligned bounding box
 class RAabb
 {
 public:

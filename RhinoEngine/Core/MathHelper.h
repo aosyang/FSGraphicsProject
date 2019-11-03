@@ -3,8 +3,13 @@
 //
 // Math helper functions
 //=============================================================================
+
 #pragma once
 
+#include <winerror.h>	// FORCEINLINE
+
+#include <stdlib.h>
+#include <float.h>
 
 #define FLT_EQUAL(a,b)			(fabsf((a)-(b))<FLT_EPSILON)
 #define FLT_EQUAL_ZERO(a)		(fabsf(a)<FLT_EPSILON)
