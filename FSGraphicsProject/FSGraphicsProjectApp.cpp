@@ -437,7 +437,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	camAabb.Expand(camPos + RVec3(5.0f, 5.0f, 5.0f));
 	camAabb.Expand(camPos - RVec3(5.0f, 5.0f, 5.0f));
 
-	const vector<RMeshElement>& sceneMeshElements = m_SceneMeshCity->GetMeshElements();
+	const std::vector<RMeshElement>& sceneMeshElements = m_SceneMeshCity->GetMeshElements();
 	for (UINT i = 0; i < sceneMeshElements.size(); i++)
 	{
 		worldMoveVec = camAabb.TestDynamicCollisionWithAabb(worldMoveVec, sceneMeshElements[i].GetAabb());
@@ -715,7 +715,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 		GDebugRenderer.DrawAabb(aabb);
 
-		const vector<RMeshElement>& sceneMeshElements = m_SceneMeshCity->GetMeshElements();
+		const std::vector<RMeshElement>& sceneMeshElements = m_SceneMeshCity->GetMeshElements();
 		for (UINT i = 0; i < sceneMeshElements.size(); i++)
 		{
 			worldOffset = aabb.TestDynamicCollisionWithAabb(worldOffset, sceneMeshElements[i].GetAabb());

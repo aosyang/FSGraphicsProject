@@ -91,16 +91,16 @@ void RPostProcessorManager::RecreateLostResources()
 	}
 }
 
-RPostProcessingEffect* RPostProcessorManager::CreateEffectFromFile(const string& Name, const string& FileName, const char* EntryPoint /*= "main"*/, const char* ShaderProfile /*= "ps_4_0"*/)
+RPostProcessingEffect* RPostProcessorManager::CreateEffectFromFile(const std::string& Name, const std::string& FileName, const char* EntryPoint /*= "main"*/, const char* ShaderProfile /*= "ps_4_0"*/)
 {
-	ifstream fin;
-	fin.open(FileName.c_str(), ios_base::binary);
+	std::ifstream fin;
+	fin.open(FileName.c_str(), std::ios_base::binary);
 
 	if (fin.is_open())
 	{
-		fin.seekg(0, ios_base::end);
+		fin.seekg(0, std::ios_base::end);
 		int fileSize = (int)fin.tellg();
-		unique_ptr<char[]> pBuffer(new char[fileSize]);
+		std::unique_ptr<char[]> pBuffer(new char[fileSize]);
 
 		fin.seekg(0);
 		fin.read(pBuffer.get(), fileSize);
@@ -141,7 +141,7 @@ RPostProcessingEffect* RPostProcessorManager::CreateEffectFromFile(const string&
 	return nullptr;
 }
 
-RPostProcessingEffect* RPostProcessorManager::CreateEffectFromBytecode(const string& Name, const void* pBytecode, SIZE_T BytecodeSize)
+RPostProcessingEffect* RPostProcessorManager::CreateEffectFromBytecode(const std::string& Name, const void* pBytecode, SIZE_T BytecodeSize)
 {
 	// Assume we don't have a post processing effect with the same name
 	assert(PostProcessingEffectList.find(Name) == PostProcessingEffectList.end());

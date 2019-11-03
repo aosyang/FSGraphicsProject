@@ -5,8 +5,6 @@
 //=============================================================================
 #pragma once
 
-using namespace std;
-
 enum AnimationBitFlag
 {
 	AnimBitFlag_Loop			= 1 << 0,
@@ -70,8 +68,8 @@ public:
 	RAnimation(int nodeCount, int frameCount, float startTime, float endTime, float frameRate);
 	~RAnimation();
 
-	void SetName(const string& name) { m_Name = name; }
-	const string& GetName() const { return m_Name; }
+	void SetName(const std::string& name) { m_Name = name; }
+	const std::string& GetName() const { return m_Name; }
 
 	void SetBitFlags(int flags) { m_Flags = flags; }
 	int GetBitFlags() const { return m_Flags; }
@@ -104,16 +102,16 @@ public:
 	/// Get frame rate in frames per second
 	float GetFrameRate() const { return m_FrameRate; }
 private:
-	string					m_Name;
+	std::string					m_Name;
 	int						m_Flags;
 	int						m_FrameCount;
 	float					m_StartTime, m_EndTime, m_FrameRate;
 
-	vector<string>			m_NodeNames;
-	vector<int>				m_NodeParents;
-	vector<RMatrix4*>		m_NodeKeyFrames;
+	std::vector<std::string>			m_NodeNames;
+	std::vector<int>				m_NodeParents;
+	std::vector<RMatrix4*>		m_NodeKeyFrames;
 
-	vector<RVec3>			m_RootDisplacement;
+	std::vector<RVec3>			m_RootDisplacement;
 	int						m_RootNode;
 };
 

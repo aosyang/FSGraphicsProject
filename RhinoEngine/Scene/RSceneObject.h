@@ -71,10 +71,10 @@ public:
 	const T* CastTo() const { return IsType<T>() ? static_cast<const T*>(this) : nullptr; }
 
 	/// Set name of scene object
-	void SetName(const string& name)		{ m_Name = name; }
+	void SetName(const std::string& name)		{ m_Name = name; }
 
 	/// Get name of scene object
-	const string& GetName() const			{ return m_Name; }
+	const std::string& GetName() const			{ return m_Name; }
 
 	/// Get the scene which this object belongs to
 	RScene* GetScene() const				{ return m_Scene; }
@@ -162,13 +162,13 @@ public:
 
 	/// Set script string with function name and parameters to be invoked
 	/// example: 'RotateObject 1, 0, 0 50' - rotate object around axis [1, 0, 0] by 50 degree
-	void SetScript(const string& script)	{ m_Script = script; }
+	void SetScript(const std::string& script)	{ m_Script = script; }
 
 	/// Get script string
-	const string& GetScript() const			{ return m_Script; }
+	const std::string& GetScript() const			{ return m_Script; }
 
 	/// Get split script strings in array form
-	const vector<string>& GetParsedScript();
+	const std::vector<std::string>& GetParsedScript();
 
 	/// Create a unique runtime type id for scene object types
 	static int MakeUniqueRuntimeTypeId()
@@ -184,17 +184,17 @@ protected:
 	void UpdateComponents(float DeltaTime);
 
 protected:
-	string			m_Name;
+	std::string			m_Name;
 	RTransform		m_NodeTransform;
 	RScene*			m_Scene;
 	bool			m_bVisible;
-	string			m_Script;
-	vector<string>	m_ParsedScript;
+	std::string			m_Script;
+	std::vector<std::string>	m_ParsedScript;
 
 	int				m_Flags;
 
 	/// Components of this scene object
-	vector<unique_ptr<ISceneComponent>>	SceneComponents;
+	std::vector<std::unique_ptr<ISceneComponent>>	SceneComponents;
 
 	static int NextUniqueRuntimeTypeId;
 };

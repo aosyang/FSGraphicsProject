@@ -15,7 +15,7 @@ void RMaterial::Serialize(RSerializer& serializer)
 {
 	if (serializer.IsReading())
 	{
-		string shaderName;
+		std::string shaderName;
 		serializer.SerializeData(shaderName);
 		Shader = RShaderManager::Instance().GetShaderResource(shaderName.c_str());
 
@@ -24,7 +24,7 @@ void RMaterial::Serialize(RSerializer& serializer)
 		int i;
 		for (i = 0; i < TextureNum; i++)
 		{
-			string textureName;
+			std::string textureName;
 			serializer.SerializeData(textureName);
 			Textures[i] = RResourceManager::Instance().FindResource<RTexture>(textureName.c_str());
 			if (!Textures[i])
@@ -38,7 +38,7 @@ void RMaterial::Serialize(RSerializer& serializer)
 	}
 	else
 	{
-		string shaderName;
+		std::string shaderName;
 		if (Shader)
 			shaderName = Shader->GetName();
 
@@ -48,18 +48,18 @@ void RMaterial::Serialize(RSerializer& serializer)
 		int i;
 		for (i = 0; i < TextureNum; i++)
 		{
-			string textureName = Textures[i]->GetAssetPath();
+			std::string textureName = Textures[i]->GetAssetPath();
 			serializer.SerializeData(textureName);
 		}
 	}
 }
 
-bool RMaterial::LoadFromXmlFile(const string& Filename, vector<RMaterial>& OutMaterials)
+bool RMaterial::LoadFromXmlFile(const std::string& Filename, std::vector<RMaterial>& OutMaterials)
 {
-	unique_ptr<tinyxml2::XMLDocument> XmlDoc(new tinyxml2::XMLDocument());
+	std::unique_ptr<tinyxml2::XMLDocument> XmlDoc(new tinyxml2::XMLDocument());
 	if (XmlDoc->LoadFile(Filename.c_str()) == tinyxml2::XML_SUCCESS)
 	{
-		vector<RMaterial> xmlMaterials;
+		std::vector<RMaterial> xmlMaterials;
 
 		tinyxml2::XMLElement* root = XmlDoc->RootElement();
 		tinyxml2::XMLElement* elem = root->FirstChildElement("MeshElement");
@@ -72,7 +72,7 @@ bool RMaterial::LoadFromXmlFile(const string& Filename, vector<RMaterial>& OutMa
 			tinyxml2::XMLElement* elem_tex = elem->FirstChildElement();
 			while (elem_tex)
 			{
-				string textureName = elem_tex->GetText();
+				std::string textureName = elem_tex->GetText();
 				RTexture* texture = RResourceManager::Instance().FindResource<RTexture>(textureName);
 
 				if (!texture)

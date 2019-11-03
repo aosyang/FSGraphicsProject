@@ -61,8 +61,8 @@ public:
 
 	void Serialize(RSerializer& serializer);
 
-	void SetTriangles(const vector<UINT>& triIndices);
-	void SetVertices(const vector<RVertexType::MeshLoader>& vertices, int vertexComponentMask);
+	void SetTriangles(const std::vector<UINT>& triIndices);
+	void SetVertices(const std::vector<RVertexType::MeshLoader>& vertices, int vertexComponentMask);
 	void SetVertexComponentMask(int mask) { m_VertexComponentMask = mask; }
 	int GetVertexComponentMask() const { return m_VertexComponentMask; }
 	
@@ -73,24 +73,24 @@ public:
 
 
 	void SetName(const char* name) { m_Name = name; }
-	const string& GetName() const { return m_Name; }
+	const std::string& GetName() const { return m_Name; }
 
 	const RAabb& GetAabb() const { return m_Aabb; }
 
 	void SetFlag(int flag) { m_Flag = flag; }
 	int GetFlag() const { return m_Flag; }
 
-	vector<UINT>				TriangleIndices;
-	vector<RVertexType::Vec3Data>	PositionArray;
-	vector<RVertexType::Vec2Data>	UV0Array;
-	vector<RVertexType::Vec3Data>	NormalArray;
-	vector<RVertexType::Vec3Data>	TangentArray;
-	vector<RVertexType::Vec2Data>	UV1Array;
-	vector<VBoneIds>			BoneIdArray;
-	vector<RVertexType::Vec4Data>	BoneWeightArray;
+	std::vector<UINT>				TriangleIndices;
+	std::vector<RVertexType::Vec3Data>	PositionArray;
+	std::vector<RVertexType::Vec2Data>	UV0Array;
+	std::vector<RVertexType::Vec3Data>	NormalArray;
+	std::vector<RVertexType::Vec3Data>	TangentArray;
+	std::vector<RVertexType::Vec2Data>	UV1Array;
+	std::vector<VBoneIds>			BoneIdArray;
+	std::vector<RVertexType::Vec4Data>	BoneWeightArray;
 
 private:
-	string				m_Name;
+	std::string				m_Name;
 	RAabb				m_Aabb;
 	UINT				m_Flag;
 

@@ -60,7 +60,7 @@ private:
 	RVec3 Scale;
 
 	RTransform*	Parent;
-	vector<RTransform*>	Children;
+	std::vector<RTransform*>	Children;
 
 	RMatrix4	CachedMatrix;
 	bool		bIsCachedMatrixDirty;

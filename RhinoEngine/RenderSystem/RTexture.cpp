@@ -11,7 +11,7 @@
 
 const std::string RTexture::InternalTextureName("[Internal]");
 
-RTexture::RTexture(const string& Path)
+RTexture::RTexture(const std::string& Path)
 	: RResourceBase(RT_Texture, Path), m_SRV(nullptr), m_Width(0), m_Height(0)
 {
 }
@@ -26,9 +26,9 @@ RTexture::~RTexture()
 	SAFE_RELEASE(m_SRV);
 }
 
-vector<string> RTexture::GetSupportedExtensions()
+std::vector<std::string> RTexture::GetSupportedExtensions()
 {
-	static const vector<string> TextureExts{ ".dds" };
+	static const std::vector<std::string> TextureExts{ ".dds" };
 	return TextureExts;
 }
 
@@ -43,8 +43,8 @@ bool RTexture::LoadResourceData(bool bIsAsyncLoading)
 
 	bool bIsSRGBTexture = false;
 
-	unique_ptr<tinyxml2::XMLDocument> XmlDoc(new tinyxml2::XMLDocument());
-	string MetaFileName = GetFileSystemPath() + ".meta";
+	std::unique_ptr<tinyxml2::XMLDocument> XmlDoc(new tinyxml2::XMLDocument());
+	std::string MetaFileName = GetFileSystemPath() + ".meta";
 	if (XmlDoc->LoadFile(MetaFileName.c_str()) == tinyxml2::XML_SUCCESS)
 	{
 		tinyxml2::XMLElement* MetaElem = XmlDoc->FirstChildElement("Metadata");

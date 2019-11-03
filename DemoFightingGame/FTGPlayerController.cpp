@@ -248,7 +248,7 @@ void FTGPlayerController::SetAnimationDeviation(float Deviation)
 	m_StateMachine.SetAnimationDeviation(Deviation);
 }
 
-vector<FTGPlayerController*> FTGPlayerController::TestSphereHitWithOtherPlayers(float Radius, const RVec3& LocalSpaceOffset)
+std::vector<FTGPlayerController*> FTGPlayerController::TestSphereHitWithOtherPlayers(float Radius, const RVec3& LocalSpaceOffset)
 {
 	RSphere HitSphere;
 	HitSphere.center = GetTransform()->GetTranslatedVector(LocalSpaceOffset, ETransformSpace::Local);
@@ -259,7 +259,7 @@ vector<FTGPlayerController*> FTGPlayerController::TestSphereHitWithOtherPlayers(
 		GDebugRenderer.DrawSphere(HitSphere.center, HitSphere.radius);
 	}
 
-	vector<FTGPlayerController*> Results;
+	std::vector<FTGPlayerController*> Results;
 	for (auto PlayerController : m_Scene->FindAllObjectsOfType<FTGPlayerController>())
 	{
 		if (PlayerController == this)

@@ -170,12 +170,12 @@ void RMeshElement::Serialize(RSerializer& serializer)
 		UpdateRenderBuffer();
 }
 
-void RMeshElement::SetTriangles(const vector<UINT>& triIndices)
+void RMeshElement::SetTriangles(const std::vector<UINT>& triIndices)
 {
 	TriangleIndices = triIndices;
 }
 
-void RMeshElement::SetVertices(const vector<RVertexType::MeshLoader>& vertices, int vertexComponentMask)
+void RMeshElement::SetVertices(const std::vector<RVertexType::MeshLoader>& vertices, int vertexComponentMask)
 {
 	m_VertexComponentMask = vertexComponentMask;
 

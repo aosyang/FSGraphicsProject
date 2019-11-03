@@ -38,6 +38,6 @@ private:
 	RgRubik*		m_RubikCube;
 	RSceneObject*	m_CameraOrbiter;
 	bool			m_IsScramblingCube;
-	vector<UINT8>	m_ScrambleMoves;
+	std::vector<UINT8>	m_ScrambleMoves;
 };
 

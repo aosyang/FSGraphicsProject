@@ -35,8 +35,8 @@ public:
 	void UpdateScriptableObjects();
 private:
 	lua_State*					m_LuaState;
-	vector<RSceneObject*>		m_ScriptableObjects;
-	map<string, ScriptParams>	m_ScriptParams;
+	std::vector<RSceneObject*>		m_ScriptableObjects;
+	std::map<std::string, ScriptParams>	m_ScriptParams;
 };
 
 #define GScriptSystem RScriptSystem::Instance()

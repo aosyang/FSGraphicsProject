@@ -17,18 +17,18 @@
 namespace
 {
 	// For debug rendering regions in different colors
-	vector<RColor> DebugRegionColors;
+	std::vector<RColor> DebugRegionColors;
 
 	// For debug rendering the region map at various heightfield
-	vector<RegionMapType> DebugRegionMaps;
+	std::vector<RegionMapType> DebugRegionMaps;
 
 	struct EdgePoint
 	{
 		RVec3 Point;
 		bool bIsMandatory;
 	};
-	typedef vector<EdgePoint> EdgePoints;
-	vector<EdgePoints> DebugRegionEdgePoints;
+	typedef std::vector<EdgePoint> EdgePoints;
+	std::vector<EdgePoints> DebugRegionEdgePoints;
 
 	// Calculate squared distance from a point to a line segment
 	float CalculateSquaredDistanceOfPointToLineSegment(const RVec3& p, const RVec3& a, const RVec3& b)
@@ -56,13 +56,13 @@ namespace
 
 	// Simplify a list of edges with Douglas-Peucker algorithm
 	// Note: the last point does go into return value for easier making up a loop
-	vector<RVec3> SimplifyEdges(const vector<RVec3>& Edges)
+	std::vector<RVec3> SimplifyEdges(const std::vector<RVec3>& Edges)
 	{
 		assert(Edges.size() >= 2);
 
 		if (Edges.size() == 2)
 		{
-			return vector<RVec3>{ Edges[0] };
+			return std::vector<RVec3>{ Edges[0] };
 		}
 
 		const RVec3& Start = Edges[0];
@@ -84,16 +84,16 @@ namespace
 		if (MaxSqrDist <= Threshold * Threshold)
 		{
 			// All distances from the line segment to points are smaller than the threshold. The edge list can be simplified as one edge.
-			return vector<RVec3>{ Edges[0] };
+			return std::vector<RVec3>{ Edges[0] };
 		}
 		else
 		{
 			// Taking the point with a max distance to the line segment as a middle point,
 			// split the edges into two sublists and perform the algorithm on each of them.
-			auto Left = SimplifyEdges(vector<RVec3>(Edges.begin(), Edges.begin() + MaxPointIdx + 1));
-			auto Right = SimplifyEdges(vector<RVec3>(Edges.begin() + MaxPointIdx, Edges.end()));
+			auto Left = SimplifyEdges(std::vector<RVec3>(Edges.begin(), Edges.begin() + MaxPointIdx + 1));
+			auto Right = SimplifyEdges(std::vector<RVec3>(Edges.begin() + MaxPointIdx, Edges.end()));
 
-			vector<RVec3> Result;
+			std::vector<RVec3> Result;
 			Result.reserve(Left.size() + Right.size());
 			Result.insert(Result.end(), Left.begin(), Left.end());
 			Result.insert(Result.end(), Right.begin(), Right.end());
@@ -494,10 +494,10 @@ void RVoxelizer::GenerateOpenSpanNeighbourData()
 void RVoxelizer::GenerateDistanceField()
 {
 	// TODO: preallocate data with total open span count
-	queue<OpenSpanKey> PendingSpans;
+	std::queue<OpenSpanKey> PendingSpans;
 
 	// The result of each span and its distance field
-	map<OpenSpanKey, int> SpanDistanceMap;
+	std::map<OpenSpanKey, int> SpanDistanceMap;
 
 	// Collect all border open spans from heightfield
 	for (int x = 0; x < CellNumX; x++)
@@ -612,7 +612,7 @@ void RVoxelizer::GenerateRegions()
 	for (int DistanceFieldIdx = MaxDistanceField; DistanceFieldIdx >= 0; DistanceFieldIdx--)
 	{
 		// New spans that do not directly connect to any existing regions
-		vector<OpenSpanKey> IsolatedSpans;
+		std::vector<OpenSpanKey> IsolatedSpans;
 
 		for (int x = 0; x < CellNumX; x++)
 		{
@@ -684,7 +684,7 @@ void RVoxelizer::GenerateRegions()
 			do
 			{
 				MergedSpans = 0;
-				vector<OpenSpanKey> IgnoredSpans;
+				std::vector<OpenSpanKey> IgnoredSpans;
 				for (int i = (int)IsolatedSpans.size() - 1; i >= 0; i--)
 				{
 					OpenSpanKey& OtherSpan = IsolatedSpans[i];
@@ -854,11 +854,11 @@ void RVoxelizer::GenerateRegionContours()
 		{
 			int StartIdx = FirstIdx;
 			int EndIdx = -1;
-			vector<RVec3> SimplifiedPoints;
+			std::vector<RVec3> SimplifiedPoints;
 
 			do
 			{
-				vector<RVec3> Points;
+				std::vector<RVec3> Points;
 				for (int i = 0; i <= (int)RegionEdges.size(); i++)
 				{
 					int Idx = (StartIdx + i) % RegionEdges.size();
@@ -872,13 +872,13 @@ void RVoxelizer::GenerateRegionContours()
 
 				assert(EndIdx != -1);
 
-				vector<RVec3> Simplified = SimplifyEdges(Points);
+				std::vector<RVec3> Simplified = SimplifyEdges(Points);
 				SimplifiedPoints.insert(SimplifiedPoints.end(), Simplified.begin(), Simplified.end());
 				StartIdx = EndIdx;
 			} while (StartIdx != FirstIdx);
 
 			// For testing
-			vector<EdgePoint> NewEdgePoints;
+			std::vector<EdgePoint> NewEdgePoints;
 			for (const auto& p : SimplifiedPoints)
 			{
 				NewEdgePoints.push_back({ p, true });

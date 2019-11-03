@@ -8,7 +8,7 @@
 #include "RResourceBase.h"
 
 
-RResourceBase::RResourceBase(ResourceType type, const string& path)
+RResourceBase::RResourceBase(ResourceType type, const std::string& path)
 	: m_State				(RS_Empty),
 	  m_Type				(type),
 	  m_FileSystemPath		(path),
@@ -57,8 +57,8 @@ void RResourceBase::OnLoadingFinished(bool bIsAsyncLoading)
 	}
 }
 
-vector<RResourceBase*> RResourceBase::EnumerateReferencedResources() const
+std::vector<RResourceBase*> RResourceBase::EnumerateReferencedResources() const
 {
-	const static vector<RResourceBase*> EmptyResources;
+	const static std::vector<RResourceBase*> EmptyResources;
 	return EmptyResources;
 }

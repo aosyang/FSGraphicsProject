@@ -9,8 +9,6 @@
 #include "Core/RSingleton.h"
 #include "RScene.h"
 
-using namespace std;
-
 /// A manager for all active scenes in the engine
 class RSceneManager : public RSingleton<RSceneManager>
 {
@@ -42,7 +40,7 @@ protected:
 	RScene m_DefaultScene;
 
 	/// A list of all registered scenes
-	vector<RScene*> RegisteredScenes;
+	std::vector<RScene*> RegisteredScenes;
 };
 
 FORCEINLINE RScene* RSceneManager::DefaultScene()

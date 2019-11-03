@@ -51,7 +51,7 @@ protected:
 	void SetupMaterialsFromMeshResource();
 
 	RMesh*					m_Mesh;
-	vector<RMaterial>		m_Materials;
+	std::vector<RMaterial>		m_Materials;
 	RAabb					m_MeshAABB;
 	RShader*				m_OverridingShader;
 	int						m_OverridingShaderFeatures;

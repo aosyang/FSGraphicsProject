@@ -200,9 +200,9 @@ RAnimation::RAnimation()
 RAnimation::RAnimation(int nodeCount, int frameCount, float startTime, float endTime, float frameRate)
 	: m_Flags(0), m_FrameCount(frameCount), m_StartTime(startTime), m_EndTime(endTime), m_FrameRate(frameRate), m_RootNode(-1)
 {
-	m_NodeKeyFrames = vector<RMatrix4*>(nodeCount, nullptr);
-	m_NodeParents = vector<int>(nodeCount, -1);
-	m_NodeNames = vector<string>(nodeCount, "");
+	m_NodeKeyFrames = std::vector<RMatrix4*>(nodeCount, nullptr);
+	m_NodeParents = std::vector<int>(nodeCount, -1);
+	m_NodeNames = std::vector<std::string>(nodeCount, "");
 }
 
 
@@ -337,7 +337,7 @@ void RAnimation::AddNodeNameToId(const char* nodeName, int nodeId)
 
 int RAnimation::GetNodeIdByName(const char* nodeName) const
 {
-	for (vector<string>::const_iterator iter = m_NodeNames.begin(); iter != m_NodeNames.end(); iter++)
+	for (std::vector<std::string>::const_iterator iter = m_NodeNames.begin(); iter != m_NodeNames.end(); iter++)
 	{
 		if (strcmp(iter->c_str(), nodeName) == 0)
 			return (int)(iter - m_NodeNames.begin());

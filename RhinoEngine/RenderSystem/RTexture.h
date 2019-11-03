@@ -10,14 +10,14 @@ class RTexture : public RResourceBase
 {
 	friend class RResourceManager;
 public:
-	RTexture(const string& Path);
+	RTexture(const std::string& Path);
 
 	/// Create texture from existing shader resource view
 	RTexture(ID3D11ShaderResourceView* srv);
 	~RTexture();
 
 	/// Required by RResourceManager::RegisterResourceType
-	static vector<string> GetSupportedExtensions();
+	static std::vector<std::string> GetSupportedExtensions();
 
 	virtual bool LoadResourceData(bool bIsAsyncLoading) override;
 
@@ -30,6 +30,6 @@ private:
 	ID3D11ShaderResourceView*	m_SRV;
 	UINT						m_Width, m_Height;
 
-	static const string			InternalTextureName;
+	static const std::string			InternalTextureName;
 };
 

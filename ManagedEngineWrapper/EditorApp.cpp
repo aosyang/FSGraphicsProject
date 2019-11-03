@@ -288,11 +288,11 @@ namespace ManagedEngineWrapper
 		pos.SetZ(SnapTo(pos.Z(), 1.0f));
 		pObj->SetPosition(pos);
 
-		string AssetName = RFileUtil::GetFileNameInPath(MeshAssetPath);
+		std::string AssetName = RFileUtil::GetFileNameInPath(MeshAssetPath);
 		AssetName = RFileUtil::StripExtension(AssetName);
 
 		// Generate a unique name for the object
-		const string ObjectName = m_Scene.GenerateUniqueObjectName(AssetName);
+		const std::string ObjectName = m_Scene.GenerateUniqueObjectName(AssetName);
 		pObj->SetName(ObjectName);
 
 		return pObj;
@@ -304,18 +304,18 @@ namespace ManagedEngineWrapper
 		m_Scene.DestroyAllObjects();
 
 		// Check if file name is under base assets path by comparing their full path
-		const string FullPath = RFileUtil::GetFullPath(filename);
-		const string BaseAssetPath = RFileUtil::GetFullPath(RResourceManager::GetAssetsBasePath());
+		const std::string FullPath = RFileUtil::GetFullPath(filename);
+		const std::string BaseAssetPath = RFileUtil::GetFullPath(RResourceManager::GetAssetsBasePath());
 		if (FullPath.find(BaseAssetPath) == 0)
 		{
-			string MapAssetPath = string("/") + FullPath.substr(BaseAssetPath.size());
+			std::string MapAssetPath = std::string("/") + FullPath.substr(BaseAssetPath.size());
 			m_Scene.LoadFromFile(MapAssetPath);
 		}
 		else
 		{
-			string ErrorMsg = string("Unable to open map file:\n");
+			std::string ErrorMsg = std::string("Unable to open map file:\n");
 			ErrorMsg += FullPath;
-			ErrorMsg += string("\n\nPlease select a map from current base assets path: ");
+			ErrorMsg += std::string("\n\nPlease select a map from current base assets path: ");
 			ErrorMsg += BaseAssetPath;
 
 			MessageBoxA(NULL, ErrorMsg.c_str(), "Load Map Error", MB_ICONWARNING);
@@ -339,7 +339,7 @@ namespace ManagedEngineWrapper
 		m_SelectedObject = SceneObject;
 	}
 
-	vector<RSceneObject*> EditorApp::GetSceneObjects() const
+	std::vector<RSceneObject*> EditorApp::GetSceneObjects() const
 	{
 		return m_Scene.EnumerateSceneObjects();
 	}
@@ -354,13 +354,13 @@ namespace ManagedEngineWrapper
 
 	void EditorApp::ExportAllAnimationsToBinaryFiles()
 	{
-		vector<RMesh*> meshVec = RResourceManager::Instance().GetMeshResources();
+		std::vector<RMesh*> meshVec = RResourceManager::Instance().GetMeshResources();
 		for (UINT i = 0; i < meshVec.size(); i++)
 		{
 			RAnimation* anim = meshVec[i]->GetAnimation();
 			if (anim)
 			{
-				string animFilename = meshVec[i]->GetFileSystemPath();
+				std::string animFilename = meshVec[i]->GetFileSystemPath();
 				animFilename = RFileUtil::ReplaceExtension(animFilename, "ranim");
 				//anim->SaveToFile(animFilename.c_str());
 			}
@@ -451,7 +451,7 @@ namespace ManagedEngineWrapper
 				}
 			};
 
-			vector<RayPickingResult> rayPickingList;
+			std::vector<RayPickingResult> rayPickingList;
 			float tmin = FLT_MAX;
 
 			for (auto SceneObject : m_Scene.EnumerateSceneObjects())
@@ -505,7 +505,7 @@ namespace ManagedEngineWrapper
 	{
 		if (m_SelectedObject)
 		{
-			vector<RSceneObject*> SceneObjects = m_Scene.EnumerateSceneObjects();
+			std::vector<RSceneObject*> SceneObjects = m_Scene.EnumerateSceneObjects();
 			assert(StdContains(SceneObjects, m_SelectedObject));
 			m_Scene.DestroyObject(m_SelectedObject);
 			m_SelectedObject = nullptr;

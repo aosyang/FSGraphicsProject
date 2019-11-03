@@ -29,7 +29,7 @@ distribution.
 #   include <limits.h>
 #   include <stdio.h>
 #   include <stdlib.h>
-#   include <string.h>
+#   include <std::string.h>
 #else
 #   include <cctype>
 #   include <climits>
@@ -673,11 +673,11 @@ public:
 
     /** The meaning of 'value' changes for the specific type.
     	@verbatim
-    	Document:	empty (NULL is returned, not an empty string)
+    	Document:	empty (NULL is returned, not an empty std::string)
     	Element:	name of the element
     	Comment:	the comment text
     	Unknown:	the tag contents
-    	Text:		the text string
+    	Text:		the text std::string
     	@endverbatim
     */
     const char* Value() const;
@@ -969,7 +969,7 @@ private:
 	however.
 
 	The text of the declaration isn't interpreted. It is parsed
-	and written as a string.
+	and written as a std::string.
 */
 class TINYXML2_LIB XMLDeclaration : public XMLNode
 {
@@ -1104,7 +1104,7 @@ public:
     /// See QueryIntValue
     XMLError QueryFloatValue( float* value ) const;
 
-    /// Set the attribute to a string value.
+    /// Set the attribute to a std::string value.
     void SetAttribute( const char* value );
     /// Set the attribute to value.
     void SetAttribute( int value );
@@ -1361,7 +1361,7 @@ public:
     	and accessing it directly.
 
     	If the first child of 'this' is a XMLText, the GetText()
-    	returns the character string of the Text node, else null is returned.
+    	returns the character std::string of the Text node, else null is returned.
 
     	This is a convenient method for getting the text of simple contained text:
     	@verbatim
@@ -1391,7 +1391,7 @@ public:
     	and mutating it directly.
 
     	If the first child of 'this' is a XMLText, SetText() sets its value to
-		the given string, otherwise it will create a first child that is an XMLText.
+		the given std::string, otherwise it will create a first child that is an XMLText.
 
     	This is a convenient method for setting the text of simple contained text:
     	@verbatim
@@ -1535,14 +1535,14 @@ public:
     }
 
     /**
-    	Parse an XML file from a character string.
+    	Parse an XML file from a character std::string.
     	Returns XML_NO_ERROR (0) on success, or
     	an errorID.
 
     	You may optionally pass in the 'nBytes', which is
     	the number of bytes which will be parsed. If not
     	specified, TinyXML-2 will assume 'xml' points to a
-    	null terminated string.
+    	null terminated std::string.
     */
     XMLError Parse( const char* xml, size_t nBytes=(size_t)(-1) );
 
@@ -1683,11 +1683,11 @@ public:
     }
 	const char* ErrorName() const;
 
-    /// Return a possibly helpful diagnostic location or string.
+    /// Return a possibly helpful diagnostic location or std::string.
     const char* GetErrorStr1() const {
         return _errorStr1;
     }
-    /// Return a possibly helpful secondary diagnostic location or string.
+    /// Return a possibly helpful secondary diagnostic location or std::string.
     const char* GetErrorStr2() const {
         return _errorStr2;
     }

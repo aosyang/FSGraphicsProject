@@ -15,5 +15,5 @@ public:
 
 private:
 	/// Optimize mesh buffer by combining duplicated vertices
-	void OptimizeMesh(vector<UINT>& IndexData, vector<RVertexType::MeshLoader>& VertexData) const;
+	void OptimizeMesh(std::vector<UINT>& IndexData, std::vector<RVertexType::MeshLoader>& VertexData) const;
 };

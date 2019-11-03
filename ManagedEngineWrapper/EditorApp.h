@@ -37,7 +37,7 @@ namespace ManagedEngineWrapper
 
 		RSceneObject* GetSelection();
 		void SetSelection(RSceneObject* SceneObject);
-		vector<RSceneObject*> GetSceneObjects() const;
+		std::vector<RSceneObject*> GetSceneObjects() const;
 
 		void SaveMeshMaterialFromSelection();
 		void ExportAllAnimationsToBinaryFiles();

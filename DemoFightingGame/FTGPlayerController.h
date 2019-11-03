@@ -59,13 +59,13 @@ public:
 	void SetAnimationDeviation(float Deviation);
 
 	/// Run a sphere shape hit test with other players
-	vector<FTGPlayerController*> TestSphereHitWithOtherPlayers(float Radius, const RVec3& LocalSpaceOffset);
+	std::vector<FTGPlayerController*> TestSphereHitWithOtherPlayers(float Radius, const RVec3& LocalSpaceOffset);
 
 	/// Get the animation blender used for this player controller
 	RAnimationBlender& GetAnimBlender() { return m_StateMachine.GetAnimBlender(); }
 
 	/// Active player controller list
-	static list<RSceneObject*>	ActivePlayerControllers;
+	static std::list<RSceneObject*>	ActivePlayerControllers;
 
 	/// Whether to draw debug shape that represents player's hit
 	static bool DrawDebugHitShape;
@@ -83,7 +83,7 @@ private:
 	RMatrix4				m_BoneMatrices[MAX_BONE_COUNT];
 
 	FTGPlayerStateMachine	m_StateMachine;
-	vector<FTGPlayerController*> HitPlayerControllers;
+	std::vector<FTGPlayerController*> HitPlayerControllers;
 };
 
 

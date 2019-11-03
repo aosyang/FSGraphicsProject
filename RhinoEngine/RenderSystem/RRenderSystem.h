@@ -131,9 +131,9 @@ protected:
 
 	bool					m_bIsUsingDeferredShading;
 
-	vector<RRenderMeshComponent*>	m_RegisteredRenderMeshComponents;
-	vector<ILight*>					m_RegisteredLights;
-	vector<IShadowCaster*>			m_RegisteredShadowCasters;
+	std::vector<RRenderMeshComponent*>	m_RegisteredRenderMeshComponents;
+	std::vector<ILight*>					m_RegisteredLights;
+	std::vector<IShadowCaster*>			m_RegisteredShadowCasters;
 
 	RScene*					m_ActiveScene;
 };

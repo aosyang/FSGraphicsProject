@@ -11,13 +11,13 @@
 // Whether to export .fbx as .rmesh after loading
 #define EXPORT_FBX_AS_BINARY_MESH 1
 
-RMesh::RMesh(const string& Path)
+RMesh::RMesh(const std::string& Path)
 	: RResourceBase(RT_Mesh, Path),
 	  m_Animation(nullptr)
 {
 }
 
-RMesh::RMesh(const string& Path, const vector<RMeshElement>& meshElements, const vector<RMaterial>& materials)
+RMesh::RMesh(const std::string& Path, const std::vector<RMeshElement>& meshElements, const std::vector<RMaterial>& materials)
 	: RResourceBase(RT_Mesh, Path),
 	  m_Animation(nullptr)
 {
@@ -25,7 +25,7 @@ RMesh::RMesh(const string& Path, const vector<RMeshElement>& meshElements, const
 	m_Materials = materials;
 }
 
-RMesh::RMesh(const string& Path, const RMeshElement* meshElements, int numElement, const RMaterial* materials, int numMaterial)
+RMesh::RMesh(const std::string& Path, const RMeshElement* meshElements, int numElement, const RMaterial* materials, int numMaterial)
 	: RResourceBase(RT_Mesh, Path),
 	  m_Animation(nullptr)
 {
@@ -55,9 +55,9 @@ RMesh::~RMesh()
 	SAFE_DELETE(m_Animation);
 }
 
-vector<string> RMesh::GetSupportedExtensions()
+std::vector<std::string> RMesh::GetSupportedExtensions()
 {
-	static const vector<string> MeshExts{ ".fbx"/*, ".rmesh"*/ };
+	static const std::vector<std::string> MeshExts{ ".fbx"/*, ".rmesh"*/ };
 	return MeshExts;
 }
 
@@ -136,17 +136,17 @@ RAnimation* RMesh::GetAnimation() const
 	return m_Animation;
 }
 
-void RMesh::SetBoneInitInvMatrices(vector<RMatrix4>& bonePoses)
+void RMesh::SetBoneInitInvMatrices(std::vector<RMatrix4>& bonePoses)
 {
 	m_BoneInitInvMatrices = move(bonePoses);
 }
 
-void RMesh::SetBoneNameList(const vector<string>& boneNameList)
+void RMesh::SetBoneNameList(const std::vector<std::string>& boneNameList)
 {
 	m_BoneIdToName = boneNameList;
 }
 
-const string& RMesh::GetBoneName(int boneId) const
+const std::string& RMesh::GetBoneName(int boneId) const
 {
 	return m_BoneIdToName[boneId];
 }
@@ -165,7 +165,7 @@ void RMesh::CacheAnimation(RAnimation* anim)
 	anim->SetRootNode(anim->GetNodeIdByName(rootNodeName));
 	anim->BuildRootDisplacementArray();
 
-	vector<int> nodeIdMap;
+	std::vector<int> nodeIdMap;
 	nodeIdMap.resize(m_BoneIdToName.size());
 	for (int i = 0; i < (int)m_BoneIdToName.size(); i++)
 	{
@@ -197,9 +197,9 @@ int RMesh::GetCachedAnimationNodeId(RAnimation* anim, int boneId)
 	return Iter->second[boneId];
 }
 
-vector<RResourceBase*> RMesh::EnumerateReferencedResources() const
+std::vector<RResourceBase*> RMesh::EnumerateReferencedResources() const
 {
-	vector<RResourceBase*> ReferencedResources;
+	std::vector<RResourceBase*> ReferencedResources;
 
 	for (const auto& Material : m_Materials)
 	{
@@ -230,7 +230,7 @@ bool RMesh::TryLoadAsFbxMesh(bool bIsAsyncLoading)
 		OnLoadingFinished(bIsAsyncLoading);
 
 #if EXPORT_FBX_AS_BINARY_MESH == 1
-		string rmeshName = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmesh");
+		std::string rmeshName = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmesh");
 		RSerializer serializer;
 		serializer.Open(rmeshName, ESerializeMode::Write);
 		if (serializer.IsOpen())
@@ -246,12 +246,12 @@ bool RMesh::TryLoadAsFbxMesh(bool bIsAsyncLoading)
 
 bool RMesh::TryLoadAsRmesh(bool bIsAsyncLoading)
 {
-	vector<RMeshElement> meshElements;
-	vector<RMaterial> materials;
+	std::vector<RMeshElement> meshElements;
+	std::vector<RMaterial> materials;
 
 	RLog("Loading mesh [%s]...\n", GetFileSystemPath().data());
 
-	const string BinaryMeshPath = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmesh");
+	const std::string BinaryMeshPath = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmesh");
 
 	RSerializer serializer;
 	serializer.Open(BinaryMeshPath, ESerializeMode::Read);
@@ -261,11 +261,11 @@ bool RMesh::TryLoadAsRmesh(bool bIsAsyncLoading)
 	serializer.Close();
 
 	//RAnimation* animation = new RAnimation();
-	//string animFilename = RFileUtil::ReplaceExt(task->Filename.size(), "ranim");
+	//std::string animFilename = RFileUtil::ReplaceExt(task->Filename.size(), "ranim");
 
 	// Load material from file
 	{
-		string mtlFilename = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmtl");
+		std::string mtlFilename = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmtl");
 		RMaterial::LoadFromXmlFile(mtlFilename, materials);
 
 		if (materials.size())

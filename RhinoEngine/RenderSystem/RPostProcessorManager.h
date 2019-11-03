@@ -25,8 +25,8 @@ public:
 	void Release();
 	void RecreateLostResources();
 
-	RPostProcessingEffect* CreateEffectFromFile(const string& Name, const string& FileName, const char* EntryPoint = "main", const char* ShaderProfile = "ps_4_0");
-	RPostProcessingEffect* CreateEffectFromBytecode(const string& Name, const void* pBytecode, SIZE_T BytecodeSize);
+	RPostProcessingEffect* CreateEffectFromFile(const std::string& Name, const std::string& FileName, const char* EntryPoint = "main", const char* ShaderProfile = "ps_4_0");
+	RPostProcessingEffect* CreateEffectFromBytecode(const std::string& Name, const void* pBytecode, SIZE_T BytecodeSize);
 
 	void SetupRenderTarget();
 	void Draw(RPostProcessingEffect* Effect);
@@ -59,7 +59,7 @@ private:
 	// The resource used to draw into the depth and stencil buffer of render target
 	ID3D11DepthStencilView*		m_RTDepthStencilView;
 
-	map<string, RPostProcessingEffect*>		PostProcessingEffectList;
+	std::map<std::string, RPostProcessingEffect*>		PostProcessingEffectList;
 };
 
 #define GPostProcessorManager RPostProcessorManager::Instance()

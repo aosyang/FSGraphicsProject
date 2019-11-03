@@ -36,5 +36,5 @@ void RLogOutputTargets::OutputInternal(const char* Buffer)
 	OutputDebugStringA(Buffer);
 
 	// Print to console output
-	cout << Buffer;
+	std::cout << Buffer;
 }

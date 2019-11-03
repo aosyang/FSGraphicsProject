@@ -105,7 +105,7 @@ protected:
 		RgCubeBlock*		m_Blocks[BLOCK_NUMS];
 		RgCubeBlock*		m_Block3x3x3[3][3][3];	// x, y, z
 	};
-	vector<RgCubeBlock*>	m_MoveBlocks;
+	std::vector<RgCubeBlock*>	m_MoveBlocks;
 	RgCubeBlock*			m_CenterOfMove;
 
 	RQuat					m_SourceRotation;

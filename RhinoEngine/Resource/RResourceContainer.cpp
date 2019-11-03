@@ -44,28 +44,28 @@ public:
 		Mutex.unlock();
 	}
 
-	mutex Mutex;
+	std::mutex Mutex;
 };
 
 class UniqueLockWrapperImpl : public UniqueLockWrapper
 {
 public:
-	UniqueLockWrapperImpl(unique_ptr<MutexWrapper>& Mutex)
+	UniqueLockWrapperImpl(std::unique_ptr<MutexWrapper>& Mutex)
 		: UniqueLock(static_cast<MutexWrapperImpl*>(Mutex.get())->Mutex)
 	{
 	}
 
-	unique_lock<mutex> UniqueLock;
+	std::unique_lock<std::mutex> UniqueLock;
 };
 
-unique_ptr<MutexWrapper> MutexWrapper::Create()
+std::unique_ptr<MutexWrapper> MutexWrapper::Create()
 {
-	return move(unique_ptr<MutexWrapper>(new MutexWrapperImpl()));
+	return move(std::unique_ptr<MutexWrapper>(new MutexWrapperImpl()));
 }
 
-unique_ptr<UniqueLockWrapper> UniqueLockWrapper::Create(unique_ptr<MutexWrapper>& Mutex)
+std::unique_ptr<UniqueLockWrapper> UniqueLockWrapper::Create(std::unique_ptr<MutexWrapper>& Mutex)
 {
-	return move(unique_ptr<UniqueLockWrapper>(new UniqueLockWrapperImpl(Mutex)));
+	return move(std::unique_ptr<UniqueLockWrapper>(new UniqueLockWrapperImpl(Mutex)));
 }
 
 RResourceContainerBase::RResourceContainerBase()

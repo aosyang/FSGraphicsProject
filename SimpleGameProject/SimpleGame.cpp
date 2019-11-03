@@ -24,7 +24,7 @@ bool SimpleGame::Initialize()
 	m_CamYaw = m_CamPitch = 0.0f;
 
 	// Load texture for skybox
-	const string SkyboxTextureName("/powderpeak.dds");
+	const std::string SkyboxTextureName("/powderpeak.dds");
 	RResourceManager::Instance().LoadResource<RTexture>(SkyboxTextureName);
 	m_Skybox.CreateSkybox(SkyboxTextureName);
 

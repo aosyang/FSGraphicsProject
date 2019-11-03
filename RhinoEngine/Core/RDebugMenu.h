@@ -54,7 +54,7 @@ private:
 		void Decrease();
 	};
 
-	vector<MenuItem>		m_MenuItems;
+	std::vector<MenuItem>		m_MenuItems;
 	UINT					m_SelMenu;
 	bool					m_bEnabled;
 	float					m_KeyRepeatTime;

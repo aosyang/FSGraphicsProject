@@ -9,7 +9,7 @@
 #include "RShaderManager.h"
 #include "D3DCommonPrivate.h"
 
-const string RShaderManager::EmptyShaderName = "";
+const std::string RShaderManager::EmptyShaderName = "";
 
 bool RShader::operator==(const RShader& rhs) const
 {
@@ -49,12 +49,12 @@ RShaderManager::~RShaderManager()
 
 }
 
-string RShaderManager::GetShaderRootPath()
+std::string RShaderManager::GetShaderRootPath()
 {
-	string Path("../Shaders");
+	std::string Path("../Shaders");
 	if (PathFileExistsA(Path.c_str()) == FALSE)
 	{
-		Path = string("../") + Path;
+		Path = std::string("../") + Path;
 		if (PathFileExistsA(Path.c_str()) == FALSE)
 		{
 			return RFileUtil::InvalidPath;
@@ -64,11 +64,11 @@ string RShaderManager::GetShaderRootPath()
 	return RFileUtil::GetFullPath(Path);
 }
 
-void RShaderManager::LoadShaders(const string& Path)
+void RShaderManager::LoadShaders(const std::string& Path)
 {
 	if (PathFileExistsA(Path.c_str()) == FALSE)
 	{
-		string FullPath = RFileUtil::GetFullPath(Path);
+		std::string FullPath = RFileUtil::GetFullPath(Path);
 		RLogError("ShaderManager: Path \'%s\' does not exist while loading shaders.\n", FullPath.c_str());
 		return;
 	}
@@ -80,7 +80,7 @@ void RShaderManager::LoadShaders(const string& Path)
 	HANDLE hFind;
 
 	// Load shader
-	string resFindingPath = "*.hlsl";
+	std::string resFindingPath = "*.hlsl";
 	hFind = FindFirstFileA(resFindingPath.data(), &FindFileData);
 
 	if (hFind != INVALID_HANDLE_VALUE)
@@ -89,10 +89,10 @@ void RShaderManager::LoadShaders(const string& Path)
 		{
 			if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
 			{
-				string filename(FindFileData.cFileName);
+				std::string filename(FindFileData.cFileName);
 
 				// Get actual shader name
-				string shaderName = filename.substr(0, filename.length() - 8);
+				std::string shaderName = filename.substr(0, filename.length() - 8);
 
 				RShader* Shader = nullptr;
 				auto Iter = m_Shaders.find(shaderName);
@@ -116,14 +116,14 @@ void RShaderManager::LoadShaders(const string& Path)
 				}
 
 				// Read shader text from .hlsl
-				ifstream fin;
-				string fileFullPath = filename;
-				fin.open(fileFullPath, ios_base::binary);
+				std::ifstream fin;
+				std::string fileFullPath = filename;
+				fin.open(fileFullPath, std::ios_base::binary);
 
 				if (!fin.is_open())
 					continue;
 
-				fin.seekg(0, ios_base::end);
+				fin.seekg(0, std::ios_base::end);
 				int fileSize = (int)fin.tellg();
 				char* pBuffer = new char[fileSize];
 
@@ -143,7 +143,7 @@ void RShaderManager::LoadShaders(const string& Path)
 				RLog("Compiling shader %s\n", filename.c_str());
 
 				// Detect shader type by file name suffix
-				if (filename.find("_VS.hlsl") != string::npos)
+				if (filename.find("_VS.hlsl") != std::string::npos)
 				{
 					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 					{
@@ -159,7 +159,7 @@ void RShaderManager::LoadShaders(const string& Path)
 
 					if (strstr(pBuffer, "USE_SKINNING"))
 					{
-						filename = string("Skinned") + filename;
+						filename = std::string("Skinned") + filename;
 
 						D3D_SHADER_MACRO skinnedShaderMacro[] = { "USE_SKINNING", "1", NULL, NULL };
 
@@ -178,7 +178,7 @@ void RShaderManager::LoadShaders(const string& Path)
 					
 					if (strstr(pBuffer, "USE_INSTANCING"))
 					{
-						filename = string("Instanced") + filename;
+						filename = std::string("Instanced") + filename;
 
 						D3D_SHADER_MACRO instancedShaderMacro[] = { "USE_INSTANCING", "1", NULL, NULL };
 
@@ -195,7 +195,7 @@ void RShaderManager::LoadShaders(const string& Path)
 						}
 					}
 				}
-				else if (filename.find("_PS.hlsl") != string::npos)
+				else if (filename.find("_PS.hlsl") != std::string::npos)
 				{
 					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 					{
@@ -211,7 +211,7 @@ void RShaderManager::LoadShaders(const string& Path)
 
 					if (strstr(pBuffer, "USE_DEFERRED_SHADING"))
 					{
-						filename = string("Deferred") + filename;
+						filename = std::string("Deferred") + filename;
 
 						D3D_SHADER_MACRO deferredShaderMacro[] = { "USE_DEFERRED_SHADING", "1", NULL, NULL };
 
@@ -228,7 +228,7 @@ void RShaderManager::LoadShaders(const string& Path)
 						}
 					}
 				}
-				else if (filename.find("_GS.hlsl") != string::npos)
+				else if (filename.find("_GS.hlsl") != std::string::npos)
 				{
 					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "gs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
 					{
@@ -309,9 +309,9 @@ RShader* RShaderManager::GetShaderResource(const char* shaderName)
 	return nullptr;
 }
 
-vector<string> RShaderManager::EnumerateAllShaderNames() const
+std::vector<std::string> RShaderManager::EnumerateAllShaderNames() const
 {
-	vector<string> NameList;
+	std::vector<std::string> NameList;
 
 	for (auto& ShaderData : m_Shaders)
 	{
@@ -333,7 +333,7 @@ ID3D11PixelShader* RShaderManager::CreatePixelShaderFromBytecode(const void* pBy
 	return OutputShader;
 }
 
-const string& RShaderManager::GetShaderName(const RShader* shader) const
+const std::string& RShaderManager::GetShaderName(const RShader* shader) const
 {
 	auto iter = m_Shaders.begin();
 	for (; iter != m_Shaders.end(); iter++)

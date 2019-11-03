@@ -18,7 +18,7 @@ namespace
 	RAnimation* LoadFbxSceneAnimation(FbxScene* Scene);
 
 	/// Load materials from fbx node
-	void LoadFbxMaterials(FbxNode* SceneNode, vector<RMaterial>& OutMaterials);
+	void LoadFbxMaterials(FbxNode* SceneNode, std::vector<RMaterial>& OutMaterials);
 
 	/// A helper function to convert fbx matrix to RMatrix4
 	void MatrixTransfer(RMatrix4* dest, const FbxAMatrix* src);
@@ -27,8 +27,8 @@ namespace
 
 bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* FileName)
 {
-	vector<RMeshElement> meshElements;
-	vector<RMaterial> materials;
+	std::vector<RMeshElement> meshElements;
+	std::vector<RMaterial> materials;
 
 	RLog("Loading mesh [%s]...\n", FileName);
 
@@ -90,8 +90,8 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 	//bool result = lGeomConverter.SplitMeshesPerMaterial(lFbxScene, true);
 
 	// Load skinning nodes
-	vector<FbxNode*> fbxBoneNodes;
-	vector<string> meshBoneIdToName;
+	std::vector<FbxNode*> fbxBoneNodes;
+	std::vector<std::string> meshBoneIdToName;
 	int NumFbxNodes = lFbxScene->GetNodeCount();
 
 	// Load bone information into an array
@@ -117,7 +117,7 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 	// Load scene animation
 	RAnimation* animation = LoadFbxSceneAnimation(lFbxScene);
 
-	vector<RMatrix4> boneInitInvPose;
+	std::vector<RMatrix4> boneInitInvPose;
 
 	// Load meshes
 	for (int IdxNode = 0; IdxNode < NumFbxNodes; IdxNode++)
@@ -137,7 +137,7 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 		RLog("    Found mesh element! [%s]\n", NodeName);
 
 		FbxVector4* controlPointArray;
-		vector<RVertexType::MeshLoader> vertData;
+		std::vector<RVertexType::MeshLoader> vertData;
 		int VertexComponentMask = 0;
 
 		controlPointArray = MeshNode->GetControlPoints();
@@ -453,10 +453,10 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 			NumPolygonMaterials = 1;
 		}
 
-		vector<vector<UINT>> SubmeshIndexArray;
+		std::vector<std::vector<UINT>> SubmeshIndexArray;
 		SubmeshIndexArray.resize(NumPolygonMaterials);
 
-		vector<RVertexType::MeshLoader> flatVertData;
+		std::vector<RVertexType::MeshLoader> flatVertData;
 
 		// Fill triangle data
 		int polyCount = MeshNode->GetPolygonCount();
@@ -632,8 +632,8 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 	lFbxSdkManager->Destroy();
 
 	// If a material file .rmtl for the mesh exists, override materials from fbx
-	string mtlFilename = RFileUtil::ReplaceExtension(FileName, "rmtl");
-	vector<RMaterial> OverrideMaterials;
+	std::string mtlFilename = RFileUtil::ReplaceExtension(FileName, "rmtl");
+	std::vector<RMaterial> OverrideMaterials;
 	if (RMaterial::LoadFromXmlFile(mtlFilename, OverrideMaterials))
 	{
 		if (OverrideMaterials.size() >= materials.size())
@@ -662,14 +662,14 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const std::str
 	return LoadDataForMeshResource(MeshResource, FileName.c_str());
 }
 
-void RFbxMeshLoader::OptimizeMesh(vector<UINT>& IndexData, vector<RVertexType::MeshLoader>& VertexData) const
+void RFbxMeshLoader::OptimizeMesh(std::vector<UINT>& IndexData, std::vector<RVertexType::MeshLoader>& VertexData) const
 {
 	// Optimize mesh
 	RLog("Optimizing mesh...\n");
 
-	map<RVertexType::MeshLoader, int> meshVertIndexTable;
-	vector<RVertexType::MeshLoader> optimizedVertData;
-	vector<UINT> optimizedIndexData;
+	std::map<RVertexType::MeshLoader, int> meshVertIndexTable;
+	std::vector<RVertexType::MeshLoader> optimizedVertData;
+	std::vector<UINT> optimizedIndexData;
 	UINT Index = 0;
 
 	for (UINT i = 0; i < IndexData.size(); i++)
@@ -730,7 +730,7 @@ namespace
 				(float)animEndTime.GetFrameCountPrecise(animTimeMode),
 				animFrameRate);
 
-			map<string, int> nodeNameToId;
+			std::map<std::string, int> nodeNameToId;
 
 			for (int FbxSceneNodeIndex = 0; FbxSceneNodeIndex < NumFbxNodes; FbxSceneNodeIndex++)
 			{
@@ -784,7 +784,7 @@ namespace
 		return animation;
 	}
 
-	void LoadFbxMaterials(FbxNode* SceneNode, vector<RMaterial>& OutMaterials)
+	void LoadFbxMaterials(FbxNode* SceneNode, std::vector<RMaterial>& OutMaterials)
 	{
 		int NumFbxMaterials = SceneNode->GetSrcObjectCount<FbxSurfaceMaterial>();
 
@@ -804,7 +804,7 @@ namespace
 			{
 				FbxProperty prop = material->FindProperty(texType[idxTexProp]);
 				int layeredTexCount = prop.GetSrcObjectCount<FbxLayeredTexture>();
-				string textureName;
+				std::string textureName;
 
 				for (int idxLayeredTex = 0; idxLayeredTex < layeredTexCount; idxLayeredTex++)
 				{
@@ -836,7 +836,7 @@ namespace
 						textureName = RFileUtil::GetFileNameInPath(textureName);
 					}
 
-					string ddsFilename = RFileUtil::ReplaceExtension(textureName, "dds");
+					std::string ddsFilename = RFileUtil::ReplaceExtension(textureName, "dds");
 					RTexture* texture = RResourceManager::Instance().FindResource<RTexture>(ddsFilename);
 
 					if (!texture)

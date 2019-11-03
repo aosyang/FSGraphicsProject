@@ -15,13 +15,13 @@
 
 #include "tinyxml2/tinyxml2.h"
 
-static mutex								m_TaskQueueMutex;
-static condition_variable					m_TaskQueueCondition;
-static mutex								m_PendingNotifyResourceMutex;
+static std::mutex								m_TaskQueueMutex;
+static std::condition_variable					m_TaskQueueCondition;
+static std::mutex								m_PendingNotifyResourceMutex;
 
-static mutex	TextureResourcesMutex;
+static std::mutex	TextureResourcesMutex;
 
-string RResourceManager::AssetsBasePathName = "../Assets/";
+std::string RResourceManager::AssetsBasePathName = "../Assets/";
 
 void ResourceLoaderThread(LoaderThreadData* data)
 {
@@ -30,7 +30,7 @@ void ResourceLoaderThread(LoaderThreadData* data)
 		LoaderThreadTask task;
 
 		{
-			unique_lock<mutex> uniqueLock(*data->TaskQueueMutex);
+			std::unique_lock<std::mutex> uniqueLock(*data->TaskQueueMutex);
 			if (data->TaskQueue->size() == 0)
 			{
 				RLog("=== Resource loader thread is idle ===\n");
@@ -64,10 +64,10 @@ void RResourceManager::Initialize()
 	// Check if assets folder exists at given path. If not, go to the upper folder and search for it again.
 	if (!RFileUtil::CheckPathExists(AssetsBasePathName))
 	{
-		vector<string> SearchedPaths;
+		std::vector<std::string> SearchedPaths;
 		SearchedPaths.push_back(AssetsBasePathName);
 
-		string FallbackPath = string("../") + AssetsBasePathName;
+		std::string FallbackPath = std::string("../") + AssetsBasePathName;
 		if (RFileUtil::CheckPathExists(FallbackPath))
 		{
 			AssetsBasePathName = FallbackPath;
@@ -77,7 +77,7 @@ void RResourceManager::Initialize()
 			SearchedPaths.push_back(FallbackPath);
 
 			RLogError("Assets folder does not exist in following searching paths:\n");
-			for (const string& Path : SearchedPaths)
+			for (const std::string& Path : SearchedPaths)
 			{
 				RLog("    %s\n", RFileUtil::GetFullPath(Path).c_str());
 			}
@@ -94,7 +94,7 @@ void RResourceManager::Initialize()
 	m_LoaderThreadData.ShouldQuitThread = &m_ShouldQuitLoaderThread;
 	m_LoaderThreadData.HasQuitThread = &m_HasLoaderThreadQuit;
 
-	thread t(ResourceLoaderThread, &m_LoaderThreadData);
+	std::thread t(ResourceLoaderThread, &m_LoaderThreadData);
 	t.detach();
 }
 
@@ -102,7 +102,7 @@ void RResourceManager::Destroy()
 {
 	// terminate loader thread
 	{
-		unique_lock<mutex> uniqueLock(m_TaskQueueMutex);
+		std::unique_lock<std::mutex> uniqueLock(m_TaskQueueMutex);
 		m_ShouldQuitLoaderThread = true;
 	}
 	m_TaskQueueCondition.notify_all();
@@ -122,28 +122,28 @@ void RResourceManager::LoadAllResources()
 	HANDLE hFind;
 
 	// Load resources including sub-directories
-	queue<string> dir_queue;
+	std::queue<std::string> dir_queue;
 	dir_queue.push("");
 
 	do
 	{
-		const string dir_name = dir_queue.front();
+		const std::string dir_name = dir_queue.front();
 		dir_queue.pop();
-		const string SearchingPath = GetAssetsBasePath() + dir_name + "*.*";
+		const std::string SearchingPath = GetAssetsBasePath() + dir_name + "*.*";
 		hFind = FindFirstFileA(SearchingPath.data(), &FindFileData);
 
 		do
 		{
 			if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
 			{
-				const string FilePath = string("/") + dir_name + FindFileData.cFileName;
+				const std::string FilePath = std::string("/") + dir_name + FindFileData.cFileName;
 				LoadResourceAutoDetectType(FilePath);
 			}
 			else
 			{
 				if (FindFileData.cFileName[0] != '.')
 				{
-					dir_queue.push(dir_name + string(FindFileData.cFileName) + "/");
+					dir_queue.push(dir_name + std::string(FindFileData.cFileName) + "/");
 				}
 			}
 
@@ -175,7 +175,7 @@ void RResourceManager::UnloadSRVWrappers()
 
 void RResourceManager::AddPendingNotifyResource(RResourceBase* Resource)
 {
-	unique_lock<mutex> UniqueLock(m_PendingNotifyResourceMutex);
+	std::unique_lock<std::mutex> UniqueLock(m_PendingNotifyResourceMutex);
 
 	if (find(PendingNotifyResources.begin(), PendingNotifyResources.end(), Resource) == PendingNotifyResources.end())
 	{
@@ -185,7 +185,7 @@ void RResourceManager::AddPendingNotifyResource(RResourceBase* Resource)
 
 void RResourceManager::Update()
 {
-	unique_lock<mutex> UniqueLock(m_PendingNotifyResourceMutex);
+	std::unique_lock<std::mutex> UniqueLock(m_PendingNotifyResourceMutex);
 
 	for (int i = (int)PendingNotifyResources.size() - 1; i >= 0; i--)
 	{
@@ -207,9 +207,9 @@ void RResourceManager::RegisterResourceTypes()
 	RegisterResourceType<RTexture>();
 }
 
-RResourceBase* RResourceManager::LoadResourceAutoDetectType(const string& Path, EResourceLoadMode mode)
+RResourceBase* RResourceManager::LoadResourceAutoDetectType(const std::string& Path, EResourceLoadMode mode)
 {
-	string FileExt = Path.substr(Path.find_last_of('.'));
+	std::string FileExt = Path.substr(Path.find_last_of('.'));
 	for (UINT i = 0; i < FileExt.size(); i++)
 	{
 		FileExt[i] = tolower(FileExt[i]);
@@ -244,22 +244,22 @@ void RResourceManager::NotifyThreadTaskEnqueued()
 	m_TaskQueueCondition.notify_all();
 }
 
-vector<RMesh*> RResourceManager::GetMeshResources()
+std::vector<RMesh*> RResourceManager::GetMeshResources()
 {
 	return GetResourceContainer<RMesh>().GetResourceArrayCopy();
 }
 
-const string& RResourceManager::GetAssetsBasePath()
+const std::string& RResourceManager::GetAssetsBasePath()
 {
 	return AssetsBasePathName;
 }
 
-string RResourceManager::GetRelativePathToResource(const string& ResourcePath)
+std::string RResourceManager::GetRelativePathToResource(const std::string& ResourcePath)
 {
 	char currentPath[MAX_PATH];
 	GetCurrentDirectoryA(MAX_PATH, currentPath);
 
-	string targetPath = string(currentPath) + "\\" + GetAssetsBasePath() + ResourcePath;
+	std::string targetPath = std::string(currentPath) + "\\" + GetAssetsBasePath() + ResourcePath;
 
 	char fullTargetPath[MAX_PATH];
 	char** parts = { nullptr };

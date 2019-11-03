@@ -92,14 +92,14 @@ void RSMeshObject::SaveMaterialsToFile()
 	SetupMaterialsFromMeshResource();
 
 	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
-	doc->InsertEndChild(doc->NewComment((string("Mesh path: ") + m_Mesh->GetFileSystemPath()).c_str()));
+	doc->InsertEndChild(doc->NewComment((std::string("Mesh path: ") + m_Mesh->GetFileSystemPath()).c_str()));
 
 	tinyxml2::XMLElement* elem_mat = doc->NewElement("Material");
 
 	SerializeMaterialsToXML(doc, elem_mat);
 	doc->InsertEndChild(elem_mat);
 
-	string filepath = m_Mesh->GetFileSystemPath();
+	std::string filepath = m_Mesh->GetFileSystemPath();
 	filepath = filepath.substr(0, filepath.length() - 3);
 	filepath += "rmtl";
 
@@ -118,12 +118,12 @@ void RSMeshObject::SerializeMaterialsToXML(tinyxml2::XMLDocument* doc, tinyxml2:
 		if (i < (int)m_Materials.size())
 		{
 			RMaterial& material = m_Materials[i];
-			string shaderName = material.Shader->GetName();
+			std::string shaderName = material.Shader->GetName();
 
 			elem_submesh->SetAttribute("Shader", shaderName.c_str());
 			for (int t = 0; t < material.TextureNum; t++)
 			{
-				string texturePath = "";
+				std::string texturePath = "";
 
 				if (material.Textures[t])
 					texturePath = material.Textures[t]->GetAssetPath();

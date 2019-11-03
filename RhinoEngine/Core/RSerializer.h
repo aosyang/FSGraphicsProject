@@ -15,21 +15,10 @@ enum class ESerializeMode : UINT8
 class RSerializer
 {
 public:
-	~RSerializer()
-	{
-		Close();
-	}
+	~RSerializer();
 
 	/// Open a file for serialization
-	void Open(const string& filename, ESerializeMode mode)
-	{
-		m_Mode = mode;
-
-		m_FileStream.open(filename.c_str(), (mode == ESerializeMode::Read ? ios::in : ios::out) | ios::binary);
-
-		if (!m_FileStream.is_open())
-			return;
-	}
+	void Open(const std::string& filename, ESerializeMode mode);
 
 	/// Close file stream of serializer
 	FORCEINLINE void Close()
@@ -56,36 +45,11 @@ public:
 	///
 	///   Read mode  : Read header string and compare it with given header.
 	///                Returns true if both header equal, false otherwise.
-	bool EnsureHeader(const char* header, UINT size)
-	{
-		if (m_Mode == ESerializeMode::Write)
-		{
-			m_FileStream.write(header, size);
-		}
-		else
-		{
-			assert(!m_FileStream.eof());
-			char* pBuf = new char[size];
-			m_FileStream.read(pBuf, size);
-
-			for (UINT i = 0; i < size; i++)
-			{
-				if (pBuf[i] != header[i])
-				{
-					delete[] pBuf;
-					return false;
-				}
-			}
-
-			delete[] pBuf;
-		}
-
-		return true;
-	}
+	bool EnsureHeader(const char* header, UINT size);
 
 	/// Serialize a std::vector with plain data type
 	template<typename T>
-	void SerializeVector(vector<T>& vec)
+	void SerializeVector(std::vector<T>& vec)
 	{
 		if (m_Mode == ESerializeMode::Write)
 		{
@@ -107,7 +71,7 @@ public:
 
 	/// Serialize a std::vector with a custom serialization function
 	template<typename T>
-	void SerializeVector(vector<T>& vec, void (RSerializer::*func)(T&))
+	void SerializeVector(std::vector<T>& vec, void (RSerializer::*func)(T&))
 	{
 		UINT size;
 		if (m_Mode == ESerializeMode::Write)
@@ -143,9 +107,9 @@ public:
 		}
 	}
 
-	/// Serialize a std::string
+	/// Serialize a string
 	template<>
-	void SerializeData<string>(string& str)
+	void SerializeData<std::string>(std::string& str)
 	{
 		if (m_Mode == ESerializeMode::Write)
 		{
@@ -208,7 +172,7 @@ public:
 	}
 
 private:
-	fstream			m_FileStream;
+	std::fstream	m_FileStream;
 	ESerializeMode	m_Mode;
 };
 

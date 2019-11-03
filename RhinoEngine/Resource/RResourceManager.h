@@ -19,7 +19,7 @@ namespace std
 struct LoaderThreadTask
 {
 	/// The asset path for accessing the resource in the engine
-	string			AssetPath;
+	std::string			AssetPath;
 
 	/// The resource object
 	RResourceBase*	Resource;
@@ -30,11 +30,11 @@ struct LoaderThreadTask
 
 struct LoaderThreadData
 {
-	mutex*						TaskQueueMutex;
-	condition_variable*			TaskQueueCondition;
-	queue<LoaderThreadTask>*	TaskQueue;
-	bool*						ShouldQuitThread;
-	bool*						HasQuitThread;
+	std::mutex*						TaskQueueMutex;
+	std::condition_variable*		TaskQueueCondition;
+	std::queue<LoaderThreadTask>*	TaskQueue;
+	bool*							ShouldQuitThread;
+	bool*							HasQuitThread;
 };
 
 enum class EResourceLoadMode : UINT8
@@ -68,20 +68,20 @@ public:
 
 	/// Load resource from path
 	template<typename T>
-	T* LoadResource(const string& AssetPath, EResourceLoadMode mode = EResourceLoadMode::Threaded);
+	T* LoadResource(const std::string& AssetPath, EResourceLoadMode mode = EResourceLoadMode::Threaded);
 
 	/// Find resource by path
 	template<typename T>
-	T* FindResource(const string& Path);
+	T* FindResource(const std::string& Path);
 
 	/// Get an array of all mesh resources
-	vector<RMesh*> GetMeshResources();
+	std::vector<RMesh*> GetMeshResources();
 
 	/// Root path of assets folder
-	static const string& GetAssetsBasePath();
+	static const std::string& GetAssetsBasePath();
 
 	/// Get relative path to resource from working directory
-	static string GetRelativePathToResource(const string& ResourcePath);
+	static std::string GetRelativePathToResource(const std::string& ResourcePath);
 
 	// Wrap a d3d11 srv and get a pointer to texture
 	RTexture* WrapSRV(ID3D11ShaderResourceView* srv);
@@ -96,7 +96,7 @@ private:
 	void RegisterResourceType();
 
 	/// Load resource, detecting file type by registered extensions
-	RResourceBase* LoadResourceAutoDetectType(const string& Path, EResourceLoadMode mode = EResourceLoadMode::Threaded);
+	RResourceBase* LoadResourceAutoDetectType(const std::string& Path, EResourceLoadMode mode = EResourceLoadMode::Threaded);
 
 	/// Create a new resource container for resource type
 	template<typename T>
@@ -110,10 +110,10 @@ private:
 	static void UnlockTaskQueue();
 	static void NotifyThreadTaskEnqueued();
 
-	static string						AssetsBasePathName;
+	static std::string						AssetsBasePathName;
 
 	/// Registered resource containers for resource types
-	vector<RResourceContainerBase*>		ResourceContainers;
+	std::vector<RResourceContainerBase*>		ResourceContainers;
 
 	class IResourceLoader
 	{
@@ -123,31 +123,31 @@ private:
 
 	struct ResourceLoaderData
 	{
-		ResourceLoaderData(unique_ptr<IResourceLoader>& InLoaderFunc, const vector<string>& Exts)
+		ResourceLoaderData(std::unique_ptr<IResourceLoader>& InLoaderFunc, const std::vector<std::string>& Exts)
 			: ResourceLoader(move(InLoaderFunc))
 			, SupportedExtensions(Exts)
 		{}
 
-		unique_ptr<IResourceLoader> ResourceLoader;
-		vector<string>				SupportedExtensions;
+		std::unique_ptr<IResourceLoader> ResourceLoader;
+		std::vector<std::string>				SupportedExtensions;
 	};
 
-	vector<ResourceLoaderData>	ResourceLoaders;
+	std::vector<ResourceLoaderData>	ResourceLoaders;
 
-	typedef map<ID3D11ShaderResourceView*, RTexture*> WrapperTextureMap;
+	typedef std::map<ID3D11ShaderResourceView*, RTexture*> WrapperTextureMap;
 	WrapperTextureMap					m_WrapperTextureResources;
 
 	bool								m_ShouldQuitLoaderThread;
 	bool								m_HasLoaderThreadQuit;
-	queue<LoaderThreadTask>				m_LoaderThreadTaskQueue;
+	std::queue<LoaderThreadTask>				m_LoaderThreadTaskQueue;
 	LoaderThreadData					m_LoaderThreadData;
 
 	/// A list of loaded resources waiting to notify their states
-	vector<RResourceBase*>				PendingNotifyResources;
+	std::vector<RResourceBase*>				PendingNotifyResources;
 };
 
 template<typename T>
-T* RResourceManager::LoadResource(const string& AssetPath, EResourceLoadMode mode)
+T* RResourceManager::LoadResource(const std::string& AssetPath, EResourceLoadMode mode)
 {
 	// Find resource in resource container
 	RResourceContainer<T>& ResourceContainer = GetResourceContainer<T>();
@@ -158,7 +158,7 @@ T* RResourceManager::LoadResource(const string& AssetPath, EResourceLoadMode mod
 		return Resource;
 	}
 
-	string RelativePath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), AssetPath);
+	std::string RelativePath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), AssetPath);
 	Resource = new T(RelativePath);
 	Resource->OnEnqueuedForLoading();
 
@@ -195,7 +195,7 @@ T* RResourceManager::LoadResource(const string& AssetPath, EResourceLoadMode mod
 }
 
 template<typename T>
-T* RResourceManager::FindResource(const string& Path)
+T* RResourceManager::FindResource(const std::string& Path)
 {
 	RResourceContainer<T>& ResourceContainer = GetResourceContainer<T>();
 	return ResourceContainer.Find(Path.c_str());
@@ -214,7 +214,7 @@ void RResourceManager::RegisterResourceType()
 		}
 	};
 
-	unique_ptr<IResourceLoader> ResourceLoader(new ResourceTypeLoader());
+	std::unique_ptr<IResourceLoader> ResourceLoader(new ResourceTypeLoader());
 	ResourceLoaders.emplace_back(ResourceLoader, T::GetSupportedExtensions());
 }
 

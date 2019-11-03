@@ -26,7 +26,7 @@ struct RShader
 	bool operator==(const RShader& rhs) const;
 
 	void Bind(int featureMasks = 0);
-	const string& GetName() const;
+	const std::string& GetName() const;
 };
 
 class RShaderManager : public RSingleton<RShaderManager>
@@ -35,10 +35,10 @@ class RShaderManager : public RSingleton<RShaderManager>
 	friend struct RShader;
 public:
 	/// Get the root path of the shader folder
-	static string GetShaderRootPath();
+	static std::string GetShaderRootPath();
 
 	/// Recursively load all shaders in directory
-	void LoadShaders(const string& Path);
+	void LoadShaders(const std::string& Path);
 
 	/// Unload all loaded shaders
 	void UnloadAllShaders();
@@ -54,7 +54,7 @@ public:
 	RShader* GetShaderResource(const char* shaderName);
 
 	/// Get a list of all shader names
-	vector<string> EnumerateAllShaderNames() const;
+	std::vector<std::string> EnumerateAllShaderNames() const;
 
 	/// Create a pixel shader from bytecode
 	ID3D11PixelShader* CreatePixelShaderFromBytecode(const void* pBytecode, SIZE_T BytecodeSize);
@@ -63,16 +63,16 @@ private:
 	RShaderManager();
 	~RShaderManager();
 
-	const string& GetShaderName(const RShader* shader) const;
+	const std::string& GetShaderName(const RShader* shader) const;
 
 private:
-	map<string, RShader>	m_Shaders;
+	std::map<std::string, RShader>	m_Shaders;
 
-	static const string EmptyShaderName;
+	static const std::string EmptyShaderName;
 };
 
 
-FORCEINLINE const string& RShader::GetName() const
+FORCEINLINE const std::string& RShader::GetName() const
 {
 	return RShaderManager::Instance().GetShaderName(this);
 }

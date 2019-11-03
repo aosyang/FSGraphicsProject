@@ -12,7 +12,7 @@ class RSceneObject;
 #define DECLARE_SCENE_COMPONENT(type, base)\
 		typedef base Base;\
 	public:\
-		static unique_ptr<type> _CreateComponentUnique(RSceneObject* InOwner) { return unique_ptr<type>(new type(InOwner)); }\
+		static std::unique_ptr<type> _CreateComponentUnique(RSceneObject* InOwner) { return std::unique_ptr<type>(new type(InOwner)); }\
 	private:
 
 

@@ -11,7 +11,7 @@
 #define VERTEX_TYPE_DECLARE_LEXICOGRAPHICAL_COMPARE(v)	\
 		bool operator<(const v& rhs) const				\
 		{												\
-		return lexicographical_compare(					\
+		return std::lexicographical_compare(			\
 			(const float*)this,							\
 			(const float*)this + sizeof(v) / 4,			\
 			(const float*)&rhs,							\
@@ -153,7 +153,7 @@ public:
 	void Release();
 
 	// Get input layout from vertex type name
-	ID3D11InputLayout* GetInputLayout(const string& vertexTypeName) const;
+	ID3D11InputLayout* GetInputLayout(const std::string& vertexTypeName) const;
 
 	// Get input layout from vertex type
 	template<typename T>
@@ -163,14 +163,14 @@ public:
 	ID3D11InputLayout* GetInputLayoutByVertexComponents(int vertexComponents);
 
 	// Get display string from vertex component mask
-	static string GetVertexComponentsString(int vertexComponents);
+	static std::string GetVertexComponentsString(int vertexComponents);
 
 	// Get byte size of vertex from component mask
 	static int GetVertexStride(int vertexComponents);
 	static void CopyVertexComponents(void* out, const RVertexType::MeshLoader* in, int count, int vertexComponents);
 private:
-	map<string, ID3D11InputLayout*>		m_InputLayouts;
-	map<int, ID3D11InputLayout*>		m_VertexComponentInputLayouts;
+	std::map<std::string, ID3D11InputLayout*>		m_InputLayouts;
+	std::map<int, ID3D11InputLayout*>		m_VertexComponentInputLayouts;
 };
 
 template<typename T>

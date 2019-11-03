@@ -25,7 +25,7 @@ public:
 	virtual void Lock()		{}
 	virtual void Unlock()	{}
 
-	static unique_ptr<MutexWrapper> Create();
+	static std::unique_ptr<MutexWrapper> Create();
 };
 
 /// A wrapper class for std::unique_lock to avoid including mutex in engine public header files
@@ -34,7 +34,7 @@ class UniqueLockWrapper
 public:
 	virtual ~UniqueLockWrapper() {}
 
-	static unique_ptr<UniqueLockWrapper> Create(unique_ptr<MutexWrapper>& Mutex);
+	static std::unique_ptr<UniqueLockWrapper> Create(std::unique_ptr<MutexWrapper>& Mutex);
 };
 
 /// Resource container interface
@@ -51,14 +51,14 @@ protected:
 	void Unlock();
 
 protected:
-	unique_ptr<MutexWrapper>	ResourceMutex;
+	std::unique_ptr<MutexWrapper>	ResourceMutex;
 };
 
 template<typename T>
 class RResourceContainer : public RResourceContainerBase
 {
 private:
-	vector<T*>	Resources;
+	std::vector<T*>	Resources;
 public:
 
 	/// Release all resources in the container
@@ -92,7 +92,7 @@ public:
 	}
 
 	/// Find resource by path
-	T* Find(const string& Path)
+	T* Find(const std::string& Path)
 	{
 		return Find(Path.c_str());
 	}
@@ -100,7 +100,7 @@ public:
 	/// Find resource by path
 	T* Find(const char* Path)
 	{
-		unique_ptr<UniqueLockWrapper> UniqueLock = UniqueLockWrapper::Create(ResourceMutex);
+		std::unique_ptr<UniqueLockWrapper> UniqueLock = UniqueLockWrapper::Create(ResourceMutex);
 
 		if (Path)
 		{
@@ -112,7 +112,7 @@ public:
 				}
 
 				// If searching path contains file name only, also try matching file names
-				const string ResourceName = RFileUtil::GetFileNameInPath(Iter->GetAssetPath());
+				const std::string ResourceName = RFileUtil::GetFileNameInPath(Iter->GetAssetPath());
 				if (strcasecmp(ResourceName.c_str(), Path) == 0)
 				{
 					return Iter;
@@ -124,9 +124,9 @@ public:
 	}
 
 	/// Get a copy of resource array
-	vector<T*> GetResourceArrayCopy()
+	std::vector<T*> GetResourceArrayCopy()
 	{
-		vector<T*> ArrayCopy;
+		std::vector<T*> ArrayCopy;
 
 		Lock();
 		ArrayCopy = Resources;

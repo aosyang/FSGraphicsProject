@@ -99,7 +99,7 @@ private:
 		EBufferedKeyState	KeyState;
 	};
 
-	vector<unique_ptr<RKeyBindingDelegate>> KeyBindingDelegates;
+	std::vector<std::unique_ptr<RKeyBindingDelegate>> KeyBindingDelegates;
 };
 
 template<typename T>
@@ -121,7 +121,7 @@ void RInputSystem::BindKeyStateEvent(int KeyCode, EBufferedKeyState KeyState, T*
 		void(T::*Func)();
 	};
 
-	unique_ptr<KeyEvent> NewKeyEvent(new KeyEvent(KeyCode, KeyState, Object, Func));
+	std::unique_ptr<KeyEvent> NewKeyEvent(new KeyEvent(KeyCode, KeyState, Object, Func));
 	KeyBindingDelegates.push_back(move(NewKeyEvent));
 }
 

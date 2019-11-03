@@ -75,7 +75,7 @@ private:
 	EPlayerBehavior					m_NextBehavior;
 
 	/// All behavior instances
-	vector<FTGPlayerBehaviorBase*>	m_BehaviorInstances;
+	std::vector<FTGPlayerBehaviorBase*>	m_BehaviorInstances;
 
 	/// The deviation of animation playback
 	float							m_AnimSpeedDeviation;

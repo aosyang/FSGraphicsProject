@@ -45,8 +45,8 @@ private:
 	void LoadMaterialsFromMeshResource();
 
 	const RMesh*			m_Mesh;
-	vector<RMaterial>		m_Materials;
+	std::vector<RMaterial>		m_Materials;
 
 	bool					m_PostponeLoadMaterials;
-	vector<PendingAssignedMaterial>	m_PendingAssignedMaterials;
+	std::vector<PendingAssignedMaterial>	m_PendingAssignedMaterials;
 };

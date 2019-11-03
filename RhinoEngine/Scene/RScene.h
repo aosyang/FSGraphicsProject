@@ -42,13 +42,13 @@ public:
 	std::vector<T*> FindAllObjectsOfType() const;
 
 	/// Generate a unique object name with the given name
-	string GenerateUniqueObjectName(const string& ObjectName);
+	std::string GenerateUniqueObjectName(const std::string& ObjectName);
 
 	/// Generate a unique object name for cloned object
-	string GenerateUniqueObjectNameForClone(const string& ObjectName);
+	std::string GenerateUniqueObjectNameForClone(const std::string& ObjectName);
 
 	/// Check if the name has been used by any object in the scene
-	bool DoesObjectNameExist(const string& Name) const;
+	bool DoesObjectNameExist(const std::string& Name) const;
 
 	/// Destroy a scene object
 	void DestroyObject(RSceneObject* obj);
@@ -57,7 +57,7 @@ public:
 	void DestroyAllObjects();
 
 	/// Load scene from file on disk
-	void LoadFromFile(const string& MapAssetPath);
+	void LoadFromFile(const std::string& MapAssetPath);
 
 	/// Save scene to file on disk
 	void SaveToFile(const char* filename);
@@ -75,21 +75,21 @@ public:
 	void NotifyCameraDestroying(RCamera* Camera);
 
 	/// Resolve collisions for a moving bounding box in the scene
-	RVec3 TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec, list<RSceneObject*> IgnoredObjects = list<RSceneObject*>());
+	RVec3 TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec, std::list<RSceneObject*> IgnoredObjects = std::list<RSceneObject*>());
 
 	void Render(const RFrustum* pFrustum = nullptr);
 	void RenderDepthPass(const RFrustum* pFrustum = nullptr);
 
 	void UpdateScene(float DeltaTime);
 
-	vector<RSceneObject*> EnumerateSceneObjects() const;
+	std::vector<RSceneObject*> EnumerateSceneObjects() const;
 protected:
 
 	void AddSceneObjectInternal(RSceneObject* SceneObject);
 
 private:
 
-	vector<RSceneObject*>		m_SceneObjects;
+	std::vector<RSceneObject*>		m_SceneObjects;
 	RCamera*					m_RenderCamera;			// Default camera will be used for frustum culling
 };
 
@@ -105,9 +105,9 @@ T* RScene::CreateSceneObjectOfType(const char* name /*= ""*/, int Flags /*= 0*/)
 }
 
 template<typename T>
-vector<T*> RScene::FindAllObjectsOfType() const
+std::vector<T*> RScene::FindAllObjectsOfType() const
 {
-	vector<T*> Results;
+	std::vector<T*> Results;
 
 	for (auto SceneObject : m_SceneObjects)
 	{

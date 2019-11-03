@@ -49,7 +49,7 @@ void RVertexDeclaration::Initialize()
 	};
 
 	GRenderer.D3DDevice()->CreateInputLayout(meshVertDesc, 5, RMeshVertexSignature, sizeof(RMeshVertexSignature), &pInputLayout);
-	m_InputLayouts.insert(make_pair(RVertexType::Mesh::GetVertexTypeName(), pInputLayout));
+	m_InputLayouts.insert(std::make_pair(RVertexType::Mesh::GetVertexTypeName(), pInputLayout));
 
 
 	// Color primitive vertex
@@ -60,7 +60,7 @@ void RVertexDeclaration::Initialize()
 	};
 
 	GRenderer.D3DDevice()->CreateInputLayout(primitiveVertDesc, 2, RPrimitiveVertexSignature, sizeof(RPrimitiveVertexSignature), &pInputLayout);
-	m_InputLayouts.insert(make_pair(RVertexType::PositionColor::GetVertexTypeName(), pInputLayout));
+	m_InputLayouts.insert(std::make_pair(RVertexType::PositionColor::GetVertexTypeName(), pInputLayout));
 
 
 	// Skybox vertex
@@ -70,7 +70,7 @@ void RVertexDeclaration::Initialize()
 	};
 
 	GRenderer.D3DDevice()->CreateInputLayout(skyboxVertDesc, 1, RSkyboxVertexSignature, sizeof(RSkyboxVertexSignature), &pInputLayout);
-	m_InputLayouts.insert(make_pair(RVertexType::Position::GetVertexTypeName(), pInputLayout));
+	m_InputLayouts.insert(std::make_pair(RVertexType::Position::GetVertexTypeName(), pInputLayout));
 
 
 	// Particle vertex
@@ -83,7 +83,7 @@ void RVertexDeclaration::Initialize()
 	};
 
 	GRenderer.D3DDevice()->CreateInputLayout(particleVertDesc, 4, RParticleVertexSignature, sizeof(RParticleVertexSignature), &pInputLayout);
-	m_InputLayouts.insert(make_pair(RVertexType::Particle::GetVertexTypeName(), pInputLayout));
+	m_InputLayouts.insert(std::make_pair(RVertexType::Particle::GetVertexTypeName(), pInputLayout));
 
 	D3D11_INPUT_ELEMENT_DESC fontVertDesc[] =
 	{
@@ -94,7 +94,7 @@ void RVertexDeclaration::Initialize()
 	};
 
 	GRenderer.D3DDevice()->CreateInputLayout(fontVertDesc, 4, RFontVertexSignature, sizeof(RFontVertexSignature), &pInputLayout);
-	m_InputLayouts.insert(make_pair(RVertexType::Font::GetVertexTypeName(), pInputLayout));
+	m_InputLayouts.insert(std::make_pair(RVertexType::Font::GetVertexTypeName(), pInputLayout));
 }
 
 void RVertexDeclaration::Release()
@@ -112,7 +112,7 @@ void RVertexDeclaration::Release()
 	m_InputLayouts.clear();
 }
 
-ID3D11InputLayout* RVertexDeclaration::GetInputLayout(const string& vertexTypeName) const
+ID3D11InputLayout* RVertexDeclaration::GetInputLayout(const std::string& vertexTypeName) const
 {
 	auto Iter = m_InputLayouts.find(vertexTypeName);
 	if (Iter != m_InputLayouts.end())
@@ -128,7 +128,7 @@ ID3D11InputLayout* RVertexDeclaration::GetInputLayoutByVertexComponents(int vert
 #if 0
 	// Log vertex components
 	{
-		string msg_buf = "Input layout: ";
+		std::string msg_buf = "Input layout: ";
 		msg_buf += GetVertexComponentsString(vertexComponents);
 		msg_buf += "\n";
 		RLog(msg_buf.data());
@@ -163,19 +163,19 @@ ID3D11InputLayout* RVertexDeclaration::GetInputLayoutByVertexComponents(int vert
 		}
 
 		// Create shader
-		string vertexShaderSignature = "struct INPUT_VERTEX {\n";
+		std::string vertexShaderSignature = "struct INPUT_VERTEX {\n";
 
 		for (int i = 0; i < VertexComponent_Count; i++)
 		{
 			if (vertexComponents & (1 << i))
 			{
-				string variableName = VertexSemantics[i].Semantic;
+				std::string variableName = VertexSemantics[i].Semantic;
 				for (UINT n = 1; n < variableName.length(); n++)
 				{
 					variableName[n] = tolower(variableName[n]);
 				}
 
-				vertexShaderSignature += string(VertexSemantics[i].Type) + " " + variableName + " : " + VertexSemantics[i].Semantic + ";\n";
+				vertexShaderSignature += std::string(VertexSemantics[i].Type) + " " + variableName + " : " + VertexSemantics[i].Semantic + ";\n";
 			}
 		}
 
@@ -209,15 +209,15 @@ ID3D11InputLayout* RVertexDeclaration::GetInputLayoutByVertexComponents(int vert
 	}
 }
 
-string RVertexDeclaration::GetVertexComponentsString(int vertexComponents)
+std::string RVertexDeclaration::GetVertexComponentsString(int vertexComponents)
 {
-	string str;
+	std::string str;
 
 	for (int i = 0; i < VertexComponent_Count; i++)
 	{
 		if (vertexComponents & (1 << i))
 		{
-			str += string(VertexSemantics[i].Semantic) + " ";
+			str += std::string(VertexSemantics[i].Semantic) + " ";
 		}
 	}
 

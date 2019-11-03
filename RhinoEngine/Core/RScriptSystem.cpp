@@ -87,7 +87,7 @@ void RScriptSystem::UpdateScriptableObjects()
 		if (Iter->GetScript() == "")
 			continue;
 
-		const vector<string>& parsedCmds = Iter->GetParsedScript();
+		const std::vector<std::string>& parsedCmds = Iter->GetParsedScript();
 		if (parsedCmds.empty())
 			continue;
 

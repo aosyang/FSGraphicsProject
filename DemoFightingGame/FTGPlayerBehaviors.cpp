@@ -59,8 +59,8 @@ void FTGPlayerBehaviorBase::LoadAnimationAsset(const char* AssetPath, int flags 
 		{
 			m_Animation->SetBitFlags(flags);
 
-			string strResPath = string(AssetPath);
-			string filename = RFileUtil::GetFileNameInPath(strResPath);
+			std::string strResPath = std::string(AssetPath);
+			std::string filename = RFileUtil::GetFileNameInPath(strResPath);
 			m_Animation->SetName(filename);
 		}
 		else

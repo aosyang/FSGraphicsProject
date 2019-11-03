@@ -90,7 +90,7 @@ void RgColorPiece::SetColor(EPieceColor Color)
 
 void InitializeRubikMaterials()
 {
-	const string MaterialPaths[] =
+	const std::string MaterialPaths[] =
 	{
 		"/RubikCube/Blue.rmtl",
 		"/RubikCube/Green.rmtl",
@@ -103,8 +103,8 @@ void InitializeRubikMaterials()
 
 	for (int i = 0; i < ARRAYSIZE(MaterialPaths); i++)
 	{
-		vector<RMaterial> Materials;
-		const string XmlPath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), MaterialPaths[i]);
+		std::vector<RMaterial> Materials;
+		const std::string XmlPath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), MaterialPaths[i]);
 		RMaterial::LoadFromXmlFile(XmlPath, Materials);
 		assert(Materials.size() > 0);
 		RubikMaterials[i] = Materials[0];
@@ -332,7 +332,7 @@ void RgRubik::FinishCurrentMove()
 	m_CenterOfMove->FixTransformInaccuracy();
 	m_CenterOfMove = nullptr;
 
-	vector<RgCubeBlock*> AllBlocks;
+	std::vector<RgCubeBlock*> AllBlocks;
 	AllBlocks.assign(m_Blocks, m_Blocks + 27);
 
 	// Also rotate blocks in the array

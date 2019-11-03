@@ -178,7 +178,7 @@ namespace ManagedEngineWrapper
 			{
 				auto MeshElement = Mesh->GetMeshElements()[0];
 				int VertexComponentMask = MeshElement.GetVertexComponentMask();
-				string VertexComponentsString = RVertexDeclaration::GetVertexComponentsString(VertexComponentMask);
+				std::string VertexComponentsString = RVertexDeclaration::GetVertexComponentsString(VertexComponentMask);
 
 				return gcnew String(VertexComponentsString.c_str());
 			}

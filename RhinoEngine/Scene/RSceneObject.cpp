@@ -134,21 +134,21 @@ void RSceneObject::Update(float DeltaTime)
 	UpdateComponents(DeltaTime);
 }
 
-const vector<string>& RSceneObject::GetParsedScript()
+const std::vector<std::string>& RSceneObject::GetParsedScript()
 {
 	if (!m_Script.empty() && m_ParsedScript.empty())
 	{
 		size_t pos = 0;
-		string script = m_Script;
+		std::string script = m_Script;
 
-		while ((pos = script.find(',')) != string::npos)
+		while ((pos = script.find(',')) != std::string::npos)
 		{
 			script = script.replace(pos, 1, " ");
 		}
 
-		istringstream iss(script);
-		copy(istream_iterator<string>(iss),
-			istream_iterator<string>(),
+		std::istringstream iss(script);
+		copy(std::istream_iterator<std::string>(iss),
+			std::istream_iterator<std::string>(),
 			back_inserter(m_ParsedScript));
 	}
 
@@ -165,6 +165,6 @@ void RSceneObject::UpdateComponents(float DeltaTime)
 
 RSceneObjectRuntimeTypeInfo::RSceneObjectRuntimeTypeInfo(const char* ClassName)
 {
-	TypeId = hash<string>{}(string(ClassName));
+	TypeId = std::hash<std::string>{}(std::string(ClassName));
 	RLog("Class \'%s\' has type id %zu\n", ClassName, TypeId);
 }

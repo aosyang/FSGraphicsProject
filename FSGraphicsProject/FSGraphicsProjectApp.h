@@ -74,7 +74,7 @@ private:
 
 	RSMeshObject*				m_CharacterObj;
 	RMesh*						m_CharacterAnimation;
-	vector<RMesh*>				m_CharacterAnimations;
+	std::vector<RMesh*>				m_CharacterAnimations;
 	int							m_CurrentAnim;
 
 	RMesh*						m_AOSceneMesh;

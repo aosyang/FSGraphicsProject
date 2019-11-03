@@ -20,7 +20,7 @@ public:
 	virtual void Render();
 
 protected:
-	vector<RVertexType::Font>	m_Vertices;
+	std::vector<RVertexType::Font>	m_Vertices;
 	RMeshRenderBuffer				m_VertexBuffer;
 	RTexture*						m_FontTexture;
 	RShader*						m_FontShader;

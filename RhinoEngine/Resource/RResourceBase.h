@@ -24,20 +24,20 @@ enum ResourceType
 class RResourceBase
 {
 public:
-	RResourceBase(ResourceType type, const string& path);
+	RResourceBase(ResourceType type, const std::string& path);
 	virtual ~RResourceBase() = 0 {}
 
 	ResourceState GetResourceState() const	{ return m_State; }
 	ResourceType GetResourceType() const	{ return m_Type; }
 
 	/// Set the asset path of resource
-	void SetAssetPath(const string& InAssetPath);
+	void SetAssetPath(const std::string& InAssetPath);
 
 	/// Get the asset path of resource
-	const string& GetAssetPath() const;
+	const std::string& GetAssetPath() const;
 
 	/// Get a path of the resource used in the file system (eg. for serialization)
-	const string& GetFileSystemPath() const;
+	const std::string& GetFileSystemPath() const;
 
 	/// Check if resource has been fully loaded
 	bool IsLoaded() const					{ return m_State == RS_Loaded; }
@@ -58,32 +58,32 @@ public:
 
 protected:
 	/// Enumerate all resources been referenced directly by this resource
-	virtual vector<RResourceBase*> EnumerateReferencedResources() const;
+	virtual std::vector<RResourceBase*> EnumerateReferencedResources() const;
 
 private:
 	ResourceState		m_State;
 	ResourceType		m_Type;
 
 	/// The asset path used to access the resource in the engine
-	string				m_AssetPath;
+	std::string				m_AssetPath;
 
 	/// Path to the resource file in file system
-	string				m_FileSystemPath;
+	std::string				m_FileSystemPath;
 	float				m_LoadingFinishTime;
 };
 
-FORCEINLINE void RResourceBase::SetAssetPath(const string& InAssetPath)
+FORCEINLINE void RResourceBase::SetAssetPath(const std::string& InAssetPath)
 {
-	assert(InAssetPath.find("..") == string::npos);
+	assert(InAssetPath.find("..") == std::string::npos);
 	m_AssetPath = InAssetPath;
 }
 
-FORCEINLINE const string& RResourceBase::GetAssetPath() const
+FORCEINLINE const std::string& RResourceBase::GetAssetPath() const
 {
 	return m_AssetPath;
 }
 
-FORCEINLINE const string& RResourceBase::GetFileSystemPath() const
+FORCEINLINE const std::string& RResourceBase::GetFileSystemPath() const
 {
 	return m_FileSystemPath;
 }

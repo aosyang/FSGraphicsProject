@@ -2198,8 +2198,8 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
             TIXMLASSERT( p <= q );
         }
     }
-    // Flush the remaining string. This will be the entire
-    // string if an entity wasn't found.
+    // Flush the remaining std::string. This will be the entire
+    // std::string if an entity wasn't found.
     TIXMLASSERT( p <= q );
     if ( !_processEntities || ( p < q ) ) {
         Print( "%s", p );

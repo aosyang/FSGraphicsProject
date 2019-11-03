@@ -82,7 +82,7 @@ namespace ManagedEngineWrapper
 	{
 		List<String^>^ list = gcnew List<String^>();
 
-		vector<RMesh*> meshList = RResourceManager::Instance().GetMeshResources();
+		std::vector<RMesh*> meshList = RResourceManager::Instance().GetMeshResources();
 		for (auto Iter : meshList)
 		{
 			list->Add(gcnew String(Iter->GetAssetPath().data()));

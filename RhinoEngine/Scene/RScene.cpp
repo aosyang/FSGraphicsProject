@@ -32,7 +32,7 @@ namespace
 				if (XmlElementPosition)
 				{
 					float PosData[3];
-					stringstream StringStream(XmlElementPosition->GetText());
+					std::stringstream StringStream(XmlElementPosition->GetText());
 
 					for (int n = 0; n < 3; n++)
 					{
@@ -53,7 +53,7 @@ namespace
 				if (XmlElementRotation)
 				{
 					float RotData[3];
-					stringstream StringStream(XmlElementRotation->GetText());
+					std::stringstream StringStream(XmlElementRotation->GetText());
 
 					for (int n = 0; n < 3; n++)
 					{
@@ -78,7 +78,7 @@ namespace
 				if (XmlElementScale)
 				{
 					float ScaleData[3];
-					stringstream StringStream(XmlElementScale->GetText());
+					std::stringstream StringStream(XmlElementScale->GetText());
 
 					for (int n = 0; n < 3; n++)
 					{
@@ -174,7 +174,7 @@ namespace
 			if (XmlElementTransform)
 			{
 				RMatrix4 Matrix;
-				stringstream StringStream(XmlElementTransform->GetText());
+				std::stringstream StringStream(XmlElementTransform->GetText());
 
 				for (int n = 0; n < 16; n++)
 				{
@@ -289,13 +289,13 @@ RSceneObject* RScene::FindObject(const char* name) const
 	return nullptr;
 }
 
-string RScene::GenerateUniqueObjectName(const string& ObjectName)
+std::string RScene::GenerateUniqueObjectName(const std::string& ObjectName)
 {
-	string UniqueName;
+	std::string UniqueName;
 	int NameIndex = 0;
 	while (true)
 	{
-		UniqueName = ObjectName + "_" + to_string(NameIndex);
+		UniqueName = ObjectName + "_" + std::to_string(NameIndex);
 		NameIndex++;
 
 		if (!DoesObjectNameExist(UniqueName))
@@ -307,16 +307,16 @@ string RScene::GenerateUniqueObjectName(const string& ObjectName)
 	return UniqueName;
 }
 
-string RScene::GenerateUniqueObjectNameForClone(const string& ObjectName)
+std::string RScene::GenerateUniqueObjectNameForClone(const std::string& ObjectName)
 {
 	size_t UnderScorePos = ObjectName.find_last_of('_');
 
 	// Object name doesn't contain under score, simply generate a unique name.
-	if (UnderScorePos != string::npos)
+	if (UnderScorePos != std::string::npos)
 	{
 		bool bHasDigitSuffix = true;
 
-		string Suffix = ObjectName.substr(UnderScorePos + 1);
+		std::string Suffix = ObjectName.substr(UnderScorePos + 1);
 		for (size_t i = 0; i < Suffix.length(); i++)
 		{
 			if (!isdigit(Suffix[i]))
@@ -328,7 +328,7 @@ string RScene::GenerateUniqueObjectNameForClone(const string& ObjectName)
 
 		if (bHasDigitSuffix)
 		{
-			string BaseName = ObjectName.substr(0, UnderScorePos);
+			std::string BaseName = ObjectName.substr(0, UnderScorePos);
 			return GenerateUniqueObjectName(BaseName);
 		}
 	}
@@ -336,7 +336,7 @@ string RScene::GenerateUniqueObjectNameForClone(const string& ObjectName)
 	return GenerateUniqueObjectName(ObjectName);
 }
 
-bool RScene::DoesObjectNameExist(const string& Name) const
+bool RScene::DoesObjectNameExist(const std::string& Name) const
 {
 	for (auto SceneObject : m_SceneObjects)
 	{
@@ -371,9 +371,9 @@ void RScene::DestroyAllObjects()
 	m_SceneObjects.clear();
 }
 
-void RScene::LoadFromFile(const string& MapAssetPath)
+void RScene::LoadFromFile(const std::string& MapAssetPath)
 {
-	const string MapFilePath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), MapAssetPath);
+	const std::string MapFilePath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), MapAssetPath);
 
 	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
 	if (doc->LoadFile(MapFilePath.c_str()) == tinyxml2::XML_SUCCESS)
@@ -384,7 +384,7 @@ void RScene::LoadFromFile(const string& MapAssetPath)
 		{
 			RSceneObject* NewSceneObject = nullptr;
 
-			string obj_type = elem_obj->Attribute("Type");
+			std::string obj_type = elem_obj->Attribute("Type");
 			if (obj_type == "MeshObject")
 			{
 				const char* ResourceFilePath = elem_obj->Attribute("Mesh");
@@ -399,7 +399,7 @@ void RScene::LoadFromFile(const string& MapAssetPath)
 				NewSceneObject = MeshObject;
 
 				tinyxml2::XMLElement* elem_mat = elem_obj->FirstChildElement("Material");
-				vector<RMaterial> xmlMaterials;
+				std::vector<RMaterial> xmlMaterials;
 
 				if (elem_mat)
 				{
@@ -432,7 +432,7 @@ void RScene::LoadFromFile(const string& MapAssetPath)
 
 								if (!texture)
 								{
-									const string Path(textureName);
+									const std::string Path(textureName);
 									texture = RResourceManager::Instance().LoadResource<RTexture>(Path, EResourceLoadMode::Immediate);
 								}
 							}
@@ -597,7 +597,7 @@ void RScene::NotifyCameraDestroying(RCamera* Camera)
 	}
 }
 
-RVec3 RScene::TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec, list<RSceneObject*> IgnoredObjects /*= list<RSceneObject*>()*/)
+RVec3 RScene::TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec, std::list<RSceneObject*> IgnoredObjects /*= std::list<RSceneObject*>()*/)
 {
 	RVec3 v = moveVec;
 
@@ -674,9 +674,9 @@ void RScene::UpdateScene(float DeltaTime)
 	}
 }
 
-vector<RSceneObject*> RScene::EnumerateSceneObjects() const
+std::vector<RSceneObject*> RScene::EnumerateSceneObjects() const
 {
-	vector<RSceneObject*> OutputObjects;
+	std::vector<RSceneObject*> OutputObjects;
 
 	for (auto& SceneObject : m_SceneObjects)
 	{

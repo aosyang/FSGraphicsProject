@@ -43,7 +43,7 @@ private:
 	RShader*								m_ColorShader;
 
 	RColor									m_PrimitiveColor;
-	vector<RVertexType::PositionColor>		m_PrimitiveVertices;
+	std::vector<RVertexType::PositionColor>		m_PrimitiveVertices;
 	bool									m_bDirtyBuffer;
 	UINT									m_MaxNumVertices;
 };
