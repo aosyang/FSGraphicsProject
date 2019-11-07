@@ -8,6 +8,7 @@
 
 #include "MathHelper.h"
 #include <math.h>
+#include <sstream>
 
 #define USE_SIMD_MATH 0
 
@@ -162,6 +163,13 @@ public:
 			y /= mag;
 			z /= mag;
 		}
+	}
+
+	FORCEINLINE std::string ToString() const
+	{
+		std::ostringstream StringStream;
+		StringStream << "(" << x << ", " << y << ", " << z << ")";
+		return StringStream.str();
 	}
 
 	RVec3 GetNormalized() const

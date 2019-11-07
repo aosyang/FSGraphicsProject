@@ -22,19 +22,11 @@ namespace
 	// For debug rendering the region map at various heightfield
 	std::vector<RegionMapType> DebugRegionMaps;
 
-	struct EdgePoint
-	{
-		RVec3 Point;
-		bool bIsMandatory;
-	};
-	typedef std::vector<EdgePoint> EdgePoints;
-	std::vector<EdgePoints> DebugRegionEdgePoints;
-
 	// Calculate squared distance from a point to a line segment
 	float CalculateSquaredDistanceOfPointToLineSegment(const RVec3& p, const RVec3& a, const RVec3& b)
 	{
 		assert(a - b != RVec3::Zero());
-		
+
 		RVec3 ap = p - a;
 		RVec3 ab = b - a;
 
@@ -100,6 +92,44 @@ namespace
 
 			return Result;
 		}
+	}
+
+	int FindShortestPartition(const EdgePointCollection &Edges)
+	{
+		int ShortestPartition = -1;
+		float SqrMinDist = 0.0f;
+		int NumEdgePoints = (int)Edges.size();
+
+		for (int EdgePt0 = 0; EdgePt0 < NumEdgePoints; EdgePt0++)
+		{
+			int EdgePt1 = (EdgePt0 + 1) % NumEdgePoints;
+			int EdgePt2 = (EdgePt0 + 2) % NumEdgePoints;
+
+			RVec3 Edge0 = Edges[EdgePt1].Point - Edges[EdgePt0].Point;
+			RVec3 Edge1 = Edges[EdgePt2].Point - Edges[EdgePt1].Point;
+
+			// Ignore vertical difference for partitioning
+			Edge0.SetY(0);
+			Edge1.SetY(0);
+
+			RVec3 cp_result = RVec3::Cross(Edge1, Edge0);
+			RLog("Edge 0: %s, Edge 1: %s, ty: %f\n", Edge0.ToString().c_str(), Edge1.ToString().c_str(), cp_result.Y());
+
+			// Skip edges lying outside of the polygon
+			if (cp_result.Y() >= 0.0f)
+			{
+				continue;
+			}
+
+			float NewSqrDist = (Edges[EdgePt0].Point - Edges[EdgePt2].Point).SquaredMagitude();
+			if (ShortestPartition == -1 || NewSqrDist < SqrMinDist)
+			{
+				ShortestPartition = EdgePt0;
+				SqrMinDist = NewSqrDist;
+			}
+		}
+
+		return ShortestPartition;
 	}
 }
 
@@ -170,6 +200,7 @@ void RVoxelizer::Initialize(RScene* Scene)
 		GenerateDistanceField();
 		GenerateRegions();
 		GenerateRegionContours();
+		TriangulateRegions();
 	}
 
 	// Generate randomized color for each region
@@ -202,7 +233,7 @@ void RVoxelizer::Render()
 		if (RInput.GetBufferedKeyState(VK_OEM_PLUS) == EBufferedKeyState::Pressed)
 		{
 			DebugDrawRegionId++;
-			if (DebugDrawRegionId >= DebugRegionEdgePoints.size())
+			if (DebugDrawRegionId >= RegionEdgePoints.size())
 			{
 				DebugDrawRegionId = 0;
 			}
@@ -213,11 +244,11 @@ void RVoxelizer::Render()
 			DebugDrawRegionId--;
 			if (DebugDrawRegionId < 0)
 			{
-				DebugDrawRegionId = (int)DebugRegionEdgePoints.size() - 1;
+				DebugDrawRegionId = (int)RegionEdgePoints.size() - 1;
 			}
 		}
 
-		const auto& RegionEdges = DebugRegionEdgePoints[DebugDrawRegionId];
+		const auto& RegionEdges = RegionEdgePoints[DebugDrawRegionId];
 		for (int i = 0; i < RegionEdges.size(); i++)
 		{
 			const RVec3& p0 = RegionEdges[i].Point;
@@ -233,6 +264,8 @@ void RVoxelizer::Render()
 				GDebugRenderer.DrawSphere(p0, 10.0f, RColor::Green, 8);
 			}
 		}
+
+		Debugger.DrawRegion(DebugDrawRegionId);
 	}
 
 	const auto& RegionMap = DebugRegionMaps[DebugDistanceField];
@@ -747,7 +780,7 @@ void RVoxelizer::GenerateRegions()
 
 void RVoxelizer::GenerateRegionContours()
 {
-	DebugRegionEdgePoints.resize(UniqueRegionIds.size());
+	RegionEdgePoints.resize(UniqueRegionIds.size());
 
 	for (const auto& RegionId : UniqueRegionIds)
 	{
@@ -835,7 +868,7 @@ void RVoxelizer::GenerateRegionContours()
 		} while (CurrentKey != StartKey || CurrentDirection != StartDirection);
 
 		// Simplify edges
-		EdgePoints& RegionEdges = DebugRegionEdgePoints[RegionId];
+		EdgePointCollection& RegionEdges = RegionEdgePoints[RegionId];
 
 		// Find a first mandatory point
 		int FirstIdx;
@@ -878,7 +911,7 @@ void RVoxelizer::GenerateRegionContours()
 			} while (StartIdx != FirstIdx);
 
 			// For testing
-			std::vector<EdgePoint> NewEdgePoints;
+			std::vector<EdgePointData> NewEdgePoints;
 			for (const auto& p : SimplifiedPoints)
 			{
 				NewEdgePoints.push_back({ p, true });
@@ -886,6 +919,57 @@ void RVoxelizer::GenerateRegionContours()
 
 			RegionEdges = NewEdgePoints;
 		}
+	}
+}
+
+
+void RVoxelizer::TriangulateRegions()
+{
+	int RegionId = 0;
+
+	for (auto& TraverseEdges : RegionEdgePoints)
+	{
+		RLog("Triangulate polygons for region %d\n", RegionId);
+
+		EdgePointCollection Edges = TraverseEdges;
+		
+		// Keep a list of edge point indices
+		std::vector<int> EdgePointIndices;
+		EdgePointIndices.resize(Edges.size());
+		for (int i = 0; i < (int)EdgePointIndices.size(); i++)
+		{
+			EdgePointIndices[i] = i;
+		}
+
+		// Find a valid shortest partition
+
+		while (1)
+		{ 
+			// Index of a point for a starting edge. The edge is represented as n and n + 2
+			int PtIdx0 = FindShortestPartition(Edges);
+			if (PtIdx0 == -1)
+			{
+				break;
+			}
+		
+			int PtIdx1 = (PtIdx0 + 1) % Edges.size();
+			int PtIdx2 = (PtIdx0 + 2) % Edges.size();
+
+			const RVec3 Offset(0.0f, 1.0f, 0.0f);
+			const RVec3 p0 = Edges[PtIdx0].Point + Offset;
+			const RVec3 p1 = Edges[PtIdx1].Point + Offset;
+			const RVec3 p2 = Edges[PtIdx2].Point + Offset;
+
+			Debugger.AddRegionEdge(RegionId, p0, p1);
+			Debugger.AddRegionEdge(RegionId, p0, p2);
+			Debugger.AddRegionEdge(RegionId, p1, p2);
+
+			// Removed a point after triangulating it with its direct neighbors
+			Edges.erase(Edges.begin() + PtIdx1);
+			EdgePointIndices.erase(EdgePointIndices.begin() + PtIdx1);
+		}
+
+		RegionId++;
 	}
 }
 
@@ -923,7 +1007,7 @@ void RVoxelizer::AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId,
 {
 	//RLog("Edge found! loc: (%d, %d), dir: %d\n", Key.x, Key.z, DirectionIdx);
 
-	assert(RegionId >= 0 && RegionId < DebugRegionEdgePoints.size());
+	assert(RegionId >= 0 && RegionId < RegionEdgePoints.size());
 
 	RVec3 CenterPoint = GetCellCenter(Key.x, GetOpenSpanByKey(Key).CellRowStart, Key.z);
 	RVec3 Offset = CellDimension;
@@ -943,7 +1027,7 @@ void RVoxelizer::AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId,
 		break;
 	}
 	RVec3 EdgePoint = CenterPoint + Offset;
-	DebugRegionEdgePoints[RegionId].push_back({ EdgePoint, bMendatoryPoint });
+	RegionEdgePoints[RegionId].push_back({ EdgePoint, bMendatoryPoint });
 }
 
 RAabb RVoxelizer::CalculateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z) const

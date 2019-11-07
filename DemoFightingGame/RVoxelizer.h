@@ -8,6 +8,7 @@
 
 #include "RHeightfieldData.h"
 #include "RVoxelizerDataType.h"
+#include "RVoxelizerDebugger.h"
 
 #include <vector>
 #include <set>
@@ -20,6 +21,15 @@ struct GridCoord
 {
 	int x, z;
 };
+
+// Data for region edges
+struct EdgePointData
+{
+	RVec3 Point;
+	bool bIsMandatory;
+};
+
+typedef std::vector<EdgePointData> EdgePointCollection;
 
 
 /// Scene voxelizer
@@ -55,6 +65,8 @@ private:
 
 	// Make region contours from cells
 	void GenerateRegionContours();
+
+	void TriangulateRegions();
 
 	// Going in one direction and find a span at the edge of the region of a given span
 	OpenSpanKey FindRegionEdgeInDirection(const OpenSpanKey& Key, int DirectionIdx = 0) const;
@@ -95,4 +107,9 @@ private:
 
 	// Unique region ids
 	std::set<int> UniqueRegionIds;
+
+	// Edge points for each region. Array indices represent region ids.
+	std::vector<EdgePointCollection> RegionEdgePoints;
+
+	RVoxelizerDebugger Debugger;
 };

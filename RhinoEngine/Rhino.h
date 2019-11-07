@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <crtdbg.h>
 
-#include <Windows.h>
 #include <Shlwapi.h>
 #pragma comment(lib, "Shlwapi.lib")
 
@@ -25,16 +24,7 @@
 #include <fstream>
 #include <iomanip>
 
-#include <memory>
-#include <functional>
-
-#include <vector>
-#include <list>
-#include <map>
-#include <set>
-#include <queue>
-#include <string>
-#include <algorithm>
+#include "Core/CoreTypes.h"
 
 // DirectX 3D
 #include <d3d11.h>
@@ -46,15 +36,6 @@
 
 #include "Core/RDelegate.h"
 #include "Core/StdHelper.h"
-
-#include "Core/RVector.h"
-#include "Core/RQuat.h"
-#include "Core/RMatrix.h"
-#include "Core/RTransform.h"
-
-#include "Core/RColor.h"
-#include "Core/RAabb.h"
-#include "Core/RRay.h"
 
 class RMesh;
 class RTexture;
