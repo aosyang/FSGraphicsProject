@@ -50,19 +50,20 @@ bool FightingGameApp::Initialize()
 		m_Player->InitAssets();
 	}
 
+	m_AIPlayers.resize(MaxNumAIs);
 	for (int i = 0; i < MaxNumAIs; i++)
 	{
-		m_AIPlayer[i] = DefaultScene->CreateSceneObjectOfType<FTGPlayerController>();
-		if (m_AIPlayer[i])
+		m_AIPlayers[i] = DefaultScene->CreateSceneObjectOfType<FTGPlayerController>();
+		if (m_AIPlayers[i])
 		{
-			m_AIPlayer[i]->SetPosition(RVec3(RMath::RandRangedF(-800, 800), 50, RMath::RandRangedF(-800, 800)));
-			m_AIPlayer[i]->InitAssets();
+			m_AIPlayers[i]->SetPosition(RVec3(RMath::RandRangedF(-800, 800), 50, RMath::RandRangedF(-800, 800)));
+			m_AIPlayers[i]->InitAssets();
 
 			// Make each AI play animation at a slightly different speed
-			m_AIPlayer[i]->SetAnimationDeviation(RMath::RandRangedF(0.8f, 1.2f));
+			m_AIPlayers[i]->SetAnimationDeviation(RMath::RandRangedF(0.8f, 1.2f));
 
 			// Create AI combat logic component
-			m_AIPlayer[i]->AddNewComponent<AIFighterLogic>();
+			m_AIPlayers[i]->AddNewComponent<AIFighterLogic>();
 		}
 	}
 
@@ -87,9 +88,9 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 		for (int i = 0; i < MaxNumAIs; i++)
 		{
-			if (m_AIPlayer[i])
+			if (m_AIPlayers[i])
 			{
-				m_AIPlayer[i]->SetPosition(RVec3(RMath::RandRangedF(-800, 800), 50, RMath::RandRangedF(-800, 800)));
+				m_AIPlayers[i]->SetPosition(RVec3(RMath::RandRangedF(-800, 800), 50, RMath::RandRangedF(-800, 800)));
 			}
 		}
 	}
@@ -148,6 +149,8 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	UpdateCameraPosition(timer.DeltaTime());
 
 	m_Voxelizer.Render();
+	//m_Voxelizer.DebugProjectPointToNavmesh(m_Player->GetPosition());
+	m_Voxelizer.DebugSetGoalPoint(m_Player->GetPosition());
 }
 
 void FightingGameApp::RenderScene()

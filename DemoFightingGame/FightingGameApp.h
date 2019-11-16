@@ -13,7 +13,7 @@
 #include "AIFighterLogic.h"
 #include "RVoxelizer.h"
 
-const static int MaxNumAIs = 5;
+const static int MaxNumAIs = 0;
 
 class FightingGameApp : public IApp
 {
@@ -41,7 +41,7 @@ private:
 	RShadowMap				m_ShadowMap;
 
 	FTGPlayerController*	m_Player;
-	FTGPlayerController*	m_AIPlayer[MaxNumAIs];
+	std::vector<FTGPlayerController*>	m_AIPlayers;
 
 	RText					m_Text;
 	bool					m_FreeFlyMode;

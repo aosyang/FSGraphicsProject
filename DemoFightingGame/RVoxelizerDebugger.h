@@ -26,8 +26,11 @@ public:
 
 	void AddRegionEdge(int RegionId, const RVec3& Start, const RVec3& End);
 
+	void AddPersistentLine(const RVec3& Start, const RVec3& End);
+
 private:
 	std::vector<std::vector<DebugLineData>> RegionDebugLines;
+	std::vector<DebugLineData> PersistentLines;
 };
 
 
@@ -40,4 +43,9 @@ FORCEINLINE void RVoxelizerDebugger::AddRegionEdge(int RegionId, const RVec3& St
 
 	auto& PersistentDebugLines = RegionDebugLines[RegionId];
 	PersistentDebugLines.emplace(PersistentDebugLines.end(), Start, End);
+}
+
+FORCEINLINE void RVoxelizerDebugger::AddPersistentLine(const RVec3& Start, const RVec3& End)
+{
+	PersistentLines.emplace(PersistentLines.end(), Start, End);
 }

@@ -141,6 +141,14 @@ public:
 	FORCEINLINE RVec3& operator/=(float val)									{ x /= val; y /= val; z /= val; return *this; }
 
 	FORCEINLINE bool operator!=(const RVec3& rhs) const							{ return x != rhs.x || y != rhs.y || z != rhs.z; }
+	FORCEINLINE bool operator==(const RVec3& rhs) const							{ return Equals(rhs); }
+
+	FORCEINLINE bool Equals(const RVec3& Other, float Tolerance = FLT_EPSILON) const
+	{
+		return (fabs(X() - Other.X()) < Tolerance) &&
+			   (fabs(Y() - Other.Y()) < Tolerance) &&
+			   (fabs(Z() - Other.Z()) < Tolerance);
+	}
 
 	FORCEINLINE float SquaredMagitude() const
 	{

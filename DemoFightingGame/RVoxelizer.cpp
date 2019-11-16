@@ -113,7 +113,7 @@ namespace
 			Edge1.SetY(0);
 
 			RVec3 cp_result = RVec3::Cross(Edge1, Edge0);
-			RLog("Edge 0: %s, Edge 1: %s, ty: %f\n", Edge0.ToString().c_str(), Edge1.ToString().c_str(), cp_result.Y());
+			//RLog("Edge 0: %s, Edge 1: %s, ty: %f\n", Edge0.ToString().c_str(), Edge1.ToString().c_str(), cp_result.Y());
 
 			// Skip edges lying outside of the polygon
 			if (cp_result.Y() >= 0.0f)
@@ -227,6 +227,19 @@ void RVoxelizer::Render()
 {
 	GDebugRenderer.DrawAabb(SceneBounds);
 
+	for (int i = 0; i < (int)TestPath.size() - 1; i++)
+	{
+		GDebugRenderer.DrawLine(TestPath[i], TestPath[i + 1], RColor::Red);
+		GDebugRenderer.DrawSphere(TestPath[i], 10.0f, RColor::Red);
+		if (i == (int)TestPath.size() - 2)
+		{
+			GDebugRenderer.DrawSphere(TestPath[i + 1], 10.0f, RColor::Red);
+		}
+	}
+
+	GDebugRenderer.DrawSphere(QueryStart, 20.0f, RColor::Yellow);
+	GDebugRenderer.DrawSphere(QueryGoal, 20.0f, RColor::Yellow);
+
 	{
 		static int DebugDrawRegionId = 0;
 
@@ -268,6 +281,7 @@ void RVoxelizer::Render()
 		Debugger.DrawRegion(DebugDrawRegionId);
 	}
 
+#if 0
 	const auto& RegionMap = DebugRegionMaps[DebugDistanceField];
 
 	for (const auto& Column : Heightfield)
@@ -324,6 +338,30 @@ void RVoxelizer::Render()
 			SpanIndex++;
 		}
 	}
+#endif
+}
+
+void RVoxelizer::DebugProjectPointToNavmesh(const RVec3& Point) const
+{
+	NavMeshProjectionResult Result = NavMeshData.ProjectPointToNavmesh(Point);
+	if (Result.Triangle != -1)
+	{
+		const NavMeshTriangleData& Triangle = NavMeshData.NavMeshTriangles[Result.Triangle];
+		for (int i = 0; i < 3; i++)
+		{
+			RVec3 p0 = NavMeshData.NavMeshPoints[Triangle.Points[i]].WorldPosition;
+			RVec3 p1 = NavMeshData.NavMeshPoints[Triangle.Points[(i + 1) % 3]].WorldPosition;
+			GDebugRenderer.DrawLine(p0, p1);
+		}
+	}
+
+	GDebugRenderer.DrawSphere(Point, 50);
+}
+
+void RVoxelizer::DebugSetGoalPoint(const RVec3& Point)
+{
+	QueryGoal = Point;
+	NavMeshData.QueryPath(QueryStart, QueryGoal, TestPath);
 }
 
 void RVoxelizer::GenerateHeightfieldColumns(const std::vector<RSceneObject*>& SceneObjects)
@@ -926,7 +964,6 @@ void RVoxelizer::GenerateRegionContours()
 void RVoxelizer::TriangulateRegions()
 {
 	int RegionId = 0;
-
 	for (auto& TraverseEdges : RegionEdgePoints)
 	{
 		RLog("Triangulate polygons for region %d\n", RegionId);
@@ -955,14 +992,22 @@ void RVoxelizer::TriangulateRegions()
 			int PtIdx1 = (PtIdx0 + 1) % Edges.size();
 			int PtIdx2 = (PtIdx0 + 2) % Edges.size();
 
-			const RVec3 Offset(0.0f, 1.0f, 0.0f);
-			const RVec3 p0 = Edges[PtIdx0].Point + Offset;
-			const RVec3 p1 = Edges[PtIdx1].Point + Offset;
-			const RVec3 p2 = Edges[PtIdx2].Point + Offset;
+			const RVec3 p0 = Edges[PtIdx0].Point;
+			const RVec3 p1 = Edges[PtIdx1].Point;
+			const RVec3 p2 = Edges[PtIdx2].Point;
 
-			Debugger.AddRegionEdge(RegionId, p0, p1);
-			Debugger.AddRegionEdge(RegionId, p0, p2);
-			Debugger.AddRegionEdge(RegionId, p1, p2);
+			NavMeshData.AddTriangle(p0, p1, p2, RegionId);
+
+#if 1
+			// Add edges to debugger for debug rendering
+			{
+				const RVec3 Offset(0.0f, 1.0f, 0.0f);
+				
+				Debugger.AddRegionEdge(RegionId, p0 + Offset, p1 + Offset);
+				Debugger.AddRegionEdge(RegionId, p0 + Offset, p2 + Offset);
+				Debugger.AddRegionEdge(RegionId, p1 + Offset, p2 + Offset);
+			}
+#endif // 0
 
 			// Removed a point after triangulating it with its direct neighbors
 			Edges.erase(Edges.begin() + PtIdx1);
@@ -971,6 +1016,10 @@ void RVoxelizer::TriangulateRegions()
 
 		RegionId++;
 	}
+
+	QueryStart = RVec3(1500, 50, 10);
+	QueryGoal = RVec3(-1500, 50, 10);
+	NavMeshData.QueryPath(QueryStart, QueryGoal, TestPath);
 }
 
 OpenSpanKey RVoxelizer::FindRegionEdgeInDirection(const OpenSpanKey& Key, int DirectionIdx /*= 0*/) const

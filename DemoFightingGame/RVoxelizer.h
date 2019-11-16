@@ -8,6 +8,8 @@
 
 #include "RHeightfieldData.h"
 #include "RVoxelizerDataType.h"
+#include "RNavMeshData.h"
+
 #include "RVoxelizerDebugger.h"
 
 #include <vector>
@@ -42,6 +44,9 @@ public:
 	void Initialize(RScene* Scene);
 
 	void Render();
+
+	void DebugProjectPointToNavmesh(const RVec3& Point) const;
+	void DebugSetGoalPoint(const RVec3& Point);
 
 	HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key);
 	const HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key) const;
@@ -111,5 +116,11 @@ private:
 	// Edge points for each region. Array indices represent region ids.
 	std::vector<EdgePointCollection> RegionEdgePoints;
 
+	RNavMeshData NavMeshData;
+
 	RVoxelizerDebugger Debugger;
+
+	RVec3 QueryStart;
+	RVec3 QueryGoal;
+	std::vector<RVec3> TestPath;
 };

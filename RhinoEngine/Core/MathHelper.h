@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <float.h>
 
+class RVec3;
+
 #define FLT_EQUAL(a,b)			(fabsf((a)-(b))<FLT_EPSILON)
 #define FLT_EQUAL_ZERO(a)		(fabsf(a)<FLT_EPSILON)
 #define PI 3.14159265358979323846f
@@ -58,5 +60,10 @@ namespace RMath
 
 	FORCEINLINE float DegreeToRadian(float Degree)				{ return PI / 180.0f * Degree; }
 	FORCEINLINE float RadianToDegree(float Radian)				{ return 180.0f / PI * Radian; }
+
+	void Barycentric(const RVec3& p, const RVec3& a, const RVec3& b, const RVec3& c, float& u, float& v, float &w);
+
+	// Barycentric with all positions considered on xz-plane
+	void Barycentric2D_XZ(const RVec3& p, const RVec3& a, const RVec3& b, const RVec3& c, float& u, float& v, float &w);
 }
 
