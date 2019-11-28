@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <vector>
 
-#define NUM_NEIGHBOUR_SPANS 4
+#define NUM_NEIGHBOR_SPANS 4
 
 // A span represents solid spaces occupied by any geometries
 struct HeightfieldSolidSpan
@@ -35,17 +35,17 @@ struct HeightfieldOpenSpan
 		: DistanceField(-1)
 		, RegionId(-1)
 	{
-		std::fill_n(NeighbourLink, NUM_NEIGHBOUR_SPANS, -1);
+		std::fill_n(NeighborLink, NUM_NEIGHBOR_SPANS, -1);
 	}
 
 	int CellRowStart;
 	int CellRowEnd;
 
-	// Whether the span is a border span (which has less than 8 valid neighbour spans including diagonal ones)
+	// Whether the span is a border span (which has less than 8 valid neighbor spans including diagonal ones)
 	bool bBorder;
 
-	// Index to a neighbour open span this spawn is linked to
-	int NeighbourLink[NUM_NEIGHBOUR_SPANS];
+	// Index to a neighbor open span this spawn is linked to
+	int NeighborLink[NUM_NEIGHBOR_SPANS];
 
 	int DistanceField;
 
@@ -64,7 +64,7 @@ struct HeightfieldCellData
 	std::vector<HeightfieldOpenSpan> OpenSpans;
 };
 
-// Heightfield data used by voxelizer
+// Heightfield data used by navmesh generators
 class RHeightfieldData
 {
 public:

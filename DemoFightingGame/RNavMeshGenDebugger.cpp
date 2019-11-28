@@ -6,9 +6,9 @@
 
 #include "Rhino.h"
 
-#include "RVoxelizerDebugger.h"
+#include "RNavMeshGenDebugger.h"
 
-void RVoxelizerDebugger::DrawRegion(int RegionId)
+void RNavMeshGenDebugger::DrawRegion(int RegionId)
 {
 	if (RegionId >= 0 && RegionId < (int)RegionDebugLines.size())
 	{

@@ -11,7 +11,7 @@
 #include <map>
 #include <vector>
 
-class RVoxelizer;
+class RNavMeshGenerator;
 
 // Type for mapping an open span to its region id
 typedef std::map<OpenSpanKey, int> RegionMapType;
@@ -19,7 +19,7 @@ typedef std::map<OpenSpanKey, int> RegionMapType;
 class RRegionData
 {
 public:
-	RRegionData(RVoxelizer* InVoxelizer);
+	RRegionData(RNavMeshGenerator* InNavMeshGenerator);
 
 	// Get a region id for a span key. Create a default region id for the key if the id doesn't exist
 	int FindOrAddRegionId(const OpenSpanKey& Key);
@@ -28,13 +28,13 @@ public:
 	void SetRegionId(const OpenSpanKey& Key, int RegionId);
 
 	// Find region id for a span from its adjacent spans
-	bool SetRegionIdFromAdjacency(const OpenSpanKey& Key, const std::vector<OpenSpanKey>* IgnoredNeighbours = nullptr);
+	bool SetRegionIdFromAdjacency(const OpenSpanKey& Key, const std::vector<OpenSpanKey>* IgnoredNeighbors = nullptr);
 
 	// Get a reference of region map
 	RegionMapType& GetRegionMapRef();
 
 private:
-	RVoxelizer* Voxelizer;
+	RNavMeshGenerator* NavMeshGenerator;
 
 	RegionMapType RegionMap;
 };

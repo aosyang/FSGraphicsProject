@@ -7,10 +7,10 @@
 #include "RRegionData.h"
 
 #include "Core/StdHelper.h"
-#include "RVoxelizer.h"
+#include "RNavMeshGenerator.h"
 
-RRegionData::RRegionData(RVoxelizer* InVoxelizer)
-	: Voxelizer(InVoxelizer)
+RRegionData::RRegionData(RNavMeshGenerator* InVoxelizer)
+	: NavMeshGenerator(InVoxelizer)
 {
 }
 
@@ -33,38 +33,38 @@ void RRegionData::SetRegionId(const OpenSpanKey& Key, int RegionId)
 	RegionMap[Key] = RegionId;
 }
 
-bool RRegionData::SetRegionIdFromAdjacency(const OpenSpanKey& Key, const std::vector<OpenSpanKey>* IgnoredNeighbours /*= nullptr*/)
+bool RRegionData::SetRegionIdFromAdjacency(const OpenSpanKey& Key, const std::vector<OpenSpanKey>* IgnoredNeighbors /*= nullptr*/)
 {
-	auto& Span = Voxelizer->GetOpenSpanByKey(Key);
+	auto& Span = NavMeshGenerator->GetOpenSpanByKey(Key);
 	int DiagonalRegionId = -1;
-	for (int NeighbourIdx = 0; NeighbourIdx < 4; NeighbourIdx++)
+	for (int NeighborIdx = 0; NeighborIdx < 4; NeighborIdx++)
 	{
-		int NeighbourSpanIndex = Span.NeighbourLink[NeighbourIdx];
-		if (NeighbourSpanIndex == -1)
+		int NeighborSpanIndex = Span.NeighborLink[NeighborIdx];
+		if (NeighborSpanIndex == -1)
 		{
 			continue;
 		}
 
-		int nx = Key.x + RVoxelizer::NeighbourOffset[NeighbourIdx].x;
-		int nz = Key.z + RVoxelizer::NeighbourOffset[NeighbourIdx].z;
+		int nx = Key.x + RNavMeshGenerator::NeighborOffset[NeighborIdx].x;
+		int nz = Key.z + RNavMeshGenerator::NeighborOffset[NeighborIdx].z;
 
-		OpenSpanKey NeighbourKey(nx, nz, NeighbourSpanIndex);
-		if (IgnoredNeighbours && StdContains(*IgnoredNeighbours, NeighbourKey))
+		OpenSpanKey NeighborKey(nx, nz, NeighborSpanIndex);
+		if (IgnoredNeighbors && StdContains(*IgnoredNeighbors, NeighborKey))
 		{
 			continue;
 		}
 
-		int NeighbourRegionId = FindOrAddRegionId(NeighbourKey);
-		if (NeighbourRegionId != -1)
+		int NeighborRegionId = FindOrAddRegionId(NeighborKey);
+		if (NeighborRegionId != -1)
 		{
-			SetRegionId(Key, NeighbourRegionId);
+			SetRegionId(Key, NeighborRegionId);
 			return true;
 		}
 
 		if (DiagonalRegionId == -1)
 		{
 			// Diagonal searching pattern:
-			// (x: current span; n: neighbour span; o: diagonal span)
+			// (x: current span; n: neighbor span; o: diagonal span)
 			//
 			// o n o         o   o
 			//   x     and   n x n
@@ -72,7 +72,7 @@ bool RRegionData::SetRegionIdFromAdjacency(const OpenSpanKey& Key, const std::ve
 			// 
 
 			int OffsetIdx[2];
-			if (NeighbourIdx % 2 == 0)
+			if (NeighborIdx % 2 == 0)
 			{
 				OffsetIdx[0] = 1;
 				OffsetIdx[1] = 3;
@@ -85,23 +85,23 @@ bool RRegionData::SetRegionIdFromAdjacency(const OpenSpanKey& Key, const std::ve
 
 			for (int i = 0; i < 2; i++)
 			{
-				OpenSpanKey DiagonalNeighbourKey = Voxelizer->GetNeighbourSpanByIndex(NeighbourKey, OffsetIdx[i]);
+				OpenSpanKey DiagonalNeighborKey = NavMeshGenerator->GetNeighborSpanByIndex(NeighborKey, OffsetIdx[i]);
 
-				if (IgnoredNeighbours && StdContains(*IgnoredNeighbours, DiagonalNeighbourKey))
+				if (IgnoredNeighbors && StdContains(*IgnoredNeighbors, DiagonalNeighborKey))
 				{
 					continue;
 				}
 
-				if (DiagonalNeighbourKey.IsValid())
+				if (DiagonalNeighborKey.IsValid())
 				{
-					DiagonalRegionId = FindOrAddRegionId(DiagonalNeighbourKey);
+					DiagonalRegionId = FindOrAddRegionId(DiagonalNeighborKey);
 					break;
 				}
 			}
 		}
 	}
 
-	// Diagonal neighbours
+	// Diagonal neighbors
 	if (DiagonalRegionId != -1)
 	{
 		SetRegionId(Key, DiagonalRegionId);

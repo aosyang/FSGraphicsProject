@@ -10,7 +10,7 @@
 #include "RVoxelizerDataType.h"
 #include "RNavMeshData.h"
 
-#include "RVoxelizerDebugger.h"
+#include "RNavMeshGenDebugger.h"
 
 #include <vector>
 #include <set>
@@ -34,12 +34,12 @@ struct EdgePointData
 typedef std::vector<EdgePointData> EdgePointCollection;
 
 
-/// Scene voxelizer
-class RVoxelizer
+/// Navmesh generator
+class RNavMeshGenerator
 {
 public:
-	RVoxelizer();
-	~RVoxelizer();
+	RNavMeshGenerator();
+	~RNavMeshGenerator();
 
 	void Initialize(RScene* Scene);
 
@@ -51,16 +51,16 @@ public:
 	HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key);
 	const HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key) const;
 
-	OpenSpanKey GetNeighbourSpanByIndex(const OpenSpanKey& Key, int OffsetIndex) const;
+	OpenSpanKey GetNeighborSpanByIndex(const OpenSpanKey& Key, int OffsetIndex) const;
 
 	// Coordinates for all offsets of neightbours
-	static const GridCoord	NeighbourOffset[];
+	static const GridCoord	NeighborOffset[];
 
 private:
 	void GenerateHeightfieldColumns(const std::vector<RSceneObject*>& SceneObjects);
 
-	// Generate neighbour data after we have open spans for all columns 
-	void GenerateOpenSpanNeighbourData();
+	// Generate neighbor data after we have open spans for all columns 
+	void GenerateOpenSpanNeighborData();
 
 	// Mark each area with its distance to a closest border span
 	void GenerateDistanceField();
@@ -81,7 +81,7 @@ private:
 	RAabb CalculateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z) const;
 
 	// Returns if a character can navigate between given open spans
-	bool IsValidNeighbourSpan(const HeightfieldOpenSpan& ThisOpenSpan, const HeightfieldOpenSpan& NeighbourOpenSpan) const;
+	bool IsValidNeighborSpan(const HeightfieldOpenSpan& ThisOpenSpan, const HeightfieldOpenSpan& NeighborOpenSpan) const;
 
 	// Returns center location of a cell
 	RVec3 GetCellCenter(int x, int y, int z) const;
@@ -118,7 +118,7 @@ private:
 
 	RNavMeshData NavMeshData;
 
-	RVoxelizerDebugger Debugger;
+	RNavMeshGenDebugger Debugger;
 
 	RVec3 QueryStart;
 	RVec3 QueryGoal;

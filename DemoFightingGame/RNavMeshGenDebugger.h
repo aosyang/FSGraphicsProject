@@ -19,7 +19,7 @@ struct DebugLineData
 	RVec3 End;
 };
 
-class RVoxelizerDebugger
+class RNavMeshGenDebugger
 {
 public:
 	void DrawRegion(int RegionId);
@@ -34,7 +34,7 @@ private:
 };
 
 
-FORCEINLINE void RVoxelizerDebugger::AddRegionEdge(int RegionId, const RVec3& Start, const RVec3& End)
+FORCEINLINE void RNavMeshGenDebugger::AddRegionEdge(int RegionId, const RVec3& Start, const RVec3& End)
 {
 	if (RegionDebugLines.size() < RegionId + 1)
 	{
@@ -45,7 +45,7 @@ FORCEINLINE void RVoxelizerDebugger::AddRegionEdge(int RegionId, const RVec3& St
 	PersistentDebugLines.emplace(PersistentDebugLines.end(), Start, End);
 }
 
-FORCEINLINE void RVoxelizerDebugger::AddPersistentLine(const RVec3& Start, const RVec3& End)
+FORCEINLINE void RNavMeshGenDebugger::AddPersistentLine(const RVec3& Start, const RVec3& End)
 {
 	PersistentLines.emplace(PersistentLines.end(), Start, End);
 }

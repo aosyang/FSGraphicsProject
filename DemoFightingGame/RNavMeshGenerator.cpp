@@ -6,7 +6,7 @@
 
 #include "Rhino.h"
 
-#include "RVoxelizer.h"
+#include "RNavMeshGenerator.h"
 #include "Core/RAabb.h"
 #include "RenderSystem/RDebugRenderer.h"
 
@@ -135,9 +135,9 @@ namespace
 
 const OpenSpanKey OpenSpanKey::Invalid(-1, -1, -1);
 
-const GridCoord RVoxelizer::NeighbourOffset[8] =
+const GridCoord RNavMeshGenerator::NeighborOffset[8] =
 {
-	// Direct neighbour grids
+	// Direct neighbor grids
 	{-1,  0 },
 	{ 0,  1 },
 	{ 1,  0 },
@@ -151,7 +151,7 @@ const GridCoord RVoxelizer::NeighbourOffset[8] =
 };
 
 
-RVoxelizer::RVoxelizer()
+RNavMeshGenerator::RNavMeshGenerator()
 	: DebugDistanceField(0)
 	, CellDimension(100.0f, 20.0f, 100.0f)
 	, MinTraversableHeight(200.0f)
@@ -161,16 +161,16 @@ RVoxelizer::RVoxelizer()
 	MaxStepNumCells = (int)floor(MaxStepHeight / CellDimension.Y());
 }
 
-RVoxelizer::~RVoxelizer()
+RNavMeshGenerator::~RNavMeshGenerator()
 {
 	// Unbind all debug key functions
 	RInput.UnbindKeyStateEvents(VK_OEM_4, EBufferedKeyState::Pressed);
 	RInput.UnbindKeyStateEvents(VK_OEM_6, EBufferedKeyState::Pressed);
 }
 
-void RVoxelizer::Initialize(RScene* Scene)
+void RNavMeshGenerator::Initialize(RScene* Scene)
 {
-	RLog("Initalizing voxelizer from static level meshes.\n");
+	RLog("Initalizing navmesh generator from static level meshes.\n");
 
 	// Measure scene size
 	SceneBounds = RAabb::Default;
@@ -196,7 +196,7 @@ void RVoxelizer::Initialize(RScene* Scene)
 		Heightfield.Resize(CellNumX, CellNumZ);
 
 		GenerateHeightfieldColumns(SceneObjects);
-		GenerateOpenSpanNeighbourData();
+		GenerateOpenSpanNeighborData();
 		GenerateDistanceField();
 		GenerateRegions();
 		GenerateRegionContours();
@@ -217,13 +217,13 @@ void RVoxelizer::Initialize(RScene* Scene)
 	}
 
 	// Debug key '['
-	RInput.BindKeyStateEvent(VK_OEM_4, EBufferedKeyState::Pressed, this, &RVoxelizer::IncreaseDebugDistanceFieldLevel);
+	RInput.BindKeyStateEvent(VK_OEM_4, EBufferedKeyState::Pressed, this, &RNavMeshGenerator::IncreaseDebugDistanceFieldLevel);
 
 	// Debug key ']'
-	RInput.BindKeyStateEvent(VK_OEM_6, EBufferedKeyState::Pressed, this, &RVoxelizer::DecreaseDebugDistanceFieldLevel);
+	RInput.BindKeyStateEvent(VK_OEM_6, EBufferedKeyState::Pressed, this, &RNavMeshGenerator::DecreaseDebugDistanceFieldLevel);
 }
 
-void RVoxelizer::Render()
+void RNavMeshGenerator::Render()
 {
 	GDebugRenderer.DrawAabb(SceneBounds);
 
@@ -314,21 +314,21 @@ void RVoxelizer::Render()
 
 			for (int i = 0; i < NUM_NEIGHBOUR_SPANS; i++)
 			{
-				int NeighbourLinkIndex = OpenSpan.NeighbourLink[i];
-				if (NeighbourLinkIndex != -1)
+				int NeighborLinkIndex = OpenSpan.NeighborLink[i];
+				if (NeighborLinkIndex != -1)
 				{
-					const int n_x = Column.x + NeighbourOffset[i].x;
-					const int n_z = Column.z + NeighbourOffset[i].z;
+					const int n_x = Column.x + NeighborOffset[i].x;
+					const int n_z = Column.z + NeighborOffset[i].z;
 
 					if (n_x >= 0 && n_x < CellNumX &&
 						n_z >= 0 && n_z < CellNumZ)
 					{
-						int NeighbourIndex = n_x * CellNumZ + n_z;
-						const HeightfieldOpenSpan& NeighbourOpenSpan = Heightfield[NeighbourIndex].OpenSpans[NeighbourLinkIndex];
-						int NeighbourStart = NeighbourOpenSpan.CellRowStart;
+						int NeighborIndex = n_x * CellNumZ + n_z;
+						const HeightfieldOpenSpan& NeighborOpenSpan = Heightfield[NeighborIndex].OpenSpans[NeighborLinkIndex];
+						int NeighborStart = NeighborOpenSpan.CellRowStart;
 
 						RVec3 Start = GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z);
-						RVec3 End = GetCellCenter(n_x, NeighbourStart, n_z);
+						RVec3 End = GetCellCenter(n_x, NeighborStart, n_z);
 
 						GDebugRenderer.DrawLine(Start, End, RColor(1.0f, 0.5f, 0.5f));
 					}
@@ -341,7 +341,7 @@ void RVoxelizer::Render()
 #endif
 }
 
-void RVoxelizer::DebugProjectPointToNavmesh(const RVec3& Point) const
+void RNavMeshGenerator::DebugProjectPointToNavmesh(const RVec3& Point) const
 {
 	NavMeshProjectionResult Result = NavMeshData.ProjectPointToNavmesh(Point);
 	if (Result.Triangle != -1)
@@ -358,13 +358,13 @@ void RVoxelizer::DebugProjectPointToNavmesh(const RVec3& Point) const
 	GDebugRenderer.DrawSphere(Point, 50);
 }
 
-void RVoxelizer::DebugSetGoalPoint(const RVec3& Point)
+void RNavMeshGenerator::DebugSetGoalPoint(const RVec3& Point)
 {
 	QueryGoal = Point;
 	NavMeshData.QueryPath(QueryStart, QueryGoal, TestPath);
 }
 
-void RVoxelizer::GenerateHeightfieldColumns(const std::vector<RSceneObject*>& SceneObjects)
+void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObject*>& SceneObjects)
 {
 	for (int x = 0; x < CellNumX; x++)
 	{
@@ -499,7 +499,7 @@ void RVoxelizer::GenerateHeightfieldColumns(const std::vector<RSceneObject*>& Sc
 	}
 }
 
-void RVoxelizer::GenerateOpenSpanNeighbourData()
+void RNavMeshGenerator::GenerateOpenSpanNeighborData()
 {
 	for (int x = 0; x < CellNumX; x++)
 	{
@@ -510,44 +510,44 @@ void RVoxelizer::GenerateOpenSpanNeighbourData()
 
 			for (auto& ThisOpenSpan : Column.OpenSpans)
 			{
-				int NumValidNeighbours = 0;
-				for (int NeighbourLinkIndex = 0; NeighbourLinkIndex < 8; NeighbourLinkIndex++)
+				int NumValidNeighbors = 0;
+				for (int NeighborLinkIndex = 0; NeighborLinkIndex < 8; NeighborLinkIndex++)
 				{
-					// Neighbour coordinates
-					const int n_x = x + NeighbourOffset[NeighbourLinkIndex].x;
-					const int n_z = z + NeighbourOffset[NeighbourLinkIndex].z;
+					// Neighbor coordinates
+					const int n_x = x + NeighborOffset[NeighborLinkIndex].x;
+					const int n_z = z + NeighborOffset[NeighborLinkIndex].z;
 
 					if (n_x >= 0 && n_x < CellNumX &&
 						n_z >= 0 && n_z < CellNumZ)
 					{
-						int NeighbourIndex = n_x * CellNumZ + n_z;
+						int NeighborIndex = n_x * CellNumZ + n_z;
 
-						if (NeighbourLinkIndex < NUM_NEIGHBOUR_SPANS)
+						if (NeighborLinkIndex < NUM_NEIGHBOR_SPANS)
 						{
-							// Check direct neighbours and add valid ones to the neighbour link list
-							int NeighbourOpenSpanIndex = 0;
+							// Check direct neighbors and add valid ones to the neighbor link list
+							int NeighborOpenSpanIndex = 0;
 
-							// Find linked neighbour open spans
-							for (const auto& NeighbourOpenSpan : Heightfield[NeighbourIndex].OpenSpans)
+							// Find linked neighbor open spans
+							for (const auto& NeighborOpenSpan : Heightfield[NeighborIndex].OpenSpans)
 							{
-								if (IsValidNeighbourSpan(ThisOpenSpan, NeighbourOpenSpan))
+								if (IsValidNeighborSpan(ThisOpenSpan, NeighborOpenSpan))
 								{
-									ThisOpenSpan.NeighbourLink[NeighbourLinkIndex] = NeighbourOpenSpanIndex;
-									NumValidNeighbours++;
+									ThisOpenSpan.NeighborLink[NeighborLinkIndex] = NeighborOpenSpanIndex;
+									NumValidNeighbors++;
 									break;
 								}
 
-								NeighbourOpenSpanIndex++;
+								NeighborOpenSpanIndex++;
 							}
 						}
 						else
 						{
-							// Diagonal neighbours are only used to check for border spans
-							for (const auto& NeighbourOpenSpan : Heightfield[NeighbourIndex].OpenSpans)
+							// Diagonal neighbors are only used to check for border spans
+							for (const auto& NeighborOpenSpan : Heightfield[NeighborIndex].OpenSpans)
 							{
-								if (IsValidNeighbourSpan(ThisOpenSpan, NeighbourOpenSpan))
+								if (IsValidNeighborSpan(ThisOpenSpan, NeighborOpenSpan))
 								{
-									NumValidNeighbours++;
+									NumValidNeighbors++;
 									break;
 								}
 							}
@@ -555,14 +555,14 @@ void RVoxelizer::GenerateOpenSpanNeighbourData()
 					}
 				}
 
-				// Span is a border if at least one of eight neighbours is not walkable from it
-				ThisOpenSpan.bBorder = (NumValidNeighbours < 8);
+				// Span is a border if at least one of eight neighbors is not walkable from it
+				ThisOpenSpan.bBorder = (NumValidNeighbors < 8);
 			}
 		}
 	}
 }
 
-void RVoxelizer::GenerateDistanceField()
+void RNavMeshGenerator::GenerateDistanceField()
 {
 	// TODO: preallocate data with total open span count
 	std::queue<OpenSpanKey> PendingSpans;
@@ -595,7 +595,7 @@ void RVoxelizer::GenerateDistanceField()
 
 	int NumSpansProcessed = 0;
 
-	// Loop through all neighbour spans and add them to the end of the container
+	// Loop through all neighbor spans and add them to the end of the container
 	while (PendingSpans.size() != 0)
 	{
 		// Get one element from the queue in the front
@@ -607,21 +607,21 @@ void RVoxelizer::GenerateDistanceField()
 
 		for (int i = 0; i < 4; i++)
 		{
-			int NeighbourSpanIndex = Column.OpenSpans[ThisSpanKey.span_idx].NeighbourLink[i];
-			if (NeighbourSpanIndex != -1)
+			int NeighborSpanIndex = Column.OpenSpans[ThisSpanKey.span_idx].NeighborLink[i];
+			if (NeighborSpanIndex != -1)
 			{
 				// New span data with the distance field
 				OpenSpanKey NewKey(
-					ThisSpanKey.x + NeighbourOffset[i].x,
-					ThisSpanKey.z + NeighbourOffset[i].z,
-					NeighbourSpanIndex);
+					ThisSpanKey.x + NeighborOffset[i].x,
+					ThisSpanKey.z + NeighborOffset[i].z,
+					NeighborSpanIndex);
 
-				// Neighbour distance = current distance + 1
+				// Neighbor distance = current distance + 1
 				int NewDistance = SpanDistanceMap.find(ThisSpanKey)->second + 1;
 
 				auto Iter = SpanDistanceMap.find(NewKey);
 
-				// If this neighbour is a new span, added it to the queue
+				// If this neighbor is a new span, added it to the queue
 				if (Iter == SpanDistanceMap.end())
 				{
 					PendingSpans.emplace(NewKey);
@@ -673,7 +673,7 @@ void RVoxelizer::GenerateDistanceField()
 	DebugDistanceField = MaxDistanceField;
 }
 
-void RVoxelizer::GenerateRegions()
+void RNavMeshGenerator::GenerateRegions()
 {
 	int NumRegions = 0;
 	RRegionData RegionData(this);
@@ -699,37 +699,37 @@ void RVoxelizer::GenerateRegions()
 				{
 					if (ThisOpenSpan.DistanceField == DistanceFieldIdx)
 					{
-						// 1. At least one neighbour is from a previous distance field: Set region id to neighbour's region id
-						// 2. Neighbour has no direct connection to previous spans. Possibly:
+						// 1. At least one neighbor is from a previous distance field: Set region id to neighbor's region id
+						// 2. Neighbor has no direct connection to previous spans. Possibly:
 						//    - Span is connecting to one or more existing regions through other spans
 						//    - Span is forming a new region (if no connections are made to existing regions)
 
 						OpenSpanKey ThisKey(x, z, SpanIndex);
 						int ThisRegionId = RegionData.FindOrAddRegionId(ThisKey);
 
-						for (int NeighbourIdx = 0; NeighbourIdx < 4; NeighbourIdx++)
+						for (int NeighborIdx = 0; NeighborIdx < 4; NeighborIdx++)
 						{
-							int NeighbourSpanIndex = ThisOpenSpan.NeighbourLink[NeighbourIdx];
-							if (NeighbourSpanIndex == -1)
+							int NeighborSpanIndex = ThisOpenSpan.NeighborLink[NeighborIdx];
+							if (NeighborSpanIndex == -1)
 							{
 								continue;
 							}
 
-							OpenSpanKey NeighbourKey(
-								x + NeighbourOffset[NeighbourIdx].x,
-								z + NeighbourOffset[NeighbourIdx].z,
-								NeighbourSpanIndex
+							OpenSpanKey NeighborKey(
+								x + NeighborOffset[NeighborIdx].x,
+								z + NeighborOffset[NeighborIdx].z,
+								NeighborSpanIndex
 							);
 
-							int NeighbourRegionId = RegionData.FindOrAddRegionId(NeighbourKey);
-							if (NeighbourRegionId != -1)
+							int NeighborRegionId = RegionData.FindOrAddRegionId(NeighborKey);
+							if (NeighborRegionId != -1)
 							{
 								// Only set region ids if a span is next to one from previous distance field.
 								// Note: This avoids one region expanding too fast, taking up spaces next to other regions.
-								if (GetOpenSpanByKey(NeighbourKey).DistanceField > DistanceFieldIdx)
+								if (GetOpenSpanByKey(NeighborKey).DistanceField > DistanceFieldIdx)
 								{
-									RegionData.SetRegionId(ThisKey, NeighbourRegionId);
-									ThisRegionId = NeighbourRegionId;
+									RegionData.SetRegionId(ThisKey, NeighborRegionId);
+									ThisRegionId = NeighborRegionId;
 								}
 							}
 						}
@@ -816,7 +816,7 @@ void RVoxelizer::GenerateRegions()
 	}
 }
 
-void RVoxelizer::GenerateRegionContours()
+void RNavMeshGenerator::GenerateRegionContours()
 {
 	RegionEdgePoints.resize(UniqueRegionIds.size());
 
@@ -857,20 +857,20 @@ void RVoxelizer::GenerateRegionContours()
 
 		CurrentDirection++;
 		while (CurrentDirection >= 4) { CurrentDirection -= 4; }
-		int LastNeighbourRegionId = INT_MAX;
+		int LastNeighborRegionId = INT_MAX;
 
 		RLog("Begin edge searching for region %d\n", RegionId);
 		do
 		{
 			const HeightfieldOpenSpan& CurrentSpan = GetOpenSpanByKey(CurrentKey);
-			if (CurrentSpan.NeighbourLink[CurrentDirection] == -1)
+			if (CurrentSpan.NeighborLink[CurrentDirection] == -1)
 			{
 				// A mandatory point is a point shared by three or more regions including null regions
-				bool bMandatoryPoint = (LastNeighbourRegionId != INT_MAX && LastNeighbourRegionId != -1);
+				bool bMandatoryPoint = (LastNeighborRegionId != INT_MAX && LastNeighborRegionId != -1);
 
-				// No more neighbours in this direction, turn 90 to the right
+				// No more neighbors in this direction, turn 90 to the right
 				AddEdge(CurrentKey, CurrentDirection, RegionId, bMandatoryPoint);
-				LastNeighbourRegionId = -1;
+				LastNeighborRegionId = -1;
 				CurrentDirection++;
 				while (CurrentDirection >= 4) { CurrentDirection -= 4; }
 			}
@@ -878,20 +878,20 @@ void RVoxelizer::GenerateRegionContours()
 			{
 				// Is facing an edge?
 				OpenSpanKey NextKey(
-					CurrentKey.x + NeighbourOffset[CurrentDirection].x,
-					CurrentKey.z + NeighbourOffset[CurrentDirection].z,
-					CurrentSpan.NeighbourLink[CurrentDirection]
+					CurrentKey.x + NeighborOffset[CurrentDirection].x,
+					CurrentKey.z + NeighborOffset[CurrentDirection].z,
+					CurrentSpan.NeighborLink[CurrentDirection]
 				);
 
 				const HeightfieldOpenSpan& NextSpan = GetOpenSpanByKey(NextKey);
 				if (NextSpan.RegionId != CurrentSpan.RegionId)
 				{
 					// A mandatory point is a point shared by three or more regions including null regions
-					bool bMandatoryPoint = (LastNeighbourRegionId != INT_MAX && LastNeighbourRegionId != NextSpan.RegionId);
+					bool bMandatoryPoint = (LastNeighborRegionId != INT_MAX && LastNeighborRegionId != NextSpan.RegionId);
 					
 					// Region edge, turn 90 to the right
 					AddEdge(CurrentKey, CurrentDirection, RegionId, bMandatoryPoint);
-					LastNeighbourRegionId = NextSpan.RegionId;
+					LastNeighborRegionId = NextSpan.RegionId;
 					CurrentDirection++;
 					while (CurrentDirection >= 4) { CurrentDirection -= 4; }
 				}
@@ -961,7 +961,7 @@ void RVoxelizer::GenerateRegionContours()
 }
 
 
-void RVoxelizer::TriangulateRegions()
+void RNavMeshGenerator::TriangulateRegions()
 {
 	int RegionId = 0;
 	for (auto& TraverseEdges : RegionEdgePoints)
@@ -1022,21 +1022,21 @@ void RVoxelizer::TriangulateRegions()
 	NavMeshData.QueryPath(QueryStart, QueryGoal, TestPath);
 }
 
-OpenSpanKey RVoxelizer::FindRegionEdgeInDirection(const OpenSpanKey& Key, int DirectionIdx /*= 0*/) const
+OpenSpanKey RNavMeshGenerator::FindRegionEdgeInDirection(const OpenSpanKey& Key, int DirectionIdx /*= 0*/) const
 {
 	const HeightfieldOpenSpan* RegionSpan = &GetOpenSpanByKey(Key);
 
 	int CurrentSpanIdx = Key.span_idx;
 
 	// Move in one direction until we find an edge
-	int NextSpanIdx = RegionSpan->NeighbourLink[DirectionIdx];
+	int NextSpanIdx = RegionSpan->NeighborLink[DirectionIdx];
 	int nx = Key.x, nz = Key.z;
 	while (NextSpanIdx != -1)
 	{
 		OpenSpanKey CurrentKey(nx, nz, CurrentSpanIdx);
 
-		nx += NeighbourOffset[DirectionIdx].x;
-		nz += NeighbourOffset[DirectionIdx].z;
+		nx += NeighborOffset[DirectionIdx].x;
+		nz += NeighborOffset[DirectionIdx].z;
 		OpenSpanKey NextKey(nx, nz, NextSpanIdx);
 		const HeightfieldOpenSpan& NextSpan = GetOpenSpanByKey(NextKey);
 		if (NextSpan.RegionId != RegionSpan->RegionId)
@@ -1046,13 +1046,13 @@ OpenSpanKey RVoxelizer::FindRegionEdgeInDirection(const OpenSpanKey& Key, int Di
 
 		RegionSpan = &NextSpan;
 		CurrentSpanIdx = NextSpanIdx;
-		NextSpanIdx = RegionSpan->NeighbourLink[DirectionIdx];
+		NextSpanIdx = RegionSpan->NeighborLink[DirectionIdx];
 	}
 
 	return OpenSpanKey(nx, nz, CurrentSpanIdx);
 }
 
-void RVoxelizer::AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMendatoryPoint)
+void RNavMeshGenerator::AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMendatoryPoint)
 {
 	//RLog("Edge found! loc: (%d, %d), dir: %d\n", Key.x, Key.z, DirectionIdx);
 
@@ -1079,7 +1079,7 @@ void RVoxelizer::AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId,
 	RegionEdgePoints[RegionId].push_back({ EdgePoint, bMendatoryPoint });
 }
 
-RAabb RVoxelizer::CalculateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z) const
+RAabb RNavMeshGenerator::CalculateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z) const
 {
 	RAabb Result;
 	float Scale = 1.0f;
@@ -1094,13 +1094,13 @@ RAabb RVoxelizer::CalculateBoundsForSpan(const HeightfieldSolidSpan& Span, int x
 	return Result;
 }
 
-bool RVoxelizer::IsValidNeighbourSpan(const HeightfieldOpenSpan& ThisOpenSpan, const HeightfieldOpenSpan& NeighbourOpenSpan) const
+bool RNavMeshGenerator::IsValidNeighborSpan(const HeightfieldOpenSpan& ThisOpenSpan, const HeightfieldOpenSpan& NeighborOpenSpan) const
 {
-	return abs(NeighbourOpenSpan.CellRowStart - ThisOpenSpan.CellRowStart) <= MaxStepNumCells &&
-		   (NeighbourOpenSpan.CellRowEnd - ThisOpenSpan.CellRowStart) > MinTraversableNumCells;
+	return abs(NeighborOpenSpan.CellRowStart - ThisOpenSpan.CellRowStart) <= MaxStepNumCells &&
+		   (NeighborOpenSpan.CellRowEnd - ThisOpenSpan.CellRowStart) > MinTraversableNumCells;
 }
 
-HeightfieldOpenSpan& RVoxelizer::GetOpenSpanByKey(const OpenSpanKey& Key)
+HeightfieldOpenSpan& RNavMeshGenerator::GetOpenSpanByKey(const OpenSpanKey& Key)
 {
 	assert(Key.x >= 0 && Key.x < CellNumX && Key.z >= 0 && Key.z < CellNumZ);
 	int Index = Key.x * CellNumZ + Key.z;
@@ -1111,30 +1111,30 @@ HeightfieldOpenSpan& RVoxelizer::GetOpenSpanByKey(const OpenSpanKey& Key)
 	return OpenSpans[Key.span_idx];
 }
 
-const HeightfieldOpenSpan& RVoxelizer::GetOpenSpanByKey(const OpenSpanKey& Key) const
+const HeightfieldOpenSpan& RNavMeshGenerator::GetOpenSpanByKey(const OpenSpanKey& Key) const
 {
-	return const_cast<RVoxelizer*>(this)->GetOpenSpanByKey(Key);
+	return const_cast<RNavMeshGenerator*>(this)->GetOpenSpanByKey(Key);
 }
 
-OpenSpanKey RVoxelizer::GetNeighbourSpanByIndex(const OpenSpanKey& Key, int OffsetIndex) const
+OpenSpanKey RNavMeshGenerator::GetNeighborSpanByIndex(const OpenSpanKey& Key, int OffsetIndex) const
 {
 	auto& Span = GetOpenSpanByKey(Key);
 
-	assert(OffsetIndex >= 0 && OffsetIndex < NUM_NEIGHBOUR_SPANS);
-	int NeighbourSpanIdx = Span.NeighbourLink[OffsetIndex];
-	if (NeighbourSpanIdx != -1)
+	assert(OffsetIndex >= 0 && OffsetIndex < NUM_NEIGHBOR_SPANS);
+	int NeighborSpanIdx = Span.NeighborLink[OffsetIndex];
+	if (NeighborSpanIdx != -1)
 	{
 		return OpenSpanKey(
-			Key.x + NeighbourOffset[OffsetIndex].x,
-			Key.z + NeighbourOffset[OffsetIndex].z,
-			NeighbourSpanIdx
+			Key.x + NeighborOffset[OffsetIndex].x,
+			Key.z + NeighborOffset[OffsetIndex].z,
+			NeighborSpanIdx
 		);
 	}
 
 	return OpenSpanKey::Invalid;
 }
 
-RVec3 RVoxelizer::GetCellCenter(int x, int y, int z) const
+RVec3 RNavMeshGenerator::GetCellCenter(int x, int y, int z) const
 {
 	assert(x >= 0 && x < CellNumX && y >= 0 && y < CellNumY && z >= 0 && z < CellNumZ);
 	return RVec3(
@@ -1144,7 +1144,7 @@ RVec3 RVoxelizer::GetCellCenter(int x, int y, int z) const
 	);
 }
 
-void RVoxelizer::IncreaseDebugDistanceFieldLevel()
+void RNavMeshGenerator::IncreaseDebugDistanceFieldLevel()
 {
 	DebugDistanceField++;
 	if (DebugDistanceField > MaxDistanceField)
@@ -1155,7 +1155,7 @@ void RVoxelizer::IncreaseDebugDistanceFieldLevel()
 	RLog("Drawing debug distance field %d\n", DebugDistanceField);
 }
 
-void RVoxelizer::DecreaseDebugDistanceFieldLevel()
+void RNavMeshGenerator::DecreaseDebugDistanceFieldLevel()
 {
 	DebugDistanceField--;
 	if (DebugDistanceField < 0)

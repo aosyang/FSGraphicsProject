@@ -11,7 +11,7 @@
 
 #include "FTGPlayerController.h"
 #include "AIFighterLogic.h"
-#include "RVoxelizer.h"
+#include "RNavMeshGenerator.h"
 
 const static int MaxNumAIs = 0;
 
@@ -47,6 +47,6 @@ private:
 	bool					m_FreeFlyMode;
 	RFreeFlyCameraControl*	m_FreeFlyCameraControl;
 
-	RVoxelizer				m_Voxelizer;
+	RNavMeshGenerator		NavMeshGenerator;
 };
 
