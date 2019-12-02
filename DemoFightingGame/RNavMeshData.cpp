@@ -8,6 +8,44 @@
 
 #include "RNavMeshData.h"
 
+namespace
+{
+	// Returns the clockwise of three points on the XZ plane
+	int CCW2D_XZ(const RVec3& p0, const RVec3& p1, const RVec3& p2)
+	{
+		float d = RVec3::Cross(p1 - p0, p2 - p0).Y();
+		return d > 0 ? 1 : (d < 0 ? -1 : 0);
+	}
+
+	// Checks if two line segments on XZ plane intersect
+	bool CheckLineSegmentsIntersection2D_XZ(const RVec3& p0, const RVec3& p1, const RVec3& p2, const RVec3& p3)
+	{
+		// Project all points to XZ plane
+		RVec3 a(p0); a.SetY(0);
+		RVec3 b(p1); b.SetY(0);
+		RVec3 c(p2); c.SetY(0);
+		RVec3 d(p3); d.SetY(0);
+
+		int d0 = CCW2D_XZ(a, c, d);
+		int d1 = CCW2D_XZ(b, c, d);
+
+		if (d0 == d1 || d0 * d1 == 0)
+		{
+			return false;
+		}
+
+		int d2 = CCW2D_XZ(a, b, c);
+		int d3 = CCW2D_XZ(a, b, d);
+
+		if (d2 == d3 || d2 * d3 == 0)
+		{
+			return false;
+		}
+
+		return true;
+	}
+}
+
 void NavMeshPointData::AddNeighbor(int NeighborId, const RVec3& NeighborPosition)
 {
 	assert(NumNeighbors < MaxNumNeighbors);
@@ -23,6 +61,10 @@ void RNavMeshData::AddTriangle(const RVec3& p0, const RVec3& p1, const RVec3& p2
 	int idx0 = FindOrAddPoint(p0);
 	int idx1 = FindOrAddPoint(p1);
 	int idx2 = FindOrAddPoint(p2);
+
+	AddEdge(idx0, idx1);
+	AddEdge(idx0, idx2);
+	AddEdge(idx1, idx2);
 
 	MakeNeighbors(idx0, idx1);
 	MakeNeighbors(idx0, idx2);
@@ -54,6 +96,7 @@ bool RNavMeshData::QueryPath(const RVec3& Start, const RVec3& Goal, std::vector<
 	}
 
 	OutPath = AStarPathfinder.Evaluate(this, StartResult, GoalResult);
+	OutPath = StringPullPath(OutPath);
 
 	return OutPath.size() > 0;
 }
@@ -103,6 +146,94 @@ void RNavMeshData::MakeNeighbors(int PointId0, int PointId1)
 			ThisPointData.AddNeighbor(OtherPointId, NavMeshPoints[OtherPointId].WorldPosition);
 		}
 	}
+}
+
+void RNavMeshData::AddEdge(int PointId0, int PointId1)
+{
+	NavMeshEdgeData NewEdge(PointId0, PointId1);
+
+	auto Iter = std::find(NavMeshEdges.begin(), NavMeshEdges.end(), NewEdge);
+	if (Iter != NavMeshEdges.end())
+	{
+		// If an edge exists in the edge list, it must be shared with another triangle so let's unset the 'is border' flag.
+		Iter->IsBorder = false;
+	}
+	else
+	{
+		NavMeshEdges.emplace(NavMeshEdges.begin(), NewEdge);
+	}
+}
+
+std::vector<RVec3> RNavMeshData::StringPullPath(const std::vector<RVec3>& Path)
+{
+	for (int i = 0; i < (int)Path.size() - 1; i++)
+	{
+		GDebugRenderer.DrawLine(Path[i], Path[i + 1], RColor::Yellow);
+	}
+
+	bool bFirstIntersection = true;
+
+	// Can't string pull a path further if there are only two points in it
+	if (Path.size() <= 2)
+	{
+		return Path;
+	}
+
+	std::vector<RVec3> Result;
+	Result.push_back(Path[0]);
+
+	int BeginIdx = 0;
+	int EndIdx = 2;
+	while (EndIdx < (int)Path.size())
+	{
+		bool bCrossingEdge = false;
+		RVec3 PathA(Path[BeginIdx]);
+		RVec3 PathB(Path[EndIdx]);
+
+		for (const auto& Edge : NavMeshEdges)
+		{
+			if (!Edge.IsBorder)
+			{
+				continue;
+			}
+
+			RVec3 EdgeA(NavMeshPoints[Edge.p0].WorldPosition);
+			RVec3 EdgeB(NavMeshPoints[Edge.p1].WorldPosition);
+
+			// TODO: This check may involve unwanted edges from other layers
+			if (CheckLineSegmentsIntersection2D_XZ(PathA, PathB, EdgeA, EdgeB))
+			{
+				if (bFirstIntersection)
+				{
+					GDebugRenderer.DrawLine(PathA, PathB, RColor::Green);
+					GDebugRenderer.DrawLine(EdgeA, EdgeB, RColor::Red);
+
+					bFirstIntersection = false;
+				}
+
+				bCrossingEdge = true;
+				break;
+			}
+		}
+
+		if (bCrossingEdge)
+		{
+			Result.push_back(Path[EndIdx - 1]);
+
+			BeginIdx = EndIdx - 1;
+			EndIdx = BeginIdx + 2;
+		}
+		else
+		{
+			EndIdx++;
+		}
+	}
+
+	// Add the last point to the result path
+	assert(EndIdx - 1 < (int)Path.size());
+	Result.push_back(Path[EndIdx - 1]);
+
+	return Result;
 }
 
 NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point) const

@@ -41,9 +41,11 @@ public:
 	RNavMeshGenerator();
 	~RNavMeshGenerator();
 
-	void Initialize(RScene* Scene);
+	// Build the navmesh for a scene
+	void Build(RScene* Scene);
 
-	void Render();
+	// Draw debug geometries for the navmesh generator
+	void DebugRender();
 
 	void DebugProjectPointToNavmesh(const RVec3& Point) const;
 	void DebugSetGoalPoint(const RVec3& Point);
@@ -76,7 +78,8 @@ private:
 	// Going in one direction and find a span at the edge of the region of a given span
 	OpenSpanKey FindRegionEdgeInDirection(const OpenSpanKey& Key, int DirectionIdx = 0) const;
 
-	void AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMendatoryPoint);
+	// Add a new point as an edge point, indicating this point is shared by two or more regions.
+	void AddEdgePoint(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMendatoryPoint);
 
 	RAabb CalculateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z) const;
 
@@ -87,6 +90,8 @@ private:
 	RVec3 GetCellCenter(int x, int y, int z) const;
 
 private:
+	void DebugDrawPathQuery() const;
+
 	void IncreaseDebugDistanceFieldLevel();
 	void DecreaseDebugDistanceFieldLevel();
 

@@ -168,7 +168,7 @@ RNavMeshGenerator::~RNavMeshGenerator()
 	RInput.UnbindKeyStateEvents(VK_OEM_6, EBufferedKeyState::Pressed);
 }
 
-void RNavMeshGenerator::Initialize(RScene* Scene)
+void RNavMeshGenerator::Build(RScene* Scene)
 {
 	RLog("Initalizing navmesh generator from static level meshes.\n");
 
@@ -223,22 +223,10 @@ void RNavMeshGenerator::Initialize(RScene* Scene)
 	RInput.BindKeyStateEvent(VK_OEM_6, EBufferedKeyState::Pressed, this, &RNavMeshGenerator::DecreaseDebugDistanceFieldLevel);
 }
 
-void RNavMeshGenerator::Render()
+void RNavMeshGenerator::DebugRender()
 {
 	GDebugRenderer.DrawAabb(SceneBounds);
-
-	for (int i = 0; i < (int)TestPath.size() - 1; i++)
-	{
-		GDebugRenderer.DrawLine(TestPath[i], TestPath[i + 1], RColor::Red);
-		GDebugRenderer.DrawSphere(TestPath[i], 10.0f, RColor::Red);
-		if (i == (int)TestPath.size() - 2)
-		{
-			GDebugRenderer.DrawSphere(TestPath[i + 1], 10.0f, RColor::Red);
-		}
-	}
-
-	GDebugRenderer.DrawSphere(QueryStart, 20.0f, RColor::Yellow);
-	GDebugRenderer.DrawSphere(QueryGoal, 20.0f, RColor::Yellow);
+	DebugDrawPathQuery();
 
 	{
 		static int DebugDrawRegionId = 0;
@@ -346,11 +334,11 @@ void RNavMeshGenerator::DebugProjectPointToNavmesh(const RVec3& Point) const
 	NavMeshProjectionResult Result = NavMeshData.ProjectPointToNavmesh(Point);
 	if (Result.Triangle != -1)
 	{
-		const NavMeshTriangleData& Triangle = NavMeshData.NavMeshTriangles[Result.Triangle];
+		const NavMeshTriangleData& Triangle = NavMeshData.GetNavMeshTriangleData(Result.Triangle);
 		for (int i = 0; i < 3; i++)
 		{
-			RVec3 p0 = NavMeshData.NavMeshPoints[Triangle.Points[i]].WorldPosition;
-			RVec3 p1 = NavMeshData.NavMeshPoints[Triangle.Points[(i + 1) % 3]].WorldPosition;
+			RVec3 p0 = NavMeshData.GetNavMeshPointData(Triangle.Points[i]).WorldPosition;
+			RVec3 p1 = NavMeshData.GetNavMeshPointData(Triangle.Points[(i + 1) % 3]).WorldPosition;
 			GDebugRenderer.DrawLine(p0, p1);
 		}
 	}
@@ -869,7 +857,7 @@ void RNavMeshGenerator::GenerateRegionContours()
 				bool bMandatoryPoint = (LastNeighborRegionId != INT_MAX && LastNeighborRegionId != -1);
 
 				// No more neighbors in this direction, turn 90 to the right
-				AddEdge(CurrentKey, CurrentDirection, RegionId, bMandatoryPoint);
+				AddEdgePoint(CurrentKey, CurrentDirection, RegionId, bMandatoryPoint);
 				LastNeighborRegionId = -1;
 				CurrentDirection++;
 				while (CurrentDirection >= 4) { CurrentDirection -= 4; }
@@ -890,7 +878,7 @@ void RNavMeshGenerator::GenerateRegionContours()
 					bool bMandatoryPoint = (LastNeighborRegionId != INT_MAX && LastNeighborRegionId != NextSpan.RegionId);
 					
 					// Region edge, turn 90 to the right
-					AddEdge(CurrentKey, CurrentDirection, RegionId, bMandatoryPoint);
+					AddEdgePoint(CurrentKey, CurrentDirection, RegionId, bMandatoryPoint);
 					LastNeighborRegionId = NextSpan.RegionId;
 					CurrentDirection++;
 					while (CurrentDirection >= 4) { CurrentDirection -= 4; }
@@ -1052,7 +1040,7 @@ OpenSpanKey RNavMeshGenerator::FindRegionEdgeInDirection(const OpenSpanKey& Key,
 	return OpenSpanKey(nx, nz, CurrentSpanIdx);
 }
 
-void RNavMeshGenerator::AddEdge(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMendatoryPoint)
+void RNavMeshGenerator::AddEdgePoint(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMendatoryPoint)
 {
 	//RLog("Edge found! loc: (%d, %d), dir: %d\n", Key.x, Key.z, DirectionIdx);
 
@@ -1142,6 +1130,25 @@ RVec3 RNavMeshGenerator::GetCellCenter(int x, int y, int z) const
 		SceneCenterPoint.Y() + (-0.5f * (CellNumY - 1) + y) * CellDimension.Y(),
 		SceneCenterPoint.Z() + (-0.5f * (CellNumZ - 1) + z) * CellDimension.Z()
 	);
+}
+
+void RNavMeshGenerator::DebugDrawPathQuery() const
+{
+	static const RColor PathColor = RColor::Cyan;
+	static const RColor EndPointColor = RColor::Yellow;
+
+	for (int i = 0; i < (int)TestPath.size() - 1; i++)
+	{
+		GDebugRenderer.DrawLine(TestPath[i], TestPath[i + 1], PathColor);
+		GDebugRenderer.DrawSphere(TestPath[i], 10.0f, PathColor);
+		if (i == (int)TestPath.size() - 2)
+		{
+			GDebugRenderer.DrawSphere(TestPath[i + 1], 10.0f, PathColor);
+		}
+	}
+
+	GDebugRenderer.DrawSphere(QueryStart, 20.0f, EndPointColor);
+	GDebugRenderer.DrawSphere(QueryGoal, 20.0f, EndPointColor);
 }
 
 void RNavMeshGenerator::IncreaseDebugDistanceFieldLevel()

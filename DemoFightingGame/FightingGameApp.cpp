@@ -28,7 +28,7 @@ bool FightingGameApp::Initialize()
 	DefaultScene->Initialize();
 	DefaultScene->LoadFromFile("/TestArena.rmap");
 	
-	NavMeshGenerator.Initialize(DefaultScene);
+	NavMeshGenerator.Build(DefaultScene);
 
 	m_ShadowMap.Initialize(1024, 1024);
 	m_Camera = DefaultScene->CreateSceneObjectOfType<RCamera>();
@@ -148,8 +148,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 	UpdateCameraPosition(timer.DeltaTime());
 
-	NavMeshGenerator.Render();
-	//m_Voxelizer.DebugProjectPointToNavmesh(m_Player->GetPosition());
+	NavMeshGenerator.DebugRender();
 	NavMeshGenerator.DebugSetGoalPoint(m_Player->GetPosition());
 }
 

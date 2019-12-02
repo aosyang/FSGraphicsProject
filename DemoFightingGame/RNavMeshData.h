@@ -44,6 +44,27 @@ struct NavMeshTriangleData
 	int Points[3];
 };
 
+struct NavMeshEdgeData
+{
+	NavMeshEdgeData(int _p0, int _p1)
+		: p0(_p0)
+		, p1(_p1)
+		, IsBorder(true)
+	{
+	}
+
+	bool operator==(const NavMeshEdgeData& Rhs) const
+	{
+		return (Rhs.p0 == p0 && Rhs.p1 == p1) || (Rhs.p0 == p1 && Rhs.p1 == p0);
+	}
+
+	// Indices of both points
+	int p0, p1;
+
+	// Whether the edge lies at the border of the navmesh
+	bool IsBorder;
+};
+
 struct NavMeshProjectionResult
 {
 	NavMeshProjectionResult()
@@ -62,12 +83,17 @@ public:
 	// Add a triangle to the collection of navmesh convex
 	void AddTriangle(const RVec3& p0, const RVec3& p1, const RVec3& p2, int RegionId);
 
+	// Query a path on navmesh between two points
 	bool QueryPath(const RVec3& Start, const RVec3& Goal, std::vector<RVec3>& OutPath);
 
+	// Project a point to navmesh
 	NavMeshProjectionResult ProjectPointToNavmesh(const RVec3& Point) const;
 
 	NavMeshPointData& GetNavMeshPointData(int Index);
 	const NavMeshPointData& GetNavMeshPointData(int Index) const;
+
+	NavMeshTriangleData& GetNavMeshTriangleData(int Index);
+	const NavMeshTriangleData& GetNavMeshTriangleData(int Index) const;
 
 private:
 	// Find the index of a point in navmesh point list. If the point does not exist it will be appended to the list.
@@ -76,11 +102,18 @@ private:
 	// Make two points neighbors of each other
 	void MakeNeighbors(int PointId0, int PointId1);
 
-public:
+	void AddEdge(int PointId0, int PointId1);
+
+	// Run string pulling algorithm on a path
+	std::vector<RVec3> StringPullPath(const std::vector<RVec3>& Path);
+
+private:
 	std::vector<NavMeshPointData> NavMeshPoints;
 
 	std::vector<NavMeshTriangleData> NavMeshTriangles;
+	std::vector<NavMeshEdgeData> NavMeshEdges;
 
+	// The A-star algorithm class
 	RAStarPathfinder AStarPathfinder;
 };
 
@@ -92,4 +125,14 @@ FORCEINLINE NavMeshPointData& RNavMeshData::GetNavMeshPointData(int Index)
 FORCEINLINE const NavMeshPointData& RNavMeshData::GetNavMeshPointData(int Index) const
 {
 	return NavMeshPoints[Index];
+}
+
+FORCEINLINE NavMeshTriangleData& RNavMeshData::GetNavMeshTriangleData(int Index)
+{
+	return NavMeshTriangles[Index];
+}
+
+FORCEINLINE const NavMeshTriangleData& RNavMeshData::GetNavMeshTriangleData(int Index) const
+{
+	return NavMeshTriangles[Index];
 }
