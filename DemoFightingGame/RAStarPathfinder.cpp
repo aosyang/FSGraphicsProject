@@ -15,12 +15,12 @@ RAStarSearchData::RAStarSearchData(const RNavMeshData* InNavMeshData)
 
 }
 
-void RAStarSearchData::ConditionalAddOpenNode(int ParentId, int PointId, float TotalCost, float Heuristics)
+void RAStarSearchData::ConditionalAddOpenNode(int ParentId, int EdgeId, float TotalCost, float Heuristics)
 {
-	AStarSearchNodeData NewSearchNodeData(ParentId, PointId, TotalCost, Heuristics);
-	int SearchNodeIdx = GetSearchNodeIndexByPointId(PointId);
+	AStarSearchNodeData NewSearchNodeData(ParentId, EdgeId, TotalCost, Heuristics);
+	int SearchNodeIdx = GetSearchNodeIndexByEdgeId(EdgeId);
 
-	// If a point id exists in the open list and has a lower cost, ignore the new node
+	// If a node id exists in the open list and has a lower cost, ignore the new node
 	{
 		auto Iter = std::find(OpenList.begin(), OpenList.end(), SearchNodeIdx);
 		if (Iter != OpenList.end())
@@ -32,7 +32,7 @@ void RAStarSearchData::ConditionalAddOpenNode(int ParentId, int PointId, float T
 		}
 	}
 
-	// If a point id exists in the closed list and has a lower cost, ignore the new node
+	// If a node id exists in the closed list and has a lower cost, ignore the new node
 	{
 		auto Iter = std::find(ClosedList.begin(), ClosedList.end(), SearchNodeIdx);
 		if (Iter != ClosedList.end())
@@ -48,7 +48,7 @@ void RAStarSearchData::ConditionalAddOpenNode(int ParentId, int PointId, float T
 		}
 	}
 
-	if (IsNewPoint(PointId))
+	if (IsNewEdge(EdgeId))
 	{
 		int NewIndex = (int)SearchNodes.size();
 		SearchNodes.emplace(SearchNodes.end(), NewSearchNodeData);
@@ -61,12 +61,12 @@ void RAStarSearchData::ConditionalAddOpenNode(int ParentId, int PointId, float T
 	}
 }
 
-void RAStarSearchData::AddGoalCandidate(int ParentId, int PointId, float TotalCost)
+void RAStarSearchData::AddGoalCandidate(int ParentId, int EdgeId, float TotalCost)
 {
-	AStarSearchNodeData GoalCandidateData(ParentId, PointId, TotalCost, 0.0f);
-	int SearchNodeIdx = GetSearchNodeIndexByPointId(PointId);
+	AStarSearchNodeData GoalCandidateData(ParentId, EdgeId, TotalCost, 0.0f);
+	int SearchNodeIdx = GetSearchNodeIndexByEdgeId(EdgeId);
 
-	if (IsNewPoint(PointId))
+	if (IsNewEdge(EdgeId))
 	{
 		int NewIndex = (int)SearchNodes.size();
 		SearchNodes.emplace(SearchNodes.end(), GoalCandidateData);
@@ -112,10 +112,10 @@ bool RAStarSearchData::HasOpenNodes() const
 	return OpenList.size() != 0;
 }
 
-void RAStarSearchData::AddNodeToClosedList(int PointId)
+void RAStarSearchData::AddNodeToClosedList(int EdgeId)
 {
-	VerifyIsExistingPoint(PointId);
-	ClosedList.push_back(PointId);
+	VerifyIsExistingPoint(EdgeId);
+	ClosedList.push_back(EdgeId);
 }
 
 int RAStarSearchData::GetBestGoalCandicate() const
@@ -146,13 +146,13 @@ int RAStarSearchData::GetParent(int SearchNodeIdx) const
 	return SearchNodes[SearchNodeIdx].ParentId;
 }
 
-int RAStarSearchData::GetSearchNodeIndexByPointId(int PointId) const
+int RAStarSearchData::GetSearchNodeIndexByEdgeId(int EdgeId) const
 {
 	int Index = 0;
 
 	for (const auto& SearchNode : SearchNodes)
 	{
-		if (SearchNode.NavmeshPointId == PointId)
+		if (SearchNode.NavmeshEdgeId == EdgeId)
 		{
 			return Index;
 		}
@@ -163,10 +163,15 @@ int RAStarSearchData::GetSearchNodeIndexByPointId(int PointId) const
 	return -1;
 }
 
-const NavMeshPointData& RAStarSearchData::GetPointDataRefBySearchNode(int SearchNodeIdx) const
+int RAStarSearchData::GetEdgeIdBySearchNode(int SearchNodeIdx) const
 {
-	int PointIdx = SearchNodes[SearchNodeIdx].NavmeshPointId;
-	return NavMeshData->GetNavMeshPointData(PointIdx);
+	return SearchNodes[SearchNodeIdx].NavmeshEdgeId;
+}
+
+const NavMeshEdgeData& RAStarSearchData::GetEdgeDataRefBySearchNode(int SearchNodeIdx) const
+{
+	int EdgeIdx = SearchNodes[SearchNodeIdx].NavmeshEdgeId;
+	return NavMeshData->GetNavMeshEdgeData(EdgeIdx);
 }
 
 void RAStarSearchData::DumpToLog() const
@@ -175,22 +180,21 @@ void RAStarSearchData::DumpToLog() const
 	RLog("Open list:\n");
 	for (int SearchNodeIdx : OpenList)
 	{
-		int NavMeshPointIdx = SearchNodes[SearchNodeIdx].NavmeshPointId;
-		const NavMeshPointData& PointData = NavMeshData->GetNavMeshPointData(NavMeshPointIdx);
+		int NavMeshEdgeIdx = SearchNodes[SearchNodeIdx].NavmeshEdgeId;
 		RLog(" Point %d, parent: %d, cost from start: %.2f, pos: %s\n",
 			 SearchNodeIdx,
 			 SearchNodes[SearchNodeIdx].ParentId,
 			 GetTotalCost(SearchNodeIdx),
-			 PointData.WorldPosition.ToString().c_str());
+			 NavMeshData->GetEdgeCenter(NavMeshEdgeIdx).ToString().c_str());
 	}
 	RLog("=== End Dump Search Data ===\n")
 }
 
-bool RAStarSearchData::IsNewPoint(int PointId) const
+bool RAStarSearchData::IsNewEdge(int EdgeId) const
 {
 	for (const auto& SearchNode : SearchNodes)
 	{
-		if (SearchNode.NavmeshPointId == PointId)
+		if (SearchNode.NavmeshEdgeId == EdgeId)
 		{
 			return false;
 		}
@@ -199,9 +203,9 @@ bool RAStarSearchData::IsNewPoint(int PointId) const
 	return true;
 }
 
-void RAStarSearchData::VerifyIsExistingPoint(int PointId) const
+void RAStarSearchData::VerifyIsExistingPoint(int EdgeId) const
 {
-	assert(PointId >= 0 && PointId < (int)SearchNodes.size());
+	assert(EdgeId >= 0 && EdgeId < (int)SearchNodes.size());
 }
 
 std::vector<RVec3> RAStarPathfinder::Evaluate(const RNavMeshData* NavMeshData, const NavMeshProjectionResult& Start, const NavMeshProjectionResult& Goal)
@@ -214,11 +218,13 @@ std::vector<RVec3> RAStarPathfinder::Evaluate(const RNavMeshData* NavMeshData, c
 	// Initialize the open list with three vertices of the triangle the start point lies inside.
 	for (int i = 0; i < 3; i++)
 	{
-		const NavMeshPointData& PointData = NavMeshData->NavMeshPoints[StartTriangle.Points[i]];
-		float Distance = (PointData.WorldPosition - Start.PositionOnNavmesh).Magnitude();
-		float Heuristics = EvaluateHeuristics(PointData.WorldPosition, Goal.PositionOnNavmesh);
+		int EdgeId = NavMeshData->FindEdgeIndexForPointsChecked(StartTriangle.Points[i], StartTriangle.Points[(i + 1) % 3]);
+		RVec3 EdgeCenter = NavMeshData->GetEdgeCenter(EdgeId);
 
-		SearchData.ConditionalAddOpenNode(-1, StartTriangle.Points[i], Distance, Heuristics);
+		float Distance = RVec3::Distance(EdgeCenter, Start.PositionOnNavmesh);
+		float Heuristics = EvaluateHeuristics(EdgeCenter, Goal.PositionOnNavmesh);
+
+		SearchData.ConditionalAddOpenNode(-1, EdgeId, Distance, Heuristics);
 	}
 
 	std::vector<int> GoalCandidates;
@@ -230,22 +236,27 @@ std::vector<RVec3> RAStarPathfinder::Evaluate(const RNavMeshData* NavMeshData, c
 
 		// Find a node with minimal total cost
 		int SearchNodeIdx = SearchData.PopOpenNodeWithMinimalCost();
-		const NavMeshPointData& Point = SearchData.GetPointDataRefBySearchNode(SearchNodeIdx);
+		const NavMeshEdgeData& Edge = SearchData.GetEdgeDataRefBySearchNode(SearchNodeIdx);
 		float TotalCost = SearchData.GetTotalCost(SearchNodeIdx);
 		bool bReachedGoalTriangle = false;
 
-		for (int n = 0; n < Point.NumNeighbors; n++)
+		for (int n = 0; n < (int)Edge.Neighbors.size(); n++)
 		{
 			// Index to a neighbor point in the point list of navmesh 
-			int NeighborIdx = Point.Neighbors[n];
-			float DistanceToNeighbor = Point.NeighborsDistance[n];
+			int NeighborEdgeIdx = Edge.Neighbors[n].NeighborIndex;
+			float DistanceToNeighbor = Edge.Neighbors[n].Distance;
 
+			//
 			for (int p = 0; p < 3; p++)
 			{
-				if (NeighborIdx == GoalTriangle.Points[p])
+				int EdgePoint0 = GoalTriangle.Points[p];
+				int EdgePoint1 = GoalTriangle.Points[(p + 1) % 3];
+				int Edge = NavMeshData->FindEdgeIndexForPointsChecked(EdgePoint0, EdgePoint1);
+
+				if (NeighborEdgeIdx == Edge)
 				{
 					// TODO: Has reached the goal, stop search.
-					SearchData.AddGoalCandidate(SearchNodeIdx, NeighborIdx, TotalCost + DistanceToNeighbor);
+					SearchData.AddGoalCandidate(SearchNodeIdx, NeighborEdgeIdx, TotalCost + DistanceToNeighbor);
 					bReachedGoalTriangle = true;
 				}
 			}
@@ -257,9 +268,9 @@ std::vector<RVec3> RAStarPathfinder::Evaluate(const RNavMeshData* NavMeshData, c
 			}
 			else
 			{
-				const NavMeshPointData& NeighborPoint = NavMeshData->GetNavMeshPointData(NeighborIdx);
-				float Heuristics = EvaluateHeuristics(NeighborPoint.WorldPosition, Goal.PositionOnNavmesh);
-				SearchData.ConditionalAddOpenNode(SearchNodeIdx, NeighborIdx, TotalCost + DistanceToNeighbor, Heuristics);
+				RVec3 EdgeCenter = NavMeshData->GetEdgeCenter(NeighborEdgeIdx);
+				float Heuristics = EvaluateHeuristics(EdgeCenter, Goal.PositionOnNavmesh);
+				SearchData.ConditionalAddOpenNode(SearchNodeIdx, NeighborEdgeIdx, TotalCost + DistanceToNeighbor, Heuristics);
 			}
 		}
 
@@ -281,8 +292,9 @@ std::vector<RVec3> RAStarPathfinder::Evaluate(const RNavMeshData* NavMeshData, c
 		int BackTraceIdx = BestCandidate;
 		while (BackTraceIdx != -1)
 		{
-			auto& PointData = SearchData.GetPointDataRefBySearchNode(BackTraceIdx);
-			PathResult.push_back(PointData.WorldPosition);
+			int EdgeId = SearchData.GetEdgeIdBySearchNode(BackTraceIdx);
+
+			PathResult.push_back(NavMeshData->GetEdgeCenter(EdgeId));
 			BackTraceIdx = SearchData.GetParent(BackTraceIdx);
 		}
 

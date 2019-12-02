@@ -208,6 +208,12 @@ public:
 					 lhs.X() * rhs.Y() - lhs.Y() * rhs.X());
 	}
 
+	// Calculates the distance between two vectors
+	static float Distance(const RVec3& lhs, const RVec3& rhs)
+	{
+		return (lhs - rhs).Magnitude();
+	}
+
 	static RVec3 Zero()
 	{
 		return RVec3(0.0f, 0.0f, 0.0f);

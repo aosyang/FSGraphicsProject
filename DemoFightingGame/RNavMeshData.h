@@ -41,7 +41,20 @@ struct NavMeshTriangleData
 	{
 	}
 
+	// Indices in navmesh point list
 	int Points[3];
+};
+
+struct NavMeshEdgeNeighborData
+{
+	NavMeshEdgeNeighborData(int InNeighborIndex, float InDistance)
+		: NeighborIndex(InNeighborIndex)
+		, Distance(InDistance)
+	{
+	}
+
+	int NeighborIndex;
+	float Distance;
 };
 
 struct NavMeshEdgeData
@@ -63,6 +76,8 @@ struct NavMeshEdgeData
 
 	// Whether the edge lies at the border of the navmesh
 	bool IsBorder;
+
+	std::vector<NavMeshEdgeNeighborData> Neighbors;
 };
 
 struct NavMeshProjectionResult
@@ -95,14 +110,25 @@ public:
 	NavMeshTriangleData& GetNavMeshTriangleData(int Index);
 	const NavMeshTriangleData& GetNavMeshTriangleData(int Index) const;
 
+	NavMeshEdgeData& GetNavMeshEdgeData(int Index);
+	const NavMeshEdgeData& GetNavMeshEdgeData(int Index) const;
+
+	RVec3 GetEdgeCenter(int EdgeId) const;
+
+	int FindEdgeIndexForPointsChecked(int PointId0, int PointId1) const;
+
 private:
 	// Find the index of a point in navmesh point list. If the point does not exist it will be appended to the list.
 	int FindOrAddPoint(const RVec3& Point);
 	
 	// Make two points neighbors of each other
-	void MakeNeighbors(int PointId0, int PointId1);
+	void MakePointNeighbors(int PointId0, int PointId1);
 
-	void AddEdge(int PointId0, int PointId1);
+	void MakeEdgeNeighbors(int EdgeId0, int EdgeId1);
+
+	// Add a new edge or mark an existing edge as non-border
+	// Return an index to the edge
+	int AddOrUpdateEdge(int PointId0, int PointId1);
 
 	// Run string pulling algorithm on a path
 	std::vector<RVec3> StringPullPath(const std::vector<RVec3>& Path);
@@ -135,4 +161,14 @@ FORCEINLINE NavMeshTriangleData& RNavMeshData::GetNavMeshTriangleData(int Index)
 FORCEINLINE const NavMeshTriangleData& RNavMeshData::GetNavMeshTriangleData(int Index) const
 {
 	return NavMeshTriangles[Index];
+}
+
+FORCEINLINE NavMeshEdgeData& RNavMeshData::GetNavMeshEdgeData(int Index)
+{
+	return NavMeshEdges[Index];
+}
+
+FORCEINLINE const NavMeshEdgeData& RNavMeshData::GetNavMeshEdgeData(int Index) const
+{
+	return NavMeshEdges[Index];
 }

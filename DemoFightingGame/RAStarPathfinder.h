@@ -11,13 +11,14 @@
 class RNavMeshData;
 struct NavMeshProjectionResult;
 struct NavMeshPointData;
+struct NavMeshEdgeData;
 
 // Data structure for A-star node during searching
 struct AStarSearchNodeData
 {
-	AStarSearchNodeData(int InParentId, int InPointId, float InCostFromStart, float InHeuristics)
+	AStarSearchNodeData(int InParentId, int InEdgeId, float InCostFromStart, float InHeuristics)
 		: ParentId(InParentId)
-		, NavmeshPointId(InPointId)
+		, NavmeshEdgeId(InEdgeId)
 		, CostFromStart(InCostFromStart)
 		, HeuristicCostToGoal(InHeuristics)
 	{
@@ -25,7 +26,7 @@ struct AStarSearchNodeData
 	}
 
 	int ParentId;					// Id of parent search node data
-	int NavmeshPointId;				// Id of point from original navmesh
+	int NavmeshEdgeId;				// Id of edge from original navmesh
 	float CostFromStart;			// Cost to this node from the starting position
 	float HeuristicCostToGoal;
 	float TotalEstimatedCost;
@@ -37,14 +38,14 @@ class RAStarSearchData
 public:
 	RAStarSearchData(const RNavMeshData* InNavMeshData);
 
-	// Adds a point to the open list if suitable
-	void ConditionalAddOpenNode(int ParentId, int PointId, float TotalCost, float Heuristics);
+	// Adds an edge to the open list if suitable
+	void ConditionalAddOpenNode(int ParentId, int EdgeId, float TotalCost, float Heuristics);
 
-	// Adds a point to the closed list
-	void AddNodeToClosedList(int PointId);
+	// Adds an edge to the closed list
+	void AddNodeToClosedList(int EdgeId);
 
 	// Adds node data for a possibly best path to the goal
-	void AddGoalCandidate(int ParentId, int PointId, float TotalCost);
+	void AddGoalCandidate(int ParentId, int EdgeId, float TotalCost);
 
 	// Pops an open node with minimal cost and returns its index in all search nodes
 	int PopOpenNodeWithMinimalCost();
@@ -62,20 +63,22 @@ public:
 	int GetParent(int SearchNodeIdx) const;
 
 	// Gets id of a search node by the point index from navmesh
-	int GetSearchNodeIndexByPointId(int PointId) const;
+	int GetSearchNodeIndexByEdgeId(int EdgeId) const;
+
+	int GetEdgeIdBySearchNode(int SearchNodeIdx) const;
 
 	// Gets associated navmesh point data of a search node
-	const NavMeshPointData& GetPointDataRefBySearchNode(int SearchNodeIdx) const;
+	const NavMeshEdgeData& GetEdgeDataRefBySearchNode(int SearchNodeIdx) const;
 
 	// Dumps useful search data information to log
 	void DumpToLog() const;
 
 private:
 	// Checks if a point is new in all search nodes
-	bool IsNewPoint(int PointId) const;
+	bool IsNewEdge(int EdgeId) const;
 
 	// Asserts the existence of a point in search nodes
-	void VerifyIsExistingPoint(int PointId) const;
+	void VerifyIsExistingPoint(int EdgeId) const;
 
 private:
 	// Pointer to navmesh data, for accessing points and triangles in the navmesh directly 

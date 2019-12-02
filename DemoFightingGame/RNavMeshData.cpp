@@ -51,24 +51,29 @@ void NavMeshPointData::AddNeighbor(int NeighborId, const RVec3& NeighborPosition
 	assert(NumNeighbors < MaxNumNeighbors);
 
 	Neighbors[NumNeighbors] = NeighborId;
-	NeighborsDistance[NumNeighbors] = (NeighborPosition - WorldPosition).Magnitude();
+	NeighborsDistance[NumNeighbors] = RVec3::Distance(NeighborPosition, WorldPosition);
 	NumNeighbors++;
 }
 
 void RNavMeshData::AddTriangle(const RVec3& p0, const RVec3& p1, const RVec3& p2, int RegionId)
 {
-	// TODO: Does not handle region id now
+	// Note: Region ids are NOT used now
+
 	int idx0 = FindOrAddPoint(p0);
 	int idx1 = FindOrAddPoint(p1);
 	int idx2 = FindOrAddPoint(p2);
 
-	AddEdge(idx0, idx1);
-	AddEdge(idx0, idx2);
-	AddEdge(idx1, idx2);
+	MakePointNeighbors(idx0, idx1);
+	MakePointNeighbors(idx0, idx2);
+	MakePointNeighbors(idx1, idx2);
 
-	MakeNeighbors(idx0, idx1);
-	MakeNeighbors(idx0, idx2);
-	MakeNeighbors(idx1, idx2);
+	int Edge0 = AddOrUpdateEdge(idx0, idx1);
+	int Edge1 = AddOrUpdateEdge(idx0, idx2);
+	int Edge2 = AddOrUpdateEdge(idx1, idx2);
+
+	MakeEdgeNeighbors(Edge0, Edge1);
+	MakeEdgeNeighbors(Edge0, Edge2);
+	MakeEdgeNeighbors(Edge1, Edge2);
 
 	NavMeshTriangles.emplace(NavMeshTriangles.end(), idx0, idx1, idx2);
 }
@@ -96,9 +101,28 @@ bool RNavMeshData::QueryPath(const RVec3& Start, const RVec3& Goal, std::vector<
 	}
 
 	OutPath = AStarPathfinder.Evaluate(this, StartResult, GoalResult);
-	OutPath = StringPullPath(OutPath);
+	//OutPath = StringPullPath(OutPath);
 
 	return OutPath.size() > 0;
+}
+
+RVec3 RNavMeshData::GetEdgeCenter(int EdgeId) const
+{
+	const auto& EdgeData = NavMeshEdges[EdgeId];
+	int p0 = EdgeData.p0;
+	int p1 = EdgeData.p1;
+
+	return (NavMeshPoints[p0].WorldPosition + NavMeshPoints[p1].WorldPosition) * 0.5f;
+}
+
+int RNavMeshData::FindEdgeIndexForPointsChecked(int PointId0, int PointId1) const
+{
+	NavMeshEdgeData SearchEdge(PointId0, PointId1);
+
+	auto Iter = std::find(NavMeshEdges.begin(), NavMeshEdges.end(), SearchEdge);
+	assert(Iter != NavMeshEdges.end());
+
+	return int(Iter - NavMeshEdges.begin());
 }
 
 int RNavMeshData::FindOrAddPoint(const RVec3& Point)
@@ -118,7 +142,7 @@ int RNavMeshData::FindOrAddPoint(const RVec3& Point)
 	return Index;
 }
 
-void RNavMeshData::MakeNeighbors(int PointId0, int PointId1)
+void RNavMeshData::MakePointNeighbors(int PointId0, int PointId1)
 {
 	int PointIds[] = { PointId0, PointId1 };
 
@@ -148,7 +172,17 @@ void RNavMeshData::MakeNeighbors(int PointId0, int PointId1)
 	}
 }
 
-void RNavMeshData::AddEdge(int PointId0, int PointId1)
+void RNavMeshData::MakeEdgeNeighbors(int EdgeId0, int EdgeId1)
+{
+	RVec3 EdgeCenter0 = GetEdgeCenter(EdgeId0);
+	RVec3 EdgeCenter1 = GetEdgeCenter(EdgeId1);
+	float Distance = RVec3::Distance(EdgeCenter0, EdgeCenter1);
+
+	NavMeshEdges[EdgeId0].Neighbors.push_back(NavMeshEdgeNeighborData(EdgeId1, Distance));
+	NavMeshEdges[EdgeId1].Neighbors.push_back(NavMeshEdgeNeighborData(EdgeId0, Distance));
+}
+
+int RNavMeshData::AddOrUpdateEdge(int PointId0, int PointId1)
 {
 	NavMeshEdgeData NewEdge(PointId0, PointId1);
 
@@ -157,10 +191,13 @@ void RNavMeshData::AddEdge(int PointId0, int PointId1)
 	{
 		// If an edge exists in the edge list, it must be shared with another triangle so let's unset the 'is border' flag.
 		Iter->IsBorder = false;
+
+		return int(Iter - NavMeshEdges.begin());
 	}
 	else
 	{
-		NavMeshEdges.emplace(NavMeshEdges.begin(), NewEdge);
+		NavMeshEdges.emplace(NavMeshEdges.end(), NewEdge);
+		return (int)NavMeshEdges.size() - 1;
 	}
 }
 
