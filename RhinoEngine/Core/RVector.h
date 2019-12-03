@@ -200,6 +200,12 @@ public:
 		return lhs.X() * rhs.X() + lhs.Y() * rhs.Y() + lhs.Z() * rhs.Z();
 	}
 
+	// Dot product in XZ plane
+	static float Dot2D(const RVec3& lhs, const RVec3& rhs)
+	{
+		return lhs.X() * rhs.X() + lhs.Z() * rhs.Z();
+	}
+
 	// Cross product
 	static RVec3 Cross(const RVec3& lhs, const RVec3& rhs)
 	{
@@ -207,6 +213,13 @@ public:
 					 lhs.Z() * rhs.X() - lhs.X() * rhs.Z(),
 					 lhs.X() * rhs.Y() - lhs.Y() * rhs.X());
 	}
+
+	// Cross product in XZ plane. Returns Y value only
+	static float Cross2D(const RVec3& lhs, const RVec3& rhs)
+	{
+		return lhs.Z() * rhs.X() - lhs.X() * rhs.Z();
+	}
+
 
 	// Calculates the distance between two vectors
 	static float Distance(const RVec3& lhs, const RVec3& rhs)

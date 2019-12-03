@@ -87,6 +87,11 @@ struct NavMeshProjectionResult
 	{
 	}
 
+	bool IsValid() const
+	{
+		return Triangle != -1;
+	}
+
 	int Triangle;
 	RVec3 PositionOnNavmesh;
 };
@@ -102,7 +107,7 @@ public:
 	bool QueryPath(const RVec3& Start, const RVec3& Goal, std::vector<RVec3>& OutPath);
 
 	// Project a point to navmesh
-	NavMeshProjectionResult ProjectPointToNavmesh(const RVec3& Point) const;
+	NavMeshProjectionResult ProjectPointToNavmesh(const RVec3& Point, float MaxHeightDifference = 50.0f) const;
 
 	NavMeshPointData& GetNavMeshPointData(int Index);
 	const NavMeshPointData& GetNavMeshPointData(int Index) const;
@@ -130,8 +135,14 @@ private:
 	// Return an index to the edge
 	int AddOrUpdateEdge(int PointId0, int PointId1);
 
-	// Run string pulling algorithm on a path
-	std::vector<RVec3> StringPullPath(const std::vector<RVec3>& Path);
+	// Perform the string pulling algorithm on a path
+	std::vector<NavPathNode> PerformStringPulling(const std::vector<NavPathNode>& InPathData) const;
+
+	// Perform the funnel algorithm on a path
+	std::vector<NavPathNode> PerformFunnel(const std::vector<NavPathNode>& InPathData) const;
+
+private:
+	void DebugDrawEdge(int EdgeId, const RColor& Color) const;
 
 private:
 	std::vector<NavMeshPointData> NavMeshPoints;

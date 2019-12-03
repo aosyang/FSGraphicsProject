@@ -71,12 +71,12 @@ void RAStarSearchData::AddGoalCandidate(int ParentId, int EdgeId, float TotalCos
 		int NewIndex = (int)SearchNodes.size();
 		SearchNodes.emplace(SearchNodes.end(), GoalCandidateData);
 
-		GoalCandicates.push_back(NewIndex);
+		GoalCandidates.push_back(NewIndex);
 	}
 	else
 	{
 		SearchNodes[SearchNodeIdx] = GoalCandidateData;
-		GoalCandicates.push_back(SearchNodeIdx);
+		GoalCandidates.push_back(SearchNodeIdx);
 	}
 }
 
@@ -84,7 +84,7 @@ int RAStarSearchData::PopOpenNodeWithMinimalCost()
 {
 	float MinCost = -1.0f;
 
-	OpenListType::iterator MinCostIter = OpenList.end();
+	OpenListIterator MinCostIter = OpenList.end();
 
 	for (auto Iter = OpenList.begin(); Iter != OpenList.end(); Iter++)
 	{
@@ -124,7 +124,7 @@ int RAStarSearchData::GetBestGoalCandicate() const
 	float MinCost = -1;
 
 	// Find a goal candidate with minimal cost from start point
-	for (const auto& CandidateIdx : GoalCandicates)
+	for (const auto& CandidateIdx : GoalCandidates)
 	{
 		if (BestCandicate == -1 || SearchNodes[CandidateIdx].CostFromStart < MinCost)
 		{
@@ -208,7 +208,7 @@ void RAStarSearchData::VerifyIsExistingPoint(int EdgeId) const
 	assert(EdgeId >= 0 && EdgeId < (int)SearchNodes.size());
 }
 
-std::vector<RVec3> RAStarPathfinder::Evaluate(const RNavMeshData* NavMeshData, const NavMeshProjectionResult& Start, const NavMeshProjectionResult& Goal)
+std::vector<NavPathNode> RAStarPathfinder::Evaluate(const RNavMeshData* NavMeshData, const NavMeshProjectionResult& Start, const NavMeshProjectionResult& Goal)
 {
 	RAStarSearchData SearchData(NavMeshData);
 
@@ -283,23 +283,24 @@ std::vector<RVec3> RAStarPathfinder::Evaluate(const RNavMeshData* NavMeshData, c
 	}
 
 	//SearchData.DumpToLog();
-	std::vector<RVec3> PathResult;
+	std::vector<NavPathNode> PathResult;
 
 	if (BestCandidate != -1)
 	{
-		PathResult.push_back(Goal.PositionOnNavmesh);
+		PathResult.emplace(PathResult.end(), Goal.PositionOnNavmesh, -1);
 
 		int BackTraceIdx = BestCandidate;
 		while (BackTraceIdx != -1)
 		{
 			int EdgeId = SearchData.GetEdgeIdBySearchNode(BackTraceIdx);
 
-			PathResult.push_back(NavMeshData->GetEdgeCenter(EdgeId));
+			PathResult.emplace(PathResult.end(), NavMeshData->GetEdgeCenter(EdgeId), EdgeId);
 			BackTraceIdx = SearchData.GetParent(BackTraceIdx);
 		}
 
-		PathResult.push_back(Start.PositionOnNavmesh);
+		PathResult.emplace(PathResult.end(), Start.PositionOnNavmesh, -1);
 
+		// We're doing a back-tracking so we need to reverse the result
 		std::reverse(PathResult.begin(), PathResult.end());
 	}
 

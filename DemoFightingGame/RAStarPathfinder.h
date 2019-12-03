@@ -32,6 +32,18 @@ struct AStarSearchNodeData
 	float TotalEstimatedCost;
 };
 
+// A single node that represents each step of a path from pathfinding
+struct NavPathNode
+{
+	NavPathNode(const RVec3& InPosition, int InEdgeId)
+		: Position(InPosition)
+		, EdgeId(InEdgeId)
+	{}
+
+	RVec3 Position;		// Node position in world space
+	int EdgeId;			// Which edge this node belongs to. -1 if none
+};
+
 // Search data structure used by a-star algorithm
 class RAStarSearchData
 {
@@ -84,21 +96,25 @@ private:
 	// Pointer to navmesh data, for accessing points and triangles in the navmesh directly 
 	const RNavMeshData* NavMeshData;
 
+	// Search nodes with their information of current states (eg. total cost to the start point)
 	std::vector<AStarSearchNodeData> SearchNodes;
 
-	typedef std::list<int> OpenListType;
-	OpenListType OpenList;
+	// The open list. Stores nodes to be evaluated
+	std::list<int> OpenList;
+	typedef std::list<int>::iterator OpenListIterator;
 
+	// The closed list. Stored nodes that have been visited
 	std::vector<int> ClosedList;
 
-	std::vector<int> GoalCandicates;
+	// The goal candidates list. Stores multiple nodes of paths to the goal location
+	std::vector<int> GoalCandidates;
 };
 
 // A-star pathfinding algorithm for navmesh
 class RAStarPathfinder
 {
 public:
-	std::vector<RVec3> Evaluate(const RNavMeshData* NavMeshData, const NavMeshProjectionResult& Start, const NavMeshProjectionResult& Goal);
+	std::vector<NavPathNode> Evaluate(const RNavMeshData* NavMeshData, const NavMeshProjectionResult& Start, const NavMeshProjectionResult& Goal);
 
 private:
 	float EvaluateHeuristics(const RVec3& Point, const RVec3& Goal) const;

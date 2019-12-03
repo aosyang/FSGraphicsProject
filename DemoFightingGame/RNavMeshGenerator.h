@@ -90,6 +90,8 @@ private:
 	RVec3 GetCellCenter(int x, int y, int z) const;
 
 private:
+	void DebugDrawSpans();
+
 	void DebugDrawPathQuery() const;
 
 	void IncreaseDebugDistanceFieldLevel();

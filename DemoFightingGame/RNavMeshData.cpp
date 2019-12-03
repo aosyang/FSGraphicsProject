@@ -13,7 +13,7 @@ namespace
 	// Returns the clockwise of three points on the XZ plane
 	int CCW2D_XZ(const RVec3& p0, const RVec3& p1, const RVec3& p2)
 	{
-		float d = RVec3::Cross(p1 - p0, p2 - p0).Y();
+		float d = RVec3::Cross2D(p1 - p0, p2 - p0);
 		return d > 0 ? 1 : (d < 0 ? -1 : 0);
 	}
 
@@ -43,6 +43,26 @@ namespace
 		}
 
 		return true;
+	}
+
+	int DetermineSideOfPointToLine2D(const RVec3& p, const RVec3& l0, const RVec3& l1)
+	{
+		float d = RVec3::Cross2D(p - l0, l1 - l0);
+		return d > 0 ? 1 : (d < 0 ? -1 : 0);
+	}
+
+	// Get an array of position that represents the path
+	std::vector<RVec3> ConvertToPath(const std::vector<NavPathNode>& PathNodes)
+	{
+		std::vector<RVec3> Result;
+		Result.resize(PathNodes.size());
+
+		for (int i = 0; i < (int)PathNodes.size(); i++)
+		{
+			Result[i] = PathNodes[i].Position;
+		}
+
+		return Result;
 	}
 }
 
@@ -83,8 +103,10 @@ bool RNavMeshData::QueryPath(const RVec3& Start, const RVec3& Goal, std::vector<
 	NavMeshProjectionResult StartResult = ProjectPointToNavmesh(Start);
 	NavMeshProjectionResult GoalResult = ProjectPointToNavmesh(Goal);
 
+	GDebugRenderer.DrawSphere(GoalResult.PositionOnNavmesh, 20.0f, RColor::Yellow);
+
 	// Both the starting point and the end point need to be on the navmesh
-	if (StartResult.Triangle == -1 || GoalResult.Triangle == -1)
+	if (!StartResult.IsValid() || !GoalResult.IsValid())
 	{
 		return false;
 	}
@@ -100,8 +122,9 @@ bool RNavMeshData::QueryPath(const RVec3& Start, const RVec3& Goal, std::vector<
 		return true;
 	}
 
-	OutPath = AStarPathfinder.Evaluate(this, StartResult, GoalResult);
-	//OutPath = StringPullPath(OutPath);
+	std::vector<NavPathNode> PathResult = AStarPathfinder.Evaluate(this, StartResult, GoalResult);
+	PathResult = PerformFunnel(PathResult);
+	OutPath = ConvertToPath(PathResult);
 
 	return OutPath.size() > 0;
 }
@@ -201,31 +224,32 @@ int RNavMeshData::AddOrUpdateEdge(int PointId0, int PointId1)
 	}
 }
 
-std::vector<RVec3> RNavMeshData::StringPullPath(const std::vector<RVec3>& Path)
+std::vector<NavPathNode> RNavMeshData::PerformStringPulling(const std::vector<NavPathNode>& InPathData) const
 {
-	for (int i = 0; i < (int)Path.size() - 1; i++)
+	// Debug draw the original path
+	for (int i = 0; i < (int)InPathData.size() - 1; i++)
 	{
-		GDebugRenderer.DrawLine(Path[i], Path[i + 1], RColor::Yellow);
+		GDebugRenderer.DrawLine(InPathData[i].Position, InPathData[i + 1].Position, RColor::Yellow);
 	}
 
 	bool bFirstIntersection = true;
 
 	// Can't string pull a path further if there are only two points in it
-	if (Path.size() <= 2)
+	if (InPathData.size() <= 2)
 	{
-		return Path;
+		return InPathData;
 	}
 
-	std::vector<RVec3> Result;
-	Result.push_back(Path[0]);
+	std::vector<NavPathNode> Result;
+	Result.emplace(Result.end(), InPathData[0]);
 
 	int BeginIdx = 0;
 	int EndIdx = 2;
-	while (EndIdx < (int)Path.size())
+	while (EndIdx < (int)InPathData.size())
 	{
 		bool bCrossingEdge = false;
-		RVec3 PathA(Path[BeginIdx]);
-		RVec3 PathB(Path[EndIdx]);
+		RVec3 PathA(InPathData[BeginIdx].Position);
+		RVec3 PathB(InPathData[EndIdx].Position);
 
 		for (const auto& Edge : NavMeshEdges)
 		{
@@ -255,7 +279,7 @@ std::vector<RVec3> RNavMeshData::StringPullPath(const std::vector<RVec3>& Path)
 
 		if (bCrossingEdge)
 		{
-			Result.push_back(Path[EndIdx - 1]);
+			Result.emplace(Result.end(), InPathData[EndIdx - 1]);
 
 			BeginIdx = EndIdx - 1;
 			EndIdx = BeginIdx + 2;
@@ -267,13 +291,165 @@ std::vector<RVec3> RNavMeshData::StringPullPath(const std::vector<RVec3>& Path)
 	}
 
 	// Add the last point to the result path
-	assert(EndIdx - 1 < (int)Path.size());
-	Result.push_back(Path[EndIdx - 1]);
+	assert(EndIdx - 1 < (int)InPathData.size());
+	Result.emplace(Result.end(), InPathData[EndIdx - 1]);
 
 	return Result;
 }
 
-NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point) const
+std::vector<NavPathNode> RNavMeshData::PerformFunnel(const std::vector<NavPathNode>& InPathData) const
+{
+	static bool bDebugOutput = false;
+
+	// Debug draw the original path
+	for (int i = 0; i < (int)InPathData.size() - 1; i++)
+	{
+		if (i != 0)
+		{
+			GDebugRenderer.DrawSphere(InPathData[i].Position, 5.0f, RColor::Yellow, 8);
+		}
+
+		GDebugRenderer.DrawLine(InPathData[i].Position, InPathData[i + 1].Position, RColor::Yellow);
+		DebugDrawEdge(InPathData[i].EdgeId, RColor::Blue);
+	}
+
+	// The path is already simple enough. Stop
+	if (InPathData.size() <= 2)
+	{
+		return InPathData;
+	}
+
+	std::vector<NavPathNode> Result;
+	RVec3 Start = InPathData[0].Position;
+	Result.emplace(Result.end(), InPathData[0]);
+
+	RVec3 Left, Right;
+	bool bInitializePoints = true;
+
+	static const int LEFT_EDGE_SIDE = 1;
+	static const int RIGHT_EDGE_SIDE = -1;
+
+	for (int i = 1; i < (int)InPathData.size(); i++)
+	{
+		const RVec3& PrevPosition = InPathData[i - 1].Position;
+		const RVec3& CurrentPosition = InPathData[i].Position;
+
+		int EdgeId = InPathData[i].EdgeId;
+
+		if (EdgeId == -1)
+		{
+			// Assuming this is the last point in the path
+			assert(i == (int)InPathData.size() - 1);
+
+			// For the last point, we need to decide whether it's crossing the left point or the right point or it can be directly connected 
+			// from the previous point.
+
+			if (DetermineSideOfPointToLine2D(Right, Start, CurrentPosition) != RIGHT_EDGE_SIDE)
+			{
+				Result.emplace(Result.end(), Right, -1);
+			}
+
+			if (DetermineSideOfPointToLine2D(Left, Start, CurrentPosition) != LEFT_EDGE_SIDE)
+			{
+				Result.emplace(Result.end(), Left, -1);
+			}
+
+			Result.emplace(Result.end(), InPathData[i].Position, -1);
+			continue;
+		}
+
+		const NavMeshEdgeData& Edge = NavMeshEdges[EdgeId];
+
+		// Find position for both endpoints of the edge
+		RVec3 NewLeft = NavMeshPoints[Edge.p0].WorldPosition;
+		RVec3 NewRight = NavMeshPoints[Edge.p1].WorldPosition;
+
+		int LeftEdgeSide = DetermineSideOfPointToLine2D(NewLeft, PrevPosition, CurrentPosition);
+		int RightEdgeSide = DetermineSideOfPointToLine2D(NewRight, PrevPosition, CurrentPosition);
+
+		// Since an edge does not guarantee the order of two endpoints, swap both endpoints if necessary
+		if (RightEdgeSide > LeftEdgeSide)
+		{
+			std::swap(NewLeft, NewRight);
+			std::swap(LeftEdgeSide, RightEdgeSide);
+		}
+
+		if (!bInitializePoints)
+		{
+			if (Left != NewLeft)
+			{
+				// If new endpoint is narrower, adapt it as the new point
+				if (DetermineSideOfPointToLine2D(Left, Start, NewLeft) == LeftEdgeSide)
+				{
+					// Check if either left or right point has crossed each other
+					if (DetermineSideOfPointToLine2D(NewLeft, Start, Right) != LeftEdgeSide)
+					{
+						Result.emplace(Result.end(), Right, -1);
+						Start = Right;
+						bInitializePoints = true;
+					}
+					else
+					{
+						Left = NewLeft;
+					}
+				}
+			}
+
+			if (Right != NewRight)
+			{
+				if (DetermineSideOfPointToLine2D(Right, Start, NewRight) == RightEdgeSide)
+				{
+					// Check if either left or right point has crossed each other
+					if (DetermineSideOfPointToLine2D(NewRight, Start, Left) != RightEdgeSide)
+					{
+						Result.emplace(Result.end(), Left, -1);
+						Start = Left;
+						bInitializePoints = true;
+					}
+					else
+					{
+						Right = NewRight;
+					}
+				}
+			}
+		}
+
+		if (bInitializePoints)
+		{
+			// The initial left and right endpoint will be used as starting points
+			Left = NewLeft;
+			Right = NewRight;
+
+			bInitializePoints = false;
+		}
+
+		if (bDebugOutput)
+		{
+			RLog("Step %d - Start: %s, Current: %s, Left: %s, Right: %s\n", i,
+				Start.ToString().c_str(),
+				CurrentPosition.ToString().c_str(),
+				Left.ToString().c_str(),
+				Right.ToString().c_str());
+		}
+	}
+
+	bDebugOutput = false;
+
+	return Result;
+}
+
+void RNavMeshData::DebugDrawEdge(int EdgeId, const RColor& Color) const
+{
+	if (EdgeId > 0 && EdgeId < (int)NavMeshEdges.size())
+	{
+		int p0 = NavMeshEdges[EdgeId].p0;
+		int p1 = NavMeshEdges[EdgeId].p1;
+
+		GDebugRenderer.DrawLine(NavMeshPoints[p0].WorldPosition, NavMeshPoints[p1].WorldPosition, Color);
+	}
+}
+
+NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point, float MaxHeightDifference /*= 50.0f*/) const
 {
 	NavMeshProjectionResult Result;
 	for (int Index = 0; Index < (int)NavMeshTriangles.size(); Index++)
@@ -302,11 +478,12 @@ NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point) 
 			// Project the point to navmesh by modifying y from the input
 			RVec3 ProjectedPoint = Point;
 			ProjectedPoint.SetY((p0 * u + p1 * v + p2 * w).Y());
-			Result.PositionOnNavmesh = ProjectedPoint;
 
-			// TODO: Handle multi-layered navmesh in the future
-
-			break;
+			if (fabs(Point.Y() - ProjectedPoint.Y()) < MaxHeightDifference)
+			{
+				Result.PositionOnNavmesh = ProjectedPoint;
+				break;
+			}
 		}
 	}
 

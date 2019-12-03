@@ -153,9 +153,9 @@ const GridCoord RNavMeshGenerator::NeighborOffset[8] =
 
 RNavMeshGenerator::RNavMeshGenerator()
 	: DebugDistanceField(0)
-	, CellDimension(100.0f, 20.0f, 100.0f)
+	, CellDimension(100.0f, 10.0f, 100.0f)
 	, MinTraversableHeight(200.0f)
-	, MaxStepHeight(50.0f)
+	, MaxStepHeight(10.0f)
 {
 	MinTraversableNumCells = (int)ceil(MinTraversableHeight / CellDimension.Y());
 	MaxStepNumCells = (int)floor(MaxStepHeight / CellDimension.Y());
@@ -270,69 +270,14 @@ void RNavMeshGenerator::DebugRender()
 	}
 
 #if 0
-	const auto& RegionMap = DebugRegionMaps[DebugDistanceField];
-
-	for (const auto& Column : Heightfield)
-	{
-		// Draw solid spans
-		//for (const auto& Span : Column.SolidSpans)
-		//{
-		//	GDebugRenderer.DrawAabb(Span.Bounds, Span.bTraversable ? RColor::Green : RColor::Red);
-		//}
-
-		int SpanIndex = 0;
-
-		// Draw traversable areas
-		for (const auto& OpenSpan : Column.OpenSpans)
-		{
-			if (OpenSpan.DistanceField >= DebugDistanceField)
-			{
-				OpenSpanKey Key(Column.x, Column.z, SpanIndex);
-				auto Iter = RegionMap.find(Key);
-				if (Iter != RegionMap.end())
-				{
-					int RegionId = Iter->second;
-					if (RegionId != -1)
-					{
-						RVec3 CellPosition = GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z);
-						GDebugRenderer.DrawSphere(CellPosition, CellDimension.X() * 0.5f, DebugRegionColors[RegionId], 4);
-					}
-				}
-			}
-
-			for (int i = 0; i < NUM_NEIGHBOUR_SPANS; i++)
-			{
-				int NeighborLinkIndex = OpenSpan.NeighborLink[i];
-				if (NeighborLinkIndex != -1)
-				{
-					const int n_x = Column.x + NeighborOffset[i].x;
-					const int n_z = Column.z + NeighborOffset[i].z;
-
-					if (n_x >= 0 && n_x < CellNumX &&
-						n_z >= 0 && n_z < CellNumZ)
-					{
-						int NeighborIndex = n_x * CellNumZ + n_z;
-						const HeightfieldOpenSpan& NeighborOpenSpan = Heightfield[NeighborIndex].OpenSpans[NeighborLinkIndex];
-						int NeighborStart = NeighborOpenSpan.CellRowStart;
-
-						RVec3 Start = GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z);
-						RVec3 End = GetCellCenter(n_x, NeighborStart, n_z);
-
-						GDebugRenderer.DrawLine(Start, End, RColor(1.0f, 0.5f, 0.5f));
-					}
-				}
-			}
-
-			SpanIndex++;
-		}
-	}
+	DebugDrawSpans();
 #endif
 }
 
 void RNavMeshGenerator::DebugProjectPointToNavmesh(const RVec3& Point) const
 {
 	NavMeshProjectionResult Result = NavMeshData.ProjectPointToNavmesh(Point);
-	if (Result.Triangle != -1)
+	if (Result.IsValid())
 	{
 		const NavMeshTriangleData& Triangle = NavMeshData.GetNavMeshTriangleData(Result.Triangle);
 		for (int i = 0; i < 3; i++)
@@ -373,8 +318,9 @@ void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObjec
 				RVec3 CellCenter = GetCellCenter(x, y, z);
 
 				RAabb CellBounds;
-				CellBounds.pMax = CellCenter + CellDimension / 2.0f;
-				CellBounds.pMin = CellCenter - CellDimension / 2.0f;
+				RVec3 CollisionDimention = CellDimension; //* RVec3(0.5f, 1.0f, 0.5f);
+				CellBounds.pMax = CellCenter + CollisionDimention;
+				CellBounds.pMin = CellCenter - CollisionDimention;
 
 				bool bIsSolidCell = false;
 
@@ -1132,6 +1078,66 @@ RVec3 RNavMeshGenerator::GetCellCenter(int x, int y, int z) const
 	);
 }
 
+void RNavMeshGenerator::DebugDrawSpans()
+{
+	const auto& RegionMap = DebugRegionMaps[DebugDistanceField];
+
+	for (const auto& Column : Heightfield)
+	{
+		// Draw solid spans
+		//for (const auto& Span : Column.SolidSpans)
+		//{
+		//	GDebugRenderer.DrawAabb(Span.Bounds, Span.bTraversable ? RColor::Green : RColor::Red);
+		//}
+
+		int SpanIndex = 0;
+
+		// Draw traversable areas
+		for (const auto& OpenSpan : Column.OpenSpans)
+		{
+			if (OpenSpan.DistanceField >= DebugDistanceField)
+			{
+				OpenSpanKey Key(Column.x, Column.z, SpanIndex);
+				auto Iter = RegionMap.find(Key);
+				if (Iter != RegionMap.end())
+				{
+					int RegionId = Iter->second;
+					if (RegionId != -1)
+					{
+						RVec3 CellPosition = GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z);
+						GDebugRenderer.DrawSphere(CellPosition, CellDimension.X() * 0.5f, DebugRegionColors[RegionId], 4);
+					}
+				}
+			}
+
+			for (int i = 0; i < NUM_NEIGHBOR_SPANS; i++)
+			{
+				int NeighborLinkIndex = OpenSpan.NeighborLink[i];
+				if (NeighborLinkIndex != -1)
+				{
+					const int n_x = Column.x + NeighborOffset[i].x;
+					const int n_z = Column.z + NeighborOffset[i].z;
+
+					if (n_x >= 0 && n_x < CellNumX &&
+						n_z >= 0 && n_z < CellNumZ)
+					{
+						int NeighborIndex = n_x * CellNumZ + n_z;
+						const HeightfieldOpenSpan& NeighborOpenSpan = Heightfield[NeighborIndex].OpenSpans[NeighborLinkIndex];
+						int NeighborStart = NeighborOpenSpan.CellRowStart;
+
+						RVec3 Start = GetCellCenter(Column.x, OpenSpan.CellRowStart, Column.z);
+						RVec3 End = GetCellCenter(n_x, NeighborStart, n_z);
+
+						GDebugRenderer.DrawLine(Start, End, RColor(1.0f, 0.5f, 0.5f));
+}
+				}
+			}
+
+			SpanIndex++;
+		}
+	}
+}
+
 void RNavMeshGenerator::DebugDrawPathQuery() const
 {
 	static const RColor PathColor = RColor::Cyan;
@@ -1148,7 +1154,7 @@ void RNavMeshGenerator::DebugDrawPathQuery() const
 	}
 
 	GDebugRenderer.DrawSphere(QueryStart, 20.0f, EndPointColor);
-	GDebugRenderer.DrawSphere(QueryGoal, 20.0f, EndPointColor);
+	//GDebugRenderer.DrawSphere(QueryGoal, 20.0f, EndPointColor);
 }
 
 void RNavMeshGenerator::IncreaseDebugDistanceFieldLevel()
