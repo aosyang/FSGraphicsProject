@@ -25,6 +25,12 @@ private:
 	/// Find a target to fight
 	void FindAttackTarget();
 
+	RVec3 EvaluateMovingVector();
+
+	RVec3 GetVectorToAttackTarget() const;
+
+	bool QueryPathToAttackTarget();
+
 private:
 	FTGPlayerController* ControlledPlayer;
 	FTGPlayerController* AttackTarget;
@@ -32,4 +38,8 @@ private:
 	bool bIsWaiting;
 	float WaitTime;
 	float AttackTargetTimeOut;
+
+	std::vector<RVec3> NavPath;
+	RVec3 NavigationStartPoint;
+	RVec3 NavigationGoalPoint;
 };

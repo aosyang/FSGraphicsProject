@@ -8,7 +8,7 @@
 
 #include "RNavMeshGenDebugger.h"
 
-void RNavMeshGenDebugger::DrawRegion(int RegionId)
+void RNavMeshGenDebugger::DrawRegion(int RegionId) const
 {
 	if (RegionId >= 0 && RegionId < (int)RegionDebugLines.size())
 	{

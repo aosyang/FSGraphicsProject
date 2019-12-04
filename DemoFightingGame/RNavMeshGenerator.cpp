@@ -168,7 +168,7 @@ RNavMeshGenerator::~RNavMeshGenerator()
 	RInput.UnbindKeyStateEvents(VK_OEM_6, EBufferedKeyState::Pressed);
 }
 
-void RNavMeshGenerator::Build(RScene* Scene)
+void RNavMeshGenerator::Build(const RScene* Scene, RNavMeshData& OutNavMeshData)
 {
 	RLog("Initalizing navmesh generator from static level meshes.\n");
 
@@ -200,7 +200,7 @@ void RNavMeshGenerator::Build(RScene* Scene)
 		GenerateDistanceField();
 		GenerateRegions();
 		GenerateRegionContours();
-		TriangulateRegions();
+		TriangulateRegions(OutNavMeshData);
 	}
 
 	// Generate randomized color for each region
@@ -223,10 +223,9 @@ void RNavMeshGenerator::Build(RScene* Scene)
 	RInput.BindKeyStateEvent(VK_OEM_6, EBufferedKeyState::Pressed, this, &RNavMeshGenerator::DecreaseDebugDistanceFieldLevel);
 }
 
-void RNavMeshGenerator::DebugRender()
+void RNavMeshGenerator::DebugRender() const
 {
 	GDebugRenderer.DrawAabb(SceneBounds);
-	DebugDrawPathQuery();
 
 	{
 		static int DebugDrawRegionId = 0;
@@ -274,29 +273,6 @@ void RNavMeshGenerator::DebugRender()
 #endif
 }
 
-void RNavMeshGenerator::DebugProjectPointToNavmesh(const RVec3& Point) const
-{
-	NavMeshProjectionResult Result = NavMeshData.ProjectPointToNavmesh(Point);
-	if (Result.IsValid())
-	{
-		const NavMeshTriangleData& Triangle = NavMeshData.GetNavMeshTriangleData(Result.Triangle);
-		for (int i = 0; i < 3; i++)
-		{
-			RVec3 p0 = NavMeshData.GetNavMeshPointData(Triangle.Points[i]).WorldPosition;
-			RVec3 p1 = NavMeshData.GetNavMeshPointData(Triangle.Points[(i + 1) % 3]).WorldPosition;
-			GDebugRenderer.DrawLine(p0, p1);
-		}
-	}
-
-	GDebugRenderer.DrawSphere(Point, 50);
-}
-
-void RNavMeshGenerator::DebugSetGoalPoint(const RVec3& Point)
-{
-	QueryGoal = Point;
-	NavMeshData.QueryPath(QueryStart, QueryGoal, TestPath);
-}
-
 void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObject*>& SceneObjects)
 {
 	for (int x = 0; x < CellNumX; x++)
@@ -318,7 +294,7 @@ void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObjec
 				RVec3 CellCenter = GetCellCenter(x, y, z);
 
 				RAabb CellBounds;
-				RVec3 CollisionDimention = CellDimension; //* RVec3(0.5f, 1.0f, 0.5f);
+				RVec3 CollisionDimention = CellDimension * RVec3(1.0f, 0.5f, 1.0f);
 				CellBounds.pMax = CellCenter + CollisionDimention;
 				CellBounds.pMin = CellCenter - CollisionDimention;
 
@@ -895,7 +871,7 @@ void RNavMeshGenerator::GenerateRegionContours()
 }
 
 
-void RNavMeshGenerator::TriangulateRegions()
+void RNavMeshGenerator::TriangulateRegions(RNavMeshData& OutNavMeshData)
 {
 	int RegionId = 0;
 	for (auto& TraverseEdges : RegionEdgePoints)
@@ -930,7 +906,7 @@ void RNavMeshGenerator::TriangulateRegions()
 			const RVec3 p1 = Edges[PtIdx1].Point;
 			const RVec3 p2 = Edges[PtIdx2].Point;
 
-			NavMeshData.AddTriangle(p0, p1, p2, RegionId);
+			OutNavMeshData.AddTriangle(p0, p1, p2, RegionId);
 
 #if 1
 			// Add edges to debugger for debug rendering
@@ -950,10 +926,6 @@ void RNavMeshGenerator::TriangulateRegions()
 
 		RegionId++;
 	}
-
-	QueryStart = RVec3(1500, 50, 10);
-	QueryGoal = RVec3(-1500, 50, 10);
-	NavMeshData.QueryPath(QueryStart, QueryGoal, TestPath);
 }
 
 OpenSpanKey RNavMeshGenerator::FindRegionEdgeInDirection(const OpenSpanKey& Key, int DirectionIdx /*= 0*/) const
@@ -1136,25 +1108,6 @@ void RNavMeshGenerator::DebugDrawSpans()
 			SpanIndex++;
 		}
 	}
-}
-
-void RNavMeshGenerator::DebugDrawPathQuery() const
-{
-	static const RColor PathColor = RColor::Cyan;
-	static const RColor EndPointColor = RColor::Yellow;
-
-	for (int i = 0; i < (int)TestPath.size() - 1; i++)
-	{
-		GDebugRenderer.DrawLine(TestPath[i], TestPath[i + 1], PathColor);
-		GDebugRenderer.DrawSphere(TestPath[i], 10.0f, PathColor);
-		if (i == (int)TestPath.size() - 2)
-		{
-			GDebugRenderer.DrawSphere(TestPath[i + 1], 10.0f, PathColor);
-		}
-	}
-
-	GDebugRenderer.DrawSphere(QueryStart, 20.0f, EndPointColor);
-	//GDebugRenderer.DrawSphere(QueryGoal, 20.0f, EndPointColor);
 }
 
 void RNavMeshGenerator::IncreaseDebugDistanceFieldLevel()

@@ -11,9 +11,8 @@
 
 #include "FTGPlayerController.h"
 #include "AIFighterLogic.h"
-#include "RNavMeshGenerator.h"
 
-const static int MaxNumAIs = 0;
+const static int MaxNumAIs = 1;
 
 class FightingGameApp : public IApp
 {
@@ -46,7 +45,5 @@ private:
 	RText					m_Text;
 	bool					m_FreeFlyMode;
 	RFreeFlyCameraControl*	m_FreeFlyCameraControl;
-
-	RNavMeshGenerator		NavMeshGenerator;
 };
 

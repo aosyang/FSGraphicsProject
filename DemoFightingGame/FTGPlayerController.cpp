@@ -148,6 +148,11 @@ void FTGPlayerController::DrawDepthPass()
 
 void FTGPlayerController::SetMovementInput(const RVec3& Input)
 {
+	if (Input.HasNan())
+	{
+		DebugBreak();
+	}
+
 	m_MovementInput = Input * m_StateMachine.GetAnimationDeviation();
 }
 

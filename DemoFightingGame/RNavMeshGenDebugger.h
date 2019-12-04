@@ -22,7 +22,7 @@ struct DebugLineData
 class RNavMeshGenDebugger
 {
 public:
-	void DrawRegion(int RegionId);
+	void DrawRegion(int RegionId) const;
 
 	void AddRegionEdge(int RegionId, const RVec3& Start, const RVec3& End);
 

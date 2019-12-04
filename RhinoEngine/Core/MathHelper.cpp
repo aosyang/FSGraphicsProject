@@ -47,3 +47,27 @@ void RMath::Barycentric2D_XZ(const RVec3& p, const RVec3& a, const RVec3& b, con
 
 	Barycentric(p0, a0, b0, c0, u, v, w);
 }
+
+int RMath::WeightedDiceRoll(const std::vector<float>& Weights)
+{
+	float Sum = 0.0f;
+	for (int i = 0; i < (int)Weights.size(); i++)
+	{
+		Sum += Weights[i];
+	}
+
+	float Val = RMath::RandRangedF(0.0f, Sum);
+	for (int i = 0; i < (int)Weights.size(); i++)
+	{
+		if (Val <= Weights[i])
+		{
+			return i;
+		}
+
+		Val -= Weights[i];
+	}
+
+	// Shouldn't be here
+	assert(false);
+	return -1;
+}

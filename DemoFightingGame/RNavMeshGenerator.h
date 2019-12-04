@@ -42,13 +42,10 @@ public:
 	~RNavMeshGenerator();
 
 	// Build the navmesh for a scene
-	void Build(RScene* Scene);
+	void Build(const RScene* Scene, RNavMeshData& OutNavMeshData);
 
 	// Draw debug geometries for the navmesh generator
-	void DebugRender();
-
-	void DebugProjectPointToNavmesh(const RVec3& Point) const;
-	void DebugSetGoalPoint(const RVec3& Point);
+	void DebugRender() const;
 
 	HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key);
 	const HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key) const;
@@ -73,7 +70,7 @@ private:
 	// Make region contours from cells
 	void GenerateRegionContours();
 
-	void TriangulateRegions();
+	void TriangulateRegions(RNavMeshData& OutNavMeshData);
 
 	// Going in one direction and find a span at the edge of the region of a given span
 	OpenSpanKey FindRegionEdgeInDirection(const OpenSpanKey& Key, int DirectionIdx = 0) const;
@@ -91,8 +88,6 @@ private:
 
 private:
 	void DebugDrawSpans();
-
-	void DebugDrawPathQuery() const;
 
 	void IncreaseDebugDistanceFieldLevel();
 	void DecreaseDebugDistanceFieldLevel();
@@ -123,11 +118,5 @@ private:
 	// Edge points for each region. Array indices represent region ids.
 	std::vector<EdgePointCollection> RegionEdgePoints;
 
-	RNavMeshData NavMeshData;
-
 	RNavMeshGenDebugger Debugger;
-
-	RVec3 QueryStart;
-	RVec3 QueryGoal;
-	std::vector<RVec3> TestPath;
 };

@@ -451,6 +451,12 @@ void RNavMeshData::DebugDrawEdge(int EdgeId, const RColor& Color) const
 
 NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point, float MaxHeightDifference /*= 50.0f*/) const
 {
+	if (Point.HasNan())
+	{
+		RLog("RNavMeshData::ProjectPointToNavmesh - Point has one or more nan components!\n");
+		DebugBreak();
+	}
+
 	NavMeshProjectionResult Result;
 	for (int Index = 0; Index < (int)NavMeshTriangles.size(); Index++)
 	{
@@ -467,7 +473,8 @@ NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point, 
 		const RVec3 p2 = NavMeshPoints[idx2].WorldPosition;
 
 		// Project the point to navmesh alone y-axis by evaluating its 2D barycentric parameters
-		RMath::Barycentric2D_XZ(Point,
+		RMath::Barycentric2D_XZ(
+			Point,
 			p0, p1, p2,
 			u, v, w);
 

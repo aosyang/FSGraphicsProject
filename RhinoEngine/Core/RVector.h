@@ -152,13 +152,23 @@ public:
 
 	FORCEINLINE float SquaredMagitude() const
 	{
-		return x*x + y*y + z*z;
+		return x * x + y * y + z * z;
+	}
+
+	FORCEINLINE float SquaredMagitude2D() const
+	{
+		return x * x + z * z;
 	}
 
 	// Get length of vector
 	FORCEINLINE float Magnitude() const
 	{
 		return sqrtf(x * x + y * y + z * z);
+	}
+
+	FORCEINLINE float Magnitude2D() const
+	{
+		return sqrtf(x * x + z * z);
 	}
 
 	// Make unit vector
@@ -171,6 +181,11 @@ public:
 			y /= mag;
 			z /= mag;
 		}
+	}
+
+	FORCEINLINE bool HasNan() const
+	{
+		return isnan(x) || isnan(y) || isnan(z);
 	}
 
 	FORCEINLINE std::string ToString() const
@@ -225,6 +240,21 @@ public:
 	static float Distance(const RVec3& lhs, const RVec3& rhs)
 	{
 		return (lhs - rhs).Magnitude();
+	}
+
+	static float SquaredDistance(const RVec3& lhs, const RVec3& rhs)
+	{
+		return (lhs - rhs).SquaredMagitude();
+	}
+
+	static float Distance2D(const RVec3& lhs, const RVec3& rhs)
+	{
+		return (lhs - rhs).Magnitude2D();
+	}
+
+	static float SquaredDistance2D(const RVec3& lhs, const RVec3& rhs)
+	{
+		return (lhs - rhs).SquaredMagitude2D();
 	}
 
 	static RVec3 Zero()

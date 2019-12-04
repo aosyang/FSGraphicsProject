@@ -6,6 +6,8 @@
 
 #include "FightingGameApp.h"
 
+#include "RNavigationSystem.h"
+
 FightingGameApp::FightingGameApp()
 	: m_Player(nullptr)
 	, m_Camera(nullptr)
@@ -28,7 +30,7 @@ bool FightingGameApp::Initialize()
 	DefaultScene->Initialize();
 	DefaultScene->LoadFromFile("/TestArena.rmap");
 	
-	NavMeshGenerator.Build(DefaultScene);
+	GNavigationSystem.BuildNavMesh(DefaultScene);
 
 	m_ShadowMap.Initialize(1024, 1024);
 	m_Camera = DefaultScene->CreateSceneObjectOfType<RCamera>();
@@ -60,7 +62,8 @@ bool FightingGameApp::Initialize()
 			m_AIPlayers[i]->InitAssets();
 
 			// Make each AI play animation at a slightly different speed
-			m_AIPlayers[i]->SetAnimationDeviation(RMath::RandRangedF(0.8f, 1.2f));
+			//m_AIPlayers[i]->SetAnimationDeviation(RMath::RandRangedF(0.8f, 1.2f));
+			m_AIPlayers[i]->SetAnimationDeviation(0.8f);
 
 			// Create AI combat logic component
 			m_AIPlayers[i]->AddNewComponent<AIFighterLogic>();
@@ -148,8 +151,8 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 	UpdateCameraPosition(timer.DeltaTime());
 
-	NavMeshGenerator.DebugRender();
-	NavMeshGenerator.DebugSetGoalPoint(m_Player->GetPosition());
+	//GNavigationSystem.DebugRender();
+	//GNavigationSystem.DebugSetGoalPoint(m_Player->GetPosition());
 }
 
 void FightingGameApp::RenderScene()

@@ -65,5 +65,7 @@ namespace RMath
 
 	// Barycentric with all positions considered on xz-plane
 	void Barycentric2D_XZ(const RVec3& p, const RVec3& a, const RVec3& b, const RVec3& c, float& u, float& v, float &w);
+
+	int WeightedDiceRoll(const std::vector<float>& Weights);
 }
 
