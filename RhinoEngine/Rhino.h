@@ -84,3 +84,4 @@ class RResourceBase;
 #include "Scene/RSkybox.h"
 #include "Scene/RScene.h"
 
+#include "Navigation/RNavigationSystem.h"

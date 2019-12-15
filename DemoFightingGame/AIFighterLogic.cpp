@@ -5,7 +5,6 @@
 //=============================================================================
 
 #include "AIFighterLogic.h"
-#include "RNavigationSystem.h"
 
 AIFighterLogic::AIFighterLogic(RSceneObject* InOwner)
 	: Base(InOwner)

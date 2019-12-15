@@ -71,6 +71,8 @@ bool REngine::Initialize(HWND hWnd, int width, int height)
 	GPostProcessorManager.Initialize();
 	GSceneManager.Initialize();
 
+	GNavigationSystem.Initialize();
+
 	if (!m_Application->Initialize())
 		return false;
 

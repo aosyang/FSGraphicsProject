@@ -12,6 +12,7 @@
 
 #include "Scene/RScene.h"
 #include "RRegionData.h"
+#include "RNavigationSystem.h"
 
 
 namespace
@@ -265,7 +266,7 @@ void RNavMeshGenerator::DebugRender() const
 			}
 		}
 
-		Debugger.DrawRegion(DebugDrawRegionId);
+		GNavigationSystem.GetDebugger().DrawRegion(DebugDrawRegionId);
 	}
 
 #if 0
@@ -913,9 +914,9 @@ void RNavMeshGenerator::TriangulateRegions(RNavMeshData& OutNavMeshData)
 			{
 				const RVec3 Offset(0.0f, 1.0f, 0.0f);
 				
-				Debugger.AddRegionEdge(RegionId, p0 + Offset, p1 + Offset);
-				Debugger.AddRegionEdge(RegionId, p0 + Offset, p2 + Offset);
-				Debugger.AddRegionEdge(RegionId, p1 + Offset, p2 + Offset);
+				GNavigationSystem.GetDebugger().AddRegionEdge(RegionId, p0 + Offset, p1 + Offset);
+				GNavigationSystem.GetDebugger().AddRegionEdge(RegionId, p0 + Offset, p2 + Offset);
+				GNavigationSystem.GetDebugger().AddRegionEdge(RegionId, p1 + Offset, p2 + Offset);
 			}
 #endif // 0
 

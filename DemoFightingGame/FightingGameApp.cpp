@@ -6,8 +6,6 @@
 
 #include "FightingGameApp.h"
 
-#include "RNavigationSystem.h"
-
 FightingGameApp::FightingGameApp()
 	: m_Player(nullptr)
 	, m_Camera(nullptr)

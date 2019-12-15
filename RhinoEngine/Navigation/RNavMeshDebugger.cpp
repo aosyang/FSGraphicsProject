@@ -6,9 +6,27 @@
 
 #include "Rhino.h"
 
-#include "RNavMeshGenDebugger.h"
+#include "RNavMeshDebugger.h"
 
-void RNavMeshGenDebugger::DrawRegion(int RegionId) const
+RNavMeshDebugger::RNavMeshDebugger()
+	: NavMeshGen(nullptr)
+	, NavMeshData(nullptr)
+{
+
+}
+
+bool RNavMeshDebugger::Initialize(RNavMeshGenerator* InNavMeshGen, RNavMeshData* InNavMeshData)
+{
+	NavMeshGen = InNavMeshGen;
+	assert(NavMeshGen);
+
+	NavMeshData = InNavMeshData;
+	assert(NavMeshData);
+
+	return true;
+}
+
+void RNavMeshDebugger::DrawRegion(int RegionId) const
 {
 	if (RegionId >= 0 && RegionId < (int)RegionDebugLines.size())
 	{

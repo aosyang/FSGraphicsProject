@@ -10,8 +10,6 @@
 #include "RVoxelizerDataType.h"
 #include "RNavMeshData.h"
 
-#include "RNavMeshGenDebugger.h"
-
 #include <vector>
 #include <set>
 
@@ -117,6 +115,4 @@ private:
 
 	// Edge points for each region. Array indices represent region ids.
 	std::vector<EdgePointCollection> RegionEdgePoints;
-
-	RNavMeshGenDebugger Debugger;
 };

@@ -251,9 +251,9 @@ std::vector<NavPathNode> RAStarPathfinder::Evaluate(const RNavMeshData* NavMeshD
 			{
 				int EdgePoint0 = GoalTriangle.Points[p];
 				int EdgePoint1 = GoalTriangle.Points[(p + 1) % 3];
-				int Edge = NavMeshData->FindEdgeIndexForPointsChecked(EdgePoint0, EdgePoint1);
+				int EdgeIdx = NavMeshData->FindEdgeIndexForPointsChecked(EdgePoint0, EdgePoint1);
 
-				if (NeighborEdgeIdx == Edge)
+				if (NeighborEdgeIdx == EdgeIdx)
 				{
 					// TODO: Has reached the goal, stop search.
 					SearchData.AddGoalCandidate(SearchNodeIdx, NeighborEdgeIdx, TotalCost + DistanceToNeighbor);

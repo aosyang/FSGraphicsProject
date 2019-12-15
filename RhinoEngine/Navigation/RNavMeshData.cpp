@@ -361,8 +361,8 @@ std::vector<NavPathNode> RNavMeshData::PerformFunnel(const std::vector<NavPathNo
 		const NavMeshEdgeData& Edge = NavMeshEdges[EdgeId];
 
 		// Find position for both endpoints of the edge
-		RVec3 NewLeft = NavMeshPoints[Edge.p0].WorldPosition;
-		RVec3 NewRight = NavMeshPoints[Edge.p1].WorldPosition;
+		RVec3 NewLeft = NavMeshPoints[Edge.p1].WorldPosition;
+		RVec3 NewRight = NavMeshPoints[Edge.p0].WorldPosition;
 
 		int LeftEdgeSide = DetermineSideOfPointToLine2D(NewLeft, PrevPosition, CurrentPosition);
 		int RightEdgeSide = DetermineSideOfPointToLine2D(NewRight, PrevPosition, CurrentPosition);

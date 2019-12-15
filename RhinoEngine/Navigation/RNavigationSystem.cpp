@@ -8,6 +8,12 @@
 
 #include "RNavigationSystem.h"
 
+bool RNavigationSystem::Initialize()
+{
+	NavMeshDebugger.Initialize(&NavMeshGenerator, &NavMeshData);
+	return true;
+}
+
 void RNavigationSystem::BuildNavMesh(const RScene* Scene)
 {
 	NavMeshGenerator.Build(Scene, NavMeshData);
