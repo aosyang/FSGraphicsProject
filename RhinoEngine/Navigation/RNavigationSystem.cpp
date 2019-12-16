@@ -73,6 +73,6 @@ void RNavigationSystem::DebugDrawPathQuery() const
 		}
 	}
 
-	GDebugRenderer.DrawSphere(QueryStart, 20.0f, EndPointColor);
+	//GDebugRenderer.DrawSphere(QueryStart, 20.0f, EndPointColor);
 	//GDebugRenderer.DrawSphere(QueryGoal, 20.0f, EndPointColor);
 }

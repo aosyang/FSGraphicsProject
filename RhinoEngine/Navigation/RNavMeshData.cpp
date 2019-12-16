@@ -103,7 +103,7 @@ bool RNavMeshData::QueryPath(const RVec3& Start, const RVec3& Goal, std::vector<
 	NavMeshProjectionResult StartResult = ProjectPointToNavmesh(Start);
 	NavMeshProjectionResult GoalResult = ProjectPointToNavmesh(Goal);
 
-	GDebugRenderer.DrawSphere(GoalResult.PositionOnNavmesh, 20.0f, RColor::Yellow);
+	//GDebugRenderer.DrawSphere(GoalResult.PositionOnNavmesh, 20.0f, RColor::Yellow);
 
 	// Both the starting point and the end point need to be on the navmesh
 	if (!StartResult.IsValid() || !GoalResult.IsValid())
@@ -299,7 +299,12 @@ std::vector<NavPathNode> RNavMeshData::PerformStringPulling(const std::vector<Na
 
 std::vector<NavPathNode> RNavMeshData::PerformFunnel(const std::vector<NavPathNode>& InPathData) const
 {
-	static bool bDebugOutput = false;
+	static bool bDebugOutput = true;
+
+	if (bDebugOutput)
+	{
+		GNavigationSystem.GetDebugger().ClearFunnelResult();
+	}
 
 	// Debug draw the original path
 	for (int i = 0; i < (int)InPathData.size() - 1; i++)
@@ -355,6 +360,12 @@ std::vector<NavPathNode> RNavMeshData::PerformFunnel(const std::vector<NavPathNo
 			}
 
 			Result.emplace(Result.end(), InPathData[i].Position, -1);
+
+			if (bDebugOutput)
+			{
+				GNavigationSystem.GetDebugger().AddFunnelStep(i, Start, CurrentPosition, Left, Right);
+			}
+
 			continue;
 		}
 
@@ -425,15 +436,17 @@ std::vector<NavPathNode> RNavMeshData::PerformFunnel(const std::vector<NavPathNo
 
 		if (bDebugOutput)
 		{
-			RLog("Step %d - Start: %s, Current: %s, Left: %s, Right: %s\n", i,
-				Start.ToString().c_str(),
-				CurrentPosition.ToString().c_str(),
-				Left.ToString().c_str(),
-				Right.ToString().c_str());
+			//RLog("Step %d - Start: %s, Current: %s, Left: %s, Right: %s\n", i,
+			//	Start.ToString().c_str(),
+			//	CurrentPosition.ToString().c_str(),
+			//	Left.ToString().c_str(),
+			//	Right.ToString().c_str());
+
+			GNavigationSystem.GetDebugger().AddFunnelStep(i, Start, CurrentPosition, Left, Right);
 		}
 	}
 
-	bDebugOutput = false;
+	//bDebugOutput = false;
 
 	return Result;
 }

@@ -35,6 +35,7 @@ typedef std::vector<EdgePointData> EdgePointCollection;
 /// Navmesh generator
 class RNavMeshGenerator
 {
+	friend class RNavMeshDebugger;
 public:
 	RNavMeshGenerator();
 	~RNavMeshGenerator();

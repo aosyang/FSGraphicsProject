@@ -132,6 +132,24 @@ namespace
 
 		return ShortestPartition;
 	}
+
+	void IncreasePeriodicIndex(int& Index, int MaxIndex)
+	{
+		Index++;
+		if (Index > MaxIndex)
+		{
+			Index = 0;
+		}
+	}
+
+	void DecreasePeriodicIndex(int& Index, int MaxIndex)
+	{
+		Index--;
+		if (Index < 0)
+		{
+			Index = MaxIndex;
+		}
+	}
 }
 
 const OpenSpanKey OpenSpanKey::Invalid(-1, -1, -1);
@@ -228,46 +246,38 @@ void RNavMeshGenerator::DebugRender() const
 {
 	GDebugRenderer.DrawAabb(SceneBounds);
 
+	//{
+	//	static int DebugDrawRegionId = 0;
+
+	//	if (RInput.GetBufferedKeyState(VK_OEM_PLUS) == EBufferedKeyState::Pressed)
+	//	{
+	//		IncreasePeriodicIndex(DebugDrawRegionId, (int)RegionEdgePoints.size() - 1);
+	//	}
+
+	//	if (RInput.GetBufferedKeyState(VK_OEM_MINUS) == EBufferedKeyState::Pressed)
+	//	{
+	//		DecreasePeriodicIndex(DebugDrawRegionId, (int)RegionEdgePoints.size() - 1);
+	//	}
+
+	//	GNavigationSystem.GetDebugger().DrawRegion(DebugDrawRegionId);
+	//}
+
 	{
-		static int DebugDrawRegionId = 0;
+		static int DebugDrawFunnelId = 0;
+		int MaxFunnelIndex = GNavigationSystem.GetDebugger().GetMaxStepIndex();
 
 		if (RInput.GetBufferedKeyState(VK_OEM_PLUS) == EBufferedKeyState::Pressed)
 		{
-			DebugDrawRegionId++;
-			if (DebugDrawRegionId >= RegionEdgePoints.size())
-			{
-				DebugDrawRegionId = 0;
-			}
+			IncreasePeriodicIndex(DebugDrawFunnelId, MaxFunnelIndex);
 		}
 
 		if (RInput.GetBufferedKeyState(VK_OEM_MINUS) == EBufferedKeyState::Pressed)
 		{
-			DebugDrawRegionId--;
-			if (DebugDrawRegionId < 0)
-			{
-				DebugDrawRegionId = (int)RegionEdgePoints.size() - 1;
-			}
+			DecreasePeriodicIndex(DebugDrawFunnelId, MaxFunnelIndex);
 		}
 
-		const auto& RegionEdges = RegionEdgePoints[DebugDrawRegionId];
-		for (int i = 0; i < RegionEdges.size(); i++)
-		{
-			const RVec3& p0 = RegionEdges[i].Point;
-			const RVec3& p1 = RegionEdges[(i + 1) % RegionEdges.size()].Point;
-			GDebugRenderer.DrawLine(p0, p1, RColor::Cyan);
-
-			if (RegionEdges[i].bIsMandatory)
-			{
-				GDebugRenderer.DrawSphere(p0, 20.0f, RColor::Cyan, 8);
-			}
-			else
-			{
-				GDebugRenderer.DrawSphere(p0, 10.0f, RColor::Green, 8);
-			}
-		}
-
-		GNavigationSystem.GetDebugger().DrawRegion(DebugDrawRegionId);
-	}
+		GNavigationSystem.GetDebugger().DrawFunnel(DebugDrawFunnelId);
+}
 
 #if 0
 	DebugDrawSpans();

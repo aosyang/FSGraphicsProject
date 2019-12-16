@@ -22,6 +22,23 @@ struct DebugLineData
 	RVec3 End;
 };
 
+struct DebugFunnelData
+{
+	DebugFunnelData(int InStep, const RVec3& InStart, const RVec3& InCurrent, const RVec3& InLeft, const RVec3& InRight)
+		: Step(InStep)
+		, Start(InStart)
+		, Current(InCurrent)
+		, Left(InLeft)
+		, Right(InRight)
+	{}
+
+	int Step;
+	RVec3 Start;
+	RVec3 Current;
+	RVec3 Left;
+	RVec3 Right;
+};
+
 class RNavMeshDebugger
 {
 public:
@@ -29,15 +46,27 @@ public:
 
 	bool Initialize(RNavMeshGenerator* InNavMeshGen, RNavMeshData* InNavMeshData);
 
+	// Draw debug information for a given region
 	void DrawRegion(int RegionId) const;
 
 	void AddRegionEdge(int RegionId, const RVec3& Start, const RVec3& End);
 
+	void AddFunnelStep(int Step, const RVec3& InStart, const RVec3& InCurrent, const RVec3& InLeft, const RVec3& InRight);
+
+	void ClearFunnelResult();
+
+	void DrawFunnel(int Step) const;
+
+	int GetMaxStepIndex() const;
+
 	void AddPersistentLine(const RVec3& Start, const RVec3& End);
 
 private:
-	std::vector<std::vector<DebugLineData>> RegionDebugLines;
+	std::vector<std::vector<DebugLineData>> RegionEdgeLines;
 	std::vector<DebugLineData> PersistentLines;
+
+	// Funnel debug info
+	std::vector<DebugFunnelData> DebugFunnel;
 
 	RNavMeshGenerator*	NavMeshGen;
 	RNavMeshData*		NavMeshData;
@@ -46,13 +75,13 @@ private:
 
 FORCEINLINE void RNavMeshDebugger::AddRegionEdge(int RegionId, const RVec3& Start, const RVec3& End)
 {
-	if (RegionDebugLines.size() < RegionId + 1)
+	if (RegionEdgeLines.size() < RegionId + 1)
 	{
-		RegionDebugLines.resize(RegionId + 1);
+		RegionEdgeLines.resize(RegionId + 1);
 	}
 
-	auto& PersistentDebugLines = RegionDebugLines[RegionId];
-	PersistentDebugLines.emplace(PersistentDebugLines.end(), Start, End);
+	auto& DebugLines = RegionEdgeLines[RegionId];
+	DebugLines.emplace(DebugLines.end(), Start, End);
 }
 
 FORCEINLINE void RNavMeshDebugger::AddPersistentLine(const RVec3& Start, const RVec3& End)

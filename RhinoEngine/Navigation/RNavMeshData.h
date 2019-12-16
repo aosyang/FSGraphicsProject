@@ -99,6 +99,8 @@ struct NavMeshProjectionResult
 class RNavMeshData
 {
 	friend class RAStarPathfinder;
+	friend class RNavMeshDebugger;
+
 public:
 	// Add a triangle to the collection of navmesh convex
 	void AddTriangle(const RVec3& p0, const RVec3& p1, const RVec3& p2, int RegionId);
