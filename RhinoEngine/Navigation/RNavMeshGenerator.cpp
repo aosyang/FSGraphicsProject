@@ -246,22 +246,25 @@ void RNavMeshGenerator::DebugRender() const
 {
 	GDebugRenderer.DrawAabb(SceneBounds);
 
-	//{
-	//	static int DebugDrawRegionId = 0;
+#if 0
+	// Debug draw regions
+	{
+		static int DebugDrawRegionId = 0;
 
-	//	if (RInput.GetBufferedKeyState(VK_OEM_PLUS) == EBufferedKeyState::Pressed)
-	//	{
-	//		IncreasePeriodicIndex(DebugDrawRegionId, (int)RegionEdgePoints.size() - 1);
-	//	}
+		if (RInput.GetBufferedKeyState(VK_OEM_PLUS) == EBufferedKeyState::Pressed)
+		{
+			IncreasePeriodicIndex(DebugDrawRegionId, (int)RegionEdgePoints.size() - 1);
+		}
 
-	//	if (RInput.GetBufferedKeyState(VK_OEM_MINUS) == EBufferedKeyState::Pressed)
-	//	{
-	//		DecreasePeriodicIndex(DebugDrawRegionId, (int)RegionEdgePoints.size() - 1);
-	//	}
+		if (RInput.GetBufferedKeyState(VK_OEM_MINUS) == EBufferedKeyState::Pressed)
+		{
+			DecreasePeriodicIndex(DebugDrawRegionId, (int)RegionEdgePoints.size() - 1);
+		}
 
-	//	GNavigationSystem.GetDebugger().DrawRegion(DebugDrawRegionId);
-	//}
-
+		GNavigationSystem.GetDebugger().DrawRegion(DebugDrawRegionId);
+	}
+#else
+	// Debug draw funnel algorithm
 	{
 		static int DebugDrawFunnelId = 0;
 		int MaxFunnelIndex = GNavigationSystem.GetDebugger().GetMaxStepIndex();
@@ -277,11 +280,10 @@ void RNavMeshGenerator::DebugRender() const
 		}
 
 		GNavigationSystem.GetDebugger().DrawFunnel(DebugDrawFunnelId);
-}
-
-#if 0
-	DebugDrawSpans();
+	}
 #endif
+
+	//DebugDrawSpans();
 }
 
 void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObject*>& SceneObjects)
@@ -747,9 +749,9 @@ void RNavMeshGenerator::GenerateRegionContours()
 		int x, z, SpanIdx;
 		bool bFoundSpanForRegion = false;
 
-		for (x = 0; x < CellNumX && !bFoundSpanForRegion; x++)
+		for (x = 0; x < CellNumX; x++)
 		{
-			for (z = 0; z < CellNumZ && !bFoundSpanForRegion; z++)
+			for (z = 0; z < CellNumZ; z++)
 			{
 				int Index = x * CellNumZ + z;
 				const auto& Column = Heightfield[Index];
@@ -764,6 +766,16 @@ void RNavMeshGenerator::GenerateRegionContours()
 						break;
 					}
 				}
+
+				if (bFoundSpanForRegion)
+				{
+					break;
+				}
+			}
+
+			if (bFoundSpanForRegion)
+			{
+				break;
 			}
 		}
 
@@ -776,8 +788,6 @@ void RNavMeshGenerator::GenerateRegionContours()
 		OpenSpanKey CurrentKey(StartKey);
 		int CurrentDirection = StartDirection;
 
-		CurrentDirection++;
-		while (CurrentDirection >= 4) { CurrentDirection -= 4; }
 		int LastNeighborRegionId = INT_MAX;
 
 		RLog("Begin edge searching for region %d\n", RegionId);
@@ -971,7 +981,7 @@ OpenSpanKey RNavMeshGenerator::FindRegionEdgeInDirection(const OpenSpanKey& Key,
 
 void RNavMeshGenerator::AddEdgePoint(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMendatoryPoint)
 {
-	//RLog("Edge found! loc: (%d, %d), dir: %d\n", Key.x, Key.z, DirectionIdx);
+	//RLog("Edge found! loc: (%d, %d), dir: %d - ", Key.x, Key.z, DirectionIdx);
 
 	assert(RegionId >= 0 && RegionId < RegionEdgePoints.size());
 
@@ -992,8 +1002,10 @@ void RNavMeshGenerator::AddEdgePoint(const OpenSpanKey& Key, int DirectionIdx, i
 		Offset = Offset * RVec3(.5f, 0, -.5f);
 		break;
 	}
+
 	RVec3 EdgePoint = CenterPoint + Offset;
 	RegionEdgePoints[RegionId].push_back({ EdgePoint, bMendatoryPoint });
+	//RLog("Add edge point: %s\n", EdgePoint.ToString().c_str());
 }
 
 RAabb RNavMeshGenerator::CalculateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z) const
@@ -1061,7 +1073,7 @@ RVec3 RNavMeshGenerator::GetCellCenter(int x, int y, int z) const
 	);
 }
 
-void RNavMeshGenerator::DebugDrawSpans()
+void RNavMeshGenerator::DebugDrawSpans() const
 {
 	const auto& RegionMap = DebugRegionMaps[DebugDistanceField];
 
