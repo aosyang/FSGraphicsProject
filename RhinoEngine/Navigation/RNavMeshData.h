@@ -120,6 +120,10 @@ public:
 	NavMeshEdgeData& GetNavMeshEdgeData(int Index);
 	const NavMeshEdgeData& GetNavMeshEdgeData(int Index) const;
 
+	// Get total number of edges for navmesh
+	int GetNumEdges() const;
+
+	// Get the center position of a given edge
 	RVec3 GetEdgeCenter(int EdgeId) const;
 
 	int FindEdgeIndexForPointsChecked(int PointId0, int PointId1) const;
@@ -131,16 +135,17 @@ private:
 	// Make two points neighbors of each other
 	void MakePointNeighbors(int PointId0, int PointId1);
 
+	// Make two edges neighbors of each other
 	void MakeEdgeNeighbors(int EdgeId0, int EdgeId1);
 
 	// Add a new edge or mark an existing edge as non-border
 	// Return an index to the edge
 	int AddOrUpdateEdge(int PointId0, int PointId1);
 
-	// Perform the string pulling algorithm on a path
+	// Optimize a path by the string pulling algorithm
 	std::vector<NavPathNode> PerformStringPulling(const std::vector<NavPathNode>& InPathData) const;
 
-	// Perform the funnel algorithm on a path
+	// Optimize a path by the funnel algorithm
 	std::vector<NavPathNode> PerformFunnel(const std::vector<NavPathNode>& InPathData) const;
 
 private:
@@ -149,7 +154,10 @@ private:
 private:
 	std::vector<NavMeshPointData> NavMeshPoints;
 
+	// Triangles represented by three indices of navmesh points
 	std::vector<NavMeshTriangleData> NavMeshTriangles;
+
+	// Edges represented by two indices of navmesh points
 	std::vector<NavMeshEdgeData> NavMeshEdges;
 
 	// The A-star algorithm class
@@ -184,4 +192,9 @@ FORCEINLINE NavMeshEdgeData& RNavMeshData::GetNavMeshEdgeData(int Index)
 FORCEINLINE const NavMeshEdgeData& RNavMeshData::GetNavMeshEdgeData(int Index) const
 {
 	return NavMeshEdges[Index];
+}
+
+FORCEINLINE int RNavMeshData::GetNumEdges() const
+{
+	return (int)NavMeshEdges.size();
 }

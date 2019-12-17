@@ -315,7 +315,7 @@ std::vector<NavPathNode> RNavMeshData::PerformFunnel(const std::vector<NavPathNo
 		}
 
 		GDebugRenderer.DrawLine(InPathData[i].Position, InPathData[i + 1].Position, RColor::Yellow);
-		DebugDrawEdge(InPathData[i].EdgeId, RColor::Blue);
+		DebugDrawEdge(InPathData[i].EdgeId, RColor(0.75f, 0.75f, 0.75f));
 	}
 
 	// The path is already simple enough. Stop
@@ -390,7 +390,7 @@ std::vector<NavPathNode> RNavMeshData::PerformFunnel(const std::vector<NavPathNo
 			if (Left != NewLeft)
 			{
 				// If new endpoint is narrower, adapt it as the new point
-				if (DetermineSideOfPointToLine2D(Left, Start, NewLeft) == LeftEdgeSide)
+				if (DetermineSideOfPointToLine2D(Left, Start, NewLeft) != RightEdgeSide)
 				{
 					// Check if either left or right point has crossed each other
 					if (DetermineSideOfPointToLine2D(NewLeft, Start, Right) != LeftEdgeSide)
@@ -408,7 +408,7 @@ std::vector<NavPathNode> RNavMeshData::PerformFunnel(const std::vector<NavPathNo
 
 			if (Right != NewRight)
 			{
-				if (DetermineSideOfPointToLine2D(Right, Start, NewRight) == RightEdgeSide)
+				if (DetermineSideOfPointToLine2D(Right, Start, NewRight) != LeftEdgeSide)
 				{
 					// Check if either left or right point has crossed each other
 					if (DetermineSideOfPointToLine2D(NewRight, Start, Left) != RightEdgeSide)

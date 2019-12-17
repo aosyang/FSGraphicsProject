@@ -33,6 +33,8 @@ public:
 private:
 	void DebugDrawPathQuery() const;
 
+	void DebugDrawNavMesh() const;
+
 private:
 	RNavMeshGenerator	NavMeshGenerator;
 	RNavMeshData		NavMeshData;

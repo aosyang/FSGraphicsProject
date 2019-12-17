@@ -77,16 +77,16 @@ void RNavMeshDebugger::DrawFunnel(int Step) const
 	{
 		if (Iter.Step == Step)
 		{
-			static const RVec3 Offset(0.0f, 1.0f, 0.0f);
+			static const RVec3 Offset(0.0f, 10.0f, 0.0f);
 
 			GDebugRenderer.DrawSphere(Iter.Start + Offset, 10.0f, RColor::Cyan, 8);
 			GDebugRenderer.DrawSphere(Iter.Left + Offset, 10.0f, RColor::Red, 8);
 			GDebugRenderer.DrawSphere(Iter.Right + Offset, 10.0f, RColor::Green, 8);
-			GDebugRenderer.DrawSphere(Iter.Current + Offset, 10.0f, RColor::Blue, 8);
+			GDebugRenderer.DrawSphere(Iter.Current + Offset, 10.0f, RColor(0.5f, 0.5f, 1.0f), 8);
 			
 			GDebugRenderer.DrawLine(Iter.Start + Offset, Iter.Left + Offset, RColor::Red);
 			GDebugRenderer.DrawLine(Iter.Start + Offset, Iter.Right + Offset, RColor::Green);
-			GDebugRenderer.DrawLine(Iter.Start + Offset, Iter.Current + Offset, RColor::Blue);
+			GDebugRenderer.DrawLine(Iter.Start + Offset, Iter.Current + Offset, RColor(0.5f, 0.5f, 1.0f));
 
 			break;
 		}

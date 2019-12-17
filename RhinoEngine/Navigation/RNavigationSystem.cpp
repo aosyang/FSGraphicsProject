@@ -33,6 +33,7 @@ void RNavigationSystem::DebugRender() const
 	NavMeshGenerator.DebugRender();
 	
 	DebugDrawPathQuery();
+	DebugDrawNavMesh();
 }
 
 void RNavigationSystem::DebugProjectPointToNavmesh(const RVec3& Point) const
@@ -66,13 +67,27 @@ void RNavigationSystem::DebugDrawPathQuery() const
 	for (int i = 0; i < (int)TestPath.size() - 1; i++)
 	{
 		GDebugRenderer.DrawLine(TestPath[i], TestPath[i + 1], PathColor);
-		GDebugRenderer.DrawSphere(TestPath[i], 10.0f, PathColor);
+		GDebugRenderer.DrawSphere(TestPath[i], 5.0f, PathColor);
 		if (i == (int)TestPath.size() - 2)
 		{
-			GDebugRenderer.DrawSphere(TestPath[i + 1], 10.0f, PathColor);
+			GDebugRenderer.DrawSphere(TestPath[i + 1], 5.0f, PathColor);
 		}
 	}
 
 	//GDebugRenderer.DrawSphere(QueryStart, 20.0f, EndPointColor);
 	//GDebugRenderer.DrawSphere(QueryGoal, 20.0f, EndPointColor);
+}
+
+void RNavigationSystem::DebugDrawNavMesh() const
+{
+	for (int i = 0; i < NavMeshData.GetNumEdges(); i++)
+	{
+		auto& EdgeData = NavMeshData.GetNavMeshEdgeData(i);
+
+		GDebugRenderer.DrawLine(
+			NavMeshData.GetNavMeshPointData(EdgeData.p0).WorldPosition,
+			NavMeshData.GetNavMeshPointData(EdgeData.p1).WorldPosition,
+			EdgeData.IsBorder ? RColor(0.0f, 1.0f, 0.0f) : RColor(0.0f, 0.4f, 0.0f)
+		);
+	}
 }
