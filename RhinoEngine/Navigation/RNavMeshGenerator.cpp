@@ -172,7 +172,7 @@ const GridCoord RNavMeshGenerator::NeighborOffset[8] =
 
 RNavMeshGenerator::RNavMeshGenerator()
 	: DebugDistanceField(0)
-	, CellDimension(100.0f, 10.0f, 100.0f)
+	, CellDimension(50.0f, 10.0f, 50.0f)
 	, MinTraversableHeight(200.0f)
 	, MaxStepHeight(10.0f)
 {
@@ -849,9 +849,6 @@ void RNavMeshGenerator::GenerateRegionContours()
 			}
 		}
 		
-		// TODO: When a region is not sharing any edges with other regions, it doesn't have a mandatory edge point.
-		//		 In that case we need to simplify the edge list in a different way.
-
 		if (FirstIdx != (int)RegionEdges.size())
 		{
 			int StartIdx = FirstIdx;
@@ -887,6 +884,27 @@ void RNavMeshGenerator::GenerateRegionContours()
 			}
 
 			RegionEdges = NewEdgePoints;
+		}
+		else
+		{
+			// When a region is not sharing any edges with other regions, it doesn't have a mandatory edge point.
+			// We will simplify geometries by combining shorter line segments into a longer one. 
+			int StartIndex = 0;
+			do
+			{
+				const RVec3& p0 = RegionEdges[StartIndex].Point;
+				const RVec3& p1 = RegionEdges[(StartIndex + 1) % RegionEdges.size()].Point;
+				const RVec3& p2 = RegionEdges[(StartIndex + 2) % RegionEdges.size()].Point;
+
+				if (FLT_EQUAL(RVec3::Dot((p1 - p0).GetNormalized(), (p2 - p0).GetNormalized()), 1.0f))
+				{
+					RegionEdges.erase(RegionEdges.begin() + StartIndex + 1);
+				}
+				else
+				{
+					StartIndex++;
+				}
+			} while (StartIndex < RegionEdges.size());
 		}
 	}
 }
