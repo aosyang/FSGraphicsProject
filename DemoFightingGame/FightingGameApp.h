@@ -10,9 +10,8 @@
 #include "RhinoGameUtils.h"
 
 #include "FTGPlayerController.h"
-#include "AIFighterLogic.h"
 
-const static int MaxNumAIs = 1;
+const static int MaxNumAIs = 10;
 
 class FightingGameApp : public IApp
 {

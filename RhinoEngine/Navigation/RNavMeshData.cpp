@@ -299,9 +299,10 @@ std::vector<NavPathNode> RNavMeshData::PerformStringPulling(const std::vector<Na
 
 std::vector<NavPathNode> RNavMeshData::PerformFunnel(const std::vector<NavPathNode>& InPathData) const
 {
-	static bool bDebugOutput = true;
+	static bool bDebugOutput = false;
+	static bool bDebugDrawFunnel = true;
 
-	if (bDebugOutput)
+	if (bDebugDrawFunnel)
 	{
 		GNavigationSystem.GetDebugger().ClearFunnelResult();
 	}
@@ -436,17 +437,20 @@ std::vector<NavPathNode> RNavMeshData::PerformFunnel(const std::vector<NavPathNo
 
 		if (bDebugOutput)
 		{
-			//RLog("Step %d - Start: %s, Current: %s, Left: %s, Right: %s\n", i,
-			//	Start.ToString().c_str(),
-			//	CurrentPosition.ToString().c_str(),
-			//	Left.ToString().c_str(),
-			//	Right.ToString().c_str());
+			RLog("Step %d - Start: %s, Current: %s, Left: %s, Right: %s\n", i,
+				Start.ToString().c_str(),
+				CurrentPosition.ToString().c_str(),
+				Left.ToString().c_str(),
+				Right.ToString().c_str());
+		}
 
+		if (bDebugDrawFunnel)
+		{
 			GNavigationSystem.GetDebugger().AddFunnelStep(i, Start, CurrentPosition, Left, Right);
 		}
 	}
 
-	//bDebugOutput = false;
+	bDebugOutput = false;
 
 	return Result;
 }

@@ -281,6 +281,11 @@ std::vector<FTGPlayerController*> FTGPlayerController::TestSphereHitWithOtherPla
 	return Results;
 }
 
+void FTGPlayerController::Reset()
+{
+	OnPlayerReset.Execute();
+}
+
 bool FTGPlayerController::CanMovePlayerWithInput() const
 {
 	return m_StateMachine.GetCurrentBehavior() == BHV_Run || m_StateMachine.GetCurrentBehavior() == BHV_Idle;

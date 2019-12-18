@@ -1,12 +1,12 @@
 //=============================================================================
-// AIFighterLogic.cpp by Shiyang Ao, 2018 All Rights Reserved.
+// AIBehavior_Fighter.cpp by Shiyang Ao, 2018 All Rights Reserved.
 //
 // 
 //=============================================================================
 
-#include "AIFighterLogic.h"
+#include "AIBehavior_Fighter.h"
 
-AIFighterLogic::AIFighterLogic(RSceneObject* InOwner)
+AIBehavior_Fighter::AIBehavior_Fighter(RSceneObject* InOwner)
 	: Base(InOwner)
 	, AttackTarget(nullptr)
 	, bIsWaiting(false)
@@ -15,7 +15,7 @@ AIFighterLogic::AIFighterLogic(RSceneObject* InOwner)
 	ControlledPlayer = InOwner->CastTo<FTGPlayerController>();
 }
 
-void AIFighterLogic::Update(float DeltaTime)
+void AIBehavior_Fighter::Update(float DeltaTime)
 {
 	if (ControlledPlayer)
 	{
@@ -90,7 +90,7 @@ void AIFighterLogic::Update(float DeltaTime)
 	}
 }
 
-void AIFighterLogic::Wait(float Seconds)
+void AIBehavior_Fighter::Wait(float Seconds)
 {
 	bIsWaiting = true;
 	WaitTime = Seconds;
@@ -101,7 +101,7 @@ void AIFighterLogic::Wait(float Seconds)
 	}
 }
 
-void AIFighterLogic::FindAttackTarget()
+void AIBehavior_Fighter::FindAttackTarget()
 {
 	RScene* Scene = ControlledPlayer->GetScene();
 	if (Scene)
@@ -129,7 +129,7 @@ void AIFighterLogic::FindAttackTarget()
 	AttackTarget = nullptr;
 }
 
-RVec3 AIFighterLogic::EvaluateMovingVector()
+RVec3 AIBehavior_Fighter::EvaluateMovingVector()
 {
 	RVec3 ResultVec;
 	bool bDirectPathToGoal = false;
@@ -169,7 +169,7 @@ RVec3 AIFighterLogic::EvaluateMovingVector()
 	return ResultVec;
 }
 
-RVec3 AIFighterLogic::GetVectorToAttackTarget() const
+RVec3 AIBehavior_Fighter::GetVectorToAttackTarget() const
 {
 	RVec3 VecToTarget = AttackTarget->GetWorldPosition() - ControlledPlayer->GetWorldPosition();
 	VecToTarget.SetY(0);
@@ -177,7 +177,7 @@ RVec3 AIFighterLogic::GetVectorToAttackTarget() const
 	return VecToTarget;
 }
 
-bool AIFighterLogic::QueryPathToAttackTarget()
+bool AIBehavior_Fighter::QueryPathToAttackTarget()
 {
 	if ((ControlledPlayer->GetWorldPosition() - NavigationStartPoint).SquaredMagitude() > RMath::Square(100.0f) ||
 		(AttackTarget->GetWorldPosition() - NavigationGoalPoint).SquaredMagitude() > RMath::Square(100.0f))

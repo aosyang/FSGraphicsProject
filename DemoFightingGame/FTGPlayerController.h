@@ -70,6 +70,10 @@ public:
 	/// Whether to draw debug shape that represents player's hit
 	static bool DrawDebugHitShape;
 
+	void Reset();
+
+	RDelegate<> OnPlayerReset;
+
 private:
 	FTGPlayerController(const RConstructingParams& Params);
 

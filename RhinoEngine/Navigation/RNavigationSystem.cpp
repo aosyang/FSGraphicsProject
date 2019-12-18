@@ -87,7 +87,7 @@ void RNavigationSystem::DebugDrawNavMesh() const
 		GDebugRenderer.DrawLine(
 			NavMeshData.GetNavMeshPointData(EdgeData.p0).WorldPosition,
 			NavMeshData.GetNavMeshPointData(EdgeData.p1).WorldPosition,
-			EdgeData.IsBorder ? RColor(0.0f, 1.0f, 0.0f) : RColor(0.0f, 0.4f, 0.0f)
+			EdgeData.IsBorder ? RColor(0.0f, 1.0f, 0.0f) : RColor(0.0f, 0.7f, 0.0f)
 		);
 	}
 }

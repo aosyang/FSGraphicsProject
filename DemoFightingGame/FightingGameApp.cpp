@@ -6,6 +6,9 @@
 
 #include "FightingGameApp.h"
 
+#include "AIBehavior_Fighter.h"
+#include "AIBehavior_Roamer.h"
+
 FightingGameApp::FightingGameApp()
 	: m_Player(nullptr)
 	, m_Camera(nullptr)
@@ -64,7 +67,7 @@ bool FightingGameApp::Initialize()
 			m_AIPlayers[i]->SetAnimationDeviation(0.8f);
 
 			// Create AI combat logic component
-			m_AIPlayers[i]->AddNewComponent<AIFighterLogic>();
+			m_AIPlayers[i]->AddNewComponent<AIBehavior_Roamer>();
 		}
 	}
 
@@ -91,7 +94,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		{
 			if (m_AIPlayers[i])
 			{
-				m_AIPlayers[i]->SetPosition(RVec3(RMath::RandRangedF(-800, 800), 50, RMath::RandRangedF(-800, 800)));
+				ResetPlayerPosition(m_AIPlayers[i]);
 			}
 		}
 	}
@@ -392,4 +395,5 @@ void FightingGameApp::UpdateCameraPosition(float DeltaTime)
 void FightingGameApp::ResetPlayerPosition(FTGPlayerController* PlayerController)
 {
 	PlayerController->SetPosition(RVec3(RMath::RandRangedF(-800, 800), 50, RMath::RandRangedF(-800, 800)));
+	PlayerController->Reset();
 }

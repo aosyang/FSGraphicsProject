@@ -1,5 +1,5 @@
 //=============================================================================
-// AIFighterLogic.h by Shiyang Ao, 2018 All Rights Reserved.
+// AIBehavior_Fighter.h by Shiyang Ao, 2018 All Rights Reserved.
 //
 // 
 //=============================================================================
@@ -9,11 +9,11 @@
 #include "FTGPlayerController.h"
 
 // AI combat logic class
-class AIFighterLogic : public RSceneComponentBase
+class AIBehavior_Fighter : public RSceneComponentBase
 {
-	DECLARE_SCENE_COMPONENT(AIFighterLogic, RSceneComponentBase);
+	DECLARE_SCENE_COMPONENT(AIBehavior_Fighter, RSceneComponentBase);
 public:
-	AIFighterLogic(RSceneObject* InOwner);
+	AIBehavior_Fighter(RSceneObject* InOwner);
 
 	/// Overrides ISceneComponent
 	virtual void Update(float DeltaTime) override;
