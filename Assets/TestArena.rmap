@@ -7,7 +7,7 @@
             <Scale>50.000000, 1.000000, 50.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="cube_0" Type="MeshObject" Mesh="/cube.FBX">
+    <SceneObject Name="cube_west" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
             <MeshElement Name="Box001" Shader="BumpLighting">
                 <Texture Slot="0">/Grey.DDS</Texture>
@@ -20,7 +20,7 @@
             <Scale>5.000000, 2.000000, 5.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="cube_1" Type="MeshObject" Mesh="/cube.FBX">
+    <SceneObject Name="cube_east" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
             <MeshElement Name="Box001" Shader="BumpLighting">
                 <Texture Slot="0">/Grey.DDS</Texture>
@@ -33,7 +33,7 @@
             <Scale>5.000000, 2.000000, 5.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="cube_2" Type="MeshObject" Mesh="/cube.FBX">
+    <SceneObject Name="cube_float3" Type="MeshObject" Mesh="/cube.FBX">
         <Transform>
             <Position>0.000000, 600.000000, -700.000000</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>
@@ -52,21 +52,21 @@
             <Scale>3.000000, 3.000000, 3.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="cube_3" Type="MeshObject" Mesh="/cube.FBX">
+    <SceneObject Name="cube_float2" Type="MeshObject" Mesh="/cube.FBX">
         <Transform>
             <Position>-700.000000, 400.000000, -700.000000</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>
             <Scale>5.000000, 2.000000, 5.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="cube_4" Type="MeshObject" Mesh="/cube.FBX">
+    <SceneObject Name="cube_float1" Type="MeshObject" Mesh="/cube.FBX">
         <Transform>
             <Position>-1400.000000, 200.000000, -700.000000</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>
             <Scale>5.000000, 2.000000, 5.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="cube_5" Type="MeshObject" Mesh="/cube.FBX">
+    <SceneObject Name="cube_stair2" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
             <MeshElement Name="Box001" Shader="BumpLighting">
                 <Texture Slot="0">/Grey.DDS</Texture>
@@ -79,7 +79,7 @@
             <Scale>2.000000, 2.000000, 2.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="cube_6" Type="MeshObject" Mesh="/cube.FBX">
+    <SceneObject Name="cube_stair1" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
             <MeshElement Name="Box001" Shader="BumpLighting">
                 <Texture Slot="0">/Grey.DDS</Texture>
@@ -92,7 +92,7 @@
             <Scale>2.000000, 2.000000, 2.000000</Scale>
         </Transform>
     </SceneObject>
-    <SceneObject Name="cube_7" Type="MeshObject" Mesh="/cube.FBX">
+    <SceneObject Name="cube_stair0" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
             <MeshElement Name="Box001" Shader="BumpLighting">
                 <Texture Slot="0">/Grey.DDS</Texture>
