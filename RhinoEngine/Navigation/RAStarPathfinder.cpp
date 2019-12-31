@@ -210,10 +210,41 @@ void RAStarSearchData::VerifyIsExistingPoint(int EdgeId) const
 
 std::vector<NavPathNode> RAStarPathfinder::Evaluate(const RNavMeshData* NavMeshData, const NavMeshProjectionResult& Start, const NavMeshProjectionResult& Goal)
 {
+	assert(Start.Triangle != Goal.Triangle);
 	RAStarSearchData SearchData(NavMeshData);
 
 	const NavMeshTriangleData& StartTriangle = NavMeshData->NavMeshTriangles[Start.Triangle];
 	const NavMeshTriangleData& GoalTriangle = NavMeshData->NavMeshTriangles[Goal.Triangle];
+
+	// When a start triangle and a goal one have any shared edge, the path should be connected via that edge.
+	{
+		int NumEqualPoints = 0;
+		std::vector<int> EdgePointIds;
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				if (StartTriangle.Points[i] == GoalTriangle.Points[j])
+				{
+					NumEqualPoints++;
+					EdgePointIds.push_back(StartTriangle.Points[i]);
+				}
+			}
+		}
+
+		assert(NumEqualPoints <= 2);
+		if (NumEqualPoints == 2)
+		{
+			int SharedEdgeId = NavMeshData->FindEdgeIndexForPointsChecked(EdgePointIds[0], EdgePointIds[1]);
+
+			std::vector<NavPathNode> PathResult;
+			PathResult.emplace(PathResult.end(), Start.PositionOnNavmesh, -1);
+			PathResult.emplace(PathResult.end(), NavMeshData->GetEdgeCenter(SharedEdgeId), SharedEdgeId);
+			PathResult.emplace(PathResult.end(), Goal.PositionOnNavmesh, -1);
+
+			return PathResult;
+		}
+	}
 
 	// Initialize the open list with three vertices of the triangle the start point lies inside.
 	for (int i = 0; i < 3; i++)
