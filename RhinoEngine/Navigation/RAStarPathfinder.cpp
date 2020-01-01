@@ -61,23 +61,14 @@ void RAStarSearchData::ConditionalAddOpenNode(int ParentId, int EdgeId, float To
 	}
 }
 
-void RAStarSearchData::AddGoalCandidate(int ParentId, int EdgeId, float TotalCost)
+void RAStarSearchData::AddGoalCandidate(int EdgeId, float TotalCost)
 {
-	AStarSearchNodeData GoalCandidateData(ParentId, EdgeId, TotalCost, 0.0f);
 	int SearchNodeIdx = GetSearchNodeIndexByEdgeId(EdgeId);
+	assert(!IsNewEdge(EdgeId));
 
-	if (IsNewEdge(EdgeId))
-	{
-		int NewIndex = (int)SearchNodes.size();
-		SearchNodes.emplace(SearchNodes.end(), GoalCandidateData);
-
-		GoalCandidates.push_back(NewIndex);
-	}
-	else
-	{
-		SearchNodes[SearchNodeIdx] = GoalCandidateData;
-		GoalCandidates.push_back(SearchNodeIdx);
-	}
+	AStarSearchNodeData GoalCandidateData(SearchNodes[SearchNodeIdx].ParentId, EdgeId, TotalCost, 0.0f);
+	SearchNodes[SearchNodeIdx] = GoalCandidateData;
+	GoalCandidates.push_back(SearchNodeIdx);
 }
 
 int RAStarSearchData::PopOpenNodeWithMinimalCost()
@@ -88,9 +79,9 @@ int RAStarSearchData::PopOpenNodeWithMinimalCost()
 
 	for (auto Iter = OpenList.begin(); Iter != OpenList.end(); Iter++)
 	{
-		if (Iter == OpenList.begin() || SearchNodes[*Iter].CostFromStart < MinCost)
+		if (Iter == OpenList.begin() || SearchNodes[*Iter].TotalEstimatedCost < MinCost)
 		{
-			MinCost = SearchNodes[*Iter].CostFromStart;
+			MinCost = SearchNodes[*Iter].TotalEstimatedCost;
 			MinCostIter = Iter;
 		}
 	}
@@ -216,36 +207,6 @@ std::vector<NavPathNode> RAStarPathfinder::Evaluate(const RNavMeshData* NavMeshD
 	const NavMeshTriangleData& StartTriangle = NavMeshData->NavMeshTriangles[Start.Triangle];
 	const NavMeshTriangleData& GoalTriangle = NavMeshData->NavMeshTriangles[Goal.Triangle];
 
-	// When a start triangle and a goal one have any shared edge, the path should be connected via that edge.
-	{
-		int NumEqualPoints = 0;
-		std::vector<int> EdgePointIds;
-		for (int i = 0; i < 3; i++)
-		{
-			for (int j = 0; j < 3; j++)
-			{
-				if (StartTriangle.Points[i] == GoalTriangle.Points[j])
-				{
-					NumEqualPoints++;
-					EdgePointIds.push_back(StartTriangle.Points[i]);
-				}
-			}
-		}
-
-		assert(NumEqualPoints <= 2);
-		if (NumEqualPoints == 2)
-		{
-			int SharedEdgeId = NavMeshData->FindEdgeIndexForPointsChecked(EdgePointIds[0], EdgePointIds[1]);
-
-			std::vector<NavPathNode> PathResult;
-			PathResult.emplace(PathResult.end(), Start.PositionOnNavmesh, -1);
-			PathResult.emplace(PathResult.end(), NavMeshData->GetEdgeCenter(SharedEdgeId), SharedEdgeId);
-			PathResult.emplace(PathResult.end(), Goal.PositionOnNavmesh, -1);
-
-			return PathResult;
-		}
-	}
-
 	// Initialize the open list with three vertices of the triangle the start point lies inside.
 	for (int i = 0; i < 3; i++)
 	{
@@ -261,6 +222,16 @@ std::vector<NavPathNode> RAStarPathfinder::Evaluate(const RNavMeshData* NavMeshD
 	std::vector<int> GoalCandidates;
 	int BestCandidate = -1;
 
+	std::vector<int> GoadEdges;
+	for (int p = 0; p < 3; p++)
+	{
+		int EdgePoint0 = GoalTriangle.Points[p];
+		int EdgePoint1 = GoalTriangle.Points[(p + 1) % 3];
+		int EdgeIdx = NavMeshData->FindEdgeIndexForPointsChecked(EdgePoint0, EdgePoint1);
+
+		GoadEdges.push_back(EdgeIdx);
+	}
+
 	while (SearchData.HasOpenNodes())
 	{
 		//SearchData.DumpToLog();
@@ -271,43 +242,34 @@ std::vector<NavPathNode> RAStarPathfinder::Evaluate(const RNavMeshData* NavMeshD
 		float TotalCost = SearchData.GetTotalCost(SearchNodeIdx);
 		bool bReachedGoalTriangle = false;
 
+		// If we hit any edges of the goal triangle, we have finished the search
+		int EdgeIdx = SearchData.GetEdgeIdBySearchNode(SearchNodeIdx);
+		for (int GoalEdgeIdx : GoadEdges)
+		{
+			if (EdgeIdx == GoalEdgeIdx)
+			{
+				// Has reached the goal, stop search.
+				SearchData.AddGoalCandidate(EdgeIdx, TotalCost);
+				bReachedGoalTriangle = true;
+				break;
+			}
+		}
+
+		if (bReachedGoalTriangle)
+		{
+			BestCandidate = SearchData.GetBestGoalCandicate();
+			break;
+		}
+
 		for (int n = 0; n < (int)Edge.Neighbors.size(); n++)
 		{
 			// Index to a neighbor point in the point list of navmesh 
 			int NeighborEdgeIdx = Edge.Neighbors[n].NeighborIndex;
 			float DistanceToNeighbor = Edge.Neighbors[n].Distance;
 
-			//
-			for (int p = 0; p < 3; p++)
-			{
-				int EdgePoint0 = GoalTriangle.Points[p];
-				int EdgePoint1 = GoalTriangle.Points[(p + 1) % 3];
-				int EdgeIdx = NavMeshData->FindEdgeIndexForPointsChecked(EdgePoint0, EdgePoint1);
-
-				if (NeighborEdgeIdx == EdgeIdx)
-				{
-					// TODO: Has reached the goal, stop search.
-					SearchData.AddGoalCandidate(SearchNodeIdx, NeighborEdgeIdx, TotalCost + DistanceToNeighbor);
-					bReachedGoalTriangle = true;
-				}
-			}
-
-			if (bReachedGoalTriangle)
-			{
-				BestCandidate = SearchData.GetBestGoalCandicate();
-				break;
-			}
-			else
-			{
-				RVec3 EdgeCenter = NavMeshData->GetEdgeCenter(NeighborEdgeIdx);
-				float Heuristics = EvaluateHeuristics(EdgeCenter, Goal.PositionOnNavmesh);
-				SearchData.ConditionalAddOpenNode(SearchNodeIdx, NeighborEdgeIdx, TotalCost + DistanceToNeighbor, Heuristics);
-			}
-		}
-
-		if (bReachedGoalTriangle)
-		{
-			break;
+			RVec3 EdgeCenter = NavMeshData->GetEdgeCenter(NeighborEdgeIdx);
+			float Heuristics = EvaluateHeuristics(EdgeCenter, Goal.PositionOnNavmesh);
+			SearchData.ConditionalAddOpenNode(SearchNodeIdx, NeighborEdgeIdx, TotalCost + DistanceToNeighbor, Heuristics);
 		}
 
 		SearchData.AddNodeToClosedList(SearchNodeIdx);

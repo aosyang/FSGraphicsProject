@@ -57,7 +57,7 @@ public:
 	void AddNodeToClosedList(int EdgeId);
 
 	// Adds node data for a possibly best path to the goal
-	void AddGoalCandidate(int ParentId, int EdgeId, float TotalCost);
+	void AddGoalCandidate(int EdgeId, float TotalCost);
 
 	// Pops an open node with minimal cost and returns its index in all search nodes
 	int PopOpenNodeWithMinimalCost();
