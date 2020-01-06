@@ -283,12 +283,25 @@ std::vector<NavPathNode> RAStarPathfinder::Evaluate(const RNavMeshData* NavMeshD
 		PathResult.emplace(PathResult.end(), Goal.PositionOnNavmesh, -1);
 
 		int BackTraceIdx = BestCandidate;
+		std::vector<int> BackTraceList;
+		BackTraceList.push_back(BackTraceIdx);
+
 		while (BackTraceIdx != -1)
 		{
 			int EdgeId = SearchData.GetEdgeIdBySearchNode(BackTraceIdx);
 
 			PathResult.emplace(PathResult.end(), NavMeshData->GetEdgeCenter(EdgeId), EdgeId);
 			BackTraceIdx = SearchData.GetParent(BackTraceIdx);
+
+			if (StdContains(BackTraceList, BackTraceIdx))
+			{
+				// Detected infinite loop while searching for the path, stop with an empty path list
+				return std::vector<NavPathNode>();
+			}
+			else
+			{
+				BackTraceList.push_back(BackTraceIdx);
+			}
 		}
 
 		PathResult.emplace(PathResult.end(), Start.PositionOnNavmesh, -1);

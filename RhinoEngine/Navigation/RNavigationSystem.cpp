@@ -18,7 +18,7 @@ void RNavigationSystem::BuildNavMesh(const RScene* Scene)
 {
 	NavMeshGenerator.Build(Scene, NavMeshData);
 
-	QueryStart = RVec3(1500, 50, 10);
+	//QueryStart = RVec3(1500, 50, 10);
 	//QueryGoal = RVec3(-1500, 50, 10);
 	//NavMeshData.QueryPath(QueryStart, QueryGoal, TestPath);
 }
@@ -53,9 +53,10 @@ void RNavigationSystem::DebugProjectPointToNavmesh(const RVec3& Point) const
 	GDebugRenderer.DrawSphere(Point, 50);
 }
 
-void RNavigationSystem::DebugSetGoalPoint(const RVec3& Point)
+void RNavigationSystem::DebugSetPathQueryPoints(const RVec3& Start, const RVec3& Goal)
 {
-	QueryGoal = Point;
+	QueryStart = Start;
+	QueryGoal = Goal;
 	NavMeshData.QueryPath(QueryStart, QueryGoal, TestPath);
 }
 

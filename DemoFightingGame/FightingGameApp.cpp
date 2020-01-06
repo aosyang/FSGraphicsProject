@@ -10,12 +10,13 @@
 #include "AIBehavior_Roamer.h"
 
 FightingGameApp::FightingGameApp()
-	: m_Player(nullptr)
+	: CurrentPlayerIndex(0)
 	, m_Camera(nullptr)
 	, m_FreeFlyMode(false)
 	, m_FreeFlyCameraControl(nullptr)
 {
-
+	m_Player[0] = nullptr;
+	m_Player[1] = nullptr;
 }
 
 FightingGameApp::~FightingGameApp()
@@ -24,6 +25,8 @@ FightingGameApp::~FightingGameApp()
 
 bool FightingGameApp::Initialize()
 {
+	srand((unsigned int)time(nullptr));
+
 	//RResourceManager::Instance().LoadAllResources();
 
 	RScene* DefaultScene = GSceneManager.DefaultScene();
@@ -46,12 +49,17 @@ bool FightingGameApp::Initialize()
 	//	obj->SetScript("UpdateObject");
 	//}
 
-	m_Player = DefaultScene->CreateSceneObjectOfType<FTGPlayerController>();
-	if (m_Player)
+	for (int i = 0; i < 2; i++)
 	{
-		m_Player->SetPosition(RVec3(0, 100.0f, 0));
-		m_Player->InitAssets();
+		m_Player[i] = DefaultScene->CreateSceneObjectOfType<FTGPlayerController>();
+		if (m_Player[i])
+		{
+			m_Player[i]->InitAssets();
+		}
 	}
+
+	m_Player[0]->SetPosition(RVec3(588, 40, 539));
+	m_Player[1]->SetPosition(RVec3(802, 40, -1166));
 
 	m_AIPlayers.resize(MaxNumAIs);
 	for (int i = 0; i < MaxNumAIs; i++)
@@ -85,9 +93,12 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	if (RInput.GetBufferedKeyState('R') == EBufferedKeyState::Pressed)
 	{
 		// Reset all characters' position
-		if (m_Player)
+		for (int i = 0; i < 2; i++)
 		{
-			m_Player->SetPosition(RVec3(0, 100.0f, 0));
+			if (m_Player[i])
+			{
+				m_Player[i]->SetPosition(RVec3(0, 100.0f, 0));
+			}
 		}
 
 		for (int i = 0; i < MaxNumAIs; i++)
@@ -96,6 +107,19 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			{
 				ResetPlayerPosition(m_AIPlayers[i]);
 			}
+		}
+	}
+
+	// Select current controlled player with number key '1' and '2'
+	{
+		if (RInput.GetBufferedKeyState('1') == EBufferedKeyState::Pressed)
+		{
+			CurrentPlayerIndex = 0;
+		}
+
+		if (RInput.GetBufferedKeyState('2') == EBufferedKeyState::Pressed)
+		{
+			CurrentPlayerIndex = 1;
 		}
 	}
 
@@ -114,7 +138,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		}
 	}
 
-	if (m_Player)
+	if (auto* CurrentPlayer = GetCurrentPlayer())
 	{
 		//playerAabb.pMin = RVec3(-50.0f, 0.0f, -50.0f) + m_Player->GetPosition();
 		//playerAabb.pMax = RVec3(50.0f, 150.0f, 50.0f) + m_Player->GetPosition();
@@ -134,9 +158,9 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		//GDebugRenderer.DrawSphere(cap.end, cap.radius, color);
 
 		char msg_buf[1024];
-		RVec3 playerPos = m_Player->GetPosition();
-		float playerRot = m_Player->GetPlayerRotation();
-		RAnimationBlender& blender = m_Player->GetAnimBlender();
+		RVec3 playerPos = CurrentPlayer->GetPosition();
+		float playerRot = CurrentPlayer->GetPlayerRotation();
+		RAnimationBlender& blender = CurrentPlayer->GetAnimBlender();
 		sprintf_s(msg_buf, 1024, "Player: (%f, %f, %f), rot: %f\n"
 			"Blend From : %s\n"
 			"Blend To   : %s\n"
@@ -152,8 +176,8 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 	UpdateCameraPosition(timer.DeltaTime());
 
-	//GNavigationSystem.DebugRender();
-	//GNavigationSystem.DebugSetGoalPoint(m_Player->GetPosition());
+	GNavigationSystem.DebugRender();
+	GNavigationSystem.DebugSetPathQueryPoints(m_Player[0]->GetPosition(), m_Player[1]->GetPosition());
 }
 
 void FightingGameApp::RenderScene()
@@ -314,7 +338,7 @@ void FightingGameApp::UpdateUserInput()
 
 	if (!m_FreeFlyMode || !m_FreeFlyCameraControl)
 	{
-		if (m_Player)
+		if (auto* CurrentPlayer = GetCurrentPlayer())
 		{
 			RVec3 moveVec(0, 0, 0);
 
@@ -332,26 +356,26 @@ void FightingGameApp::UpdateUserInput()
 				moveVec *= 600.0f;
 			}
 
-			m_Player->SetMovementInput(moveVec);
+			CurrentPlayer->SetMovementInput(moveVec);
 
 			if (RInput.GetBufferedKeyState(VK_SPACE) == EBufferedKeyState::Pressed)
 			{
-				m_Player->PerformSpinAttack();
+				CurrentPlayer->PerformSpinAttack();
 			}
 
 			if (RInput.GetBufferedKeyState('J') == EBufferedKeyState::Pressed)
 			{
-				m_Player->PerformPunch();
+				CurrentPlayer->PerformPunch();
 			}
 
 			if (RInput.GetBufferedKeyState('K') == EBufferedKeyState::Pressed)
 			{
-				m_Player->PerformKick();
+				CurrentPlayer->PerformKick();
 			}
 
 			if (RInput.GetBufferedKeyState('C') == EBufferedKeyState::Pressed)
 			{
-				m_Player->SetBehavior(BHV_KnockedDown);
+				CurrentPlayer->SetBehavior(BHV_KnockedDown);
 			}
 		}
 	}
@@ -364,7 +388,8 @@ void FightingGameApp::UpdateCameraPosition(float DeltaTime)
 		return;
 	}
 
-	RVec3 PlayerPosition = m_Player ? m_Player->GetPosition() : RVec3(0, 0, 0);
+	auto* CurrentPlayer = GetCurrentPlayer();
+	RVec3 PlayerPosition = CurrentPlayer ? CurrentPlayer->GetPosition() : RVec3(0, 0, 0);
 
 	RMatrix4 playerTranslation = RMatrix4::CreateTranslation(PlayerPosition);
 
@@ -396,4 +421,10 @@ void FightingGameApp::ResetPlayerPosition(FTGPlayerController* PlayerController)
 {
 	PlayerController->SetPosition(RVec3(RMath::RandRangedF(-800, 800), 50, RMath::RandRangedF(-800, 800)));
 	PlayerController->Reset();
+}
+
+FTGPlayerController* FightingGameApp::GetCurrentPlayer() const
+{
+	assert(CurrentPlayerIndex >= 0 && CurrentPlayerIndex < 2);
+	return m_Player[CurrentPlayerIndex];
 }

@@ -128,6 +128,9 @@ public:
 
 	int FindEdgeIndexForPointsChecked(int PointId0, int PointId1) const;
 
+	// Debug draw an edge from navmesh by id
+	void DebugDrawEdge(int EdgeId, const RColor& Color) const;
+
 private:
 	// Find the index of a point in navmesh point list. If the point does not exist it will be appended to the list.
 	int FindOrAddPoint(const RVec3& Point);
@@ -147,9 +150,6 @@ private:
 
 	// Optimize a path by the funnel algorithm
 	std::vector<NavPathNode> PerformFunnel(const std::vector<NavPathNode>& InPathData) const;
-
-private:
-	void DebugDrawEdge(int EdgeId, const RColor& Color) const;
 
 private:
 	std::vector<NavMeshPointData> NavMeshPoints;

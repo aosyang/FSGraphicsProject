@@ -7,6 +7,7 @@
 #include "Rhino.h"
 
 #include "RNavMeshData.h"
+#include "RFunnelPathProcessor.h"
 
 namespace
 {
@@ -43,12 +44,6 @@ namespace
 		}
 
 		return true;
-	}
-
-	int DetermineSideOfPointToLine2D(const RVec3& p, const RVec3& l0, const RVec3& l1)
-	{
-		float d = RVec3::Cross2D(p - l0, l1 - l0);
-		return d > 0 ? 1 : (d < 0 ? -1 : 0);
 	}
 
 	// Get an array of position that represents the path
@@ -146,6 +141,17 @@ int RNavMeshData::FindEdgeIndexForPointsChecked(int PointId0, int PointId1) cons
 	assert(Iter != NavMeshEdges.end());
 
 	return int(Iter - NavMeshEdges.begin());
+}
+
+void RNavMeshData::DebugDrawEdge(int EdgeId, const RColor& Color) const
+{
+	if (EdgeId > 0 && EdgeId < (int)NavMeshEdges.size())
+	{
+		int p0 = NavMeshEdges[EdgeId].p0;
+		int p1 = NavMeshEdges[EdgeId].p1;
+
+		GDebugRenderer.DrawLine(NavMeshPoints[p0].WorldPosition, NavMeshPoints[p1].WorldPosition, Color);
+	}
 }
 
 int RNavMeshData::FindOrAddPoint(const RVec3& Point)
@@ -299,171 +305,8 @@ std::vector<NavPathNode> RNavMeshData::PerformStringPulling(const std::vector<Na
 
 std::vector<NavPathNode> RNavMeshData::PerformFunnel(const std::vector<NavPathNode>& InPathData) const
 {
-	static bool bDebugOutput = false;
-	static bool bDebugDrawFunnel = true;
-
-	if (bDebugDrawFunnel)
-	{
-		GNavigationSystem.GetDebugger().ClearFunnelResult();
-	}
-
-	// Debug draw the original path
-	for (int i = 0; i < (int)InPathData.size() - 1; i++)
-	{
-		if (i != 0)
-		{
-			GDebugRenderer.DrawSphere(InPathData[i].Position, 5.0f, RColor::Yellow, 8);
-		}
-
-		GDebugRenderer.DrawLine(InPathData[i].Position, InPathData[i + 1].Position, RColor::Yellow);
-		DebugDrawEdge(InPathData[i].EdgeId, RColor(0.75f, 0.75f, 0.75f));
-	}
-
-	// The path is already simple enough. Stop
-	if (InPathData.size() <= 2)
-	{
-		return InPathData;
-	}
-
-	std::vector<NavPathNode> Result;
-	RVec3 Start = InPathData[0].Position;
-	Result.emplace(Result.end(), InPathData[0]);
-
-	RVec3 Left, Right;
-	bool bInitializePoints = true;
-
-	static const int LEFT_EDGE_SIDE = 1;
-	static const int RIGHT_EDGE_SIDE = -1;
-
-	for (int i = 1; i < (int)InPathData.size(); i++)
-	{
-		const RVec3& PrevPosition = InPathData[i - 1].Position;
-		const RVec3& CurrentPosition = InPathData[i].Position;
-
-		int EdgeId = InPathData[i].EdgeId;
-
-		if (EdgeId == -1)
-		{
-			// Assuming this is the last point in the path
-			assert(i == (int)InPathData.size() - 1);
-
-			// For the last point, we need to decide whether it's crossing the left point or the right point or it can be directly connected 
-			// from the previous point.
-
-			if (DetermineSideOfPointToLine2D(Right, Start, CurrentPosition) != RIGHT_EDGE_SIDE)
-			{
-				Result.emplace(Result.end(), Right, -1);
-			}
-
-			if (DetermineSideOfPointToLine2D(Left, Start, CurrentPosition) != LEFT_EDGE_SIDE)
-			{
-				Result.emplace(Result.end(), Left, -1);
-			}
-
-			Result.emplace(Result.end(), InPathData[i].Position, -1);
-
-			if (bDebugOutput)
-			{
-				GNavigationSystem.GetDebugger().AddFunnelStep(i, Start, CurrentPosition, Left, Right);
-			}
-
-			continue;
-		}
-
-		const NavMeshEdgeData& Edge = NavMeshEdges[EdgeId];
-
-		// Find position for both endpoints of the edge
-		RVec3 NewLeft = NavMeshPoints[Edge.p1].WorldPosition;
-		RVec3 NewRight = NavMeshPoints[Edge.p0].WorldPosition;
-
-		int LeftEdgeSide = DetermineSideOfPointToLine2D(NewLeft, PrevPosition, CurrentPosition);
-		int RightEdgeSide = DetermineSideOfPointToLine2D(NewRight, PrevPosition, CurrentPosition);
-
-		// Since an edge does not guarantee the order of two endpoints, swap both endpoints if necessary
-		if (RightEdgeSide > LeftEdgeSide)
-		{
-			std::swap(NewLeft, NewRight);
-			std::swap(LeftEdgeSide, RightEdgeSide);
-		}
-
-		if (!bInitializePoints)
-		{
-			if (Left != NewLeft)
-			{
-				// If new endpoint is narrower, adapt it as the new point
-				if (DetermineSideOfPointToLine2D(Left, Start, NewLeft) != RightEdgeSide)
-				{
-					// Check if either left or right point has crossed each other
-					if (DetermineSideOfPointToLine2D(NewLeft, Start, Right) != LeftEdgeSide)
-					{
-						Result.emplace(Result.end(), Right, -1);
-						Start = Right;
-						bInitializePoints = true;
-					}
-					else
-					{
-						Left = NewLeft;
-					}
-				}
-			}
-
-			if (Right != NewRight)
-			{
-				if (DetermineSideOfPointToLine2D(Right, Start, NewRight) != LeftEdgeSide)
-				{
-					// Check if either left or right point has crossed each other
-					if (DetermineSideOfPointToLine2D(NewRight, Start, Left) != RightEdgeSide)
-					{
-						Result.emplace(Result.end(), Left, -1);
-						Start = Left;
-						bInitializePoints = true;
-					}
-					else
-					{
-						Right = NewRight;
-					}
-				}
-			}
-		}
-
-		if (bInitializePoints)
-		{
-			// The initial left and right endpoint will be used as starting points
-			Left = NewLeft;
-			Right = NewRight;
-
-			bInitializePoints = false;
-		}
-
-		if (bDebugOutput)
-		{
-			RLog("Step %d - Start: %s, Current: %s, Left: %s, Right: %s\n", i,
-				Start.ToString().c_str(),
-				CurrentPosition.ToString().c_str(),
-				Left.ToString().c_str(),
-				Right.ToString().c_str());
-		}
-
-		if (bDebugDrawFunnel)
-		{
-			GNavigationSystem.GetDebugger().AddFunnelStep(i, Start, CurrentPosition, Left, Right);
-		}
-	}
-
-	bDebugOutput = false;
-
-	return Result;
-}
-
-void RNavMeshData::DebugDrawEdge(int EdgeId, const RColor& Color) const
-{
-	if (EdgeId > 0 && EdgeId < (int)NavMeshEdges.size())
-	{
-		int p0 = NavMeshEdges[EdgeId].p0;
-		int p1 = NavMeshEdges[EdgeId].p1;
-
-		GDebugRenderer.DrawLine(NavMeshPoints[p0].WorldPosition, NavMeshPoints[p1].WorldPosition, Color);
-	}
+	RFunnelPathProcessor PathProcessor(this, InPathData);
+	return PathProcessor.Execute();
 }
 
 NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point, float MaxHeightDifference /*= 50.0f*/) const

@@ -28,7 +28,7 @@ public:
 	void DebugRender() const;
 
 	void DebugProjectPointToNavmesh(const RVec3& Point) const;
-	void DebugSetGoalPoint(const RVec3& Point);
+	void DebugSetPathQueryPoints(const RVec3& Start, const RVec3& Goal);
 
 private:
 	void DebugDrawPathQuery() const;
