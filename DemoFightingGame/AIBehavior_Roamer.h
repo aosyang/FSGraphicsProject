@@ -17,6 +17,10 @@ public:
 	virtual void Update(float DeltaTime) override;
 
 private:
+	// Debug draw the navigation path of AI
+	void DebugDrawPath() const;
+
+private:
 	RAabb SceneBounds;
 	FTGPlayerController* ControlledPlayer;
 	RVec3 MoveTarget;

@@ -50,9 +50,9 @@ void AIBehavior_Roamer::Update(float DeltaTime)
 {
 	if (NavPath.size() == 0)
 	{
-		bool bQueryPathSucceeded = false;
-
-		do
+		// Try finding a valid destination for pathfinding
+		const int NumMaxAttempts = 10;
+		for (int i = 0; i < NumMaxAttempts; i++)
 		{
 			MoveTarget = RVec3(
 				RMath::RandRangedF(SceneBounds.pMin.X(), SceneBounds.pMax.X()),
@@ -60,8 +60,11 @@ void AIBehavior_Roamer::Update(float DeltaTime)
 				RMath::RandRangedF(SceneBounds.pMin.Z(), SceneBounds.pMax.Z())
 			);
 
-			bQueryPathSucceeded = GNavigationSystem.QueryPath(ControlledPlayer->GetWorldPosition(), MoveTarget, NavPath);
-		} while (!bQueryPathSucceeded);
+			if (GNavigationSystem.QueryPath(ControlledPlayer->GetWorldPosition(), MoveTarget, NavPath))
+			{
+				break;
+			}
+		}
 	}
 
 	if (NavPath.size() != 0)
@@ -84,5 +87,20 @@ void AIBehavior_Roamer::Update(float DeltaTime)
 		{
 			ControlledPlayer->SetMovementInput(RVec3::Zero());
 		}
+
+		DebugDrawPath();
+	}
+}
+
+void AIBehavior_Roamer::DebugDrawPath() const
+{
+	if (NavPath.size() > 0)
+	{
+		GDebugRenderer.DrawLine(ControlledPlayer->GetWorldPosition(), NavPath[0], RColor::Cyan);
+	}
+
+	for (int i = 0; i < (int)NavPath.size() - 1; i++)
+	{
+		GDebugRenderer.DrawLine(NavPath[i], NavPath[i + 1], RColor::Cyan);
 	}
 }
