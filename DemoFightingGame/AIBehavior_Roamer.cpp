@@ -8,8 +8,6 @@
 
 namespace
 {
-	const static RVec3 InvalidPosition(FLT_MAX, FLT_MAX, FLT_MAX);
-
 	const RAabb& GetStaticSceneBounds(RScene* Scene)
 	{
 		static RAabb SceneBounds;
@@ -37,7 +35,7 @@ AIBehavior_Roamer::AIBehavior_Roamer(RSceneObject* InOwner)
 	SceneBounds = GetStaticSceneBounds(InOwner->GetScene());
 	ControlledPlayer = InOwner->CastTo<FTGPlayerController>();
 
-	MoveTarget = InvalidPosition;
+	MoveTarget = RNavigationSystem::InvalidPosition;
 
 	// When reseting the position of a player, also clear its current nav path.
 	ControlledPlayer->OnPlayerReset.BindLambda([&]()

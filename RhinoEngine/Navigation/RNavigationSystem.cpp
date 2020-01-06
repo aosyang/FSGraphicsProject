@@ -8,6 +8,10 @@
 
 #include "RNavigationSystem.h"
 
+
+const RVec3 RNavigationSystem::InvalidPosition(FLT_MAX, FLT_MAX, FLT_MAX);
+
+
 bool RNavigationSystem::Initialize()
 {
 	NavMeshDebugger.Initialize(&NavMeshGenerator, &NavMeshData);

@@ -11,7 +11,7 @@
 
 #include "FTGPlayerController.h"
 
-const static int MaxNumAIs = 0;
+const static int MaxNumAIs = 10;
 
 class FightingGameApp : public IApp
 {

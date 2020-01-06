@@ -30,6 +30,8 @@ public:
 	void DebugProjectPointToNavmesh(const RVec3& Point) const;
 	void DebugSetPathQueryPoints(const RVec3& Start, const RVec3& Goal);
 
+	static const RVec3 InvalidPosition;
+
 private:
 	void DebugDrawPathQuery() const;
 

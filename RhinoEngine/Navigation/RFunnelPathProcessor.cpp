@@ -22,6 +22,9 @@ namespace
 RFunnelPathProcessor::RFunnelPathProcessor(const RNavMeshData* InNavMeshData, const std::vector<NavPathNode>& InPathData)
 	: NavMeshData(InNavMeshData)
 	, PathData(InPathData)
+	, Start(RNavigationSystem::InvalidPosition)
+	, Left(RNavigationSystem::InvalidPosition)
+	, Right(RNavigationSystem::InvalidPosition)
 {
 	GenerateImmediateLeftAndRightForEdgePoints();
 }
@@ -113,8 +116,9 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 
 		// Find position for both endpoints of the edge
 		RVec3 NewLeft, NewRight;
-		int LeftEdgeSide, RightEdgeSide;
-		assert(FindLeftAndRightForPathNode(i, NewLeft, NewRight, &LeftEdgeSide, &RightEdgeSide));
+		int LeftEdgeSide = 0, RightEdgeSide = 0;
+		bool FindResult = FindLeftAndRightForPathNode(i, NewLeft, NewRight, &LeftEdgeSide, &RightEdgeSide);
+		assert(FindResult);
 
 		if (i != 1)
 		{
