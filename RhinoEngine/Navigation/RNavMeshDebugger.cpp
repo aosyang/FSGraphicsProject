@@ -7,6 +7,7 @@
 #include "Rhino.h"
 
 #include "RNavMeshDebugger.h"
+#include "RNavMeshGenerator.h"
 
 RNavMeshDebugger::RNavMeshDebugger()
 	: NavMeshGen(nullptr)

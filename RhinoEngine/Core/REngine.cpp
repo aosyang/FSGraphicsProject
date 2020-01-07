@@ -8,6 +8,8 @@
 #include "REngine.h"
 #include "Scene/RSceneManager.h"
 
+#include "Navigation/RNavigationSystem.h"
+
 static TCHAR szWindowClass[] = _T("rhinoapp");
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);

@@ -83,5 +83,3 @@ class RResourceBase;
 #include "Scene/RSMeshObject.h"
 #include "Scene/RSkybox.h"
 #include "Scene/RScene.h"
-
-#include "Navigation/RNavigationSystem.h"
