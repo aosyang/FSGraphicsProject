@@ -139,8 +139,7 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 					}
 				}
 			}
-
-			if (Right != NewRight)
+			else if (Right != NewRight)
 			{
 				if (DetermineSideOfPointToLine2D(Right, Start, NewRight) != LeftEdgeSide)
 				{
