@@ -858,10 +858,13 @@ void RNavMeshGenerator::GenerateRegionContours()
 			do
 			{
 				std::vector<RVec3> Points;
+				std::vector<int> EdgeIndices;
 				for (int i = 0; i <= (int)RegionEdges.size(); i++)
 				{
 					int Idx = (StartIdx + i) % RegionEdges.size();
 					Points.push_back(RegionEdges[Idx].Point);
+					EdgeIndices.push_back(Idx);
+
 					if (i != 0 && RegionEdges[Idx].bIsMandatory)
 					{
 						EndIdx = Idx;
@@ -870,6 +873,15 @@ void RNavMeshGenerator::GenerateRegionContours()
 				}
 
 				assert(EndIdx != -1);
+
+				// Note: In some cases, the point array will form a loop with the starting point being the end point.
+				//		 Avoid this so the edge simplification behaves properly.
+				if (StartIdx == EndIdx)
+				{
+					Points.pop_back();
+					EdgeIndices.pop_back();
+					EndIdx = *(EdgeIndices.end() - 1);
+				}
 
 				std::vector<RVec3> Simplified = SimplifyEdges(Points);
 				SimplifiedPoints.insert(SimplifiedPoints.end(), Simplified.begin(), Simplified.end());
