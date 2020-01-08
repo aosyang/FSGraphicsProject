@@ -120,6 +120,9 @@ public:
 	NavMeshEdgeData& GetNavMeshEdgeData(int Index);
 	const NavMeshEdgeData& GetNavMeshEdgeData(int Index) const;
 
+	// Get total number of triangles for navmesh
+	int GetNumTriangles() const;
+
 	// Get total number of edges for navmesh
 	int GetNumEdges() const;
 
@@ -192,6 +195,11 @@ FORCEINLINE NavMeshEdgeData& RNavMeshData::GetNavMeshEdgeData(int Index)
 FORCEINLINE const NavMeshEdgeData& RNavMeshData::GetNavMeshEdgeData(int Index) const
 {
 	return NavMeshEdges[Index];
+}
+
+FORCEINLINE int RNavMeshData::GetNumTriangles() const
+{
+	return (int)NavMeshTriangles.size();
 }
 
 FORCEINLINE int RNavMeshData::GetNumEdges() const

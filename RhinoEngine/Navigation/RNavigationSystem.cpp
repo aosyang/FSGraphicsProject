@@ -85,14 +85,27 @@ void RNavigationSystem::DebugDrawPathQuery() const
 
 void RNavigationSystem::DebugDrawNavMesh() const
 {
-	for (int i = 0; i < NavMeshData.GetNumEdges(); i++)
+	for (int EdgeIdx = 0; EdgeIdx < NavMeshData.GetNumEdges(); EdgeIdx++)
 	{
-		auto& EdgeData = NavMeshData.GetNavMeshEdgeData(i);
+		auto& EdgeData = NavMeshData.GetNavMeshEdgeData(EdgeIdx);
 
 		GDebugRenderer.DrawLine(
 			NavMeshData.GetNavMeshPointData(EdgeData.p0).WorldPosition,
 			NavMeshData.GetNavMeshPointData(EdgeData.p1).WorldPosition,
 			EdgeData.IsBorder ? RColor(0.0f, 1.0f, 0.0f) : RColor(0.0f, 0.7f, 0.0f)
 		);
+	}
+
+	for (int TriangleIdx = 0; TriangleIdx < NavMeshData.GetNumTriangles(); TriangleIdx++)
+	{
+		const auto& TriangleData = NavMeshData.GetNavMeshTriangleData(TriangleIdx);
+		RVec3 Points[3];
+		for (int PointIdx = 0; PointIdx < 3; PointIdx++)
+		{
+			const auto& PointData = NavMeshData.GetNavMeshPointData(TriangleData.Points[PointIdx]);
+			Points[PointIdx] = PointData.WorldPosition;
+		}
+
+		GDebugRenderer.DrawTriangle(Points[0], Points[1], Points[2], RColor(0.0f, 1.0f, 0.0f, 0.6f));
 	}
 }

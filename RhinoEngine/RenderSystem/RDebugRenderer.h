@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "RDebugRenderBuffer.h"
+
 class RDebugRenderer : public RSingleton<RDebugRenderer>
 {
 	friend class RSingleton<RDebugRenderer>;
@@ -27,6 +29,8 @@ public:
 	void DrawSphere(const RVec3& center, float radius, const RColor& color, int segment = 12);
 	void DrawSphere(const RSphere& Sphere, const RColor& color, int segment = 12);
 
+	void DrawTriangle(const RVec3& v0, const RVec3& v1, const RVec3& v2, const RColor& Color);
+
 	// Present primitive to the screen
 	void Render();
 
@@ -38,14 +42,9 @@ protected:
 	~RDebugRenderer();
 
 private:
-	RMeshRenderBuffer						m_PrimitiveMeshBuffer;
-	ID3D11InputLayout*						m_PrimitiveInputLayout;
-	RShader*								m_ColorShader;
-
 	RColor									m_PrimitiveColor;
-	std::vector<RVertexType::PositionColor>		m_PrimitiveVertices;
-	bool									m_bDirtyBuffer;
-	UINT									m_MaxNumVertices;
+	RDebugRenderBuffer						LineBuffer;
+	RDebugRenderBuffer						TriangleBuffer;
 };
 
 #define GDebugRenderer RDebugRenderer::Instance()
