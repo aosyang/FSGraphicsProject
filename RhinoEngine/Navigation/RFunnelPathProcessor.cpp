@@ -33,6 +33,7 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 {
 	static bool bDebugOutput = false;
 	static bool bDebugDrawFunnel = true;
+	static bool bDebugDrawPath = false;
 
 	RNavMeshDebugger& NavMeshDebugger = GNavigationSystem.GetDebugger();
 
@@ -42,15 +43,18 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 	}
 
 	// Debug draw the original path
-	for (int i = 0; i < (int)PathData.size() - 1; i++)
+	if (bDebugDrawPath)
 	{
-		if (i != 0)
+		for (int PathSegmentIdx = 0; PathSegmentIdx < (int)PathData.size() - 1; PathSegmentIdx++)
 		{
-			GDebugRenderer.DrawSphere(PathData[i].Position, 5.0f, RColor::Yellow, 8);
-		}
+			if (PathSegmentIdx != 0)
+			{
+				GDebugRenderer.DrawSphere(PathData[PathSegmentIdx].Position, 5.0f, RColor::Yellow, 8);
+			}
 
-		GDebugRenderer.DrawLine(PathData[i].Position, PathData[i + 1].Position, RColor::Yellow);
-		NavMeshData->DebugDrawEdge(PathData[i].EdgeId, RColor(0.75f, 0.75f, 0.75f));
+			GDebugRenderer.DrawLine(PathData[PathSegmentIdx].Position, PathData[PathSegmentIdx + 1].Position, RColor::Yellow);
+			NavMeshData->DebugDrawEdge(PathData[PathSegmentIdx].EdgeId, RColor(0.75f, 0.75f, 0.75f));
+		}
 	}
 
 	// The path is already simple enough. Stop
@@ -66,18 +70,18 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 	static const int LEFT_EDGE_SIDE = 1;
 	static const int RIGHT_EDGE_SIDE = -1;
 
-	for (int i = 1; i < (int)PathData.size();)
+	for (int PathSegmentIdx = 1; PathSegmentIdx < (int)PathData.size();)
 	{
 		int NewPathIndex = -1;
-		const RVec3& PrevPosition = PathData[i - 1].Position;
-		const RVec3& CurrentPosition = PathData[i].Position;
+		const RVec3& PrevPosition = PathData[PathSegmentIdx - 1].Position;
+		const RVec3& CurrentPosition = PathData[PathSegmentIdx].Position;
 
-		int EdgeId = PathData[i].EdgeId;
+		int EdgeId = PathData[PathSegmentIdx].EdgeId;
 
 		if (EdgeId == -1)
 		{
 			// Assuming this is the last point in the path
-			assert(i == (int)PathData.size() - 1);
+			assert(PathSegmentIdx == (int)PathData.size() - 1);
 
 			// For the last point, we need to decide whether it's crossing the left point or the right point or it can be directly connected 
 			// from the previous point.
@@ -96,17 +100,17 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 
 			if (bDebugOutput)
 			{
-				NavMeshDebugger.AddFunnelStep(i, Start, CurrentPosition, Left, Right);
+				NavMeshDebugger.AddFunnelStep(PathSegmentIdx, Start, CurrentPosition, Left, Right);
 			}
 
 			if (NewPathIndex == -1)
 			{
-				Result.emplace(Result.end(), PathData[i].Position, -1);
-				i++;
+				Result.emplace(Result.end(), PathData[PathSegmentIdx].Position, -1);
+				PathSegmentIdx++;
 			}
 			else
 			{
-				i = NewPathIndex;
+				PathSegmentIdx = NewPathIndex;
 			}
 
 			continue;
@@ -117,10 +121,10 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 		// Find position for both endpoints of the edge
 		RVec3 NewLeft, NewRight;
 		int LeftEdgeSide = 0, RightEdgeSide = 0;
-		bool FindResult = FindLeftAndRightForPathNode(i, NewLeft, NewRight, &LeftEdgeSide, &RightEdgeSide);
+		bool FindResult = FindLeftAndRightForPathNode(PathSegmentIdx, NewLeft, NewRight, &LeftEdgeSide, &RightEdgeSide);
 		assert(FindResult);
 
-		if (i != 1)
+		if (PathSegmentIdx != 1)
 		{
 			if (Left != NewLeft)
 			{
@@ -159,7 +163,7 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 
 		if (bDebugOutput)
 		{
-			RLog("Step %d - Start: %s, Current: %s, Left: %s, Right: %s\n", i,
+			RLog("Step %d - Start: %s, Current: %s, Left: %s, Right: %s\n", PathSegmentIdx,
 				Start.ToString().c_str(),
 				CurrentPosition.ToString().c_str(),
 				Left.ToString().c_str(),
@@ -168,16 +172,16 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 
 		if (bDebugDrawFunnel)
 		{
-			NavMeshDebugger.AddFunnelStep(i, Start, CurrentPosition, Left, Right);
+			NavMeshDebugger.AddFunnelStep(PathSegmentIdx, Start, CurrentPosition, Left, Right);
 		}
 
 		if (NewPathIndex != -1)
 		{
-			i = NewPathIndex;
+			PathSegmentIdx = NewPathIndex;
 		}
 		else
 		{
-			i++;
+			PathSegmentIdx++;
 		}
 	}
 
@@ -221,19 +225,19 @@ void RFunnelPathProcessor::GenerateImmediateLeftAndRightForEdgePoints()
 	RVec3 Left, Right;
 	RVec3 NewLeft, NewRight;
 
-	for (int i = 1; i < (int)PathData.size() - 1; i++)
+	for (int PathSegmentIdx = 1; PathSegmentIdx < (int)PathData.size() - 1; PathSegmentIdx++)
 	{
-		FindLeftAndRightForPathNode(i, NewLeft, NewRight);
+		FindLeftAndRightForPathNode(PathSegmentIdx, NewLeft, NewRight);
 
-		if (i != 1)
+		if (PathSegmentIdx != 1)
 		{
 			if (Left == NewLeft)
 			{
-				ImmediateNeighborData.push_back(RImmediateNeighborData(Right, Left, NewRight, i));
+				ImmediateNeighborData.push_back(RImmediateNeighborData(Right, Left, NewRight, PathSegmentIdx));
 			}
 			else if (Right == NewRight)
 			{
-				ImmediateNeighborData.push_back(RImmediateNeighborData(Left, NewLeft, Right, i));
+				ImmediateNeighborData.push_back(RImmediateNeighborData(Left, NewLeft, Right, PathSegmentIdx));
 			}
 			else
 			{
