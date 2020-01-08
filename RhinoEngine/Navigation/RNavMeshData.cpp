@@ -340,15 +340,15 @@ NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point, 
 
 		if (u >= 0 && v >= 0 && w >= 0)
 		{
-			Result.Triangle = Index;
-
 			// Project the point to navmesh by modifying y from the input
 			RVec3 ProjectedPoint = Point;
 			ProjectedPoint.SetY((p0 * u + p1 * v + p2 * w).Y());
 
 			if (fabs(Point.Y() - ProjectedPoint.Y()) < MaxHeightDifference)
 			{
+				Result.Triangle = Index;
 				Result.PositionOnNavmesh = ProjectedPoint;
+
 				break;
 			}
 		}
