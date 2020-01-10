@@ -57,6 +57,9 @@ public:
 private:
 	void GenerateHeightfieldColumns(const std::vector<RSceneObject*>& SceneObjects);
 
+	// Check if a cell is colliding with any objects in the scene
+	bool TestCellOverlappingWithScene(const std::vector<RSceneObject*>& SceneObjects, const RAabb& CellBounds);
+
 	// Generate neighbor data after we have open spans for all columns 
 	void GenerateOpenSpanNeighborData();
 

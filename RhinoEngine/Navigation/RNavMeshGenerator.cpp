@@ -313,39 +313,8 @@ void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObjec
 				CellBounds.pMax = CellCenter + CollisionDimention;
 				CellBounds.pMin = CellCenter - CollisionDimention;
 
-				bool bIsSolidCell = false;
-
 				// Has any overlaps with scene meshes?
-				for (auto& SceneObj : SceneObjects)
-				{
-					const RAabb& ObjBounds = SceneObj->GetAabb();
-					if (ObjBounds.TestIntersectionWithAabb(CellBounds))
-					{
-						// Mesh objects may contain per-element bounding box. In that case we're running overlapping test against mesh elements.
-						if (RSMeshObject* MeshObj = SceneObj->CastTo<RSMeshObject>())
-						{
-							for (int i = 0; i < MeshObj->GetMeshElementCount() && !bIsSolidCell; i++)
-							{
-								const RAabb& ElementBounds = MeshObj->GetMeshElementAabb(i);
-								const RAabb ElementWorldBounds = ElementBounds.GetTransformedAabb(MeshObj->GetTransformMatrix());
-
-								if (ElementWorldBounds.TestIntersectionWithAabb(CellBounds))
-								{
-									bIsSolidCell = true;
-								}
-							}
-						}
-						else
-						{
-							bIsSolidCell = true;
-						}
-
-						if (bIsSolidCell)
-						{
-							break;
-						}
-					}
-				}
+				bool bIsSolidCell = TestCellOverlappingWithScene(SceneObjects, CellBounds);
 
 				if (bIsSolidCell)
 				{
@@ -422,6 +391,33 @@ void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObjec
 			}
 		}
 	}
+}
+
+bool RNavMeshGenerator::TestCellOverlappingWithScene(const std::vector<RSceneObject*>& SceneObjects, const RAabb& CellBounds)
+{
+	for (auto& SceneObj : SceneObjects)
+	{
+		const RAabb& ObjBounds = SceneObj->GetAabb();
+		if (ObjBounds.TestIntersectionWithAabb(CellBounds))
+		{
+			// Mesh objects may contain per-element bounding box. In that case we're running overlapping test against mesh elements.
+			if (RSMeshObject* MeshObj = SceneObj->CastTo<RSMeshObject>())
+			{
+				for (int i = 0; i < MeshObj->GetMeshElementCount(); i++)
+				{
+					const RAabb& ElementBounds = MeshObj->GetMeshElementAabb(i);
+					const RAabb ElementWorldBounds = ElementBounds.GetTransformedAabb(MeshObj->GetTransformMatrix());
+
+					if (ElementWorldBounds.TestIntersectionWithAabb(CellBounds))
+					{
+						return true;
+					}
+				}
+			}
+		}
+	}
+
+	return false;
 }
 
 void RNavMeshGenerator::GenerateOpenSpanNeighborData()
