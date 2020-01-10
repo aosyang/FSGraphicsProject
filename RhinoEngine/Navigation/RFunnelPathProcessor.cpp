@@ -83,6 +83,11 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 			// Assuming this is the last point in the path
 			assert(PathSegmentIdx == (int)PathData.size() - 1);
 
+			if (bDebugDrawFunnel)
+			{
+				NavMeshDebugger.AddFunnelStep(PathSegmentIdx, Start, CurrentPosition, EdgeId, Left, Right);
+			}
+
 			// For the last point, we need to decide whether it's crossing the left point or the right point or it can be directly connected 
 			// from the previous point.
 
@@ -96,11 +101,6 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 			{
 				Result.emplace(Result.end(), Left, -1);
 				NewPathIndex = SetStartPoint(Left);
-			}
-
-			if (bDebugOutput)
-			{
-				NavMeshDebugger.AddFunnelStep(PathSegmentIdx, Start, CurrentPosition, Left, Right);
 			}
 
 			if (NewPathIndex == -1)
@@ -126,6 +126,9 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 
 		if (PathSegmentIdx != 1)
 		{
+			bool bStartFromRight = false;
+			bool bStartFromLeft = false;
+
 			if (Left != NewLeft)
 			{
 				// If new endpoint is narrower, adapt it as the new point
@@ -135,7 +138,7 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 					if (DetermineSideOfPointToLine2D(NewLeft, Start, Right) != LeftEdgeSide)
 					{
 						Result.emplace(Result.end(), Right, -1);
-						NewPathIndex = SetStartPoint(Right, &NewLeft, &NewRight);
+						bStartFromRight = true;
 					}
 					else
 					{
@@ -143,7 +146,8 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 					}
 				}
 			}
-			else if (Right != NewRight)
+			
+			if (Right != NewRight)
 			{
 				if (DetermineSideOfPointToLine2D(Right, Start, NewRight) != LeftEdgeSide)
 				{
@@ -151,13 +155,26 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 					if (DetermineSideOfPointToLine2D(NewRight, Start, Left) != RightEdgeSide)
 					{
 						Result.emplace(Result.end(), Left, -1);
-						NewPathIndex = SetStartPoint(Left, &NewLeft, &NewRight);
+						bStartFromLeft = true;
 					}
 					else
 					{
 						Right = NewRight;
 					}
 				}
+			}
+
+			// Should never pass tests for both sides
+			assert(!bStartFromRight || !bStartFromLeft);
+
+			if (bStartFromRight)
+			{
+				NewPathIndex = SetStartPoint(Right, &NewLeft, &NewRight);
+			}
+
+			if (bStartFromLeft)
+			{
+				NewPathIndex = SetStartPoint(Left, &NewLeft, &NewRight);
 			}
 		}
 
@@ -172,7 +189,7 @@ std::vector<NavPathNode> RFunnelPathProcessor::Execute()
 
 		if (bDebugDrawFunnel)
 		{
-			NavMeshDebugger.AddFunnelStep(PathSegmentIdx, Start, CurrentPosition, Left, Right);
+			NavMeshDebugger.AddFunnelStep(PathSegmentIdx, Start, CurrentPosition, EdgeId, Left, Right);
 		}
 
 		if (NewPathIndex != -1)

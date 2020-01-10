@@ -267,16 +267,18 @@ void RNavMeshGenerator::DebugRender() const
 	// Debug draw funnel algorithm
 	{
 		static int DebugDrawFunnelId = 0;
-		int MaxFunnelIndex = GNavigationSystem.GetDebugger().GetMaxStepIndex();
+		int MaxFunnelIndex = GNavigationSystem.GetDebugger().GetMaxFunnelSteps();
 
 		if (RInput.GetBufferedKeyState(VK_OEM_PLUS) == EBufferedKeyState::Pressed)
 		{
 			IncreasePeriodicIndex(DebugDrawFunnelId, MaxFunnelIndex);
+			RLog("Debug drawing funnel index %d\n", DebugDrawFunnelId);
 		}
 
 		if (RInput.GetBufferedKeyState(VK_OEM_MINUS) == EBufferedKeyState::Pressed)
 		{
 			DecreasePeriodicIndex(DebugDrawFunnelId, MaxFunnelIndex);
+			RLog("Debug drawing funnel index %d\n", DebugDrawFunnelId);
 		}
 
 		GNavigationSystem.GetDebugger().DrawFunnel(DebugDrawFunnelId);

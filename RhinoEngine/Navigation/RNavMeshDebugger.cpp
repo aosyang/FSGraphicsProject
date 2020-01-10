@@ -62,9 +62,9 @@ void RNavMeshDebugger::DrawRegion(int RegionId) const
 	}
 }
 
-void RNavMeshDebugger::AddFunnelStep(int Step, const RVec3& InStart, const RVec3& InCurrent, const RVec3& InLeft, const RVec3& InRight)
+void RNavMeshDebugger::AddFunnelStep(int Step, const RVec3& InStart, const RVec3& InCurrent, int EdgeId, const RVec3& InLeft, const RVec3& InRight)
 {
-	DebugFunnel.emplace(DebugFunnel.end(), Step, InStart, InCurrent, InLeft, InRight);
+	DebugFunnel.emplace(DebugFunnel.end(), Step, InStart, InCurrent, EdgeId, InLeft, InRight);
 }
 
 void RNavMeshDebugger::ClearFunnelResult()
@@ -72,29 +72,49 @@ void RNavMeshDebugger::ClearFunnelResult()
 	DebugFunnel.clear();
 }
 
-void RNavMeshDebugger::DrawFunnel(int Step) const
+void RNavMeshDebugger::DrawFunnel(int Index) const
 {
-	for (auto& Iter : DebugFunnel)
+	if (Index >= 0 && Index < (int)DebugFunnel.size())
 	{
-		if (Iter.Step == Step)
+		const auto& Iter = DebugFunnel[Index];
+		static const RVec3 Offset(0.0f, 10.0f, 0.0f);
+
+		GDebugRenderer.DrawSphere(Iter.Start + Offset, 10.0f, RColor::Cyan, 8);
+		GDebugRenderer.DrawSphere(Iter.Left + Offset, 10.0f, RColor::Red, 8);
+		GDebugRenderer.DrawSphere(Iter.Right + Offset, 10.0f, RColor::Green, 8);
+		GDebugRenderer.DrawSphere(Iter.Current + Offset, 10.0f, RColor(0.5f, 0.5f, 1.0f), 8);
+
+		GDebugRenderer.DrawLine(Iter.Start + Offset, Iter.Left + Offset, RColor::Red);
+		GDebugRenderer.DrawLine(Iter.Start + Offset, Iter.Right + Offset, RColor::Green);
+		GDebugRenderer.DrawLine(Iter.Start + Offset, Iter.Current + Offset, RColor(0.5f, 0.5f, 1.0f));
+
+		if (Iter.EdgeId != -1)
 		{
-			static const RVec3 Offset(0.0f, 10.0f, 0.0f);
-
-			GDebugRenderer.DrawSphere(Iter.Start + Offset, 10.0f, RColor::Cyan, 8);
-			GDebugRenderer.DrawSphere(Iter.Left + Offset, 10.0f, RColor::Red, 8);
-			GDebugRenderer.DrawSphere(Iter.Right + Offset, 10.0f, RColor::Green, 8);
-			GDebugRenderer.DrawSphere(Iter.Current + Offset, 10.0f, RColor(0.5f, 0.5f, 1.0f), 8);
-			
-			GDebugRenderer.DrawLine(Iter.Start + Offset, Iter.Left + Offset, RColor::Red);
-			GDebugRenderer.DrawLine(Iter.Start + Offset, Iter.Right + Offset, RColor::Green);
-			GDebugRenderer.DrawLine(Iter.Start + Offset, Iter.Current + Offset, RColor(0.5f, 0.5f, 1.0f));
-
-			break;
+			const auto& EdgeData = NavMeshData->GetNavMeshEdgeData(Iter.EdgeId);
+			RVec3 p0 = NavMeshData->GetNavMeshPointData(EdgeData.p0).WorldPosition;
+			RVec3 p1 = NavMeshData->GetNavMeshPointData(EdgeData.p1).WorldPosition;
+			GDebugRenderer.DrawLine(Iter.Start + Offset, p0 + Offset, RColor::Yellow);
+			GDebugRenderer.DrawLine(Iter.Start + Offset, p1 + Offset, RColor::Yellow);
+			GDebugRenderer.DrawSphere(p0 + Offset, 10.0f, RColor::Yellow, 8);
+			GDebugRenderer.DrawSphere(p1 + Offset, 10.0f, RColor::Yellow, 8);
 		}
 	}
 }
 
-int RNavMeshDebugger::GetMaxStepIndex() const
+void RNavMeshDebugger::DrawFunnelByStep(int Step) const
+{
+	auto Iter = std::find_if(DebugFunnel.begin(), DebugFunnel.end(), [Step](const DebugFunnelData& Data)
+	{
+		return Data.EdgeId == Step; 
+	});
+
+	if (Iter != DebugFunnel.end())
+	{
+		DrawFunnel(int(Iter - DebugFunnel.begin()));
+	}
+}
+
+int RNavMeshDebugger::GetMaxFunnelStepIndex() const
 {
 	int Index = -1;
 	for (auto& Iter : DebugFunnel)
@@ -106,4 +126,9 @@ int RNavMeshDebugger::GetMaxStepIndex() const
 	}
 
 	return Index;
+}
+
+int RNavMeshDebugger::GetMaxFunnelSteps() const
+{
+	return (int)DebugFunnel.size();
 }

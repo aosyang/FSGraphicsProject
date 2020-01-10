@@ -24,10 +24,11 @@ struct DebugLineData
 
 struct DebugFunnelData
 {
-	DebugFunnelData(int InStep, const RVec3& InStart, const RVec3& InCurrent, const RVec3& InLeft, const RVec3& InRight)
+	DebugFunnelData(int InStep, const RVec3& InStart, const RVec3& InCurrent, int InEdgeId, const RVec3& InLeft, const RVec3& InRight)
 		: Step(InStep)
 		, Start(InStart)
 		, Current(InCurrent)
+		, EdgeId(InEdgeId)
 		, Left(InLeft)
 		, Right(InRight)
 	{}
@@ -35,6 +36,7 @@ struct DebugFunnelData
 	int Step;
 	RVec3 Start;
 	RVec3 Current;
+	int EdgeId;
 	RVec3 Left;
 	RVec3 Right;
 };
@@ -51,13 +53,17 @@ public:
 
 	void AddRegionEdge(int RegionId, const RVec3& Start, const RVec3& End);
 
-	void AddFunnelStep(int Step, const RVec3& InStart, const RVec3& InCurrent, const RVec3& InLeft, const RVec3& InRight);
+	void AddFunnelStep(int Step, const RVec3& InStart, const RVec3& InCurrent, int EdgeId, const RVec3& InLeft, const RVec3& InRight);
 
 	void ClearFunnelResult();
 
-	void DrawFunnel(int Step) const;
+	void DrawFunnel(int Index) const;
 
-	int GetMaxStepIndex() const;
+	void DrawFunnelByStep(int Step) const;
+
+	int GetMaxFunnelStepIndex() const;
+
+	int GetMaxFunnelSteps() const;
 
 	void AddPersistentLine(const RVec3& Start, const RVec3& End);
 
