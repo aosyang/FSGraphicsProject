@@ -12,7 +12,7 @@ class RScene;
 
 #define DECLARE_SCENE_OBJECT(type, base)\
 		typedef base Base; friend class RScene;\
-		DECLARE_RUNTIME_TYPE(type)
+		DECLARE_RUNTIME_TYPE(type, base)
 
 // Note: Implementation is not being used currently
 #define IMPLEMENT_SCENE_OBJECT(type)
@@ -45,6 +45,7 @@ struct RConstructingParams
 class RSceneObject : public RRuntimeTypeObject
 {
 	friend class RScene;
+	DECLARE_RUNTIME_TYPE(RSceneObject, RRuntimeTypeObject);
 public:
 	virtual void Release();
 
@@ -184,7 +185,7 @@ FORCEINLINE T* RSceneObject::FindComponent() const
 {
 	for (auto& SceneComponent : SceneComponents)
 	{
-		if (SceneComponent->IsType<T>())
+		if (SceneComponent->CanCastTo<T>())
 		{
 			return static_cast<T*>(SceneComponent.get());
 		}

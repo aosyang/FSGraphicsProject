@@ -346,7 +346,7 @@ namespace ManagedEngineWrapper
 
 	void EditorApp::SaveMeshMaterialFromSelection()
 	{
-		if (m_SelectedObject && m_SelectedObject->IsType<RSMeshObject>())
+		if (m_SelectedObject && m_SelectedObject->CanCastTo<RSMeshObject>())
 		{
 			((RSMeshObject*)m_SelectedObject)->SaveMaterialsToFile();
 		}
@@ -459,7 +459,7 @@ namespace ManagedEngineWrapper
 				float t;
 				if (CameraRay.TestIntersectionWithAabb(SceneObject->GetAabb(), &t))
 				{
-					if (SceneObject->IsType<RSMeshObject>())
+					if (SceneObject->CanCastTo<RSMeshObject>())
 					{
 						RSMeshObject* meshObj = static_cast<RSMeshObject*>(SceneObject);
 						for (int i = 0; i < meshObj->GetMeshElementCount(); i++)

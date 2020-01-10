@@ -39,7 +39,7 @@ public:
 
 	/// Find all objects in the scene of given type
 	template<typename T>
-	std::vector<T*> FindAllObjectsOfType() const;
+	std::vector<T*> FindAllObjectsOfType(bool bMatchExactType = false) const;
 
 	/// Generate a unique object name with the given name
 	std::string GenerateUniqueObjectName(const std::string& ObjectName);
@@ -105,15 +105,28 @@ T* RScene::CreateSceneObjectOfType(const char* name /*= ""*/, int Flags /*= 0*/)
 }
 
 template<typename T>
-std::vector<T*> RScene::FindAllObjectsOfType() const
+std::vector<T*> RScene::FindAllObjectsOfType(bool bMatchExactType /*= false*/) const
 {
 	std::vector<T*> Results;
 
-	for (auto SceneObject : m_SceneObjects)
+	if (bMatchExactType)
 	{
-		if (SceneObject->GetRuntimeTypeId() == T::_StaticGetRuntimeTypeId())
+		for (auto SceneObject : m_SceneObjects)
 		{
-			Results.push_back(static_cast<T*>(SceneObject));
+			if (SceneObject->IsExactType<T>())
+			{
+				Results.push_back(static_cast<T*>(SceneObject));
+			}
+		}
+	}
+	else
+	{
+		for (auto SceneObject : m_SceneObjects)
+		{
+			if (T* Object = SceneObject->CastTo<T>())
+			{
+				Results.push_back(Object);
+			}
 		}
 	}
 

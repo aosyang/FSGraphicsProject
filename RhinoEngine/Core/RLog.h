@@ -5,6 +5,8 @@
 //=============================================================================
 #pragma once
 
+#include "RSingleton.h"
+
 /// A helper class that outputs logs to multiple targets
 class RLogOutputTargets : public RSingleton<RLogOutputTargets>
 {

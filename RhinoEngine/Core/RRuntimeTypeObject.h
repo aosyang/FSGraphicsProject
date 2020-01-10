@@ -12,41 +12,57 @@
 /// Runtime type info for scene object classes
 struct RSceneObjectRuntimeTypeInfo
 {
-	RSceneObjectRuntimeTypeInfo(const char* ClassName)
-	{
-		TypeId = std::hash<std::string>{}(std::string(ClassName));
-		RLog("Class \'%s\' has type id %zu\n", ClassName, TypeId);
-	}
+	RSceneObjectRuntimeTypeInfo(const char* ClassName, size_t InParentTypeId);
 
 	/// Type id from hashed class name string
 	size_t TypeId;
 };
 
-#define DECLARE_RUNTIME_TYPE(type)\
+/// Declare functions for a runtime-type object
+#define DECLARE_RUNTIME_TYPE(type, base)\
 	public:\
-		static size_t _StaticGetRuntimeTypeId() { static RSceneObjectRuntimeTypeInfo _RuntimeTypeInfo(#type); return _RuntimeTypeInfo.TypeId; }\
-		virtual size_t GetRuntimeTypeId() const override { return type::_StaticGetRuntimeTypeId(); }\
+		static RSceneObjectRuntimeTypeInfo& _StaticGetRuntimeTypeInfo()\
+		{\
+			static RSceneObjectRuntimeTypeInfo _RuntimeTypeInfo(#type, base::_StaticGetRuntimeTypeId());\
+			return _RuntimeTypeInfo;\
+		}\
+		static size_t _StaticGetRuntimeTypeId()				{ return _StaticGetRuntimeTypeInfo().TypeId; }\
+		virtual size_t GetRuntimeTypeId() const override	{ return type::_StaticGetRuntimeTypeId(); }\
 	private:
 
 
+/// Base class of any objects that require type query at runtime
 class RRuntimeTypeObject
 {
 public:
 	/// Returns runtime type id for the class
 	virtual size_t GetRuntimeTypeId() const { return 0; }
 
-	/// Dynamic-cast to another scene object type. Returns nullptr if types don't match
-	/// TODO: Need inheritance support
+	/// The runtime type id for base class
+	static size_t _StaticGetRuntimeTypeId() { return 0; }
+
+	/// Dynamic-cast to another runtime type. Returns null if types don't match
 	template<typename T>
-	T* CastTo() { return IsType<T>() ? static_cast<T*>(this) : nullptr; }
+	T* CastTo() { return CanCastTo<T>() ? static_cast<T*>(this) : nullptr; }
 
 	template<typename T>
-	const T* CastTo() const { return IsType<T>() ? static_cast<const T*>(this) : nullptr; }
+	const T* CastTo() const { return CanCastTo<T>() ? static_cast<const T*>(this) : nullptr; }
 
 	/// Check if object matches type of given class
 	template<typename T>
-	bool IsType() const
+	bool IsExactType() const
 	{
 		return GetRuntimeTypeId() == T::_StaticGetRuntimeTypeId();
 	}
+
+	/// Check if object is type or child type of given class
+	template<typename T>
+	bool CanCastTo() const
+	{
+		return IsTypeOrChildTypeOf(T::_StaticGetRuntimeTypeId());
+	}
+
+private:
+	/// Check if object is type or child type of given type id
+	bool IsTypeOrChildTypeOf(size_t OtherTypeId) const;
 };

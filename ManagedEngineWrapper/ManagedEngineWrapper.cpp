@@ -272,7 +272,7 @@ namespace ManagedEngineWrapper
 
 		for (auto SceneObject : m_Application->GetSceneObjects())
 		{
-			if (SceneObject->IsType<RSMeshObject>())
+			if (SceneObject->CanCastTo<RSMeshObject>())
 			{
 				SceneObjectsList->Add(gcnew ManagedMeshObject(SceneObject));
 			}

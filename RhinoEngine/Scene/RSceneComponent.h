@@ -12,7 +12,7 @@ class RSceneObject;
 
 #define DECLARE_SCENE_COMPONENT(type, base)\
 		typedef base Base;\
-		DECLARE_RUNTIME_TYPE(type)\
+		DECLARE_RUNTIME_TYPE(type, base)\
 	public:\
 		static std::unique_ptr<type> _CreateComponentUnique(RSceneObject* InOwner) { return std::unique_ptr<type>(new type(InOwner)); }\
 	private:
@@ -21,6 +21,7 @@ class RSceneObject;
 /// Base scene component class
 class RSceneComponent : public RRuntimeTypeObject
 {
+	DECLARE_RUNTIME_TYPE(RSceneComponent, RRuntimeTypeObject);
 public:
 	RSceneComponent(RSceneObject* InOwner);
 	virtual ~RSceneComponent() {}
