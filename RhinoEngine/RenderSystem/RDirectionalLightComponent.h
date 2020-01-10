@@ -5,7 +5,7 @@
 //=============================================================================
 #pragma once
 
-#include "Scene/RSceneComponentBase.h"
+#include "Scene/RSceneComponent.h"
 #include "ILight.h"
 #include "RShadowMap.h"
 
@@ -17,9 +17,9 @@ struct DirectionalLightParam
 
 #define MAX_CASCADED_SHADOW_SPLITS_NUM 3
 
-class RDirectionalLightComponent : public RSceneComponentBase, public ILight, public IShadowCaster
+class RDirectionalLightComponent : public RSceneComponent, public ILight, public IShadowCaster
 {
-	DECLARE_SCENE_COMPONENT(RDirectionalLightComponent, RSceneComponentBase);
+	DECLARE_SCENE_COMPONENT(RDirectionalLightComponent, RSceneComponent);
 public:
 	virtual ~RDirectionalLightComponent() override;
 

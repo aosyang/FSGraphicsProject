@@ -5,34 +5,37 @@
 //=============================================================================
 #pragma once
 
-#include "ISceneComponent.h"
+#include "RSceneComponent.h"
+#include "Core/RRuntimeTypeObject.h"
 
 class RSceneObject;
 
 #define DECLARE_SCENE_COMPONENT(type, base)\
 		typedef base Base;\
+		DECLARE_RUNTIME_TYPE(type)\
 	public:\
 		static std::unique_ptr<type> _CreateComponentUnique(RSceneObject* InOwner) { return std::unique_ptr<type>(new type(InOwner)); }\
 	private:
 
 
 /// Base scene component class
-class RSceneComponentBase : public ISceneComponent
+class RSceneComponent : public RRuntimeTypeObject
 {
 public:
-	RSceneComponentBase(RSceneObject* InOwner);
+	RSceneComponent(RSceneObject* InOwner);
+	virtual ~RSceneComponent() {}
 
 	/// Get the scene object which is owning this component
 	RSceneObject* GetOwner() const;
 
-	virtual void Update(float DeltaTime) override {}
+	virtual void Update(float DeltaTime) {}
 
 private:
 	/// The scene object owning this component
 	RSceneObject*	OwnerSceneObject;
 };
 
-FORCEINLINE RSceneObject* RSceneComponentBase::GetOwner() const
+FORCEINLINE RSceneObject* RSceneComponent::GetOwner() const
 {
 	return OwnerSceneObject;
 }

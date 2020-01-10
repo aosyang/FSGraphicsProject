@@ -7,6 +7,7 @@
 #include "AIBehavior_Fighter.h"
 
 #include "Navigation/RNavigationSystem.h"
+#include "Navigation/RAINavigationComponent.h"
 
 AIBehavior_Fighter::AIBehavior_Fighter(RSceneObject* InOwner)
 	: Base(InOwner)
@@ -14,6 +15,7 @@ AIBehavior_Fighter::AIBehavior_Fighter(RSceneObject* InOwner)
 	, bIsWaiting(false)
 	, WaitTime(0.0f)
 {
+	AINavigationComponent = InOwner->FindOrAddComponent<RAINavigationComponent>();
 	ControlledPlayer = InOwner->CastTo<FTGPlayerController>();
 }
 

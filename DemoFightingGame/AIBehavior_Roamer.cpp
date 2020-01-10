@@ -7,6 +7,7 @@
 #include "AIBehavior_Roamer.h"
 
 #include "Navigation/RNavigationSystem.h"
+#include "Navigation/RAINavigationComponent.h"
 
 namespace
 {
@@ -33,22 +34,26 @@ namespace
 
 AIBehavior_Roamer::AIBehavior_Roamer(RSceneObject* InOwner)
 	: Base(InOwner)
+	, WaitDuration(0.0f)
 {
+	AINavigationComponent = InOwner->FindOrAddComponent<RAINavigationComponent>();
+	AINavigationComponent->OnFinishedNavigation.Bind(this, &AIBehavior_Roamer::OnFinishedPathfinding);
+
 	SceneBounds = GetStaticSceneBounds(InOwner->GetScene());
 	ControlledPlayer = InOwner->CastTo<FTGPlayerController>();
 
 	MoveTarget = RNavigationSystem::InvalidPosition;
-
-	// When reseting the position of a player, also clear its current nav path.
-	ControlledPlayer->OnPlayerReset.BindLambda([&]()
-	{
-		NavPath.clear();
-	});
 }
 
 void AIBehavior_Roamer::Update(float DeltaTime)
 {
-	if (NavPath.size() == 0)
+	if (WaitDuration > 0.0f)
+	{
+		WaitDuration -= DeltaTime;
+		return;
+	}
+
+	if (AINavigationComponent->GetNavState() == EAINavState::Idle)
 	{
 		// Try finding a valid destination for pathfinding
 		const int NumMaxAttempts = 10;
@@ -60,47 +65,29 @@ void AIBehavior_Roamer::Update(float DeltaTime)
 				RMath::RandRangedF(SceneBounds.pMin.Z(), SceneBounds.pMax.Z())
 			);
 
-			if (GNavigationSystem.QueryPath(ControlledPlayer->GetWorldPosition(), MoveTarget, NavPath))
+			if (AINavigationComponent->RequestMoveTo(MoveTarget))
 			{
 				break;
 			}
 		}
 	}
 
-	if (NavPath.size() != 0)
+	if (AINavigationComponent->GetNavState() == EAINavState::Moving)
 	{
-		const RVec3 PlayerPosition = ControlledPlayer->GetWorldPosition();
-
-		if (RVec3::SquaredDistance2D(NavPath[0], PlayerPosition) < RMath::Square(5.0f))
-		{
-			NavPath.erase(NavPath.begin());
-		}
-
-		if (NavPath.size() > 0)
-		{
-			RVec3 MoveVector = NavPath[0] - PlayerPosition;
-			MoveVector.SetY(0);
-
-			ControlledPlayer->SetMovementInput(MoveVector.GetNormalized() * 600.0f);
-		}
-		else
-		{
-			ControlledPlayer->SetMovementInput(RVec3::Zero());
-		}
-
-		DebugDrawPath();
+		ControlledPlayer->SetMovementInput(AINavigationComponent->GetDesiredMoveDirection() * 600.0f);
+		AINavigationComponent->DebugDrawPath();
 	}
 }
 
-void AIBehavior_Roamer::DebugDrawPath() const
+void AIBehavior_Roamer::Wait(float Duration)
 {
-	if (NavPath.size() > 0)
-	{
-		GDebugRenderer.DrawLine(ControlledPlayer->GetWorldPosition(), NavPath[0], RColor::Cyan);
-	}
+	WaitDuration = Duration;
+}
 
-	for (int i = 0; i < (int)NavPath.size() - 1; i++)
-	{
-		GDebugRenderer.DrawLine(NavPath[i], NavPath[i + 1], RColor::Cyan);
-	}
+void AIBehavior_Roamer::OnFinishedPathfinding()
+{
+	ControlledPlayer->SetMovementInput(RVec3::Zero());
+
+	// Randomly wait at the destination
+	Wait(RMath::RandRangedF(1.5f, 3.5f));
 }

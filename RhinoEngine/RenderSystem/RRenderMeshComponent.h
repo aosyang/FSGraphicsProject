@@ -5,7 +5,7 @@
 //=============================================================================
 #pragma once
 
-#include "Scene/RSceneComponentBase.h"
+#include "Scene/RSceneComponent.h"
 
 #include "RMaterial.h"
 
@@ -20,9 +20,9 @@ struct RenderViewInfo
 	RFrustum*	Frustum;
 };
 
-class RRenderMeshComponent : public RSceneComponentBase
+class RRenderMeshComponent : public RSceneComponent
 {
-	DECLARE_SCENE_COMPONENT(RRenderMeshComponent, RSceneComponentBase);
+	DECLARE_SCENE_COMPONENT(RRenderMeshComponent, RSceneComponent);
 public:
 	virtual ~RRenderMeshComponent() override;
 

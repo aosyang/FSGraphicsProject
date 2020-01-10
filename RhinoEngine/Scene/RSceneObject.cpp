@@ -8,8 +8,6 @@
 
 #include "RSceneObject.h"
 
-int RSceneObject::NextUniqueRuntimeTypeId = 0;
-
 RSceneObject::RSceneObject(const RConstructingParams& Params)
 	: m_Scene(Params.Scene)
 	, m_bVisible(true)
@@ -161,10 +159,4 @@ void RSceneObject::UpdateComponents(float DeltaTime)
 	{
 		SceneComponent->Update(DeltaTime);
 	}
-}
-
-RSceneObjectRuntimeTypeInfo::RSceneObjectRuntimeTypeInfo(const char* ClassName)
-{
-	TypeId = std::hash<std::string>{}(std::string(ClassName));
-	RLog("Class \'%s\' has type id %zu\n", ClassName, TypeId);
 }

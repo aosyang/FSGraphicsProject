@@ -5,6 +5,7 @@
 //=============================================================================
 
 #include "FTGPlayerController.h"
+#include "Navigation/RAINavigationComponent.h"
 
 IMPLEMENT_SCENE_OBJECT(FTGPlayerController);
 
@@ -283,6 +284,13 @@ std::vector<FTGPlayerController*> FTGPlayerController::TestSphereHitWithOtherPla
 
 void FTGPlayerController::Reset()
 {
+	// When reseting the position of an AI player, also clear its current nav path.
+	RAINavigationComponent* AINavigationComponent = FindComponent<RAINavigationComponent>();
+	if (AINavigationComponent)
+	{
+		AINavigationComponent->StopMovement();
+	}
+
 	OnPlayerReset.Execute();
 }
 

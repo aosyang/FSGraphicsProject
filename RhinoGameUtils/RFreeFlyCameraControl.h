@@ -9,13 +9,13 @@
 #include "Rhino.h"
 
 /// A component handling free fly camera inputs
-class RFreeFlyCameraControl : public RSceneComponentBase
+class RFreeFlyCameraControl : public RSceneComponent
 {
-	DECLARE_SCENE_COMPONENT(RFreeFlyCameraControl, RSceneComponentBase);
+	DECLARE_SCENE_COMPONENT(RFreeFlyCameraControl, RSceneComponent);
 public:
 	RFreeFlyCameraControl(RSceneObject* InOwner);
 
-	/// Overrides ISceneComponent
+	/// Overrides RSceneComponent
 	virtual void Update(float DeltaTime) override;
 
 	void SetEnabled(bool Enabled);

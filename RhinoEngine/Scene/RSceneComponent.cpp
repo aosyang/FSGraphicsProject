@@ -6,9 +6,9 @@
 
 #include "Rhino.h"
 
-#include "RSceneComponentBase.h"
+#include "RSceneComponent.h"
 
-RSceneComponentBase::RSceneComponentBase(RSceneObject* InOwner)
+RSceneComponent::RSceneComponent(RSceneObject* InOwner)
 	: OwnerSceneObject(InOwner)
 {
 

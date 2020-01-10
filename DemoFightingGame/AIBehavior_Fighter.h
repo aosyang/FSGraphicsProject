@@ -8,14 +8,16 @@
 
 #include "FTGPlayerController.h"
 
+class RAINavigationComponent;
+
 // AI combat logic class
-class AIBehavior_Fighter : public RSceneComponentBase
+class AIBehavior_Fighter : public RSceneComponent
 {
-	DECLARE_SCENE_COMPONENT(AIBehavior_Fighter, RSceneComponentBase);
+	DECLARE_SCENE_COMPONENT(AIBehavior_Fighter, RSceneComponent);
 public:
 	AIBehavior_Fighter(RSceneObject* InOwner);
 
-	/// Overrides ISceneComponent
+	/// Overrides RSceneComponent
 	virtual void Update(float DeltaTime) override;
 
 private:
@@ -32,6 +34,8 @@ private:
 	bool QueryPathToAttackTarget();
 
 private:
+	RAINavigationComponent* AINavigationComponent;
+
 	FTGPlayerController* ControlledPlayer;
 	FTGPlayerController* AttackTarget;
 

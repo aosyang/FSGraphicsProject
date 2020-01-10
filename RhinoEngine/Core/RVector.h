@@ -209,6 +209,13 @@ public:
 		return n;
 	}
 
+	RVec3 GetNormalized2D() const
+	{
+		RVec3 Result = *this;
+		Result.SetY(0.0f);
+		return Result.GetNormalized();
+	}
+
 	// Dot product
 	static float Dot(const RVec3& lhs, const RVec3& rhs)
 	{

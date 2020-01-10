@@ -5,25 +5,14 @@
 //=============================================================================
 #pragma once
 
-#include "ISceneComponent.h"
+#include "RSceneComponent.h"
+#include "Core/RRuntimeTypeObject.h"
 
 class RScene;
 
-/// Runtime type info for scene object classes
-struct RSceneObjectRuntimeTypeInfo
-{
-	RSceneObjectRuntimeTypeInfo(const char* ClassName);
-
-	/// Type id from hashed class name string
-	size_t TypeId;
-};
-
 #define DECLARE_SCENE_OBJECT(type, base)\
 		typedef base Base; friend class RScene;\
-	public:\
-		static size_t _StaticGetRuntimeTypeId() { static RSceneObjectRuntimeTypeInfo _RuntimeTypeInfo(#type); return _RuntimeTypeInfo.TypeId; }\
-		virtual size_t GetRuntimeTypeId() const override { return type::_StaticGetRuntimeTypeId(); }\
-	private:
+		DECLARE_RUNTIME_TYPE(type)
 
 // Note: Implementation is not being used currently
 #define IMPLEMENT_SCENE_OBJECT(type)
@@ -53,22 +42,11 @@ struct RConstructingParams
 };
 
 /// Base object that can be placed in a scene
-class RSceneObject
+class RSceneObject : public RRuntimeTypeObject
 {
 	friend class RScene;
 public:
 	virtual void Release();
-
-	/// Returns runtime type id for the class
-	virtual size_t GetRuntimeTypeId() const { return 0; }
-
-	/// Dynamic-cast to another scene object type. Returns nullptr if types don't match
-	/// TODO: Need inheritance support
-	template<typename T>
-	T* CastTo() { return IsType<T>() ? static_cast<T*>(this) : nullptr; }
-
-	template<typename T>
-	const T* CastTo() const { return IsType<T>() ? static_cast<const T*>(this) : nullptr; }
 
 	/// Set name of scene object
 	void SetName(const std::string& name)		{ m_Name = name; }
@@ -79,12 +57,7 @@ public:
 	/// Get the scene which this object belongs to
 	RScene* GetScene() const				{ return m_Scene; }
 
-	template<typename T>
-	bool IsType() const
-	{
-		return GetRuntimeTypeId() == T::_StaticGetRuntimeTypeId();
-	}
-
+	/// Make a copy of scene object
 	virtual RSceneObject* Clone() 			{ return nullptr; }
 
 	RTransform* GetTransform();
@@ -160,6 +133,14 @@ public:
 	template<typename T>
 	T* AddNewComponent();
 
+	/// Find a component by class
+	template<typename T>
+	T* FindComponent() const;
+
+	/// Find a component by class or add it if it doesn't exist
+	template<typename T>
+	T* FindOrAddComponent();
+
 	/// Set script string with function name and parameters to be invoked
 	/// example: 'RotateObject 1, 0, 0 50' - rotate object around axis [1, 0, 0] by 50 degree
 	void SetScript(const std::string& script)	{ m_Script = script; }
@@ -169,12 +150,6 @@ public:
 
 	/// Get split script strings in array form
 	const std::vector<std::string>& GetParsedScript();
-
-	/// Create a unique runtime type id for scene object types
-	static int MakeUniqueRuntimeTypeId()
-	{
-		return ++NextUniqueRuntimeTypeId;
-	}
 
 protected:
 	RSceneObject(const RConstructingParams& Params);
@@ -194,9 +169,7 @@ protected:
 	int				m_Flags;
 
 	/// Components of this scene object
-	std::vector<std::unique_ptr<ISceneComponent>>	SceneComponents;
-
-	static int NextUniqueRuntimeTypeId;
+	std::vector<std::unique_ptr<RSceneComponent>>	SceneComponents;
 };
 
 template<typename T>
@@ -204,6 +177,32 @@ FORCEINLINE T* RSceneObject::AddNewComponent()
 {
 	SceneComponents.push_back(move(T::_CreateComponentUnique(this)));
 	return static_cast<T*>(SceneComponents.back().get());
+}
+
+template<typename T>
+FORCEINLINE T* RSceneObject::FindComponent() const
+{
+	for (auto& SceneComponent : SceneComponents)
+	{
+		if (SceneComponent->IsType<T>())
+		{
+			return static_cast<T*>(SceneComponent.get());
+		}
+	}
+
+	return nullptr;
+}
+
+template<typename T>
+FORCEINLINE T* RSceneObject::FindOrAddComponent()
+{
+	T* Comp = FindComponent<T>();
+	if (!Comp)
+	{
+		Comp = AddNewComponent<T>();
+	}
+
+	return Comp;
 }
 
 FORCEINLINE void RSceneObject::SetTransform(const RVec3& InPosition, const RQuat& InRotation, const RVec3& InScale /*= RVec3(1, 1, 1)*/)
