@@ -23,6 +23,12 @@ RAabb::RAabb(const RAabb& Other)
 {
 }
 
+RAabb::RAabb(const RVec3& InMin, const RVec3& InMax)
+	: pMin(InMin)
+	, pMax(InMax)
+{
+}
+
 void RAabb::Reset()
 {
 	pMin = RVec3(FLT_MAX, FLT_MAX, FLT_MAX);

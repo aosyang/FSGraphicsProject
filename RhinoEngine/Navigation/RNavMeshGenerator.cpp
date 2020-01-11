@@ -309,16 +309,16 @@ void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObjec
 				RVec3 CellCenter = GetCellCenter(x, y, z);
 
 				RAabb CellBounds;
-				RVec3 CollisionDimention = CellDimension * RVec3(1.0f, 0.5f, 1.0f);
-				CellBounds.pMax = CellCenter + CollisionDimention;
-				CellBounds.pMin = CellCenter - CollisionDimention;
+				RVec3 CollisionDimension = CellDimension * RVec3(2.0f, 0.5f, 2.0f);
+				CellBounds.pMax = CellCenter + CollisionDimension;
+				CellBounds.pMin = CellCenter - CollisionDimension;
 
 				// Has any overlaps with scene meshes?
-				bool bIsSolidCell = TestCellOverlappingWithScene(SceneObjects, CellBounds);
+				bool bIsSolidCell = TestCellOverlappingWithScene(CellBounds, SceneObjects);
 
 				if (bIsSolidCell)
 				{
-					// A new solid spawn. Finish last open span
+					// Found a new solid span, let's finish the last open one
 					if (!bIsLastCellSolid)
 					{
 						// Start a new solid span
@@ -330,6 +330,10 @@ void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObjec
 					if (bIsLastCellSolid)
 					{
 						Span.CellRowEnd = y - 1;
+
+						// Detect if top of the solid span is traversable
+						Span.bTraversable = TestCellTraversability(CellBounds, SceneObjects, 4);
+
 						Column.SolidSpans.push_back(Span);
 					}
 				}
@@ -341,6 +345,9 @@ void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObjec
 			if (bIsLastCellSolid)
 			{
 				Span.CellRowEnd = CellNumY - 1;
+
+				// Note: If a solid span hits the ceiling, consider it not traversable
+				Span.bTraversable = false;
 				Column.SolidSpans.push_back(Span);
 			}
 
@@ -353,7 +360,7 @@ void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObjec
 					HeightfieldSolidSpan& ThisSpan = Column.SolidSpans[i];
 					HeightfieldSolidSpan& NextSpan = Column.SolidSpans[i + 1];
 					int NumEmptyCells = NextSpan.CellRowStart - ThisSpan.CellRowEnd - 1;
-					ThisSpan.bTraversable = (CellDimension.Y() * NumEmptyCells >= MinTraversableHeight);
+					ThisSpan.bTraversable &= (CellDimension.Y() * NumEmptyCells >= MinTraversableHeight);
 
 					if (ThisSpan.bTraversable)
 					{
@@ -368,7 +375,7 @@ void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObjec
 					// Check if top spans are traversable by their distance to the up boundary
 					HeightfieldSolidSpan& ThisSpan = Column.SolidSpans[i];
 					int NumEmptyCells = CellNumY - ThisSpan.CellRowEnd - 1;
-					ThisSpan.bTraversable = true; //(CellDimension.Y() * NumEmptyCells >= MinTraversableHeight);
+					ThisSpan.bTraversable &= true; //(CellDimension.Y() * NumEmptyCells >= MinTraversableHeight);
 
 					if (ThisSpan.bTraversable)
 					{
@@ -393,7 +400,7 @@ void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObjec
 	}
 }
 
-bool RNavMeshGenerator::TestCellOverlappingWithScene(const std::vector<RSceneObject*>& SceneObjects, const RAabb& CellBounds)
+bool RNavMeshGenerator::TestCellOverlappingWithScene(const RAabb& CellBounds, const std::vector<RSceneObject*>& SceneObjects)
 {
 	for (auto& SceneObj : SceneObjects)
 	{
@@ -418,6 +425,37 @@ bool RNavMeshGenerator::TestCellOverlappingWithScene(const std::vector<RSceneObj
 	}
 
 	return false;
+}
+
+bool RNavMeshGenerator::TestCellTraversability(const RAabb& CellBounds, const std::vector<RSceneObject*>& SceneObjects, int NumSubdivides)
+{
+	float StepX = (CellBounds.pMax.X() - CellBounds.pMin.X()) / NumSubdivides;
+	float StepZ = (CellBounds.pMax.Z() - CellBounds.pMin.Z()) / NumSubdivides;
+	float Height = CellBounds.pMax.Y() - CellBounds.pMin.Y();
+
+	for (int z = 0; z < NumSubdivides; z++)
+	{
+		for (int x = 0; x < NumSubdivides; x++)
+		{
+			RVec3 Min(
+				CellBounds.pMin.X() + x * StepX,
+				CellBounds.pMin.Y() - Height,
+				CellBounds.pMin.Z() + z * StepZ);
+
+			RVec3 Max(
+				CellBounds.pMin.X() + (x + 1) * StepX,
+				CellBounds.pMin.Y(),
+				CellBounds.pMin.Z() + (z + 1) * StepZ);
+
+			RAabb Bounds(Min, Max);
+			if (!TestCellOverlappingWithScene(Bounds, SceneObjects))
+			{
+				return false;
+			}
+		}
+	}
+
+	return true;
 }
 
 void RNavMeshGenerator::GenerateOpenSpanNeighborData()
@@ -1108,10 +1146,10 @@ void RNavMeshGenerator::DebugDrawSpans() const
 	for (const auto& Column : Heightfield)
 	{
 		// Draw solid spans
-		//for (const auto& Span : Column.SolidSpans)
-		//{
-		//	GDebugRenderer.DrawAabb(Span.Bounds, Span.bTraversable ? RColor::Green : RColor::Red);
-		//}
+		for (const auto& Span : Column.SolidSpans)
+		{
+			GDebugRenderer.DrawAabb(Span.Bounds, Span.bTraversable ? RColor::Green : RColor::Red);
+		}
 
 		int SpanIndex = 0;
 

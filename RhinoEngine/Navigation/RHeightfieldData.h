@@ -17,7 +17,7 @@
 struct HeightfieldSolidSpan
 {
 	HeightfieldSolidSpan()
-		: bTraversable(false)
+		: bTraversable(true)
 		, CellRowStart(0)
 		, CellRowEnd(0)
 	{}

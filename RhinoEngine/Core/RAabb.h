@@ -17,6 +17,7 @@ public:
 	RVec3 pMax;
 
 	RAabb();
+	RAabb(const RVec3& InMin, const RVec3& InMax);
 	RAabb(const RAabb& Other);
 
 	inline void Expand(const RVec3& p)
