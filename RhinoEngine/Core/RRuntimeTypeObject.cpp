@@ -7,6 +7,7 @@
 #include "RRuntimeTypeObject.h"
 
 #include "CoreTypes.h"
+#include "RLog.h"
 
 /// A unordered map that holds pairs for all runtime types and their parent types
 std::unordered_map<size_t, size_t> RuntimeTypeParents;
@@ -16,7 +17,7 @@ std::unordered_map<size_t, size_t> RuntimeTypeParents;
 std::map<size_t, std::string> RuntimeTypeIdToName;
 #endif	// _DEBUG
 
-RSceneObjectRuntimeTypeInfo::RSceneObjectRuntimeTypeInfo(const char* ClassName, size_t InParentTypeId)
+RRuntimeTypeInfoData::RRuntimeTypeInfoData(const char* ClassName, size_t InParentTypeId)
 	: TypeId(std::hash<std::string>{}(std::string(ClassName)))
 {
 #ifdef _DEBUG

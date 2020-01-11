@@ -7,37 +7,39 @@
 #pragma once
 
 #include "CoreTypes.h"
-#include "RLog.h"
 
-/// Runtime type info for scene object classes
-struct RSceneObjectRuntimeTypeInfo
+/// Runtime type info struct
+struct RRuntimeTypeInfoData
 {
-	RSceneObjectRuntimeTypeInfo(const char* ClassName, size_t InParentTypeId);
+	RRuntimeTypeInfoData(const char* ClassName, size_t InParentTypeId);
 
-	/// Type id from hashed class name string
+	/// Type id from hashed string of class name
 	size_t TypeId;
 };
 
 /// Declare functions for a runtime-type object
 #define DECLARE_RUNTIME_TYPE(type, base)\
-	public:\
-		static RSceneObjectRuntimeTypeInfo& _StaticGetRuntimeTypeInfo()\
+		static RRuntimeTypeInfoData& _StaticGetRuntimeTypeInfo()\
 		{\
-			static RSceneObjectRuntimeTypeInfo _RuntimeTypeInfo(#type, base::_StaticGetRuntimeTypeId());\
+			static RRuntimeTypeInfoData _RuntimeTypeInfo(#type, base::_StaticGetRuntimeTypeId());\
 			return _RuntimeTypeInfo;\
 		}\
-		static size_t _StaticGetRuntimeTypeId()				{ return _StaticGetRuntimeTypeInfo().TypeId; }\
+		/* Get runtime type id for an object */\
 		virtual size_t GetRuntimeTypeId() const override	{ return type::_StaticGetRuntimeTypeId(); }\
+	public:\
+		/* Get runtime type id for a class or a template type */\
+		static size_t _StaticGetRuntimeTypeId()				{ return _StaticGetRuntimeTypeInfo().TypeId; }\
 	private:
 
 
 /// Base class of any objects that require type query at runtime
 class RRuntimeTypeObject
 {
-public:
+private:
 	/// Returns runtime type id for the class
 	virtual size_t GetRuntimeTypeId() const { return 0; }
 
+public:
 	/// The runtime type id for base class
 	static size_t _StaticGetRuntimeTypeId() { return 0; }
 
