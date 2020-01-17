@@ -19,7 +19,7 @@ public:
 	RAnimationPlayer();
 
 	RAnimation*		Animation;
-	float			CurrentTime;
+	float			CurrentPlaybackTime;
 	float			TimeScale;
 	
 	RVec3			RootOffset;
@@ -34,15 +34,19 @@ class RAnimationBlender
 public:
 	RAnimationBlender();
 
-	void Play(RAnimation* anim, float time, float timeScale);
-	void Play(RAnimation* anim, float timeScale = 1.0f);
-	void Blend(RAnimation* source, float sourceTime, float sourceTimeScale = 1.0f,
-			   RAnimation* target = nullptr, float targetTime = 0.0f, float targetTimeScale = 0.0f,
-			   float blendTime = 0.0f);
-	void BlendTo(RAnimation* target, float targetTime, float targetTimeScale = 1.0f, float blendTime = 0.0f);
+	/// Start playing an animation immediately
+	void Play(RAnimation* Animation, float StartTime = -1.0f, float TimeScale = 1.0f);
 
+	void Blend(RAnimation* SourceAnimation, float SourceStartTime = -1.0f, float SourceTimeScale = 1.0f,
+			   RAnimation* TargetAnimation = nullptr, float TargetStartTime = -1.0f, float TargetTimeScale = 0.0f,
+			   float BlendTime = 0.0f);
+
+	/// Blend out from current animation to a target animation
+	void BlendOutTo(RAnimation* TargetAnimation, float TargetStartTime = -1.0f, float TargetTimeScale = 1.0f, float BlendTime = 0.0f);
+
+	/// Update the animation blender for the frame
 	void ProceedAnimation(float deltaTime);
-	void GetCurrentBlendedNodePose(int sourceNodeId, int targetNodeId, RMatrix4* matrix);
+	bool GetCurrentBlendedNodePose(int SourceNodeId, int TargetNodeId, RMatrix4* OutMatrix);
 	RVec3 GetCurrentRootOffset();
 
 	/// Check if animation has finished playing.
@@ -80,7 +84,7 @@ public:
 	void Serialize(RSerializer& serializer);
 
 	void AddNodePose(int nodeId, int frameId, const RMatrix4* matrix);
-	void GetNodePose(int nodeId, float time, RMatrix4* matrix) const;
+	void GetNodePose(int NodeId, float Time, RMatrix4* OutMatrix) const;
 	int GetNodeCount() const { return (int)m_NodeKeyFrames.size(); }
 
 	RVec3 GetInitRootPosition() const;
@@ -123,7 +127,7 @@ FORCEINLINE RAnimation* RAnimationBlender::GetSourceAnimation() const
 
 FORCEINLINE float RAnimationBlender::GetSourcePlaybackTime() const
 {
-	return m_SourceAnimation.CurrentTime;
+	return m_SourceAnimation.CurrentPlaybackTime;
 }
 
 FORCEINLINE RAnimation* RAnimationBlender::GetTargetAnimation() const
@@ -133,7 +137,7 @@ FORCEINLINE RAnimation* RAnimationBlender::GetTargetAnimation() const
 
 FORCEINLINE float RAnimationBlender::GetTargetPlaybackTime() const
 {
-	return m_TargetAnimation.CurrentTime;
+	return m_TargetAnimation.CurrentPlaybackTime;
 }
 
 FORCEINLINE float RAnimationBlender::GetElapsedBlendTime() const

@@ -5,10 +5,10 @@
 //=============================================================================
 
 #include "FTGPlayerStateMachine.h"
-#include "FTGPlayerController.h"
+#include "PlayerControllerBase.h"
 
-FTGPlayerStateMachine::FTGPlayerStateMachine()
-	: m_PlayerOwner(nullptr)
+FTGPlayerStateMachine::FTGPlayerStateMachine(PlayerControllerBase* InPlayerOwner)
+	: m_PlayerOwner(InPlayerOwner)
 	, m_NextBehavior(BHV_None)
 	, m_CurrentBehaviorInstance(nullptr)
 	, m_AnimSpeedDeviation(1.0f)
@@ -20,27 +20,21 @@ FTGPlayerStateMachine::~FTGPlayerStateMachine()
 	ReleaseAssets();
 }
 
-void FTGPlayerStateMachine::Init(FTGPlayerController* Owner)
+void FTGPlayerStateMachine::InitAssets()
 {
-	m_PlayerOwner = Owner;
-
-	AllocateBehaviorInstance<FTGPlayerBehavior_Idle>();
-	AllocateBehaviorInstance<FTGPlayerBehavior_Run>();
-	AllocateBehaviorInstance<FTGPlayerBehavior_Punch>();
-	AllocateBehaviorInstance<FTGPlayerBehavior_Kick>();
-	AllocateBehaviorInstance<FTGPlayerBehavior_BackKick>();
-	AllocateBehaviorInstance<FTGPlayerBehavior_SpinAttack>();
-	AllocateBehaviorInstance<FTGPlayerBehavior_Hit>();
-	AllocateBehaviorInstance<FTGPlayerBehavior_KnockedDown>();
-	AllocateBehaviorInstance<FTGPlayerBehavior_GetUp>();
-
 	m_CurrentBehaviorInstance = FindBehaviorInstance(BHV_Idle);
-	m_AnimBlender.Play(m_CurrentBehaviorInstance->GetAnimation());
-
-	RMesh* Mesh = Owner->GetMesh();
-	if (Mesh)
+	if (m_CurrentBehaviorInstance)
 	{
-		CacheAnimations(Mesh);
+		m_AnimBlender.Play(m_CurrentBehaviorInstance->GetAnimation());
+	}
+
+	if (m_PlayerOwner)
+	{
+		RMesh* Mesh = m_PlayerOwner->GetMesh();
+		if (Mesh)
+		{
+			CacheAnimations(Mesh);
+		}
 	}
 }
 
@@ -70,16 +64,9 @@ void FTGPlayerStateMachine::Update(float DeltaTime)
 			m_NextBehavior = BHV_None;
 
 			float BlendTime = BehaviorInstance->GetBlendInTime();
-			if (BlendTime > 0.0f)
-			{
-				m_AnimBlender.BlendTo(BehaviorInstance->GetAnimation(),
-									  BehaviorInstance->GetAnimation()->GetStartTime(), m_AnimSpeedDeviation,
-									  BlendTime);
-			}
-			else
-			{
-				m_AnimBlender.Play(BehaviorInstance->GetAnimation(), m_AnimSpeedDeviation);
-			}
+			m_AnimBlender.BlendOutTo(BehaviorInstance->GetAnimation(),
+									 BehaviorInstance->GetAnimation()->GetStartTime(), m_AnimSpeedDeviation,
+									 BlendTime);
 		}
 	}
 

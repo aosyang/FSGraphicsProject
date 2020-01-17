@@ -8,23 +8,27 @@
 
 #include "FTGPlayerBehaviors.h"
 
-class FTGPlayerController;
+class PlayerControllerBase;
 
 /// The behavior state machine of player
 class FTGPlayerStateMachine
 {
 public:
-	FTGPlayerStateMachine();
+	FTGPlayerStateMachine(PlayerControllerBase* InPlayerOwner);
 	~FTGPlayerStateMachine();
 
+	/// Allocate behavior instance asset
+	template<typename T>
+	void AllocateBehaviorInstance(const std::string& AnimResourcePath, int AnimFlags = 0);
+
 	/// Initialize behavior assets
-	void Init(FTGPlayerController* Owner);
+	void InitAssets();
 
 	/// Update the state machine
 	void Update(float DeltaTime);
 
 	/// Get the owner of this state machine
-	FTGPlayerController* GetOwner() const;
+	PlayerControllerBase* GetOwner() const;
 
 	/// Get enum of current behavior
 	EPlayerBehavior GetCurrentBehavior() const;
@@ -51,10 +55,6 @@ public:
 	float GetAnimationDeviation() const;
 
 private:
-	/// Allocate behavior instance asset
-	template<typename T>
-	void AllocateBehaviorInstance();
-
 	/// Cache all animation assets for a mesh
 	void CacheAnimations(RMesh* Mesh);
 
@@ -66,7 +66,7 @@ private:
 
 private:
 	/// The owning player of this state machine
-	FTGPlayerController*			m_PlayerOwner;
+	PlayerControllerBase*			m_PlayerOwner;
 
 	/// Current behavior instance
 	FTGPlayerBehaviorBase*			m_CurrentBehaviorInstance;
@@ -85,7 +85,7 @@ private:
 };
 
 
-FORCEINLINE FTGPlayerController* FTGPlayerStateMachine::GetOwner() const
+FORCEINLINE PlayerControllerBase* FTGPlayerStateMachine::GetOwner() const
 {
 	return m_PlayerOwner;
 }
@@ -106,7 +106,7 @@ FORCEINLINE RAnimationBlender& FTGPlayerStateMachine::GetAnimBlender()
 }
 
 template<typename T>
-void FTGPlayerStateMachine::AllocateBehaviorInstance()
+void FTGPlayerStateMachine::AllocateBehaviorInstance(const std::string& AnimResourcePath, int AnimFlags /*= 0*/)
 {
-	m_BehaviorInstances.push_back(new T);
+	m_BehaviorInstances.push_back(new T(AnimResourcePath, AnimFlags));
 }

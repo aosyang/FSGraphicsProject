@@ -114,6 +114,7 @@ public:
 
 	// Identity matrix variable
 	static RMatrix4 IDENTITY;
+	static RMatrix4 Zero;
 
 	// Rotation matrix
 	static RMatrix4 CreateXAxisRotation(float degree);

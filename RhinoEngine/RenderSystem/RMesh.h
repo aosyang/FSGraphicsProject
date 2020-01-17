@@ -53,9 +53,9 @@ public:
 	const std::string& GetBoneName(int boneId) const;
 	int GetBoneCount() const;
 
-	void CacheAnimation(RAnimation* anim);
+	void CacheAnimation(RAnimation* Animation);
 	bool HasCachedAnimation(RAnimation* anim) const;
-	int GetCachedAnimationNodeId(RAnimation* anim, int boneId);
+	int GetCachedAnimationNodeId(RAnimation* Animation, int BoneId) const;
 
 protected:
 	virtual std::vector<RResourceBase*> EnumerateReferencedResources() const override;

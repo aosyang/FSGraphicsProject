@@ -5,170 +5,18 @@
 //=============================================================================
 
 #include "FTGPlayerController.h"
-#include "Navigation/RAINavigationComponent.h"
 
 IMPLEMENT_SCENE_OBJECT(FTGPlayerController);
-
-std::list<RSceneObject*> FTGPlayerController::ActivePlayerControllers;
 
 bool FTGPlayerController::DrawDebugHitShape = false;
 
 FTGPlayerController::FTGPlayerController(const RConstructingParams& Params)
 	: Base(Params)
-	, m_MovementInput(0.0f, 0.0f, 0.0f)
-	, m_Rotation(0.0f)
 {
-	ActivePlayerControllers.push_back(this);
 }
 
 FTGPlayerController::~FTGPlayerController()
 {
-	ActivePlayerControllers.remove(this);
-}
-
-void FTGPlayerController::InitAssets()
-{
-	RMesh* playerMesh = RResourceManager::Instance().LoadResource<RMesh>("/unitychan/unitychan.fbx", EResourceLoadMode::Immediate);
-	SetMesh(playerMesh);
-
-	m_StateMachine.Init(this);
-}
-
-void FTGPlayerController::UpdateController(float DeltaTime)
-{
-	PreUpdate(DeltaTime);
-	UpdateMovement(DeltaTime, m_MovementInput * DeltaTime);
-	PostUpdate(DeltaTime);
-}
-
-void FTGPlayerController::PreUpdate(float DeltaTime)
-{
-	m_StateMachine.Update(DeltaTime);
-
-	m_RootOffset = GetAnimBlender().GetCurrentRootOffset();
-
-	//if (m_Behavior == BHV_Idle || m_Behavior == BHV_Run)
-	//	m_RootOffset = RVec3(0, 0, 0);
-}
-
-float LerpDegreeAngle(float from, float to, float t)
-{
-	while (from - to > 180.0f)
-	{
-		from -= 360.0f;
-	}
-
-	while (from - to < -180.0f)
-	{
-		from += 360.0f;
-	}
-
-	return from + (to - from) * RMath::Clamp(t, 0.0f, 1.0f);
-}
-
-void FTGPlayerController::UpdateMovement(float DeltaTime, const RVec3 moveVec)
-{
-	bool bCanMovePlayer = CanMovePlayerWithInput();
-	if (bCanMovePlayer)
-	{
-		RVec3 PlannarMoveVector = moveVec;
-		PlannarMoveVector.SetY(0.0f);
-
-		if (PlannarMoveVector.SquaredMagitude() > 0.0f)
-		{
-			PlannarMoveVector = PlannarMoveVector.GetNormalized();
-			m_Rotation = LerpDegreeAngle(m_Rotation, RAD_TO_DEG(atan2f(-PlannarMoveVector.X(), -PlannarMoveVector.Z())), 10.0f * DeltaTime);
-
-			SetBehavior(BHV_Run);
-		}
-		else
-		{
-			SetBehavior(BHV_Idle);
-		}
-	}
-
-	// Offset of stair which player can step up
-	static const RVec3 StairOffset = RVec3(0, 10, 0);
-
-	RAabb playerAabb = GetMovementCollisionShape();
-	playerAabb.pMin += StairOffset;
-	playerAabb.pMax += StairOffset;
-
-	RVec3 worldMoveVec = bCanMovePlayer ? moveVec : RVec3::Zero();
-
-	// Apply gravity
-	worldMoveVec += RVec3(0, -1000.0f * DeltaTime, 0);
-
-	worldMoveVec += (RVec4(GetRootOffset(), 0) * GetTransformMatrix()).ToVec3();
-	worldMoveVec -= StairOffset;
-	worldMoveVec = m_Scene->TestMovingAabbWithScene(playerAabb, worldMoveVec, ActivePlayerControllers);
-
-	Translate(worldMoveVec + StairOffset, ETransformSpace::World);
-
-	SetRotation(RQuat::Euler(0.0f, DEG_TO_RAD(m_Rotation), 0.0f));
-}
-
-void FTGPlayerController::PostUpdate(float DeltaTime)
-{
-	for (int i = 0; i < m_Mesh->GetBoneCount(); i++)
-	{
-		RMatrix4 matrix;
-
-		int sourceBoneId = m_Mesh->GetCachedAnimationNodeId(GetAnimBlender().GetSourceAnimation(), i);
-		int targetBondId = m_Mesh->GetCachedAnimationNodeId(GetAnimBlender().GetTargetAnimation(), i);
-		GetAnimBlender().GetCurrentBlendedNodePose(sourceBoneId, targetBondId, &matrix);
-
-		m_BoneMatrices[i] = m_Mesh->GetBoneInitInvMatrices(i) * matrix * GetTransformMatrix();
-	}
-}
-
-void FTGPlayerController::Draw()
-{
-	// TODO: blend state should be set by material
-	GRenderer.SetBlendState(Blend_AlphaBlending);
-
-	// Copy bone transforms to constant buffer
-	memcpy(&RConstantBuffers::cbBoneMatrices.Data.boneMatrix, m_BoneMatrices, sizeof(RMatrix4) * MAX_BONE_COUNT);
-	RConstantBuffers::cbBoneMatrices.UpdateBufferData();
-	RConstantBuffers::cbBoneMatrices.BindBuffer();
-
-	RSMeshObject::Draw();
-
-	GRenderer.SetBlendState(Blend_Opaque);
-}
-
-void FTGPlayerController::DrawDepthPass()
-{
-	// Copy bone transforms to constant buffer
-	memcpy(&RConstantBuffers::cbBoneMatrices.Data.boneMatrix, m_BoneMatrices, sizeof(RMatrix4) * MAX_BONE_COUNT);
-	RConstantBuffers::cbBoneMatrices.UpdateBufferData();
-	RConstantBuffers::cbBoneMatrices.BindBuffer();
-
-	RSMeshObject::DrawDepthPass();
-}
-
-void FTGPlayerController::SetMovementInput(const RVec3& Input)
-{
-	if (Input.HasNan())
-	{
-		DebugBreak();
-	}
-
-	m_MovementInput = Input * m_StateMachine.GetAnimationDeviation();
-}
-
-void FTGPlayerController::SetPlayerFacing(const RVec3& Direction, bool bCheckMoveAllowed /*= true*/)
-{
-	if (bCheckMoveAllowed && !CanMovePlayerWithInput())
-	{
-		return;
-	}
-
-	if (Direction.Magnitude() > 0.0f)
-	{
-		RVec3 NormalizedDir = Direction.GetNormalized();
-		SetPlayerRotation(RAD_TO_DEG(atan2f(-NormalizedDir.X(), -NormalizedDir.Z())));
-	}
 }
 
 void FTGPlayerController::PerformPunch()
@@ -225,35 +73,6 @@ void FTGPlayerController::ClearHitPlayerControllers()
 	HitPlayerControllers.clear();
 }
 
-void FTGPlayerController::SetBehavior(EPlayerBehavior behavior)
-{
-	m_StateMachine.SetNextBehavior(behavior);
-}
-
-float FTGPlayerController::GetBehaviorTime()
-{
-	return m_StateMachine.GetCurrentBehaviorTime();
-}
-
-RAabb FTGPlayerController::GetMovementCollisionShape() const
-{
-	RAabb playerAabb;
-	playerAabb.pMin = RVec3(-50.0f, 0.0f, -50.0f) + GetPosition();
-	playerAabb.pMax = RVec3(50.0f, 150.0f, 50.0f) + GetPosition();
-
-	return playerAabb;
-}
-
-RCapsule FTGPlayerController::GetCollisionShape() const
-{
-	return RCapsule{ GetPosition() + RVec3(0, 40, 0), GetPosition() + RVec3(0, 110, 0), 40 };
-}
-
-void FTGPlayerController::SetAnimationDeviation(float Deviation)
-{
-	m_StateMachine.SetAnimationDeviation(Deviation);
-}
-
 std::vector<FTGPlayerController*> FTGPlayerController::TestSphereHitWithOtherPlayers(float Radius, const RVec3& LocalSpaceOffset)
 {
 	RSphere HitSphere;
@@ -280,21 +99,4 @@ std::vector<FTGPlayerController*> FTGPlayerController::TestSphereHitWithOtherPla
 	}
 
 	return Results;
-}
-
-void FTGPlayerController::Reset()
-{
-	// When reseting the position of an AI player, also clear its current nav path.
-	RAINavigationComponent* AINavigationComponent = FindComponent<RAINavigationComponent>();
-	if (AINavigationComponent)
-	{
-		AINavigationComponent->StopMovement();
-	}
-
-	OnPlayerReset.Execute();
-}
-
-bool FTGPlayerController::CanMovePlayerWithInput() const
-{
-	return m_StateMachine.GetCurrentBehavior() == BHV_Run || m_StateMachine.GetCurrentBehavior() == BHV_Idle;
 }

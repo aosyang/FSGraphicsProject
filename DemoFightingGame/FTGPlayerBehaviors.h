@@ -10,6 +10,8 @@
 
 enum EPlayerBehavior
 {
+	BHV_None,
+
 	BHV_Idle,
 	BHV_Run,
 	BHV_Punch,
@@ -19,8 +21,6 @@ enum EPlayerBehavior
 	BHV_Hit,
 	BHV_KnockedDown,
 	BHV_GetUp,
-
-	BHV_None,
 };
 
 class FTGPlayerController;
@@ -30,6 +30,7 @@ class FTGPlayerBehaviorBase
 {
 public:
 	FTGPlayerBehaviorBase();
+	FTGPlayerBehaviorBase(const std::string& AnimResourcePath, int AnimFlags = 0);
 
 	virtual bool EvaluateForExecution(FTGPlayerStateMachine* StateMachine);
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime);
@@ -45,7 +46,7 @@ public:
 protected:
 	virtual void OnBehaviorFinished(FTGPlayerStateMachine* StateMachine);
 
-	void LoadAnimationAsset(const char* AssetPath, int flags = 0);
+	void LoadAnimationAsset(const std::string& AssetPath, int flags = 0);
 
 	EPlayerBehavior m_BehaviorEnum;
 
@@ -59,33 +60,33 @@ protected:
 class FTGPlayerBehavior_Idle : public FTGPlayerBehaviorBase
 {
 public:
-	FTGPlayerBehavior_Idle()
+	FTGPlayerBehavior_Idle(const std::string& AnimResourcePath, int AnimFlags)
+		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_Idle;
 		m_BlendTime = 0.2f;
-		LoadAnimationAsset("/unitychan/FUCM05_0000_Idle.fbx", AnimBitFlag_Loop);
 	}
 };
 
 class FTGPlayerBehavior_Run : public FTGPlayerBehaviorBase
 {
 public:
-	FTGPlayerBehavior_Run()
+	FTGPlayerBehavior_Run(const std::string& AnimResourcePath, int AnimFlags)
+		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_Run;
 		m_BlendTime = 0.2f;
-		LoadAnimationAsset("/unitychan/FUCM_0012b_EH_RUN_LP_NoZ.fbx", AnimBitFlag_Loop);
 	}
 };
 
 class FTGPlayerBehavior_Punch : public FTGPlayerBehaviorBase
 {
 public:
-	FTGPlayerBehavior_Punch()
+	FTGPlayerBehavior_Punch(const std::string& AnimResourcePath, int AnimFlags)
+		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_Punch;
 		m_BlendTime = 0.1f;
-		LoadAnimationAsset("/unitychan/FUCM05_0001_M_CMN_LJAB.fbx", AnimBitFlag_HasRootMotion);
 	}
 
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
@@ -94,11 +95,11 @@ public:
 class FTGPlayerBehavior_Kick : public FTGPlayerBehaviorBase
 {
 public:
-	FTGPlayerBehavior_Kick()
+	FTGPlayerBehavior_Kick(const std::string& AnimResourcePath, int AnimFlags)
+		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_Kick;
 		m_BlendTime = 0.1f;
-		LoadAnimationAsset("/unitychan/FUCM_04_0001_RHiKick.fbx", AnimBitFlag_HasRootMotion);
 	}
 
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
@@ -107,11 +108,11 @@ public:
 class FTGPlayerBehavior_BackKick : public FTGPlayerBehaviorBase
 {
 public:
-	FTGPlayerBehavior_BackKick()
+	FTGPlayerBehavior_BackKick(const std::string& AnimResourcePath, int AnimFlags)
+		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_BackKick;
 		m_BlendTime = 0.1f;
-		LoadAnimationAsset("/unitychan/FUCM02_0004_CH01_AS_MAWAK.fbx", AnimBitFlag_HasRootMotion);
 	}
 
 	virtual bool EvaluateForExecution(FTGPlayerStateMachine* StateMachine) override;
@@ -121,11 +122,11 @@ public:
 class FTGPlayerBehavior_SpinAttack : public FTGPlayerBehaviorBase
 {
 public:
-	FTGPlayerBehavior_SpinAttack()
+	FTGPlayerBehavior_SpinAttack(const std::string& AnimResourcePath, int AnimFlags)
+		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_SpinAttack;
 		m_BlendTime = 0.2f;
-		LoadAnimationAsset("/unitychan/FUCM02_0029_Cha01_STL01_ScrewK01.fbx", AnimBitFlag_HasRootMotion);
 	}
 
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
@@ -134,23 +135,23 @@ public:
 class FTGPlayerBehavior_Hit : public FTGPlayerBehaviorBase
 {
 public:
-	FTGPlayerBehavior_Hit()
+	FTGPlayerBehavior_Hit(const std::string& AnimResourcePath, int AnimFlags)
+		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_Hit;
 		m_BlendTime = 0.1f;
 		m_bAllowRerunSelf = true;
-		LoadAnimationAsset("/unitychan/unitychan_DAMAGED00.fbx", AnimBitFlag_HasRootMotion);
 	}
 };
 
 class FTGPlayerBehavior_KnockedDown : public FTGPlayerBehaviorBase
 {
 public:
-	FTGPlayerBehavior_KnockedDown()
+	FTGPlayerBehavior_KnockedDown(const std::string& AnimResourcePath, int AnimFlags)
+		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_KnockedDown;
 		m_BlendTime = 0.1f;
-		LoadAnimationAsset("/unitychan/FUCM02_0025_MYA_TF_DOWN.fbx", AnimBitFlag_HasRootMotion);
 	}
 
 protected:
@@ -160,11 +161,11 @@ protected:
 class FTGPlayerBehavior_GetUp : public FTGPlayerBehaviorBase
 {
 public:
-	FTGPlayerBehavior_GetUp()
+	FTGPlayerBehavior_GetUp(const std::string& AnimResourcePath, int AnimFlags)
+		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_GetUp;
 		m_BlendTime = 0.1f;
-		LoadAnimationAsset("/unitychan/FUCM03_0019_HeadSpring.fbx", AnimBitFlag_HasRootMotion);
 	}
 };
 

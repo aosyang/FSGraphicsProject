@@ -9,6 +9,7 @@
 
 RMatrix4 RMatrix4::IDENTITY = RMatrix4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
+RMatrix4 RMatrix4::Zero = RMatrix4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 //////////////////////////////////////////////////////////////////////////
 // Matrix3 implementations

@@ -17,6 +17,12 @@ FTGPlayerBehaviorBase::FTGPlayerBehaviorBase()
 
 }
 
+FTGPlayerBehaviorBase::FTGPlayerBehaviorBase(const std::string& AnimResourcePath, int AnimFlags /*= 0*/)
+	: FTGPlayerBehaviorBase()
+{
+	LoadAnimationAsset(AnimResourcePath, AnimFlags);
+}
+
 bool FTGPlayerBehaviorBase::EvaluateForExecution(FTGPlayerStateMachine* StateMachine)
 {
 	return StateMachine->GetNextBehavior() == GetBehaviorEnum();
@@ -29,10 +35,14 @@ void FTGPlayerBehaviorBase::Update(FTGPlayerStateMachine* StateMachine, float De
 
 void FTGPlayerBehaviorBase::NotifyBegin(FTGPlayerStateMachine* StateMachine)
 {
-	FTGPlayerController* OwnerPlayer = StateMachine->GetOwner();
+	PlayerControllerBase* OwnerPlayer = StateMachine->GetOwner();
 	if (OwnerPlayer)
 	{
-		OwnerPlayer->ClearHitPlayerControllers();
+		FTGPlayerController* OwnerFightingPlayer = OwnerPlayer->CastTo<FTGPlayerController>();
+		if (OwnerFightingPlayer)
+		{
+			OwnerFightingPlayer->ClearHitPlayerControllers();
+		}
 	}
 }
 
@@ -47,7 +57,7 @@ void FTGPlayerBehaviorBase::OnBehaviorFinished(FTGPlayerStateMachine* StateMachi
 	StateMachine->SetNextBehavior(BHV_Idle);
 }
 
-void FTGPlayerBehaviorBase::LoadAnimationAsset(const char* AssetPath, int flags /*= 0*/)
+void FTGPlayerBehaviorBase::LoadAnimationAsset(const std::string& AssetPath, int flags /*= 0*/)
 {
 	assert(m_Animation == nullptr);
 	RMesh* mesh = RResourceManager::Instance().LoadResource<RMesh>(AssetPath, EResourceLoadMode::Immediate);
@@ -91,27 +101,31 @@ void FTGPlayerBehavior_Kick::Update(FTGPlayerStateMachine* StateMachine, float D
 	float BehaviorTime = StateMachine->GetCurrentBehaviorTime();
 	if (BehaviorTime > 0.1f && BehaviorTime < 0.3f)
 	{
-		FTGPlayerController* PlayerOwner = StateMachine->GetOwner();
-		if (PlayerOwner)
+		PlayerControllerBase* OwnerPlayer = StateMachine->GetOwner();
+		if (OwnerPlayer)
 		{
-			auto HitPlayers = PlayerOwner->TestSphereHitWithOtherPlayers(50.0f, RVec3(0, 100, -50));
-			for (auto HitPlayer : HitPlayers)
+			FTGPlayerController* OwnerFightingPlayer = OwnerPlayer->CastTo<FTGPlayerController>();
+			if (OwnerFightingPlayer)
 			{
-				if (HitPlayer == PlayerOwner)
+				auto HitPlayers = OwnerFightingPlayer->TestSphereHitWithOtherPlayers(50.0f, RVec3(0, 100, -50));
+				for (auto HitPlayer : HitPlayers)
 				{
-					continue;
-				}
+					if (HitPlayer == OwnerFightingPlayer)
+					{
+						continue;
+					}
 
-				if (PlayerOwner->HasHitPlayerController(HitPlayer))
-				{
-					continue;
-				}
+					if (OwnerFightingPlayer->HasHitPlayerController(HitPlayer))
+					{
+						continue;
+					}
 
-				if (HitPlayer->GetBehavior() != BHV_KnockedDown)
-				{
-					HitPlayer->SetBehavior(BHV_Hit);
+					if (HitPlayer->GetBehavior() != BHV_KnockedDown)
+					{
+						HitPlayer->SetBehavior(BHV_Hit);
 
-					PlayerOwner->AddHitPlayerController(HitPlayer);
+						OwnerFightingPlayer->AddHitPlayerController(HitPlayer);
+					}
 				}
 			}
 		}
@@ -123,27 +137,31 @@ void FTGPlayerBehavior_Punch::Update(FTGPlayerStateMachine* StateMachine, float 
 	float BehaviorTime = StateMachine->GetCurrentBehaviorTime();
 	if (BehaviorTime > 0.1f && BehaviorTime < 0.3f)
 	{
-		FTGPlayerController* PlayerOwner = StateMachine->GetOwner();
-		if (PlayerOwner)
+		PlayerControllerBase* OwnerPlayer = StateMachine->GetOwner();
+		if (OwnerPlayer)
 		{
-			auto HitPlayers = PlayerOwner->TestSphereHitWithOtherPlayers(20.0f, RVec3(0, 100, -50));
-			for (auto HitPlayer : HitPlayers)
+			FTGPlayerController* OwnerFightingPlayer = OwnerPlayer->CastTo<FTGPlayerController>();
+			if (OwnerFightingPlayer)
 			{
-				if (HitPlayer == PlayerOwner)
+				auto HitPlayers = OwnerFightingPlayer->TestSphereHitWithOtherPlayers(20.0f, RVec3(0, 100, -50));
+				for (auto HitPlayer : HitPlayers)
 				{
-					continue;
-				}
+					if (HitPlayer == OwnerFightingPlayer)
+					{
+						continue;
+					}
 
-				if (PlayerOwner->HasHitPlayerController(HitPlayer))
-				{
-					continue;
-				}
+					if (OwnerFightingPlayer->HasHitPlayerController(HitPlayer))
+					{
+						continue;
+					}
 
-				if (HitPlayer->GetBehavior() != BHV_KnockedDown)
-				{
-					HitPlayer->SetBehavior(BHV_Hit);
+					if (HitPlayer->GetBehavior() != BHV_KnockedDown)
+					{
+						HitPlayer->SetBehavior(BHV_Hit);
 
-					PlayerOwner->AddHitPlayerController(HitPlayer);
+						OwnerFightingPlayer->AddHitPlayerController(HitPlayer);
+					}
 				}
 			}
 		}
@@ -155,37 +173,41 @@ void FTGPlayerBehavior_BackKick::Update(FTGPlayerStateMachine* StateMachine, flo
 	float BehaviorTime = StateMachine->GetCurrentBehaviorTime();
 	if (BehaviorTime > 0.1f && BehaviorTime < 0.3f)
 	{
-		FTGPlayerController* PlayerOwner = StateMachine->GetOwner();
-		if (PlayerOwner)
+		PlayerControllerBase* OwnerPlayer = StateMachine->GetOwner();
+		if (OwnerPlayer)
 		{
-			auto HitPlayers = PlayerOwner->TestSphereHitWithOtherPlayers(50.0f, RVec3(0, 100, -30));
-			for (auto HitPlayer : HitPlayers)
+			FTGPlayerController* OwnerFightingPlayer = OwnerPlayer->CastTo<FTGPlayerController>();
+			if (OwnerFightingPlayer)
 			{
-				if (HitPlayer == PlayerOwner)
+				auto HitPlayers = OwnerFightingPlayer->TestSphereHitWithOtherPlayers(50.0f, RVec3(0, 100, -30));
+				for (auto HitPlayer : HitPlayers)
 				{
-					continue;
-				}
-
-				if (PlayerOwner->HasHitPlayerController(HitPlayer))
-				{
-					continue;
-				}
-
-				if (HitPlayer->GetBehavior() != BHV_KnockedDown)
-				{
-					RVec3 HitCenter = PlayerOwner->GetTransform()->GetTranslatedVector(RVec3(0, 50, -50), ETransformSpace::Local);
-					RVec3 VictimToHitCenter = HitCenter - HitPlayer->GetPosition();
-					VictimToHitCenter.SetY(0.0f);
-					RVec3 AttackerForward = -PlayerOwner->GetForwardVector();
-					if (RVec3::Dot(AttackerForward, VictimToHitCenter) >= 0)
+					if (HitPlayer == OwnerFightingPlayer)
 					{
-						VictimToHitCenter = -AttackerForward;
+						continue;
 					}
 
-					HitPlayer->SetPlayerFacing(VictimToHitCenter, false);
-					HitPlayer->SetBehavior(BHV_KnockedDown);
+					if (OwnerFightingPlayer->HasHitPlayerController(HitPlayer))
+					{
+						continue;
+					}
 
-					PlayerOwner->AddHitPlayerController(HitPlayer);
+					if (HitPlayer->GetBehavior() != BHV_KnockedDown)
+					{
+						RVec3 HitCenter = OwnerFightingPlayer->GetTransform()->GetTranslatedVector(RVec3(0, 50, -50), ETransformSpace::Local);
+						RVec3 VictimToHitCenter = HitCenter - HitPlayer->GetPosition();
+						VictimToHitCenter.SetY(0.0f);
+						RVec3 AttackerForward = -OwnerFightingPlayer->GetForwardVector();
+						if (RVec3::Dot(AttackerForward, VictimToHitCenter) >= 0)
+						{
+							VictimToHitCenter = -AttackerForward;
+						}
+
+						HitPlayer->SetPlayerFacing(VictimToHitCenter, false);
+						HitPlayer->SetBehavior(BHV_KnockedDown);
+
+						OwnerFightingPlayer->AddHitPlayerController(HitPlayer);
+					}
 				}
 			}
 		}
@@ -197,37 +219,41 @@ void FTGPlayerBehavior_SpinAttack::Update(FTGPlayerStateMachine* StateMachine, f
 	float BehaviorTime = StateMachine->GetCurrentBehaviorTime();
 	if (BehaviorTime > 0.3f && BehaviorTime < 0.6f)
 	{
-		FTGPlayerController* PlayerOwner = StateMachine->GetOwner();
-		if (PlayerOwner)
+		PlayerControllerBase* OwnerPlayer = StateMachine->GetOwner();
+		if (OwnerPlayer)
 		{
-			auto HitPlayers = PlayerOwner->TestSphereHitWithOtherPlayers(50.0f, RVec3(0, 50, -50));
-			for (auto HitPlayer : HitPlayers)
+			FTGPlayerController* OwnerFightingPlayer = OwnerPlayer->CastTo<FTGPlayerController>();
+			if (OwnerFightingPlayer)
 			{
-				if (HitPlayer == PlayerOwner)
+				auto HitPlayers = OwnerFightingPlayer->TestSphereHitWithOtherPlayers(50.0f, RVec3(0, 50, -50));
+				for (auto HitPlayer : HitPlayers)
 				{
-					continue;
-				}
-
-				if (PlayerOwner->HasHitPlayerController(HitPlayer))
-				{
-					continue;
-				}
-
-				if (HitPlayer->GetBehavior() != BHV_KnockedDown)
-				{
-					RVec3 HitCenter = PlayerOwner->GetTransform()->GetTranslatedVector(RVec3(0, 50, -50), ETransformSpace::Local);
-					RVec3 VictimToHitCenter = HitCenter - HitPlayer->GetPosition();
-					VictimToHitCenter.SetY(0.0f);
-					RVec3 AttackerForward = -PlayerOwner->GetForwardVector();
-					if (RVec3::Dot(AttackerForward, VictimToHitCenter) >= 0)
+					if (HitPlayer == OwnerFightingPlayer)
 					{
-						VictimToHitCenter = -AttackerForward;
+						continue;
 					}
 
-					HitPlayer->SetPlayerFacing(VictimToHitCenter, false);
-					HitPlayer->SetBehavior(BHV_KnockedDown);
-					
-					PlayerOwner->AddHitPlayerController(HitPlayer);
+					if (OwnerFightingPlayer->HasHitPlayerController(HitPlayer))
+					{
+						continue;
+					}
+
+					if (HitPlayer->GetBehavior() != BHV_KnockedDown)
+					{
+						RVec3 HitCenter = OwnerFightingPlayer->GetTransform()->GetTranslatedVector(RVec3(0, 50, -50), ETransformSpace::Local);
+						RVec3 VictimToHitCenter = HitCenter - HitPlayer->GetPosition();
+						VictimToHitCenter.SetY(0.0f);
+						RVec3 AttackerForward = -OwnerFightingPlayer->GetForwardVector();
+						if (RVec3::Dot(AttackerForward, VictimToHitCenter) >= 0)
+						{
+							VictimToHitCenter = -AttackerForward;
+						}
+
+						HitPlayer->SetPlayerFacing(VictimToHitCenter, false);
+						HitPlayer->SetBehavior(BHV_KnockedDown);
+
+						OwnerFightingPlayer->AddHitPlayerController(HitPlayer);
+					}
 				}
 			}
 		}

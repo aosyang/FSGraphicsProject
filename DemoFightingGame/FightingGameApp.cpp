@@ -50,17 +50,31 @@ bool FightingGameApp::Initialize()
 	//	obj->SetScript("UpdateObject");
 	//}
 
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < MaxNumPlayers; i++)
 	{
-		m_Player[i] = DefaultScene->CreateSceneObjectOfType<FTGPlayerController>();
+		m_Player[i] = DefaultScene->CreateSceneObjectOfType<PlayerControllerBase>();
 		if (m_Player[i])
 		{
-			m_Player[i]->InitAssets();
+			FTGPlayerStateMachine& StateMachine = m_Player[i]->GetStateMachine();
+			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Idle>("/HumanBody/Animations/Idle.fbx", AnimBitFlag_Loop);
+			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Run>("/HumanBody/Animations/Running.fbx", AnimBitFlag_Loop);
+
+			m_Player[i]->InitAssets("/HumanBody/HumanBody_DefaultPose.fbx");
+
+			// Hacked start points for players
+			{
+				if (i == 0)
+				{
+					m_Player[i]->SetPosition(RVec3(-1795, 40, -200));
+				}
+
+				if (i == 1)
+				{
+					m_Player[i]->SetPosition(RVec3(1835, 40, -853));
+				}
+			}
 		}
 	}
-
-	m_Player[0]->SetPosition(RVec3(588, 40, 539));
-	m_Player[1]->SetPosition(RVec3(802, 40, -1166));
 
 	m_AIPlayers.resize(MaxNumAIs);
 	for (int i = 0; i < MaxNumAIs; i++)
@@ -69,7 +83,19 @@ bool FightingGameApp::Initialize()
 		if (m_AIPlayers[i])
 		{
 			m_AIPlayers[i]->SetPosition(RVec3(RMath::RandRangedF(-800, 800), 50, RMath::RandRangedF(-800, 800)));
-			m_AIPlayers[i]->InitAssets();
+
+			FTGPlayerStateMachine& StateMachine = m_AIPlayers[i]->GetStateMachine();
+			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Idle>("/unitychan/FUCM05_0000_Idle.fbx", AnimBitFlag_Loop);
+			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Run>("/unitychan/FUCM_0012b_EH_RUN_LP_NoZ.fbx", AnimBitFlag_Loop);
+			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Punch>("/unitychan/FUCM05_0001_M_CMN_LJAB.fbx", AnimBitFlag_HasRootMotion);
+			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Kick>("/unitychan/FUCM_04_0001_RHiKick.fbx", AnimBitFlag_HasRootMotion);
+			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_BackKick>("/unitychan/FUCM02_0004_CH01_AS_MAWAK.fbx", AnimBitFlag_HasRootMotion);
+			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_SpinAttack>("/unitychan/FUCM02_0029_Cha01_STL01_ScrewK01.fbx", AnimBitFlag_HasRootMotion);
+			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Hit>("/unitychan/unitychan_DAMAGED00.fbx", AnimBitFlag_HasRootMotion);
+			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_KnockedDown>("/unitychan/FUCM02_0025_MYA_TF_DOWN.fbx", AnimBitFlag_HasRootMotion);
+			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_GetUp>("/unitychan/FUCM03_0019_HeadSpring.fbx", AnimBitFlag_HasRootMotion);
+
+			m_AIPlayers[i]->InitAssets("/unitychan/unitychan.fbx");
 
 			// Make each AI play animation at a slightly different speed
 			//m_AIPlayers[i]->SetAnimationDeviation(RMath::RandRangedF(0.8f, 1.2f));
@@ -94,7 +120,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	if (RInput.GetBufferedKeyState('R') == EBufferedKeyState::Pressed)
 	{
 		// Reset all characters' position
-		for (int i = 0; i < 2; i++)
+		for (int i = 0; i < MaxNumPlayers; i++)
 		{
 			if (m_Player[i])
 			{
@@ -113,12 +139,12 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 	// Select current controlled player with number key '1' and '2'
 	{
-		if (RInput.GetBufferedKeyState('1') == EBufferedKeyState::Pressed)
+		if (RInput.GetBufferedKeyState('1') == EBufferedKeyState::Pressed && MaxNumPlayers >= 1)
 		{
 			CurrentPlayerIndex = 0;
 		}
 
-		if (RInput.GetBufferedKeyState('2') == EBufferedKeyState::Pressed)
+		if (RInput.GetBufferedKeyState('2') == EBufferedKeyState::Pressed && MaxNumPlayers >= 2)
 		{
 			CurrentPlayerIndex = 1;
 		}
@@ -177,8 +203,11 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 	UpdateCameraPosition(timer.DeltaTime());
 
-	GNavigationSystem.DebugRender();
-	GNavigationSystem.DebugSetPathQueryPoints(m_Player[0]->GetPosition(), m_Player[1]->GetPosition());
+	//GNavigationSystem.DebugRender();
+	if (MaxNumPlayers >= 2)
+	{
+		GNavigationSystem.DebugSetPathQueryPoints(m_Player[0]->GetPosition(), m_Player[1]->GetPosition());
+	}
 }
 
 void FightingGameApp::RenderScene()
@@ -359,24 +388,28 @@ void FightingGameApp::UpdateUserInput()
 
 			CurrentPlayer->SetMovementInput(moveVec);
 
-			if (RInput.GetBufferedKeyState(VK_SPACE) == EBufferedKeyState::Pressed)
+			FTGPlayerController* FightingPlayer = CurrentPlayer->CastTo<FTGPlayerController>();
+			if (FightingPlayer)
 			{
-				CurrentPlayer->PerformSpinAttack();
-			}
+				if (RInput.GetBufferedKeyState(VK_SPACE) == EBufferedKeyState::Pressed)
+				{
+					FightingPlayer->PerformSpinAttack();
+				}
 
-			if (RInput.GetBufferedKeyState('J') == EBufferedKeyState::Pressed)
-			{
-				CurrentPlayer->PerformPunch();
-			}
+				if (RInput.GetBufferedKeyState('J') == EBufferedKeyState::Pressed)
+				{
+					FightingPlayer->PerformPunch();
+				}
 
-			if (RInput.GetBufferedKeyState('K') == EBufferedKeyState::Pressed)
-			{
-				CurrentPlayer->PerformKick();
-			}
+				if (RInput.GetBufferedKeyState('K') == EBufferedKeyState::Pressed)
+				{
+					FightingPlayer->PerformKick();
+				}
 
-			if (RInput.GetBufferedKeyState('C') == EBufferedKeyState::Pressed)
-			{
-				CurrentPlayer->SetBehavior(BHV_KnockedDown);
+				if (RInput.GetBufferedKeyState('C') == EBufferedKeyState::Pressed)
+				{
+					FightingPlayer->SetBehavior(BHV_KnockedDown);
+				}
 			}
 		}
 	}
@@ -424,8 +457,8 @@ void FightingGameApp::ResetPlayerPosition(FTGPlayerController* PlayerController)
 	PlayerController->Reset();
 }
 
-FTGPlayerController* FightingGameApp::GetCurrentPlayer() const
+PlayerControllerBase* FightingGameApp::GetCurrentPlayer() const
 {
-	assert(CurrentPlayerIndex >= 0 && CurrentPlayerIndex < 2);
+	assert(CurrentPlayerIndex >= 0 && CurrentPlayerIndex < MaxNumPlayers);
 	return m_Player[CurrentPlayerIndex];
 }

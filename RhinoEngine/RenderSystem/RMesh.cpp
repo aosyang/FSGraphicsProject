@@ -156,23 +156,38 @@ int RMesh::GetBoneCount() const
 	return (int)m_BoneIdToName.size();
 }
 
-void RMesh::CacheAnimation(RAnimation* anim)
+void RMesh::CacheAnimation(RAnimation* Animation)
 {
-	if (!anim || !m_BoneIdToName.size() || m_AnimationNodeCache.find(anim) != m_AnimationNodeCache.end())
+	if (!Animation)
+	{
+		RLogWarning("Failed to cache animation for mesh \'%s\': Input animation is null!\n", GetAssetPath().c_str());
 		return;
+	}
+		
+	if (!m_BoneIdToName.size())
+	{
+		RLogWarning("Failed to cache animation for mesh \'%s\': Mesh does not have any bones!\n", GetAssetPath().c_str());
+		return;
+	}
+
+	// Animation is already cached for this mesh, skip.
+	if (m_AnimationNodeCache.find(Animation) != m_AnimationNodeCache.end())
+	{
+		return;
+	}
 
 	const char* rootNodeName = m_BoneIdToName[0].data();
-	anim->SetRootNode(anim->GetNodeIdByName(rootNodeName));
-	anim->BuildRootDisplacementArray();
+	Animation->SetRootNode(Animation->GetNodeIdByName(rootNodeName));
+	Animation->BuildRootDisplacementArray();
 
 	std::vector<int> nodeIdMap;
 	nodeIdMap.resize(m_BoneIdToName.size());
 	for (int i = 0; i < (int)m_BoneIdToName.size(); i++)
 	{
-		nodeIdMap[i] = anim->GetNodeIdByName(m_BoneIdToName[i].data());
+		nodeIdMap[i] = Animation->GetNodeIdByName(m_BoneIdToName[i].data());
 	}
 
-	m_AnimationNodeCache[anim] = nodeIdMap;
+	m_AnimationNodeCache[Animation] = nodeIdMap;
 }
 
 bool RMesh::HasCachedAnimation(RAnimation* anim) const
@@ -185,16 +200,16 @@ bool RMesh::HasCachedAnimation(RAnimation* anim) const
 	return false;
 }
 
-int RMesh::GetCachedAnimationNodeId(RAnimation* anim, int boneId)
+int RMesh::GetCachedAnimationNodeId(RAnimation* Animation, int BoneId) const
 {
-	if (!anim || !m_BoneIdToName.size())
+	if (!Animation || !m_BoneIdToName.size())
 		return -1;
 
-	auto Iter = m_AnimationNodeCache.find(anim);
+	auto Iter = m_AnimationNodeCache.find(Animation);
 	if (Iter == m_AnimationNodeCache.end())
 		return -1;
 
-	return Iter->second[boneId];
+	return Iter->second[BoneId];
 }
 
 std::vector<RResourceBase*> RMesh::EnumerateReferencedResources() const

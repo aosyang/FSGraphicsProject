@@ -647,9 +647,13 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 		}
 	}
 
-	MeshResource->SetMeshElements(meshElements.data(), (UINT)meshElements.size());
-	MeshResource->SetMaterials(materials.data(), (UINT)materials.size());
-	MeshResource->UpdateAabb();
+	if (meshElements.size() > 0)
+	{
+		MeshResource->SetMeshElements(meshElements.data(), (UINT)meshElements.size());
+		MeshResource->SetMaterials(materials.data(), (UINT)materials.size());
+		MeshResource->UpdateAabb();
+	}
+
 	MeshResource->SetAnimation(animation);
 	MeshResource->SetBoneNameList(meshBoneIdToName);
 	MeshResource->SetBoneInitInvMatrices(boneInitInvPose);

@@ -12,6 +12,7 @@
 #include "FTGPlayerController.h"
 
 const static int MaxNumAIs = 10;
+const static int MaxNumPlayers = 1;
 
 class FightingGameApp : public IApp
 {
@@ -34,13 +35,13 @@ private:
 
 	void ResetPlayerPosition(FTGPlayerController* PlayerController);
 
-	FTGPlayerController* GetCurrentPlayer() const;
+	PlayerControllerBase* GetCurrentPlayer() const;
 
 private:
 	RCamera*				m_Camera;
 	RShadowMap				m_ShadowMap;
 
-	FTGPlayerController*	m_Player[2];
+	PlayerControllerBase*	m_Player[MaxNumPlayers];
 	int						CurrentPlayerIndex;
 
 	std::vector<FTGPlayerController*>	m_AIPlayers;
