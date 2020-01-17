@@ -12,6 +12,14 @@ enum EShaderFeatureMask
 	SFM_Deferred	= 1 << 2,
 };
 
+enum class EShaderType : UINT8
+{
+	Unknown,
+	VertexShader,
+	PixelShader,
+	GeometryShader,
+};
+
 struct RShader
 {
 	ID3D11VertexShader*		VertexShader;
@@ -64,6 +72,16 @@ private:
 	~RShaderManager();
 
 	const std::string& GetShaderName(const RShader* shader) const;
+
+	void CompileShader(const std::string& SourceName, const char* pBuffer, int BufferSize, RShader* Shader);
+
+	void CreateVertexShader(const std::string& SourceName, const void* ShaderBytecode, SIZE_T BytecodeLength, ID3D11VertexShader** VertexShader);
+	void CreatePixelShader(const std::string& SourceName, const void* ShaderBytecode, SIZE_T BytecodeLength, ID3D11PixelShader** PixelShader);
+	void CreateGeometryShader(const std::string& SourceName, const void* ShaderBytecode, SIZE_T BytecodeLength, ID3D11GeometryShader** GeometryShader);
+
+	/// Guess type of a shader by its file name
+	EShaderType DetectShaderType(const std::string& FileName) const;
+	UINT GetShaderCompileFlag() const;
 
 private:
 	std::map<std::string, RShader>	m_Shaders;

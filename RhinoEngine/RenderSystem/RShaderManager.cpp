@@ -9,6 +9,29 @@
 #include "RShaderManager.h"
 #include "D3DCommonPrivate.h"
 
+struct RShaderCompileOption
+{
+	EShaderType			Type;
+	std::string			Prefix;
+	const char*			ShaderTarget;
+	D3D_SHADER_MACRO	ShaderMacros[2];
+	int					MemberOffset;
+};
+
+namespace
+{
+	// Compile options for all shaders and their variations
+	RShaderCompileOption ShaderCompileOptions[] =
+	{
+		{ EShaderType::VertexShader,	"",				"vs_4_0", { nullptr, nullptr },								offsetof(RShader, VertexShader) },
+		{ EShaderType::VertexShader,	"Skinned",		"vs_4_0", { "USE_SKINNING",	  "1", nullptr, nullptr },		offsetof(RShader, VertexShader_Skinned) },
+		{ EShaderType::VertexShader,	"Instanced",	"vs_4_0", { "USE_INSTANCING", "1", nullptr, nullptr },		offsetof(RShader, VertexShader_Instanced) },
+		{ EShaderType::PixelShader,		"",				"ps_4_0", { nullptr, nullptr },								offsetof(RShader, PixelShader) },
+		{ EShaderType::PixelShader,		"Deferred",		"ps_4_0", { "USE_DEFERRED_SHADING", "1", nullptr, nullptr}, offsetof(RShader, PixelShader_Deferred) },
+		{ EShaderType::GeometryShader,	"",				"gs_4_0", { nullptr, nullptr },								offsetof(RShader, GeometryShader) },
+	};
+}
+
 const std::string RShaderManager::EmptyShaderName = "";
 
 bool RShader::operator==(const RShader& rhs) const
@@ -131,118 +154,8 @@ void RShaderManager::LoadShaders(const std::string& Path)
 				fin.read(pBuffer, fileSize);
 				fin.close();
 
-#if defined(DEBUG) || defined(_DEBUG)
-				int shaderCompileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#else
-				int shaderCompileFlag = 0;
-#endif
-				HRESULT hr = 0;
-				ComPtr<ID3DBlob> pShaderCode;
-				ComPtr<ID3DBlob> pErrorMsg;
-
 				RLog("Compiling shader %s\n", filename.c_str());
-
-				// Detect shader type by file name suffix
-				if (filename.find("_VS.hlsl") != std::string::npos)
-				{
-					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
-					{
-						GRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &Shader->VertexShader);
-#ifdef _DEBUG
-						Shader->VertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
-#endif
-					}
-					else
-					{
-						RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
-					}
-
-					if (strstr(pBuffer, "USE_SKINNING"))
-					{
-						filename = std::string("Skinned") + filename;
-
-						D3D_SHADER_MACRO skinnedShaderMacro[] = { "USE_SKINNING", "1", NULL, NULL };
-
-						if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), skinnedShaderMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
-						{
-							GRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &Shader->VertexShader_Skinned);
-#ifdef _DEBUG
-							Shader->VertexShader_Skinned->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
-#endif
-						}
-						else
-						{
-							RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
-						}
-					}
-					
-					if (strstr(pBuffer, "USE_INSTANCING"))
-					{
-						filename = std::string("Instanced") + filename;
-
-						D3D_SHADER_MACRO instancedShaderMacro[] = { "USE_INSTANCING", "1", NULL, NULL };
-
-						if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), instancedShaderMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
-						{
-							GRenderer.D3DDevice()->CreateVertexShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &Shader->VertexShader_Instanced);
-#ifdef _DEBUG
-							Shader->VertexShader_Instanced->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
-#endif
-						}
-						else
-						{
-							RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
-						}
-					}
-				}
-				else if (filename.find("_PS.hlsl") != std::string::npos)
-				{
-					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
-					{
-						GRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &Shader->PixelShader);
-#ifdef _DEBUG
-						Shader->PixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
-#endif
-					}
-					else
-					{
-						RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
-					}
-
-					if (strstr(pBuffer, "USE_DEFERRED_SHADING"))
-					{
-						filename = std::string("Deferred") + filename;
-
-						D3D_SHADER_MACRO deferredShaderMacro[] = { "USE_DEFERRED_SHADING", "1", NULL, NULL };
-
-						if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), deferredShaderMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
-						{
-							GRenderer.D3DDevice()->CreatePixelShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &Shader->PixelShader_Deferred);
-#ifdef _DEBUG
-							Shader->PixelShader_Deferred->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
-#endif
-						}
-						else
-						{
-							RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
-						}
-					}
-				}
-				else if (filename.find("_GS.hlsl") != std::string::npos)
-				{
-					if (SUCCEEDED(hr = D3DCompile(pBuffer, fileSize, filename.c_str(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "gs_4_0", shaderCompileFlag, 0, &pShaderCode, &pErrorMsg)))
-					{
-						GRenderer.D3DDevice()->CreateGeometryShader(pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), NULL, &Shader->GeometryShader);
-#ifdef _DEBUG
-						Shader->GeometryShader->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)filename.size(), filename.c_str());
-#endif
-					}
-					else
-					{
-						RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
-					}
-				}
-
+				CompileShader(filename, pBuffer, fileSize, Shader);
 				delete[] pBuffer;
 			}
 
@@ -345,4 +258,114 @@ const std::string& RShaderManager::GetShaderName(const RShader* shader) const
 	}
 
 	return EmptyShaderName;
+}
+
+void RShaderManager::CompileShader(const std::string& SourceName, const char* pBuffer, int BufferSize, RShader* Shader)
+{
+	HRESULT hr;
+	ComPtr<ID3DBlob> pShaderCode;
+	ComPtr<ID3DBlob> pErrorMsg;
+
+	EShaderType ShaderType = DetectShaderType(SourceName);
+	if (ShaderType == EShaderType::Unknown)
+	{
+		return;
+	}
+
+	for (int Index = 0; Index < ARRAYSIZE(ShaderCompileOptions); Index++)
+	{
+		const RShaderCompileOption& CompileOption = ShaderCompileOptions[Index];
+
+		if (ShaderType != CompileOption.Type)
+		{
+			continue;
+		}
+
+		if (!CompileOption.ShaderMacros[0].Name || strstr(pBuffer, CompileOption.ShaderMacros[0].Name))
+		{
+			std::string ActualSourceName = CompileOption.Prefix + SourceName;
+
+			if (SUCCEEDED(hr = D3DCompile(pBuffer, BufferSize, ActualSourceName.c_str(), CompileOption.ShaderMacros, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", CompileOption.ShaderTarget, GetShaderCompileFlag(), 0, &pShaderCode, &pErrorMsg)))
+			{
+				switch (ShaderType)
+				{
+				case EShaderType::VertexShader:
+					CreateVertexShader(ActualSourceName, pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), (ID3D11VertexShader**)((char*)Shader + CompileOption.MemberOffset));
+					break;
+
+				case EShaderType::PixelShader:
+					CreatePixelShader(ActualSourceName, pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), (ID3D11PixelShader**)((char*)Shader + CompileOption.MemberOffset));
+					break;
+
+				case EShaderType::GeometryShader:
+					CreateGeometryShader(ActualSourceName, pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), (ID3D11GeometryShader**)((char*)Shader + CompileOption.MemberOffset));
+					break;
+				}
+			}
+			else
+			{
+				RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
+			}
+		}
+	}
+}
+
+void RShaderManager::CreateVertexShader(const std::string& SourceName, const void* ShaderBytecode, SIZE_T BytecodeLength, ID3D11VertexShader** VertexShader)
+{
+	if (SUCCEEDED(GRenderer.D3DDevice()->CreateVertexShader(ShaderBytecode, BytecodeLength, NULL, VertexShader)))
+	{
+#ifdef _DEBUG
+		// Assign source file name to shader for debugging
+		(*VertexShader)->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)SourceName.size(), SourceName.c_str());
+#endif
+	}
+}
+
+void RShaderManager::CreatePixelShader(const std::string& SourceName, const void* ShaderBytecode, SIZE_T BytecodeLength, ID3D11PixelShader** PixelShader)
+{
+	if (SUCCEEDED(GRenderer.D3DDevice()->CreatePixelShader(ShaderBytecode, BytecodeLength, NULL, PixelShader)))
+	{
+#ifdef _DEBUG
+		// Assign source file name to shader for debugging
+		(*PixelShader)->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)SourceName.size(), SourceName.c_str());
+#endif
+	}
+}
+
+void RShaderManager::CreateGeometryShader(const std::string& SourceName, const void* ShaderBytecode, SIZE_T BytecodeLength, ID3D11GeometryShader** GeometryShader)
+{
+	if (SUCCEEDED(GRenderer.D3DDevice()->CreateGeometryShader(ShaderBytecode, BytecodeLength, NULL, GeometryShader)))
+	{
+#ifdef _DEBUG
+		// Assign source file name to shader for debugging
+		(*GeometryShader)->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)SourceName.size(), SourceName.c_str());
+#endif
+	}
+}
+
+EShaderType RShaderManager::DetectShaderType(const std::string& FileName) const
+{
+	if (FileName.find("_VS") != std::string::npos)
+	{
+		return EShaderType::VertexShader;
+	}
+	else if (FileName.find("_PS") != std::string::npos)
+	{
+		return EShaderType::PixelShader;
+	}
+	else if (FileName.find("_GS") != std::string::npos)
+	{
+		return EShaderType::GeometryShader;
+	}
+
+	return EShaderType::Unknown;
+}
+
+UINT RShaderManager::GetShaderCompileFlag() const
+{
+#if defined(DEBUG) || defined(_DEBUG)
+	return D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#else
+	return 0;
+#endif
 }
