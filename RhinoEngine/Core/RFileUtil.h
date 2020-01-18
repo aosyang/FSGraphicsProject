@@ -5,6 +5,15 @@
 //=============================================================================
 #pragma once
 
+// Result for comparing timestamps of two files
+enum class ETimestampComparison : UINT8
+{
+	InvalidFile,				// One or both files are invalid
+	EarlierFirst,				// The first file is earlier than the second
+	EarlierSecond,				// The second file is earlier than the first
+	Equal,						// Both files have the same timestamp
+};
+
 class RFileUtil
 {
 public:
@@ -22,6 +31,12 @@ public:
 
 	/// Check if a path exists
 	static bool CheckPathExists(const std::string& Path);
+
+	/// Create a directory
+	static bool CreateDirectory(const std::string& PathName);
+
+	/// Compare timestamps of two files
+	static ETimestampComparison CompareFileTimestamp(const std::string& First, const std::string& Second);
 
 	/// Push a new path as working path and store current one
 	static void PushWorkingPath(const std::string& NewPath);

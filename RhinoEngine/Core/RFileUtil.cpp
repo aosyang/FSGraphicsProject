@@ -85,6 +85,49 @@ bool RFileUtil::CheckPathExists(const std::string& Path)
 	return PathFileExistsA(Path.c_str()) == TRUE;
 }
 
+bool RFileUtil::CreateDirectory(const std::string& PathName)
+{
+	return CreateDirectoryA(PathName.c_str(), NULL) == TRUE;
+}
+
+ETimestampComparison RFileUtil::CompareFileTimestamp(const std::string& First, const std::string& Second)
+{
+	HANDLE hFirstFile = CreateFileA(First.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	if (hFirstFile == INVALID_HANDLE_VALUE)
+	{
+		return ETimestampComparison::InvalidFile;
+	}
+
+	HANDLE hSecondFile = CreateFileA(Second.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	if (hSecondFile == INVALID_HANDLE_VALUE)
+	{
+		CloseHandle(hFirstFile);
+		return ETimestampComparison::InvalidFile;
+	}
+
+	FILETIME FirstTimestamp, SecondTimestamp;
+	GetFileTime(hFirstFile, NULL, NULL, &FirstTimestamp);
+	GetFileTime(hSecondFile, NULL, NULL, &SecondTimestamp);
+
+	CloseHandle(hFirstFile);
+	CloseHandle(hSecondFile);
+
+	LONG Result = CompareFileTime(&FirstTimestamp, &SecondTimestamp);
+
+	if (Result == -1)
+	{
+		return ETimestampComparison::EarlierFirst;
+	}
+	else if (Result == 1)
+	{
+		return ETimestampComparison::EarlierSecond;
+	}
+	else
+	{
+		return ETimestampComparison::Equal;
+	}
+}
+
 void RFileUtil::PushWorkingPath(const std::string& NewPath)
 {
 	char pWorkingPath[1024];

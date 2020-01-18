@@ -74,22 +74,30 @@ RShaderManager::~RShaderManager()
 
 std::string RShaderManager::GetShaderRootPath()
 {
-	std::string Path("../Shaders");
-	if (PathFileExistsA(Path.c_str()) == FALSE)
+	static std::string RootPath;
+	if (RootPath.size() == 0)
 	{
-		Path = std::string("../") + Path;
-		if (PathFileExistsA(Path.c_str()) == FALSE)
+		std::string Path("../Shaders");
+		if (!RFileUtil::CheckPathExists(Path))
 		{
-			return RFileUtil::InvalidPath;
+			// Search a parent path for the shader folder
+			Path = std::string("../") + Path;
+			if (!RFileUtil::CheckPathExists(Path))
+			{
+				RootPath = RFileUtil::InvalidPath;
+				return RootPath;
+			}
 		}
+
+		RootPath = RFileUtil::GetFullPath(Path);
 	}
 
-	return RFileUtil::GetFullPath(Path);
+	return RootPath;
 }
 
 void RShaderManager::LoadShaders(const std::string& Path)
 {
-	if (PathFileExistsA(Path.c_str()) == FALSE)
+	if (RFileUtil::CheckPathExists(Path) == FALSE)
 	{
 		std::string FullPath = RFileUtil::GetFullPath(Path);
 		RLogError("ShaderManager: Path \'%s\' does not exist while loading shaders.\n", FullPath.c_str());
@@ -284,27 +292,50 @@ void RShaderManager::CompileShader(const std::string& SourceName, const char* pB
 		if (!CompileOption.ShaderMacros[0].Name || strstr(pBuffer, CompileOption.ShaderMacros[0].Name))
 		{
 			std::string ActualSourceName = CompileOption.Prefix + SourceName;
+			std::vector<char> ShaderCache;
 
-			if (SUCCEEDED(hr = D3DCompile(pBuffer, BufferSize, ActualSourceName.c_str(), CompileOption.ShaderMacros, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", CompileOption.ShaderTarget, GetShaderCompileFlag(), 0, &pShaderCode, &pErrorMsg)))
+			void* ShaderCodeBuffer = nullptr;
+			SIZE_T ShaderCodeSize;
+			bool bHasCacheFile;
+
+			if (bHasCacheFile = TryLoadShaderFromCache(ActualSourceName, SourceName, ShaderCache))
 			{
-				switch (ShaderType)
-				{
-				case EShaderType::VertexShader:
-					CreateVertexShader(ActualSourceName, pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), (ID3D11VertexShader**)((char*)Shader + CompileOption.MemberOffset));
-					break;
-
-				case EShaderType::PixelShader:
-					CreatePixelShader(ActualSourceName, pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), (ID3D11PixelShader**)((char*)Shader + CompileOption.MemberOffset));
-					break;
-
-				case EShaderType::GeometryShader:
-					CreateGeometryShader(ActualSourceName, pShaderCode->GetBufferPointer(), pShaderCode->GetBufferSize(), (ID3D11GeometryShader**)((char*)Shader + CompileOption.MemberOffset));
-					break;
-				}
+				ShaderCodeBuffer = ShaderCache.data();
+				ShaderCodeSize = ShaderCache.size();
 			}
 			else
 			{
-				RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
+				if (SUCCEEDED(hr = D3DCompile(pBuffer, BufferSize, ActualSourceName.c_str(), CompileOption.ShaderMacros, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", CompileOption.ShaderTarget, GetShaderCompileFlag(), 0, &pShaderCode, &pErrorMsg)))
+				{
+					ShaderCodeBuffer = pShaderCode->GetBufferPointer();
+					ShaderCodeSize = pShaderCode->GetBufferSize();
+				}
+				else
+				{
+					RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
+					continue;
+				}
+			}
+
+			switch (ShaderType)
+			{
+			case EShaderType::VertexShader:
+				CreateVertexShader(ActualSourceName, ShaderCodeBuffer, ShaderCodeSize, (ID3D11VertexShader**)((char*)Shader + CompileOption.MemberOffset));
+				break;
+
+			case EShaderType::PixelShader:
+				CreatePixelShader(ActualSourceName, ShaderCodeBuffer, ShaderCodeSize, (ID3D11PixelShader**)((char*)Shader + CompileOption.MemberOffset));
+				break;
+
+			case EShaderType::GeometryShader:
+				CreateGeometryShader(ActualSourceName, ShaderCodeBuffer, ShaderCodeSize, (ID3D11GeometryShader**)((char*)Shader + CompileOption.MemberOffset));
+				break;
+			}
+
+			if (!bHasCacheFile)
+			{
+				// Create a new cache for shader
+				SaveShaderCache(ActualSourceName, ShaderCodeBuffer, ShaderCodeSize);
 			}
 		}
 	}
@@ -341,6 +372,88 @@ void RShaderManager::CreateGeometryShader(const std::string& SourceName, const v
 		(*GeometryShader)->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)SourceName.size(), SourceName.c_str());
 #endif
 	}
+}
+
+bool RShaderManager::TryLoadShaderFromCache(const std::string& SourceName, const std::string& DiskFileName, std::vector<char>& OutBytecode)
+{
+	std::string ShaderCachePath = GetShaderCachePath() + MakeCacheFileName(SourceName);
+
+	if (RFileUtil::CheckPathExists(ShaderCachePath))
+	{
+		std::string ShaderFilePath = GetShaderRootPath() + "/" + DiskFileName;
+		ETimestampComparison Result = RFileUtil::CompareFileTimestamp(ShaderFilePath, ShaderCachePath);
+		if (Result == ETimestampComparison::EarlierSecond || Result == ETimestampComparison::InvalidFile)
+		{
+			// If shader file has been saved after cache file, regenerate the cache now.
+			return false;
+		}
+
+		// Load compiled shader from cache file
+		std::ifstream fin;
+		fin.open(ShaderCachePath.c_str(), std::ios::binary);
+
+		if (fin.is_open())
+		{
+			fin.seekg(0, std::ios::end);
+			int fileSize = (int)fin.tellg();
+			OutBytecode.resize(fileSize);
+
+			fin.seekg(0);
+			fin.read(OutBytecode.data(), fileSize);
+			fin.close();
+
+			if (OutBytecode.size() == 0)
+			{
+				return false;
+			}
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void RShaderManager::SaveShaderCache(const std::string& SourceName, const void* ShaderBytecode, SIZE_T BytecodeLength)
+{
+	std::string ShaderCachePath = GetShaderCachePath();
+
+	// Create the cache folder if it doesn't exist
+	if (!RFileUtil::CheckPathExists(ShaderCachePath))
+	{
+		if (!RFileUtil::CreateDirectory(ShaderCachePath))
+		{
+			return;
+		}
+	}
+
+	ShaderCachePath += MakeCacheFileName(SourceName);
+	std::ofstream fout;
+	fout.open(ShaderCachePath, std::ios::binary | std::ios::trunc);
+	if (fout.is_open())
+	{
+		fout.write((const char*)ShaderBytecode, BytecodeLength);
+		fout.close();
+		RLog("Shader cache is saved to: %s\n", ShaderCachePath.c_str());
+	}
+	else
+	{
+		RLogError("Failed to write to shader cache: %s\n", ShaderCachePath.c_str());
+	}
+}
+
+std::string RShaderManager::MakeCacheFileName(const std::string& SourceName) const
+{
+	std::string CacheFileName = RFileUtil::StripExtension(SourceName);
+	CacheFileName += "_";
+	CacheFileName += std::to_string(GetShaderCompileFlag());
+	CacheFileName += ".shadercache";
+	return CacheFileName;
+}
+
+std::string RShaderManager::GetShaderCachePath() const
+{
+	return RFileUtil::GetFullPath(GetShaderRootPath() + "/Cache/");
 }
 
 EShaderType RShaderManager::DetectShaderType(const std::string& FileName) const

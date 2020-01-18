@@ -34,6 +34,7 @@
 /lua5.3/x64/
 /Build/*
 !/Build/Readme.txt
+/Shaders/Cache/
 
 *.sdf
 *.suo

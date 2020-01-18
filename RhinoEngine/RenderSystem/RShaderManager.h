@@ -79,6 +79,18 @@ private:
 	void CreatePixelShader(const std::string& SourceName, const void* ShaderBytecode, SIZE_T BytecodeLength, ID3D11PixelShader** PixelShader);
 	void CreateGeometryShader(const std::string& SourceName, const void* ShaderBytecode, SIZE_T BytecodeLength, ID3D11GeometryShader** GeometryShader);
 
+	/// Load a shader from its cache file
+	bool TryLoadShaderFromCache(const std::string& SourceName, const std::string& DiskFileName, std::vector<char>& OutBytecode);
+
+	/// Save cache file for a shader to disk
+	void SaveShaderCache(const std::string& SourceName, const void* ShaderBytecode, SIZE_T BytecodeLength);
+
+	/// Generate cache file name for a shader file
+	std::string MakeCacheFileName(const std::string& SourceName) const;
+
+	/// Get the path of shader cache folder
+	std::string GetShaderCachePath() const;
+
 	/// Guess type of a shader by its file name
 	EShaderType DetectShaderType(const std::string& FileName) const;
 	UINT GetShaderCompileFlag() const;
