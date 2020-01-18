@@ -390,7 +390,7 @@ bool RShaderManager::TryLoadShaderFromCache(const std::string& SourceName, const
 
 		// Load compiled shader from cache file
 		std::ifstream fin;
-		fin.open(ShaderCachePath.c_str(), std::ios::binary);
+		fin.open(ShaderCachePath, std::ios::binary);
 
 		if (fin.is_open())
 		{

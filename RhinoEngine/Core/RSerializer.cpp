@@ -17,7 +17,7 @@ void RSerializer::Open(const std::string& filename, ESerializeMode mode)
 {
 	m_Mode = mode;
 
-	m_FileStream.open(filename.c_str(), (mode == ESerializeMode::Read ? std::ios::in : std::ios::out) | std::ios::binary);
+	m_FileStream.open(filename, (mode == ESerializeMode::Read ? std::ios::in : std::ios::out) | std::ios::binary);
 
 	if (!m_FileStream.is_open())
 		return;
