@@ -268,6 +268,19 @@ bool RMesh::TryLoadAsRmesh(bool bIsAsyncLoading)
 
 	const std::string BinaryMeshPath = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmesh");
 
+	// Binary mesh file doesn't exist, load fbx instead
+	if (!RFileUtil::CheckPathExists(BinaryMeshPath))
+	{
+		return false;
+	}
+
+	// Fbx is newer than binary mesh file, load fbx and regenerate binaries
+	ETimestampComparison Result = RFileUtil::CompareFileTimestamp(GetFileSystemPath(), BinaryMeshPath);
+	if (Result == ETimestampComparison::EarlierSecond && Result != ETimestampComparison::InvalidFile)
+	{
+		return false;
+	}
+
 	RSerializer serializer;
 	serializer.Open(BinaryMeshPath, ESerializeMode::Read);
 	if (!serializer.IsOpen())
