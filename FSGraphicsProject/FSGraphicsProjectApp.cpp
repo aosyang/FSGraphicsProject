@@ -746,7 +746,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 			ZeroMemory(&cbSkinned, sizeof(cbSkinned));
 		}
 
-		GDebugRenderer.DrawLine(nodePos, nodePos + worldOffset * 10, RColor(1.0f, 0.0f, 0.0f), RColor(1.0f, 0.0f, 0.0f));
+		GDebugRenderer.DrawLine(nodePos, nodePos + worldOffset * 10, RColor(1.0f, 0.0f, 0.0f));
 
 		RConstantBuffers::cbBoneMatrices.UpdateBufferData();
 		RConstantBuffers::cbBoneMatrices.BindBuffer();

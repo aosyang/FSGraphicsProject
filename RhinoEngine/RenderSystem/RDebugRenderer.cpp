@@ -30,30 +30,25 @@ void RDebugRenderer::Release()
 	TriangleBuffer.Release();
 }
 
-void RDebugRenderer::SetPrimitiveColor(const RColor& color)
-{
-	m_PrimitiveColor = color;
-}
-
 void RDebugRenderer::DrawLine(const RVec3& start, const RVec3& end, const RColor& color1, const RColor& color2)
 {
 	LineBuffer.AppendVertex(start, color1);
 	LineBuffer.AppendVertex(end, color2);
 }
 
-void RDebugRenderer::DrawAabb(const RAabb& aabb, const RColor& color)
+void RDebugRenderer::DrawBox(const RVec3& Dimensions, const RMatrix4& transform, const RColor& color /*= GDebugRenderer.GetPrimitiveColor()*/)
 {
 	RVec3 cornerPoints[] =
 	{
-		RVec3(aabb.pMin.X(), aabb.pMin.Y(), aabb.pMin.Z()),
-		RVec3(aabb.pMin.X(), aabb.pMin.Y(), aabb.pMax.Z()),
-		RVec3(aabb.pMin.X(), aabb.pMax.Y(), aabb.pMax.Z()),
-		RVec3(aabb.pMin.X(), aabb.pMax.Y(), aabb.pMin.Z()),
+		RVec3(-Dimensions.X(), -Dimensions.Y(), -Dimensions.Z()),
+		RVec3(-Dimensions.X(), -Dimensions.Y(),  Dimensions.Z()),
+		RVec3(-Dimensions.X(),  Dimensions.Y(),  Dimensions.Z()),
+		RVec3(-Dimensions.X(),  Dimensions.Y(), -Dimensions.Z()),
 
-		RVec3(aabb.pMax.X(), aabb.pMin.Y(), aabb.pMin.Z()),
-		RVec3(aabb.pMax.X(), aabb.pMin.Y(), aabb.pMax.Z()),
-		RVec3(aabb.pMax.X(), aabb.pMax.Y(), aabb.pMax.Z()),
-		RVec3(aabb.pMax.X(), aabb.pMax.Y(), aabb.pMin.Z()),
+		RVec3(Dimensions.X(), -Dimensions.Y(), -Dimensions.Z()),
+		RVec3(Dimensions.X(), -Dimensions.Y(),  Dimensions.Z()),
+		RVec3(Dimensions.X(),  Dimensions.Y(),  Dimensions.Z()),
+		RVec3(Dimensions.X(),  Dimensions.Y(), -Dimensions.Z()),
 	};
 
 	int wiredCubeIdx[] =
@@ -67,14 +62,19 @@ void RDebugRenderer::DrawAabb(const RAabb& aabb, const RColor& color)
 	{
 		RVertexType::PositionColor v =
 		{
-			RVec4(cornerPoints[wiredCubeIdx[i]]),
+			RVec4(cornerPoints[wiredCubeIdx[i]]) * transform,
 			color,
 		};
 		LineBuffer.AppendVertex(v);
 	}
 }
 
-void RDebugRenderer::DrawFrustum(const RFrustum& frustum, const RColor& color)
+void RDebugRenderer::DrawAabb(const RAabb& aabb, const RColor& color /*= GDebugRenderer.GetPrimitiveColor() */)
+{
+	DrawBox(aabb.GetLocalDimension(), RMatrix4::CreateTranslation(aabb.GetCenter()), color);
+}
+
+void RDebugRenderer::DrawFrustum(const RFrustum& frustum, const RColor& color /*= GDebugRenderer.GetPrimitiveColor() */)
 {
 	int wiredCubeIdx[] =
 	{
@@ -152,7 +152,7 @@ void RDebugRenderer::DrawSphere(const RSphere& Sphere, const RColor& color, int 
 	DrawSphere(Sphere.center, Sphere.radius, color, segment);
 }
 
-void RDebugRenderer::DrawTriangle(const RVec3& v0, const RVec3& v1, const RVec3& v2, const RColor& Color)
+void RDebugRenderer::DrawTriangle(const RVec3& v0, const RVec3& v1, const RVec3& v2, const RColor& Color /*= GDebugRenderer.GetPrimitiveColor() */)
 {
 	TriangleBuffer.AppendVertex({ RVec4(v0), Color });
 	TriangleBuffer.AppendVertex({ RVec4(v1), Color });

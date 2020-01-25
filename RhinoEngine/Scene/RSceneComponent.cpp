@@ -13,3 +13,8 @@ RSceneComponent::RSceneComponent(RSceneObject* InOwner)
 {
 
 }
+
+void RSceneComponent::NotifyComponentAdded()
+{
+	OnComponentAdded();
+}

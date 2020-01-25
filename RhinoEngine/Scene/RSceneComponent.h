@@ -26,10 +26,15 @@ public:
 	RSceneComponent(RSceneObject* InOwner);
 	virtual ~RSceneComponent() {}
 
+	void NotifyComponentAdded();
+
 	/// Get the scene object which is owning this component
 	RSceneObject* GetOwner() const;
 
 	virtual void Update(float DeltaTime) {}
+protected:
+	/// Callback when component is added to a scene object
+	virtual void OnComponentAdded() {}
 
 private:
 	/// The scene object owning this component

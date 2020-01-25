@@ -45,7 +45,7 @@ RTransform& RTransform::operator=(const RTransform& rhs)
 	return *this;
 }
 
-const RMatrix4& RTransform::GetMatrix()
+const RMatrix4& RTransform::GetMatrix() const
 {
 	if (bIsCachedMatrixDirty)
 	{
@@ -140,7 +140,7 @@ RTransform* RTransform::GetParent() const
 	return Parent;
 }
 
-void RTransform::NotifyChildrenMatricesChanged()
+void RTransform::NotifyChildrenMatricesChanged() const
 {
 	for (auto Iter : Children)
 	{

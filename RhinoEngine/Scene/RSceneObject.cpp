@@ -31,7 +31,7 @@ RTransform* RSceneObject::GetTransform()
 	return &m_NodeTransform;
 }
 
-const RMatrix4& RSceneObject::GetTransformMatrix()
+const RMatrix4& RSceneObject::GetTransformMatrix() const
 {
 	return m_NodeTransform.GetMatrix();
 }

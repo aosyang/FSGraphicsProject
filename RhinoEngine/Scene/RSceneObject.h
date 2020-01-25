@@ -62,7 +62,7 @@ public:
 	virtual RSceneObject* Clone() 			{ return nullptr; }
 
 	RTransform* GetTransform();
-	const RMatrix4& GetTransformMatrix();
+	const RMatrix4& GetTransformMatrix() const;
 
 	/// Set matrix as transform of scene object
 	void SetTransform(const RMatrix4& transform);
@@ -177,7 +177,11 @@ template<typename T>
 FORCEINLINE T* RSceneObject::AddNewComponent()
 {
 	SceneComponents.push_back(move(T::_CreateComponentUnique(this)));
-	return static_cast<T*>(SceneComponents.back().get());
+
+	RSceneComponent* NewComponent = SceneComponents.back().get();
+	NewComponent->NotifyComponentAdded();
+
+	return static_cast<T*>(NewComponent);
 }
 
 template<typename T>

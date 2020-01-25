@@ -9,6 +9,7 @@
 #include "Scene/RSceneManager.h"
 
 #include "Navigation/RNavigationSystem.h"
+#include "Physics/RPhysicsEngine.h"
 
 static TCHAR szWindowClass[] = _T("rhinoapp");
 
@@ -53,10 +54,19 @@ bool REngine::Initialize(HWND hWnd, int width, int height)
 		m_hWnd = hWnd;
 
 	if (!RInput.Initialize())
+	{
 		return false;
+	}
 
 	if (!GRenderer.Initialize(m_hWnd, width, height, true))
+	{
 		return false;
+	}
+
+	if (!GPhysicsEngine.Initialize())
+	{
+		return false;
+	}
 
 	// Initialize resource manager
 	RResourceManager::Instance().Initialize();
@@ -97,8 +107,8 @@ void REngine::Shutdown()
 	// Destroy resource manager
 	RResourceManager::Instance().Destroy();
 
+	GPhysicsEngine.Shutdown();
 	GRenderer.Shutdown();
-
 	RInput.Shutdown();
 
 	if (m_UseEngineRenderWindow)
@@ -174,6 +184,8 @@ void REngine::RunOneFrame(bool update_input)
 
 	// Update all registered scenes with their objects
 	GSceneManager.Update(m_Timer.DeltaTime());
+
+	GPhysicsEngine.Simulate(m_Timer.DeltaTime());
 
 	if (!m_bIsEditor)
 	{

@@ -50,6 +50,34 @@ bool FightingGameApp::Initialize()
 	//	obj->SetScript("UpdateObject");
 	//}
 
+	// Add static colliders to scene objects
+	auto SceneObjects = DefaultScene->EnumerateSceneObjects();
+	for (auto& SceneObject : SceneObjects)
+	{
+		if (SceneObject->CanCastTo<RSMeshObject>())
+		{
+			RRigidBodyComponent* RigidBody = SceneObject->AddNewComponent<RRigidBodyComponent>();
+			RigidBody->SetMovable(false);
+		}
+	}
+
+#if 0
+	// Create physics boxes
+	{
+		RMesh* CubeMesh = RResourceManager::Instance().LoadResource<RMesh>("/cube.fbx", EResourceLoadMode::Immediate);
+
+		for (int x = -10; x <= 10; x += 2)
+		{
+			for (int z = -10; z <= 10; z += 2)
+			{
+				RSMeshObject* BoxObject = DefaultScene->CreateMeshObject(CubeMesh);
+				BoxObject->SetPosition(RVec3(200.0f * x, 1000, 200.0f * z));
+				BoxObject->AddNewComponent<RRigidBodyComponent>();
+			}
+		}
+	}
+#endif
+
 	for (int i = 0; i < MaxNumPlayers; i++)
 	{
 		m_Player[i] = DefaultScene->CreateSceneObjectOfType<PlayerControllerBase>();

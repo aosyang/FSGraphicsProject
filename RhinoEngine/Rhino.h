@@ -74,6 +74,9 @@ class RResourceBase;
 #include "RenderSystem/RRenderMeshComponent.h"
 #include "RenderSystem/RPostProcessorManager.h"
 
+#include "Physics/RPhysicsEngine.h"
+#include "Physics/RRigidBodyComponent.h"
+
 #include "Core/RDebugMenu.h"
 #include "Core/REngine.h"
 

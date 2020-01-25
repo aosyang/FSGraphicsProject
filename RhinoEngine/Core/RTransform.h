@@ -30,7 +30,7 @@ public:
 	const RQuat& GetRotation() const { return Rotation; }
 	const RVec3& GetScale() const { return Scale; }
 
-	const RMatrix4& GetMatrix();
+	const RMatrix4& GetMatrix() const;
 	bool FromMatrix4(const RMatrix4& Matrix);
 
 	RVec3 GetForward() const;
@@ -48,7 +48,7 @@ public:
 	RTransform* GetParent() const;
 
 	bool IsCacheDirty() const;
-	void NotifyChildrenMatricesChanged();
+	void NotifyChildrenMatricesChanged() const;
 
 	static RTransform Combine(RTransform* lhs, RTransform* rhs);
 
@@ -62,8 +62,8 @@ private:
 	RTransform*	Parent;
 	std::vector<RTransform*>	Children;
 
-	RMatrix4	CachedMatrix;
-	bool		bIsCachedMatrixDirty;
+	mutable RMatrix4	CachedMatrix;
+	mutable bool		bIsCachedMatrixDirty;
 };
 
 FORCEINLINE RVec3 RTransform::GetForward() const
