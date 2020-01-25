@@ -61,23 +61,6 @@ bool FightingGameApp::Initialize()
 		}
 	}
 
-#if 0
-	// Create physics boxes
-	{
-		RMesh* CubeMesh = RResourceManager::Instance().LoadResource<RMesh>("/cube.fbx", EResourceLoadMode::Immediate);
-
-		for (int x = -10; x <= 10; x += 2)
-		{
-			for (int z = -10; z <= 10; z += 2)
-			{
-				RSMeshObject* BoxObject = DefaultScene->CreateMeshObject(CubeMesh);
-				BoxObject->SetPosition(RVec3(200.0f * x, 1000, 200.0f * z));
-				BoxObject->AddNewComponent<RRigidBodyComponent>();
-			}
-		}
-	}
-#endif
-
 	for (int i = 0; i < MaxNumPlayers; i++)
 	{
 		m_Player[i] = DefaultScene->CreateSceneObjectOfType<PlayerControllerBase>();
@@ -176,6 +159,11 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		{
 			CurrentPlayerIndex = 1;
 		}
+	}
+
+	if (RInput.GetBufferedKeyState('X') == EBufferedKeyState::Pressed)
+	{
+		CreatePhysicsBoxes();
 	}
 
 	UpdateUserInput();
@@ -477,6 +465,42 @@ void FightingGameApp::UpdateCameraPosition(float DeltaTime)
 	actualCamVec = RVec3::Lerp(actualCamVec, camVec, 5.0f * DeltaTime);
 	m_Camera->SetPosition(actualCamVec + lookTarget);
 	m_Camera->LookAt(lookTarget);
+}
+
+void FightingGameApp::CreatePhysicsBoxes()
+{
+	static std::vector<RSMeshObject*> BoxList;
+
+	for (auto Iter : BoxList)
+	{
+		Iter->Destroy();
+	}
+	BoxList.clear();
+
+	// Create physics boxes
+	{
+		RMesh* CubeMesh = RResourceManager::Instance().LoadResource<RMesh>("/cube.fbx", EResourceLoadMode::Immediate);
+		RScene* DefaultScene = GSceneManager.DefaultScene();
+
+		for (int x = -10; x <= 10; x += 2)
+		{
+			for (int z = -10; z <= 10; z += 2)
+			{
+				RSMeshObject* BoxObject = DefaultScene->CreateMeshObject(CubeMesh);
+				BoxObject->SetPosition(RVec3(200.0f * x, 1000, 200.0f * z));
+
+				float scale_x = RMath::RandRangedF(0.5f, 4.0f);
+				float scale_y = RMath::RandRangedF(0.5f, 4.0f);
+				float scale_z = RMath::RandRangedF(0.5f, 4.0f);
+
+				BoxObject->SetScale(RVec3(scale_x, scale_y, scale_z));
+				BoxObject->SetRotation(RQuat::Euler(0.0f, RMath::RadianToDegree(45.0f), 0.0f));
+				BoxObject->AddNewComponent<RRigidBodyComponent>();
+
+				BoxList.push_back(BoxObject);
+			}
+		}
+	}
 }
 
 void FightingGameApp::ResetPlayerPosition(FTGPlayerController* PlayerController)

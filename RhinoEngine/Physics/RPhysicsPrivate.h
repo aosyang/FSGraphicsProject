@@ -32,6 +32,7 @@ struct RPhysicsObjectContext
 {
 	RPhysicsObjectContext()
 		: BoxHalfSize(-0.5f, -0.5f, -0.5f)
+		, BoxOffset(0.0f, 0.0f, 0.0f)
 		, Mass(-1)
 	{}
 
@@ -39,6 +40,7 @@ struct RPhysicsObjectContext
 	std::unique_ptr<btMotionState> MotionState;
 	std::unique_ptr<btRigidBody> Body;
 	RVec3 BoxHalfSize;
+	RVec3 BoxOffset;
 	float Mass;
 };
 

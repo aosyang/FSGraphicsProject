@@ -61,6 +61,9 @@ public:
 	/// Make a copy of scene object
 	virtual RSceneObject* Clone() 			{ return nullptr; }
 
+	/// Destroy the object
+	void Destroy();
+
 	RTransform* GetTransform();
 	const RMatrix4& GetTransformMatrix() const;
 

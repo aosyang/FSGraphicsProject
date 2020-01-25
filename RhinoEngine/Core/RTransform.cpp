@@ -80,13 +80,13 @@ void RTransform::Translate(const RVec3& t, ETransformSpace Space)
 	}
 	else  // Space == ETransformSpace::Local
 	{
-		Position += Rotation * t;
+		Position += Rotation * (t * Scale);
 	}
 
 	bIsCachedMatrixDirty = true;
 }
 
-RVec3 RTransform::GetTranslatedVector(const RVec3& t, ETransformSpace Space)
+RVec3 RTransform::GetTranslatedVector(const RVec3& t, ETransformSpace Space) const
 {
 	if (Space == ETransformSpace::World)
 	{
@@ -94,7 +94,7 @@ RVec3 RTransform::GetTranslatedVector(const RVec3& t, ETransformSpace Space)
 	}
 
 	// Space == ETransformSpace::Local
-	return Position + Rotation * t;
+	return Position + Rotation * (t * Scale);
 }
 
 void RTransform::LookAt(const RVec3& target, const RVec3& world_up /*= RVec3(0, 1, 0)*/)

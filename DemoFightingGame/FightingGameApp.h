@@ -33,6 +33,8 @@ private:
 
 	void UpdateCameraPosition(float DeltaTime);
 
+	void CreatePhysicsBoxes();
+
 	void ResetPlayerPosition(FTGPlayerController* PlayerController);
 
 	PlayerControllerBase* GetCurrentPlayer() const;

@@ -26,6 +26,12 @@ void RSceneObject::Release()
 	SceneComponents.clear();
 }
 
+void RSceneObject::Destroy()
+{
+	assert(m_Scene);
+	m_Scene->DestroyObject(this);
+}
+
 RTransform* RSceneObject::GetTransform()
 {
 	return &m_NodeTransform;

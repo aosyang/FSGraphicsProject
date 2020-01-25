@@ -44,13 +44,14 @@ void RRigidBodyComponent::Update(float DeltaTime)
 			PhysicsTransform.setIdentity();
 		}
 
-		Owner->SetPosition(btVec3ToRVec3(PhysicsTransform.getOrigin()));
-		Owner->SetRotation(btQuatToRQuat(PhysicsTransform.getRotation()));
-
-		// Debug draw physics object
-		RTransform Transform = *Owner->GetTransform();
-		Transform.SetScale(RVec3(1.0f, 1.0f, 1.0f));
+		// Half box size already contains scale transform so the transform has scales of 1 for debug rendering
+		RTransform Transform(btVec3ToRVec3(PhysicsTransform.getOrigin()), btQuatToRQuat(PhysicsTransform.getRotation()));
 		GDebugRenderer.DrawBox(Context->BoxHalfSize * 2.0f, Transform.GetMatrix());
+
+		// Now we apply the scale to the object and translate it back by its offset to the box center
+		Transform.SetScale(Owner->GetScale());
+		Transform.Translate(-Context->BoxOffset, ETransformSpace::Local);
+		Owner->SetTransform(Transform);
 	}
 }
 
@@ -86,17 +87,19 @@ void RRigidBodyComponent::OnComponentAdded()
 		if (Mesh)
 		{
 			Context->BoxHalfSize = Mesh->GetLocalSpaceAabb().GetLocalDimension() * Owner->GetScale() / 2.0f;
+			Context->BoxOffset = Mesh->GetLocalSpaceAabb().GetCenter();
 		}
 		else
 		{
 			Context->BoxHalfSize = Owner->GetAabb().GetLocalDimension() / 2.0f;
+			Context->BoxOffset = Owner->GetAabb().GetCenter() - Owner->GetWorldPosition();
 		}
 
 		btVector3 BoxHalfSize(RVec3TobtVec3(Context->BoxHalfSize));
 		Context->Shape = std::make_unique<btBoxShape>(BoxHalfSize);
 
 		btTransform InitTransform;
-		InitTransform.setOrigin(RVec3TobtVec3(Owner->GetWorldPosition()));
+		InitTransform.setOrigin(RVec3TobtVec3(Owner->GetWorldPosition() + Owner->GetRotation() * Context->BoxOffset));
 		InitTransform.setRotation(RQuatTobtQuat(Owner->GetRotation()));
 
 		btScalar Mass(1.0f);
