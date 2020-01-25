@@ -235,6 +235,18 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 
 	GRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState[SamplerState_ShadowDepthComparison]);
 
+	// Enable antialiasing for line rendering
+	D3D11_RASTERIZER_DESC RasterizerDesc;
+	ZeroMemory(&RasterizerDesc, sizeof(RasterizerDesc));
+	RasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	RasterizerDesc.CullMode = D3D11_CULL_BACK;
+	RasterizerDesc.DepthClipEnable = TRUE;
+	RasterizerDesc.AntialiasedLineEnable = TRUE;
+
+	ComPtr<ID3D11RasterizerState> RasterizerState;
+	GRenderer.D3DDevice()->CreateRasterizerState(&RasterizerDesc, RasterizerState.GetAddressOf());
+	GRenderer.D3DImmediateContext()->RSSetState(RasterizerState.Get());
+
 	RConstantBuffers::Initialize();
 
 	return true;
