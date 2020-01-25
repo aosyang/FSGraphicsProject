@@ -50,7 +50,7 @@ void RRigidBodyComponent::Update(float DeltaTime)
 		// Debug draw physics object
 		RTransform Transform = *Owner->GetTransform();
 		Transform.SetScale(RVec3(1.0f, 1.0f, 1.0f));
-		GDebugRenderer.DrawBox(Context->BoxSize, Transform.GetMatrix());
+		GDebugRenderer.DrawBox(Context->BoxHalfSize * 2.0f, Transform.GetMatrix());
 	}
 }
 
@@ -85,15 +85,15 @@ void RRigidBodyComponent::OnComponentAdded()
 		RMesh* Mesh = MeshObject ? MeshObject->GetMesh() : nullptr;
 		if (Mesh)
 		{
-			Context->BoxSize = Mesh->GetLocalSpaceAabb().GetLocalDimension() * Owner->GetScale() / 2.0f;
+			Context->BoxHalfSize = Mesh->GetLocalSpaceAabb().GetLocalDimension() * Owner->GetScale() / 2.0f;
 		}
 		else
 		{
-			Context->BoxSize = Owner->GetAabb().GetLocalDimension() / 2.0f;
+			Context->BoxHalfSize = Owner->GetAabb().GetLocalDimension() / 2.0f;
 		}
 
-		btVector3 BoxSize(RVec3TobtVec3(Context->BoxSize));
-		Context->Shape = std::make_unique<btBoxShape>(BoxSize);
+		btVector3 BoxHalfSize(RVec3TobtVec3(Context->BoxHalfSize));
+		Context->Shape = std::make_unique<btBoxShape>(BoxHalfSize);
 
 		btTransform InitTransform;
 		InitTransform.setOrigin(RVec3TobtVec3(Owner->GetWorldPosition()));

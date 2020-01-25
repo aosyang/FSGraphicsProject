@@ -31,14 +31,14 @@ struct RPhysicsEngineContext
 struct RPhysicsObjectContext
 {
 	RPhysicsObjectContext()
-		: BoxSize(-1, -1, -1)
+		: BoxHalfSize(-0.5f, -0.5f, -0.5f)
 		, Mass(-1)
 	{}
 
 	std::unique_ptr<btCollisionShape> Shape;
 	std::unique_ptr<btMotionState> MotionState;
 	std::unique_ptr<btRigidBody> Body;
-	RVec3 BoxSize;
+	RVec3 BoxHalfSize;
 	float Mass;
 };
 

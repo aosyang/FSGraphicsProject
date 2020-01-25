@@ -50,8 +50,8 @@ const RMatrix4& RTransform::GetMatrix() const
 	if (bIsCachedMatrixDirty)
 	{
 		CachedMatrix = RMatrix4::IDENTITY;
-		RMatrix3 rot_scale = Rotation.GetRotationMatrix() * RMatrix3::CreateScale(Scale);
-		CachedMatrix.SetRotation(rot_scale);
+		const RMatrix3 ScaleRotation = RMatrix3::CreateScale(Scale) * Rotation.GetRotationMatrix();
+		CachedMatrix.SetRotation(ScaleRotation);
 		CachedMatrix.SetTranslation(Position);
 
 		if (Parent)

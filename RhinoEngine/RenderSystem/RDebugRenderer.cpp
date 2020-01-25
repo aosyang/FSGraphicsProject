@@ -40,15 +40,15 @@ void RDebugRenderer::DrawBox(const RVec3& Dimensions, const RMatrix4& transform,
 {
 	RVec3 cornerPoints[] =
 	{
-		RVec3(-Dimensions.X(), -Dimensions.Y(), -Dimensions.Z()),
-		RVec3(-Dimensions.X(), -Dimensions.Y(),  Dimensions.Z()),
-		RVec3(-Dimensions.X(),  Dimensions.Y(),  Dimensions.Z()),
-		RVec3(-Dimensions.X(),  Dimensions.Y(), -Dimensions.Z()),
+		RVec3(-Dimensions.X(), -Dimensions.Y(), -Dimensions.Z()) / 2,
+		RVec3(-Dimensions.X(), -Dimensions.Y(),  Dimensions.Z()) / 2,
+		RVec3(-Dimensions.X(),  Dimensions.Y(),  Dimensions.Z()) / 2,
+		RVec3(-Dimensions.X(),  Dimensions.Y(), -Dimensions.Z()) / 2,
 
-		RVec3(Dimensions.X(), -Dimensions.Y(), -Dimensions.Z()),
-		RVec3(Dimensions.X(), -Dimensions.Y(),  Dimensions.Z()),
-		RVec3(Dimensions.X(),  Dimensions.Y(),  Dimensions.Z()),
-		RVec3(Dimensions.X(),  Dimensions.Y(), -Dimensions.Z()),
+		RVec3(Dimensions.X(), -Dimensions.Y(), -Dimensions.Z()) / 2,
+		RVec3(Dimensions.X(), -Dimensions.Y(),  Dimensions.Z()) / 2,
+		RVec3(Dimensions.X(),  Dimensions.Y(),  Dimensions.Z()) / 2,
+		RVec3(Dimensions.X(),  Dimensions.Y(), -Dimensions.Z()) / 2,
 	};
 
 	int wiredCubeIdx[] =
