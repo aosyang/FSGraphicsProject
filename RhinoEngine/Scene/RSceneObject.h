@@ -117,6 +117,9 @@ public:
 	/// Detach from parent object
 	void DetachFromParent();
 
+	void IncreaseInternalTransformUpdateCounter();
+	void DecreaseInternalTransformUpdateCounter();
+
 	/// Get world space AABB for scene object
 	virtual const RAabb& GetAabb() { return RAabb::Default; }
 	virtual void Draw() {}
@@ -162,6 +165,11 @@ protected:
 	/// Update all components on this scene object
 	void UpdateComponents(float DeltaTime);
 
+	void NotifyTransformModified();
+
+	/// Notify derived classes about transform being changed by setting position, rotation or scale directly
+	virtual void OnTransformModified();
+
 protected:
 	std::string			m_Name;
 	RTransform		m_NodeTransform;
@@ -170,11 +178,28 @@ protected:
 	std::string			m_Script;
 	std::vector<std::string>	m_ParsedScript;
 
+	bool			bTransformModified;
+
 	int				m_Flags;
+
+	/// If > 0, changing transform will not result in calling OnTransformModified
+	int				InternalTransformUpdateCounter;
 
 	/// Components of this scene object
 	std::vector<std::unique_ptr<RSceneComponent>>	SceneComponents;
 };
+
+/// Helper class for updating transform of scene objects without triggering OnTransformModified
+class RScopeInternalTransformUpdate
+{
+public:
+	RScopeInternalTransformUpdate(RSceneObject* InSceneObject);
+	~RScopeInternalTransformUpdate();
+
+private:
+	RSceneObject* SceneObject;
+};
+
 
 template<typename T>
 FORCEINLINE T* RSceneObject::AddNewComponent()

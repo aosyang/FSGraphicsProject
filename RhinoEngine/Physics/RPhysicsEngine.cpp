@@ -20,9 +20,9 @@ bool RPhysicsEngine::Initialize()
 {
 	Context->CollisionConfiguration = std::make_unique<btDefaultCollisionConfiguration>();
 	Context->Dispatcher = std::make_unique<btCollisionDispatcher>(Context->CollisionConfiguration.get());
-	Context->OverlappingPairCache = std::make_unique<btDbvtBroadphase>();
+	Context->Broadphase = std::make_unique<btDbvtBroadphase>();
 	Context->Solver = std::make_unique<btSequentialImpulseConstraintSolver>();
-	Context->DynamicWorld = std::make_unique<btDiscreteDynamicsWorld>(Context->Dispatcher.get(), Context->OverlappingPairCache.get(), Context->Solver.get(), Context->CollisionConfiguration.get());
+	Context->DynamicWorld = std::make_unique<btDiscreteDynamicsWorld>(Context->Dispatcher.get(), Context->Broadphase.get(), Context->Solver.get(), Context->CollisionConfiguration.get());
 
 	Context->DynamicWorld->setGravity(btVector3(0, -1000, 0));
 

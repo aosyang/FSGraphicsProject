@@ -8,21 +8,63 @@
 
 #include "Navigation/RAINavigationComponent.h"
 
+// For definition of RPhysicsEngineContext
+// TODO: Should keep this header private. Maybe move implementation to the engine
+#include "Physics/RPhysicsPrivate.h"
+
+#include "BulletCollision/CollisionDispatch/btGhostObject.h"
+
 std::list<RSceneObject*> PlayerControllerBase::ActivePlayerControllers;
 
 PlayerControllerBase::PlayerControllerBase(const RConstructingParams& Params)
 	: Base(Params)
 	, StairOffset(0.0f, 20.0f, 0.0f)
 	, m_MovementInput(0.0f, 0.0f, 0.0f)
+	, CapsuleRadius(40.0f)
+	, CapsuleHeight(70.0f)
 	, m_Rotation(0.0f)
 	, m_StateMachine(this)
 {
 	ActivePlayerControllers.push_back(this);
+
+	GhostObject = std::make_unique<btPairCachingGhostObject>();
+	CapsuleShape = std::make_unique<btCapsuleShape>(CapsuleRadius, CapsuleHeight);
+	KinematicCharacterController = std::make_unique<btKinematicCharacterController>(GhostObject.get(), CapsuleShape.get(), 30.0f, btVector3(0.0f, 1.0f, 0.0f));
+	KinematicCharacterController->setGravity(btVector3(0, -980 * 3, 0));
+	KinematicCharacterController->setFallSpeed(55000);
+
+	GhostObject->setCollisionShape(CapsuleShape.get());
+	GhostObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
+
+	// Set up pair callback for default collision behavior on character controller
+	GhostPairCallback = std::make_unique<btGhostPairCallback>();
+	GPhysicsEngine.GetContext()->Broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(GhostPairCallback.get());
+
+	GPhysicsEngine.GetContext()->DynamicWorld->addCollisionObject(GhostObject.get(), btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
+	GPhysicsEngine.GetContext()->DynamicWorld->addAction(KinematicCharacterController.get());
 }
 
 PlayerControllerBase::~PlayerControllerBase()
 {
+	GPhysicsEngine.GetContext()->DynamicWorld->removeAction(KinematicCharacterController.get());
+	GPhysicsEngine.GetContext()->DynamicWorld->removeCollisionObject(GhostObject.get());
+
 	ActivePlayerControllers.remove(this);
+}
+
+void PlayerControllerBase::Update(float DeltaTime)
+{
+	Base::Update(DeltaTime);
+
+	const btTransform& PhysicsTransform = GhostObject->getWorldTransform();
+	RVec3 Position = btVec3ToRVec3(PhysicsTransform.getOrigin());
+	RQuat Rotation = btQuatToRQuat(PhysicsTransform.getRotation());
+	GDebugRenderer.DrawCapsule(Position, CapsuleHeight, CapsuleRadius, RColor::Yellow);
+
+	RScopeInternalTransformUpdate InternalTransformUpdate(this);
+
+	SetPosition(Position - GetHalfCapsuleOffset());
+	SetRotation(Rotation);
 }
 
 void PlayerControllerBase::InitAssets(const std::string& MeshResourcePath)
@@ -67,6 +109,9 @@ float LerpDegreeAngle(float from, float to, float t)
 
 void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 moveVec)
 {
+	KinematicCharacterController->setWalkDirection(RVec3TobtVec3(moveVec));
+
+#if 0
 	bool bCanMovePlayer = CanMovePlayerWithInput();
 	if (bCanMovePlayer)
 	{
@@ -102,6 +147,7 @@ void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 moveVec)
 	Translate(worldMoveVec + StairOffset, ETransformSpace::World);
 
 	SetRotation(RQuat::Euler(0.0f, DEG_TO_RAD(m_Rotation), 0.0f));
+#endif	// if 0
 }
 
 void PlayerControllerBase::PostUpdate(float DeltaTime)
@@ -230,6 +276,22 @@ void PlayerControllerBase::Reset()
 	}
 
 	OnPlayerReset.Execute();
+}
+
+void PlayerControllerBase::OnTransformModified()
+{
+	// If SetPosition/SetRotation is called on a player controller, update transform for physics object
+	btTransform PhysicsTransform;
+	PhysicsTransform.setIdentity();
+	PhysicsTransform.setOrigin(RVec3TobtVec3(GetWorldPosition() + GetHalfCapsuleOffset()));
+	PhysicsTransform.setRotation(RQuatTobtQuat(GetRotation()));
+
+	GhostObject->setWorldTransform(PhysicsTransform);
+}
+
+RVec3 PlayerControllerBase::GetHalfCapsuleOffset() const
+{
+	return RVec3(0, CapsuleHeight / 2 + CapsuleRadius, 0);
 }
 
 bool PlayerControllerBase::CanMovePlayerWithInput() const

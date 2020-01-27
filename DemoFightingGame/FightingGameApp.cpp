@@ -76,7 +76,7 @@ bool FightingGameApp::Initialize()
 			{
 				if (i == 0)
 				{
-					m_Player[i]->SetPosition(RVec3(-1795, 40, -200));
+					m_Player[i]->SetPosition(RVec3(-1795, 200, -200));
 				}
 
 				if (i == 1)
@@ -493,7 +493,7 @@ void FightingGameApp::CreatePhysicsBoxes()
 				float scale_y = RMath::RandRangedF(0.5f, 4.0f);
 				float scale_z = RMath::RandRangedF(0.5f, 4.0f);
 
-				BoxObject->SetScale(RVec3(scale_x, scale_y, scale_z));
+				BoxObject->SetScale(RVec3(scale_x, scale_y, scale_x));
 				BoxObject->SetRotation(RQuat::Euler(0.0f, RMath::RadianToDegree(45.0f), 0.0f));
 				BoxObject->AddNewComponent<RRigidBodyComponent>();
 

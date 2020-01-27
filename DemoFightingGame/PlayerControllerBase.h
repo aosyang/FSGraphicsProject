@@ -9,12 +9,17 @@
 #include "Rhino.h"
 
 #include "FTGPlayerStateMachine.h"
+#include "btBulletDynamicsCommon.h"
+#include "BulletDynamics/Character/btKinematicCharacterController.h"
+#include "BulletCollision/CollisionDispatch/btGhostObject.h"
 
 class PlayerControllerBase : public RSMeshObject
 {
 	DECLARE_SCENE_OBJECT(PlayerControllerBase, RSMeshObject);
 public:
 	~PlayerControllerBase();
+
+	virtual void Update(float DeltaTime) override;
 
 	/// Initialize assets used by the player controller
 	void InitAssets(const std::string& MeshResourcePath);
@@ -64,7 +69,11 @@ public:
 protected:
 	PlayerControllerBase(const RConstructingParams& Params);
 
+	virtual void OnTransformModified() override;
+
 private:
+	RVec3 GetHalfCapsuleOffset() const;
+
 	/// Can the player move with user input
 	bool CanMovePlayerWithInput() const;
 
@@ -72,6 +81,14 @@ private:
 	const RVec3				StairOffset;
 
 	RVec3					m_MovementInput;
+
+	float	CapsuleRadius;
+	float	CapsuleHeight;
+
+	std::unique_ptr<btPairCachingGhostObject> GhostObject;
+	std::unique_ptr<btCapsuleShape> CapsuleShape;
+	std::unique_ptr<btKinematicCharacterController> KinematicCharacterController;
+	std::unique_ptr<btGhostPairCallback> GhostPairCallback;
 
 	float					m_Rotation;
 	RVec3					m_RootOffset;

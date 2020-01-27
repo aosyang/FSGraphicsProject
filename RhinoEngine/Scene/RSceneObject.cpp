@@ -11,7 +11,9 @@
 RSceneObject::RSceneObject(const RConstructingParams& Params)
 	: m_Scene(Params.Scene)
 	, m_bVisible(true)
+	, bTransformModified(true)
 	, m_Flags(Params.Flags)
+	, InternalTransformUpdateCounter(0)
 {
 	GScriptSystem.RegisterScriptableObject(this);
 }
@@ -54,16 +56,20 @@ void RSceneObject::SetTransform(const RMatrix4& transform)
 		m_NodeTransform.SetRotation(Rotation);
 		m_NodeTransform.SetScale(Scale);
 	}
+
+	NotifyTransformModified();
 }
 
 void RSceneObject::SetRotation(const RQuat& quat)
 {
 	m_NodeTransform.SetRotation(quat);
+	NotifyTransformModified();
 }
 
 void RSceneObject::SetPosition(const RVec3& pos)
 {
 	m_NodeTransform.SetPosition(pos);
+	NotifyTransformModified();
 }
 
 RVec3 RSceneObject::GetPosition() const
@@ -101,6 +107,7 @@ const RQuat RSceneObject::GetRotation() const
 void RSceneObject::SetScale(const RVec3& scale)
 {
 	m_NodeTransform.SetScale(scale);
+	NotifyTransformModified();
 }
 
 const RVec3& RSceneObject::GetScale() const
@@ -128,11 +135,28 @@ void RSceneObject::DetachFromParent()
 	m_NodeTransform.Detach();
 }
 
+void RSceneObject::IncreaseInternalTransformUpdateCounter()
+{
+	InternalTransformUpdateCounter++;
+}
+
+void RSceneObject::DecreaseInternalTransformUpdateCounter()
+{
+	InternalTransformUpdateCounter--;
+	assert(InternalTransformUpdateCounter >= 0);
+}
+
 void RSceneObject::Update(float DeltaTime)
 {
 	if (m_NodeTransform.IsCacheDirty())
 	{
 		m_NodeTransform.NotifyChildrenMatricesChanged();
+	}
+
+	if (bTransformModified)
+	{
+		OnTransformModified();
+		bTransformModified = false;
 	}
 
 	UpdateComponents(DeltaTime);
@@ -165,4 +189,28 @@ void RSceneObject::UpdateComponents(float DeltaTime)
 	{
 		SceneComponent->Update(DeltaTime);
 	}
+}
+
+void RSceneObject::NotifyTransformModified()
+{
+	if (InternalTransformUpdateCounter == 0)
+	{
+		bTransformModified = true;
+	}
+}
+
+void RSceneObject::OnTransformModified()
+{
+}
+
+RScopeInternalTransformUpdate::RScopeInternalTransformUpdate(RSceneObject* InSceneObject)
+	: SceneObject(InSceneObject)
+{
+	assert(SceneObject != nullptr);
+	SceneObject->IncreaseInternalTransformUpdateCounter();
+}
+
+RScopeInternalTransformUpdate::~RScopeInternalTransformUpdate()
+{
+	SceneObject->DecreaseInternalTransformUpdateCounter();
 }

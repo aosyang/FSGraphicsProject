@@ -19,7 +19,7 @@ struct RPhysicsEngineContext
 	std::unique_ptr<btCollisionDispatcher> Dispatcher;
 
 	// The broadphase
-	std::unique_ptr<btBroadphaseInterface> OverlappingPairCache;
+	std::unique_ptr<btBroadphaseInterface> Broadphase;
 
 	// The default constraint solver
 	std::unique_ptr<btSequentialImpulseConstraintSolver> Solver;

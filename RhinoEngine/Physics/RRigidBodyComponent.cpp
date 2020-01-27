@@ -34,6 +34,8 @@ void RRigidBodyComponent::Update(float DeltaTime)
 	RSceneObject* Owner = GetOwner();
 	if (Owner)
 	{
+		RScopeInternalTransformUpdate InternalTransformUpdate(Owner);
+
 		btTransform PhysicsTransform;
 		if (Context->Body && Context->MotionState)
 		{

@@ -31,6 +31,8 @@ public:
 	void DrawSphere(const RVec3& center, float radius, const RColor& color, int segment = 12);
 	void DrawSphere(const RSphere& Sphere, const RColor& color, int segment = 12);
 
+	void DrawCapsule(const RVec3& Center, float Height, float Radius, const RColor& Color = GDebugRenderer.GetPrimitiveColor(), int Segment = 12);
+
 	void DrawTriangle(const RVec3& v0, const RVec3& v1, const RVec3& v2, const RColor& Color = GDebugRenderer.GetPrimitiveColor());
 
 	void SetPrimitiveColor(const RColor& color);
@@ -45,6 +47,8 @@ public:
 protected:
 	RDebugRenderer();
 	~RDebugRenderer();
+
+	void DrawHemisphereRange(const RVec3 Center, float Radius, float Start, float End, const RColor& Color = GDebugRenderer.GetPrimitiveColor(), int Segment = 12);
 
 private:
 	RColor									m_PrimitiveColor;
