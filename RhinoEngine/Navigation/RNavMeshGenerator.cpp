@@ -187,7 +187,7 @@ RNavMeshGenerator::~RNavMeshGenerator()
 	RInput.UnbindKeyStateEvents(VK_OEM_6, EBufferedKeyState::Pressed);
 }
 
-void RNavMeshGenerator::Build(const RScene* Scene, RNavMeshData& OutNavMeshData)
+void RNavMeshGenerator::Build(const RScene* Scene, RNavMeshData& OutNavMeshData, INavMeshCellDetector& CellDetector)
 {
 	RLog("Initalizing navmesh generator from static level meshes.\n");
 
@@ -214,7 +214,7 @@ void RNavMeshGenerator::Build(const RScene* Scene, RNavMeshData& OutNavMeshData)
 		// Allocate heightfield cells by x-z grid
 		Heightfield.Resize(CellNumX, CellNumZ);
 
-		GenerateHeightfieldColumns(SceneObjects);
+		GenerateHeightfieldColumns(CellDetector);
 		GenerateOpenSpanNeighborData();
 		GenerateDistanceField();
 		GenerateRegions();
@@ -288,7 +288,7 @@ void RNavMeshGenerator::DebugRender() const
 	//DebugDrawSpans();
 }
 
-void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObject*>& SceneObjects)
+void RNavMeshGenerator::GenerateHeightfieldColumns(INavMeshCellDetector& CellDetector)
 {
 	for (int x = 0; x < CellNumX; x++)
 	{
@@ -314,7 +314,7 @@ void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObjec
 				CellBounds.pMin = CellCenter - CollisionDimension;
 
 				// Has any overlaps with scene meshes?
-				bool bIsSolidCell = TestCellOverlappingWithScene(CellBounds, SceneObjects);
+				bool bIsSolidCell = CellDetector.IsCellVacant(CellBounds);
 
 				if (bIsSolidCell)
 				{
@@ -332,7 +332,7 @@ void RNavMeshGenerator::GenerateHeightfieldColumns(const std::vector<RSceneObjec
 						Span.CellRowEnd = y - 1;
 
 						// Detect if top of the solid span is traversable
-						Span.bTraversable = TestCellTraversability(CellBounds, SceneObjects, 4);
+						Span.bTraversable = CellDetector.IsCellTraversable(CellBounds);
 
 						Column.SolidSpans.push_back(Span);
 					}

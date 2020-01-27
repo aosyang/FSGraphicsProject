@@ -9,6 +9,7 @@
 #include "RHeightfieldData.h"
 #include "RVoxelizerDataType.h"
 #include "RNavMeshData.h"
+#include "RNavMeshCellDetector.h"
 
 #include <vector>
 #include <set>
@@ -41,7 +42,7 @@ public:
 	~RNavMeshGenerator();
 
 	// Build the navmesh for a scene
-	void Build(const RScene* Scene, RNavMeshData& OutNavMeshData);
+	void Build(const RScene* Scene, RNavMeshData& OutNavMeshData, INavMeshCellDetector& CellDetector);
 
 	// Draw debug geometries for the navmesh generator
 	void DebugRender() const;
@@ -55,7 +56,7 @@ public:
 	static const GridCoord	NeighborOffset[];
 
 private:
-	void GenerateHeightfieldColumns(const std::vector<RSceneObject*>& SceneObjects);
+	void GenerateHeightfieldColumns(INavMeshCellDetector& CellDetector);
 
 	// Test if a cell is colliding with any objects in the scene
 	bool TestCellOverlappingWithScene(const RAabb& CellBounds, const std::vector<RSceneObject*>& SceneObjects);

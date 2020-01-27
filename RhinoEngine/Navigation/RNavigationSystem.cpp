@@ -18,9 +18,9 @@ bool RNavigationSystem::Initialize()
 	return true;
 }
 
-void RNavigationSystem::BuildNavMesh(const RScene* Scene)
+void RNavigationSystem::BuildNavMesh(const RScene* Scene, INavMeshCellDetector& CellDetector /*= RDefaultNavMeshCellDetector()*/)
 {
-	NavMeshGenerator.Build(Scene, NavMeshData);
+	NavMeshGenerator.Build(Scene, NavMeshData, CellDetector);
 
 	//QueryStart = RVec3(1500, 50, 10);
 	//QueryGoal = RVec3(-1500, 50, 10);

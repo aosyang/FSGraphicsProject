@@ -34,8 +34,19 @@ bool FightingGameApp::Initialize()
 
 	DefaultScene->Initialize();
 	DefaultScene->LoadFromFile("/TestArena.rmap");
-	
-	GNavigationSystem.BuildNavMesh(DefaultScene);
+
+	// Add static colliders to scene objects
+	auto SceneObjects = DefaultScene->EnumerateSceneObjects();
+	for (auto& SceneObject : SceneObjects)
+	{
+		if (SceneObject->CanCastTo<RSMeshObject>())
+		{
+			RRigidBodyComponent* RigidBody = SceneObject->AddNewComponent<RRigidBodyComponent>();
+			RigidBody->SetMovable(false);
+		}
+	}
+
+	GNavigationSystem.BuildNavMesh(DefaultScene, RPhysicsNavMeshCellDetector());
 
 	m_ShadowMap.Initialize(1024, 1024);
 	m_Camera = DefaultScene->CreateSceneObjectOfType<RCamera>();
@@ -49,17 +60,6 @@ bool FightingGameApp::Initialize()
 	//	RSceneObject* obj = DefaultScene->GetSceneObjects()[i];
 	//	obj->SetScript("UpdateObject");
 	//}
-
-	// Add static colliders to scene objects
-	auto SceneObjects = DefaultScene->EnumerateSceneObjects();
-	for (auto& SceneObject : SceneObjects)
-	{
-		if (SceneObject->CanCastTo<RSMeshObject>())
-		{
-			RRigidBodyComponent* RigidBody = SceneObject->AddNewComponent<RRigidBodyComponent>();
-			RigidBody->SetMovable(false);
-		}
-	}
 
 	for (int i = 0; i < MaxNumPlayers; i++)
 	{
