@@ -8,8 +8,13 @@
 #include "RShadowMap.h"
 
 RShadowMap::RShadowMap()
-	: m_RenderTargetBuffer(nullptr), m_RenderTargetView(nullptr), m_RenderTargetSRV(nullptr),
-	  m_DepthBuffer(nullptr), m_DepthView(nullptr), m_bNeedUpdateFrustum(true)
+	: m_RenderTargetBuffer(nullptr)
+	, m_RenderTargetView(nullptr)
+	, m_RenderTargetSRV(nullptr)
+	, m_DepthBuffer(nullptr)
+	, m_DepthView(nullptr)
+	, m_RenderTargetDepthSRV(nullptr)
+	, m_bNeedUpdateFrustum(true)
 {
 	m_ViewMatrix = RMatrix4::IDENTITY;
 	m_ProjMatrix = RMatrix4::IDENTITY;

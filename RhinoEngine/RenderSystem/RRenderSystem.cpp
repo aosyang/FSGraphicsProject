@@ -91,25 +91,46 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 
 	if (FAILED(hr))
 	{
-		TCHAR* szErrMsg;
-
-		if (FormatMessage(
-			FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-			NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPTSTR)&szErrMsg, 0, NULL) != 0)
+		// D3D11 SDK layers are not present while creating a debug device. Try creating a device without debugging features.
+		if (hr == DXGI_ERROR_SDK_COMPONENT_MISSING)
 		{
-			TCHAR buffer[1024];
-			_snwprintf_s(buffer, sizeof(buffer) / sizeof(TCHAR), 1024, L"Failed to create D3D11 device: %s", szErrMsg);
+			createDeviceFlags = 0;
 
-			MessageBox(0, buffer, 0, MB_ICONERROR);
-
-			LocalFree(szErrMsg);
+			hr = D3D11CreateDevice(
+				vAdapters[bestAdapterIndex],
+				D3D_DRIVER_TYPE_UNKNOWN,
+				0,
+				createDeviceFlags,
+				0, 0,
+				D3D11_SDK_VERSION,
+				&m_pD3DDevice,
+				&featureLevel,
+				&m_pD3DImmediateContext);
 		}
-		else
+		
+		if (FAILED(hr))
 		{
-			MessageBox(0, L"Failed to create D3D11 device: Unknown error.", 0, MB_ICONERROR);
+			TCHAR* szErrMsg;
+
+			if (FormatMessage(
+				FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+				NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				(LPTSTR)&szErrMsg, 0, NULL) != 0)
+			{
+				TCHAR buffer[1024];
+				_snwprintf_s(buffer, sizeof(buffer) / sizeof(TCHAR), 1024, L"Failed to create D3D11 device: %s", szErrMsg);
+
+				MessageBox(0, buffer, 0, MB_ICONERROR);
+
+				LocalFree(szErrMsg);
+			}
+			else
+			{
+				MessageBox(0, L"Failed to create D3D11 device: Unknown error.", 0, MB_ICONERROR);
+			}
+
+			return false;
 		}
-		return false;
 	}
 
 #if _DEBUG
