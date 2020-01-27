@@ -16,8 +16,8 @@ class INavMeshCellDetector
 public:
 	virtual ~INavMeshCellDetector() {}
 
-	/// Test if space of the cell is empty
-	virtual bool IsCellVacant(const RAabb& CellBounds) { return false; }
+	/// Test if space of the cell is overlapping with scene geometries
+	virtual bool IsCellOccupied(const RAabb& CellBounds) { return false; }
 
 	/// Test if a cell is traversable
 	virtual bool IsCellTraversable(const RAabb& CellBounds) { return false; }
@@ -29,7 +29,7 @@ class RDefaultNavMeshCellDetector : public INavMeshCellDetector
 public:
 	RDefaultNavMeshCellDetector(int InNumSubdivides = 4);
 
-	virtual bool IsCellVacant(const RAabb& CellBounds) override;
+	virtual bool IsCellOccupied(const RAabb& CellBounds) override;
 	virtual bool IsCellTraversable(const RAabb& CellBounds) override;
 
 private:
@@ -43,7 +43,7 @@ class RPhysicsNavMeshCellDetector : public INavMeshCellDetector
 public:
 	RPhysicsNavMeshCellDetector();
 
-	virtual bool IsCellVacant(const RAabb& CellBounds) override;
+	virtual bool IsCellOccupied(const RAabb& CellBounds) override;
 	virtual bool IsCellTraversable(const RAabb& CellBounds) override;
 
 private:

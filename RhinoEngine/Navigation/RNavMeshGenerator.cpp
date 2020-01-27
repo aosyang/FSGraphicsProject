@@ -314,7 +314,7 @@ void RNavMeshGenerator::GenerateHeightfieldColumns(INavMeshCellDetector& CellDet
 				CellBounds.pMin = CellCenter - CollisionDimension;
 
 				// Has any overlaps with scene meshes?
-				bool bIsSolidCell = CellDetector.IsCellVacant(CellBounds);
+				bool bIsSolidCell = CellDetector.IsCellOccupied(CellBounds);
 
 				if (bIsSolidCell)
 				{

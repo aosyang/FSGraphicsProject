@@ -21,7 +21,7 @@ RDefaultNavMeshCellDetector::RDefaultNavMeshCellDetector(int InNumSubdivides /*=
 	SceneObjects = GSceneManager.DefaultScene()->EnumerateSceneObjects();
 }
 
-bool RDefaultNavMeshCellDetector::IsCellVacant(const RAabb& CellBounds)
+bool RDefaultNavMeshCellDetector::IsCellOccupied(const RAabb& CellBounds)
 {
 	for (auto& SceneObj : SceneObjects)
 	{
@@ -69,7 +69,7 @@ bool RDefaultNavMeshCellDetector::IsCellTraversable(const RAabb& CellBounds)
 				CellBounds.pMin.Z() + (z + 1) * StepZ);
 
 			RAabb Bounds(Min, Max);
-			if (!IsCellVacant(Bounds))
+			if (!IsCellOccupied(Bounds))
 			{
 				return false;
 			}
@@ -101,7 +101,7 @@ RPhysicsNavMeshCellDetector::RPhysicsNavMeshCellDetector()
 	GhostObject->setCollisionShape(BoxShape.get());
 }
 
-bool RPhysicsNavMeshCellDetector::IsCellVacant(const RAabb& CellBounds)
+bool RPhysicsNavMeshCellDetector::IsCellOccupied(const RAabb& CellBounds)
 {
 	if (GhostObject->getCollisionShape())
 	{
@@ -119,7 +119,7 @@ bool RPhysicsNavMeshCellDetector::IsCellVacant(const RAabb& CellBounds)
 	CellContactResultCallback ContactResult;
 
 	GPhysicsEngine.GetContext()->DynamicWorld->contactTest(GhostObject.get(), ContactResult);
-	return !ContactResult.bHasContacts;
+	return ContactResult.bHasContacts;
 }
 
 bool RPhysicsNavMeshCellDetector::IsCellTraversable(const RAabb& CellBounds)
