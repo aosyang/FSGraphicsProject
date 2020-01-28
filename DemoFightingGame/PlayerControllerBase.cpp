@@ -59,6 +59,8 @@ void PlayerControllerBase::Update(float DeltaTime)
 	const btTransform& PhysicsTransform = GhostObject->getWorldTransform();
 	RVec3 Position = btVec3ToRVec3(PhysicsTransform.getOrigin());
 	RQuat Rotation = btQuatToRQuat(PhysicsTransform.getRotation());
+
+	// Debug draw character capsule
 	//GDebugRenderer.DrawCapsule(Position, CapsuleHeight, CapsuleRadius, RColor::Yellow, 8);
 
 	RScopeInternalTransformUpdate InternalTransformUpdate(this);
@@ -78,7 +80,9 @@ void PlayerControllerBase::InitAssets(const std::string& MeshResourcePath)
 void PlayerControllerBase::UpdateController(float DeltaTime)
 {
 	PreUpdate(DeltaTime);
-	UpdateMovement(DeltaTime, m_MovementInput * DeltaTime);
+
+	// Note: Bullet physics requires a fixed input vector for character movements
+	UpdateMovement(DeltaTime, m_MovementInput / 60.0f);
 	PostUpdate(DeltaTime);
 }
 
@@ -107,14 +111,14 @@ float LerpDegreeAngle(float from, float to, float t)
 	return from + (to - from) * RMath::Clamp(t, 0.0f, 1.0f);
 }
 
-void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 moveVec)
+void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 MoveVec)
 {
-	KinematicCharacterController->setWalkDirection(RVec3TobtVec3(moveVec));
+	KinematicCharacterController->setWalkDirection(RVec3TobtVec3(MoveVec));
 
 	bool bCanMovePlayer = CanMovePlayerWithInput();
 	if (bCanMovePlayer)
 	{
-		RVec3 PlannarMoveVector = moveVec;
+		RVec3 PlannarMoveVector = MoveVec;
 		PlannarMoveVector.SetY(0.0f);
 
 		if (PlannarMoveVector.SquaredMagitude() > 0.0f)

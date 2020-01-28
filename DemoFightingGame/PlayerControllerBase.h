@@ -27,7 +27,7 @@ public:
 	void UpdateController(float DeltaTime);
 
 	void PreUpdate(float DeltaTime);
-	void UpdateMovement(float DeltaTime, const RVec3 moveVec);
+	void UpdateMovement(float DeltaTime, const RVec3 MoveVec);
 	void PostUpdate(float DeltaTime);
 
 	const RVec3& GetRootOffset() const;
