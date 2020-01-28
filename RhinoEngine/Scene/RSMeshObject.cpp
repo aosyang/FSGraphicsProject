@@ -92,7 +92,7 @@ void RSMeshObject::SaveMaterialsToFile()
 	SetupMaterialsFromMeshResource();
 
 	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
-	doc->InsertEndChild(doc->NewComment((std::string("Mesh path: ") + m_Mesh->GetFileSystemPath()).c_str()));
+	doc->InsertEndChild(doc->NewComment((std::string("Mesh path: ") + m_Mesh->GetAssetPath()).c_str()));
 
 	tinyxml2::XMLElement* elem_mat = doc->NewElement("Material");
 

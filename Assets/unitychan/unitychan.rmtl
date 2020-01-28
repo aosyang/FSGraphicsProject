@@ -1,90 +1,95 @@
-<Material Mesh="/unitychan/unitychan.fbx">
+<!--Mesh path: /unitychan/unitychan.fbx-->
+<Material>
     <MeshElement Name="head_back" Shader="Lighting">
-        <Texture Slot="0">/unitychan/face_00.dds</Texture>
+        <Texture Slot="0">/unitychan/face_00.DDS</Texture>
     </MeshElement>
     <MeshElement Name="eye_base_old" Shader="Lighting">
-        <Texture Slot="0">/unitychan/eyeline_00.dds</Texture>
+        <Texture Slot="0">/unitychan/eyeline_00.DDS</Texture>
     </MeshElement>
     <MeshElement Name="eye_L_old" Shader="Lighting">
-        <Texture Slot="0">/unitychan/eye_iris_L_00.dds</Texture>
+        <Texture Slot="0">/unitychan/eye_iris_L_00.DDS</Texture>
     </MeshElement>
     <MeshElement Name="eye_R_old" Shader="Lighting">
-        <Texture Slot="0">/unitychan/eye_iris_R_00.dds</Texture>
+        <Texture Slot="0">/unitychan/eye_iris_R_00.DDS</Texture>
     </MeshElement>
     <MeshElement Name="MTH_DEF" Shader="Lighting">
-        <Texture Slot="0">/unitychan/face_00.dds</Texture>
+        <Texture Slot="0">/unitychan/face_00.DDS</Texture>
     </MeshElement>
-    <MeshElement Name="EL_DEF" Shader="Default"/>
-    <MeshElement Name="BLW_DEF" Shader="Default"/>
+    <MeshElement Name="EL_DEF" Shader="Lighting">
+        <Texture Slot="0">/unitychan/eyeline_00.DDS</Texture>
+    </MeshElement>
+    <MeshElement Name="BLW_DEF" Shader="Lighting">
+        <Texture Slot="0">/unitychan/eyeline_00.DDS</Texture>
+    </MeshElement>
     <MeshElement Name="tail" Shader="BumpLighting">
-        <Texture Slot="0">/unitychan/hair_01.dds</Texture>
-        <Texture Slot="1">/unitychan/hair_01_NRM.dds</Texture>
-        <Texture Slot="2">/unitychan/hair_01_SPEC.dds</Texture>
+        <Texture Slot="0">/unitychan/hair_01.DDS</Texture>
+        <Texture Slot="1">/unitychan/hair_01_NRM.DDS</Texture>
+        <Texture Slot="2">/unitychan/hair_01_SPEC.DDS</Texture>
     </MeshElement>
     <MeshElement Name="hair_frontside" Shader="BumpLighting">
-        <Texture Slot="0">/unitychan/hair_01.dds</Texture>
-        <Texture Slot="1">/unitychan/hair_01_NRM.dds</Texture>
-        <Texture Slot="2">/unitychan/hair_01_SPEC.dds</Texture>
+        <Texture Slot="0">/unitychan/hair_01.DDS</Texture>
+        <Texture Slot="1">/unitychan/hair_01_NRM.DDS</Texture>
+        <Texture Slot="2">/unitychan/hair_01_SPEC.DDS</Texture>
     </MeshElement>
     <MeshElement Name="hair_front" Shader="BumpLighting">
-        <Texture Slot="0">/unitychan/hair_01.dds</Texture>
-        <Texture Slot="1">/unitychan/hair_01_NRM.dds</Texture>
-        <Texture Slot="2">/unitychan/hair_01_SPEC.dds</Texture>
+        <Texture Slot="0">/unitychan/hair_01.DDS</Texture>
+        <Texture Slot="1">/unitychan/hair_01_NRM.DDS</Texture>
+        <Texture Slot="2">/unitychan/hair_01_SPEC.DDS</Texture>
     </MeshElement>
     <MeshElement Name="tail_bottom" Shader="BumpLighting">
-        <Texture Slot="0">/unitychan/hair_01.dds</Texture>
-        <Texture Slot="1">/unitychan/hair_01_NRM.dds</Texture>
-        <Texture Slot="2">/unitychan/hair_01_SPEC.dds</Texture>
+        <Texture Slot="0">/unitychan/hair_01.DDS</Texture>
+        <Texture Slot="1">/unitychan/hair_01_NRM.DDS</Texture>
+        <Texture Slot="2">/unitychan/hair_01_SPEC.DDS</Texture>
     </MeshElement>
     <MeshElement Name="hair_accce" Shader="BumpLighting">
-        <Texture Slot="0">/unitychan/body_01.dds</Texture>
-        <Texture Slot="1">/unitychan/body_01_NRM.dds</Texture>
-        <Texture Slot="2">/unitychan/body_01_SPEC.dds</Texture>
+        <Texture Slot="0">/unitychan/body_01.DDS</Texture>
+        <Texture Slot="1">/unitychan/body_01_NRM.DDS</Texture>
+        <Texture Slot="2">/unitychan/body_01_SPEC.DDS</Texture>
     </MeshElement>
     <MeshElement Name="skin" Shader="Lighting">
-        <Texture Slot="0">/unitychan/skin_01.dds</Texture>
+        <Texture Slot="0">/unitychan/skin_01.DDS</Texture>
     </MeshElement>
     <MeshElement Name="uwagi" Shader="BumpLighting">
-        <Texture Slot="0">/unitychan/body_01.dds</Texture>
-        <Texture Slot="1">/unitychan/body_01_NRM.dds</Texture>
-        <Texture Slot="2">/unitychan/body_01_SPEC.dds</Texture>
+        <Texture Slot="0">/unitychan/body_01.DDS</Texture>
+        <Texture Slot="1">/unitychan/body_01_NRM.DDS</Texture>
+        <Texture Slot="2">/unitychan/body_01_SPEC.DDS</Texture>
     </MeshElement>
     <MeshElement Name="uwagi_BK" Shader="BumpLighting">
-        <Texture Slot="0">/unitychan/body_01.dds</Texture>
-        <Texture Slot="1">/unitychan/body_01_NRM.dds</Texture>
-        <Texture Slot="2">/unitychan/body_01_SPEC.dds</Texture>
+        <Texture Slot="0">/unitychan/body_01.DDS</Texture>
+        <Texture Slot="1">/unitychan/body_01_NRM.DDS</Texture>
+        <Texture Slot="2">/unitychan/body_01_SPEC.DDS</Texture>
     </MeshElement>
     <MeshElement Name="Shirts" Shader="BumpLighting">
-        <Texture Slot="0">/unitychan/body_01.dds</Texture>
-        <Texture Slot="1">/unitychan/body_01_NRM.dds</Texture>
-        <Texture Slot="2">/unitychan/body_01_SPEC.dds</Texture>
+        <Texture Slot="0">/unitychan/body_01.DDS</Texture>
+        <Texture Slot="1">/unitychan/body_01_NRM.DDS</Texture>
+        <Texture Slot="2">/unitychan/body_01_SPEC.DDS</Texture>
     </MeshElement>
     <MeshElement Name="shirts_sode" Shader="BumpLighting">
-        <Texture Slot="0">/unitychan/body_01.dds</Texture>
-        <Texture Slot="1">/unitychan/body_01_NRM.dds</Texture>
-        <Texture Slot="2">/unitychan/body_01_SPEC.dds</Texture>
+        <Texture Slot="0">/unitychan/body_01.DDS</Texture>
+        <Texture Slot="1">/unitychan/body_01_NRM.DDS</Texture>
+        <Texture Slot="2">/unitychan/body_01_SPEC.DDS</Texture>
     </MeshElement>
     <MeshElement Name="shirts_sode_BK" Shader="BumpLighting">
-        <Texture Slot="0">/unitychan/body_01.dds</Texture>
-        <Texture Slot="1">/unitychan/body_01_NRM.dds</Texture>
-        <Texture Slot="2">/unitychan/body_01_SPEC.dds</Texture>
+        <Texture Slot="0">/unitychan/body_01.DDS</Texture>
+        <Texture Slot="1">/unitychan/body_01_NRM.DDS</Texture>
+        <Texture Slot="2">/unitychan/body_01_SPEC.DDS</Texture>
     </MeshElement>
     <MeshElement Name="button" Shader="BumpLighting">
-        <Texture Slot="0">/unitychan/body_01.dds</Texture>
-        <Texture Slot="1">/unitychan/body_01_NRM.dds</Texture>
-        <Texture Slot="2">/unitychan/body_01_SPEC.dds</Texture>
+        <Texture Slot="0">/unitychan/body_01.DDS</Texture>
+        <Texture Slot="1">/unitychan/body_01_NRM.DDS</Texture>
+        <Texture Slot="2">/unitychan/body_01_SPEC.DDS</Texture>
     </MeshElement>
     <MeshElement Name="hairband" Shader="BumpLighting">
-        <Texture Slot="0">/unitychan/body_01.dds</Texture>
-        <Texture Slot="1">/unitychan/body_01_NRM.dds</Texture>
-        <Texture Slot="2">/unitychan/body_01_SPEC.dds</Texture>
+        <Texture Slot="0">/unitychan/body_01.DDS</Texture>
+        <Texture Slot="1">/unitychan/body_01_NRM.DDS</Texture>
+        <Texture Slot="2">/unitychan/body_01_SPEC.DDS</Texture>
     </MeshElement>
     <MeshElement Name="cheek" Shader="Lighting">
-        <Texture Slot="0">/unitychan/cheek_00.dds</Texture>
+        <Texture Slot="0">/unitychan/cheek_00.DDS</Texture>
     </MeshElement>
     <MeshElement Name="Leg" Shader="BumpLighting">
-        <Texture Slot="0">/unitychan/body_01.dds</Texture>
-        <Texture Slot="1">/unitychan/body_01_NRM.dds</Texture>
-        <Texture Slot="2">/unitychan/body_01_SPEC.dds</Texture>
+        <Texture Slot="0">/unitychan/body_01.DDS</Texture>
+        <Texture Slot="1">/unitychan/body_01_NRM.DDS</Texture>
+        <Texture Slot="2">/unitychan/body_01_SPEC.DDS</Texture>
     </MeshElement>
 </Material>
