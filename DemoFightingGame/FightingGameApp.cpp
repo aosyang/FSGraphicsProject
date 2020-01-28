@@ -219,7 +219,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 	UpdateCameraPosition(timer.DeltaTime());
 
-	//GNavigationSystem.DebugRender();
+	//GNavigationSystem.DebugRender(NavMeshDebug_DrawNavMesh);
 	if (MaxNumPlayers >= 2)
 	{
 		GNavigationSystem.DebugSetPathQueryPoints(m_Player[0]->GetPosition(), m_Player[1]->GetPosition());

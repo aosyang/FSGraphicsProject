@@ -10,6 +10,17 @@
 #include "RNavMeshData.h"
 #include "RNavMeshDebugger.h"
 
+enum ENavMeshDebugFlag
+{
+	NavMeshDebug_DrawNavMesh	= 1 << 0,
+	NavMeshDebug_DrawRegions	= 1 << 1,
+	NavMeshDebug_DrawFunnel		= 1 << 2,
+	NavMeshDebug_DrawSpans		= 1 << 3,
+	NavMeshDebug_DrawPathQuery	= 1 << 4,
+
+	DrawAll = NavMeshDebug_DrawNavMesh | NavMeshDebug_DrawRegions | NavMeshDebug_DrawSpans | NavMeshDebug_DrawPathQuery,
+};
+
 class RNavigationSystem : public RSingleton<RNavigationSystem>
 {
 	friend class RSingleton<RNavigationSystem>;
@@ -25,7 +36,7 @@ public:
 	RNavMeshDebugger& GetDebugger();
 	const RNavMeshDebugger& GetDebugger() const;
 
-	void DebugRender() const;
+	void DebugRender(int DebugFlags) const;
 
 	void DebugProjectPointToNavmesh(const RVec3& Point) const;
 	void DebugSetPathQueryPoints(const RVec3& Start, const RVec3& Goal);

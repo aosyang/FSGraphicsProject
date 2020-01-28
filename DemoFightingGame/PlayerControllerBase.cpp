@@ -59,7 +59,7 @@ void PlayerControllerBase::Update(float DeltaTime)
 	const btTransform& PhysicsTransform = GhostObject->getWorldTransform();
 	RVec3 Position = btVec3ToRVec3(PhysicsTransform.getOrigin());
 	RQuat Rotation = btQuatToRQuat(PhysicsTransform.getRotation());
-	GDebugRenderer.DrawCapsule(Position, CapsuleHeight, CapsuleRadius, RColor::Yellow);
+	//GDebugRenderer.DrawCapsule(Position, CapsuleHeight, CapsuleRadius, RColor::Yellow, 8);
 
 	RScopeInternalTransformUpdate InternalTransformUpdate(this);
 
@@ -111,7 +111,6 @@ void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 moveVec)
 {
 	KinematicCharacterController->setWalkDirection(RVec3TobtVec3(moveVec));
 
-#if 0
 	bool bCanMovePlayer = CanMovePlayerWithInput();
 	if (bCanMovePlayer)
 	{
@@ -131,6 +130,11 @@ void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 moveVec)
 		}
 	}
 
+	btTransform PhysicsTransform = GhostObject->getWorldTransform();
+	PhysicsTransform.setRotation(RQuatTobtQuat(RQuat::Euler(0.0f, DEG_TO_RAD(m_Rotation), 0.0f)));
+	GhostObject->setWorldTransform(PhysicsTransform);
+
+#if 0
 	RAabb playerAabb = GetMovementCollisionShape();
 	playerAabb.pMin += StairOffset;
 	playerAabb.pMax += StairOffset;

@@ -122,7 +122,7 @@ bool RPhysicsNavMeshCellDetector::IsCellOccupied(const RAabb& CellBounds)
 	return ContactResult.bHasContacts;
 }
 
-bool RPhysicsNavMeshCellDetector::IsCellTraversable(const RAabb& CellBounds)
-{
-	return true;
-}
+//bool RPhysicsNavMeshCellDetector::IsCellTraversable(const RAabb& CellBounds)
+//{
+//	return true;
+//}

@@ -45,7 +45,7 @@ public:
 	void Build(const RScene* Scene, RNavMeshData& OutNavMeshData, INavMeshCellDetector& CellDetector);
 
 	// Draw debug geometries for the navmesh generator
-	void DebugRender() const;
+	void DebugRender(int DebugFlags) const;
 
 	HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key);
 	const HeightfieldOpenSpan& GetOpenSpanByKey(const OpenSpanKey& Key) const;

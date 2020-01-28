@@ -56,7 +56,8 @@ void AIBehavior_Roamer::Update(float DeltaTime)
 	if (AINavigationComponent->GetNavState() == EAINavState::Idle)
 	{
 		// Try finding a valid destination for pathfinding
-		const int NumMaxAttempts = 10;
+		const int NumMaxAttempts = 5;
+		bool bStartedMove = false;
 		for (int i = 0; i < NumMaxAttempts; i++)
 		{
 			MoveTarget = RVec3(
@@ -67,8 +68,14 @@ void AIBehavior_Roamer::Update(float DeltaTime)
 
 			if (AINavigationComponent->RequestMoveTo(MoveTarget))
 			{
+				bStartedMove = true;
 				break;
 			}
+		}
+
+		if (!bStartedMove)
+		{
+			Wait(0.2f);
 		}
 	}
 

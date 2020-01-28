@@ -242,12 +242,12 @@ void RNavMeshGenerator::Build(const RScene* Scene, RNavMeshData& OutNavMeshData,
 	RInput.BindKeyStateEvent(VK_OEM_6, EBufferedKeyState::Pressed, this, &RNavMeshGenerator::DecreaseDebugDistanceFieldLevel);
 }
 
-void RNavMeshGenerator::DebugRender() const
+void RNavMeshGenerator::DebugRender(int DebugFlags) const
 {
 	GDebugRenderer.DrawAabb(SceneBounds);
 
-#if 0
 	// Debug draw regions
+	if (DebugFlags & NavMeshDebug_DrawRegions)
 	{
 		static int DebugDrawRegionId = 0;
 
@@ -263,8 +263,9 @@ void RNavMeshGenerator::DebugRender() const
 
 		GNavigationSystem.GetDebugger().DrawRegion(DebugDrawRegionId);
 	}
-#else
+
 	// Debug draw funnel algorithm
+	if (DebugFlags & NavMeshDebug_DrawFunnel)
 	{
 		static int DebugDrawFunnelId = 0;
 		int MaxFunnelIndex = GNavigationSystem.GetDebugger().GetMaxFunnelSteps();
@@ -283,9 +284,11 @@ void RNavMeshGenerator::DebugRender() const
 
 		GNavigationSystem.GetDebugger().DrawFunnel(DebugDrawFunnelId);
 	}
-#endif
 
-	//DebugDrawSpans();
+	if (DebugFlags & NavMeshDebug_DrawSpans)
+	{
+		DebugDrawSpans();
+	}
 }
 
 void RNavMeshGenerator::GenerateHeightfieldColumns(INavMeshCellDetector& CellDetector)
@@ -309,7 +312,7 @@ void RNavMeshGenerator::GenerateHeightfieldColumns(INavMeshCellDetector& CellDet
 				RVec3 CellCenter = GetCellCenter(x, y, z);
 
 				RAabb CellBounds;
-				RVec3 CollisionDimension = CellDimension * RVec3(2.0f, 0.5f, 2.0f);
+				RVec3 CollisionDimension = CellDimension * RVec3(1.0f, 0.5f, 1.0f);
 				CellBounds.pMax = CellCenter + CollisionDimension;
 				CellBounds.pMin = CellCenter - CollisionDimension;
 

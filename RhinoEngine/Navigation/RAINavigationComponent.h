@@ -43,6 +43,7 @@ public:
 private:
 	std::vector<RVec3>	NavPath;
 	RVec3				DesiredMoveDirection;
+	float				ReachRadius;
 };
 
 FORCEINLINE const RVec3& RAINavigationComponent::GetDesiredMoveDirection() const

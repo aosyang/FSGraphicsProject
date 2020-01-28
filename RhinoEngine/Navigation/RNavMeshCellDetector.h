@@ -38,13 +38,13 @@ private:
 };
 
 /// A cell detector using physics system
-class RPhysicsNavMeshCellDetector : public INavMeshCellDetector
+class RPhysicsNavMeshCellDetector : public RDefaultNavMeshCellDetector
 {
 public:
 	RPhysicsNavMeshCellDetector();
 
 	virtual bool IsCellOccupied(const RAabb& CellBounds) override;
-	virtual bool IsCellTraversable(const RAabb& CellBounds) override;
+	//virtual bool IsCellTraversable(const RAabb& CellBounds) override;
 
 private:
 	std::unique_ptr<class btPairCachingGhostObject> GhostObject;

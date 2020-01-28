@@ -12,6 +12,7 @@
 RAINavigationComponent::RAINavigationComponent(RSceneObject* InOwner)
 	: Base(InOwner)
 	, DesiredMoveDirection(0.0f, 0.0f, 0.0f)
+	, ReachRadius(10.0f)
 {
 
 }
@@ -22,7 +23,8 @@ void RAINavigationComponent::Update(float DeltaTime)
 	{
 		const RVec3 AIPosition = GetOwner()->GetWorldPosition();
 
-		if (RVec3::SquaredDistance2D(NavPath[0], AIPosition) < RMath::Square(5.0f))
+		// Once agent arrives, remove a path node from the path array
+		if (RVec3::SquaredDistance2D(NavPath[0], AIPosition) < RMath::Square(ReachRadius))
 		{
 			NavPath.erase(NavPath.begin());
 		}

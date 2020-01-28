@@ -94,6 +94,8 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 		// D3D11 SDK layers are not present while creating a debug device. Try creating a device without debugging features.
 		if (hr == DXGI_ERROR_SDK_COMPONENT_MISSING)
 		{
+			RLogWarning("D3D11 SDK Layers for Windows 10 is not found on the system. The D3D11 device will be created without debugging features.\n");
+
 			createDeviceFlags = 0;
 
 			hr = D3D11CreateDevice(

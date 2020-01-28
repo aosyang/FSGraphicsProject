@@ -32,12 +32,19 @@ bool RNavigationSystem::QueryPath(const RVec3& Start, const RVec3& Goal, std::ve
 	return NavMeshData.QueryPath(Start, Goal, OutPath);
 }
 
-void RNavigationSystem::DebugRender() const
+void RNavigationSystem::DebugRender(int DebugFlags) const
 {
-	NavMeshGenerator.DebugRender();
+	NavMeshGenerator.DebugRender(DebugFlags);
 	
-	DebugDrawPathQuery();
-	DebugDrawNavMesh();
+	if (DebugFlags & NavMeshDebug_DrawPathQuery)
+	{
+		DebugDrawPathQuery();
+	}
+
+	if (DebugFlags & NavMeshDebug_DrawNavMesh)
+	{
+		DebugDrawNavMesh();
+	}
 }
 
 void RNavigationSystem::DebugProjectPointToNavmesh(const RVec3& Point) const
