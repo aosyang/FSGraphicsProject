@@ -16,9 +16,8 @@ enum ENavMeshDebugFlag
 	NavMeshDebug_DrawRegions	= 1 << 1,
 	NavMeshDebug_DrawFunnel		= 1 << 2,
 	NavMeshDebug_DrawSpans		= 1 << 3,
-	NavMeshDebug_DrawPathQuery	= 1 << 4,
-
-	DrawAll = NavMeshDebug_DrawNavMesh | NavMeshDebug_DrawRegions | NavMeshDebug_DrawSpans | NavMeshDebug_DrawPathQuery,
+	NavMeshDebug_DrawSolidSpans	= 1 << 4,
+	NavMeshDebug_DrawPathQuery	= 1 << 5,
 };
 
 class RNavigationSystem : public RSingleton<RNavigationSystem>

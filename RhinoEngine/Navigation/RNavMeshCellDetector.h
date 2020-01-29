@@ -44,7 +44,7 @@ public:
 	RPhysicsNavMeshCellDetector();
 
 	virtual bool IsCellOccupied(const RAabb& CellBounds) override;
-	//virtual bool IsCellTraversable(const RAabb& CellBounds) override;
+	virtual bool IsCellTraversable(const RAabb& CellBounds) override;
 
 private:
 	std::unique_ptr<class btPairCachingGhostObject> GhostObject;

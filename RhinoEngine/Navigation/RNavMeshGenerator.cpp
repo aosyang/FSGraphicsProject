@@ -287,7 +287,7 @@ void RNavMeshGenerator::DebugRender(int DebugFlags) const
 
 	if (DebugFlags & NavMeshDebug_DrawSpans)
 	{
-		DebugDrawSpans();
+		DebugDrawSpans(DebugFlags);
 	}
 }
 
@@ -1142,16 +1142,19 @@ RVec3 RNavMeshGenerator::GetCellCenter(int x, int y, int z) const
 	);
 }
 
-void RNavMeshGenerator::DebugDrawSpans() const
+void RNavMeshGenerator::DebugDrawSpans(int DebugFlags) const
 {
 	const auto& RegionMap = DebugRegionMaps[DebugDistanceField];
 
 	for (const auto& Column : Heightfield)
 	{
-		// Draw solid spans
-		for (const auto& Span : Column.SolidSpans)
+		if (DebugFlags & NavMeshDebug_DrawSolidSpans)
 		{
-			GDebugRenderer.DrawAabb(Span.Bounds, Span.bTraversable ? RColor::Green : RColor::Red);
+			// Draw solid spans
+			for (const auto& Span : Column.SolidSpans)
+			{
+				GDebugRenderer.DrawAabb(Span.Bounds, Span.bTraversable ? RColor::Green : RColor::Red);
+			}
 		}
 
 		int SpanIndex = 0;

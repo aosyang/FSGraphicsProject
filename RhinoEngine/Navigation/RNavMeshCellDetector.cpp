@@ -95,7 +95,8 @@ struct CellContactResultCallback : public btCollisionWorld::ContactResultCallbac
 };
 
 RPhysicsNavMeshCellDetector::RPhysicsNavMeshCellDetector()
-	: GhostObject(std::make_unique<btPairCachingGhostObject>())
+	: RDefaultNavMeshCellDetector(8)
+	, GhostObject(std::make_unique<btPairCachingGhostObject>())
 	, BoxShape(std::make_unique<btBoxShape>(btVector3(1, 1, 1)))
 {
 	GhostObject->setCollisionShape(BoxShape.get());
@@ -122,7 +123,7 @@ bool RPhysicsNavMeshCellDetector::IsCellOccupied(const RAabb& CellBounds)
 	return ContactResult.bHasContacts;
 }
 
-//bool RPhysicsNavMeshCellDetector::IsCellTraversable(const RAabb& CellBounds)
-//{
-//	return true;
-//}
+bool RPhysicsNavMeshCellDetector::IsCellTraversable(const RAabb& CellBounds)
+{
+	return RDefaultNavMeshCellDetector::IsCellTraversable(CellBounds);
+}
