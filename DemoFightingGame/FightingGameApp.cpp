@@ -458,7 +458,7 @@ void FightingGameApp::UpdateCameraPosition(float DeltaTime)
 	RVec3 camVec = cameraTransform.GetTranslation() - lookTarget;
 	RScene* DefaultScene = GSceneManager.DefaultScene();
 
-	camVec = DefaultScene->TestMovingAabbWithScene(camAabb, camVec, FTGPlayerController::ActivePlayerControllers);
+	//camVec = DefaultScene->TestMovingAabbWithScene(camAabb, camVec, FTGPlayerController::ActivePlayerControllers);
 
 	//m_Camera->SetTransform(cameraTransform);
 	static RVec3 actualCamVec = m_Camera->GetWorldPosition();

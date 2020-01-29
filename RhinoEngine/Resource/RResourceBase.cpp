@@ -19,7 +19,7 @@ RResourceBase::RResourceBase(ResourceType type, const std::string& path)
 bool RResourceBase::LoadResourceData(bool bIsAsyncLoading)
 {
 	MetaData = std::make_unique<RResourceMetaData>();
-	std::string MetaFileName = RFileUtil::ReplaceExtension(m_FileSystemPath, "meta");
+	std::string MetaFileName = m_FileSystemPath + ".meta";
 	MetaData->LoadFromFile(MetaFileName);
 
 	return LoadResourceImpl(bIsAsyncLoading);
