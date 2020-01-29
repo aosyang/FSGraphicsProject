@@ -40,9 +40,18 @@ struct RPhysicsObjectContext
 		, Mass(-1)
 	{}
 
+	// Triangle mesh data for collision. Used when object has a triangle mesh shape of collision
+	std::unique_ptr<btTriangleMesh> TriangleMesh;
+	
+	// The collision shape
 	std::unique_ptr<btCollisionShape> Shape;
+
+	// The state of motion
 	std::unique_ptr<btMotionState> MotionState;
+
+	// The rigid body
 	std::unique_ptr<btRigidBody> Body;
+
 	RVec3 BoxHalfSize;
 	RVec3 BoxOffset;
 	float Mass;

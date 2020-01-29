@@ -90,7 +90,7 @@ void RRigidBodyComponent::OnComponentAdded()
 		{
 			if (Mesh->GetCollisionType() == EMeshCollisionType::TriangleMesh)
 			{
-				BuildConvexHull(Mesh);
+				BuildTriangleMeshCollision(Mesh);
 
 				// Note: Triangle mesh can't be dynamic
 				Context->Mass = 0.0f;
@@ -148,11 +148,11 @@ void RRigidBodyComponent::SetPhysicsBodyMass(float InMass)
 	Context->Body->setMassProps(Mass, LocalInertia);
 }
 
-void RRigidBodyComponent::BuildConvexHull(RMesh* Mesh)
+void RRigidBodyComponent::BuildTriangleMeshCollision(RMesh* Mesh)
 {
-	// TODO: Delete triangle mesh
-	btTriangleMesh* TriangleMesh = new btTriangleMesh();
-
+	// Physics bodies CAN'T be scaled so we must create triangle meshes for objects with each scale
+	// TODO: Reuse triangle meshes for multiple rigid bodies with the same scale
+	Context->TriangleMesh = std::make_unique<btTriangleMesh>();
 	RVec3 Scale = GetOwner()->GetScale();
 
 	for (const RMeshElement& MeshElement : Mesh->GetMeshElements())
@@ -163,7 +163,7 @@ void RRigidBodyComponent::BuildConvexHull(RMesh* Mesh)
 			int idx1 = MeshElement.TriangleIndices[i + 1];
 			int idx2 = MeshElement.TriangleIndices[i + 2];
 
-			TriangleMesh->addTriangle(
+			Context->TriangleMesh->addTriangle(
 				RVec3TobtVec3(RVec3(&MeshElement.PositionArray[idx0].x) * Scale),
 				RVec3TobtVec3(RVec3(&MeshElement.PositionArray[idx1].x) * Scale),
 				RVec3TobtVec3(RVec3(&MeshElement.PositionArray[idx2].x) * Scale)
@@ -171,5 +171,5 @@ void RRigidBodyComponent::BuildConvexHull(RMesh* Mesh)
 		}
 	}
 
-	Context->Shape = std::make_unique<btBvhTriangleMeshShape>(TriangleMesh, true, true);
+	Context->Shape = std::make_unique<btBvhTriangleMeshShape>(Context->TriangleMesh.get(), true, true);
 }

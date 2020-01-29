@@ -29,7 +29,7 @@ protected:
 private:
 	void SetPhysicsBodyMass(float InMass);
 
-	void BuildConvexHull(RMesh* Mesh);
+	void BuildTriangleMeshCollision(RMesh* Mesh);
 
 private:
 	std::unique_ptr<RPhysicsObjectContext> Context;
