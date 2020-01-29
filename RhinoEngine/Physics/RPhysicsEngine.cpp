@@ -24,6 +24,10 @@ bool RPhysicsEngine::Initialize()
 	Context->Solver = std::make_unique<btSequentialImpulseConstraintSolver>();
 	Context->DynamicWorld = std::make_unique<btDiscreteDynamicsWorld>(Context->Dispatcher.get(), Context->Broadphase.get(), Context->Solver.get(), Context->CollisionConfiguration.get());
 
+	// Set up pair callback for default collision behavior on character controllers
+	Context->GhostPairCallback = std::make_unique<btGhostPairCallback>();
+	Context->Broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(Context->GhostPairCallback.get());
+
 	Context->DynamicWorld->setGravity(btVector3(0, -1000, 0));
 
 	return true;
@@ -31,6 +35,7 @@ bool RPhysicsEngine::Initialize()
 
 void RPhysicsEngine::Shutdown()
 {
+	Context->Broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(nullptr);
 }
 
 void RPhysicsEngine::Simulate(float DeltaTime)

@@ -36,10 +36,6 @@ PlayerControllerBase::PlayerControllerBase(const RConstructingParams& Params)
 	GhostObject->setCollisionShape(CapsuleShape.get());
 	GhostObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
 
-	// Set up pair callback for default collision behavior on character controller
-	GhostPairCallback = std::make_unique<btGhostPairCallback>();
-	GPhysicsEngine.GetContext()->Broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(GhostPairCallback.get());
-
 	GPhysicsEngine.GetContext()->DynamicWorld->addCollisionObject(GhostObject.get(), btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
 	GPhysicsEngine.GetContext()->DynamicWorld->addAction(KinematicCharacterController.get());
 }

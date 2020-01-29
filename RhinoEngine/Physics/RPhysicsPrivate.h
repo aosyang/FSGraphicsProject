@@ -7,6 +7,7 @@
 #pragma once
 
 #include "btBulletDynamicsCommon.h"
+#include "BulletCollision/CollisionDispatch/btGhostObject.h"
 
 struct RPhysicsEngineContext
 {
@@ -18,13 +19,16 @@ struct RPhysicsEngineContext
 	// The default collision dispatcher
 	std::unique_ptr<btCollisionDispatcher> Dispatcher;
 
-	// The broadphase
+	// The broadphase used by physics simulation
 	std::unique_ptr<btBroadphaseInterface> Broadphase;
+
+	// The default behavior for ghost object collisions
+	std::unique_ptr<btGhostPairCallback> GhostPairCallback;
 
 	// The default constraint solver
 	std::unique_ptr<btSequentialImpulseConstraintSolver> Solver;
 
-	// The physics for simulation
+	// The physics world of simulation
 	std::unique_ptr<btDiscreteDynamicsWorld> DynamicWorld;
 };
 
