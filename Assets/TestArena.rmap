@@ -105,4 +105,45 @@
             <Scale>2.000000, 2.000000, 2.000000</Scale>
         </Transform>
     </SceneObject>
+    <SceneObject Name="Oak_Tree_0" Type="MeshObject" Mesh="/Trees/Oak_Tree.fbx">
+        <Transform>
+            <Position>1035.000000, 41.000000, 734.000000</Position>
+            <Rotation>0.000000, -0.383973, 0.000000</Rotation>
+            <Scale>1.000000, 1.000000, 1.000000</Scale>
+        </Transform>
+    </SceneObject>
+    <SceneObject Name="Palm_Tree_0" Type="MeshObject" Mesh="/Trees/Palm_Tree.fbx">
+        <Transform>
+            <Position>-12.000000, 39.000000, 869.000000</Position>
+            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
+            <Scale>1.000000, 1.000000, 1.000000</Scale>
+        </Transform>
+    </SceneObject>
+    <SceneObject Name="Oak_Tree_1" Type="MeshObject" Mesh="/Trees/Oak_Tree.fbx">
+        <Transform>
+            <Position>1035.000000, 41.000000, 1193.000000</Position>
+            <Rotation>-3.141592, 0.785400, -3.141592</Rotation>
+            <Scale>1.000000, 1.000000, 1.000000</Scale>
+        </Transform>
+    </SceneObject>
+    <SceneObject Name="Oak_Tree_2" Type="MeshObject" Mesh="/Trees/Oak_Tree.fbx">
+        <Transform>
+            <Position>771.000000, 41.000000, 923.000000</Position>
+            <Rotation>0.000000, 0.628321, 0.000000</Rotation>
+            <Scale>1.000000, 1.000000, 1.000000</Scale>
+        </Transform>
+    </SceneObject>
+    <SceneObject Name="cube_east_0" Type="MeshObject" Mesh="/cube.FBX">
+        <Material Index="0">
+            <MeshElement Name="Box001" Shader="BumpLighting">
+                <Texture Slot="0">/Grey.DDS</Texture>
+                <Texture Slot="1">/DiamondPlateNormal.dds</Texture>
+            </MeshElement>
+        </Material>
+        <Transform>
+            <Position>-700.000000, 120.000000, 1181.000000</Position>
+            <Rotation>0.000000, 0.785398, 0.000000</Rotation>
+            <Scale>5.000000, 2.000000, 5.000000</Scale>
+        </Transform>
+    </SceneObject>
 </Scene>

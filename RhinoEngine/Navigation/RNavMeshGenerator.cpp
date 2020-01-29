@@ -173,7 +173,7 @@ const GridCoord RNavMeshGenerator::NeighborOffset[8] =
 RNavMeshGenerator::RNavMeshGenerator()
 	: DebugDistanceField(0)
 	, CellDimension(50.0f, 10.0f, 50.0f)
-	, MinTraversableHeight(200.0f)
+	, MinTraversableHeight(150.0f)
 	, MaxStepHeight(10.0f)
 {
 	MinTraversableNumCells = (int)ceil(MinTraversableHeight / CellDimension.Y());
