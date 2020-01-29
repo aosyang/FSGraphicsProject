@@ -23,7 +23,7 @@ public:
 	/// Replace extension in filename
 	static std::string ReplaceExtension(const std::string& filename, const std::string& ext);
 
-	/// Remove extension from filename
+	/// Remove extension from filename ('File.ext' becomes 'File')
 	static std::string StripExtension(const std::string& filename);
 
 	/// Check if a path is relative

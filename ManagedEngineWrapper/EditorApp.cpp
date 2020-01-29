@@ -346,9 +346,12 @@ namespace ManagedEngineWrapper
 
 	void EditorApp::SaveMeshMaterialFromSelection()
 	{
-		if (m_SelectedObject && m_SelectedObject->CanCastTo<RSMeshObject>())
+		if (m_SelectedObject)
 		{
-			((RSMeshObject*)m_SelectedObject)->SaveMaterialsToFile();
+			if (RSMeshObject* MeshObject = m_SelectedObject->CastTo<RSMeshObject>())
+			{
+				MeshObject->SaveMaterialsToDiskAsDefaults();
+			}
 		}
 	}
 

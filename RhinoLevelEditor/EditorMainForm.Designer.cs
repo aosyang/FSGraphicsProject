@@ -383,7 +383,7 @@
             // 
             this.saveMaterialToolStripMenuItem.Name = "saveMaterialToolStripMenuItem";
             this.saveMaterialToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
-            this.saveMaterialToolStripMenuItem.Text = "Save object material to XML";
+            this.saveMaterialToolStripMenuItem.Text = "Save Default Materials to Disk for Selection";
             this.saveMaterialToolStripMenuItem.Click += new System.EventHandler(this.saveMaterialToolStripMenuItem_Click);
             // 
             // refreshAssetsPreviewsToolStripMenuItem

@@ -79,11 +79,15 @@ RMaterial* RSMeshObject::GetMaterial(int index)
 	return &m_Materials[index];
 }
 
-void RSMeshObject::SaveMaterialsToFile()
+void RSMeshObject::SaveMaterialsToDiskAsDefaults()
 {
+	// No mesh is assigned to the mesh object, stop
 	if (!m_Mesh)
+	{
 		return;
+	}
 
+	// Hack: when a mesh is still in async loading, wait until it's done
 	while (!m_Mesh->IsLoaded())
 	{
 		Sleep(10);
@@ -91,21 +95,17 @@ void RSMeshObject::SaveMaterialsToFile()
 
 	SetupMaterialsFromMeshResource();
 
-	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
+	std::unique_ptr<tinyxml2::XMLDocument> doc = std::make_unique<tinyxml2::XMLDocument>();
+
+	// Save original mesh path in the comment
 	doc->InsertEndChild(doc->NewComment((std::string("Mesh path: ") + m_Mesh->GetAssetPath()).c_str()));
 
 	tinyxml2::XMLElement* elem_mat = doc->NewElement("Material");
-
-	SerializeMaterialsToXML(doc, elem_mat);
+	SerializeMaterialsToXML(doc.get(), elem_mat);
 	doc->InsertEndChild(elem_mat);
 
-	std::string filepath = m_Mesh->GetFileSystemPath();
-	filepath = filepath.substr(0, filepath.length() - 3);
-	filepath += "rmtl";
-
+	std::string filepath = RFileUtil::StripExtension(m_Mesh->GetFileSystemPath()) + ".rmtl";
 	doc->SaveFile(filepath.c_str());
-
-	delete doc;
 }
 
 void RSMeshObject::SerializeMaterialsToXML(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* elem_mat)

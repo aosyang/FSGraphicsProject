@@ -26,7 +26,10 @@ public:
 	void SetMaterial(RMaterial* materials, int materialNum);
 	RMaterial* GetMaterial(int index);
 
-	void SaveMaterialsToFile();
+	/// Save current materials to disk and use them as default materials for the mesh
+	void SaveMaterialsToDiskAsDefaults();
+
+	/// Save current materials to an XML document
 	void SerializeMaterialsToXML(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* elem_mat);
 
 	void SetOverridingShader(RShader* shader, int features = -1);
@@ -51,7 +54,7 @@ protected:
 	void SetupMaterialsFromMeshResource();
 
 	RMesh*					m_Mesh;
-	std::vector<RMaterial>		m_Materials;
+	std::vector<RMaterial>	m_Materials;
 	RAabb					m_MeshAABB;
 	RShader*				m_OverridingShader;
 	int						m_OverridingShaderFeatures;
