@@ -19,12 +19,14 @@ public:
 	/// Required by RResourceManager::RegisterResourceType
 	static std::vector<std::string> GetSupportedExtensions();
 
-	virtual bool LoadResourceData(bool bIsAsyncLoading) override;
-
 	ID3D11ShaderResourceView* GetSRV() { return m_SRV; }
 	ID3D11ShaderResourceView** GetPtrSRV() { return &m_SRV; }
 	UINT GetWidth() const { return m_Width; }
 	UINT GetHeight() const { return m_Height; }
+
+protected:
+
+	virtual bool LoadResourceImpl(bool bIsAsyncLoading) override;
 
 private:
 	ID3D11ShaderResourceView*	m_SRV;

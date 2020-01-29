@@ -73,7 +73,7 @@ namespace
 			}
 		}
 
-		static const float Threshold = 80.0f;
+		static const float Threshold = 70.0f;
 		if (MaxSqrDist <= Threshold * Threshold)
 		{
 			// All distances from the line segment to points are smaller than the threshold. The edge list can be simplified as one edge.

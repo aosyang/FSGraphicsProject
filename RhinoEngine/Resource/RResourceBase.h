@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Core/REngine.h"
+#include "RResourceMetaData.h"
 
 enum ResourceState
 {
@@ -30,6 +31,8 @@ public:
 	ResourceState GetResourceState() const	{ return m_State; }
 	ResourceType GetResourceType() const	{ return m_Type; }
 
+	const RResourceMetaData& GetMetaData() const;
+
 	/// Set the asset path of resource
 	void SetAssetPath(const std::string& InAssetPath);
 
@@ -42,7 +45,7 @@ public:
 	/// Check if resource has been fully loaded
 	bool IsLoaded() const					{ return m_State == RS_Loaded; }
 
-	virtual bool LoadResourceData(bool bIsAsyncLoading);
+	bool LoadResourceData(bool bIsAsyncLoading);
 
 	/// Check if all referenced resources have been fully loaded
 	bool AreReferencedResourcesLoaded() const;
@@ -60,17 +63,26 @@ protected:
 	/// Enumerate all resources been referenced directly by this resource
 	virtual std::vector<RResourceBase*> EnumerateReferencedResources() const;
 
+	virtual bool LoadResourceImpl(bool bIsAsyncLoading);
+
 private:
 	ResourceState		m_State;
 	ResourceType		m_Type;
 
+	std::unique_ptr<RResourceMetaData> MetaData;
+
 	/// The asset path used to access the resource in the engine
-	std::string				m_AssetPath;
+	std::string			m_AssetPath;
 
 	/// Path to the resource file in file system
-	std::string				m_FileSystemPath;
+	std::string			m_FileSystemPath;
 	float				m_LoadingFinishTime;
 };
+
+FORCEINLINE const RResourceMetaData& RResourceBase::GetMetaData() const
+{
+	return *MetaData;
+}
 
 FORCEINLINE void RResourceBase::SetAssetPath(const std::string& InAssetPath)
 {

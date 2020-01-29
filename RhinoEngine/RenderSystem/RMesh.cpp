@@ -78,7 +78,7 @@ void RMesh::Serialize(RSerializer& serializer)
 	}
 }
 
-bool RMesh::LoadResourceData(bool bIsAsyncLoading)
+bool RMesh::LoadResourceImpl(bool bIsAsyncLoading)
 {
 	if (TryLoadAsRmesh(bIsAsyncLoading))
 	{
@@ -210,6 +210,17 @@ int RMesh::GetCachedAnimationNodeId(RAnimation* Animation, int BoneId) const
 		return -1;
 
 	return Iter->second[BoneId];
+}
+
+EMeshCollisionType RMesh::GetCollisionType() const
+{
+	const std::string CollisionValue = GetMetaData()["CollisionType"];
+	if (CollisionValue == "TriangleMesh")
+	{
+		return EMeshCollisionType::TriangleMesh;
+	}
+
+	return EMeshCollisionType::BoundingBox;
 }
 
 std::vector<RResourceBase*> RMesh::EnumerateReferencedResources() const

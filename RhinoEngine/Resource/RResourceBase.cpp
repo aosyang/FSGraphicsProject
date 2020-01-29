@@ -18,7 +18,11 @@ RResourceBase::RResourceBase(ResourceType type, const std::string& path)
 
 bool RResourceBase::LoadResourceData(bool bIsAsyncLoading)
 {
-	return false;
+	MetaData = std::make_unique<RResourceMetaData>();
+	std::string MetaFileName = RFileUtil::ReplaceExtension(m_FileSystemPath, "meta");
+	MetaData->LoadFromFile(MetaFileName);
+
+	return LoadResourceImpl(bIsAsyncLoading);
 }
 
 bool RResourceBase::AreReferencedResourcesLoaded() const
@@ -61,4 +65,10 @@ std::vector<RResourceBase*> RResourceBase::EnumerateReferencedResources() const
 {
 	const static std::vector<RResourceBase*> EmptyResources;
 	return EmptyResources;
+}
+
+bool RResourceBase::LoadResourceImpl(bool bIsAsyncLoading)
+{
+	// Base class does nothing
+	return false;
 }

@@ -32,7 +32,7 @@ std::vector<std::string> RTexture::GetSupportedExtensions()
 	return TextureExts;
 }
 
-bool RTexture::LoadResourceData(bool bIsAsyncLoading)
+bool RTexture::LoadResourceImpl(bool bIsAsyncLoading)
 {
 	ID3D11ShaderResourceView* srv;
 	size_t char_len;
@@ -41,19 +41,7 @@ bool RTexture::LoadResourceData(bool bIsAsyncLoading)
 
 	RLog("Loading texture [%s]...\n", GetFileSystemPath().data());
 
-	bool bIsSRGBTexture = false;
-
-	std::unique_ptr<tinyxml2::XMLDocument> XmlDoc(new tinyxml2::XMLDocument());
-	std::string MetaFileName = GetFileSystemPath() + ".meta";
-	if (XmlDoc->LoadFile(MetaFileName.c_str()) == tinyxml2::XML_SUCCESS)
-	{
-		tinyxml2::XMLElement* MetaElem = XmlDoc->FirstChildElement("Metadata");
-		if (MetaElem)
-		{
-			static const char NameSRGB[] = "SRGB";
-			MetaElem->QueryBoolAttribute(NameSRGB, &bIsSRGBTexture);
-		}
-	}
+	bool bIsSRGBTexture = (GetMetaData()["SRGB"] == "true");
 
 	ID3D11Resource* pResource;
 	HRESULT hr;

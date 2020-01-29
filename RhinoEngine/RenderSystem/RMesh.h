@@ -15,6 +15,12 @@ struct BoneMatrices
 	RMatrix4 boneMatrix[MAX_BONE_COUNT];
 };
 
+enum class EMeshCollisionType
+{
+	BoundingBox,
+	TriangleMesh,
+};
+
 class RMesh : public RResourceBase
 {
 public:
@@ -27,8 +33,6 @@ public:
 	static std::vector<std::string> GetSupportedExtensions();
 
 	void Serialize(RSerializer& serializer);
-
-	virtual bool LoadResourceData(bool bIsAsyncLoading) override;
 
 	const RMaterial& GetMaterial(int index) const;
 	const std::vector<RMaterial>& GetMaterials() const;
@@ -57,8 +61,12 @@ public:
 	bool HasCachedAnimation(RAnimation* anim) const;
 	int GetCachedAnimationNodeId(RAnimation* Animation, int BoneId) const;
 
+	EMeshCollisionType GetCollisionType() const;
+
 protected:
 	virtual std::vector<RResourceBase*> EnumerateReferencedResources() const override;
+
+	virtual bool LoadResourceImpl(bool bIsAsyncLoading) override;
 
 	bool TryLoadAsFbxMesh(bool bIsAsyncLoading);
 	bool TryLoadAsRmesh(bool bIsAsyncLoading);

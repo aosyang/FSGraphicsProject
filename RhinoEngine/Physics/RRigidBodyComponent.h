@@ -29,6 +29,8 @@ protected:
 private:
 	void SetPhysicsBodyMass(float InMass);
 
+	void BuildConvexHull(RMesh* Mesh);
+
 private:
 	std::unique_ptr<RPhysicsObjectContext> Context;
 };

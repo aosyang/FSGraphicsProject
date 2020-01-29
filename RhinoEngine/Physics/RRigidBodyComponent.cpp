@@ -88,33 +88,47 @@ void RRigidBodyComponent::OnComponentAdded()
 		RMesh* Mesh = MeshObject ? MeshObject->GetMesh() : nullptr;
 		if (Mesh)
 		{
-			Context->BoxHalfSize = Mesh->GetLocalSpaceAabb().GetLocalDimension() * Owner->GetScale() / 2.0f;
-			Context->BoxOffset = Mesh->GetLocalSpaceAabb().GetCenter();
+			if (Mesh->GetCollisionType() == EMeshCollisionType::TriangleMesh)
+			{
+				BuildConvexHull(Mesh);
+
+				// Note: Triangle mesh can't be dynamic
+				Context->Mass = 0.0f;
+			}
+			else
+			{
+				Context->BoxHalfSize = Mesh->GetLocalSpaceAabb().GetLocalDimension() * Owner->GetScale() / 2.0f;
+				Context->BoxOffset = Mesh->GetLocalSpaceAabb().GetCenter();
+		
+				btVector3 BoxHalfSize(RVec3TobtVec3(Context->BoxHalfSize));
+				Context->Shape = std::make_unique<btBoxShape>(BoxHalfSize);
+
+				Context->Mass = 1.0f;
+			}
 		}
 		else
 		{
 			Context->BoxHalfSize = Owner->GetAabb().GetLocalDimension() / 2.0f;
 			Context->BoxOffset = Owner->GetAabb().GetCenter() - Owner->GetWorldPosition();
-		}
 
-		btVector3 BoxHalfSize(RVec3TobtVec3(Context->BoxHalfSize));
-		Context->Shape = std::make_unique<btBoxShape>(BoxHalfSize);
+			btVector3 BoxHalfSize(RVec3TobtVec3(Context->BoxHalfSize));
+			Context->Shape = std::make_unique<btBoxShape>(BoxHalfSize);
+
+			Context->Mass = 1.0f;
+		}
 
 		btTransform InitTransform;
 		InitTransform.setOrigin(RVec3TobtVec3(Owner->GetWorldPosition() + Owner->GetRotation() * Context->BoxOffset));
 		InitTransform.setRotation(RQuatTobtQuat(Owner->GetRotation()));
 
-		btScalar Mass(1.0f);
-		Context->Mass = Mass;
-
 		btVector3 LocalInertia(0.0f, 0.0f, 0.0f);
-		if (Mass != 0.0f)
+		if (Context->Mass != 0.0f)
 		{
-			Context->Shape->calculateLocalInertia(Mass, LocalInertia);
+			Context->Shape->calculateLocalInertia(Context->Mass, LocalInertia);
 		}
 
 		Context->MotionState = std::make_unique<btDefaultMotionState>(InitTransform);
-		btRigidBody::btRigidBodyConstructionInfo BodyInfo(Mass, Context->MotionState.get(), Context->Shape.get(), LocalInertia);
+		btRigidBody::btRigidBodyConstructionInfo BodyInfo(Context->Mass, Context->MotionState.get(), Context->Shape.get(), LocalInertia);
 		Context->Body = std::make_unique<btRigidBody>(BodyInfo);
 
 		PhysicsEngineContext->DynamicWorld->addRigidBody(Context->Body.get());
@@ -132,4 +146,30 @@ void RRigidBodyComponent::SetPhysicsBodyMass(float InMass)
 	}
 
 	Context->Body->setMassProps(Mass, LocalInertia);
+}
+
+void RRigidBodyComponent::BuildConvexHull(RMesh* Mesh)
+{
+	// TODO: Delete triangle mesh
+	btTriangleMesh* TriangleMesh = new btTriangleMesh();
+
+	RVec3 Scale = GetOwner()->GetScale();
+
+	for (const RMeshElement& MeshElement : Mesh->GetMeshElements())
+	{
+		for (int i = 0; i < MeshElement.TriangleIndices.size(); i += 3)
+		{
+			int idx0 = MeshElement.TriangleIndices[i];
+			int idx1 = MeshElement.TriangleIndices[i + 1];
+			int idx2 = MeshElement.TriangleIndices[i + 2];
+
+			TriangleMesh->addTriangle(
+				RVec3TobtVec3(RVec3(&MeshElement.PositionArray[idx0].x) * Scale),
+				RVec3TobtVec3(RVec3(&MeshElement.PositionArray[idx1].x) * Scale),
+				RVec3TobtVec3(RVec3(&MeshElement.PositionArray[idx2].x) * Scale)
+			);
+		}
+	}
+
+	Context->Shape = std::make_unique<btBvhTriangleMeshShape>(TriangleMesh, true, true);
 }
