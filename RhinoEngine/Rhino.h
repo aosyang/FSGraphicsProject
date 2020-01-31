@@ -12,18 +12,6 @@
 #include <Shlwapi.h>
 #pragma comment(lib, "Shlwapi.lib")
 
-#include <cmath>
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
-#include <tchar.h>
-
-#include <sstream>
-#include <iterator>
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-
 #include "Core/CoreTypes.h"
 
 // DirectX 3D

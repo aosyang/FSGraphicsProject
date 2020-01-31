@@ -82,7 +82,13 @@ private:
 	OpenSpanKey FindRegionEdgeInDirection(const OpenSpanKey& Key, int DirectionIdx = 0) const;
 
 	// Add a new point as an edge point, indicating this point is shared by two or more regions.
-	void AddEdgePoint(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMendatoryPoint);
+	void AddEdgePoint(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMandatoryPoint);
+
+	void SetEdgePointMandatory(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMandatoryPoint);
+
+	RVec3 GetOffsetInDirection(int DirectionIdx) const;
+
+	void VerifyIsEdgePointMandatory(int PointRegionId, const RVec3& Point, bool bMandatory) const;
 
 	RAabb CalculateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z) const;
 

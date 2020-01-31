@@ -44,7 +44,7 @@ struct HeightfieldOpenSpan
 	// Whether the span is a border span (which has less than 8 valid neighbor spans including diagonal ones)
 	bool bBorder;
 
-	// Index to a neighbor open span this spawn is linked to
+	// Index to a neighbor open span which current span is linked to
 	int NeighborLink[NUM_NEIGHBOR_SPANS];
 
 	int DistanceField;

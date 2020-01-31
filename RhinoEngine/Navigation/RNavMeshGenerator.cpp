@@ -13,6 +13,7 @@
 #include "Scene/RScene.h"
 #include "RRegionData.h"
 #include "RNavigationSystem.h"
+#include "RNavMeshRegionSimplifier.h"
 
 
 namespace
@@ -22,78 +23,6 @@ namespace
 
 	// For debug rendering the region map at various heightfield
 	std::vector<RegionMapType> DebugRegionMaps;
-
-	// Calculate squared distance from a point to a line segment
-	float CalculateSquaredDistanceOfPointToLineSegment(const RVec3& p, const RVec3& a, const RVec3& b)
-	{
-		assert(a - b != RVec3::Zero());
-
-		RVec3 ap = p - a;
-		RVec3 ab = b - a;
-
-		float f = RVec3::Dot(ap, ab) / RVec3::Dot(ab, ab);
-		if (f <= 0.0f)
-		{
-			return ap.SquaredMagitude();
-		}
-		else if (f >= 1.0f)
-		{
-			return (p - b).SquaredMagitude();
-		}
-		else
-		{
-			RVec3 q = a + ab * f;
-			return (p - q).SquaredMagitude();
-		}
-	}
-
-	// Simplify a list of edges with Douglas-Peucker algorithm
-	// Note: the last point does go into return value for easier making up a loop
-	std::vector<RVec3> SimplifyEdges(const std::vector<RVec3>& Edges)
-	{
-		assert(Edges.size() >= 2);
-
-		if (Edges.size() == 2)
-		{
-			return std::vector<RVec3>{ Edges[0] };
-		}
-
-		const RVec3& Start = Edges[0];
-		const RVec3& End = Edges[Edges.size() - 1];
-		float MaxSqrDist = 0.0f;
-		int MaxPointIdx = -1;
-
-		for (int i = 1; i < (int)Edges.size() - 1; i++)
-		{
-			float SqrDist = CalculateSquaredDistanceOfPointToLineSegment(Edges[i], Start, End);
-			if (SqrDist > MaxSqrDist)
-			{
-				MaxSqrDist = SqrDist;
-				MaxPointIdx = i;
-			}
-		}
-
-		static const float Threshold = 70.0f;
-		if (MaxSqrDist <= Threshold * Threshold)
-		{
-			// All distances from the line segment to points are smaller than the threshold. The edge list can be simplified as one edge.
-			return std::vector<RVec3>{ Edges[0] };
-		}
-		else
-		{
-			// Taking the point with a max distance to the line segment as a middle point,
-			// split the edges into two sublists and perform the algorithm on each of them.
-			auto Left = SimplifyEdges(std::vector<RVec3>(Edges.begin(), Edges.begin() + MaxPointIdx + 1));
-			auto Right = SimplifyEdges(std::vector<RVec3>(Edges.begin() + MaxPointIdx, Edges.end()));
-
-			std::vector<RVec3> Result;
-			Result.reserve(Left.size() + Right.size());
-			Result.insert(Result.end(), Left.begin(), Left.end());
-			Result.insert(Result.end(), Right.begin(), Right.end());
-
-			return Result;
-		}
-	}
 
 	int FindShortestPartition(const EdgePointCollection &Edges)
 	{
@@ -778,6 +707,8 @@ void RNavMeshGenerator::GenerateRegions()
 	}
 }
 
+#pragma optimize( "", off )
+
 void RNavMeshGenerator::GenerateRegionContours()
 {
 	RegionEdgePoints.resize(UniqueRegionIds.size());
@@ -796,7 +727,7 @@ void RNavMeshGenerator::GenerateRegionContours()
 				const auto& Column = Heightfield[Index];
 
 				for (SpanIdx = 0; SpanIdx < Column.OpenSpans.size(); SpanIdx++)
-				{ 
+				{
 					const HeightfieldOpenSpan& Span = Column.OpenSpans[SpanIdx];
 
 					if (Span.RegionId == RegionId)
@@ -840,6 +771,7 @@ void RNavMeshGenerator::GenerateRegionContours()
 
 				// No more neighbors in this direction, turn 90 to the right
 				AddEdgePoint(CurrentKey, CurrentDirection, RegionId, bMandatoryPoint);
+
 				LastNeighborRegionId = -1;
 				CurrentDirection++;
 				while (CurrentDirection >= 4) { CurrentDirection -= 4; }
@@ -858,9 +790,10 @@ void RNavMeshGenerator::GenerateRegionContours()
 				{
 					// A mandatory point is a point shared by three or more regions including null regions
 					bool bMandatoryPoint = (LastNeighborRegionId != INT_MAX && LastNeighborRegionId != NextSpan.RegionId);
-					
+
 					// Region edge, turn 90 to the right
 					AddEdgePoint(CurrentKey, CurrentDirection, RegionId, bMandatoryPoint);
+
 					LastNeighborRegionId = NextSpan.RegionId;
 					CurrentDirection++;
 					while (CurrentDirection >= 4) { CurrentDirection -= 4; }
@@ -875,91 +808,48 @@ void RNavMeshGenerator::GenerateRegionContours()
 			}
 		} while (CurrentKey != StartKey || CurrentDirection != StartDirection);
 
-		// Simplify edges
-		EdgePointCollection& RegionEdges = RegionEdgePoints[RegionId];
-
-		// Find a first mandatory point
-		int FirstIdx;
-		for (FirstIdx = 0; FirstIdx < (int)RegionEdges.size(); FirstIdx++)
+		// Going back to the beginning span. Now let's double-check if the first span is mandatory.
+		if (1)
 		{
-			if (RegionEdges[FirstIdx].bIsMandatory)
+			bool bMandatoryPoint = false;
+			const HeightfieldOpenSpan& CurrentSpan = GetOpenSpanByKey(CurrentKey);
+			if (CurrentSpan.NeighborLink[CurrentDirection] == -1)
 			{
-				break;
+				// A mandatory point is a point shared by three or more regions including null regions
+				bMandatoryPoint = (LastNeighborRegionId != INT_MAX && LastNeighborRegionId != -1);
 			}
-		}
-		
-		if (FirstIdx != (int)RegionEdges.size())
-		{
-			int StartIdx = FirstIdx;
-			int EndIdx = -1;
-			std::vector<RVec3> SimplifiedPoints;
-
-			do
+			else
 			{
-				std::vector<RVec3> Points;
-				std::vector<int> EdgeIndices;
-				for (int i = 0; i <= (int)RegionEdges.size(); i++)
+				// Is facing an edge?
+				OpenSpanKey NextKey(
+					CurrentKey.x + NeighborOffset[CurrentDirection].x,
+					CurrentKey.z + NeighborOffset[CurrentDirection].z,
+					CurrentSpan.NeighborLink[CurrentDirection]
+				);
+
+				const HeightfieldOpenSpan& NextSpan = GetOpenSpanByKey(NextKey);
+				if (NextSpan.RegionId != CurrentSpan.RegionId)
 				{
-					int Idx = (StartIdx + i) % RegionEdges.size();
-					Points.push_back(RegionEdges[Idx].Point);
-					EdgeIndices.push_back(Idx);
-
-					if (i != 0 && RegionEdges[Idx].bIsMandatory)
-					{
-						EndIdx = Idx;
-						break;
-					}
+					// A mandatory point is a point shared by three or more regions including null regions
+					bMandatoryPoint = (LastNeighborRegionId != INT_MAX && LastNeighborRegionId != NextSpan.RegionId);
 				}
-
-				assert(EndIdx != -1);
-
-				// Note: In some cases, the point array will form a loop with the starting point being the end point.
-				//		 Avoid this so the edge simplification behaves properly.
-				if (StartIdx == EndIdx)
-				{
-					Points.pop_back();
-					EdgeIndices.pop_back();
-					EndIdx = *(EdgeIndices.end() - 1);
-				}
-
-				std::vector<RVec3> Simplified = SimplifyEdges(Points);
-				SimplifiedPoints.insert(SimplifiedPoints.end(), Simplified.begin(), Simplified.end());
-				StartIdx = EndIdx;
-			} while (StartIdx != FirstIdx);
-
-			// For testing
-			std::vector<EdgePointData> NewEdgePoints;
-			for (const auto& p : SimplifiedPoints)
-			{
-				NewEdgePoints.push_back({ p, true });
 			}
 
-			RegionEdges = NewEdgePoints;
-		}
-		else
-		{
-			// When a region is not sharing any edges with other regions, it doesn't have a mandatory edge point.
-			// We will simplify geometries by combining shorter line segments into a longer one. 
-			int StartIndex = 0;
-			do
+			if (bMandatoryPoint)
 			{
-				const RVec3& p0 = RegionEdges[StartIndex].Point;
-				const RVec3& p1 = RegionEdges[(StartIndex + 1) % RegionEdges.size()].Point;
-				const RVec3& p2 = RegionEdges[(StartIndex + 2) % RegionEdges.size()].Point;
-
-				if (FLT_EQUAL(RVec3::Dot((p1 - p0).GetNormalized(), (p2 - p0).GetNormalized()), 1.0f))
-				{
-					RegionEdges.erase(RegionEdges.begin() + StartIndex + 1);
-				}
-				else
-				{
-					StartIndex++;
-				}
-			} while (StartIndex < RegionEdges.size());
+				SetEdgePointMandatory(CurrentKey, CurrentDirection, RegionId, bMandatoryPoint);
+			}
 		}
 	}
+
+#if 1
+	// Simplify edges
+	RNavMeshRegionSimplifier RegionSimplifier;
+	RegionSimplifier.Execute(UniqueRegionIds, RegionEdgePoints);
+#endif
 }
 
+#pragma optimize( "", on )
 
 void RNavMeshGenerator::TriangulateRegions(RNavMeshData& OutNavMeshData)
 {
@@ -1048,33 +938,78 @@ OpenSpanKey RNavMeshGenerator::FindRegionEdgeInDirection(const OpenSpanKey& Key,
 	return OpenSpanKey(nx, nz, CurrentSpanIdx);
 }
 
-void RNavMeshGenerator::AddEdgePoint(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMendatoryPoint)
+void RNavMeshGenerator::AddEdgePoint(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMandatoryPoint)
 {
 	//RLog("Edge found! loc: (%d, %d), dir: %d - ", Key.x, Key.z, DirectionIdx);
-
 	assert(RegionId >= 0 && RegionId < RegionEdgePoints.size());
 
 	RVec3 CenterPoint = GetCellCenter(Key.x, GetOpenSpanByKey(Key).CellRowStart, Key.z);
-	RVec3 Offset = CellDimension;
+	RVec3 EdgePoint = CenterPoint + GetOffsetInDirection(DirectionIdx);
+	RegionEdgePoints[RegionId].push_back({ EdgePoint, bMandatoryPoint });
+	//RLog("Add edge point: %s\n", EdgePoint.ToString().c_str());
+
+	//VerifyIsEdgePointMandatory(RegionId, EdgePoint, bMandatoryPoint);
+}
+
+void RNavMeshGenerator::SetEdgePointMandatory(const OpenSpanKey& Key, int DirectionIdx, int RegionId, bool bMandatoryPoint)
+{
+	assert(RegionId >= 0 && RegionId < RegionEdgePoints.size());
+
+	RVec3 CenterPoint = GetCellCenter(Key.x, GetOpenSpanByKey(Key).CellRowStart, Key.z);
+	RVec3 EdgePoint = CenterPoint + GetOffsetInDirection(DirectionIdx);
+
+	for (int i = 0; i < (int)RegionEdgePoints[RegionId].size(); i++)
+	{
+		auto& p = RegionEdgePoints[RegionId][i];
+		if (p.Point == EdgePoint)
+		{
+			p.bIsMandatory = bMandatoryPoint;
+			break;
+		}
+	}
+}
+
+RVec3 RNavMeshGenerator::GetOffsetInDirection(int DirectionIdx) const
+{
+	RVec3 Offset(0.0f, 0.0f, 0.0f);
 	switch (DirectionIdx)
 	{
 	case 0:
-		Offset = Offset * RVec3(-.5f, 0, -.5f);
+		Offset = CellDimension * RVec3(-.5f, 0, -.5f);
 		break;
 	case 1:
-		Offset = Offset * RVec3(-.5f, 0, .5f);
+		Offset = CellDimension * RVec3(-.5f, 0, .5f);
 		break;
 	case 2:
-		Offset = Offset * RVec3(.5f, 0, .5f);
+		Offset = CellDimension * RVec3(.5f, 0, .5f);
 		break;
 	case 3:
-		Offset = Offset * RVec3(.5f, 0, -.5f);
+		Offset = CellDimension * RVec3(.5f, 0, -.5f);
 		break;
 	}
 
-	RVec3 EdgePoint = CenterPoint + Offset;
-	RegionEdgePoints[RegionId].push_back({ EdgePoint, bMendatoryPoint });
-	//RLog("Add edge point: %s\n", EdgePoint.ToString().c_str());
+	return Offset;
+}
+
+void RNavMeshGenerator::VerifyIsEdgePointMandatory(int PointRegionId, const RVec3& Point, bool bMandatory) const
+{
+	for (int RegionIdx : UniqueRegionIds)
+	{
+		for (const EdgePointData& PointData : RegionEdgePoints[RegionIdx])
+		{
+			if (PointData.Point == Point)
+			{
+				if (PointData.bIsMandatory != bMandatory)
+				{
+					RLog("Point %s: region %d mandatory = %s, region %d mandatory = %s\n",
+						Point.ToString().c_str(),
+						PointRegionId, bMandatory ? "true" : "false",
+						RegionIdx, PointData.bIsMandatory ? "true" : "false");
+					DebugBreak();
+				}
+			}
+		}
+	}
 }
 
 RAabb RNavMeshGenerator::CalculateBoundsForSpan(const HeightfieldSolidSpan& Span, int x, int z) const

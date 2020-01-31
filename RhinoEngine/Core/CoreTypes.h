@@ -6,9 +6,22 @@
 
 #pragma once
 
+#include <cmath>
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+#include <tchar.h>
+
+#include <sstream>
+#include <iterator>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+
 #include <memory>
 #include <functional>
 
+// STL libraries
 #include <vector>
 #include <list>
 #include <map>
