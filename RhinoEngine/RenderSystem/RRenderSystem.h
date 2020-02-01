@@ -41,6 +41,14 @@ struct RenderStats
 	void Reset() { DrawCalls = 0; }
 };
 
+/// Renderable objects used as UI overlays
+class IOverlayRenderable
+{
+public:
+	virtual ~IOverlayRenderable() {}
+	virtual void Render() = 0;
+};
+
 class RRenderSystem : public RSingleton<RRenderSystem>
 {
 	friend class RSingleton<RRenderSystem>;
@@ -88,6 +96,9 @@ public:
 	void RegisterShadowCaster(IShadowCaster* ShadowCaster);
 	void UnregisterShadowCaster(IShadowCaster* ShadowCaster);
 
+	void RegisterOverlayRenderable(IOverlayRenderable* OverlayRenderable);
+	void UnregisterOverlayRenderable(IOverlayRenderable* OverlayRenderable);
+
 	void SetActiveScene(RScene* Scene);
 	RScene* GetActiveScene() const;
 
@@ -132,8 +143,9 @@ protected:
 	bool					m_bIsUsingDeferredShading;
 
 	std::vector<RRenderMeshComponent*>	m_RegisteredRenderMeshComponents;
-	std::vector<ILight*>					m_RegisteredLights;
+	std::vector<ILight*>				m_RegisteredLights;
 	std::vector<IShadowCaster*>			m_RegisteredShadowCasters;
+	std::vector<IOverlayRenderable*>	m_OverlayRenderables;
 
 	RScene*					m_ActiveScene;
 };

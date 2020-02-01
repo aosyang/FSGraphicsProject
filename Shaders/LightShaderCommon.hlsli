@@ -68,7 +68,7 @@ float SampleShadowMap_BilinearFiltering(Texture2D shadowMap, float3 shadowPosH, 
 	return shadowMap.SampleCmpLevelZero(ShadowMapComparisonState, shadowPosH.xy, shadowPosH.z - depthOffset);
 }
 
-float SampleShadowMap_4x4PCF(Texture2D shadowMap, float3 shadowPosH, float depthOffset = 0.01f)
+float SampleShadowMap_4x4PCF(Texture2D shadowMap, float3 shadowPosH, float depthOffset = 0.01f, float PixelSpacing = 1.0f)
 {
 	// 4x4 PCF 
 	float final = 0;
@@ -76,7 +76,7 @@ float SampleShadowMap_4x4PCF(Texture2D shadowMap, float3 shadowPosH, float depth
 	{
 		for (float y = -1.5f; y <= 1.5f; y++)
 		{
-			float2 offset = float2(x, y) / 1024.0f;
+			float2 offset = float2(x, y) * PixelSpacing / 1024.0f;
 			final += shadowMap.SampleCmpLevelZero(ShadowMapComparisonState, shadowPosH.xy + offset, shadowPosH.z - depthOffset) / 16.0f;
 		}
 	}
@@ -90,7 +90,7 @@ float SampleCascadedShadowMap(float4 shadowPosH[3], float NdotL, float depth)
 	{
 		0.01f * saturate(1 - NdotL),
 		0.01f * saturate(1 - NdotL),
-		0.01 + 0.01f * saturate(1 - NdotL),
+		0.00f + 0.01f * saturate(1 - NdotL),
 	};
 
 	if (CascadedShadowCount == 1)
@@ -100,8 +100,8 @@ float SampleCascadedShadowMap(float4 shadowPosH[3], float NdotL, float depth)
 	else if (CascadedShadowCount > 1)
 	{
 		float level0 = SampleShadowMap_4x4PCF(ShadowDepthTexture[0], shadowPosH[0].xyz, shadowOffset[0]);
-		float level1 = SampleShadowMap_4x4PCF(ShadowDepthTexture[1], shadowPosH[1].xyz, shadowOffset[1]);
-		float level2 = (CascadedShadowCount > 2) ? SampleShadowMap_BilinearFiltering(ShadowDepthTexture[2], shadowPosH[2].xyz, shadowOffset[2]) : 1.0f;
+		float level1 = SampleShadowMap_4x4PCF(ShadowDepthTexture[1], shadowPosH[1].xyz, shadowOffset[1], 0.5f);
+		float level2 = (CascadedShadowCount > 2) ? SampleShadowMap_4x4PCF(ShadowDepthTexture[2], shadowPosH[2].xyz, shadowOffset[2], 0.25f) : 1.0f;
 
 		if (depth < CascadedShadowDepth[0])
 		{
@@ -115,8 +115,8 @@ float SampleCascadedShadowMap(float4 shadowPosH[3], float NdotL, float depth)
 		}
 		else if (CascadedShadowCount > 2 && depth < CascadedShadowDepth[2])
 		{
-			float blend = saturate((depth - CascadedShadowDepth[2] * 0.99995) / 0.00005);
-			return lerp(level2, 1.0f, blend);
+			// Does not blend the last level of shadow map
+			return level2;
 		}
 	}
 

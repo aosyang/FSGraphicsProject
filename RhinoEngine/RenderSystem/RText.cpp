@@ -12,11 +12,13 @@
 RText::RText()
 	: m_FontShader(nullptr), m_bNeedUpdateBuffer(true)
 {
+	GRenderer.RegisterOverlayRenderable(this);
 }
 
 RText::~RText()
 {
 	m_VertexBuffer.Release();
+	GRenderer.UnregisterOverlayRenderable(this);
 }
 
 void RText::Initialize(RTexture* fontTexture, UINT rows, UINT columns)

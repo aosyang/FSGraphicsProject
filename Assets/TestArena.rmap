@@ -26,9 +26,8 @@
     </SceneObject>
     <SceneObject Name="cube_east" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="BumpLighting">
-                <Texture Slot="0">/Grey.DDS</Texture>
-                <Texture Slot="1">/DiamondPlateNormal.dds</Texture>
+            <MeshElement Name="Box001" Shader="WorldAligned">
+                <Texture Slot="0">/DefaultGrid512.dds</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -46,8 +45,8 @@
     </SceneObject>
     <SceneObject Name="Sphere_0" Type="MeshObject" Mesh="/Sphere.FBX">
         <Material Index="0">
-            <MeshElement Name="Sphere001" Shader="Lighting">
-                <Texture Slot="0">/Grey.DDS</Texture>
+            <MeshElement Name="Sphere001" Shader="WorldAligned">
+                <Texture Slot="0">/DefaultGrid512.dds</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -136,13 +135,12 @@
     </SceneObject>
     <SceneObject Name="cube_east_0" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="BumpLighting">
-                <Texture Slot="0">/Grey.DDS</Texture>
-                <Texture Slot="1">/DiamondPlateNormal.dds</Texture>
+            <MeshElement Name="Box001" Shader="WorldAligned">
+                <Texture Slot="0">/DefaultGrid512.dds</Texture>
             </MeshElement>
         </Material>
         <Transform>
-            <Position>-700.000000, 120.000000, 1181.000000</Position>
+            <Position>-700.000000, 120.000000, 1200.000000</Position>
             <Rotation>0.000000, 0.785398, 0.000000</Rotation>
             <Scale>5.000000, 2.000000, 5.000000</Scale>
         </Transform>

@@ -478,6 +478,17 @@ void RRenderSystem::UnregisterShadowCaster(IShadowCaster* ShadowCaster)
 	StdRemoveChecked(m_RegisteredShadowCasters, ShadowCaster);
 }
 
+void RRenderSystem::RegisterOverlayRenderable(IOverlayRenderable* OverlayRenderable)
+{
+	assert(!StdContains(m_OverlayRenderables, OverlayRenderable));
+	m_OverlayRenderables.push_back(OverlayRenderable);
+}
+
+void RRenderSystem::UnregisterOverlayRenderable(IOverlayRenderable* OverlayRenderable)
+{
+	StdRemoveChecked(m_OverlayRenderables, OverlayRenderable);
+}
+
 void RRenderSystem::SetActiveScene(RScene* Scene)
 {
 	m_ActiveScene = Scene;
@@ -572,6 +583,17 @@ void RRenderSystem::RenderFrame()
 		cbScene.projMatrix = projMatrix;
 		cbScene.viewProjMatrix = viewMatrix * projMatrix;
 		cbScene.cameraPos = RenderCamera->GetWorldPosition();
+
+		// Set constant buffer for screen variables
+		auto& cbScreen = RConstantBuffers::cbGlobal.Data;
+		RConstantBuffers::cbGlobal.ClearData();
+
+		cbScreen.ScreenSize = RVec4((float)GetClientWidth(), (float)GetClientHeight(),
+									1.0f / (float)GetClientWidth(), 1.0f / (float)GetClientHeight());
+		cbScreen.UseGammaCorrection = UsingGammaCorrection();
+
+		RConstantBuffers::cbGlobal.UpdateBufferData();
+		RConstantBuffers::cbGlobal.BindBuffer();
 
 		int CascadedShadowsNum = 0;
 		RVec4 ShadowDepths;
@@ -669,6 +691,13 @@ void RRenderSystem::RenderFrame()
 
 	GDebugRenderer.Render();
 	GDebugRenderer.Reset();
+
+	// Clear the depth buffer while keeping the color buffer and render overlays on top of the screen
+	GRenderer.Clear(false);
+	for (auto OverlayRenderable : m_OverlayRenderables)
+	{
+		OverlayRenderable->Render();
+	}
 
 	Present();
 }

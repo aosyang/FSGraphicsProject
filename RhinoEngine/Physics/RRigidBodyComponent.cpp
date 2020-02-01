@@ -48,7 +48,7 @@ void RRigidBodyComponent::Update(float DeltaTime)
 
 		// Half box size already contains scale transform so the transform has scales of 1 for debug rendering
 		RTransform Transform(btVec3ToRVec3(PhysicsTransform.getOrigin()), btQuatToRQuat(PhysicsTransform.getRotation()));
-		GDebugRenderer.DrawBox(Context->BoxHalfSize * 2.0f, Transform.GetMatrix());
+		//GDebugRenderer.DrawBox(Context->BoxHalfSize * 2.0f, Transform.GetMatrix());
 
 		// Now we apply the scale to the object and translate it back by its offset to the box center
 		Transform.SetScale(Owner->GetScale());

@@ -17,7 +17,7 @@ RMatrix4(
 
 namespace
 {
-	float shadowSplitPoints[4] = { 0.0f, 0.05f, 0.4f, 1.0f };
+	float shadowSplitPoints[4] = { 0.0f, 0.05f, 0.2f, 1.0f };
 
 	bool DrawDebugCascadedFrustum = false;
 	bool DebugFreezeFrustum = false;
@@ -62,7 +62,7 @@ void RDirectionalLightComponent::PrepareDepthPass(int PassIndex, const RenderVie
 	RConstantBuffers::cbScene.ClearData();
 
 	// Distance between shadow caster and center of frustum
-	float LightDistPerLevel[3] = { 1000.0f, 2000.0f, 2000.0f };
+	float LightDistPerLevel[3] = { 1000.0f, 2000.0f, 6000.0f };
 
 	RFrustum* ViewFrustum = View.Frustum;
 

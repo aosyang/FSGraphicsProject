@@ -17,6 +17,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	FightingGameApp app;
 
 	GEngine.BindApp(&app);
+	GEngine.SetUseCustomRenderingPipeline(false);
 
 	if (GEngine.Initialize())
 	{
