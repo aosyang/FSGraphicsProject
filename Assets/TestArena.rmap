@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scene>
     <SceneObject Name="Floor" Type="MeshObject" Mesh="/cube.FBX">
+        <Material Index="0">
+            <MeshElement Name="Box001" Shader="WorldAligned">
+                <Texture Slot="0">/DefaultGrid512.dds</Texture>
+            </MeshElement>
+        </Material>
         <Transform>
             <Position>0.000000, 0.000000, 0.000000</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>
@@ -9,9 +14,8 @@
     </SceneObject>
     <SceneObject Name="cube_west" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="BumpLighting">
-                <Texture Slot="0">/Grey.DDS</Texture>
-                <Texture Slot="1">/DiamondPlateNormal.dds</Texture>
+            <MeshElement Name="Box001" Shader="WorldAligned">
+                <Texture Slot="0">/DefaultGrid256.dds</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -68,9 +72,8 @@
     </SceneObject>
     <SceneObject Name="cube_stair2" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="BumpLighting">
-                <Texture Slot="0">/Grey.DDS</Texture>
-                <Texture Slot="1">/DiamondPlateNormal.dds</Texture>
+            <MeshElement Name="Box001" Shader="WorldAligned">
+                <Texture Slot="0">/DefaultGrid256.dds</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -81,9 +84,8 @@
     </SceneObject>
     <SceneObject Name="cube_stair1" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="BumpLighting">
-                <Texture Slot="0">/Grey.DDS</Texture>
-                <Texture Slot="1">/DiamondPlateNormal.dds</Texture>
+            <MeshElement Name="Box001" Shader="WorldAligned">
+                <Texture Slot="0">/DefaultGrid256.dds</Texture>
             </MeshElement>
         </Material>
         <Transform>
@@ -94,9 +96,8 @@
     </SceneObject>
     <SceneObject Name="cube_stair0" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="BumpLighting">
-                <Texture Slot="0">/Grey.DDS</Texture>
-                <Texture Slot="1">/DiamondPlateNormal.dds</Texture>
+            <MeshElement Name="Box001" Shader="WorldAligned">
+                <Texture Slot="0">/DefaultGrid256.dds</Texture>
             </MeshElement>
         </Material>
         <Transform>
