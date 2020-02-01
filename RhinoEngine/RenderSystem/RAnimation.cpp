@@ -19,7 +19,7 @@ void RAnimationPlayer::Proceed(float deltaTime)
 	if (Animation && !IsAnimDone)
 	{
 		// Changing time may cause start time greater than end time
-		if (CurrentPlaybackTime >= Animation->GetEndTime() - 1)
+		if (CurrentPlaybackTime >= Animation->GetEndTime())
 		{
 			CurrentPlaybackTime = Animation->GetStartTime();
 		}
@@ -28,11 +28,12 @@ void RAnimationPlayer::Proceed(float deltaTime)
 		CurrentPlaybackTime += deltaTime * Animation->GetFrameRate() * TimeScale;
 		bool startOver = false;
 
-		if (CurrentPlaybackTime >= Animation->GetEndTime() - 1)
+		// The playback time has passed the end time of the animation
+		if (CurrentPlaybackTime >= Animation->GetEndTime())
 		{
 			if (Animation->IsLooping())
 			{
-				float AnimDuration = Animation->GetEndTime() - Animation->GetStartTime() - 1;
+				float AnimDuration = Animation->GetEndTime() - Animation->GetStartTime();
 
 				if (AnimDuration == 0.0f)
 				{
@@ -42,16 +43,16 @@ void RAnimationPlayer::Proceed(float deltaTime)
 				}
 				else
 				{
-					do
+					while (CurrentPlaybackTime >= Animation->GetEndTime())
 					{
 						CurrentPlaybackTime -= AnimDuration;
 						startOver = true;
-					} while (CurrentPlaybackTime >= Animation->GetEndTime() - 1);
+					}
 				}
 			}
 			else
 			{
-				CurrentPlaybackTime = Animation->GetEndTime() - 1;
+				CurrentPlaybackTime = Animation->GetEndTime();
 				IsAnimDone = true;
 			}
 		}
@@ -69,7 +70,6 @@ void RAnimationPlayer::Proceed(float deltaTime)
 		{
 			RootOffset = RVec3(0, 0, 0);
 		}
-
 	}
 }
 
