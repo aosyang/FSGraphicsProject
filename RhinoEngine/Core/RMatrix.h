@@ -127,11 +127,17 @@ public:
 	static RMatrix4 CreateScale(const RVec3& scale);
 	static RMatrix4 CreateScale(float sx, float sy, float sz);
 
+	static RMatrix4 CreateTransform(const RVec3& Position, const RQuat& Rotation, const RVec3& Scale = RVec3(1.0f, 1.0f, 1.0f));
+
 	static RMatrix4 CreatePerspectiveProjectionLH(float fov, float aspect, float zNear, float zFar);
 	static RMatrix4 CreateOrthographicProjectionLH(float viewWidth, float viewHeight, float zNear, float zFar);
 	static RMatrix4 CreateLookAtViewLH(const RVec3& eye, const RVec3& lookAt, const RVec3& up);
 
-	static RMatrix4 Lerp(const RMatrix4& lhs, const RMatrix4&, float t);
+	// Linear interpolates on two matrices
+	static RMatrix4 Lerp(const RMatrix4& lhs, const RMatrix4& rhs, float t);
+
+	// Spherical linear interpolates two matrices (Better handled rotation than lerp)
+	static RMatrix4 Slerp(const RMatrix4& lhs, const RMatrix4& rhs, float t);
 };
 
 RVec4 operator*(const RVec4& v, const RMatrix4& m);
@@ -265,5 +271,15 @@ FORCEINLINE RMatrix4 RMatrix4::CreateScale(float sx, float sy, float sz)
 	mat.m[2][2] = sz;
 
 	return mat;
+}
+
+FORCEINLINE RMatrix4 RMatrix4::CreateTransform(const RVec3& Position, const RQuat& Rotation, const RVec3& Scale /*= RVec3(1.0f, 1.0f, 1.0f)*/)
+{
+	RMatrix4 TransformMatrix = RMatrix4::IDENTITY;
+	const RMatrix3 ScaleRotation = RMatrix3::CreateScale(Scale) * Rotation.GetRotationMatrix();
+	TransformMatrix.SetRotation(ScaleRotation);
+	TransformMatrix.SetTranslation(Position);
+
+	return TransformMatrix;
 }
 

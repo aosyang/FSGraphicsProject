@@ -23,7 +23,9 @@ void RAnimationPlayer::Proceed(float deltaTime)
 		{
 			CurrentPlaybackTime = Animation->GetStartTime();
 		}
-		RVec3 start_offset = Animation->GetRootPosition(CurrentPlaybackTime);
+
+		// Root motion offset at the beginning of this frame
+		RVec3 PrevRootOffset = Animation->GetRootPosition(CurrentPlaybackTime);
 
 		CurrentPlaybackTime += deltaTime * Animation->GetFrameRate() * TimeScale;
 		bool startOver = false;
@@ -52,18 +54,29 @@ void RAnimationPlayer::Proceed(float deltaTime)
 			}
 			else
 			{
-				CurrentPlaybackTime = Animation->GetEndTime();
+				CurrentPlaybackTime = Animation->GetEndTime() - 0.01f;
 				IsAnimDone = true;
 			}
 		}
 
 		if (Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
 		{
-			RootOffset = Animation->GetRootPosition(CurrentPlaybackTime) - start_offset;
+			RootOffset = Animation->GetRootPosition(CurrentPlaybackTime) - PrevRootOffset;
+
+			if (RootOffset.Z() > 100.0f)
+			{
+				DebugBreak();
+			}
+
 			if (startOver)
 			{
-				RootOffset = Animation->GetRootPosition(Animation->GetEndTime() - 1) - start_offset +
+				RootOffset = Animation->GetRootPosition(Animation->GetEndTime() - 1) - PrevRootOffset +
 							 Animation->GetRootPosition(CurrentPlaybackTime) - Animation->GetInitRootPosition();
+			}
+
+			if (RootOffset.Z() > 100.0f)
+			{
+				DebugBreak();
 			}
 		}
 		else
@@ -164,31 +177,14 @@ bool RAnimationBlender::GetCurrentBlendedNodePose(int SourceNodeId, int TargetNo
 		m_SourceAnimation.Animation->GetNodePose(SourceNodeId, m_SourceAnimation.CurrentPlaybackTime, &mat1);
 		m_TargetAnimation.Animation->GetNodePose(TargetNodeId, m_TargetAnimation.CurrentPlaybackTime, &mat2);
 
-		// Apply inversed root translation
-		if (m_SourceAnimation.Animation->HasRootMotion())
-		{
-			mat1 *= RMatrix4::CreateTranslation(-m_SourceAnimation.Animation->GetRootPosition(m_SourceAnimation.CurrentPlaybackTime));
-		}
-
-		if (m_TargetAnimation.Animation->HasRootMotion())
-		{
-			mat2 *= RMatrix4::CreateTranslation(-m_TargetAnimation.Animation->GetRootPosition(m_TargetAnimation.CurrentPlaybackTime));
-		}
-
 		float t = min(1.0f, m_ElapsedBlendTime / m_BlendTime);
-		*OutMatrix = RMatrix4::Lerp(mat1, mat2, t);
+		*OutMatrix = RMatrix4::Slerp(mat1, mat2, t);
 
 		return true;
 	}
 	else if (m_SourceAnimation.Animation)
 	{
 		m_SourceAnimation.Animation->GetNodePose(SourceNodeId, m_SourceAnimation.CurrentPlaybackTime, OutMatrix);
-
-		if (m_SourceAnimation.Animation->HasRootMotion())
-		{
-			*OutMatrix *= RMatrix4::CreateTranslation(-m_SourceAnimation.Animation->GetRootPosition(m_SourceAnimation.CurrentPlaybackTime));
-		}
-
 		return true;
 	}
 
@@ -293,7 +289,18 @@ void RAnimation::GetNodePose(int NodeId, float Time, RMatrix4* OutMatrix) const
 	assert(Time >= 0 && Time < m_FrameCount);
 
 	int frame1 = (int)Time;
-	int frame2 = ((int)Time + 1) % m_FrameCount;
+	int frame2;
+	
+	if (IsLooping())
+	{
+		frame2 = ((int)Time + 1) % m_FrameCount;
+	}
+	else
+	{
+		// Non-looping animations should stay at the last frame when finish playing
+		frame2 = RMath::Min((int)Time + 1, m_FrameCount - 1);
+	}
+
 	float t = Time - frame1;
 
 	const RMatrix4& Transform1 = m_NodeKeyFrames[NodeId][frame1];
@@ -305,6 +312,12 @@ void RAnimation::GetNodePose(int NodeId, float Time, RMatrix4* OutMatrix) const
 
 	Transform1.Decompose(Position1, Rotation1, Scale1);
 	Transform2.Decompose(Position2, Rotation2, Scale2);
+
+	if (HasRootMotion())
+	{
+		Position1 -= GetRootPosition((float)frame1);
+		Position2 -= GetRootPosition((float)frame2);
+	}
 
 	RTransform ResultTransform(
 		RVec3::Lerp(Position1, Position2, t),
@@ -342,9 +355,10 @@ RVec3 RAnimation::GetRootPosition(float time) const
 	time -= m_StartTime;
 
 	int frame1 = (int)time;
-	int frame2 = ((int)time + 1) % m_FrameCount;
-	//if (frame2 < frame1)
-	//	frame2 = frame1;
+
+	// If the animation has reached its end and loops from the beginning,
+	// make sure we don't end up taking a large step back with the root offset
+	int frame2 = RMath::Min(((int)time + 1), m_FrameCount - 1);
 	float t = time - frame1;
 
 	RVec3 va = m_RootDisplacement[frame1];

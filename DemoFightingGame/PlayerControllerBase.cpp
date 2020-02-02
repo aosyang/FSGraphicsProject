@@ -181,11 +181,11 @@ float LerpDegreeAngle(float from, float to, float t)
 
 void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 MoveVec)
 {
-	KinematicCharacterController->setWalkDirection(RVec3TobtVec3(MoveVec));
-
 	bool bCanMovePlayer = CanMovePlayerWithInput();
 	if (bCanMovePlayer)
 	{
+		KinematicCharacterController->setWalkDirection(RVec3TobtVec3(MoveVec));
+
 		RVec3 PlannarMoveVector = MoveVec;
 		PlannarMoveVector.SetY(0.0f);
 
@@ -201,8 +201,14 @@ void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 MoveVec)
 			SetBehavior(BHV_Idle);
 		}
 	}
+	else
+	{
+		KinematicCharacterController->setWalkDirection(btVector3(0, 0, 0));
+	}
 
+	RVec3 RootMotionTranslation = (RVec4(GetRootOffset(), 0) * GetTransformMatrix()).ToVec3();
 	btTransform PhysicsTransform = GhostObject->getWorldTransform();
+	PhysicsTransform.setOrigin(PhysicsTransform.getOrigin() + RVec3TobtVec3(RootMotionTranslation));
 	PhysicsTransform.setRotation(RQuatTobtQuat(RQuat::Euler(0.0f, DEG_TO_RAD(m_Rotation), 0.0f)));
 	GhostObject->setWorldTransform(PhysicsTransform);
 

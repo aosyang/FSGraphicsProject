@@ -370,6 +370,22 @@ RMatrix4 RMatrix4::Lerp(const RMatrix4& lhs, const RMatrix4& rhs, float t)
 	return result;
 }
 
+RMatrix4 RMatrix4::Slerp(const RMatrix4& lhs, const RMatrix4& rhs, float t)
+{
+	RVec3 Position1, Position2;
+	RQuat Rotation1, Rotation2;
+	RVec3 Scale1, Scale2;
+
+	lhs.Decompose(Position1, Rotation1, Scale1);
+	rhs.Decompose(Position2, Rotation2, Scale2);
+
+	return CreateTransform(
+		RVec3::Lerp(Position1, Position2, t),
+		RQuat::Slerp(Rotation1, Rotation2, t),
+		RVec3::Lerp(Scale1, Scale2, t)
+	);
+}
+
 RVec4 operator*(const RVec4& v, const RMatrix4& m)
 {
 	RVec4 v_result = v;
