@@ -52,13 +52,18 @@ void RNavigationSystem::DebugProjectPointToNavmesh(const RVec3& Point) const
 	NavMeshProjectionResult Result = NavMeshData.ProjectPointToNavmesh(Point);
 	if (Result.IsValid())
 	{
-		const NavMeshTriangleData& Triangle = NavMeshData.GetNavMeshTriangleData(Result.Triangle);
-		for (int i = 0; i < 3; i++)
+		if (Result.Triangle != -1)
 		{
-			RVec3 p0 = NavMeshData.GetNavMeshPointData(Triangle.Points[i]).WorldPosition;
-			RVec3 p1 = NavMeshData.GetNavMeshPointData(Triangle.Points[(i + 1) % 3]).WorldPosition;
-			GDebugRenderer.DrawLine(p0, p1);
+			const NavMeshTriangleData& Triangle = NavMeshData.GetNavMeshTriangleData(Result.Triangle);
+			for (int i = 0; i < 3; i++)
+			{
+				RVec3 p0 = NavMeshData.GetNavMeshPointData(Triangle.Points[i]).WorldPosition;
+				RVec3 p1 = NavMeshData.GetNavMeshPointData(Triangle.Points[(i + 1) % 3]).WorldPosition;
+				GDebugRenderer.DrawLine(p0, p1);
+			}
 		}
+
+		GDebugRenderer.DrawSphere(Result.PositionOnNavmesh, 20, RColor::Cyan);
 	}
 
 	GDebugRenderer.DrawSphere(Point, 50);

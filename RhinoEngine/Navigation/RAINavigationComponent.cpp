@@ -13,6 +13,10 @@ RAINavigationComponent::RAINavigationComponent(RSceneObject* InOwner)
 	: Base(InOwner)
 	, DesiredMoveDirection(0.0f, 0.0f, 0.0f)
 	, ReachRadius(10.0f)
+	, LastAgentPosition(RNavigationSystem::InvalidPosition)
+	, TimeStuck(0.0f)
+	, StuckCheckRadius(50.0f)
+	, MaxTimeAllowedInStuck(1.0f)
 {
 
 }
@@ -33,10 +37,27 @@ void RAINavigationComponent::Update(float DeltaTime)
 		{
 			RVec3 MoveVector = NavPath[0] - AIPosition;
 			DesiredMoveDirection = MoveVector.GetNormalized2D();
+
+			if (RVec3::SquaredDistance(LastAgentPosition, AIPosition) > RMath::Square(StuckCheckRadius))
+			{
+				LastAgentPosition = AIPosition;
+				TimeStuck = 0.0f;
+			}
+			else
+			{
+				TimeStuck += DeltaTime;
+				if (TimeStuck > MaxTimeAllowedInStuck)
+				{
+					// Agent is stuck. Invalidate the path and finish current path-finding
+					NavPath.clear();
+					OnFinishedNavigation.Execute(EAINavResult::Failed);
+					TimeStuck = 0.0f;
+				}
+			}
 		}
 		else
 		{
-			OnFinishedNavigation.Execute();
+			OnFinishedNavigation.Execute(EAINavResult::Succeeded);
 			DesiredMoveDirection = RVec3::Zero();
 		}
 	}

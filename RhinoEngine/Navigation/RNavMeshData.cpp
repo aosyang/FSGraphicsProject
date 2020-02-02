@@ -8,6 +8,7 @@
 
 #include "RNavMeshData.h"
 #include "RFunnelPathProcessor.h"
+#include "RNavigationSystem.h"
 
 namespace
 {
@@ -68,6 +69,13 @@ void NavMeshPointData::AddNeighbor(int NeighborId, const RVec3& NeighborPosition
 	Neighbors[NumNeighbors] = NeighborId;
 	NeighborsDistance[NumNeighbors] = RVec3::Distance(NeighborPosition, WorldPosition);
 	NumNeighbors++;
+}
+
+NavMeshProjectionResult::NavMeshProjectionResult()
+	: Triangle(-1)
+	, PositionOnNavmesh(RNavigationSystem::InvalidPosition)
+{
+
 }
 
 void RNavMeshData::AddTriangle(const RVec3& p0, const RVec3& p1, const RVec3& p2, int RegionId)
@@ -309,7 +317,7 @@ std::vector<NavPathNode> RNavMeshData::PerformFunnel(const std::vector<NavPathNo
 	return PathProcessor.Execute();
 }
 
-NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point, float MaxHeightDifference /*= 50.0f*/) const
+NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point, float MaxHeightDifference /*= 50.0f*/, float Radius /*= 40.0f*/) const
 {
 	if (Point.HasNan())
 	{
@@ -318,6 +326,10 @@ NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point, 
 	}
 
 	NavMeshProjectionResult Result;
+	float MinDistToEdgeSqr = -1;
+	int MinEdgePoint0 = -1, MinEdgePoint1 = -1;
+	int MinTriangleIdx = -1;
+
 	for (int Index = 0; Index < (int)NavMeshTriangles.size(); Index++)
 	{
 		const auto& Triangle = NavMeshTriangles[Index];
@@ -352,6 +364,28 @@ NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point, 
 				break;
 			}
 		}
+		else
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				int p0 = Triangle.Points[i];
+				int p1 = Triangle.Points[(i + 1) % 3];
+				float SqrDist = RMath::SqrDist_PointToLineSegment(Point, NavMeshPoints[p0].WorldPosition, NavMeshPoints[p1].WorldPosition);
+				if (MinDistToEdgeSqr < 0 || SqrDist < MinDistToEdgeSqr)
+				{
+					MinDistToEdgeSqr = SqrDist;
+					MinEdgePoint0 = p0;
+					MinEdgePoint1 = p1;
+					MinTriangleIdx = Index;
+				}
+			}
+		}
+	}
+
+	if (Result.Triangle == -1 && MinDistToEdgeSqr >= 0.0f)
+	{
+		Result.Triangle = MinTriangleIdx;
+		Result.PositionOnNavmesh = RMath::GetClosestPointOnLineSegment(Point, NavMeshPoints[MinEdgePoint0].WorldPosition, NavMeshPoints[MinEdgePoint1].WorldPosition);
 	}
 
 	return Result;

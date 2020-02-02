@@ -40,7 +40,6 @@ private:
 
 private:
 	RCamera*				m_Camera;
-	RShadowMap				m_ShadowMap;
 
 	PlayerControllerBase*	m_Player[MaxNumPlayers];
 	int						CurrentPlayerIndex;

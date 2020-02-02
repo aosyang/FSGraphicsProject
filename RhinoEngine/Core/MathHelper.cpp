@@ -48,6 +48,51 @@ void RMath::Barycentric2D_XZ(const RVec3& p, const RVec3& a, const RVec3& b, con
 	Barycentric(p0, a0, b0, c0, u, v, w);
 }
 
+float RMath::SqrDist_PointToLineSegment(const RVec3& p, const RVec3& a, const RVec3& b)
+{
+	assert(a - b != RVec3::Zero());
+
+	RVec3 ap = p - a;
+	RVec3 ab = b - a;
+
+	float f = RVec3::Dot(ap, ab) / RVec3::Dot(ab, ab);
+	if (f <= 0.0f)
+	{
+		return ap.SquaredMagitude();
+	}
+	else if (f >= 1.0f)
+	{
+		return (p - b).SquaredMagitude();
+	}
+	else
+	{
+		RVec3 q = a + ab * f;
+		return (p - q).SquaredMagitude();
+	}
+}
+
+RVec3 RMath::GetClosestPointOnLineSegment(const RVec3& p, const RVec3& a, const RVec3& b)
+{
+	assert(a != b);
+
+	RVec3 ap = p - a;
+	RVec3 ab = b - a;
+
+	float f = RVec3::Dot(ap, ab) / RVec3::Dot(ab, ab);
+	if (f <= 0.0f)
+	{
+		return a;
+	}
+	else if (f >= 1.0f)
+	{
+		return b;
+	}
+	else
+	{
+		return a + (b - a) * f;
+	}
+}
+
 int RMath::WeightedDiceRoll(const std::vector<float>& Weights)
 {
 	float Sum = 0.0f;

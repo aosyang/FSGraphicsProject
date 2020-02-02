@@ -130,7 +130,7 @@ std::vector<RVec3> RNavMeshRegionSimplifier::SimplifyEdges(const std::vector<RVe
 
 	for (int i = 1; i < (int)Edges.size() - 1; i++)
 	{
-		float SqrDist = CalculateSquaredDistanceOfPointToLineSegment(Edges[i], Start, End);
+		float SqrDist = RMath::SqrDist_PointToLineSegment(Edges[i], Start, End);
 		if (SqrDist > MaxSqrDist)
 		{
 			MaxSqrDist = SqrDist;
@@ -157,28 +157,5 @@ std::vector<RVec3> RNavMeshRegionSimplifier::SimplifyEdges(const std::vector<RVe
 		Result.insert(Result.end(), Right.begin(), Right.end());
 
 		return Result;
-	}
-}
-
-float RNavMeshRegionSimplifier::CalculateSquaredDistanceOfPointToLineSegment(const RVec3& p, const RVec3& a, const RVec3& b)
-{
-	assert(a - b != RVec3::Zero());
-
-	RVec3 ap = p - a;
-	RVec3 ab = b - a;
-
-	float f = RVec3::Dot(ap, ab) / RVec3::Dot(ab, ab);
-	if (f <= 0.0f)
-	{
-		return ap.SquaredMagitude();
-	}
-	else if (f >= 1.0f)
-	{
-		return (p - b).SquaredMagitude();
-	}
-	else
-	{
-		RVec3 q = a + ab * f;
-		return (p - q).SquaredMagitude();
 	}
 }

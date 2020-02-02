@@ -91,7 +91,7 @@ void AIBehavior_Roamer::Wait(float Duration)
 	WaitDuration = Duration;
 }
 
-void AIBehavior_Roamer::OnFinishedPathfinding()
+void AIBehavior_Roamer::OnFinishedPathfinding(EAINavResult Result)
 {
 	ControlledPlayer->SetMovementInput(RVec3::Zero());
 

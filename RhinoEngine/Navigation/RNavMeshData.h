@@ -82,10 +82,7 @@ struct NavMeshEdgeData
 
 struct NavMeshProjectionResult
 {
-	NavMeshProjectionResult()
-		: Triangle(-1)
-	{
-	}
+	NavMeshProjectionResult();
 
 	bool IsValid() const
 	{
@@ -109,7 +106,7 @@ public:
 	bool QueryPath(const RVec3& Start, const RVec3& Goal, std::vector<RVec3>& OutPath);
 
 	// Project a point to navmesh
-	NavMeshProjectionResult ProjectPointToNavmesh(const RVec3& Point, float MaxHeightDifference = 50.0f) const;
+	NavMeshProjectionResult ProjectPointToNavmesh(const RVec3& Point, float MaxHeightDifference = 50.0f, float Radius = 40.0f) const;
 
 	NavMeshPointData& GetNavMeshPointData(int Index);
 	const NavMeshPointData& GetNavMeshPointData(int Index) const;

@@ -66,6 +66,12 @@ namespace RMath
 	// Barycentric with all positions considered on xz-plane
 	void Barycentric2D_XZ(const RVec3& p, const RVec3& a, const RVec3& b, const RVec3& c, float& u, float& v, float &w);
 
+	// Calculate squared distance from a point to a line segment
+	float SqrDist_PointToLineSegment(const RVec3& p, const RVec3& a, const RVec3& b);
+
+	// Get a closest point to given one on a line segment
+	RVec3 GetClosestPointOnLineSegment(const RVec3& p, const RVec3& a, const RVec3& b);
+
 	int WeightedDiceRoll(const std::vector<float>& Weights);
 }
 

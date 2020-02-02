@@ -707,8 +707,6 @@ void RNavMeshGenerator::GenerateRegions()
 	}
 }
 
-#pragma optimize( "", off )
-
 void RNavMeshGenerator::GenerateRegionContours()
 {
 	RegionEdgePoints.resize(UniqueRegionIds.size());
@@ -848,8 +846,6 @@ void RNavMeshGenerator::GenerateRegionContours()
 	RegionSimplifier.Execute(UniqueRegionIds, RegionEdgePoints);
 #endif
 }
-
-#pragma optimize( "", on )
 
 void RNavMeshGenerator::TriangulateRegions(RNavMeshData& OutNavMeshData)
 {

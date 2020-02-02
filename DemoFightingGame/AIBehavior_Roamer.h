@@ -7,6 +7,7 @@
 #pragma once
 
 #include "FTGPlayerController.h"
+#include "Navigation/RAINavigationComponent.h"
 
 class RAINavigationComponent;
 
@@ -21,7 +22,7 @@ public:
 private:
 	void Wait(float Duration);
 
-	void OnFinishedPathfinding();
+	void OnFinishedPathfinding(EAINavResult Result);
 
 private:
 	RAINavigationComponent* AINavigationComponent;
