@@ -294,33 +294,35 @@ void RAnimation::GetNodePose(int NodeId, float Time, RMatrix4* OutMatrix) const
 
 	int frame1 = (int)Time;
 	int frame2 = ((int)Time + 1) % m_FrameCount;
-	//if (frame2 < frame1)
-	//	frame2 = frame1;
 	float t = Time - frame1;
 
+	const RMatrix4& Transform1 = m_NodeKeyFrames[NodeId][frame1];
+	const RMatrix4& Transform2 = m_NodeKeyFrames[NodeId][frame2];
+
+	RVec3 Position1, Position2;
+	RQuat Rotation1, Rotation2;
+	RVec3 Scale1, Scale2;
+
+	Transform1.Decompose(Position1, Rotation1, Scale1);
+	Transform2.Decompose(Position2, Rotation2, Scale2);
+
+	RTransform ResultTransform(
+		RVec3::Lerp(Position1, Position2, t),
+		RQuat::Slerp(Rotation1, Rotation2, t),
+		RVec3::Lerp(Scale1, Scale2, t)
+	);
+
+	*OutMatrix = ResultTransform.GetMatrix();
+
+#if 0
 	// Linear interpolate two matrices
-	// TODO: Use quaternion slerp and position lerp instead!
 	for (int i = 0; i < 16; i++)
 	{
 		float va = ((float*)&m_NodeKeyFrames[NodeId][frame1])[i];
 		float vb = ((float*)&m_NodeKeyFrames[NodeId][frame2])[i];
 		((float*)OutMatrix)[i] = va + (vb - va) * t;
 	}
-	//XMMATRIX m1 = XMLoadFloat4x4(&m_NodeKeyFrames[nodeId][frame1]);
-	//XMMATRIX m2 = XMLoadFloat4x4(&m_NodeKeyFrames[nodeId][frame2]);
-	//XMVECTOR s1, s2, q1, q2, t1, t2;
-	//XMMatrixDecompose(&s1, &q1, &t1, m1);
-	//XMMatrixDecompose(&s2, &q2, &t2, m2);
-
-	//XMVECTOR s = XMVectorLerp(s1, s2, t);
-	//XMVECTOR q = XMQuaternionSlerp(q1, q2, t);
-	//XMVECTOR tm = XMVectorLerp(t1, t2, t);
-
-	//XMVECTOR vec_zero = XMLoadFloat3(&XMFLOAT3(0.0f, 0.0f, 0.0f));
-	//XMVECTOR quat_identity = XMLoadFloat4(&XMFLOAT4(0, 0, 0, 1));
-	//XMMATRIX m = XMMatrixTransformation(vec_zero, quat_identity, s, vec_zero, q, tm);
-
-	//XMStoreFloat4x4(matrix, m);
+#endif
 }
 
 RVec3 RAnimation::GetInitRootPosition() const
