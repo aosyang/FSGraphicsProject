@@ -203,21 +203,40 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		//GDebugRenderer.DrawSphere(cap.start, cap.radius, color);
 		//GDebugRenderer.DrawSphere(cap.end, cap.radius, color);
 
-		char msg_buf[1024];
 		RVec3 playerPos = CurrentPlayer->GetPosition();
 		float playerRot = CurrentPlayer->GetPlayerRotation();
 		RAnimationBlender& blender = CurrentPlayer->GetAnimBlender();
-		sprintf_s(msg_buf, 1024, "Player: (%f, %f, %f), rot: %f\n"
-			"Blend From : %s\n"
-			"Blend To   : %s\n"
-			"Blend time : %f\n"
-			"%s",
-			playerPos.X(), playerPos.Y(), playerPos.Z(), playerRot,
-			blender.GetSourceAnimation() ? blender.GetSourceAnimation()->GetName().c_str() : "",
-			blender.GetTargetAnimation() ? blender.GetTargetAnimation()->GetName().c_str() : "",
-			blender.GetElapsedBlendTime(),
-			FTGPlayerController::DrawDebugHitShape ? "Draw debug hit shape" : "");
-		m_Text.SetText(msg_buf, RColor(0, 1, 0));
+		float SourcePlayback = blender.GetSourcePlaybackTime();
+
+		std::stringstream DebugMsg;
+		DebugMsg << "Player: ("
+				 << playerPos.X() << ", "
+				 << playerPos.Y() << ", "
+				 << playerPos.Z() << "), rot: "
+				 << playerRot << std::endl;
+
+		DebugMsg << "Source animation : ";
+		if (blender.GetSourceAnimation())
+		{
+			DebugMsg << blender.GetSourceAnimation()->GetName();
+		}
+		DebugMsg << std::endl;
+
+		DebugMsg << "Source start time : " << blender.GetSourceAnimation()->GetStartTime() << std::endl;
+		DebugMsg << "Source end time   : " << blender.GetSourceAnimation()->GetEndTime() << std::endl;
+		DebugMsg << "Source playback time : " << SourcePlayback << std::endl;
+		DebugMsg << "Current root motion : " << blender.GetCurrentRootOffset().ToString() << std::endl;
+
+		DebugMsg << "Blend from : " << (blender.GetSourceAnimation() ? blender.GetSourceAnimation()->GetName() : "") << std::endl;
+		DebugMsg << "Blend to   : " << (blender.GetTargetAnimation() ? blender.GetTargetAnimation()->GetName() : "") << std::endl;
+		DebugMsg << "Blend time : " << blender.GetElapsedBlendTime() << std::endl;
+
+		if (FTGPlayerController::DrawDebugHitShape)
+		{
+			DebugMsg << "Draw debug hit shape" << std::endl;
+		}
+
+		m_Text.SetText(DebugMsg.str().c_str(), RColor(0, 1, 0), RColor(0, 0, 0, 0.75f));
 	}
 
 	UpdateCameraPosition(timer.DeltaTime());
