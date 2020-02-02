@@ -14,6 +14,77 @@
 
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
 
+namespace
+{
+	static const float FixedTimestamp = 1.0f / 60.0f;
+}
+
+class RKinematicCharacterController : public btKinematicCharacterController
+{
+public:
+	RKinematicCharacterController(btPairCachingGhostObject* ghostObject, btConvexShape* convexShape, btScalar stepHeight, const btVector3& up = btVector3(1.0, 0.0, 0.0))
+		: btKinematicCharacterController(ghostObject, convexShape, stepHeight, up)
+		, LocalTime(0.0f)
+		, NumSimulationSubSteps(0)
+		, CurrentFrame(0)
+	{
+		const btTransform& PhysicsTransform = ghostObject->getWorldTransform();
+		for (int i = 0; i < 2; i++)
+		{
+			ControllerPosition[i] = btVec3ToRVec3(PhysicsTransform.getOrigin());
+			ControllerRotation[i] = btQuatToRQuat(PhysicsTransform.getRotation());
+		}
+	}
+
+	// Override the update function from btKinematicCharacterController so it can handle transform interpolation
+	virtual void updateAction(btCollisionWorld * collisionWorld, btScalar deltaTime) override
+	{
+		preStep(collisionWorld);
+		playerStep(collisionWorld, deltaTime);
+
+		const btTransform& PhysicsTransform = getGhostObject()->getWorldTransform();
+		ControllerPosition[CurrentFrame] = btVec3ToRVec3(PhysicsTransform.getOrigin());
+		ControllerRotation[CurrentFrame] = btQuatToRQuat(PhysicsTransform.getRotation());
+
+		CurrentFrame = 1 - CurrentFrame;
+	}
+
+	void Update(float DeltaTime)
+	{
+		LocalTime += DeltaTime;
+
+		if (LocalTime > FixedTimestamp)
+		{
+			NumSimulationSubSteps = int(LocalTime / FixedTimestamp);
+			LocalTime -= NumSimulationSubSteps * FixedTimestamp;
+		}
+	}
+
+	RVec3 GetInterpolatedPosition() const
+	{
+		float t = LocalTime / FixedTimestamp;
+		assert(t >= 0.0f && t <= 1.0f);
+
+		return RVec3::Lerp(ControllerPosition[1 - CurrentFrame], ControllerPosition[CurrentFrame], t);
+	}
+
+	RQuat GetInterpolatedRotation() const
+	{
+		float t = LocalTime / FixedTimestamp;
+		assert(t >= 0.0f && t <= 1.0f);
+
+		return RQuat::Slerp(ControllerRotation[1 - CurrentFrame], ControllerRotation[CurrentFrame], t);
+	}
+
+private:
+	float LocalTime;
+	int NumSimulationSubSteps;
+
+	int CurrentFrame;
+	RVec3 ControllerPosition[2];
+	RQuat ControllerRotation[2];
+};
+
 std::list<RSceneObject*> PlayerControllerBase::ActivePlayerControllers;
 
 PlayerControllerBase::PlayerControllerBase(const RConstructingParams& Params)
@@ -29,7 +100,7 @@ PlayerControllerBase::PlayerControllerBase(const RConstructingParams& Params)
 
 	GhostObject = std::make_unique<btPairCachingGhostObject>();
 	CapsuleShape = std::make_unique<btCapsuleShape>(CapsuleRadius, CapsuleHeight);
-	KinematicCharacterController = std::make_unique<btKinematicCharacterController>(GhostObject.get(), CapsuleShape.get(), 30.0f, btVector3(0.0f, 1.0f, 0.0f));
+	KinematicCharacterController = std::make_unique<RKinematicCharacterController>(GhostObject.get(), CapsuleShape.get(), 30.0f, btVector3(0.0f, 1.0f, 0.0f));
 	KinematicCharacterController->setGravity(btVector3(0, -980 * 3, 0));
 	KinematicCharacterController->setFallSpeed(55000);
 
@@ -52,9 +123,10 @@ void PlayerControllerBase::Update(float DeltaTime)
 {
 	Base::Update(DeltaTime);
 
-	const btTransform& PhysicsTransform = GhostObject->getWorldTransform();
-	RVec3 Position = btVec3ToRVec3(PhysicsTransform.getOrigin());
-	RQuat Rotation = btQuatToRQuat(PhysicsTransform.getRotation());
+	KinematicCharacterController->Update(DeltaTime);
+
+	RVec3 Position = KinematicCharacterController->GetInterpolatedPosition();
+	RQuat Rotation = KinematicCharacterController->GetInterpolatedRotation();
 
 	// Debug draw character capsule
 	//GDebugRenderer.DrawCapsule(Position, CapsuleHeight, CapsuleRadius, RColor::Yellow, 8);

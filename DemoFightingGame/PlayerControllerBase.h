@@ -87,7 +87,7 @@ private:
 
 	std::unique_ptr<btPairCachingGhostObject> GhostObject;
 	std::unique_ptr<btCapsuleShape> CapsuleShape;
-	std::unique_ptr<btKinematicCharacterController> KinematicCharacterController;
+	std::unique_ptr<class RKinematicCharacterController> KinematicCharacterController;
 	std::unique_ptr<btGhostPairCallback> GhostPairCallback;
 
 	float					m_Rotation;
