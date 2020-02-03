@@ -13,6 +13,7 @@ enum EPlayerBehavior
 	BHV_None,
 
 	BHV_Idle,
+	BHV_Walk,
 	BHV_Run,
 	BHV_Punch,
 	BHV_Kick,
@@ -64,6 +65,17 @@ public:
 		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_Idle;
+		m_BlendTime = 0.2f;
+	}
+};
+
+class FTGPlayerBehavior_Walk : public FTGPlayerBehaviorBase
+{
+public:
+	FTGPlayerBehavior_Walk(const std::string& AnimResourcePath, int AnimFlags)
+		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
+	{
+		m_BehaviorEnum = BHV_Walk;
 		m_BlendTime = 0.2f;
 	}
 };

@@ -188,13 +188,21 @@ void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 MoveVec)
 
 		RVec3 PlannarMoveVector = MoveVec;
 		PlannarMoveVector.SetY(0.0f);
+		float SqrMagnitude = PlannarMoveVector.SquaredMagitude();
 
-		if (PlannarMoveVector.SquaredMagitude() > 0.0f)
+		if (SqrMagnitude > 0.0f)
 		{
 			PlannarMoveVector = PlannarMoveVector.GetNormalized();
 			m_Rotation = LerpDegreeAngle(m_Rotation, RAD_TO_DEG(atan2f(-PlannarMoveVector.X(), -PlannarMoveVector.Z())), 10.0f * DeltaTime);
 
-			SetBehavior(BHV_Run);
+			if (SqrMagnitude > RMath::Square(5.0f))
+			{
+				SetBehavior(BHV_Run);
+			}
+			else
+			{
+				SetBehavior(BHV_Walk);
+			}
 		}
 		else
 		{
@@ -378,5 +386,5 @@ RVec3 PlayerControllerBase::GetHalfCapsuleOffset() const
 
 bool PlayerControllerBase::CanMovePlayerWithInput() const
 {
-	return m_StateMachine.GetCurrentBehavior() == BHV_Run || m_StateMachine.GetCurrentBehavior() == BHV_Idle;
+	return m_StateMachine.GetCurrentBehavior() == BHV_Run || m_StateMachine.GetCurrentBehavior() == BHV_Walk || m_StateMachine.GetCurrentBehavior() == BHV_Idle;
 }

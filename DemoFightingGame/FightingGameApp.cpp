@@ -97,6 +97,7 @@ bool FightingGameApp::Initialize()
 		{
 			FTGPlayerStateMachine& StateMachine = m_Player[i]->GetStateMachine();
 			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Idle>("/HumanBody/Animations/Idle.fbx", AnimBitFlag_Loop);
+			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Walk>("/HumanBody/Animations/Walking.fbx", AnimBitFlag_Loop);
 			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Run>("/HumanBody/Animations/Running.fbx", AnimBitFlag_Loop);
 
 			m_Player[i]->InitAssets("/HumanBody/HumanBody_DefaultPose.fbx");
@@ -306,11 +307,12 @@ void FightingGameApp::UpdateUserInput()
 			if (RInput.IsKeyDown('S')) moveVec -= charForward;
 			if (RInput.IsKeyDown('A')) moveVec -= charRight;
 			if (RInput.IsKeyDown('D')) moveVec += charRight;
+			bool bNavSlowly = RInput.IsKeyDown(VK_SHIFT);
 
 			if (moveVec.SquaredMagitude() > 0.0f)
 			{
 				moveVec.Normalize();
-				moveVec *= 600.0f;
+				moveVec *= bNavSlowly ? 300.0f : 600.0f;
 			}
 
 			CurrentPlayer->SetMovementInput(moveVec);

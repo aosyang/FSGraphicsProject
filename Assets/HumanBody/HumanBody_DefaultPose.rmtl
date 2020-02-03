@@ -1,0 +1,6 @@
+<!--Mesh path: /HumanBody/HumanBody_DefaultPose.fbx-->
+<Material>
+    <MeshElement Name="Body Mesh" Shader="Lighting">
+        <Texture Slot="0">/Grey.DDS</Texture>
+    </MeshElement>
+</Material>

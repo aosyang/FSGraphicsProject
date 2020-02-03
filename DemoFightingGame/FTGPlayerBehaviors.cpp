@@ -228,11 +228,13 @@ void FTGPlayerBehavior_SpinAttack::Update(FTGPlayerStateMachine* StateMachine, f
 				auto HitPlayers = OwnerFightingPlayer->TestSphereHitWithOtherPlayers(50.0f, RVec3(0, 50, -50));
 				for (auto HitPlayer : HitPlayers)
 				{
+					// Avoid self-damage
 					if (HitPlayer == OwnerFightingPlayer)
 					{
 						continue;
 					}
 
+					// Avoid hitting a target twice with the same action
 					if (OwnerFightingPlayer->HasHitPlayerController(HitPlayer))
 					{
 						continue;
