@@ -326,7 +326,7 @@ std::vector<NavPathNode> RNavMeshData::PerformFunnel(const std::vector<NavPathNo
 	return PathProcessor.Execute();
 }
 
-NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point, float MaxHeightDifference /*= 50.0f*/, float Radius /*= 40.0f*/) const
+NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point, float MaxHeightDifference /*= 50.0f*/, float MaxOffNavmeshDistance /*= 40.0f*/) const
 {
 	if (Point.HasNan())
 	{
@@ -375,23 +375,30 @@ NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point, 
 		}
 		else
 		{
+			// Point lies outside of the triangle, update the closest distance to edges of navmesh
 			for (int i = 0; i < 3; i++)
 			{
 				int p0 = Triangle.Points[i];
 				int p1 = Triangle.Points[(i + 1) % 3];
-				float SqrDist = RMath::SqrDist_PointToLineSegment(Point, NavMeshPoints[p0].WorldPosition, NavMeshPoints[p1].WorldPosition);
-				if (MinDistToEdgeSqr < 0 || SqrDist < MinDistToEdgeSqr)
+				RVec3 ClosestPointOnEdge = RMath::GetClosestPointOnLineSegment(Point, NavMeshPoints[p0].WorldPosition, NavMeshPoints[p1].WorldPosition);
+
+				if (fabs(Point.Y() - ClosestPointOnEdge.Y()) < MaxHeightDifference)
 				{
-					MinDistToEdgeSqr = SqrDist;
-					MinEdgePoint0 = p0;
-					MinEdgePoint1 = p1;
-					MinTriangleIdx = Index;
+					float SqrDist = RVec3::SquaredDistance(Point, ClosestPointOnEdge);
+
+					if (MinDistToEdgeSqr < 0 || SqrDist < MinDistToEdgeSqr)
+					{
+						MinDistToEdgeSqr = SqrDist;
+						MinEdgePoint0 = p0;
+						MinEdgePoint1 = p1;
+						MinTriangleIdx = Index;
+					}
 				}
 			}
 		}
 	}
 
-	if (Result.Triangle == -1 && MinDistToEdgeSqr >= 0.0f)
+	if (Result.Triangle == -1 && MinDistToEdgeSqr >= 0.0f && MinDistToEdgeSqr < RMath::Square(MaxOffNavmeshDistance))
 	{
 		Result.Triangle = MinTriangleIdx;
 		Result.PositionOnNavmesh = RMath::GetClosestPointOnLineSegment(Point, NavMeshPoints[MinEdgePoint0].WorldPosition, NavMeshPoints[MinEdgePoint1].WorldPosition);
