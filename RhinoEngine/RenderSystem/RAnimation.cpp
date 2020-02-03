@@ -62,21 +62,10 @@ void RAnimationPlayer::Proceed(float deltaTime)
 		if (Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
 		{
 			RootOffset = Animation->GetRootPosition(CurrentPlaybackTime) - PrevRootOffset;
-
-			if (RootOffset.Z() > 100.0f)
-			{
-				DebugBreak();
-			}
-
 			if (startOver)
 			{
 				RootOffset = Animation->GetRootPosition(Animation->GetEndTime() - 1) - PrevRootOffset +
 							 Animation->GetRootPosition(CurrentPlaybackTime) - Animation->GetInitRootPosition();
-			}
-
-			if (RootOffset.Z() > 100.0f)
-			{
-				DebugBreak();
 			}
 		}
 		else
