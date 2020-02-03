@@ -27,6 +27,18 @@ void RNavigationSystem::BuildNavMesh(const RScene* Scene, INavMeshCellDetector& 
 	//NavMeshData.QueryPath(QueryStart, QueryGoal, TestPath);
 }
 
+bool RNavigationSystem::SerializeNavMesh(RSerializer& Serializer)
+{
+	if (!Serializer.EnsureHeader("NAVMESH", 7))
+	{
+		return false;
+	}
+
+	NavMeshData.Serialize(Serializer);
+
+	return true;
+}
+
 bool RNavigationSystem::QueryPath(const RVec3& Start, const RVec3& Goal, std::vector<RVec3>& OutPath)
 {
 	return NavMeshData.QueryPath(Start, Goal, OutPath);

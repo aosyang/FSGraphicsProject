@@ -31,9 +31,10 @@ bool FightingGameApp::Initialize()
 	//RResourceManager::Instance().LoadAllResources();
 
 	RScene* DefaultScene = GSceneManager.DefaultScene();
+	const std::string MapPath("/TestArena.rmap");
 
 	DefaultScene->Initialize();
-	DefaultScene->LoadFromFile("/TestArena.rmap");
+	DefaultScene->LoadFromFile(MapPath);
 
 	// Add static colliders to scene objects
 	auto SceneObjects = DefaultScene->EnumerateSceneObjects();
@@ -46,7 +47,32 @@ bool FightingGameApp::Initialize()
 		}
 	}
 
-	GNavigationSystem.BuildNavMesh(DefaultScene, RPhysicsNavMeshCellDetector());
+	bool bNavMeshLoaded = false;
+	std::string NavMeshDataPath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), MapPath);
+	NavMeshDataPath = RFileUtil::ReplaceExtension(NavMeshDataPath, "navmesh");
+
+	// Load navmesh data from file
+	RSerializer NavMeshSerializer;
+	NavMeshSerializer.Open(NavMeshDataPath, ESerializeMode::Read);
+	if (NavMeshSerializer.IsOpen())
+	{
+		bNavMeshLoaded = GNavigationSystem.SerializeNavMesh(NavMeshSerializer);
+		NavMeshSerializer.Close();
+	}
+	
+	if (!bNavMeshLoaded)
+	{
+		// Failed to load navmesh data from file. Rebuild the navmesh now
+		GNavigationSystem.BuildNavMesh(DefaultScene, RPhysicsNavMeshCellDetector());
+
+		// Save the built data to file
+		NavMeshSerializer.Open(NavMeshDataPath, ESerializeMode::Write);
+		if (NavMeshSerializer.IsOpen())
+		{
+			GNavigationSystem.SerializeNavMesh(NavMeshSerializer);
+			NavMeshSerializer.Close();
+		}
+	}
 
 	RSceneObject* GlobalLightInfo = DefaultScene->CreateSceneObjectOfType<RSceneObject>("DirectionalLight", CF_NoSerialization);
 	RDirectionalLightComponent* DirLightComponent = GlobalLightInfo->AddNewComponent<RDirectionalLightComponent>();

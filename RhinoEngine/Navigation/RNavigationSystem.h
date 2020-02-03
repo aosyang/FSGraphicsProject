@@ -29,6 +29,8 @@ public:
 	// Build navmesh data from a scene
 	void BuildNavMesh(const RScene* Scene, INavMeshCellDetector& CellDetector = RDefaultNavMeshCellDetector());
 
+	bool SerializeNavMesh(RSerializer& Serializer);
+
 	// Query a path on navmesh
 	bool QueryPath(const RVec3& Start, const RVec3& Goal, std::vector<RVec3>& OutPath);
 

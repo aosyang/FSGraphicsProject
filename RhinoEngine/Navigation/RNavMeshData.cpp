@@ -10,6 +10,8 @@
 #include "RFunnelPathProcessor.h"
 #include "RNavigationSystem.h"
 
+const RVec3 NavMeshPointData::InvalidPosition(FLT_MAX, FLT_MAX, FLT_MAX);
+
 namespace
 {
 	// Returns the clockwise of three points on the XZ plane
@@ -76,6 +78,13 @@ NavMeshProjectionResult::NavMeshProjectionResult()
 	, PositionOnNavmesh(RNavigationSystem::InvalidPosition)
 {
 
+}
+
+void RNavMeshData::Serialize(RSerializer& Serializer)
+{
+	Serializer.SerializeVector(NavMeshPoints);
+	Serializer.SerializeVector(NavMeshTriangles);
+	Serializer.SerializeVector(NavMeshEdges, &RSerializer::SerializeObject);
 }
 
 void RNavMeshData::AddTriangle(const RVec3& p0, const RVec3& p1, const RVec3& p2, int RegionId)
@@ -389,4 +398,12 @@ NavMeshProjectionResult RNavMeshData::ProjectPointToNavmesh(const RVec3& Point, 
 	}
 
 	return Result;
+}
+
+void NavMeshEdgeData::Serialize(RSerializer& Serializer)
+{
+	Serializer.SerializeData(p0);
+	Serializer.SerializeData(p1);
+	Serializer.SerializeData(IsBorder);
+	Serializer.SerializeVector(Neighbors);
 }

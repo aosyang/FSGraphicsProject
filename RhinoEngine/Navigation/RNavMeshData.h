@@ -8,11 +8,18 @@
 
 #include "Core/CoreTypes.h"
 #include "RAStarPathfinder.h"
+#include "Core/RSerializer.h"
 
 // Data for navmesh points
 struct NavMeshPointData
 {
 	static const int MaxNumNeighbors = 16;
+	static const RVec3 InvalidPosition;
+
+	NavMeshPointData()
+		: NavMeshPointData(InvalidPosition)
+	{
+	}
 
 	NavMeshPointData(const RVec3& InWorldPosition)
 		: WorldPosition(InWorldPosition)
@@ -36,6 +43,11 @@ struct NavMeshPointData
 
 struct NavMeshTriangleData
 {
+	NavMeshTriangleData()
+		: NavMeshTriangleData(-1, -1, -1)
+	{
+	}
+
 	NavMeshTriangleData(int InPt0, int InPt1, int InPt2)
 		: Points{ InPt0, InPt1, InPt2 }
 	{
@@ -47,6 +59,11 @@ struct NavMeshTriangleData
 
 struct NavMeshEdgeNeighborData
 {
+	NavMeshEdgeNeighborData()
+		: NavMeshEdgeNeighborData(-1, 0.0f)
+	{
+	}
+
 	NavMeshEdgeNeighborData(int InNeighborIndex, float InDistance)
 		: NeighborIndex(InNeighborIndex)
 		, Distance(InDistance)
@@ -59,12 +76,19 @@ struct NavMeshEdgeNeighborData
 
 struct NavMeshEdgeData
 {
+	NavMeshEdgeData()
+		: NavMeshEdgeData(-1, -1)
+	{
+	}
+
 	NavMeshEdgeData(int _p0, int _p1)
 		: p0(_p0)
 		, p1(_p1)
 		, IsBorder(true)
 	{
 	}
+
+	void Serialize(RSerializer& Serializer);
 
 	bool operator==(const NavMeshEdgeData& Rhs) const
 	{
@@ -99,6 +123,8 @@ class RNavMeshData
 	friend class RNavMeshDebugger;
 
 public:
+	void Serialize(RSerializer& Serializer);
+
 	// Add a triangle to the collection of navmesh convex
 	void AddTriangle(const RVec3& p0, const RVec3& p1, const RVec3& p2, int RegionId);
 
