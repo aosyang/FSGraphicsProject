@@ -698,8 +698,6 @@ void RRenderSystem::RenderFrame()
 	{
 		OverlayRenderable->Render();
 	}
-
-	Present();
 }
 
 void RRenderSystem::CreateRenderTargetView()

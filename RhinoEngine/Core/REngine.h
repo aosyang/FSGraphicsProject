@@ -12,7 +12,7 @@ public:
 	// Initialize all engine components
 	bool Initialize();
 
-	bool Initialize(HWND hWnd, int width, int height);
+	bool InitializeSubsystems(HWND hWnd, int width, int height);
 
 	// Specify the application for the engine to run
 	inline void BindApp(IApp* app) { m_Application = app; }
@@ -47,6 +47,13 @@ private:
 	bool CreateRenderWindow(int width, int height, bool fullscreen = false, int bpp = 32);
 	void DestroyRenderWindow();
 	void CalculateFrameStats();
+
+	void CreateImGuiContext();
+	void InitImGuiWindowAndDevice(HWND hWnd);
+	void ShutdownImGui();
+
+	void BeginImGuiFrame();
+	void EndImGuiFrame();
 
 	bool				m_bIsEditor;
 

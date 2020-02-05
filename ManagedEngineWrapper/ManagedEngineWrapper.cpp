@@ -50,7 +50,7 @@ namespace ManagedEngineWrapper
 		int width = rect.right - rect.left;
 		int height = rect.bottom - rect.top;
 
-		m_IsInitialized = GEngine.Initialize((HWND)hWnd.ToPointer(), width, height);
+		m_IsInitialized = GEngine.InitializeSubsystems((HWND)hWnd.ToPointer(), width, height);
 		return m_IsInitialized;
 	}
 

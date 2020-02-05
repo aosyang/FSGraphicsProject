@@ -11,6 +11,9 @@
 #include "Navigation/RNavigationSystem.h"
 #include "Physics/RPhysicsEngine.h"
 
+#include "imgui/imgui_impl_win32.h"
+#include "imgui/imgui_impl_dx11.h"
+
 static TCHAR szWindowClass[] = _T("rhinoapp");
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -40,13 +43,15 @@ bool REngine::Initialize()
 	int width = 1024,
 		height = 768;
 
+	CreateImGuiContext();
+
 	if (!CreateRenderWindow(width, height))
 		return false;
 
-	return Initialize(m_hWnd, width, height);
+	return InitializeSubsystems(m_hWnd, width, height);
 }
 
-bool REngine::Initialize(HWND hWnd, int width, int height)
+bool REngine::InitializeSubsystems(HWND hWnd, int width, int height)
 {
 	m_bIsInitialized = true;
 
@@ -62,6 +67,8 @@ bool REngine::Initialize(HWND hWnd, int width, int height)
 	{
 		return false;
 	}
+
+	InitImGuiWindowAndDevice(m_hWnd);
 
 	if (!GPhysicsEngine.Initialize())
 	{
@@ -108,6 +115,9 @@ void REngine::Shutdown()
 	RResourceManager::Instance().Destroy();
 
 	GPhysicsEngine.Shutdown();
+
+	ShutdownImGui();
+
 	GRenderer.Shutdown();
 	RInput.Shutdown();
 
@@ -180,6 +190,8 @@ void REngine::RunOneFrame(bool update_input)
 
 	m_Timer.Tick();
 
+	BeginImGuiFrame();
+
 	m_Application->UpdateScene(m_Timer);
 
 	// Update all registered scenes with their objects
@@ -200,11 +212,18 @@ void REngine::RunOneFrame(bool update_input)
 	else
 	{
 		GRenderer.RenderFrame();
+
+		EndImGuiFrame();
+		GRenderer.Present();
 	}
 }
 
 void REngine::ResizeClientWindow(int width, int height)
 {
+	// Resize ImGui display
+	ImGuiIO& io = ImGui::GetIO();
+	io.DisplaySize = ImVec2((float)width, (float)height);
+
 	GRenderer.ResizeClient(width, height);
 	GPostProcessorManager.RecreateLostResources();
 	m_Application->OnResize(width, height);
@@ -356,8 +375,51 @@ void REngine::CalculateFrameStats()
 	}
 }
 
+void REngine::CreateImGuiContext()
+{
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+
+	unsigned char* tex_pixels = NULL;
+	int tex_w, tex_h;
+	io.Fonts->GetTexDataAsRGBA32(&tex_pixels, &tex_w, &tex_h);
+}
+
+void REngine::InitImGuiWindowAndDevice(HWND hWnd)
+{
+	ImGui_ImplWin32_Init(hWnd);
+	ImGui_ImplDX11_Init(GRenderer.D3DDevice(), GRenderer.D3DImmediateContext());
+}
+
+void REngine::ShutdownImGui()
+{
+	ImGui_ImplDX11_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+}
+
+void REngine::BeginImGuiFrame()
+{
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+}
+
+void REngine::EndImGuiFrame()
+{
+	ImGui::Render();
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+}
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	// Handling ImGui events
+	extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+	{
+		return true;
+	}
+
 	switch (message)
 	{
 	case WM_DESTROY:

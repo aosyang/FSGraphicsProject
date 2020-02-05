@@ -61,6 +61,8 @@ public:
 
 	void Clear(bool clearColor = true, const RColor& color = RColor(0.69f, 0.77f, 0.87f, 1.0f), bool clearDepth = true, float depth = 1.0f, bool clearStencil = true, UINT8 stencil = 0);
 	void ClearRenderTarget(ID3D11RenderTargetView* rtv, const RColor& color = RColor(0.69f, 0.77f, 0.87f, 1.0f));
+
+	// Present current frame. Called by the engine
 	void Present();
 
 	ID3D11Device*			D3DDevice()						{ return m_pD3DDevice; }
