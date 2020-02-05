@@ -82,6 +82,7 @@ bool FightingGameApp::Initialize()
 	m_Camera->SetTransform(RVec3(407.023712f, 339.007507f, 876.396484f), RQuat::Euler(0.09f, 3.88659930f, 0.0f));
 	m_Camera->SetupView(45.0f, GRenderer.AspectRatio(), 1.0f, 10000.0f);
 	m_FreeFlyCameraControl = m_Camera->AddNewComponent<RFreeFlyCameraControl>();
+	m_FreeFlyCameraControl->SetEnabled(false);
 
 	//RSceneObject* player = DefaultScene->FindObject("Player");
 	//for (UINT i = 0; i < DefaultScene->GetSceneObjects().size(); i++)

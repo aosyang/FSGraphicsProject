@@ -152,6 +152,45 @@ void RFileUtil::PopWorkingPath()
 	WorkingPathStack.pop_back();
 }
 
+std::vector<std::string> RFileUtil::GetFilesInDirectoryAndSubdirectories(const std::string& SearchPath, const std::string& FilePattern)
+{
+	std::vector<std::string> SearchResult;
+
+	WIN32_FIND_DATAA FindFileData;
+	HANDLE hFind;
+
+	// Load resources including sub-directories
+	std::queue<std::string> dir_queue;
+	dir_queue.push("");
+
+	do
+	{
+		const std::string dir_name = dir_queue.front();
+		dir_queue.pop();
+		const std::string SearchingPath = SearchPath + dir_name + FilePattern;
+		hFind = FindFirstFileA(SearchingPath.data(), &FindFileData);
+
+		do
+		{
+			if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+			{
+				const std::string FilePath = std::string("/") + dir_name + FindFileData.cFileName;
+				SearchResult.push_back(FilePath);
+			}
+			else
+			{
+				if (FindFileData.cFileName[0] != '.')
+				{
+					dir_queue.push(dir_name + std::string(FindFileData.cFileName) + "/");
+				}
+			}
+
+		} while (FindNextFileA(hFind, &FindFileData) != 0);
+	} while (dir_queue.size());
+
+	return SearchResult;
+}
+
 std::string RFileUtil::GetFullPath(const std::string& Path)
 {
 	char FullPath[MAX_PATH + 1];

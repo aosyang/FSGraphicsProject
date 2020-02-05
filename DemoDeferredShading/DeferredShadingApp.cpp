@@ -451,8 +451,6 @@ void DeferredShadingApp::RenderScene()
 	GDebugRenderer.Reset();
 
 	m_DebugMenu.Render();
-
-	GRenderer.Present();
 }
 
 void DeferredShadingApp::OnResize(int width, int height)

@@ -44,6 +44,9 @@ public:
 	/// Pop a stored path and make it current
 	static void PopWorkingPath();
 
+	/// Search a directory and its subdirectories and fine all files matching a given pattern
+	static std::vector<std::string> GetFilesInDirectoryAndSubdirectories(const std::string& SearchPath, const std::string& FilePattern);
+
 	/// Get full path of a relative path
 	static std::string GetFullPath(const std::string& Path);
 

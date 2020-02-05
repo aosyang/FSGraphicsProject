@@ -6,6 +6,9 @@
 
 #pragma once
 
+#include "RTimer.h"
+#include <tchar.h>
+
 class IApp
 {
 public:

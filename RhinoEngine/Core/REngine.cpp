@@ -212,10 +212,10 @@ void REngine::RunOneFrame(bool update_input)
 	else
 	{
 		GRenderer.RenderFrame();
-
-		EndImGuiFrame();
-		GRenderer.Present();
 	}
+
+	EndImGuiFrame();
+	GRenderer.Present();
 }
 
 void REngine::ResizeClientWindow(int width, int height)

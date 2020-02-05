@@ -547,23 +547,26 @@ void RRenderSystem::RenderFrame()
 				}
 			}
 		}
+	}
 
-		// Restore default render targets
-		SetRenderTargets();
+	// Restore default render targets
+	SetRenderTargets();
 
-		// Setup viewport
-		D3D11_VIEWPORT vp;
-		vp.TopLeftX = 0.0f;
-		vp.TopLeftY = 0.0f;
-		vp.Width = static_cast<float>(m_ClientWidth);
-		vp.Height = static_cast<float>(m_ClientHeight);
-		vp.MinDepth = 0.0f;
-		vp.MaxDepth = 1.0f;
+	// Setup viewport
+	D3D11_VIEWPORT vp;
+	vp.TopLeftX = 0.0f;
+	vp.TopLeftY = 0.0f;
+	vp.Width = static_cast<float>(m_ClientWidth);
+	vp.Height = static_cast<float>(m_ClientHeight);
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
 
-		m_pD3DImmediateContext->RSSetViewports(1, &vp);
+	m_pD3DImmediateContext->RSSetViewports(1, &vp);
 
-		Clear();
+	Clear();
 
+	if (RenderCamera)
+	{
 		auto& cbGlobal = RConstantBuffers::cbGlobal.Data;
 		RConstantBuffers::cbGlobal.ClearData();
 

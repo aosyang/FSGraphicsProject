@@ -9,7 +9,7 @@
 RFreeFlyCameraControl::RFreeFlyCameraControl(RSceneObject* InOwner)
 	: Base(InOwner)
 	, NavigationSpeed(1000.0f)
-	, m_Enabled(false)
+	, m_Enabled(true)
 	, m_CamYaw(0.0f)
 	, m_CamPitch(0.0f)
 {

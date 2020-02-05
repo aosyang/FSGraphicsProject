@@ -884,7 +884,6 @@ void FSGraphicsProjectApp::RenderScene()
 		}
 	}
 
-	GRenderer.Present();
 	GDebugRenderer.Reset();
 }
 
