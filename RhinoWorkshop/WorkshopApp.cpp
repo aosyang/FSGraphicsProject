@@ -47,7 +47,16 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				ImGui::MenuItem("New Map");
+				if (ImGui::MenuItem("New Map"))
+				{
+					RScene* DefaultScene = GSceneManager.DefaultScene();
+					assert(DefaultScene);
+
+					SetSelectedObject(nullptr);
+					DefaultScene->DestroyAllObjects();
+
+					PostMapLoaded();
+				}
 
 				// Open menu
 				if (ImGui::MenuItem("Open"))
@@ -55,6 +64,19 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 					// Note: Since the menu code path won't execute when the popup is open, we need to indicate the state by a variable
 					bShowOpenDialog = true;
 					UpdateEngineMapList();
+				}
+
+				if (ImGui::MenuItem("Save Map"))
+				{
+					RScene* DefaultScene = GSceneManager.DefaultScene();
+					assert(DefaultScene);
+
+					DefaultScene->SaveToFile((RResourceManager::GetAssetsBasePath() + CurrentMapPath).c_str());
+				}
+
+				if (ImGui::MenuItem("Exit"))
+				{
+					PostQuitMessage(0);
 				}
 
 				ImGui::EndMenu();
@@ -74,38 +96,32 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 		{
 			auto SceneObjects = GetAllSceneObjects();
 
-			ImGui::SetNextItemOpen(true);
-			if (ImGui::TreeNode("Scene"))
+			if (SceneObjects.size() > 0)
 			{
-				if (SceneObjects.size() > 0)
+				for (int i = 0; i < (int)SceneObjects.size(); i++)
 				{
-					for (int i = 0; i < (int)SceneObjects.size(); i++)
+					bool bIsSelected = (Selected == SceneObjects[i]);
+					std::string ObjectName = SceneObjects[i]->GetName();
+					if (ObjectName == "")
 					{
-						bool bIsSelected = (Selected == SceneObjects[i]);
-						std::string ObjectName = SceneObjects[i]->GetName();
-						if (ObjectName == "")
-						{
-							ObjectName = "(no name)";
-						}
+						ObjectName = "(no name)";
+					}
 
-						// Append unique ids to the label to avoid conflicts
-						ObjectName += "##" + std::to_string(i);
+					// Append unique ids to the label to avoid conflicts
+					ObjectName += "##" + std::to_string(i);
 
-						if (ImGui::Selectable(ObjectName.c_str(), &bIsSelected))
-						{
-							SetSelectedObject(SceneObjects[i]);
-						}
+					if (ImGui::Selectable(ObjectName.c_str(), &bIsSelected))
+					{
+						SetSelectedObject(SceneObjects[i]);
 					}
 				}
-				else
-				{
-					ImGui::Text("(No objects)");
-				}
-				ImGui::TreePop();
 			}
-
-			ImGui::End();
+			else
+			{
+				ImGui::Text("(No objects)");
+			}
 		}
+		ImGui::End();
 
 		if (Selected)
 		{
@@ -132,6 +148,11 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 				// TODO: Quaternion to Euler is NOT stable. Values my change when clicking on the same object a second time
 				if (ImGui::DragFloat3("Rotation", RotValueArray))
 				{
+					for (int i = 0; i < 3; i++)
+					{
+						RotValueArray[i] = RMath::UnwindDegree(RotValueArray[i]);
+					}
+
 					Selected->SetRotation(RQuat::Euler(RVec3(
 						RMath::DegreeToRadian(RotValueArray[0]),
 						RMath::DegreeToRadian(RotValueArray[1]),
@@ -284,9 +305,14 @@ void WorkshopApp::PostMapLoaded()
 {
 	// Add default camera to scene
 	RScene* DefaultScene = GSceneManager.DefaultScene();
-	RCamera* Camera = DefaultScene->CreateSceneObjectOfType<RCamera>();
+	RCamera* Camera = DefaultScene->CreateSceneObjectOfType<RCamera>("Editor Camera", CF_NoSerialization);
 	RFreeFlyCameraControl* CameraControl = Camera->AddNewComponent<RFreeFlyCameraControl>();
 	CameraControl->SetEnabled(true);
+
+	// Create default lighting
+	RSceneObject* GlobalLightInfo = DefaultScene->CreateSceneObjectOfType<RSceneObject>("DirectionalLight", CF_NoSerialization);
+	RDirectionalLightComponent* DirLightComponent = GlobalLightInfo->AddNewComponent<RDirectionalLightComponent>();
+	DirLightComponent->SetParameters({ RVec3(sinf(1.0f) * 0.5f, 0.25f, cosf(1.0) * 0.5f), RColor(1.0f, 1.0f, 0.8f, 1.0f) });
 }
 
 float WorkshopApp::GetCameraSpeed() const

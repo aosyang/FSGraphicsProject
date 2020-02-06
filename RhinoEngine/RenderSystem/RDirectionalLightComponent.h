@@ -38,7 +38,7 @@ public:
 	void SetParameters(const DirectionalLightParam& Parameters);
 
 	// Returns normalized light direction
-	const RVec3& GetLightDirection() const;
+	RVec3 GetLightDirection() const;
 	
 	// Returns color of light
 	const RColor& GetLightColor() const;
@@ -60,11 +60,6 @@ private:
 
 	static const RMatrix4 ShadowBiasTransform;
 };
-
-FORCEINLINE const RVec3& RDirectionalLightComponent::GetLightDirection() const
-{
-	return m_LightDirection;
-}
 
 FORCEINLINE const RColor& RDirectionalLightComponent::GetLightColor() const
 {

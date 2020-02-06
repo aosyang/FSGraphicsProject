@@ -100,7 +100,7 @@ void RDirectionalLightComponent::PrepareDepthPass(int PassIndex, const RenderVie
 	//LightDistPerLevel[PassIndex] = max(LightDistPerLevel[PassIndex], BoundSphere.radius);
 
 	RVec3 shadowTarget = BoundSphere.center;
-	RVec3 shadowEyePos = shadowTarget + m_LightDirection * LightDistPerLevel[PassIndex];
+	RVec3 shadowEyePos = shadowTarget + GetLightDirection() * LightDistPerLevel[PassIndex];
 
 	RVec3 viewForward = (shadowTarget - shadowEyePos).GetNormalized();
 	RVec3 viewRight = RVec3::Cross(RVec3(0, 1, 0), viewForward).GetNormalized();
@@ -208,6 +208,8 @@ ID3D11ShaderResourceView* RDirectionalLightComponent::GetRTDepthSRV(int PassInde
 void RDirectionalLightComponent::SetParameters(const DirectionalLightParam& Parameters)
 {
 	m_LightDirection = Parameters.Direction.GetNormalized();
+	GetOwner()->GetTransform()->LookAt(GetOwner()->GetWorldPosition() + m_LightDirection);
+
 	m_LightColor = Parameters.Color;
 }
 
@@ -241,4 +243,9 @@ RSphere RDirectionalLightComponent::CalculateBoundingSphereFromFrustum(const RFr
 	//}
 
 	return s;
+}
+
+RVec3 RDirectionalLightComponent::GetLightDirection() const
+{
+	return GetOwner()->GetForwardVector();
 }

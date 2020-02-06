@@ -58,6 +58,9 @@ namespace RMath
 	// Restrict a value to a given range [min, max] 
 	FORCEINLINE float Clamp(float a, float min, float max)		{ return (a < min) ? min : (a > max) ? max : a; }
 
+	// Make a degree fall between -180 and 180
+	float UnwindDegree(float Degree);
+
 	FORCEINLINE float DegreeToRadian(float Degree)				{ return PI / 180.0f * Degree; }
 	FORCEINLINE float RadianToDegree(float Radian)				{ return 180.0f / PI * Radian; }
 

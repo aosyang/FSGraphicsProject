@@ -10,6 +10,13 @@
 
 #define DEBUG_CHECK_NAN 1
 
+float RMath::UnwindDegree(float Degree)
+{
+	while (Degree > 180) { Degree -= 360; }
+	while (Degree < -180) { Degree += 360; }
+	return Degree;
+}
+
 void RMath::Barycentric(const RVec3& p, const RVec3& a, const RVec3& b, const RVec3& c, float& u, float& v, float &w)
 {
 	RVec3 v0 = b - a, v1 = c - a, v2 = p - a;
