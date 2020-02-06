@@ -11,10 +11,12 @@
 /// Runtime type info struct
 struct RRuntimeTypeInfoData
 {
-	RRuntimeTypeInfoData(const char* ClassName, size_t InParentTypeId);
+	RRuntimeTypeInfoData(const char* InClassName, size_t InParentTypeId);
 
 	/// Type id from hashed string of class name
 	size_t TypeId;
+
+	const char* ClassName;
 };
 
 /// Declare functions for a runtime-type object
@@ -29,6 +31,7 @@ struct RRuntimeTypeInfoData
 	public:\
 		/* Get runtime type id for a class or a template type */\
 		static size_t _StaticGetRuntimeTypeId()				{ return _StaticGetRuntimeTypeInfo().TypeId; }\
+		virtual const char* GetClassName() const override	{ return _StaticGetRuntimeTypeInfo().ClassName; }\
 	private:
 
 
@@ -38,6 +41,8 @@ class RRuntimeTypeObject
 private:
 	/// Returns runtime type id for the class
 	virtual size_t GetRuntimeTypeId() const { return 0; }
+
+	virtual const char* GetClassName() const { return ""; }
 
 public:
 	/// The runtime type id for base class

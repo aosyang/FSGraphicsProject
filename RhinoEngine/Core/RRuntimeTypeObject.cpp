@@ -17,8 +17,9 @@ std::unordered_map<size_t, size_t> RuntimeTypeParents;
 std::map<size_t, std::string> RuntimeTypeIdToName;
 #endif	// _DEBUG
 
-RRuntimeTypeInfoData::RRuntimeTypeInfoData(const char* ClassName, size_t InParentTypeId)
-	: TypeId(std::hash<std::string>{}(std::string(ClassName)))
+RRuntimeTypeInfoData::RRuntimeTypeInfoData(const char* InClassName, size_t InParentTypeId)
+	: TypeId(std::hash<std::string>{}(std::string(InClassName)))
+	, ClassName(InClassName)
 {
 #ifdef _DEBUG
 	RuntimeTypeIdToName[TypeId] = ClassName;

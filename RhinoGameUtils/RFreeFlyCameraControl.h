@@ -20,6 +20,9 @@ public:
 
 	void SetEnabled(bool Enabled);
 
+	float GetNavigationSpeed() const;
+	void SetNavigationSpeed(float InSpeed);
+
 private:
 	/// How fast the camera can move
 	float NavigationSpeed;
@@ -30,3 +33,13 @@ private:
 	float m_CamPitch;
 };
 
+
+FORCEINLINE float RFreeFlyCameraControl::GetNavigationSpeed() const
+{
+	return NavigationSpeed;
+}
+
+FORCEINLINE void RFreeFlyCameraControl::SetNavigationSpeed(float InSpeed)
+{
+	NavigationSpeed = RMath::Max(InSpeed, 1.0f);
+}

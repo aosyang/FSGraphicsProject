@@ -107,6 +107,30 @@ void RInputSystem::_UpdateKeyStates(HWND hWnd)
 	}
 }
 
+void RInputSystem::_ClearKeyStates()
+{
+	// Update keyboard key states
+	for (int i = 0; i < MAX_KEY_NUM; i++)
+	{
+		m_bKeyDown[i] = false;
+		m_bKeyDownLastFrame[i] = false;
+	}
+
+	// Update mouse button states
+	for (int i = VK_LBUTTON; i <= VK_MBUTTON; i++)
+	{
+		m_bKeyDown[i] = false;
+		m_bKeyDownLastFrame[i] = false;
+	}
+
+	// Update system key states
+	for (int i = VK_LSHIFT; i <= VK_RMENU; i++)
+	{
+		m_bKeyDown[i] = false;
+		m_bKeyDownLastFrame[i] = false;
+	}
+}
+
 void RInputSystem::LockCursor()
 {
 	if (!m_bCursorLocked)

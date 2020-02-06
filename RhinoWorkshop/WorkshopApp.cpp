@@ -26,14 +26,15 @@ bool WorkshopApp::Initialize()
 void WorkshopApp::UpdateScene(const RTimer& timer)
 {
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
-	ImGui::SetNextWindowSize(ImVec2((float)WindowWidth, 200));
+	ImGui::SetNextWindowSize(ImVec2((float)WindowWidth, 0));
 
 	ImGuiWindowFlags Flags =
 		ImGuiWindowFlags_NoTitleBar |
 		ImGuiWindowFlags_NoResize |
 		ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoCollapse |
-		ImGuiWindowFlags_NoBackground |
+		//ImGuiWindowFlags_NoBackground |
+		//ImGuiWindowFlags_AlwaysAutoResize |
 		ImGuiWindowFlags_MenuBar;
 
 	// Disable corner rounding on the main menu
@@ -58,7 +59,115 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 
 				ImGui::EndMenu();
 			}
+
 			ImGui::EndMenuBar();
+		}
+
+		float CameraSpeed = GetCameraSpeed();
+		ImGui::SetNextItemWidth(80);
+		if (ImGui::DragFloat("Camera Speed", &CameraSpeed, 10.0f, 1.0f, FLT_MAX, "%.1f"))
+		{
+			SetCameraSpeed(CameraSpeed);
+		}
+
+		if (ImGui::Begin("Scene View", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			auto SceneObjects = GetAllSceneObjects();
+
+			ImGui::SetNextItemOpen(true);
+			if (ImGui::TreeNode("Scene"))
+			{
+				if (SceneObjects.size() > 0)
+				{
+					for (int i = 0; i < (int)SceneObjects.size(); i++)
+					{
+						bool bIsSelected = (Selected == SceneObjects[i]);
+						std::string ObjectName = SceneObjects[i]->GetName();
+						if (ObjectName == "")
+						{
+							ObjectName = "(no name)";
+						}
+
+						// Append unique ids to the label to avoid conflicts
+						ObjectName += "##" + std::to_string(i);
+
+						if (ImGui::Selectable(ObjectName.c_str(), &bIsSelected))
+						{
+							SetSelectedObject(SceneObjects[i]);
+						}
+					}
+				}
+				else
+				{
+					ImGui::Text("(No objects)");
+				}
+				ImGui::TreePop();
+			}
+
+			ImGui::End();
+		}
+
+		if (Selected)
+		{
+			ImGui::Begin("Object View", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+
+			ImGui::Text("Class: %s", Selected->GetClassName());
+
+			char ObjectName[256];
+			strcpy_s(ObjectName, Selected->GetName().c_str());
+			if (ImGui::InputText("Name", ObjectName, sizeof(ObjectName)))
+			{
+				Selected->SetName(ObjectName);
+			}
+
+			static bool TransformTreeOpen = true;
+			ImGui::SetNextTreeNodeOpen(TransformTreeOpen);
+			if (TransformTreeOpen = ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_None))
+			{
+				if (ImGui::DragFloat3("Position", PosValueArray))
+				{
+					Selected->SetPosition(RVec3(PosValueArray));
+				}
+
+				// TODO: Quaternion to Euler is NOT stable. Values my change when clicking on the same object a second time
+				if (ImGui::DragFloat3("Rotation", RotValueArray))
+				{
+					Selected->SetRotation(RQuat::Euler(RVec3(
+						RMath::DegreeToRadian(RotValueArray[0]),
+						RMath::DegreeToRadian(RotValueArray[1]),
+						RMath::DegreeToRadian(RotValueArray[2])
+					)));
+				}
+
+				if (ImGui::DragFloat3("Scale", ScaleValueArray))
+				{
+					Selected->SetScale(RVec3(ScaleValueArray));
+				}
+			}
+
+			if (RSMeshObject* MeshObject = Selected->CastTo<RSMeshObject>())
+			{
+				static bool MeshTreeOpen = true;
+				ImGui::SetNextTreeNodeOpen(MeshTreeOpen);
+				if (MeshTreeOpen = ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_None))
+				{
+					RMesh* Mesh = MeshObject->GetMesh();
+					std::string AssetPath;
+					if (Mesh)
+					{
+						AssetPath = Mesh->GetAssetPath();
+					}
+
+					// Button for mesh selection
+					ImGui::Button("..."); ImGui::SameLine();
+
+					char MeshAssetName[256];
+					strcpy_s(MeshAssetName, AssetPath.c_str());
+					ImGui::InputText("Mesh", MeshAssetName, sizeof(MeshAssetName));
+				}
+			}
+
+			ImGui::End();
 		}
 
 		if (bShowOpenDialog)
@@ -88,7 +197,7 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 					RScene* DefaultScene = GSceneManager.DefaultScene();
 					assert(DefaultScene);
 
-					Selected = nullptr;
+					SetSelectedObject(nullptr);
 					DefaultScene->DestroyAllObjects();
 					DefaultScene->LoadFromFile(CurrentMapPath);
 
@@ -124,6 +233,23 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 	{
 		RVec2 CursorPoint = GetMousePositionInViewport();
 		SelectSceneObjectAtCursor(CursorPoint);
+		if (Selected)
+		{
+			RVec3 Position = Selected->GetPosition();
+			PosValueArray[0] = Position.X();
+			PosValueArray[1] = Position.Y();
+			PosValueArray[2] = Position.Z();
+
+			RVec3 Rotation = Selected->GetRotation().ToEuler();
+			RotValueArray[0] = RMath::RadianToDegree(Rotation.X());
+			RotValueArray[1] = RMath::RadianToDegree(Rotation.Y());
+			RotValueArray[2] = RMath::RadianToDegree(Rotation.Z());
+
+			RVec3 Scale = Selected->GetScale();
+			ScaleValueArray[0] = Scale.X();
+			ScaleValueArray[1] = Scale.Y();
+			ScaleValueArray[2] = Scale.Z();
+		}
 	}
 
 	if (Selected)
@@ -161,6 +287,75 @@ void WorkshopApp::PostMapLoaded()
 	RCamera* Camera = DefaultScene->CreateSceneObjectOfType<RCamera>();
 	RFreeFlyCameraControl* CameraControl = Camera->AddNewComponent<RFreeFlyCameraControl>();
 	CameraControl->SetEnabled(true);
+}
+
+float WorkshopApp::GetCameraSpeed() const
+{
+	RScene* DefaultScene = GSceneManager.DefaultScene();
+	if (DefaultScene)
+	{
+		RCamera* Camera = DefaultScene->GetRenderCamera();
+		if (Camera)
+		{
+			RFreeFlyCameraControl* EditorCamera = Camera->FindComponent<RFreeFlyCameraControl>();
+			if (EditorCamera)
+			{
+				return EditorCamera->GetNavigationSpeed();
+			}
+		}
+	}
+
+	return -1;
+}
+
+void WorkshopApp::SetCameraSpeed(float InSpeed)
+{
+	RScene* DefaultScene = GSceneManager.DefaultScene();
+	if (DefaultScene)
+	{
+		RCamera* Camera = DefaultScene->GetRenderCamera();
+		if (Camera)
+		{
+			RFreeFlyCameraControl* EditorCamera = Camera->FindComponent<RFreeFlyCameraControl>();
+			if (EditorCamera)
+			{
+				EditorCamera->SetNavigationSpeed(InSpeed);
+			}
+		}
+	}
+}
+
+void WorkshopApp::SetSelectedObject(RSceneObject* InSelected)
+{
+	Selected = InSelected;
+	if (Selected)
+	{
+		RVec3 Position = Selected->GetPosition();
+		PosValueArray[0] = Position.X();
+		PosValueArray[1] = Position.Y();
+		PosValueArray[2] = Position.Z();
+
+		RVec3 Rotation = Selected->GetRotation().ToEuler();
+		RotValueArray[0] = RMath::RadianToDegree(Rotation.X());
+		RotValueArray[1] = RMath::RadianToDegree(Rotation.Y());
+		RotValueArray[2] = RMath::RadianToDegree(Rotation.Z());
+
+		RVec3 Scale = Selected->GetScale();
+		ScaleValueArray[0] = Scale.X();
+		ScaleValueArray[1] = Scale.Y();
+		ScaleValueArray[2] = Scale.Z();
+	}
+}
+
+std::vector<RSceneObject*> WorkshopApp::GetAllSceneObjects() const
+{
+	RScene* DefaultScene = GSceneManager.DefaultScene();
+	if (DefaultScene)
+	{
+		return DefaultScene->EnumerateSceneObjects();
+	}
+
+	return std::vector<RSceneObject*>();
 }
 
 RVec2 WorkshopApp::GetMousePositionInViewport() const
@@ -315,7 +510,7 @@ void WorkshopApp::SelectSceneObjectAtCursor(const RVec2& Point)
 			//}
 			//else
 			{
-				Selected = rayPickingList[0].obj;
+				SetSelectedObject(rayPickingList[0].obj);
 			}
 		}
 	}

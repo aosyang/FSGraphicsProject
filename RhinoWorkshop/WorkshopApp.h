@@ -26,6 +26,14 @@ private:
 
 	void PostMapLoaded();
 
+	float GetCameraSpeed() const;
+	void SetCameraSpeed(float InSpeed);
+
+	// Call this function to set a current selected object so its transforms get updated
+	void SetSelectedObject(RSceneObject* InSelected);
+
+	std::vector<RSceneObject*> GetAllSceneObjects() const;
+
 	RVec2 GetMousePositionInViewport() const;
 	RRay MakeRayFromViewportPoint(const RVec2& Point)const;
 	void SelectSceneObjectAtCursor(const RVec2& Point);
@@ -39,4 +47,8 @@ private:
 	std::string CurrentMapPath;
 
 	RSceneObject* Selected;
+
+	float PosValueArray[3];
+	float RotValueArray[3];
+	float ScaleValueArray[3];
 };

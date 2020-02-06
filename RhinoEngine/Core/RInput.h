@@ -70,6 +70,8 @@ protected:
 	//   - Called by REngine once per frame
 	void _UpdateKeyStates(HWND hWnd);
 
+	void _ClearKeyStates();
+
 	// Set a new 'key down' state for a key
 	// Called by low-level key event handlers
 	void SetKeyDownState(int KeyCode, bool bIsKeyDown);

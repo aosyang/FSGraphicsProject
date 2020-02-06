@@ -148,7 +148,17 @@ void REngine::Run()
 	{
 		MSG msg;
 
-		RInput._UpdateKeyStates(m_hWnd);
+		ImGuiIO& io = ImGui::GetIO();
+		if (!io.WantCaptureKeyboard && !io.WantCaptureMouse)
+		{
+			RInput._UpdateKeyStates(m_hWnd);
+		}
+		else
+		{
+			// Clear any key states when UI is handling input
+			// TODO: Still catches key down event here
+			RInput._ClearKeyStates();
+		}
 
 		// Handle win32 window messages
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
