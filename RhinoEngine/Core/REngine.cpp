@@ -148,7 +148,7 @@ void REngine::Run()
 	{
 		MSG msg;
 
-		RInput._UpdateKeyStates();
+		RInput._UpdateKeyStates(m_hWnd);
 
 		// Handle win32 window messages
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -183,7 +183,7 @@ void REngine::RunOneFrame(bool update_input)
 
 	if (update_input)
 	{
-		RInput._UpdateKeyStates();
+		RInput._UpdateKeyStates(m_hWnd);
 	}
 
 	RInput.CheckAndExecuteKeyBindings();
@@ -233,6 +233,14 @@ RECT REngine::GetWindowRectInfo() const
 {
 	RECT rect;
 	GetWindowRect(m_hWnd, &rect);
+
+	return rect;
+}
+
+RECT REngine::GetClientRectInfo() const
+{
+	RECT rect;
+	GetClientRect(m_hWnd, &rect);
 
 	return rect;
 }

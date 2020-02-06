@@ -62,7 +62,7 @@ namespace ManagedEngineWrapper
 
 			RECT rwRect = GEngine.GetWindowRectInfo();
 			int mx, my;
-			RInput.GetCursorPosition(mx, my);
+			RInput.GetCursorScreenPosition(mx, my);
 
 			if (mx >= rwRect.left && mx <= rwRect.right &&
 				my >= rwRect.top && my <= rwRect.bottom)
@@ -561,7 +561,7 @@ namespace ManagedEngineWrapper
 		RECT WindowRect = GEngine.GetWindowRectInfo();
 
 		int CurX, CurY;
-		RInput.GetCursorPosition(CurX, CurY);
+		RInput.GetCursorScreenPosition(CurX, CurY);
 
 		// Mouse cursor relative position in viewport
 		return RVec2(

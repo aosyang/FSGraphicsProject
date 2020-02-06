@@ -73,7 +73,7 @@ void RInputSystem::CheckAndExecuteKeyBindings()
 	}
 }
 
-void RInputSystem::_UpdateKeyStates()
+void RInputSystem::_UpdateKeyStates(HWND hWnd)
 {
 	// Update keyboard key states
 	for (int i = 0; i < MAX_KEY_NUM; i++)
@@ -95,6 +95,10 @@ void RInputSystem::_UpdateKeyStates()
 
 	m_CursorPosLastFrame = m_CursorPos;
 	::GetPhysicalCursorPos(&m_CursorPos);
+
+	// Convert cursor point to client
+	m_CursorClientPos = m_CursorPos;
+	::ScreenToClient(hWnd, &m_CursorClientPos);
 
 	if (m_bCursorLocked)
 	{
@@ -131,10 +135,16 @@ void RInputSystem::HideCursor()
 	::ShowCursor(FALSE);
 }
 
-void RInputSystem::GetCursorPosition(int& x, int& y) const
+void RInputSystem::GetCursorScreenPosition(int& x, int& y) const
 {
 	x = m_CursorPos.x;
 	y = m_CursorPos.y;
+}
+
+void RInputSystem::GetCursorClientPosition(int& x, int& y) const
+{
+	x = m_CursorClientPos.x;
+	y = m_CursorClientPos.y;
 }
 
 void RInputSystem::GetRelativeCursorPosition(int& dx, int& dy) const

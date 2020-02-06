@@ -42,7 +42,8 @@ public:
 	void ShowCursor();
 	void HideCursor();
 
-	void GetCursorPosition(int& x, int& y) const;
+	void GetCursorScreenPosition(int& x, int& y) const;
+	void GetCursorClientPosition(int& x, int& y) const;
 	void GetRelativeCursorPosition(int& dx, int& dy) const;
 
 	EBufferedKeyState GetBufferedKeyState(int KeyCode) const;
@@ -67,7 +68,7 @@ protected:
 
 	// Update input device states
 	//   - Called by REngine once per frame
-	void _UpdateKeyStates();
+	void _UpdateKeyStates(HWND hWnd);
 
 	// Set a new 'key down' state for a key
 	// Called by low-level key event handlers
@@ -82,6 +83,7 @@ private:
 
 	POINT	m_CursorPos;
 	POINT	m_CursorPosLastFrame;
+	POINT	m_CursorClientPos;
 
 	bool	m_bCursorLocked;
 	POINT	m_CursorLockingPos;

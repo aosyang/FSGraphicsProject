@@ -27,7 +27,7 @@ public:
 
 	void ResizeClientWindow(int width, int height);
 	RECT GetWindowRectInfo() const;
-
+	RECT GetClientRectInfo() const;
 	RTimer& GetTimer() { return m_Timer; }
 
 	/// Has engine been initialized

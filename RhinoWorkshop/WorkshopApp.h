@@ -9,6 +9,8 @@
 #include "Core/CoreTypes.h"
 #include "Core/IApp.h"
 
+class RSceneObject;
+
 class WorkshopApp : public IApp
 {
 public:
@@ -24,6 +26,10 @@ private:
 
 	void PostMapLoaded();
 
+	RVec2 GetMousePositionInViewport() const;
+	RRay MakeRayFromViewportPoint(const RVec2& Point)const;
+	void SelectSceneObjectAtCursor(const RVec2& Point);
+
 private:
 	int WindowWidth, WindowHeight;
 	bool bShowOpenDialog;
@@ -31,4 +37,6 @@ private:
 	// A list of paths to all maps in the asset folder
 	std::vector<std::string> EngineMaps;
 	std::string CurrentMapPath;
+
+	RSceneObject* Selected;
 };
