@@ -11,6 +11,7 @@
 
 class RSceneObject;
 class RResourceBase;
+class RFreeFlyCameraControl;
 
 enum RAssetType
 {
@@ -36,8 +37,10 @@ private:
 
 	void PostMapLoaded();
 
+	RFreeFlyCameraControl* GetFreeFlyCamera() const;
 	float GetCameraSpeed() const;
 	void SetCameraSpeed(float InSpeed);
+	void FocusOnSelection();
 
 	// Call this function to set a current selected object so its transforms get updated
 	void SetSelectedObject(RSceneObject* InSelected);

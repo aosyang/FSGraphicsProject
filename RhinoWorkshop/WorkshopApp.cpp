@@ -263,6 +263,11 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 		}
 	}
 
+	if (RInput.GetBufferedKeyState('F') == EBufferedKeyState::KeyDown)
+	{
+		FocusOnSelection();
+	}
+
 	if (SelectedObject)
 	{
 		GDebugRenderer.DrawAabb(SelectedObject->GetAabb());
@@ -305,7 +310,7 @@ void WorkshopApp::PostMapLoaded()
 	DirLightComponent->SetParameters({ RVec3(sinf(1.0f) * 0.5f, 0.25f, cosf(1.0) * 0.5f), RColor(1.0f, 1.0f, 0.8f, 1.0f) });
 }
 
-float WorkshopApp::GetCameraSpeed() const
+RFreeFlyCameraControl* WorkshopApp::GetFreeFlyCamera() const
 {
 	RScene* DefaultScene = GSceneManager.DefaultScene();
 	if (DefaultScene)
@@ -313,12 +318,19 @@ float WorkshopApp::GetCameraSpeed() const
 		RCamera* Camera = DefaultScene->GetRenderCamera();
 		if (Camera)
 		{
-			RFreeFlyCameraControl* EditorCamera = Camera->FindComponent<RFreeFlyCameraControl>();
-			if (EditorCamera)
-			{
-				return EditorCamera->GetNavigationSpeed();
-			}
+			return Camera->FindComponent<RFreeFlyCameraControl>();
 		}
+	}
+
+	return nullptr;
+}
+
+float WorkshopApp::GetCameraSpeed() const
+{
+	RFreeFlyCameraControl* EditorCamera = GetFreeFlyCamera();
+	if (EditorCamera)
+	{
+		return EditorCamera->GetNavigationSpeed();
 	}
 
 	return -1;
@@ -326,18 +338,19 @@ float WorkshopApp::GetCameraSpeed() const
 
 void WorkshopApp::SetCameraSpeed(float InSpeed)
 {
-	RScene* DefaultScene = GSceneManager.DefaultScene();
-	if (DefaultScene)
+	RFreeFlyCameraControl* EditorCamera = GetFreeFlyCamera();
+	if (EditorCamera)
 	{
-		RCamera* Camera = DefaultScene->GetRenderCamera();
-		if (Camera)
-		{
-			RFreeFlyCameraControl* EditorCamera = Camera->FindComponent<RFreeFlyCameraControl>();
-			if (EditorCamera)
-			{
-				EditorCamera->SetNavigationSpeed(InSpeed);
-			}
-		}
+		EditorCamera->SetNavigationSpeed(InSpeed);
+	}
+}
+
+void WorkshopApp::FocusOnSelection()
+{
+	RFreeFlyCameraControl* EditorCamera = GetFreeFlyCamera();
+	if (EditorCamera && SelectedObject)
+	{
+		EditorCamera->FocusOnObject(SelectedObject);
 	}
 }
 
@@ -555,6 +568,11 @@ void WorkshopApp::DisplaySceneViewWindow()
 				if (ImGui::Selectable(ObjectName.c_str(), &bIsSelected))
 				{
 					SetSelectedObject(SceneObjects[i]);
+				}
+
+				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+				{
+					FocusOnSelection();
 				}
 			}
 		}

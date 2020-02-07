@@ -12,6 +12,8 @@ RFreeFlyCameraControl::RFreeFlyCameraControl(RSceneObject* InOwner)
 	, m_Enabled(true)
 	, m_CamYaw(0.0f)
 	, m_CamPitch(0.0f)
+	, FocalPointDistance(0.0f)
+	, bEasingOutToTarget(false)
 {
 }
 
@@ -31,7 +33,8 @@ void RFreeFlyCameraControl::Update(float DeltaTime)
 			RInput.UnlockCursor();
 		}
 
-		if (RInput.IsKeyDown(VK_RBUTTON))
+		bool bIsOrbiting = RInput.IsKeyDown(VK_LBUTTON) && RInput.IsKeyDown(VK_LMENU);
+		if (RInput.IsKeyDown(VK_RBUTTON) || bIsOrbiting)
 		{
 			int dx, dy;
 			RInput.GetRelativeCursorPosition(dx, dy);
@@ -40,6 +43,20 @@ void RFreeFlyCameraControl::Update(float DeltaTime)
 				m_CamYaw += (float)dx / 200.0f;
 				m_CamPitch += (float)dy / 200.0f;
 				m_CamPitch = max(-PI / 2, min(PI / 2, m_CamPitch));
+			}
+
+			// Stop easing out to target
+			bEasingOutToTarget = false;
+		}
+
+		if (bEasingOutToTarget)
+		{
+			RVec3 CurrentPosition = GetOwner()->GetWorldPosition();
+			RVec3 NewPosition = RVec3::Lerp(CurrentPosition, TargetPosition, RMath::Min(DeltaTime * 10.0f, 1.0f));
+			GetOwner()->SetPosition(NewPosition);
+			if (NewPosition == TargetPosition)
+			{
+				bEasingOutToTarget = false;
 			}
 		}
 
@@ -63,8 +80,19 @@ void RFreeFlyCameraControl::Update(float DeltaTime)
 		RCamera* Camera = GetOwner()->CastTo<RCamera>();
 		if (Camera)
 		{
+			RVec3 FocalPoint = RVec3::Zero();
+			if (bIsOrbiting)
+			{
+				FocalPoint = Camera->GetWorldPosition() + Camera->GetForwardVector() * FocalPointDistance;
+			}
+
 			Camera->Translate(moveVec, ETransformSpace::Local);
 			Camera->SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0.0f));
+
+			if (bIsOrbiting)
+			{
+				Camera->SetPosition(FocalPoint - Camera->GetForwardVector() * FocalPointDistance);
+			}
 		}
 	}
 }
@@ -96,5 +124,16 @@ void RFreeFlyCameraControl::SetEnabled(bool Enabled)
 
 			m_CamYaw = CameraRotation.Z();
 		}
+	}
+}
+
+void RFreeFlyCameraControl::FocusOnObject(RSceneObject* SceneObject)
+{
+	RAabb Bounds = SceneObject->GetAabb();
+	if (Bounds.IsValid())
+	{
+		FocalPointDistance = (Bounds.pMax - Bounds.pMin).Magnitude();
+		TargetPosition = Bounds.GetCenter() - GetOwner()->GetForwardVector() * FocalPointDistance;
+		bEasingOutToTarget = true;
 	}
 }

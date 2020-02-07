@@ -23,6 +23,8 @@ public:
 	float GetNavigationSpeed() const;
 	void SetNavigationSpeed(float InSpeed);
 
+	void FocusOnObject(RSceneObject* SceneObject);
+
 private:
 	/// How fast the camera can move
 	float NavigationSpeed;
@@ -31,6 +33,10 @@ private:
 
 	float m_CamYaw;
 	float m_CamPitch;
+
+	float FocalPointDistance;
+	bool bEasingOutToTarget;
+	RVec3 TargetPosition;
 };
 
 
