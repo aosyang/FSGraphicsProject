@@ -51,6 +51,19 @@ FOREACH(Shader ${SRC_HLSL})
 	)
 ENDFOREACH()
 
+FILE(GLOB_RECURSE SRC_SHADERS
+	 "../Shaders/*.h"
+	 "../Shaders/*.hlsl"
+	 "../Shaders/*.hlsli"
+)
+
+# Exclude shaders from the building process as they're only for editing
+FOREACH(Shader ${SRC_SHADERS})
+	SET_SOURCE_FILES_PROPERTIES(${Shader} PROPERTIES
+		HEADER_FILE_ONLY TRUE
+	)
+ENDFOREACH()
+
 FILE(GLOB_RECURSE SRC_IMGUI
 	 "imgui/*.cpp"
 	 "imgui/*.h"
@@ -103,6 +116,7 @@ ADD_LIBRARY(${PROJECT_NAME} STATIC
 	${SRC_SCRIPT}
 	${SRC_TINYXML2}
 	${SRC_LUA5_3}
+	${SRC_SHADERS}
 )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} libfbxsdk.lib)
@@ -121,5 +135,6 @@ SOURCE_GROUP("Scene" FILES ${SRC_SCENE})
 SOURCE_GROUP("Script" FILES ${SRC_SCRIPT})
 SOURCE_GROUP("tinyxml2" FILES ${SRC_TINYXML2})
 SOURCE_GROUP("lua5.3" FILES ${SRC_LUA5_3})
+SOURCE_GROUP("Shaders" FILES ${SRC_SHADERS})
 
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES FOLDER Engine)
