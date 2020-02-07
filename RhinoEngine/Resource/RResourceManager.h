@@ -53,7 +53,7 @@ public:
 
 	void Destroy();
 
-	void LoadAllResources();
+	void LoadAllResources(EResourceLoadMode LoadMode = EResourceLoadMode::Threaded);
 	void UnloadAllResources();
 	void UnloadSRVWrappers();
 

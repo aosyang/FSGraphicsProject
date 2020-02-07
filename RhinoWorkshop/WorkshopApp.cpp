@@ -12,6 +12,7 @@
 WorkshopApp::WorkshopApp()
 	: bShowOpenDialog(false)
 	, bShowAssetsView(false)
+	, AssetViewFilter(AssetType_All)
 	, SelectedObject(nullptr)
 	, SelectedResource(nullptr)
 {
@@ -20,6 +21,7 @@ WorkshopApp::WorkshopApp()
 
 bool WorkshopApp::Initialize()
 {
+	RResourceManager::Instance().LoadAllResources(EResourceLoadMode::Immediate);
 	GSceneManager.DefaultScene()->Initialize();
 
 	return true;
@@ -152,7 +154,16 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 				if (MeshTreeOpen = ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_None))
 				{
 					// Button for mesh selection
-					ImGui::Button("..."); ImGui::SameLine();
+					ImGui::Button(".."); ImGui::SameLine();
+					if (ImGui::Button("->"))
+					{
+						RMesh* MeshAsset = SelectedResource->CastTo<RMesh>();
+						if (MeshAsset)
+						{
+							MeshObject->SetMesh(MeshAsset);
+						}
+					}
+					ImGui::SameLine();
 
 					RMesh* Mesh = MeshObject->GetMesh();
 					std::string AssetPath;
@@ -561,15 +572,65 @@ void WorkshopApp::DisplayAssetsViewWindow()
 	{
 		if (ImGui::Begin("Assets View"))
 		{
+			ImGui::Text("Filter:");
+			DisplayAssertFilter("All", AssetType_All); ImGui::SameLine();
+			DisplayAssertFilter("Mesh", AssetType_Mesh); ImGui::SameLine();
+			DisplayAssertFilter("Texture", AssetType_Texture);
+
+			ImGui::BeginChild("AssetChild");
 			auto& ResourceList = RResourceManager::Instance().EnumerateAllResources();
 			for (auto Iter : ResourceList)
 			{
+				if (Iter->CanCastTo<RMesh>() && !(AssetViewFilter & AssetType_Mesh))
+				{
+					continue;
+				}
+
+				if (Iter->CanCastTo<RTexture>() && !(AssetViewFilter & AssetType_Texture))
+				{
+					continue;
+				}
+
 				if (ImGui::Selectable(Iter->GetAssetPath().c_str(), SelectedResource == Iter))
 				{
 					SelectedResource = Iter;
 				}
 			}
+			ImGui::EndChild();
 		}
 		ImGui::End();
+	}
+}
+
+void WorkshopApp::DisplayAssertFilter(const char* Label, int FilterType)
+{
+	if (FilterType == AssetType_All)
+	{
+		bool bFilterChecked = (AssetViewFilter == FilterType);
+		ImGui::Checkbox(Label, &bFilterChecked);
+		if (bFilterChecked != (AssetViewFilter == FilterType))
+		{
+			if (bFilterChecked)
+			{
+				AssetViewFilter = AssetType_All;
+			}
+			else
+			{
+				AssetViewFilter = 0;
+			}
+		}
+	}
+	else
+	{
+		bool bFilterChecked = (AssetViewFilter & FilterType);
+		ImGui::Checkbox(Label, &bFilterChecked);
+		if (bFilterChecked)
+		{
+			AssetViewFilter |= FilterType;
+		}
+		else
+		{
+			AssetViewFilter &= ~FilterType;
+		}
 	}
 }

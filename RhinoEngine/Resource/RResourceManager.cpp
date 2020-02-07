@@ -116,39 +116,13 @@ void RResourceManager::Destroy()
 	UnloadAllResources();
 }
 
-void RResourceManager::LoadAllResources()
+void RResourceManager::LoadAllResources(EResourceLoadMode LoadMode /*= EResourceLoadMode::Threaded*/)
 {
-	WIN32_FIND_DATAA FindFileData;
-	HANDLE hFind;
-
-	// Load resources including sub-directories
-	std::queue<std::string> dir_queue;
-	dir_queue.push("");
-
-	do
+	std::vector<std::string> ResourcePaths = RFileUtil::GetFilesInDirectoryAndSubdirectories(GetAssetsBasePath(), "*.*");
+	for (auto& Path : ResourcePaths)
 	{
-		const std::string dir_name = dir_queue.front();
-		dir_queue.pop();
-		const std::string SearchingPath = GetAssetsBasePath() + dir_name + "*.*";
-		hFind = FindFirstFileA(SearchingPath.data(), &FindFileData);
-
-		do
-		{
-			if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
-			{
-				const std::string FilePath = std::string("/") + dir_name + FindFileData.cFileName;
-				LoadResourceAutoDetectType(FilePath);
-			}
-			else
-			{
-				if (FindFileData.cFileName[0] != '.')
-				{
-					dir_queue.push(dir_name + std::string(FindFileData.cFileName) + "/");
-				}
-			}
-
-		} while (FindNextFileA(hFind, &FindFileData) != 0);
-	} while (dir_queue.size());
+		LoadResourceAutoDetectType(Path, LoadMode);
+	}
 }
 
 void RResourceManager::UnloadAllResources()

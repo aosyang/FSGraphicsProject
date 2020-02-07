@@ -12,6 +12,14 @@
 class RSceneObject;
 class RResourceBase;
 
+enum RAssetType
+{
+	AssetType_Texture	= 1 << 0,
+	AssetType_Mesh		= 1 << 1,
+
+	AssetType_All		= AssetType_Texture | AssetType_Mesh,
+};
+
 class WorkshopApp : public IApp
 {
 public:
@@ -45,11 +53,14 @@ private:
 	void DisplaySceneViewWindow();
 	void DisplayAssetsViewWindow();
 
+	void DisplayAssertFilter(const char* Label, int FilterType);
+
 private:
 	int WindowWidth, WindowHeight;
 	bool bShowOpenDialog;
 
 	bool bShowAssetsView;
+	int AssetViewFilter;
 
 	// A list of paths to all maps in the asset folder
 	std::vector<std::string> EngineMaps;
