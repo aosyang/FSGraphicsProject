@@ -23,6 +23,7 @@ enum class EMeshCollisionType
 
 class RMesh : public RResourceBase
 {
+	DECLARE_RUNTIME_TYPE(RMesh, RResourceBase)
 public:
 	RMesh(const std::string& Path);
 	RMesh(const std::string& Path, const std::vector<RMeshElement>& meshElements, const std::vector<RMaterial>& materials);

@@ -7,6 +7,7 @@
 
 #include "Core/REngine.h"
 #include "RResourceMetaData.h"
+#include "Core/RRuntimeTypeObject.h"
 
 enum ResourceState
 {
@@ -22,8 +23,9 @@ enum ResourceType
 };
 
 /// Base resource class
-class RResourceBase
+class RResourceBase : public RRuntimeTypeObject
 {
+	DECLARE_RUNTIME_TYPE(RResourceBase, RRuntimeTypeObject)
 public:
 	RResourceBase(ResourceType type, const std::string& path);
 	virtual ~RResourceBase() = 0 {}

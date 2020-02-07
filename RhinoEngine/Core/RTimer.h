@@ -12,6 +12,7 @@ public:
 
 	float TotalTime() const;
 	float DeltaTime() const;
+	float GetFramerate() const;
 
 	void Reset();
 	void Start();

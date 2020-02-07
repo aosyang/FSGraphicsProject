@@ -45,6 +45,8 @@ private:
 	virtual const char* GetClassName() const { return ""; }
 
 public:
+	virtual ~RRuntimeTypeObject() {}
+
 	/// The runtime type id for base class
 	static size_t _StaticGetRuntimeTypeId() { return 0; }
 

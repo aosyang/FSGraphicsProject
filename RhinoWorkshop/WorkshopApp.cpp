@@ -11,7 +11,9 @@
 
 WorkshopApp::WorkshopApp()
 	: bShowOpenDialog(false)
-	, Selected(nullptr)
+	, bShowAssetsView(false)
+	, SelectedObject(nullptr)
+	, SelectedResource(nullptr)
 {
 
 }
@@ -65,7 +67,7 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 					bShowOpenDialog = true;
 					UpdateEngineMapList();
 				}
-
+				ImGui::Separator();
 				if (ImGui::MenuItem("Save Map"))
 				{
 					RScene* DefaultScene = GSceneManager.DefaultScene();
@@ -73,12 +75,17 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 
 					DefaultScene->SaveToFile((RResourceManager::GetAssetsBasePath() + CurrentMapPath).c_str());
 				}
-
+				ImGui::Separator();
 				if (ImGui::MenuItem("Exit"))
 				{
 					PostQuitMessage(0);
 				}
+				ImGui::EndMenu();
+			}
 
+			if (ImGui::BeginMenu("View"))
+			{
+				ImGui::MenuItem("Show Assets View", nullptr, &bShowAssetsView);
 				ImGui::EndMenu();
 			}
 
@@ -92,48 +99,20 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 			SetCameraSpeed(CameraSpeed);
 		}
 
-		if (ImGui::Begin("Scene View", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-		{
-			auto SceneObjects = GetAllSceneObjects();
+		DisplaySceneViewWindow();
+		DisplayAssetsViewWindow();
 
-			if (SceneObjects.size() > 0)
-			{
-				for (int i = 0; i < (int)SceneObjects.size(); i++)
-				{
-					bool bIsSelected = (Selected == SceneObjects[i]);
-					std::string ObjectName = SceneObjects[i]->GetName();
-					if (ObjectName == "")
-					{
-						ObjectName = "(no name)";
-					}
-
-					// Append unique ids to the label to avoid conflicts
-					ObjectName += "##" + std::to_string(i);
-
-					if (ImGui::Selectable(ObjectName.c_str(), &bIsSelected))
-					{
-						SetSelectedObject(SceneObjects[i]);
-					}
-				}
-			}
-			else
-			{
-				ImGui::Text("(No objects)");
-			}
-		}
-		ImGui::End();
-
-		if (Selected)
+		if (SelectedObject)
 		{
 			ImGui::Begin("Object View", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
-			ImGui::Text("Class: %s", Selected->GetClassName());
+			ImGui::Text("Class: %s", SelectedObject->GetClassName());
 
 			char ObjectName[256];
-			strcpy_s(ObjectName, Selected->GetName().c_str());
+			strcpy_s(ObjectName, SelectedObject->GetName().c_str());
 			if (ImGui::InputText("Name", ObjectName, sizeof(ObjectName)))
 			{
-				Selected->SetName(ObjectName);
+				SelectedObject->SetName(ObjectName);
 			}
 
 			static bool TransformTreeOpen = true;
@@ -142,7 +121,7 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 			{
 				if (ImGui::DragFloat3("Position", PosValueArray))
 				{
-					Selected->SetPosition(RVec3(PosValueArray));
+					SelectedObject->SetPosition(RVec3(PosValueArray));
 				}
 
 				// TODO: Quaternion to Euler is NOT stable. Values my change when clicking on the same object a second time
@@ -153,7 +132,7 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 						RotValueArray[i] = RMath::UnwindDegree(RotValueArray[i]);
 					}
 
-					Selected->SetRotation(RQuat::Euler(RVec3(
+					SelectedObject->SetRotation(RQuat::Euler(RVec3(
 						RMath::DegreeToRadian(RotValueArray[0]),
 						RMath::DegreeToRadian(RotValueArray[1]),
 						RMath::DegreeToRadian(RotValueArray[2])
@@ -162,25 +141,25 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 
 				if (ImGui::DragFloat3("Scale", ScaleValueArray))
 				{
-					Selected->SetScale(RVec3(ScaleValueArray));
+					SelectedObject->SetScale(RVec3(ScaleValueArray));
 				}
 			}
 
-			if (RSMeshObject* MeshObject = Selected->CastTo<RSMeshObject>())
+			if (RSMeshObject* MeshObject = SelectedObject->CastTo<RSMeshObject>())
 			{
 				static bool MeshTreeOpen = true;
 				ImGui::SetNextTreeNodeOpen(MeshTreeOpen);
 				if (MeshTreeOpen = ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_None))
 				{
+					// Button for mesh selection
+					ImGui::Button("..."); ImGui::SameLine();
+
 					RMesh* Mesh = MeshObject->GetMesh();
 					std::string AssetPath;
 					if (Mesh)
 					{
 						AssetPath = Mesh->GetAssetPath();
 					}
-
-					// Button for mesh selection
-					ImGui::Button("..."); ImGui::SameLine();
 
 					char MeshAssetName[256];
 					strcpy_s(MeshAssetName, AssetPath.c_str());
@@ -254,28 +233,28 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 	{
 		RVec2 CursorPoint = GetMousePositionInViewport();
 		SelectSceneObjectAtCursor(CursorPoint);
-		if (Selected)
+		if (SelectedObject)
 		{
-			RVec3 Position = Selected->GetPosition();
+			RVec3 Position = SelectedObject->GetPosition();
 			PosValueArray[0] = Position.X();
 			PosValueArray[1] = Position.Y();
 			PosValueArray[2] = Position.Z();
 
-			RVec3 Rotation = Selected->GetRotation().ToEuler();
+			RVec3 Rotation = SelectedObject->GetRotation().ToEuler();
 			RotValueArray[0] = RMath::RadianToDegree(Rotation.X());
 			RotValueArray[1] = RMath::RadianToDegree(Rotation.Y());
 			RotValueArray[2] = RMath::RadianToDegree(Rotation.Z());
 
-			RVec3 Scale = Selected->GetScale();
+			RVec3 Scale = SelectedObject->GetScale();
 			ScaleValueArray[0] = Scale.X();
 			ScaleValueArray[1] = Scale.Y();
 			ScaleValueArray[2] = Scale.Z();
 		}
 	}
 
-	if (Selected)
+	if (SelectedObject)
 	{
-		GDebugRenderer.DrawAabb(Selected->GetAabb());
+		GDebugRenderer.DrawAabb(SelectedObject->GetAabb());
 	}
 }
 
@@ -353,20 +332,20 @@ void WorkshopApp::SetCameraSpeed(float InSpeed)
 
 void WorkshopApp::SetSelectedObject(RSceneObject* InSelected)
 {
-	Selected = InSelected;
-	if (Selected)
+	SelectedObject = InSelected;
+	if (SelectedObject)
 	{
-		RVec3 Position = Selected->GetPosition();
+		RVec3 Position = SelectedObject->GetPosition();
 		PosValueArray[0] = Position.X();
 		PosValueArray[1] = Position.Y();
 		PosValueArray[2] = Position.Z();
 
-		RVec3 Rotation = Selected->GetRotation().ToEuler();
+		RVec3 Rotation = SelectedObject->GetRotation().ToEuler();
 		RotValueArray[0] = RMath::RadianToDegree(Rotation.X());
 		RotValueArray[1] = RMath::RadianToDegree(Rotation.Y());
 		RotValueArray[2] = RMath::RadianToDegree(Rotation.Z());
 
-		RVec3 Scale = Selected->GetScale();
+		RVec3 Scale = SelectedObject->GetScale();
 		ScaleValueArray[0] = Scale.X();
 		ScaleValueArray[1] = Scale.Y();
 		ScaleValueArray[2] = Scale.Z();
@@ -539,5 +518,58 @@ void WorkshopApp::SelectSceneObjectAtCursor(const RVec2& Point)
 				SetSelectedObject(rayPickingList[0].obj);
 			}
 		}
+	}
+}
+
+void WorkshopApp::DisplaySceneViewWindow()
+{
+	if (ImGui::Begin("Scene View", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		auto SceneObjects = GetAllSceneObjects();
+
+		if (SceneObjects.size() > 0)
+		{
+			for (int i = 0; i < (int)SceneObjects.size(); i++)
+			{
+				bool bIsSelected = (SelectedObject == SceneObjects[i]);
+				std::string ObjectName = SceneObjects[i]->GetName();
+				if (ObjectName == "")
+				{
+					ObjectName = "(no name)";
+				}
+
+				// Append unique ids to the label to avoid conflicts
+				ObjectName += "##" + std::to_string(i);
+
+				if (ImGui::Selectable(ObjectName.c_str(), &bIsSelected))
+				{
+					SetSelectedObject(SceneObjects[i]);
+				}
+			}
+		}
+		else
+		{
+			ImGui::Text("(No objects)");
+		}
+	}
+	ImGui::End();
+}
+
+void WorkshopApp::DisplayAssetsViewWindow()
+{
+	if (bShowAssetsView)
+	{
+		if (ImGui::Begin("Assets View"))
+		{
+			auto& ResourceList = RResourceManager::Instance().EnumerateAllResources();
+			for (auto Iter : ResourceList)
+			{
+				if (ImGui::Selectable(Iter->GetAssetPath().c_str(), SelectedResource == Iter))
+				{
+					SelectedResource = Iter;
+				}
+			}
+		}
+		ImGui::End();
 	}
 }

@@ -249,6 +249,18 @@ std::vector<RMesh*> RResourceManager::GetMeshResources()
 	return GetResourceContainer<RMesh>().GetResourceArrayCopy();
 }
 
+std::vector<RResourceBase*> RResourceManager::EnumerateAllResources()
+{
+	std::vector<RResourceBase*> Resources;
+	for (auto& Container : ResourceContainers)
+	{
+		auto Array = Container->GetResourceBaseArray();
+		Resources.insert(Resources.end(), Array.begin(), Array.end());
+	}
+
+	return Resources;
+}
+
 const std::string& RResourceManager::GetAssetsBasePath()
 {
 	return AssetsBasePathName;

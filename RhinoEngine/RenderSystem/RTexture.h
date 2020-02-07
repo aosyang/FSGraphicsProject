@@ -8,6 +8,7 @@
 
 class RTexture : public RResourceBase
 {
+	DECLARE_RUNTIME_TYPE(RTexture, RResourceBase)
 	friend class RResourceManager;
 public:
 	RTexture(const std::string& Path);

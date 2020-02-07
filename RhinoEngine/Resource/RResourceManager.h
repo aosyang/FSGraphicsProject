@@ -77,6 +77,11 @@ public:
 	/// Get an array of all mesh resources
 	std::vector<RMesh*> GetMeshResources();
 
+	template<typename T>
+	std::vector<T*> EnumerateResourcesOfType();
+
+	std::vector<RResourceBase*> EnumerateAllResources();
+
 	/// Root path of assets folder
 	static const std::string& GetAssetsBasePath();
 
@@ -105,6 +110,9 @@ private:
 	/// Get resource container for resource type
 	template<typename T>
 	RResourceContainer<T>& GetResourceContainer();
+
+	template<typename T>
+	const RResourceContainer<T>& GetResourceContainer() const;
 
 	static void LockTaskQueue();
 	static void UnlockTaskQueue();
@@ -202,6 +210,12 @@ T* RResourceManager::FindResource(const std::string& Path)
 }
 
 template<typename T>
+std::vector<T*> RResourceManager::EnumerateResourcesOfType()
+{
+	return GetResourceContainer<T>().GetResourceArrayCopy();
+}
+
+template<typename T>
 void RResourceManager::RegisterResourceType()
 {
 	// Functor class for template resource loader function
@@ -240,4 +254,10 @@ RResourceContainer<T>& RResourceManager::GetResourceContainer()
 
 	assert(ResourceContainer);
 	return *ResourceContainer;
+}
+
+template<typename T>
+const RResourceContainer<T>& RResourceManager::GetResourceContainer() const
+{
+	return const_cast<RResourceManager*>(this)->GetResourceContainer();
 }

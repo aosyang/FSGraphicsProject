@@ -46,6 +46,8 @@ public:
 
 	virtual void ReleaseAllResources() {}
 
+	virtual std::vector<RResourceBase*> GetResourceBaseArray() { return std::vector<RResourceBase*>(); }
+
 protected:
 	void Lock();
 	void Unlock();
@@ -121,6 +123,20 @@ public:
 		}
 
 		return nullptr;
+	}
+
+	virtual std::vector<RResourceBase*> GetResourceBaseArray() override
+	{
+		std::vector<RResourceBase*> ArrayCopy;
+
+		Lock();
+		for (auto Resource : Resources)
+		{
+			ArrayCopy.push_back(Resource);
+		}
+		Unlock();
+
+		return ArrayCopy;
 	}
 
 	/// Get a copy of resource array

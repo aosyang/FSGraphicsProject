@@ -146,21 +146,15 @@ void REngine::Run()
 	// Main game loop
 	while (bRunLoop)
 	{
-		MSG msg;
-
 		ImGuiIO& io = ImGui::GetIO();
-		if (!io.WantCaptureKeyboard && !io.WantCaptureMouse)
+		bool bKeyCapturedByGui = (io.WantCaptureKeyboard || io.WantCaptureMouse);
+		if (!bKeyCapturedByGui)
 		{
 			RInput._UpdateKeyStates(m_hWnd);
 		}
-		else
-		{
-			// Clear any key states when UI is handling input
-			// TODO: Still catches key down event here
-			RInput._ClearKeyStates();
-		}
 
 		// Handle win32 window messages
+		MSG msg;
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT)
@@ -174,6 +168,13 @@ void REngine::Run()
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
+		}
+
+		if (bKeyCapturedByGui)
+		{
+			// Key states are changed during window message callback.
+			// If GUI is capturing keyboard/mouse event, let's clear any key states for this frame.
+			RInput._ClearKeyStates();
 		}
 
 		RunOneFrame();

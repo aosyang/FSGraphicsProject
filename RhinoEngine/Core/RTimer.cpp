@@ -33,6 +33,11 @@ float RTimer::DeltaTime() const
 	return (float)m_DeltaTime;
 }
 
+float RTimer::GetFramerate() const
+{
+	return (float)(1.0 / m_DeltaTime);
+}
+
 void RTimer::Reset()
 {
 	__int64 currTime;
