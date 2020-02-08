@@ -206,7 +206,7 @@ bool FSGraphicsProjectApp::Initialize()
 
 	RMaterial tachikomaMaterials[] =
 	{
-		{ m_RefractionShader, 1, RResourceManager::Instance().WrapSRV(m_RenderTargetSRV) },
+		{ m_RefractionShader, 1, RResourceManager::Instance().WrapShaderResourceViewInTexture(m_RenderTargetSRV) },
 	};
 
 	m_TachikomaObj->SetMaterial(tachikomaMaterials, 1);
@@ -908,7 +908,7 @@ void FSGraphicsProjectApp::OnResize(int width, int height)
 
 		RMaterial tachikomaMaterials[] =
 		{
-			{ m_RefractionShader, 1, RResourceManager::Instance().WrapSRV(m_RenderTargetSRV) },
+			{ m_RefractionShader, 1, RResourceManager::Instance().WrapShaderResourceViewInTexture(m_RenderTargetSRV) },
 		};
 
 		m_TachikomaObj->SetMaterial(tachikomaMaterials, 1);

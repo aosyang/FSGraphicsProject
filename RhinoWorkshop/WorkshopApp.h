@@ -8,6 +8,7 @@
 
 #include "Core/CoreTypes.h"
 #include "Core/IApp.h"
+#include "RMeshPreviewBuilder.h"
 
 class RSceneObject;
 class RResourceBase;
@@ -75,4 +76,6 @@ private:
 	float PosValueArray[3];
 	float RotValueArray[3];
 	float ScaleValueArray[3];
+
+	RMeshPreviewBuilder MeshPreviewBuilder;
 };

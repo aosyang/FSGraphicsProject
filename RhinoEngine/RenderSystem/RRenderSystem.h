@@ -63,7 +63,7 @@ public:
 	void ClearRenderTarget(ID3D11RenderTargetView* rtv, const RColor& color = RColor(0.69f, 0.77f, 0.87f, 1.0f));
 
 	// Present current frame. Called by the engine
-	void Present();
+	void Present(bool bWaitForVsync = true);
 
 	ID3D11Device*			D3DDevice()						{ return m_pD3DDevice; }
 	ID3D11DeviceContext*	D3DImmediateContext()			{ return m_pD3DImmediateContext; }

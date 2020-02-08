@@ -113,6 +113,7 @@ void RResourceManager::Destroy()
 		Sleep(1);
 	}
 
+	UnloadSRVWrappers();
 	UnloadAllResources();
 }
 
@@ -140,8 +141,6 @@ void RResourceManager::UnloadSRVWrappers()
 {
 	for (const auto& Iter : m_WrapperTextureResources)
 	{
-		// Delete wrapper textures without releasing shader resource view
-		Iter.second->m_SRV = nullptr;
 		delete Iter.second;
 	}
 	m_WrapperTextureResources.clear();
@@ -265,14 +264,22 @@ std::string RResourceManager::GetRelativePathToResource(const std::string& Resou
 	return RelativePath;
 }
 
-RTexture* RResourceManager::WrapSRV(ID3D11ShaderResourceView* srv)
+RTexture* RResourceManager::WrapShaderResourceViewInTexture(ID3D11ShaderResourceView* ShaderResourceView, bool bTransferOwnership /*= false*/)
 {
-	if (m_WrapperTextureResources.find(srv) != m_WrapperTextureResources.end())
-		return m_WrapperTextureResources[srv];
+	RTexture* Texture = nullptr;
 
-	RTexture* tex = new RTexture(srv);
-	tex->OnLoadingFinished(false);
-	m_WrapperTextureResources[srv] = tex;
-	return tex;
+	if (m_WrapperTextureResources.find(ShaderResourceView) != m_WrapperTextureResources.end())
+	{
+		Texture = m_WrapperTextureResources[ShaderResourceView];
+		assert(Texture->HasOwnershipOfResource() == bTransferOwnership);
+	}
+	else
+	{
+		Texture = new RTexture(ShaderResourceView, bTransferOwnership);
+		Texture->OnLoadingFinished(false);
+		m_WrapperTextureResources[ShaderResourceView] = Texture;
+	}
+
+	return Texture;
 }
 

@@ -18,8 +18,6 @@
 // http://go.microsoft.com/fwlink/?LinkId=248929
 //--------------------------------------------------------------------------------------
 
-#include "Rhino.h"
-
 #include <assert.h>
 #include <algorithm>
 #include <memory>

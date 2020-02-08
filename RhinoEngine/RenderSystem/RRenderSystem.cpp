@@ -373,11 +373,11 @@ void RRenderSystem::ClearRenderTarget(ID3D11RenderTargetView* rtv, const RColor&
 	m_pD3DImmediateContext->ClearRenderTargetView(rtv, reinterpret_cast<const float*>(&color));
 }
 
-void RRenderSystem::Present()
+void RRenderSystem::Present(bool bWaitForVsync /*= true*/)
 {
 	assert(m_SwapChain);
 
-	HR(m_SwapChain->Present(1, 0));
+	HR(m_SwapChain->Present(bWaitForVsync ? 1 : 0, 0));
 }
 
 void RRenderSystem::SetRenderTargets(UINT numViews, ID3D11RenderTargetView* const* renderTargetView, ID3D11DepthStencilView* depthStencilView)

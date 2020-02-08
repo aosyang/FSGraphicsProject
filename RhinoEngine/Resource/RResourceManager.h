@@ -88,8 +88,8 @@ public:
 	/// Get relative path to resource from working directory
 	static std::string GetRelativePathToResource(const std::string& ResourcePath);
 
-	// Wrap a d3d11 srv and get a pointer to texture
-	RTexture* WrapSRV(ID3D11ShaderResourceView* srv);
+	/// Wrap a d3d11 shader resource view and get a pointer to texture
+	RTexture* WrapShaderResourceViewInTexture(ID3D11ShaderResourceView* ShaderResourceView, bool bTransferOwnership = false);
 
 private:
 	RResourceManager() {}
