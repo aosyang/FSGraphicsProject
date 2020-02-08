@@ -113,7 +113,6 @@ void RResourceManager::Destroy()
 		Sleep(1);
 	}
 
-	UnloadSRVWrappers();
 	UnloadAllResources();
 }
 
