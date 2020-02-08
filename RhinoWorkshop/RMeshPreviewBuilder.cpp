@@ -21,19 +21,6 @@ void RMeshPreviewBuilder::BuildPreviewForAllMeshes()
 	}
 }
 
-void RMeshPreviewBuilder::BuildTest()
-{
-	std::vector<RMesh*> MeshCollection = RResourceManager::Instance().EnumerateResourcesOfType<RMesh>();
-	for (auto Mesh : MeshCollection)
-	{
-		RTexture* PreviewTexture = GeneratePreviewTexture(Mesh, 512, 512);
-		if (PreviewTexture)
-		{
-			return;
-		}
-	}
-}
-
 RTexture* RMeshPreviewBuilder::FindPreviewTexture(RMesh* Mesh) const
 {
 	auto Iter = MeshPreviews.find(Mesh);
@@ -157,6 +144,18 @@ RTexture* RMeshPreviewBuilder::GeneratePreviewTexture(RMesh* Mesh, int Width, in
 		RConstantBuffers::cbMaterial.Data.GlobalOpacity = 1.0f;
 		RConstantBuffers::cbMaterial.UpdateBufferData();
 		RConstantBuffers::cbMaterial.BindBuffer();
+
+		if (Mesh->HasAnySkinnedMeshElements())
+		{
+			RConstantBuffers::cbBoneMatrices.ClearData();
+			for (int i = 0; i < MAX_BONE_COUNT; i++)
+			{
+				RConstantBuffers::cbBoneMatrices.Data.boneMatrix[i] = RMatrix4::IDENTITY;
+			}
+			RConstantBuffers::cbBoneMatrices.UpdateBufferData();
+			RConstantBuffers::cbBoneMatrices.BindBuffer();
+		}
+
 
 		PreviewScene.Render();
 		GRenderer.Present(false);

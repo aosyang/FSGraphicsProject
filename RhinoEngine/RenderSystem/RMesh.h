@@ -51,6 +51,9 @@ public:
 	void SetAnimation(RAnimation* anim);
 	RAnimation* GetAnimation() const;
 
+	// Check if any mesh elements uses skinning
+	bool HasAnySkinnedMeshElements() const;
+
 	void SetBoneInitInvMatrices(std::vector<RMatrix4>& bonePoses);
 	const RMatrix4& GetBoneInitInvMatrices(int index) const { return m_BoneInitInvMatrices[index]; }
 

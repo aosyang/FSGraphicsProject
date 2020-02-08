@@ -15,7 +15,6 @@ class RMeshPreviewBuilder
 {
 public:
 	void BuildPreviewForAllMeshes();
-	void BuildTest();
 
 	RTexture* FindPreviewTexture(RMesh* Mesh) const;
 

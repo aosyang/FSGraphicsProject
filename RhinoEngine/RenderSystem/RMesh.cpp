@@ -136,6 +136,19 @@ RAnimation* RMesh::GetAnimation() const
 	return m_Animation;
 }
 
+bool RMesh::HasAnySkinnedMeshElements() const
+{
+	for (const auto& MeshElement : m_MeshElements)
+	{
+		if (MeshElement.GetFlag() & MEF_Skinned)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void RMesh::SetBoneInitInvMatrices(std::vector<RMatrix4>& bonePoses)
 {
 	m_BoneInitInvMatrices = move(bonePoses);
