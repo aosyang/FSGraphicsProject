@@ -147,24 +147,12 @@ void RShaderManager::LoadShaders(const std::string& Path)
 				}
 
 				// Read shader text from .hlsl
-				std::ifstream fin;
-				std::string fileFullPath = filename;
-				fin.open(fileFullPath, std::ios_base::binary);
-
-				if (!fin.is_open())
-					continue;
-
-				fin.seekg(0, std::ios_base::end);
-				int fileSize = (int)fin.tellg();
-				char* pBuffer = new char[fileSize];
-
-				fin.seekg(0);
-				fin.read(pBuffer, fileSize);
-				fin.close();
-
-				RLog("Compiling shader %s\n", filename.c_str());
-				CompileShader(filename, pBuffer, fileSize, Shader);
-				delete[] pBuffer;
+				std::string ShaderBuffer = ReadStringBuffer(filename);
+				if (ShaderBuffer.size() > 0)
+				{
+					RLog("Compiling shader %s\n", filename.c_str());
+					CompileShader(filename, ShaderBuffer, Shader);
+				}
 			}
 
 		} while (FindNextFileA(hFind, &FindFileData) != 0);
@@ -268,7 +256,7 @@ const std::string& RShaderManager::GetShaderName(const RShader* shader) const
 	return EmptyShaderName;
 }
 
-void RShaderManager::CompileShader(const std::string& SourceName, const char* pBuffer, int BufferSize, RShader* Shader)
+void RShaderManager::CompileShader(const std::string& SourceName, const std::string& ShaderBuffer, RShader* Shader)
 {
 	HRESULT hr;
 	ComPtr<ID3DBlob> pShaderCode;
@@ -280,6 +268,14 @@ void RShaderManager::CompileShader(const std::string& SourceName, const char* pB
 		return;
 	}
 
+	// Find all included files for timestamp comparison with the shader cache
+	std::vector<std::string> IncludeFiles;
+	FindShaderIncludedFiles(ShaderBuffer, IncludeFiles);
+	IncludeFiles.push_back(SourceName);
+
+	// Remove the engine header file
+	StdRemove(IncludeFiles, "Rhino.h");
+
 	for (int Index = 0; Index < ARRAYSIZE(ShaderCompileOptions); Index++)
 	{
 		const RShaderCompileOption& CompileOption = ShaderCompileOptions[Index];
@@ -289,23 +285,30 @@ void RShaderManager::CompileShader(const std::string& SourceName, const char* pB
 			continue;
 		}
 
-		if (!CompileOption.ShaderMacros[0].Name || strstr(pBuffer, CompileOption.ShaderMacros[0].Name))
+		// The shader doesn't use and predefined macros. An original shader should always be loaded
+		bool bOriginalShader = !CompileOption.ShaderMacros[0].Name;
+
+		// Search if macro has been used by the shader code 
+		bool bIsFeatureUsed = CompileOption.ShaderMacros[0].Name && ShaderBuffer.find(CompileOption.ShaderMacros[0].Name) != std::string::npos;
+
+		if (bOriginalShader || bIsFeatureUsed)
 		{
 			std::string ActualSourceName = CompileOption.Prefix + SourceName;
 			std::vector<char> ShaderCache;
 
 			void* ShaderCodeBuffer = nullptr;
 			SIZE_T ShaderCodeSize;
-			bool bHasCacheFile;
+			bool bHasCacheFile = false;
 
-			if (bHasCacheFile = TryLoadShaderFromCache(ActualSourceName, SourceName, ShaderCache))
+			if (!CheckShaderCacheOutdated(ActualSourceName, IncludeFiles) &&
+				(bHasCacheFile = TryLoadShaderFromCache(ActualSourceName, SourceName, ShaderCache)))
 			{
 				ShaderCodeBuffer = ShaderCache.data();
 				ShaderCodeSize = ShaderCache.size();
 			}
 			else
 			{
-				if (SUCCEEDED(hr = D3DCompile(pBuffer, BufferSize, ActualSourceName.c_str(), CompileOption.ShaderMacros, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", CompileOption.ShaderTarget, GetShaderCompileFlag(), 0, &pShaderCode, &pErrorMsg)))
+				if (SUCCEEDED(hr = D3DCompile(ShaderBuffer.c_str(), ShaderBuffer.size(), ActualSourceName.c_str(), CompileOption.ShaderMacros, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", CompileOption.ShaderTarget, GetShaderCompileFlag(), 0, &pShaderCode, &pErrorMsg)))
 				{
 					ShaderCodeBuffer = pShaderCode->GetBufferPointer();
 					ShaderCodeSize = pShaderCode->GetBufferSize();
@@ -372,6 +375,27 @@ void RShaderManager::CreateGeometryShader(const std::string& SourceName, const v
 		(*GeometryShader)->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)SourceName.size(), SourceName.c_str());
 #endif
 	}
+}
+
+bool RShaderManager::CheckShaderCacheOutdated(const std::string& SourceName, const std::vector<std::string>& Includes)
+{
+	std::string ShaderCachePath = GetShaderCachePath() + MakeCacheFileName(SourceName);
+
+	if (RFileUtil::CheckPathExists(ShaderCachePath))
+	{
+		for (auto IncludeFile : Includes)
+		{
+			std::string ShaderFilePath = GetShaderRootPath() + "/" + IncludeFile;
+			ETimestampComparison Result = RFileUtil::CompareFileTimestamp(ShaderFilePath, ShaderCachePath);
+			if (Result == ETimestampComparison::EarlierSecond || Result == ETimestampComparison::InvalidFile)
+			{
+				// If any include file has been saved after the shader cache, the cache is outdated.
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 bool RShaderManager::TryLoadShaderFromCache(const std::string& SourceName, const std::string& DiskFileName, std::vector<char>& OutBytecode)
@@ -454,6 +478,63 @@ std::string RShaderManager::MakeCacheFileName(const std::string& SourceName) con
 std::string RShaderManager::GetShaderCachePath() const
 {
 	return RFileUtil::GetFullPath(GetShaderRootPath() + "/Cache/");
+}
+
+std::string RShaderManager::ReadStringBuffer(const std::string& filename) const
+{
+	std::string StringBuffer;
+
+	std::ifstream fin;
+	std::string fileFullPath = filename;
+	fin.open(fileFullPath);
+
+	if (fin.is_open())
+	{
+		fin.seekg(0, std::ios_base::end);
+		int fileSize = (int)fin.tellg();
+		StringBuffer.resize(fileSize);
+
+		fin.seekg(0);
+		fin.read(&StringBuffer[0], fileSize);
+		fin.close();
+	}
+
+	return StringBuffer;
+}
+
+bool RShaderManager::FindShaderIncludedFiles(const std::string& ShaderBuffer, std::vector<std::string>& InOutFileList)
+{
+	std::istringstream StreamStream(ShaderBuffer);
+	std::string Line;
+	while (std::getline(StreamStream, Line))
+	{
+		std::istringstream LineStream(Line);
+		char c;
+		LineStream >> c;
+		if (c == '#')
+		{
+			std::string KeyWord;
+			LineStream >> KeyWord;
+			if (KeyWord == "include")
+			{
+				std::string FileName;
+				LineStream >> FileName;
+
+				// Remove quote marks
+				FileName.erase(std::remove(FileName.begin(), FileName.end(), '\"'), FileName.end());
+
+				if (!StdContains(InOutFileList, FileName))
+				{
+					InOutFileList.push_back(FileName);
+
+					std::string StringBuffer = ReadStringBuffer(FileName);
+					FindShaderIncludedFiles(StringBuffer, InOutFileList);
+				}
+			}
+		}
+	}
+
+	return InOutFileList.size() != 0;
 }
 
 EShaderType RShaderManager::DetectShaderType(const std::string& FileName) const

@@ -73,11 +73,14 @@ private:
 
 	const std::string& GetShaderName(const RShader* shader) const;
 
-	void CompileShader(const std::string& SourceName, const char* pBuffer, int BufferSize, RShader* Shader);
+	void CompileShader(const std::string& SourceName, const std::string& ShaderBuffer, RShader* Shader);
 
 	void CreateVertexShader(const std::string& SourceName, const void* ShaderBytecode, SIZE_T BytecodeLength, ID3D11VertexShader** VertexShader);
 	void CreatePixelShader(const std::string& SourceName, const void* ShaderBytecode, SIZE_T BytecodeLength, ID3D11PixelShader** PixelShader);
 	void CreateGeometryShader(const std::string& SourceName, const void* ShaderBytecode, SIZE_T BytecodeLength, ID3D11GeometryShader** GeometryShader);
+
+	/// Check if any include files is newer than the shader cache
+	bool CheckShaderCacheOutdated(const std::string& SourceName, const std::vector<std::string>& Includes);
 
 	/// Load a shader from its cache file
 	bool TryLoadShaderFromCache(const std::string& SourceName, const std::string& DiskFileName, std::vector<char>& OutBytecode);
@@ -90,6 +93,12 @@ private:
 
 	/// Get the path of shader cache folder
 	std::string GetShaderCachePath() const;
+
+	/// Read a string buffer from file
+	std::string ReadStringBuffer(const std::string& filename) const;
+
+	/// Find all include file names in the shader buffer (recursively)
+	bool FindShaderIncludedFiles(const std::string& ShaderBuffer, std::vector<std::string>& InOutFileList);
 
 	/// Guess type of a shader by its file name
 	EShaderType DetectShaderType(const std::string& FileName) const;
