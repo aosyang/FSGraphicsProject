@@ -486,7 +486,7 @@ std::string RShaderManager::ReadStringBuffer(const std::string& filename) const
 
 	std::ifstream fin;
 	std::string fileFullPath = filename;
-	fin.open(fileFullPath);
+	fin.open(fileFullPath, std::ios::binary);
 
 	if (fin.is_open())
 	{
