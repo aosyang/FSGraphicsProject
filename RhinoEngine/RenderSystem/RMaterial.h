@@ -62,7 +62,8 @@ public:
 	const std::vector<RTextureSlotData>& GetTextureSlots() const;
 	std::vector<RTextureSlotData>& GetTextureSlots();
 
-	void AssignTextureToSlot(RTexture* Texture, int Slot);
+	void SetTextureSlot(int Slot, RTexture* Texture);
+	RTexture* GetTextureBySlot(int SlotId) const;
 
 	/// Get a default material
 	static RMaterial* GetDefault();
@@ -93,4 +94,17 @@ FORCEINLINE const std::vector<RTextureSlotData>& RMaterial::GetTextureSlots() co
 FORCEINLINE std::vector<RTextureSlotData>& RMaterial::GetTextureSlots()
 {
 	return TextureSlots;
+}
+
+FORCEINLINE RTexture* RMaterial::GetTextureBySlot(int SlotId) const
+{
+	for (int i = 0; i < TextureSlots.size(); i++)
+	{
+		if (TextureSlots[i].SlotId == SlotId)
+		{
+			return TextureSlots[i].Texture;
+		}
+	}
+
+	return nullptr;
 }

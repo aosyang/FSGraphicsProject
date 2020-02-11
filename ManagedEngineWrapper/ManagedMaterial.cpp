@@ -14,7 +14,7 @@ namespace ManagedEngineWrapper
 	ManagedMaterial::ManagedMaterial(RMaterial* mat, const char* elemName)
 		: material(mat)
 		, meshElementName(gcnew String(elemName))
-		, ShaderWrapper(mat->Shader)
+		, ShaderWrapper(mat->GetShader())
 	{
 
 	}

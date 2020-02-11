@@ -146,7 +146,7 @@ void RMaterial::Serialize(RSerializer& serializer)
 	}
 }
 
-void RMaterial::AssignTextureToSlot(RTexture* Texture, int Slot)
+void RMaterial::SetTextureSlot(int Slot, RTexture* Texture)
 {
 	for (int i = 0; i < (int)TextureSlots.size(); i++)
 	{
