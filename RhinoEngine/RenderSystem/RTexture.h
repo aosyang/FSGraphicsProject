@@ -31,7 +31,7 @@ public:
 
 protected:
 
-	virtual bool LoadResourceImpl(bool bIsAsyncLoading) override;
+	virtual bool LoadResourceImpl() override;
 	
 private:
 	void QueryTextureDesc(ID3D11ShaderResourceView& ShaderResourceView);

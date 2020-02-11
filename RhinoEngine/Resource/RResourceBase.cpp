@@ -21,7 +21,7 @@ bool RResourceBase::LoadResourceData(bool bIsAsyncLoading)
 	std::string MetaFileName = m_FileSystemPath + ".meta";
 	MetaData->LoadFromFile(MetaFileName);
 
-	if (LoadResourceImpl(bIsAsyncLoading))
+	if (LoadResourceImpl())
 	{
 		OnLoadingFinished(bIsAsyncLoading);
 
@@ -29,6 +29,11 @@ bool RResourceBase::LoadResourceData(bool bIsAsyncLoading)
 	}
 
 	return false;
+}
+
+bool RResourceBase::SaveToDisk()
+{
+	return SaveResourceImpl();
 }
 
 bool RResourceBase::AreReferencedResourcesLoaded() const
@@ -73,7 +78,13 @@ std::vector<RResourceBase*> RResourceBase::EnumerateReferencedResources() const
 	return EmptyResources;
 }
 
-bool RResourceBase::LoadResourceImpl(bool bIsAsyncLoading)
+bool RResourceBase::LoadResourceImpl()
+{
+	// Base class does nothing
+	return false;
+}
+
+bool RResourceBase::SaveResourceImpl()
 {
 	// Base class does nothing
 	return false;

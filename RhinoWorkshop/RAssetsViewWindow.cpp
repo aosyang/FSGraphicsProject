@@ -16,16 +16,73 @@ RAssetsViewWindow::RAssetsViewWindow()
 	, PreviewIconSize(256)
 	, SelectedResource(nullptr)
 	, EditingResource(nullptr)
+	, bShowNewMaterialDialog(false)
 {
-
+	strcpy_s(NewMaterialPath, "/");
 }
 
 void RAssetsViewWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder)
 {
 	if (bShowWindow)
 	{
-		if (ImGui::Begin("Assets View"))
+		if (ImGui::Begin("Assets View", nullptr, ImGuiWindowFlags_MenuBar))
 		{
+			if (ImGui::BeginMenuBar())
+			{
+				if (ImGui::BeginMenu("File"))
+				{
+					if (ImGui::MenuItem("New Material"))
+					{
+						bShowNewMaterialDialog = true;
+						ZeroMemory(NewMaterialName, sizeof(NewMaterialName));
+					}
+
+					ImGui::EndMenu();
+				}
+				ImGui::EndMenuBar();
+			}
+
+			if (bShowNewMaterialDialog)
+			{
+				ImGui::OpenPopup("New Material");
+			}
+
+			if (ImGui::BeginPopupModal("New Material", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+			{
+				ImGui::InputText("Material name", NewMaterialName, sizeof(NewMaterialName));
+				ImGui::InputText("Asset path", NewMaterialPath, sizeof(NewMaterialPath));
+				if (ImGui::Button("Create"))
+				{
+					std::string MaterialName(NewMaterialName);
+					std::string AssetPath(NewMaterialPath);
+
+					// Add extension to material name
+					MaterialName = RFileUtil::StripExtension(MaterialName) + ".material";
+
+					// Replace back slashes with forward slashes
+					std::replace(AssetPath.begin(), AssetPath.end(), '\\', '/');
+					if (AssetPath[AssetPath.size() - 1] != '/')
+					{
+						AssetPath += '/';
+					}
+
+					RMaterial* NewMaterial = RResourceManager::Instance().CreateNewResource<RMaterial>(AssetPath + MaterialName);
+					PreviewBuilder.BuildPreviewForResource(NewMaterial);
+
+					ImGui::CloseCurrentPopup();
+					bShowNewMaterialDialog = false;
+				}
+
+				ImGui::SameLine();
+				if (ImGui::Button("Cancel"))
+				{
+					ImGui::CloseCurrentPopup();
+					bShowNewMaterialDialog = false;
+				}
+
+				ImGui::EndPopup();
+			}
+
 			ImGui::Text("Filter:");
 			DisplayAssertFilter("All", AssetType_All); ImGui::SameLine();
 			DisplayAssertFilter("Mesh", AssetType_Mesh); ImGui::SameLine();

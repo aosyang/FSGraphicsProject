@@ -84,7 +84,7 @@ public:
 
 	/// Create a new resource
 	template<typename T>
-	T* CreateNewResource(const std::string& FileSystemPath);
+	T* CreateNewResource(const std::string& AssetPath);
 
 	/// Root path of assets folder
 	static const std::string& GetAssetsBasePath();
@@ -230,9 +230,10 @@ std::vector<T*> RResourceManager::EnumerateResourcesOfType()
 }
 
 template<typename T>
-T* RResourceManager::CreateNewResource(const std::string& FileSystemPath)
+T* RResourceManager::CreateNewResource(const std::string& AssetPath)
 {
-	T* NewResource = new T(FileSystemPath);
+	T* NewResource = new T(GetAssetsBasePath() + AssetPath);
+	NewResource->SetAssetPath(AssetPath);
 	GetResourceContainer<T>().Add(NewResource);
 	return NewResource;
 }

@@ -123,20 +123,24 @@ void RMesh::Serialize(RSerializer& serializer)
 	}
 }
 
-bool RMesh::LoadResourceImpl(bool bIsAsyncLoading)
+bool RMesh::LoadResourceImpl()
 {
-	if (TryLoadAsRmesh(bIsAsyncLoading))
+	if (TryLoadAsRmesh())
 	{
 		return true;
 	}
 
-	return TryLoadAsFbxMesh(bIsAsyncLoading);
+	return TryLoadAsFbxMesh();
 }
 
 const RMaterial* RMesh::GetMaterial(int index) const
 {
-	assert(index >= 0 && index < (int)m_Materials.size());
-	return m_Materials[index];
+	if (index >= 0 && index < (int)m_Materials.size())
+	{
+		return m_Materials[index];
+	}
+
+	return RMaterial::GetDefault();
 }
 
 void RMesh::SetMeshElements(RMeshElement* meshElements, UINT numElement)
@@ -329,15 +333,12 @@ std::vector<RResourceBase*> RMesh::EnumerateReferencedResources() const
 	return ReferencedResources;
 }
 
-bool RMesh::TryLoadAsFbxMesh(bool bIsAsyncLoading)
+bool RMesh::TryLoadAsFbxMesh()
 {
 	std::unique_ptr<RFbxMeshLoader> FbxMeshLoader(new RFbxMeshLoader);
 
 	if (FbxMeshLoader->LoadDataForMeshResource(this, GetFileSystemPath()))
 	{
-		// Notify mesh has been loaded
-		//OnLoadingFinished(bIsAsyncLoading);
-
 #if EXPORT_FBX_AS_BINARY_MESH == 1
 		std::string rmeshName = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmesh");
 		RSerializer serializer;
@@ -353,7 +354,7 @@ bool RMesh::TryLoadAsFbxMesh(bool bIsAsyncLoading)
 	return true;
 }
 
-bool RMesh::TryLoadAsRmesh(bool bIsAsyncLoading)
+bool RMesh::TryLoadAsRmesh()
 {
 	std::vector<RMeshElement> meshElements;
 
@@ -413,8 +414,6 @@ bool RMesh::TryLoadAsRmesh(bool bIsAsyncLoading)
 			SetMaterials(Materials);
 		}
 	}
-
-	//OnLoadingFinished(bIsAsyncLoading);
 
 	return true;
 }

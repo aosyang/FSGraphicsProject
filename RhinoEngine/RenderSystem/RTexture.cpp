@@ -49,7 +49,7 @@ std::vector<std::string> RTexture::GetSupportedExtensions()
 	return TextureExts;
 }
 
-bool RTexture::LoadResourceImpl(bool bIsAsyncLoading)
+bool RTexture::LoadResourceImpl()
 {
 	ID3D11ShaderResourceView* ShaderResourceView;
 	size_t char_len;

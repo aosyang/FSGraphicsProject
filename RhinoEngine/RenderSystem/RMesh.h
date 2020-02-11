@@ -85,10 +85,10 @@ public:
 protected:
 	virtual std::vector<RResourceBase*> EnumerateReferencedResources() const override;
 
-	virtual bool LoadResourceImpl(bool bIsAsyncLoading) override;
+	virtual bool LoadResourceImpl() override;
 
-	bool TryLoadAsFbxMesh(bool bIsAsyncLoading);
-	bool TryLoadAsRmesh(bool bIsAsyncLoading);
+	bool TryLoadAsFbxMesh();
+	bool TryLoadAsRmesh();
 private:
 	std::vector<RMeshElement>			m_MeshElements;
 

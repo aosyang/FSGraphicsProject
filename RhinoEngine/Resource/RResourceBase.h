@@ -43,6 +43,9 @@ public:
 
 	bool LoadResourceData(bool bIsAsyncLoading);
 
+	/// Save any changes made to this asset
+	bool SaveToDisk();
+
 	/// Check if all referenced resources have been fully loaded
 	bool AreReferencedResourcesLoaded() const;
 
@@ -59,7 +62,8 @@ protected:
 	/// Enumerate all resources been referenced directly by this resource
 	virtual std::vector<RResourceBase*> EnumerateReferencedResources() const;
 
-	virtual bool LoadResourceImpl(bool bIsAsyncLoading);
+	virtual bool LoadResourceImpl();
+	virtual bool SaveResourceImpl();
 
 private:
 	ResourceState		m_State;

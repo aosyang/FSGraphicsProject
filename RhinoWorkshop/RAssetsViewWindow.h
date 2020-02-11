@@ -42,6 +42,10 @@ private:
 
 	RResourceBase* SelectedResource;
 	RResourceBase* EditingResource;
+
+	bool bShowNewMaterialDialog;
+	char NewMaterialName[MAX_PATH];
+	char NewMaterialPath[MAX_PATH];
 };
 
 FORCEINLINE RResourceBase* RAssetsViewWindow::GetSelectedResource() const

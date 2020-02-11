@@ -36,6 +36,7 @@ void RAssetEditorWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, RRe
 					{
 						if (ImGui::MenuItem("Save Asset"))
 						{
+							EditingResource->SaveToDisk();
 						}
 
 						if (RMesh* Mesh = EditingResource->CastTo<RMesh>())
@@ -89,6 +90,88 @@ void RAssetEditorWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, RRe
 						{
 
 						}
+					}
+				}
+				else if (RMaterial* Material = EditingResource->CastTo<RMaterial>())
+				{
+					bool bUpdatePreview = false;
+
+					std::string MaterialShaderName = Material->GetShader()->GetName();
+					int CurrentShader = 0;
+
+					auto ShaderNames = RShaderManager::Instance().EnumerateAllShaderNames();
+					std::vector<const char*> ShaderNameStrings;
+					for (int i = 0; i < (int)ShaderNames.size(); i++)
+					{
+						ShaderNameStrings.push_back(ShaderNames[i].c_str());
+						if (ShaderNames[i] == MaterialShaderName)
+						{
+							CurrentShader = i;
+						}
+					}
+					
+
+					if (ImGui::Combo("Shader", &CurrentShader, ShaderNameStrings.data(), (int)ShaderNameStrings.size()))
+					{
+						Material->SetShader(RShaderManager::Instance().GetShaderResource(ShaderNameStrings[CurrentShader]));
+						bUpdatePreview = true;
+					}
+
+					auto& Slots = Material->GetTextureSlots();
+					for (int i = 0; i < (int)Slots.size(); i++)
+					{
+						std::string AssignButtonText("->##" + std::to_string(i));
+						if (ImGui::Button(AssignButtonText.c_str()))
+						{
+							if (auto Resource = AssetsViewResource)
+							{
+								if (RTexture* TextureAsset = Resource->CastTo<RTexture>())
+								{
+									Material->SetTextureSlot(Slots[i].SlotId, TextureAsset);
+									bUpdatePreview = true;
+								}
+							}
+						}
+						ImGui::SameLine();
+				
+						std::string TextureAssetLabel = std::string("Texture##") + std::to_string(i);
+						std::string TextureAssetPath = Slots[i].Texture->GetAssetPath();
+						char TextureAssetName[256];
+						strcpy_s(TextureAssetName, TextureAssetPath.c_str());
+						ImGui::SetNextItemWidth(-200);
+						if (ImGui::InputText(TextureAssetLabel.c_str(), TextureAssetName, sizeof(TextureAssetName)))
+						{
+
+						}
+						ImGui::SameLine();
+
+						std::string SlotIdLabel = std::string("Slot##") + std::to_string(i);
+						std::string SlotIdString = std::to_string(Slots[i].SlotId);
+						char TextureSlotName[256];
+						strcpy_s(TextureSlotName, SlotIdString.c_str());
+						ImGui::SetNextItemWidth(-100);
+						if (ImGui::InputText(SlotIdLabel.c_str(), TextureSlotName, sizeof(TextureSlotName)))
+						{
+
+						}
+						ImGui::SameLine();
+
+						std::string RemoveButtonText("x##" + std::to_string(i));
+						if (ImGui::Button(RemoveButtonText.c_str()))
+						{
+
+						}
+					}
+
+					// Button for adding a new texture
+					if (ImGui::Button("+"))
+					{
+
+					}
+
+					if (bUpdatePreview)
+					{
+						PreviewBuilder.BuildPreviewForResource(Material);
 					}
 				}
 			}

@@ -178,7 +178,7 @@ RMaterial* RMaterial::GetDefault()
 	return DefaultMaterial;
 }
 
-bool RMaterial::LoadResourceImpl(bool bIsAsyncLoading)
+bool RMaterial::LoadResourceImpl()
 {
 	std::unique_ptr<tinyxml2::XMLDocument> XmlDoc = std::make_unique<tinyxml2::XMLDocument>();
 	if (XmlDoc->LoadFile(GetFileSystemPath().c_str()) == tinyxml2::XML_SUCCESS)
@@ -215,4 +215,42 @@ bool RMaterial::LoadResourceImpl(bool bIsAsyncLoading)
 	}
 
 	return false;
+}
+
+bool RMaterial::SaveResourceImpl()
+{
+	std::unique_ptr<tinyxml2::XMLDocument> XmlDoc = std::make_unique<tinyxml2::XMLDocument>();
+
+	// Save asset path in header comments
+	XmlDoc->InsertEndChild(XmlDoc->NewComment((std::string("Material path: ") + GetAssetPath()).c_str()));
+
+	tinyxml2::XMLElement* XmlElemMaterial = XmlDoc->NewElement("Material");
+	if (Shader != nullptr)
+	{
+		XmlElemMaterial->SetAttribute("Shader", Shader->GetName().c_str());
+	}
+	else
+	{
+		XmlElemMaterial->SetAttribute("Shader", "Default");
+	}
+
+	struct TextureSlotSorter
+	{
+		bool operator() (const RTextureSlotData& Lhs, const RTextureSlotData& Rhs)
+		{
+			return Lhs.SlotId < Rhs.SlotId;
+		}
+	};
+
+	std::sort(TextureSlots.begin(), TextureSlots.end(), TextureSlotSorter());
+
+	for (int i = 0; i < (int)TextureSlots.size(); i++)
+	{
+		tinyxml2::XMLElement* XmlElemTexture = XmlDoc->NewElement("Texture");
+		XmlElemTexture->SetAttribute("Slot", TextureSlots[i].SlotId);
+		XmlElemTexture->SetText(TextureSlots[i].Texture->GetAssetPath().c_str());
+		XmlDoc->InsertEndChild(XmlElemMaterial);
+	}
+
+	return XmlDoc->SaveFile(GetFileSystemPath().c_str()) == tinyxml2::XML_NO_ERROR;
 }

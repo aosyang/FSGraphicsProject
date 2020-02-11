@@ -69,7 +69,8 @@ public:
 	static RMaterial* GetDefault();
 
 protected:
-	virtual bool LoadResourceImpl(bool bIsAsyncLoading) override;
+	virtual bool LoadResourceImpl() override;
+	virtual bool SaveResourceImpl() override;
 
 private:
 	RShader* Shader;
