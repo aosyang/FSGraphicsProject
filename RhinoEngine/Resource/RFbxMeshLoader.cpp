@@ -18,7 +18,7 @@ namespace
 	RAnimation* LoadFbxSceneAnimation(FbxScene* Scene);
 
 	/// Load materials from fbx node
-	void LoadFbxMaterials(FbxNode* SceneNode, std::vector<RMaterial>& OutMaterials);
+	void LoadFbxMaterials(FbxNode* SceneNode, std::vector<RMaterial*>& OutMaterials);
 
 	/// A helper function to convert fbx matrix to RMatrix4
 	void MatrixTransfer(RMatrix4* dest, const FbxAMatrix* src);
@@ -28,7 +28,7 @@ namespace
 bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* FileName)
 {
 	std::vector<RMeshElement> meshElements;
-	std::vector<RMaterial> materials;
+	std::vector<RMaterial*> materials;
 
 	RLog("Loading mesh [%s]...\n", FileName);
 
@@ -633,24 +633,42 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 
 	// If a material file .rmtl for the mesh exists, override materials from fbx
 	std::string mtlFilename = RFileUtil::ReplaceExtension(FileName, "rmtl");
-	std::vector<RMaterial> OverrideMaterials;
-	if (RMaterial::LoadFromXmlFile(mtlFilename, OverrideMaterials))
+	std::vector<std::string> MaterialNames = RMeshMaterialData::LoadFromXmlFile(mtlFilename);
+	if (MaterialNames.size() > 0)
 	{
-		if (OverrideMaterials.size() >= materials.size())
+		if (MaterialNames.size() >= materials.size())
 		{
+			std::vector<RMaterial*> OverrideMaterials;
+			for (int i = 0; i < (int)MaterialNames.size(); i++)
+			{
+				RMaterial* Material = RResourceManager::Instance().FindResource<RMaterial>(MaterialNames[i]);
+				if (!Material)
+				{
+					Material = RResourceManager::Instance().LoadResource<RMaterial>(MaterialNames[i], EResourceLoadMode::Immediate);
+				}
+
+				if (!Material)
+				{
+					Material = RMaterial::GetDefault();
+				}
+
+				assert(Material);
+				OverrideMaterials.push_back(Material);
+			}
+
 			materials = OverrideMaterials;
 		}
 		else
 		{
 			RLogWarning("Loading %d materials from .rmtl, expecting %d. Ignoring material overriding.\n",
-				(int)OverrideMaterials.size(), (int)materials.size());
+						(int)MaterialNames.size(), (int)materials.size());
 		}
 	}
 
 	if (meshElements.size() > 0)
 	{
 		MeshResource->SetMeshElements(meshElements.data(), (UINT)meshElements.size());
-		MeshResource->SetMaterials(materials.data(), (UINT)materials.size());
+		MeshResource->SetMaterials(materials);
 		MeshResource->UpdateAabb();
 	}
 
@@ -788,14 +806,27 @@ namespace
 		return animation;
 	}
 
-	void LoadFbxMaterials(FbxNode* SceneNode, std::vector<RMaterial>& OutMaterials)
+	enum FbxMaterialMap
+	{
+		DiffuseMap,
+		NormalMap,
+		SpecularMap,
+	};
+
+	void LoadFbxMaterials(FbxNode* SceneNode, std::vector<RMaterial*>& OutMaterials)
 	{
 		int NumFbxMaterials = SceneNode->GetSrcObjectCount<FbxSurfaceMaterial>();
 
 		for (int IdxMaterial = 0; IdxMaterial < NumFbxMaterials; IdxMaterial++)
 		{
-			RMaterial meshMaterial = { 0 };
+#if 0		// Do not extract any material from fbx
 			FbxSurfaceMaterial* material = SceneNode->GetSrcObject<FbxSurfaceMaterial>(IdxMaterial);
+			std::string MaterialName = material->GetName();
+
+			// Create a new material from fbx material
+			RMaterial* meshMaterial = RResourceManager::Instance().CreateNewResource<RMaterial>(MaterialName);
+			meshMaterial->SetAssetPath(MaterialName);
+			int NextTextureSlotIdx = 0;
 
 			const char* texType[] =
 			{
@@ -803,6 +834,8 @@ namespace
 				FbxSurfaceMaterial::sNormalMap,
 				FbxSurfaceMaterial::sSpecular,
 			};
+
+			bool bHasMaps[3] = { false };
 
 			for (int idxTexProp = 0; idxTexProp < 3; idxTexProp++)
 			{
@@ -848,17 +881,47 @@ namespace
 						texture = RResourceManager::Instance().LoadResource<RTexture>(ddsFilename, EResourceLoadMode::Immediate);
 					}
 
-					meshMaterial.Textures[meshMaterial.TextureNum] = texture;
-					meshMaterial.TextureNum++;
+					meshMaterial->GetTextureSlots().push_back(RTextureSlotData(texture, NextTextureSlotIdx));
+					NextTextureSlotIdx++;
+
+					bHasMaps[idxTexProp] = true;
 				}
 			}
 
+			RShader* Shader = nullptr;
+			if (bHasMaps[DiffuseMap])
+			{
+				if (bHasMaps[NormalMap])
+				{
+					if (bHasMaps[SpecularMap])
+					{
+						Shader = RShaderManager::Instance().GetShaderResource("BumpSpecularLighting");
+					}
+					else
+					{
+						Shader = RShaderManager::Instance().GetShaderResource("BumpLighting");
+					}
+				}
+				else
+				{
+					Shader = RShaderManager::Instance().GetShaderResource("Lighting");
+				}
+			}
+			else
+			{
+				Shader = RShaderManager::Instance().GetShaderResource("Default");
+			}
+
+			assert(Shader != nullptr);
+			meshMaterial->SetShader(Shader);
+
 			OutMaterials.push_back(meshMaterial);
+#endif
 		}
 
 		if (NumFbxMaterials == 0)
 		{
-			OutMaterials.push_back(RMaterial{ 0 });
+			OutMaterials.push_back(RMaterial::GetDefault());
 		}
 	}
 

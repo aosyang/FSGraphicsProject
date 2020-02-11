@@ -72,7 +72,7 @@ public:
 
 	/// Find resource by path
 	template<typename T>
-	T* FindResource(const std::string& Path);
+	T* FindResource(const std::string& Path, bool bAllowPartialMatch = false);
 
 	/// Get an array of all mesh resources
 	std::vector<RMesh*> GetMeshResources();
@@ -81,6 +81,10 @@ public:
 	std::vector<T*> EnumerateResourcesOfType();
 
 	std::vector<RResourceBase*> EnumerateAllResources();
+
+	/// Create a new resource
+	template<typename T>
+	T* CreateNewResource(const std::string& FileSystemPath);
 
 	/// Root path of assets folder
 	static const std::string& GetAssetsBasePath();
@@ -123,6 +127,7 @@ private:
 	/// Registered resource containers for resource types
 	std::vector<RResourceContainerBase*>		ResourceContainers;
 
+	/// The internal resource loader interface. Used for resource loader registration
 	class IResourceLoader
 	{
 	public:
@@ -172,24 +177,32 @@ T* RResourceManager::LoadResource(const std::string& AssetPath, EResourceLoadMod
 
 	ResourceContainer.Add(Resource);
 
+	// Assign to asset path
+	Resource->SetAssetPath(AssetPath);
+
 #if (ENABLE_THREADED_LOADING == 0)
 	mode = EResourceLoadMode::Immediate;
 #endif
 
-	LoaderThreadTask task;
-	task.AssetPath = AssetPath;
-	task.Resource = Resource;
-	task.bIsAsync = (mode == EResourceLoadMode::Threaded);
-
-	// Assign to asset path
-	Resource->SetAssetPath(AssetPath);
-
 	if (mode == EResourceLoadMode::Immediate)
 	{
-		Resource->LoadResourceData(false);
+		bool Result = Resource->LoadResourceData(false);
+
+		// Failed to load the asset. Remove the resource and return null
+		if (!Result)
+		{
+			ResourceContainer.Remove(Resource);
+			delete Resource;
+			Resource = nullptr;
+		}
 	}
 	else
 	{
+		LoaderThreadTask task;
+		task.AssetPath = AssetPath;
+		task.Resource = Resource;
+		task.bIsAsync = (mode == EResourceLoadMode::Threaded);
+
 		// Upload task to working queue
 		LockTaskQueue();
 		m_LoaderThreadTaskQueue.push(task);
@@ -199,20 +212,29 @@ T* RResourceManager::LoadResource(const std::string& AssetPath, EResourceLoadMod
 		NotifyThreadTaskEnqueued();
 	}
 
+	// TODO: Multi-threaded loading will still return the resource pointer even if the loading may fail
 	return Resource;
 }
 
 template<typename T>
-T* RResourceManager::FindResource(const std::string& Path)
+T* RResourceManager::FindResource(const std::string& Path, bool bAllowPartialMatch /*= false*/)
 {
 	RResourceContainer<T>& ResourceContainer = GetResourceContainer<T>();
-	return ResourceContainer.Find(Path.c_str());
+	return ResourceContainer.Find(Path.c_str(), bAllowPartialMatch);
 }
 
 template<typename T>
 std::vector<T*> RResourceManager::EnumerateResourcesOfType()
 {
 	return GetResourceContainer<T>().GetResourceArrayCopy();
+}
+
+template<typename T>
+T* RResourceManager::CreateNewResource(const std::string& FileSystemPath)
+{
+	T* NewResource = new T(FileSystemPath);
+	GetResourceContainer<T>().Add(NewResource);
+	return NewResource;
 }
 
 template<typename T>

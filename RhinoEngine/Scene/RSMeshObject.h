@@ -23,14 +23,21 @@ public:
 	RMesh* GetMesh() const;
 
 	int GetMeshElementCount() const;
-	void SetMaterial(RMaterial* materials, int materialNum);
+	void SetMaterials(const std::vector<RMaterial*>& materials);
+
+	/// Get a material at index
 	RMaterial* GetMaterial(int index);
+
+	/// Get number of materials
+	int GetNumMaterials() const;
 
 	/// Save current materials to disk and use them as default materials for the mesh
 	void SaveMaterialsToDiskAsDefaults();
 
+	void SerializeXmlMaterials_Load(tinyxml2::XMLElement* XmlElemMaterial);
+
 	/// Save current materials to an XML document
-	void SerializeMaterialsToXML(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* elem_mat);
+	void SerializeXmlMaterials_Save(tinyxml2::XMLDocument* XmlDoc, tinyxml2::XMLElement* XmlElemMaterial);
 
 	void SetOverridingShader(RShader* shader, int features = -1);
 
@@ -54,10 +61,14 @@ protected:
 	void SetupMaterialsFromMeshResource();
 
 	RMesh*					m_Mesh;
-	std::vector<RMaterial>	m_Materials;
+	std::vector<RMaterial*>	m_Materials;
 	RAabb					m_MeshAABB;
 	RShader*				m_OverridingShader;
 	int						m_OverridingShaderFeatures;
 	bool					m_bNeedUpdateMaterial;
 };
 
+FORCEINLINE int RSMeshObject::GetNumMaterials() const
+{
+	return (int)m_Materials.size();
+}

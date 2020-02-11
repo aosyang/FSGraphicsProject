@@ -7,43 +7,42 @@
 #include "Rhino.h"
 #include "RMesh.h"
 #include "Resource/RFbxMeshLoader.h"
+#include "tinyxml2/tinyxml2.h"
 
 // Whether to export .fbx as .rmesh after loading
 #define EXPORT_FBX_AS_BINARY_MESH 1
 
 RMesh::RMesh(const std::string& Path)
-	: RResourceBase(RT_Mesh, Path),
+	: RResourceBase(Path),
 	  m_Animation(nullptr)
 {
 }
 
-RMesh::RMesh(const std::string& Path, const std::vector<RMeshElement>& meshElements, const std::vector<RMaterial>& materials)
-	: RResourceBase(RT_Mesh, Path),
-	  m_Animation(nullptr)
-{
-	m_MeshElements = meshElements;
-	m_Materials = materials;
-}
-
-RMesh::RMesh(const std::string& Path, const RMeshElement* meshElements, int numElement, const RMaterial* materials, int numMaterial)
-	: RResourceBase(RT_Mesh, Path),
-	  m_Animation(nullptr)
-{
-	assert(meshElements && numElement);
-	m_MeshElements.assign(meshElements, meshElements + numElement);
-
-	if (materials && numMaterial)
-		m_Materials.assign(materials, materials + numMaterial);
-	else
-	{
-		RMaterial emptyMaterial;
-		ZeroMemory(&emptyMaterial, sizeof(emptyMaterial));
-		for (int i = 0; i < numElement; i++)
-		{
-			m_Materials.push_back(emptyMaterial);
-		}
-	}
-}
+//RMesh::RMesh(const std::string& Path, const std::vector<RMeshElement>& meshElements, const std::vector<RMeshMaterialData>& materials)
+//	: RMesh(Path)
+//{
+//	m_MeshElements = meshElements;
+//	m_Materials = materials;
+//}
+//
+//RMesh::RMesh(const std::string& Path, const RMeshElement* meshElements, int numElement, const RMeshMaterialData* materials, int numMaterial)
+//	: RMesh(Path)
+//{
+//	assert(meshElements && numElement);
+//	m_MeshElements.assign(meshElements, meshElements + numElement);
+//
+//	if (materials && numMaterial)
+//		m_Materials.assign(materials, materials + numMaterial);
+//	else
+//	{
+//		RMeshMaterialData emptyMaterial;
+//		ZeroMemory(&emptyMaterial, sizeof(emptyMaterial));
+//		for (int i = 0; i < numElement; i++)
+//		{
+//			m_Materials.push_back(emptyMaterial);
+//		}
+//	}
+//}
 
 RMesh::~RMesh()
 {
@@ -67,7 +66,53 @@ void RMesh::Serialize(RSerializer& serializer)
 		return;
 
 	serializer.SerializeVector(m_MeshElements, &RSerializer::SerializeObject);
-	serializer.SerializeVector(m_Materials, &RSerializer::SerializeObject);
+
+	if (serializer.IsReading())
+	{
+		size_t NumMaterials = 0;
+		serializer.SerializeData(NumMaterials);
+		m_Materials.resize(NumMaterials);
+		for (int i = 0; i < (int)NumMaterials; i++)
+		{
+			std::string MaterialPath;
+			serializer.SerializeData(MaterialPath);
+
+			// Sanity check
+			assert(MaterialPath.size() < MAX_PATH);
+
+			RMaterial* ReferencedMaterial = nullptr;
+
+			if (MaterialPath == "" || MaterialPath == "DefaultMaterial")
+			{
+				ReferencedMaterial = RMaterial::GetDefault();
+			}
+			else
+			{
+				ReferencedMaterial = RResourceManager::Instance().FindResource<RMaterial>(MaterialPath);
+			}
+
+			if (!ReferencedMaterial)
+			{
+				ReferencedMaterial = RResourceManager::Instance().LoadResource<RMaterial>(MaterialPath, EResourceLoadMode::Immediate);
+			}
+
+			m_Materials[i] = ReferencedMaterial;
+		}
+	}
+	else
+	{
+		size_t NumMaterials = m_Materials.size();
+		serializer.SerializeData(NumMaterials);
+		for (int i = 0; i < (int)m_Materials.size(); i++)
+		{
+			std::string AssetPath = m_Materials[i]->GetAssetPath();
+
+			// TODO Fix-me: Wrong template function is called if the parameter is a type of const std::string&
+			//				This will lead to corrupted data during loading
+			serializer.SerializeData(AssetPath);
+		}
+	}
+
 	serializer.SerializeObjectPtr(&m_Animation);
 	serializer.SerializeVector(m_BoneInitInvMatrices);
 	serializer.SerializeVector(m_BoneIdToName, &RSerializer::SerializeData);
@@ -88,7 +133,7 @@ bool RMesh::LoadResourceImpl(bool bIsAsyncLoading)
 	return TryLoadAsFbxMesh(bIsAsyncLoading);
 }
 
-const RMaterial& RMesh::GetMaterial(int index) const
+const RMaterial* RMesh::GetMaterial(int index) const
 {
 	assert(index >= 0 && index < (int)m_Materials.size());
 	return m_Materials[index];
@@ -101,10 +146,35 @@ void RMesh::SetMeshElements(RMeshElement* meshElements, UINT numElement)
 	m_MeshElements.assign(meshElements, meshElements + numElement);
 }
 
-void RMesh::SetMaterials(RMaterial* materials, UINT numMaterial)
+void RMesh::SetMaterialSlot(int SlotId, RMaterial* Material)
 {
-	assert(materials && numMaterial);
-	m_Materials.assign(materials, materials + numMaterial);
+	if (SlotId >= m_Materials.size())
+	{
+		m_Materials.resize(SlotId + 1);
+	}
+
+	m_Materials[SlotId] = Material;
+}
+
+void RMesh::SetMaterials(const std::vector<RMaterial*> NewMaterials)
+{
+	//assert(NewMaterials.size() > 0);
+	m_Materials = NewMaterials;
+}
+
+void RMesh::SaveMaterialsToDiskAsDefaults()
+{
+	std::unique_ptr<tinyxml2::XMLDocument> XmlDoc = std::make_unique<tinyxml2::XMLDocument>();
+
+	// Save original mesh path in the comment
+	XmlDoc->InsertEndChild(XmlDoc->NewComment((std::string("Mesh path: ") + GetAssetPath()).c_str()));
+
+	tinyxml2::XMLElement* XmlElemMaterial = XmlDoc->NewElement("Material");
+	SerializeXmlMaterials_Save(m_Materials, XmlDoc.get(), XmlElemMaterial);
+	XmlDoc->InsertEndChild(XmlElemMaterial);
+
+	std::string filepath = RFileUtil::StripExtension(GetFileSystemPath()) + ".rmtl";
+	XmlDoc->SaveFile(filepath.c_str());
 }
 
 void RMesh::UpdateAabb()
@@ -242,9 +312,9 @@ std::vector<RResourceBase*> RMesh::EnumerateReferencedResources() const
 
 	for (const auto& Material : m_Materials)
 	{
-		for (int i = 0; i < Material.TextureNum; i++)
+		for (const RTextureSlotData& SlotData : Material->GetTextureSlots())
 		{
-			RTexture* Texture = Material.Textures[i];
+			RTexture* Texture = SlotData.Texture;
 			if (Texture != nullptr)
 			{
 				// Add unique resources to the list
@@ -266,7 +336,7 @@ bool RMesh::TryLoadAsFbxMesh(bool bIsAsyncLoading)
 	if (FbxMeshLoader->LoadDataForMeshResource(this, GetFileSystemPath()))
 	{
 		// Notify mesh has been loaded
-		OnLoadingFinished(bIsAsyncLoading);
+		//OnLoadingFinished(bIsAsyncLoading);
 
 #if EXPORT_FBX_AS_BINARY_MESH == 1
 		std::string rmeshName = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmesh");
@@ -286,7 +356,6 @@ bool RMesh::TryLoadAsFbxMesh(bool bIsAsyncLoading)
 bool RMesh::TryLoadAsRmesh(bool bIsAsyncLoading)
 {
 	std::vector<RMeshElement> meshElements;
-	std::vector<RMaterial> materials;
 
 	RLog("Loading mesh [%s]...\n", GetFileSystemPath().data());
 
@@ -318,15 +387,53 @@ bool RMesh::TryLoadAsRmesh(bool bIsAsyncLoading)
 	// Load material from file
 	{
 		std::string mtlFilename = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmtl");
-		RMaterial::LoadFromXmlFile(mtlFilename, materials);
+		std::vector<std::string> MaterialPaths = RMeshMaterialData::LoadFromXmlFile(mtlFilename);
+		std::vector<RMaterial*> Materials;
 
-		if (materials.size())
+		for (auto Iter : MaterialPaths)
 		{
-			SetMaterials(materials.data(), (UINT)materials.size());
+			RMaterial* Material = RResourceManager::Instance().FindResource<RMaterial>(Iter);
+
+			if (!Material)
+			{
+				Material = RResourceManager::Instance().LoadResource<RMaterial>(Iter, EResourceLoadMode::Immediate);
+			}
+
+			if (!Material)
+			{
+				Material = RMaterial::GetDefault();
+			}
+
+			assert(Material);
+			Materials.push_back(Material);
+		}
+
+		if (Materials.size())
+		{
+			SetMaterials(Materials);
 		}
 	}
 
-	OnLoadingFinished(bIsAsyncLoading);
+	//OnLoadingFinished(bIsAsyncLoading);
 
 	return true;
+}
+
+void SerializeXmlMaterials_Save(const std::vector<RMaterial*>& Materials, tinyxml2::XMLDocument* XmlDoc, tinyxml2::XMLElement* XmlElemMaterial)
+{
+	// <Material>
+	for (int i = 0; i < (int)Materials.size(); i++)
+	{
+		// <MeshElement Index="0" Name="Element">/Path/To/Material</MeshElement>
+		tinyxml2::XMLElement* XmlElemSubmesh = XmlDoc->NewElement("MeshElement");
+		XmlElemSubmesh->SetAttribute("Index", i);
+		//XmlElemSubmesh->SetAttribute("Name", m_Mesh->GetMeshElements()[i].GetName().c_str());
+
+		RMaterial* Material = Materials[i];
+		if (Material && Material->GetAssetPath() != "")
+		{
+			XmlElemSubmesh->SetText(Material->GetAssetPath().c_str());
+		}
+		XmlElemMaterial->InsertEndChild(XmlElemSubmesh);
+	}
 }

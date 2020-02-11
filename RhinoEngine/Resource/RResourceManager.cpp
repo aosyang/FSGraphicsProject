@@ -177,6 +177,7 @@ void RResourceManager::RegisterResourceTypes()
 {
 	RegisterResourceType<RMesh>();
 	RegisterResourceType<RTexture>();
+	RegisterResourceType<RMaterial>();
 }
 
 RResourceBase* RResourceManager::LoadResourceAutoDetectType(const std::string& Path, EResourceLoadMode mode)

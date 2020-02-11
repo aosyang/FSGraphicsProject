@@ -60,12 +60,13 @@ int RSMeshObject::GetMeshElementCount() const
 	return 0;
 }
 
-void RSMeshObject::SetMaterial(RMaterial* materials, int materialNum)
+void RSMeshObject::SetMaterials(const std::vector<RMaterial*>& materials)
 {
 	m_Materials.clear();
 
-	for (int i = 0; i < materialNum; i++)
+	for (int i = 0; i < (int)materials.size(); i++)
 	{
+		assert(materials[i] != nullptr);
 		m_Materials.push_back(materials[i]);
 	}
 
@@ -76,7 +77,7 @@ RMaterial* RSMeshObject::GetMaterial(int index)
 {
 	SetupMaterialsFromMeshResource();
 
-	return &m_Materials[index];
+	return m_Materials[index];
 }
 
 void RSMeshObject::SaveMaterialsToDiskAsDefaults()
@@ -101,41 +102,63 @@ void RSMeshObject::SaveMaterialsToDiskAsDefaults()
 	doc->InsertEndChild(doc->NewComment((std::string("Mesh path: ") + m_Mesh->GetAssetPath()).c_str()));
 
 	tinyxml2::XMLElement* elem_mat = doc->NewElement("Material");
-	SerializeMaterialsToXML(doc.get(), elem_mat);
+	SerializeXmlMaterials_Save(doc.get(), elem_mat);
 	doc->InsertEndChild(elem_mat);
 
 	std::string filepath = RFileUtil::StripExtension(m_Mesh->GetFileSystemPath()) + ".rmtl";
 	doc->SaveFile(filepath.c_str());
 }
 
-void RSMeshObject::SerializeMaterialsToXML(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* elem_mat)
+void RSMeshObject::SerializeXmlMaterials_Load(tinyxml2::XMLElement* XmlElemMaterial)
 {
-	for (int i = 0; i < m_Mesh->GetMeshElementCount(); i++)
+	std::vector<RMaterial*> xmlMaterials;
+
+	if (XmlElemMaterial)
 	{
-		tinyxml2::XMLElement* elem_submesh = doc->NewElement("MeshElement");
-		elem_submesh->SetAttribute("Name", m_Mesh->GetMeshElements()[i].GetName().c_str());
-
-		if (i < (int)m_Materials.size())
+		// Start with filling all materials by ones from the mesh asset
+		for (int i = 0; i < GetMeshElementCount(); i++)
 		{
-			RMaterial& material = m_Materials[i];
-			std::string shaderName = material.Shader->GetName();
-
-			elem_submesh->SetAttribute("Shader", shaderName.c_str());
-			for (int t = 0; t < material.TextureNum; t++)
-			{
-				std::string texturePath = "";
-
-				if (material.Textures[t])
-					texturePath = material.Textures[t]->GetAssetPath();
-
-				tinyxml2::XMLElement* elem_texture = doc->NewElement("Texture");
-				elem_texture->SetAttribute("Slot", t);
-				elem_texture->SetText(texturePath.c_str());
-				elem_submesh->InsertEndChild(elem_texture);
-			}
+			RMaterial* Material = i < GetNumMaterials() ? GetMaterial(i) : nullptr;
+			xmlMaterials.push_back(Material);
 		}
-		elem_mat->InsertEndChild(elem_submesh);
+
+		// <MeshElement Index="0" Name="Element">/Path/To/Material</MeshElement>
+		tinyxml2::XMLElement* XmlElemSubmesh = XmlElemMaterial->FirstChildElement("MeshElement");
+		while (XmlElemSubmesh)
+		{
+			int index = -1;
+			XmlElemMaterial->QueryIntAttribute("Index", &index);
+
+			if (index != -1)
+			{
+				RMaterial* Material = nullptr;
+				const char* MaterialPath = XmlElemMaterial->GetText();
+				if (MaterialPath)
+				{
+					Material = RResourceManager::Instance().FindResource<RMaterial>(MaterialPath);
+				}
+
+				if (Material == nullptr)
+				{
+					Material = RMaterial::GetDefault();
+				}
+
+				xmlMaterials[index] = Material;
+			}
+
+			XmlElemSubmesh = XmlElemSubmesh->NextSiblingElement();
+		}
 	}
+
+	if (xmlMaterials.size())
+	{
+		SetMaterials(xmlMaterials);
+	}
+}
+
+void RSMeshObject::SerializeXmlMaterials_Save(tinyxml2::XMLDocument* XmlDoc, tinyxml2::XMLElement* XmlElemMaterial)
+{
+	::SerializeXmlMaterials_Save(m_Materials, XmlDoc, XmlElemMaterial);
 }
 
 void RSMeshObject::SetOverridingShader(RShader* shader, int features)
@@ -184,7 +207,11 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 		if (m_OverridingShader)
 			shader = m_OverridingShader;
 		else if (i < m_Materials.size())
-			shader = m_Materials[i].Shader;
+			shader = m_Materials[i]->GetShader();
+		else
+		{
+			shader = RShaderManager::Instance().GetShaderResource("Default");
+		}
 
 		if (shader)
 		{
@@ -206,24 +233,40 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 			else
 				shader->Bind(shaderFeatureMask);
 
+			ID3D11ShaderResourceView* NullShaderResourceView[] = { nullptr };
+
 			// Hack: for shaders bound separately, consider textures loaded from mesh
 			if (m_OverridingShader)
 			{
-				const RMaterial& OverrideMaterial = m_Mesh->GetMaterial(i);
-				for (int t = 0; t < OverrideMaterial.TextureNum; t++)
+				const RMaterial* OverrideMaterial = m_Mesh->GetMaterial(i);
+				assert(OverrideMaterial);
+
+				int NumTextureSlots = (int)OverrideMaterial->GetTextureSlots().size();
+
+				for (int t = 0; t < NumTextureSlots; t++)
 				{
-					GRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, OverrideMaterial.Textures[t]->GetPtrSRV());
+					RTexture* Texture = OverrideMaterial->GetTextureSlots()[t].Texture;
+					int SlotId = OverrideMaterial->GetTextureSlots()[t].SlotId;
+
+					GRenderer.D3DImmediateContext()->PSSetShaderResources(SlotId, 1, Texture ? Texture->GetPtrSRV() : NullShaderResourceView);
 				}
 			}
 			else
 			{
-				ID3D11ShaderResourceView* NullShaderResourceView[] = { nullptr };
-				const RMaterial& Material = m_Materials[i];
-
-				for (int t = 0; t < Material.TextureNum; t++)
+				if (i < m_Materials.size())
 				{
-					RTexture* Texture = Material.Textures[t];
-					GRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, Texture ? Texture->GetPtrSRV() : NullShaderResourceView);
+					const RMaterial* Material = m_Materials[i];
+					assert(Material);
+
+					int NumTextureSlots = (int)Material->GetTextureSlots().size();
+
+					for (int t = 0; t < NumTextureSlots; t++)
+					{
+						RTexture* Texture = Material->GetTextureSlots()[t].Texture;
+						int SlotId = Material->GetTextureSlots()[t].SlotId;
+
+						GRenderer.D3DImmediateContext()->PSSetShaderResources(SlotId, 1, Texture ? Texture->GetPtrSRV() : NullShaderResourceView);
+					}
 				}
 			}
 		}
@@ -330,10 +373,9 @@ void RSMeshObject::SetupMaterialsFromMeshResource()
 
 		for (unsigned int i = 0; i < m_Materials.size(); i++)
 		{
-			RMaterial& Material = m_Materials[i];
-			if (Material.Shader == nullptr)
+			if (m_Materials[i] == nullptr)
 			{
-				Material.Shader = RShaderManager::Instance().GetShaderResource("Default");
+				m_Materials[i] = RMaterial::GetDefault();
 			}
 		}
 

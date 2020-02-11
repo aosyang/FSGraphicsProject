@@ -21,13 +21,23 @@ enum class EMeshCollisionType
 	TriangleMesh,
 };
 
+namespace tinyxml2
+{
+	class XMLDocument;
+	class XMLElement;
+}
+
+/// A helper function to save an array of materials as XML elements
+void SerializeXmlMaterials_Save(const std::vector<RMaterial*>& Materials, tinyxml2::XMLDocument* XmlDoc, tinyxml2::XMLElement* XmlElemMaterial);
+
+
 class RMesh : public RResourceBase
 {
 	DECLARE_RUNTIME_TYPE(RMesh, RResourceBase)
 public:
 	RMesh(const std::string& Path);
-	RMesh(const std::string& Path, const std::vector<RMeshElement>& meshElements, const std::vector<RMaterial>& materials);
-	RMesh(const std::string& Path, const RMeshElement* meshElements, int numElement, const RMaterial* materials, int numMaterial);
+	//RMesh(const std::string& Path, const std::vector<RMeshElement>& meshElements, const std::vector<RMeshMaterialData>& materials);
+	//RMesh(const std::string& Path, const RMeshElement* meshElements, int numElement, const RMeshMaterialData* materials, int numMaterial);
 	~RMesh();
 
 	/// Required by RResourceManager::RegisterResourceType
@@ -35,14 +45,19 @@ public:
 
 	void Serialize(RSerializer& serializer);
 
-	const RMaterial& GetMaterial(int index) const;
-	const std::vector<RMaterial>& GetMaterials() const;
+	const RMaterial* GetMaterial(int index) const;
+	const std::vector<RMaterial*>& GetMaterials() const;
 
 	const std::vector<RMeshElement>& GetMeshElements() const;
 	int GetMeshElementCount() const;
 
 	void SetMeshElements(RMeshElement* meshElements, UINT numElement);
-	void SetMaterials(RMaterial* materials, UINT numMaterial);
+
+	void SetMaterialSlot(int SlotId, RMaterial* Material);
+	void SetMaterials(const std::vector<RMaterial*> NewMaterials);
+
+	/// Save current materials to a separate .rmtl file
+	void SaveMaterialsToDiskAsDefaults();
 
 	void UpdateAabb();
 	const RAabb& GetLocalSpaceAabb() const;
@@ -77,7 +92,7 @@ protected:
 private:
 	std::vector<RMeshElement>			m_MeshElements;
 
-	std::vector<RMaterial>				m_Materials;
+	std::vector<RMaterial*>				m_Materials;
 	RAabb							m_Aabb;
 
 	RAnimation*						m_Animation;
@@ -86,7 +101,7 @@ private:
 	std::map<RAnimation*, std::vector<int>>	m_AnimationNodeCache;
 };
 
-FORCEINLINE const std::vector<RMaterial>& RMesh::GetMaterials() const
+FORCEINLINE const std::vector<RMaterial*>& RMesh::GetMaterials() const
 {
 	return m_Materials;
 }
@@ -100,5 +115,4 @@ FORCEINLINE int RMesh::GetMeshElementCount() const
 {
 	return (int)m_MeshElements.size();
 }
-
 

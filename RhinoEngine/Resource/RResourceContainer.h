@@ -89,35 +89,32 @@ public:
 	void Remove(T* Resource)
 	{
 		Lock();
-		Resources.remove(Resource);
+		StdRemove(Resources, Resource);
 		Unlock();
 	}
 
 	/// Find resource by path
-	T* Find(const std::string& Path)
-	{
-		return Find(Path.c_str());
-	}
-
-	/// Find resource by path
-	T* Find(const char* Path)
+	T* Find(const std::string& Path, bool bAllowPartialMatch = false)
 	{
 		std::unique_ptr<UniqueLockWrapper> UniqueLock = UniqueLockWrapper::Create(ResourceMutex);
 
-		if (Path)
+		if (Path != "")
 		{
 			for (auto Iter : Resources)
 			{
-				if (strcasecmp(Iter->GetAssetPath().c_str(), Path) == 0)
+				if (strcasecmp(Iter->GetAssetPath().c_str(), Path.c_str()) == 0)
 				{
 					return Iter;
 				}
 
-				// If searching path contains file name only, also try matching file names
-				const std::string ResourceName = RFileUtil::GetFileNameInPath(Iter->GetAssetPath());
-				if (strcasecmp(ResourceName.c_str(), Path) == 0)
+				if (bAllowPartialMatch)
 				{
-					return Iter;
+					// If searching path contains file name only, also try matching file names
+					const std::string ResourceName = RFileUtil::GetFileNameInPath(Iter->GetAssetPath());
+					if (strcasecmp(ResourceName.c_str(), Path.c_str()) == 0)
+					{
+						return Iter;
+					}
 				}
 			}
 		}

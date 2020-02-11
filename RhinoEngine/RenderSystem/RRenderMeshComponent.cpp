@@ -51,11 +51,12 @@ void RRenderMeshComponent::Render(const RenderViewInfo& View) const
 
 			for (UINT32 i = 0; i < NumMeshElements; i++)
 			{
+				RMaterial* Material = m_Materials[i];
 				RShader* shader = nullptr;
 
 				if (i < NumMaterials)
 				{
-					shader = m_Materials[i].Shader;
+					shader = Material->GetShader();
 				}
 
 				assert(shader);
@@ -77,13 +78,13 @@ void RRenderMeshComponent::Render(const RenderViewInfo& View) const
 				shader->Bind(shaderFeatureMask);
 
 				ID3D11ShaderResourceView* NullShaderResourceView[] = { nullptr };
-
-				for (int t = 0; t < m_Materials[i].TextureNum; t++)
+				auto TextureSlots = Material->GetTextureSlots();
+				for (int t = 0; t < (size_t)TextureSlots.size(); t++)
 				{
-					RTexture* texture = m_Materials[i].Textures[t];
-					GRenderer.D3DImmediateContext()->PSSetShaderResources(t, 1, texture ? texture->GetPtrSRV() : NullShaderResourceView);
-
-					GRenderer.SetSamplerState(t, SamplerState_Texture);
+					RTexture* texture = TextureSlots[t].Texture;
+					int SlotId = TextureSlots[t].SlotId;
+					GRenderer.D3DImmediateContext()->PSSetShaderResources(SlotId, 1, texture ? texture->GetPtrSRV() : NullShaderResourceView);
+					GRenderer.SetSamplerState(SlotId, SamplerState_Texture);
 				}
 
 				m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -156,22 +157,22 @@ void RRenderMeshComponent::SetMesh(const RMesh* Mesh)
 	}
 }
 
-void RRenderMeshComponent::SetMaterial(UINT Index, const RMaterial& Material)
-{
-	if (m_PostponeLoadMaterials)
-	{
-		m_PendingAssignedMaterials.push_back({ Index, Material });
-	}
-	else
-	{
-		if (m_Materials.size() <= Index)
-		{
-			m_Materials.resize(Index + 1);
-		}
-
-		m_Materials[Index] = Material;
-	}
-}
+//void RRenderMeshComponent::SetMaterial(UINT Index, const RMeshMaterialData& Material)
+//{
+//	if (m_PostponeLoadMaterials)
+//	{
+//		m_PendingAssignedMaterials.push_back({ Index, Material });
+//	}
+//	else
+//	{
+//		if (m_Materials.size() <= Index)
+//		{
+//			m_Materials.resize(Index + 1);
+//		}
+//
+//		m_Materials[Index] = Material;
+//	}
+//}
 
 void RRenderMeshComponent::LoadMaterialsFromMeshResource()
 {
@@ -186,20 +187,17 @@ void RRenderMeshComponent::LoadMaterialsFromMeshResource()
 	RShader* DefaultShader = RShaderManager::Instance().GetShaderResource("Default");
 	assert(DefaultShader);
 
-	RMaterial DefaultMaterial;
-	ZeroMemory(&DefaultMaterial, sizeof(DefaultMaterial));
-	DefaultMaterial.Shader = DefaultShader;
-
 	// Assign default material to empty material slots
 	for (UINT32 i = 0; i < NumMeshElements; i++)
 	{
-		if (m_Materials[i].Shader == nullptr)
+		//if (m_Materials[i].Shader == nullptr)
+		//{
+		//	m_Materials[i] = DefaultMaterial;
+		//}
+		//else 
+		if (i >= NumMaterials)
 		{
-			m_Materials[i] = DefaultMaterial;
-		}
-		else if (i >= NumMaterials)
-		{
-			m_Materials.push_back(DefaultMaterial);
+			m_Materials.push_back(nullptr);	// TODO: Add default material
 		}
 	}
 

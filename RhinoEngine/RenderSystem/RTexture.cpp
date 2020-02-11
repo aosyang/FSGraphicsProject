@@ -12,7 +12,7 @@
 const std::string RTexture::InternalTextureName("[Internal]");
 
 RTexture::RTexture(const std::string& Path)
-	: RResourceBase(RT_Texture, Path)
+	: RResourceBase(Path)
 	, m_SRV(nullptr)
 	, m_Width(0)
 	, m_Height(0)
@@ -22,7 +22,7 @@ RTexture::RTexture(const std::string& Path)
 }
 
 RTexture::RTexture(ID3D11ShaderResourceView* ShaderResourceView, bool bTakeResourceOwnership)
-	: RResourceBase(RT_Texture, InternalTextureName)
+	: RResourceBase(InternalTextureName)
 	, m_SRV(ShaderResourceView)
 	, m_Width(0)
 	, m_Height(0)
@@ -82,7 +82,7 @@ bool RTexture::LoadResourceImpl(bool bIsAsyncLoading)
 	}
 
 	m_SRV = ShaderResourceView;
-	OnLoadingFinished(bIsAsyncLoading);
+	//OnLoadingFinished(bIsAsyncLoading);
 
 	return true;
 }

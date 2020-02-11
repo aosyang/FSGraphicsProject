@@ -1,30 +1,55 @@
 //=============================================================================
-// RMeshPreviewBuilder.cpp by Shiyang Ao, 2020 All Rights Reserved.
+// RResourcePreviewBuilder.cpp by Shiyang Ao, 2020 All Rights Reserved.
 //
 // 
 //=============================================================================
 
-#include "RMeshPreviewBuilder.h"
-
 #include "Rhino.h"
 
-void RMeshPreviewBuilder::BuildPreviewForAllMeshes()
+#include "RResourcePreviewBuilder.h"
+
+void RResourcePreviewBuilder::BuildPreviewForAllResources()
 {
-	std::vector<RMesh*> MeshCollection = RResourceManager::Instance().EnumerateResourcesOfType<RMesh>();
-	for (auto Mesh : MeshCollection)
+	std::vector<RResourceBase*> ResourceCollection = RResourceManager::Instance().EnumerateAllResources();
+	for (auto Resource : ResourceCollection)
 	{
-		RTexture* PreviewTexture = GeneratePreviewTexture(Mesh, 512, 512);
+		if (Resource->CanCastTo<RTexture>())
+		{
+			continue;
+		}
+
+		RTexture* PreviewTexture = GeneratePreviewTexture(Resource, 512, 512);
 		if (PreviewTexture)
 		{
-			MeshPreviews[Mesh] = PreviewTexture;
+			ResourcePreviews[Resource] = PreviewTexture;
 		}
 	}
 }
 
-RTexture* RMeshPreviewBuilder::FindPreviewTexture(RMesh* Mesh) const
+void RResourcePreviewBuilder::BuildPreviewForResource(RResourceBase* Resource)
 {
-	auto Iter = MeshPreviews.find(Mesh);
-	if (Iter != MeshPreviews.end())
+	if (Resource->CanCastTo<RTexture>())
+	{
+		return;
+	}
+
+	auto Iter = ResourcePreviews.find(Resource);
+	if (Iter != ResourcePreviews.end())
+	{
+		// Destroy the wrapper texture resource here
+	}
+
+	RTexture* PreviewTexture = GeneratePreviewTexture(Resource, 512, 512);
+	if (PreviewTexture)
+	{
+		ResourcePreviews[Resource] = PreviewTexture;
+	}
+}
+
+RTexture* RResourcePreviewBuilder::FindPreviewTexture(RResourceBase* Resource) const
+{
+	auto Iter = ResourcePreviews.find(Resource);
+	if (Iter != ResourcePreviews.end())
 	{
 		return Iter->second;
 	}
@@ -32,9 +57,9 @@ RTexture* RMeshPreviewBuilder::FindPreviewTexture(RMesh* Mesh) const
 	return nullptr;
 }
 
-RTexture* RMeshPreviewBuilder::GeneratePreviewTexture(RMesh* Mesh, int Width, int Height)
+RTexture* RResourcePreviewBuilder::GeneratePreviewTexture(RResourceBase* Resource, int Width, int Height)
 {
-	if (Mesh)
+	if (Resource)
 	{
 		ID3D11Texture2D*			RenderTargetBuffer;
 		ID3D11RenderTargetView*		RenderTargetView;
@@ -89,7 +114,7 @@ RTexture* RMeshPreviewBuilder::GeneratePreviewTexture(RMesh* Mesh, int Width, in
 
 		GRenderer.Clear();
 
-		RSMeshObject* MeshObject = PreviewScene.CreateMeshObject(Mesh);
+		RSceneObject* MeshObject = CreatePreviewSceneObject(PreviewScene, Resource);
 		RCamera* Camera = PreviewScene.CreateSceneObjectOfType<RCamera>();
 
 		float AspectRatio = (float)Width / (float)Height;
@@ -145,7 +170,7 @@ RTexture* RMeshPreviewBuilder::GeneratePreviewTexture(RMesh* Mesh, int Width, in
 		RConstantBuffers::cbMaterial.UpdateBufferData();
 		RConstantBuffers::cbMaterial.BindBuffer();
 
-		if (Mesh->HasAnySkinnedMeshElements())
+		if (IsSkinnedMesh(Resource))
 		{
 			RConstantBuffers::cbBoneMatrices.ClearData();
 			for (int i = 0; i < MAX_BONE_COUNT; i++)
@@ -174,6 +199,38 @@ RTexture* RMeshPreviewBuilder::GeneratePreviewTexture(RMesh* Mesh, int Width, in
 		SAFE_RELEASE(RenderTargetDepthView);
 
 		return PreviewTexture;
+	}
+
+	return nullptr;
+}
+
+bool RResourcePreviewBuilder::IsSkinnedMesh(RResourceBase* Resource)
+{
+	RMesh* Mesh = Resource->CastTo<RMesh>();
+	if (Mesh)
+	{
+		return Mesh->HasAnySkinnedMeshElements();
+	}
+
+	return false;
+}
+
+RSceneObject* RResourcePreviewBuilder::CreatePreviewSceneObject(RScene& Scene, RResourceBase* Resource)
+{
+	if (RMesh* Mesh = Resource->CastTo<RMesh>())
+	{
+		return Scene.CreateMeshObject(Mesh);
+	}
+	else if (RMaterial* Material = Resource->CastTo<RMaterial>())
+	{
+		RMesh* MaterialPreviewMesh = RResourceManager::Instance().FindResource<RMesh>("/sphere.fbx", true);
+		RSMeshObject* MeshObject = Scene.CreateMeshObject(MaterialPreviewMesh);
+
+		std::vector<RMaterial*> Materials;
+		Materials.push_back(Material);
+		MeshObject->SetMaterials(Materials);
+
+		return MeshObject;
 	}
 
 	return nullptr;

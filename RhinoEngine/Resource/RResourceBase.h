@@ -16,22 +16,16 @@ enum ResourceState
 	RS_Loaded,
 };
 
-enum ResourceType
-{
-	RT_Mesh,
-	RT_Texture,
-};
 
 /// Base resource class
 class RResourceBase : public RRuntimeTypeObject
 {
 	DECLARE_RUNTIME_TYPE(RResourceBase, RRuntimeTypeObject)
 public:
-	RResourceBase(ResourceType type, const std::string& path);
+	RResourceBase(const std::string& path);
 	virtual ~RResourceBase() = 0 {}
 
 	ResourceState GetResourceState() const	{ return m_State; }
-	ResourceType GetResourceType() const	{ return m_Type; }
 
 	const RResourceMetaData& GetMetaData() const;
 
@@ -69,7 +63,6 @@ protected:
 
 private:
 	ResourceState		m_State;
-	ResourceType		m_Type;
 
 	std::unique_ptr<RResourceMetaData> MetaData;
 

@@ -4,17 +4,16 @@
 // 
 //=============================================================================
 
+#include "Rhino.h"
+
 #include "WorkshopApp.h"
 
-#include "Rhino.h"
 #include "../RhinoGameUtils/RFreeFlyCameraControl.h"
 
 WorkshopApp::WorkshopApp()
 	: bShowOpenDialog(false)
-	, bShowAssetsView(false)
-	, AssetViewFilter(AssetType_All)
+	, bShowAssetEditor(true)
 	, SelectedObject(nullptr)
-	, SelectedResource(nullptr)
 {
 
 }
@@ -22,7 +21,7 @@ WorkshopApp::WorkshopApp()
 bool WorkshopApp::Initialize()
 {
 	RResourceManager::Instance().LoadAllResources(EResourceLoadMode::Immediate);
-	MeshPreviewBuilder.BuildPreviewForAllMeshes();
+	ResourcePreviewBuilder.BuildPreviewForAllResources();
 
 	GSceneManager.DefaultScene()->Initialize();
 
@@ -89,7 +88,8 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 
 			if (ImGui::BeginMenu("View"))
 			{
-				ImGui::MenuItem("Show Assets View", nullptr, &bShowAssetsView);
+				ImGui::MenuItem("Show Assets View", nullptr, &AssetsViewWindow.bShowWindow);
+				ImGui::MenuItem("Show Asset Editor", nullptr, &AssetEditorWindow.bShowWindow);
 				ImGui::EndMenu();
 			}
 
@@ -103,8 +103,14 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 			SetCameraSpeed(CameraSpeed);
 		}
 
+		// The tree view window of the scene
 		DisplaySceneViewWindow();
-		DisplayAssetsViewWindow();
+
+		// The asset explorer window
+		AssetsViewWindow.ShowWindow(ResourcePreviewBuilder);
+
+		AssetEditorWindow.SetEditingResource(AssetsViewWindow.GetEditingResource());
+		AssetEditorWindow.ShowWindow(ResourcePreviewBuilder, AssetsViewWindow.GetSelectedResource());
 
 		if (SelectedObject)
 		{
@@ -159,10 +165,12 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 					ImGui::Button(".."); ImGui::SameLine();
 					if (ImGui::Button("->"))
 					{
-						RMesh* MeshAsset = SelectedResource->CastTo<RMesh>();
-						if (MeshAsset)
+						if (auto Resource = AssetsViewWindow.GetSelectedResource())
 						{
-							MeshObject->SetMesh(MeshAsset);
+							if (RMesh* MeshAsset = Resource->CastTo<RMesh>())
+							{
+								MeshObject->SetMesh(MeshAsset);
+							}
 						}
 					}
 					ImGui::SameLine();
@@ -584,140 +592,4 @@ void WorkshopApp::DisplaySceneViewWindow()
 		}
 	}
 	ImGui::End();
-}
-
-void WorkshopApp::DisplayAssetsViewWindow()
-{
-	if (bShowAssetsView)
-	{
-		if (ImGui::Begin("Assets View"))
-		{
-			ImGui::Text("Filter:");
-			DisplayAssertFilter("All", AssetType_All); ImGui::SameLine();
-			DisplayAssertFilter("Mesh", AssetType_Mesh); ImGui::SameLine();
-			DisplayAssertFilter("Texture", AssetType_Texture);
-
-			const char* PreviewSizeOptions[] = { "512", "256", "128", "64" };
-			static const char* CurrentPreviewSize = PreviewSizeOptions[1];
-			if (ImGui::BeginCombo("View size", CurrentPreviewSize))
-			{
-				for (int i = 0; i < ARRAYSIZE(PreviewSizeOptions); i++)
-				{
-					bool bSelected = (CurrentPreviewSize == PreviewSizeOptions[i]);
-					if (ImGui::Selectable(PreviewSizeOptions[i], bSelected))
-					{
-						CurrentPreviewSize = PreviewSizeOptions[i];
-					}
-					if (bSelected)
-					{
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-				ImGui::EndCombo();
-			}
-
-			int PreviewSize = atoi(CurrentPreviewSize);
-
-			ImGui::BeginChild("AssetChild");
-			float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
-			ImGuiStyle& style = ImGui::GetStyle();
-
-			auto& ResourceList = RResourceManager::Instance().EnumerateAllResources();
-			for (auto Iter : ResourceList)
-			{
-				if (Iter->CanCastTo<RMesh>() && !(AssetViewFilter & AssetType_Mesh))
-				{
-					continue;
-				}
-
-				if (Iter->CanCastTo<RTexture>() && !(AssetViewFilter & AssetType_Texture))
-				{
-					continue;
-				}
-
-				ImVec2 ItemSize((float)PreviewSize, (float)PreviewSize);
-
-				// Position of selectable widget
-				ImVec2 p = ImGui::GetCursorScreenPos();
-				
-				// Hide label text from selectable
-				std::string HiddenLabel = "##" + Iter->GetAssetPath();
-				const char* Label = Iter->GetAssetPath().c_str();
-				ImVec2 LabelSize = ImGui::CalcTextSize(Label);
-
-				ImTextureID GuiTexture = nullptr;
-				if (RTexture* Texture = Iter->CastTo<RTexture>())
-				{
-					// ImGui doesn't handle cubemap rendering. Skip them for now
-					if (!Texture->IsCubeMap())
-					{
-						GuiTexture = Texture->GetSRV();
-					}
-				}
-				else if (RMesh* Mesh = Iter->CastTo<RMesh>())
-				{
-					RTexture* PreviewTexture = MeshPreviewBuilder.FindPreviewTexture(Mesh);
-					if (PreviewTexture)
-					{
-						GuiTexture = PreviewTexture->GetSRV();
-					}
-				}
-
-				if (ImGui::Selectable(HiddenLabel.c_str(), SelectedResource == Iter, 0, ImVec2(ItemSize.x, ItemSize.y + LabelSize.y + 2)))
-				{
-					SelectedResource = Iter;
-				}
-				float last_button_x2 = ImGui::GetItemRectMax().x;
-
-				// Draw custom texture and text for the selectable
-				ImGui::GetWindowDrawList()->AddImage(GuiTexture, ImVec2(p.x + 2, p.y + 2), ImVec2(p.x + ItemSize.x + 2, p.y + ItemSize.y + 2));
-				ImGui::GetWindowDrawList()->AddText(ImVec2(p.x, p.y + ItemSize.y + 2), ImGui::GetColorU32(ImGuiCol_Text), Label);
-
-				// Position of next widget
-				p = ImGui::GetCursorScreenPos();
-
-				// If there is room for another icon then draw it in the same line
-				float next_button_x2 = last_button_x2 + style.ItemSpacing.x + ItemSize.x;
-				if (next_button_x2 < window_visible_x2)
-				{
-					ImGui::SameLine();
-				}
-			}
-			ImGui::EndChild();
-		}
-		ImGui::End();
-	}
-}
-
-void WorkshopApp::DisplayAssertFilter(const char* Label, int FilterType)
-{
-	if (FilterType == AssetType_All)
-	{
-		bool bFilterChecked = (AssetViewFilter == FilterType);
-		ImGui::Checkbox(Label, &bFilterChecked);
-		if (bFilterChecked != (AssetViewFilter == FilterType))
-		{
-			if (bFilterChecked)
-			{
-				AssetViewFilter = AssetType_All;
-			}
-			else
-			{
-				AssetViewFilter = 0;
-			}
-		}
-	}
-	else
-	{
-		bool bFilterChecked = (AssetViewFilter & FilterType);
-		ImGui::Checkbox(Label, &bFilterChecked);
-		if (bFilterChecked)
-		{
-			AssetViewFilter |= FilterType;
-		}
-		else
-		{
-			AssetViewFilter &= ~FilterType;
-		}
-	}
 }

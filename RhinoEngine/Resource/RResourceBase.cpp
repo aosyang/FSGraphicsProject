@@ -8,9 +8,8 @@
 #include "RResourceBase.h"
 
 
-RResourceBase::RResourceBase(ResourceType type, const std::string& path)
+RResourceBase::RResourceBase(const std::string& path)
 	: m_State				(RS_Empty),
-	  m_Type				(type),
 	  m_FileSystemPath		(path),
 	  m_LoadingFinishTime	(0.0f)
 {
@@ -22,7 +21,14 @@ bool RResourceBase::LoadResourceData(bool bIsAsyncLoading)
 	std::string MetaFileName = m_FileSystemPath + ".meta";
 	MetaData->LoadFromFile(MetaFileName);
 
-	return LoadResourceImpl(bIsAsyncLoading);
+	if (LoadResourceImpl(bIsAsyncLoading))
+	{
+		OnLoadingFinished(bIsAsyncLoading);
+
+		return true;
+	}
+
+	return false;
 }
 
 bool RResourceBase::AreReferencedResourcesLoaded() const

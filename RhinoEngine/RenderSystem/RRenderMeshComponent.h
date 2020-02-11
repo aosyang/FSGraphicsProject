@@ -12,7 +12,7 @@
 struct PendingAssignedMaterial
 {
 	UINT		Index;
-	RMaterial	Material;
+	RMaterial*	Material;
 };
 
 struct RenderViewInfo
@@ -37,7 +37,7 @@ public:
 	/// Set mesh resource for the component to render
 	void SetMesh(const RMesh* Mesh);
 
-	void SetMaterial(UINT Index, const RMaterial& Material);
+	//void SetMaterial(UINT Index, const RMeshMaterialData& Material);
 
 private:
 	RRenderMeshComponent(RSceneObject* InOwner);
@@ -45,7 +45,7 @@ private:
 	void LoadMaterialsFromMeshResource();
 
 	const RMesh*			m_Mesh;
-	std::vector<RMaterial>		m_Materials;
+	std::vector<RMaterial*>		m_Materials;
 
 	bool					m_PostponeLoadMaterials;
 	std::vector<PendingAssignedMaterial>	m_PendingAssignedMaterials;
