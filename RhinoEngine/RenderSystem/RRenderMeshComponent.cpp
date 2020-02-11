@@ -52,6 +52,11 @@ void RRenderMeshComponent::Render(const RenderViewInfo& View) const
 			for (UINT32 i = 0; i < NumMeshElements; i++)
 			{
 				RMaterial* Material = m_Materials[i];
+				if (Material == nullptr)
+				{
+					Material = RMaterial::GetDefault();
+				}
+
 				RShader* shader = nullptr;
 
 				if (i < NumMaterials)
@@ -157,22 +162,22 @@ void RRenderMeshComponent::SetMesh(const RMesh* Mesh)
 	}
 }
 
-//void RRenderMeshComponent::SetMaterial(UINT Index, const RMeshMaterialData& Material)
-//{
-//	if (m_PostponeLoadMaterials)
-//	{
-//		m_PendingAssignedMaterials.push_back({ Index, Material });
-//	}
-//	else
-//	{
-//		if (m_Materials.size() <= Index)
-//		{
-//			m_Materials.resize(Index + 1);
-//		}
-//
-//		m_Materials[Index] = Material;
-//	}
-//}
+void RRenderMeshComponent::SetMaterial(UINT Index, RMaterial* Material)
+{
+	if (m_PostponeLoadMaterials)
+	{
+		m_PendingAssignedMaterials.push_back({ Index, Material });
+	}
+	else
+	{
+		if (m_Materials.size() <= Index)
+		{
+			m_Materials.resize(Index + 1);
+		}
+
+		m_Materials[Index] = Material;
+	}
+}
 
 void RRenderMeshComponent::LoadMaterialsFromMeshResource()
 {

@@ -1,5 +1,0 @@
-<Material Mesh="/cube.FBX">
-    <MeshElement Name="Box001" Shader="Lighting">
-        <Texture Slot="0">/RubikCube/White2x2.dds</Texture>
-    </MeshElement>
-</Material>

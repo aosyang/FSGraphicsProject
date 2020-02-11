@@ -37,7 +37,7 @@ public:
 	/// Set mesh resource for the component to render
 	void SetMesh(const RMesh* Mesh);
 
-	//void SetMaterial(UINT Index, const RMeshMaterialData& Material);
+	void SetMaterial(UINT Index, RMaterial* Material);
 
 private:
 	RRenderMeshComponent(RSceneObject* InOwner);

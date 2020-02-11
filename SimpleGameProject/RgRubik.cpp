@@ -10,7 +10,7 @@
 const float BlockSpacing = 80.0f;
 const float CubeRotatingSpeed = 5.0f;
 
-static RMaterial RubikMaterials[7];
+static RMaterial* RubikMaterials[7];
 
 float EaseInOut(float x)
 {
@@ -92,22 +92,18 @@ void InitializeRubikMaterials()
 {
 	const std::string MaterialPaths[] =
 	{
-		"/RubikCube/Blue.rmtl",
-		"/RubikCube/Green.rmtl",
-		"/RubikCube/Red.rmtl",
-		"/RubikCube/Orange.rmtl",
-		"/RubikCube/White.rmtl",
-		"/RubikCube/Yellow.rmtl",
-		"/RubikCube/Black.rmtl",
+		"/RubikCube/Blue.material",
+		"/RubikCube/Green.material",
+		"/RubikCube/Red.material",
+		"/RubikCube/Orange.material",
+		"/RubikCube/White.material",
+		"/RubikCube/Yellow.material",
+		"/RubikCube/Black.material",
 	};
 
 	for (int i = 0; i < ARRAYSIZE(MaterialPaths); i++)
 	{
-		std::vector<RMaterial> Materials;
-		const std::string XmlPath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), MaterialPaths[i]);
-		RMaterial::LoadFromXmlFile(XmlPath, Materials);
-		assert(Materials.size() > 0);
-		RubikMaterials[i] = Materials[0];
+		RubikMaterials[i] = RResourceManager::Instance().LoadResource<RMaterial>(MaterialPaths[i], EResourceLoadMode::Immediate);
 	}
 }
 
