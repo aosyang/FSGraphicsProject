@@ -375,7 +375,7 @@ void RScene::LoadFromFile(const std::string& MapAssetPath)
 {
 	const std::string MapFilePath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), MapAssetPath);
 
-	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
+	std::unique_ptr<tinyxml2::XMLDocument> doc = std::make_unique<tinyxml2::XMLDocument>();
 	if (doc->LoadFile(MapFilePath.c_str()) == tinyxml2::XML_SUCCESS)
 	{
 		tinyxml2::XMLElement* root = doc->RootElement();
@@ -438,13 +438,11 @@ void RScene::LoadFromFile(const std::string& MapAssetPath)
 			elem_obj = elem_obj->NextSiblingElement();
 		}
 	}
-
-	delete doc;
 }
 
 void RScene::SaveToFile(const char* filename)
 {
-	tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
+	std::unique_ptr<tinyxml2::XMLDocument> doc = std::make_unique<tinyxml2::XMLDocument>();
 	doc->InsertEndChild(doc->NewDeclaration());
 	tinyxml2::XMLElement* elem_scene = doc->NewElement("Scene");
 
@@ -491,7 +489,7 @@ void RScene::SaveToFile(const char* filename)
 				{
 					tinyxml2::XMLElement* elem_mat = doc->NewElement("Material");
 					elem_mat->SetAttribute("Index", i);
-					meshObj->SerializeXmlMaterials_Save(doc, elem_mat);
+					meshObj->SerializeXmlMaterials_Save(doc.get(), elem_mat);
 					elem_obj->InsertEndChild(elem_mat);
 				}
 			}
