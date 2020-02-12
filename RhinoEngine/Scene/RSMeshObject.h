@@ -25,6 +25,7 @@ public:
 	int GetMeshElementCount() const;
 	void SetMaterials(const std::vector<RMaterial*>& materials);
 
+	void SetMaterialSlot(int SlotId, RMaterial* Material);
 	/// Get a material at index
 	RMaterial* GetMaterial(int index);
 

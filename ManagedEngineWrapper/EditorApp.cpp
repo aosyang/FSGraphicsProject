@@ -28,7 +28,7 @@ namespace ManagedEngineWrapper
 
 		m_Scene.Initialize();
 
-		m_DefaultShader = RShaderManager::Instance().GetShaderResource("Default");
+		m_DefaultShader = RShaderManager::Instance().GetDefaultShader();
 
 #if 1
 		RResourceManager::Instance().LoadAllResources();

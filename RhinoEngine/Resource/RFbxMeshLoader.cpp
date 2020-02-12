@@ -909,7 +909,7 @@ namespace
 			}
 			else
 			{
-				Shader = RShaderManager::Instance().GetShaderResource("Default");
+				Shader = RShaderManager::Instance().GetDefaultShader();
 			}
 
 			assert(Shader != nullptr);

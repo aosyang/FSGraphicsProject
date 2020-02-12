@@ -71,6 +71,16 @@ void RSMeshObject::SetMaterials(const std::vector<RMaterial*>& materials)
 	m_bNeedUpdateMaterial = false;
 }
 
+void RSMeshObject::SetMaterialSlot(int SlotId, RMaterial* Material)
+{
+	if (SlotId >= m_Materials.size())
+	{
+		m_Materials.resize(SlotId + 1);
+	}
+
+	m_Materials[SlotId] = Material;
+}
+
 RMaterial* RSMeshObject::GetMaterial(int index)
 {
 	SetupMaterialsFromMeshResource();
@@ -109,7 +119,7 @@ void RSMeshObject::SaveMaterialsToDiskAsDefaults()
 
 void RSMeshObject::SerializeXmlMaterials_Load(tinyxml2::XMLElement* XmlElemMaterial)
 {
-	std::vector<RMaterial*> xmlMaterials;
+	std::vector<RMaterial*> MeshMaterials;
 
 	if (XmlElemMaterial)
 	{
@@ -117,7 +127,13 @@ void RSMeshObject::SerializeXmlMaterials_Load(tinyxml2::XMLElement* XmlElemMater
 		for (int i = 0; i < GetMeshElementCount(); i++)
 		{
 			RMaterial* Material = i < GetNumMaterials() ? GetMaterial(i) : nullptr;
-			xmlMaterials.push_back(Material);
+
+			if (Material == nullptr)
+			{
+				Material = RMaterial::GetDefault();
+			}
+
+			MeshMaterials.push_back(Material);
 		}
 
 		// <MeshElement Index="0" Name="Element">/Path/To/Material</MeshElement>
@@ -125,12 +141,12 @@ void RSMeshObject::SerializeXmlMaterials_Load(tinyxml2::XMLElement* XmlElemMater
 		while (XmlElemSubmesh)
 		{
 			int index = -1;
-			XmlElemMaterial->QueryIntAttribute("Index", &index);
+			XmlElemSubmesh->QueryIntAttribute("Index", &index);
 
 			if (index != -1)
 			{
 				RMaterial* Material = nullptr;
-				const char* MaterialPath = XmlElemMaterial->GetText();
+				const char* MaterialPath = XmlElemSubmesh->GetText();
 				if (MaterialPath)
 				{
 					Material = RResourceManager::Instance().FindResource<RMaterial>(MaterialPath);
@@ -141,16 +157,16 @@ void RSMeshObject::SerializeXmlMaterials_Load(tinyxml2::XMLElement* XmlElemMater
 					Material = RMaterial::GetDefault();
 				}
 
-				xmlMaterials[index] = Material;
+				MeshMaterials[index] = Material;
 			}
 
 			XmlElemSubmesh = XmlElemSubmesh->NextSiblingElement();
 		}
 	}
 
-	if (xmlMaterials.size())
+	if (MeshMaterials.size())
 	{
-		SetMaterials(xmlMaterials);
+		SetMaterials(MeshMaterials);
 	}
 }
 

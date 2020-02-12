@@ -134,7 +134,7 @@ void RMaterial::Serialize(RSerializer& serializer)
 		Shader = RShaderManager::Instance().GetShaderResource(shaderName.c_str());
 		if (Shader == nullptr)
 		{
-			Shader = RShaderManager::Instance().GetShaderResource("Default");
+			Shader = RShaderManager::Instance().GetDefaultShader();
 		}
 		serializer.SerializeVector(TextureSlots, &RSerializer::SerializeObject);
 	}
@@ -175,7 +175,7 @@ RMaterial* RMaterial::GetDefault()
 	static RMaterial* DefaultMaterial = nullptr;
 	if (DefaultMaterial == nullptr)
 	{
-		RShader* DefaultShader = RShaderManager::Instance().GetShaderResource("Default");
+		RShader* DefaultShader = RShaderManager::Instance().GetDefaultShader();
 
 		// Make sure we're not getting the default material before the default shader is loaded
 		assert(DefaultShader);

@@ -159,14 +159,20 @@ RTexture* RResourcePreviewBuilder::GeneratePreviewTexture(RResourceBase* Resourc
 		RConstantBuffers::cbScene.UpdateBufferData();
 		RConstantBuffers::cbScene.BindBuffer();
 
+		RVec3 SunDirection = RVec3(-1, 1, -1).GetNormalized();
+
 		RConstantBuffers::cbLight.ClearData();
 		RConstantBuffers::cbLight.Data.HighHemisphereAmbientColor = RVec4(0.4f, 0.4f, 0.4f, 1.0f);
 		RConstantBuffers::cbLight.Data.LowHemisphereAmbientColor = RVec4(0.1f, 0.1f, 0.1f, 1.0f);
+		RConstantBuffers::cbLight.Data.DirectionalLightCount = 1;
+		RConstantBuffers::cbLight.Data.DirectionalLight->Color = RVec4(1.0f, 1.0f, 0.8f, 1.0f);
+		RConstantBuffers::cbLight.Data.DirectionalLight->Direction = RVec4(SunDirection, 0.0f);
 		RConstantBuffers::cbLight.UpdateBufferData();
 		RConstantBuffers::cbLight.BindBuffer();
 
 		RConstantBuffers::cbMaterial.ClearData();
 		RConstantBuffers::cbMaterial.Data.GlobalOpacity = 1.0f;
+		RConstantBuffers::cbMaterial.Data.SpecularColorAndPower = RVec4(1, 1, 1, 32);
 		RConstantBuffers::cbMaterial.UpdateBufferData();
 		RConstantBuffers::cbMaterial.BindBuffer();
 

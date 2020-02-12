@@ -2,13 +2,7 @@
 <Scene>
     <SceneObject Name="cube_0" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="BumpLightingPBR">
-                <Texture Slot="0">/rustediron-streaks_basecolor.dds</Texture>
-                <Texture Slot="1">/rustediron-streaks_normal.dds</Texture>
-                <Texture Slot="2">/PBR_RMA_Test.dds</Texture>
-                <Texture Slot="3">/powderpeak.dds</Texture>
-                <Texture Slot="4">/powderpeak_irradiance.dds</Texture>
-            </MeshElement>
+            <MeshElement Index="0">/PBR_mat.material</MeshElement>
         </Material>
         <Transform>
             <Position>0.000000, 0.000000, -800.000000</Position>
@@ -18,13 +12,7 @@
     </SceneObject>
     <SceneObject Name="cube_1" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="BumpLightingPBR">
-                <Texture Slot="0">/rustediron-streaks_basecolor.dds</Texture>
-                <Texture Slot="1">/rustediron-streaks_normal.dds</Texture>
-                <Texture Slot="2">/rustediron-streaks_RMA.dds</Texture>
-                <Texture Slot="3">/powderpeak.dds</Texture>
-                <Texture Slot="4">/powderpeak_irradiance.dds</Texture>
-            </MeshElement>
+            <MeshElement Index="0">/PBR_Test_mat.material</MeshElement>
         </Material>
         <Transform>
             <Position>0.000000, 0.000000, 800.000000</Position>

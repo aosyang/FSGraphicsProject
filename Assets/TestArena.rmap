@@ -2,9 +2,7 @@
 <Scene>
     <SceneObject Name="Floor" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="WorldAligned">
-                <Texture Slot="0">/DefaultGrid512.dds</Texture>
-            </MeshElement>
+            <MeshElement Index="0">/DefaultGrid.material</MeshElement>
         </Material>
         <Transform>
             <Position>0.000000, 0.000000, 0.000000</Position>
@@ -14,9 +12,7 @@
     </SceneObject>
     <SceneObject Name="cube_west" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="WorldAligned">
-                <Texture Slot="0">/DefaultGrid256.dds</Texture>
-            </MeshElement>
+            <MeshElement Index="0">/DefaultGrid.material</MeshElement>
         </Material>
         <Transform>
             <Position>700.000000, 120.000000, 0.000000</Position>
@@ -26,9 +22,7 @@
     </SceneObject>
     <SceneObject Name="cube_east" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="WorldAligned">
-                <Texture Slot="0">/DefaultGrid512.dds</Texture>
-            </MeshElement>
+            <MeshElement Index="0">/DefaultGrid.material</MeshElement>
         </Material>
         <Transform>
             <Position>-700.000000, 120.000000, 0.000000</Position>
@@ -45,9 +39,7 @@
     </SceneObject>
     <SceneObject Name="Sphere_0" Type="MeshObject" Mesh="/Sphere.FBX">
         <Material Index="0">
-            <MeshElement Name="Sphere001" Shader="WorldAligned">
-                <Texture Slot="0">/DefaultGrid512.dds</Texture>
-            </MeshElement>
+            <MeshElement Index="0">/DefaultGrid.material</MeshElement>
         </Material>
         <Transform>
             <Position>729.000000, 102.000000, -630.000000</Position>
@@ -71,9 +63,7 @@
     </SceneObject>
     <SceneObject Name="cube_stair2" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="WorldAligned">
-                <Texture Slot="0">/DefaultGrid256.dds</Texture>
-            </MeshElement>
+            <MeshElement Index="0">/DefaultGrid.material</MeshElement>
         </Material>
         <Transform>
             <Position>980.000000, 80.000000, 0.000000</Position>
@@ -83,9 +73,7 @@
     </SceneObject>
     <SceneObject Name="cube_stair1" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="WorldAligned">
-                <Texture Slot="0">/DefaultGrid256.dds</Texture>
-            </MeshElement>
+            <MeshElement Index="0">/DefaultGrid.material</MeshElement>
         </Material>
         <Transform>
             <Position>980.000000, 40.000000, 160.000000</Position>
@@ -95,9 +83,7 @@
     </SceneObject>
     <SceneObject Name="cube_stair0" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="WorldAligned">
-                <Texture Slot="0">/DefaultGrid256.dds</Texture>
-            </MeshElement>
+            <MeshElement Index="0">/DefaultGrid.material</MeshElement>
         </Material>
         <Transform>
             <Position>980.000000, 0.000000, 320.000000</Position>
@@ -135,9 +121,7 @@
     </SceneObject>
     <SceneObject Name="cube_east_0" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="WorldAligned">
-                <Texture Slot="0">/DefaultGrid512.dds</Texture>
-            </MeshElement>
+            <MeshElement Index="0">/DefaultGrid.material</MeshElement>
         </Material>
         <Transform>
             <Position>-700.000000, 120.000000, 1200.000000</Position>
@@ -147,9 +131,7 @@
     </SceneObject>
     <SceneObject Name="cube_stair2_0" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="WorldAligned">
-                <Texture Slot="0">/DefaultGrid256.dds</Texture>
-            </MeshElement>
+            <MeshElement Index="0">/DefaultGrid.material</MeshElement>
         </Material>
         <Transform>
             <Position>980.000000, 100.000000, -120.000000</Position>
@@ -159,9 +141,7 @@
     </SceneObject>
     <SceneObject Name="cube_stair1_0" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="WorldAligned">
-                <Texture Slot="0">/DefaultGrid256.dds</Texture>
-            </MeshElement>
+            <MeshElement Index="0">/DefaultGrid.material</MeshElement>
         </Material>
         <Transform>
             <Position>980.000000, 60.000000, 80.000000</Position>
@@ -171,9 +151,7 @@
     </SceneObject>
     <SceneObject Name="cube_stair0_0" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="WorldAligned">
-                <Texture Slot="0">/DefaultGrid256.dds</Texture>
-            </MeshElement>
+            <MeshElement Index="0">/DefaultGrid.material</MeshElement>
         </Material>
         <Transform>
             <Position>980.000000, 20.000000, 240.000000</Position>
@@ -183,9 +161,7 @@
     </SceneObject>
     <SceneObject Name="cube_stair0_1" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Name="Box001" Shader="WorldAligned">
-                <Texture Slot="0">/DefaultGrid256.dds</Texture>
-            </MeshElement>
+            <MeshElement Index="0">/DefaultGrid.material</MeshElement>
         </Material>
         <Transform>
             <Position>980.000000, -20.000000, 400.000000</Position>

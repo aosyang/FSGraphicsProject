@@ -186,6 +186,47 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 					strcpy_s(MeshAssetName, AssetPath.c_str());
 					ImGui::InputText("Mesh", MeshAssetName, sizeof(MeshAssetName));
 				}
+
+				static bool MaterialTreeOpen = true;
+				ImGui::SetNextTreeNodeOpen(MaterialTreeOpen);
+				if (MaterialTreeOpen = ImGui::CollapsingHeader("Materials", ImGuiTreeNodeFlags_None))
+				{
+					//const auto& Materials = MeshObject->GetMaterials();
+					RMesh* Mesh = MeshObject->GetMesh();
+
+					for (int i = 0; i < Mesh->GetMeshElementCount(); i++)
+					{
+						std::string AssignButtonText("->##" + std::to_string(i));
+						if (ImGui::Button(AssignButtonText.c_str()))
+						{
+							if (auto Resource = AssetsViewWindow.GetSelectedResource())
+							{
+								if (RMaterial* MaterialAsset = Resource->CastTo<RMaterial>())
+								{
+									MeshObject->SetMaterialSlot(i, MaterialAsset);
+								}
+							}
+						}
+
+						ImGui::SameLine();
+
+						std::string MaterialAssetPath;
+						std::string Label = "Slot " + std::to_string(i) + ": " + Mesh->GetMeshElements()[i].GetName();
+
+						if (i < MeshObject->GetNumMaterials())
+						{
+							RMaterial* Material = MeshObject->GetMaterial(i);
+							MaterialAssetPath = Material ? Material->GetAssetPath() : "";
+						}
+
+						char MaterialAssetName[256];
+						strcpy_s(MaterialAssetName, MaterialAssetPath.c_str());
+						if (ImGui::InputText(Label.c_str(), MaterialAssetName, sizeof(MaterialAssetName)))
+						{
+
+						}
+					}
+				}
 			}
 
 			ImGui::End();

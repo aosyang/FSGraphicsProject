@@ -152,7 +152,7 @@ void RRenderMeshComponent::LoadMaterialsFromMeshResource()
 
 	const UINT32 NumMaterials = (UINT32)m_Materials.size();
 
-	RShader* DefaultShader = RShaderManager::Instance().GetShaderResource("Default");
+	RShader* DefaultShader = RShaderManager::Instance().GetDefaultShader();
 	assert(DefaultShader);
 
 	// Assign default material to empty material slots
