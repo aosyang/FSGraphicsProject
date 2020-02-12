@@ -248,7 +248,6 @@ bool FSGraphicsProjectApp::Initialize()
 	RMesh* sphereMesh = RResourceManager::Instance().LoadResource<RMesh>("/Sphere.fbx");
 
 	m_TransparentMesh->SetMesh(sphereMesh);
-	m_TransparentMesh->SetOverridingShader(RShaderManager::Instance().GetShaderResource("Lighting"));
 
 	// Generate random position for floating islands
 	for (int i = 0; i < 5; i++)

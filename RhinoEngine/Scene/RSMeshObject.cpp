@@ -14,8 +14,6 @@ IMPLEMENT_SCENE_OBJECT(RSMeshObject);
 RSMeshObject::RSMeshObject(const RConstructingParams& Params)
 	: RSceneObject(Params),
 	  m_Mesh(nullptr),
-	  m_OverridingShader(nullptr),
-	  m_OverridingShaderFeatures(-1),
 	  m_bNeedUpdateMaterial(true)
 {
 
@@ -161,12 +159,6 @@ void RSMeshObject::SerializeXmlMaterials_Save(tinyxml2::XMLDocument* XmlDoc, tin
 	::SerializeXmlMaterials_Save(m_Materials, XmlDoc, XmlElemMaterial);
 }
 
-void RSMeshObject::SetOverridingShader(RShader* shader, int features)
-{
-	m_OverridingShader = shader;
-	m_OverridingShaderFeatures = features;
-}
-
 const RAabb& RSMeshObject::GetAabb()
 {
 	// Update aabb for mesh with current transform
@@ -201,75 +193,10 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 
 	for (UINT32 i = 0; i < MeshElements.size(); i++)
 	{
-		RShader* shader = nullptr;
 		const RMeshElement& MeshElement = MeshElements[i];
-
-		if (m_OverridingShader)
-			shader = m_OverridingShader;
-		else if (i < m_Materials.size())
-			shader = m_Materials[i]->GetShader();
-		else
-		{
-			shader = RShaderManager::Instance().GetShaderResource("Default");
-		}
-
-		if (shader)
-		{
-			int flag = MeshElement.GetFlag();
-
-			int shaderFeatureMask = 0;
-			if ((flag & MEF_Skinned) && !GEngine.IsEditor())
-			{
-				shaderFeatureMask |= SFM_Skinned;
-			}
-			else if (instanced)
-				shaderFeatureMask |= SFM_Instanced;
-
-			if (GRenderer.IsUsingDeferredShading())
-				shaderFeatureMask |= SFM_Deferred;
-
-			if (m_OverridingShader && m_OverridingShaderFeatures != -1)
-				shader->Bind(m_OverridingShaderFeatures);
-			else
-				shader->Bind(shaderFeatureMask);
-
-			ID3D11ShaderResourceView* NullShaderResourceView[] = { nullptr };
-
-			// Hack: for shaders bound separately, consider textures loaded from mesh
-			if (m_OverridingShader)
-			{
-				const RMaterial* OverrideMaterial = m_Mesh->GetMaterial(i);
-				assert(OverrideMaterial);
-
-				int NumTextureSlots = (int)OverrideMaterial->GetTextureSlots().size();
-
-				for (int t = 0; t < NumTextureSlots; t++)
-				{
-					RTexture* Texture = OverrideMaterial->GetTextureSlots()[t].Texture;
-					int SlotId = OverrideMaterial->GetTextureSlots()[t].SlotId;
-
-					GRenderer.D3DImmediateContext()->PSSetShaderResources(SlotId, 1, Texture ? Texture->GetPtrSRV() : NullShaderResourceView);
-				}
-			}
-			else
-			{
-				if (i < m_Materials.size())
-				{
-					const RMaterial* Material = m_Materials[i];
-					assert(Material);
-
-					int NumTextureSlots = (int)Material->GetTextureSlots().size();
-
-					for (int t = 0; t < NumTextureSlots; t++)
-					{
-						RTexture* Texture = Material->GetTextureSlots()[t].Texture;
-						int SlotId = Material->GetTextureSlots()[t].SlotId;
-
-						GRenderer.D3DImmediateContext()->PSSetShaderResources(SlotId, 1, Texture ? Texture->GetPtrSRV() : NullShaderResourceView);
-					}
-				}
-			}
-		}
+		bool bSkinned = MeshElement.GetFlag() & MEF_Skinned;
+		RMaterial* Material = (i < (int)m_Materials.size()) ? m_Materials[i] : nullptr;
+		GRenderer.BindMaterial(Material, bSkinned, instanced);
 
 		if (instanced)
 		{

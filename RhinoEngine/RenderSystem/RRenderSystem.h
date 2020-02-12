@@ -80,6 +80,9 @@ public:
 	void SetBlendState(BlendState state);
 	void SetSamplerState(int slot, SamplerState state);
 
+	/// Bind a material to the pipeline for rendering
+	void BindMaterial(RMaterial* Material, bool bSkinned = false, bool bInstancing = false);
+
 	bool UsingGammaCorrection() const { return m_UseGammaCorrection; }
 
 	void SetUsingDefferedShading(bool bUseDeferredShading)	{ m_bIsUsingDeferredShading = bUseDeferredShading; }

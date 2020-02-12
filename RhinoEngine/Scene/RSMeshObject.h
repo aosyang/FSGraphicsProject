@@ -39,8 +39,6 @@ public:
 	/// Save current materials to an XML document
 	void SerializeXmlMaterials_Save(tinyxml2::XMLDocument* XmlDoc, tinyxml2::XMLElement* XmlElemMaterial);
 
-	void SetOverridingShader(RShader* shader, int features = -1);
-
 	const RAabb& GetAabb() override;
 	const RAabb& GetMeshElementAabb(int index) const;
 
@@ -63,8 +61,6 @@ protected:
 	RMesh*					m_Mesh;
 	std::vector<RMaterial*>	m_Materials;
 	RAabb					m_MeshAABB;
-	RShader*				m_OverridingShader;
-	int						m_OverridingShaderFeatures;
 	bool					m_bNeedUpdateMaterial;
 };
 

@@ -51,47 +51,10 @@ void RRenderMeshComponent::Render(const RenderViewInfo& View) const
 
 			for (UINT32 i = 0; i < NumMeshElements; i++)
 			{
-				RMaterial* Material = m_Materials[i];
-				if (Material == nullptr)
-				{
-					Material = RMaterial::GetDefault();
-				}
-
-				RShader* shader = nullptr;
-
-				if (i < NumMaterials)
-				{
-					shader = Material->GetShader();
-				}
-
-				assert(shader);
-
 				const RMeshElement& MeshElement = m_Mesh->GetMeshElements()[i];
-				int flag = MeshElement.GetFlag();
-
-				int shaderFeatureMask = 0;
-				if ((flag & MEF_Skinned) && !GEngine.IsEditor())
-				{
-					shaderFeatureMask |= SFM_Skinned;
-				}
-
-				if (GRenderer.IsUsingDeferredShading())
-				{
-					shaderFeatureMask |= SFM_Deferred;
-				}
-
-				shader->Bind(shaderFeatureMask);
-
-				ID3D11ShaderResourceView* NullShaderResourceView[] = { nullptr };
-				auto TextureSlots = Material->GetTextureSlots();
-				for (int t = 0; t < (size_t)TextureSlots.size(); t++)
-				{
-					RTexture* texture = TextureSlots[t].Texture;
-					int SlotId = TextureSlots[t].SlotId;
-					GRenderer.D3DImmediateContext()->PSSetShaderResources(SlotId, 1, texture ? texture->GetPtrSRV() : NullShaderResourceView);
-					GRenderer.SetSamplerState(SlotId, SamplerState_Texture);
-				}
-
+				bool bSkinned = MeshElement.GetFlag() & MEF_Skinned;
+				RMaterial* Material = (i < (int)m_Materials.size()) ? m_Materials[i] : nullptr;
+				GRenderer.BindMaterial(Material, bSkinned);
 				m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			}
 		}

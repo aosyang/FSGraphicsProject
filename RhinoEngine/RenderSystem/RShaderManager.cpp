@@ -218,6 +218,18 @@ RShader* RShaderManager::GetShaderResource(const char* shaderName)
 	return nullptr;
 }
 
+RShader* RShaderManager::GetDefaultShader()
+{
+	static RShader* DefaultShader = nullptr;
+	if (DefaultShader == nullptr)
+	{
+		DefaultShader = GetShaderResource("Default");
+		assert(DefaultShader);
+	}
+
+	return DefaultShader;
+}
+
 std::vector<std::string> RShaderManager::EnumerateAllShaderNames() const
 {
 	std::vector<std::string> NameList;

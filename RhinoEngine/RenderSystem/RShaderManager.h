@@ -61,6 +61,8 @@ public:
 
 	RShader* GetShaderResource(const char* shaderName);
 
+	RShader* GetDefaultShader();
+
 	/// Get a list of all shader names
 	std::vector<std::string> EnumerateAllShaderNames() const;
 

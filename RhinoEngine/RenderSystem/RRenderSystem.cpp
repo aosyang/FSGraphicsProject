@@ -413,6 +413,53 @@ void RRenderSystem::SetSamplerState(int slot, SamplerState state)
 	GRenderer.D3DImmediateContext()->PSSetSamplers(slot, 1, &m_SamplerState[state]);
 }
 
+void RRenderSystem::BindMaterial(RMaterial* Material, bool bSkinned /*= false*/, bool bInstancing /*= false*/)
+{
+	RShader* Shader = Material ? Material->GetShader() : nullptr;
+	if (Shader == nullptr)
+	{
+		Shader = RShaderManager::Instance().GetDefaultShader();
+	}
+
+	int ShaderFeatureMask = 0;
+	if (bSkinned && !GEngine.IsEditor())
+	{
+		ShaderFeatureMask |= SFM_Skinned;
+	}
+	else if (bInstancing)
+	{
+		ShaderFeatureMask |= SFM_Instanced;
+	}
+
+	if (GRenderer.IsUsingDeferredShading())
+	{
+		ShaderFeatureMask |= SFM_Deferred;
+	}
+
+	Shader->Bind(ShaderFeatureMask);
+
+	RMaterial* RenderMaterial = Material ? Material : RMaterial::GetDefault();
+	int NumTextureSlots = (int)RenderMaterial->GetTextureSlots().size();
+
+	// Note: Increase this number if we need to support more texture slots.
+	//		 Shadow map textures are starting from slot 5 so we may only unbind textures for up to slot 4.
+	static const int NumShaderResourceViews = 5;
+
+	// Unbind all unused shader resource slots
+	ID3D11ShaderResourceView* ShaderResourceViewSlots[NumShaderResourceViews] = { nullptr };
+
+	for (int t = 0; t < NumTextureSlots; t++)
+	{
+		RTexture* Texture = RenderMaterial->GetTextureSlots()[t].Texture;
+		int SlotId = RenderMaterial->GetTextureSlots()[t].SlotId;
+
+		assert(SlotId < NumShaderResourceViews);
+		ShaderResourceViewSlots[SlotId] = Texture ? Texture->GetSRV() : nullptr;
+	}
+
+	GRenderer.D3DImmediateContext()->PSSetShaderResources(0, NumShaderResourceViews, ShaderResourceViewSlots);
+}
+
 void RRenderSystem::SetVertexShader(ID3D11VertexShader* vertexShader)
 {
 	static ID3D11VertexShader* currentVertexShader = nullptr;
