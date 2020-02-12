@@ -204,12 +204,13 @@ bool FSGraphicsProjectApp::Initialize()
 	m_TachikomaObj->SetMesh(m_MeshTachikoma);
 	m_TachikomaObj->SetPosition(RVec3(0.0f, 39.0f, 0.0f));
 
-	RMaterial tachikomaMaterials[] =
-	{
-		{ m_RefractionShader, 1, RResourceManager::Instance().WrapShaderResourceViewInTexture(m_RenderTargetSRV) },
-	};
+	RMaterial* RefractionMaterial = RResourceManager::Instance().CreateNewResource<RMaterial>("Refraction");
+	RefractionMaterial->SetShader(m_RefractionShader);
+	RefractionMaterial->SetTextureSlot(0, RResourceManager::Instance().WrapShaderResourceViewInTexture(m_RenderTargetSRV));
+	std::vector<RMaterial*> TachikomaMaterials;
+	TachikomaMaterials.push_back(RefractionMaterial);
 
-	m_TachikomaObj->SetMaterial(tachikomaMaterials, 1);
+	m_TachikomaObj->SetMaterials(TachikomaMaterials);
 
 
 	m_AOSceneMesh = RResourceManager::Instance().LoadResource<RMesh>("/AO_Scene.fbx");
@@ -906,12 +907,9 @@ void FSGraphicsProjectApp::OnResize(int width, int height)
 
 		CreateSceneRenderTargetView();
 
-		RMaterial tachikomaMaterials[] =
-		{
-			{ m_RefractionShader, 1, RResourceManager::Instance().WrapShaderResourceViewInTexture(m_RenderTargetSRV) },
-		};
-
-		m_TachikomaObj->SetMaterial(tachikomaMaterials, 1);
+		// TODO: Fix the memory leak here
+		RMaterial* Material = m_TachikomaObj->GetMaterial(0);
+		Material->SetTextureSlot(0, RResourceManager::Instance().WrapShaderResourceViewInTexture(m_RenderTargetSRV));
 	}
 }
 
