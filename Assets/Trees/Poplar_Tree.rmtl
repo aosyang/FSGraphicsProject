@@ -1,6 +1,4 @@
 <!--Mesh path: /Trees/Poplar_Tree.fbx-->
 <Material>
-    <MeshElement Name="Poplar" Shader="Lighting">
-        <Texture Slot="0">/Trees/tree_diffuse.dds</Texture>
-    </MeshElement>
+    <MeshElement Index="0">/Trees/tree_mat.material</MeshElement>
 </Material>

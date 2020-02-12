@@ -1,6 +1,4 @@
 <!--Mesh path: /Trees/Oak_Tree.fbx-->
 <Material>
-    <MeshElement Name="Oak" Shader="Lighting">
-        <Texture Slot="0">/Trees/tree_diffuse.dds</Texture>
-    </MeshElement>
+    <MeshElement Index="0">/Trees/tree_mat.material</MeshElement>
 </Material>

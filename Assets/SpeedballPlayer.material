@@ -1,0 +1,5 @@
+<!--Material path: /SpeedballPlayer.material-->
+<Material Shader="BumpLighting">
+    <Texture Slot="0">/Body_Diffuse_01.DDS</Texture>
+    <Texture Slot="1">/Body_Normal_01.DDS</Texture>
+</Material>

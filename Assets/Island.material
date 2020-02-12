@@ -1,0 +1,4 @@
+<!--Material path: /Island.material-->
+<Material Shader="Lighting">
+    <Texture Slot="0">/TR_FloatingIsland02.DDS</Texture>
+</Material>

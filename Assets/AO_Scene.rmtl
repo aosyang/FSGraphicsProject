@@ -1,6 +1,4 @@
-<Material Mesh="/AO_Scene.fbx">
-    <MeshElement Name="Plane001" Shader="AmbientOcclusion">
-        <Texture Slot="0">/Grey.dds</Texture>
-        <Texture Slot="1">/AO_Scene.dds</Texture>
-    </MeshElement>
+<!--Mesh path: /AO_Scene.FBX-->
+<Material>
+    <MeshElement Index="0">/AO_Scene.material</MeshElement>
 </Material>

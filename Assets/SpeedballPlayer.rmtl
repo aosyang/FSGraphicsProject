@@ -1,6 +1,4 @@
-<Material Mesh="/SpeedballPlayer.fbx">
-    <MeshElement Name="Body_01" Shader="BumpLighting">
-        <Texture Slot="0">/Body_Diffuse_01.dds</Texture>
-        <Texture Slot="1">/Body_Normal_01.dds</Texture>
-    </MeshElement>
+<!--Mesh path: /SpeedballPlayer.FBX-->
+<Material>
+    <MeshElement Index="0">/SpeedballPlayer.material</MeshElement>
 </Material>

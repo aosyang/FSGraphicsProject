@@ -1,0 +1,4 @@
+<Material Shader="AmbientOcclusion">
+        <Texture Slot="0">/cty2x.dds</Texture>
+        <Texture Slot="1">/tallBuildingsAO.dds</Texture>
+</Material>

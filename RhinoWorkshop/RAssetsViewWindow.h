@@ -25,7 +25,7 @@ public:
 	RAssetsViewWindow();
 
 	/// Draw the window
-	void ShowWindow(RResourcePreviewBuilder& PreviewBuilder);
+	void ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bool& ShowAssetEditor);
 
 	/// Get the selected resource in assets view
 	RResourceBase* GetSelectedResource() const;

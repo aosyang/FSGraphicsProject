@@ -1,0 +1,4 @@
+<!--Material path: /unitychan/eyeline_00.material-->
+<Material Shader="Lighting">
+    <Texture Slot="0">/unitychan/eyeline_00.DDS</Texture>
+</Material>

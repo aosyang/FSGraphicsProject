@@ -39,6 +39,8 @@ struct RTextureSlotData
 
 	void Serialize(RSerializer& Serializer);
 
+	std::string GetTextureAssetPath() const;
+
 	RTexture* Texture;
 	int SlotId;
 };
@@ -64,6 +66,7 @@ public:
 
 	void SetTextureSlot(int Slot, RTexture* Texture);
 	RTexture* GetTextureBySlot(int SlotId) const;
+	void RemoveTextureSlot(int SlotId);
 
 	/// Get a default material
 	static RMaterial* GetDefault();
@@ -109,3 +112,16 @@ FORCEINLINE RTexture* RMaterial::GetTextureBySlot(int SlotId) const
 
 	return nullptr;
 }
+
+FORCEINLINE void RMaterial::RemoveTextureSlot(int SlotId)
+{
+	for (int i = 0; i < TextureSlots.size(); i++)
+	{
+		if (TextureSlots[i].SlotId == SlotId)
+		{
+			TextureSlots.erase(TextureSlots.begin() + i);
+			break;
+		}
+	}
+}
+

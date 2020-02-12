@@ -1,0 +1,4 @@
+<Material Shader="BumpLighting">
+  <Texture Slot="0">/DiamondPlate.DDS</Texture>
+  <Texture Slot="1">/DiamondPlateNormal.dds</Texture>
+</Material>

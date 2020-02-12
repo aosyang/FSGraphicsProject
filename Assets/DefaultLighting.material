@@ -1,0 +1,4 @@
+<!--Material path: /DefaultLighting.material-->
+<Material Shader="Lighting">
+    <Texture Slot="0">/Grey.dds</Texture>
+</Material>

@@ -1,3 +1,4 @@
+<!--Material path: /RubikCube/Blue.material-->
 <Material Shader="Lighting">
-        <Texture Slot="0">/RubikCube/Blue2x2.dds</Texture>
+    <Texture Slot="0">/RubikCube/Blue2x2.dds</Texture>
 </Material>

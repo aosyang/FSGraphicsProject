@@ -96,10 +96,20 @@ void RTextureSlotData::Serialize(RSerializer& Serializer)
 	}
 	else
 	{
-		std::string textureName = Texture->GetAssetPath();
+		std::string textureName = GetTextureAssetPath();
 		Serializer.SerializeData(textureName);
 		Serializer.SerializeData(SlotId);
 	}
+}
+
+std::string RTextureSlotData::GetTextureAssetPath() const
+{
+	if (Texture)
+	{
+		return Texture->GetAssetPath();
+	}
+
+	return "";
 }
 
 RMaterial::RMaterial(const std::string& Path)
@@ -242,15 +252,17 @@ bool RMaterial::SaveResourceImpl()
 		}
 	};
 
+	// Sort texture slots before saving
 	std::sort(TextureSlots.begin(), TextureSlots.end(), TextureSlotSorter());
 
 	for (int i = 0; i < (int)TextureSlots.size(); i++)
 	{
 		tinyxml2::XMLElement* XmlElemTexture = XmlDoc->NewElement("Texture");
 		XmlElemTexture->SetAttribute("Slot", TextureSlots[i].SlotId);
-		XmlElemTexture->SetText(TextureSlots[i].Texture->GetAssetPath().c_str());
-		XmlDoc->InsertEndChild(XmlElemMaterial);
+		XmlElemTexture->SetText(TextureSlots[i].GetTextureAssetPath().c_str());
+		XmlElemMaterial->InsertEndChild(XmlElemTexture);
 	}
 
+	XmlDoc->InsertEndChild(XmlElemMaterial);
 	return XmlDoc->SaveFile(GetFileSystemPath().c_str()) == tinyxml2::XML_NO_ERROR;
 }

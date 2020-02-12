@@ -1,0 +1,4 @@
+<!--Material path: /unitychan/skin_01.material-->
+<Material Shader="Lighting">
+    <Texture Slot="0">/unitychan/skin_01.DDS</Texture>
+</Material>

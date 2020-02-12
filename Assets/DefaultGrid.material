@@ -1,0 +1,4 @@
+<!--Material path: /DefaultGrid.material-->
+<Material Shader="WorldAligned">
+    <Texture Slot="0">/DefaultGrid512.dds</Texture>
+</Material>

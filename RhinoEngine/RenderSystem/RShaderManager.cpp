@@ -244,12 +244,15 @@ ID3D11PixelShader* RShaderManager::CreatePixelShaderFromBytecode(const void* pBy
 
 const std::string& RShaderManager::GetShaderName(const RShader* shader) const
 {
-	auto iter = m_Shaders.begin();
-	for (; iter != m_Shaders.end(); iter++)
+	if (shader)
 	{
-		if (iter->second == *shader)
+		auto iter = m_Shaders.begin();
+		for (; iter != m_Shaders.end(); iter++)
 		{
-			return iter->first;
+			if (iter->second == *shader)
+			{
+				return iter->first;
+			}
 		}
 	}
 

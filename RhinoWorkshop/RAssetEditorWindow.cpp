@@ -135,7 +135,7 @@ void RAssetEditorWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, RRe
 						ImGui::SameLine();
 				
 						std::string TextureAssetLabel = std::string("Texture##") + std::to_string(i);
-						std::string TextureAssetPath = Slots[i].Texture->GetAssetPath();
+						std::string TextureAssetPath = Slots[i].GetTextureAssetPath();
 						char TextureAssetName[256];
 						strcpy_s(TextureAssetName, TextureAssetPath.c_str());
 						ImGui::SetNextItemWidth(-200);
@@ -159,20 +159,37 @@ void RAssetEditorWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, RRe
 						std::string RemoveButtonText("x##" + std::to_string(i));
 						if (ImGui::Button(RemoveButtonText.c_str()))
 						{
-
+							Material->RemoveTextureSlot(Slots[i].SlotId);
 						}
 					}
 
-					// Button for adding a new texture
+					// Button for adding a new texture slot
 					if (ImGui::Button("+"))
 					{
+						int MaxSlot = -1;
+						for (auto& Slot : Material->GetTextureSlots())
+						{
+							if (Slot.SlotId > MaxSlot)
+							{
+								MaxSlot = Slot.SlotId;
+							}
+						}
 
+						Material->SetTextureSlot(MaxSlot + 1, nullptr);
 					}
 
 					if (bUpdatePreview)
 					{
 						PreviewBuilder.BuildPreviewForResource(Material);
 					}
+				}
+
+				// Draw the preview
+				RTexture* PreviewTexture = PreviewBuilder.FindPreviewTexture(EditingResource);
+				if (PreviewTexture)
+				{
+					ImGui::Text("Preview");
+					ImGui::Image(PreviewTexture->GetSRV(), ImVec2(256, 256));
 				}
 			}
 		}

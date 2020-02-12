@@ -1,0 +1,4 @@
+<Material Shader="AmbientOcclusion">
+        <Texture Slot="0">/ang1.dds</Texture>
+        <Texture Slot="1">/groundAO.dds</Texture>
+</Material>

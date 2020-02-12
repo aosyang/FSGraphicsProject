@@ -1,174 +1,46 @@
-<Material Mesh="/city.fbx">
-    <MeshElement Name="tallBuildings" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty2x.dds</Texture>
-        <Texture Slot="1">/tallBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="Street" Shader="AmbientOcclusion">
-        <Texture Slot="0">/ang1.dds</Texture>
-        <Texture Slot="1">/StreetAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="tallBuildings_part1" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty2x.dds</Texture>
-        <Texture Slot="1">/tallBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="tallBuildings_part2" Shader="AmbientOcclusion">
-        <Texture Slot="0">/ang1.dds</Texture>
-        <Texture Slot="1">/tallBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="tallBuildings_part3" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty2x.dds</Texture>
-        <Texture Slot="1">/tallBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="tallBuildings_part4" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty2x.dds</Texture>
-        <Texture Slot="1">/tallBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="tallBuildings_part5" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty2x.dds</Texture>
-        <Texture Slot="1">/tallBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="tallBuildings_part6" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty2x.dds</Texture>
-        <Texture Slot="1">/tallBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part1" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part2" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part3" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part4" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part5" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part6" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part7" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part8" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part9" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part10" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part11" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part12" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part13" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part14" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part15" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part16" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part17" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part18" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part19" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part20" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part21" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part22" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part23" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part24" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part25" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part26" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part27" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part28" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part29" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part30" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part31" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part32" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part33" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="lowBuilding_part34" Shader="AmbientOcclusion">
-        <Texture Slot="0">/cty1.dds</Texture>
-        <Texture Slot="1">/lowBuildingsAO.dds</Texture>
-    </MeshElement>
-    <MeshElement Name="Ground" Shader="AmbientOcclusion">
-        <Texture Slot="0">/ang1.dds</Texture>
-        <Texture Slot="1">/groundAO.dds</Texture>
-    </MeshElement>
+<!--Mesh path: /city.fbx-->
+<Material>
+    <MeshElement Index="0">/cty2x.material</MeshElement>
+    <MeshElement Index="1">/ang1.material</MeshElement>
+    <MeshElement Index="2">/cty2x.material</MeshElement>
+    <MeshElement Index="3">/ang1.material</MeshElement>
+    <MeshElement Index="4">/cty2x.material</MeshElement>
+    <MeshElement Index="5">/cty2x.material</MeshElement>
+    <MeshElement Index="6">/cty2x.material</MeshElement>
+    <MeshElement Index="7">/cty2x.material</MeshElement>
+    <MeshElement Index="8">/cty1.material</MeshElement>
+    <MeshElement Index="9">/cty1.material</MeshElement>
+    <MeshElement Index="10">/cty1.material</MeshElement>
+    <MeshElement Index="11">/cty1.material</MeshElement>
+    <MeshElement Index="12">/cty1.material</MeshElement>
+    <MeshElement Index="13">/cty1.material</MeshElement>
+    <MeshElement Index="14">/cty1.material</MeshElement>
+    <MeshElement Index="15">/cty1.material</MeshElement>
+    <MeshElement Index="16">/cty1.material</MeshElement>
+    <MeshElement Index="17">/cty1.material</MeshElement>
+    <MeshElement Index="18">/cty1.material</MeshElement>
+    <MeshElement Index="19">/cty1.material</MeshElement>
+    <MeshElement Index="20">/cty1.material</MeshElement>
+    <MeshElement Index="21">/cty1.material</MeshElement>
+    <MeshElement Index="22">/cty1.material</MeshElement>
+    <MeshElement Index="23">/cty1.material</MeshElement>
+    <MeshElement Index="24">/cty1.material</MeshElement>
+    <MeshElement Index="25">/cty1.material</MeshElement>
+    <MeshElement Index="26">/cty1.material</MeshElement>
+    <MeshElement Index="27">/cty1.material</MeshElement>
+    <MeshElement Index="28">/cty1.material</MeshElement>
+    <MeshElement Index="29">/cty1.material</MeshElement>
+    <MeshElement Index="30">/cty1.material</MeshElement>
+    <MeshElement Index="31">/cty1.material</MeshElement>
+    <MeshElement Index="32">/cty1.material</MeshElement>
+    <MeshElement Index="33">/cty1.material</MeshElement>
+    <MeshElement Index="34">/cty1.material</MeshElement>
+    <MeshElement Index="35">/cty1.material</MeshElement>
+    <MeshElement Index="36">/cty1.material</MeshElement>
+    <MeshElement Index="37">/cty1.material</MeshElement>
+    <MeshElement Index="38">/cty1.material</MeshElement>
+    <MeshElement Index="39">/cty1.material</MeshElement>
+    <MeshElement Index="40">/cty1.material</MeshElement>
+    <MeshElement Index="41">/cty1.material</MeshElement>
+    <MeshElement Index="42">/ang1.material</MeshElement>
 </Material>

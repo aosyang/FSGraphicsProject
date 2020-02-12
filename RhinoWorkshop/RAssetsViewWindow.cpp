@@ -21,7 +21,7 @@ RAssetsViewWindow::RAssetsViewWindow()
 	strcpy_s(NewMaterialPath, "/");
 }
 
-void RAssetsViewWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder)
+void RAssetsViewWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bool& ShowAssetEditor)
 {
 	if (bShowWindow)
 	{
@@ -141,6 +141,8 @@ void RAssetsViewWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder)
 
 				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 				{
+					// Request open asset editor
+					ShowAssetEditor = true;
 					EditingResource = SelectedResource;
 				}
 

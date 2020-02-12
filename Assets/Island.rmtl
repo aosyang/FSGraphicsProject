@@ -1,5 +1,4 @@
-<Material Mesh="/Island.fbx">
-    <MeshElement Name="TR_FloatingIsland02:Rock" Shader="Lighting">
-        <Texture Slot="0">/TR_FloatingIsland02.dds</Texture>
-    </MeshElement>
+<!--Mesh path: /Island.FBX-->
+<Material>
+    <MeshElement Index="0">/Island.material</MeshElement>
 </Material>

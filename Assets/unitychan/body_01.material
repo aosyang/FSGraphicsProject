@@ -1,0 +1,6 @@
+<!--Material path: /unitychan/body_01.material-->
+<Material Shader="BumpSpecularLighting">
+    <Texture Slot="0">/unitychan/body_01.DDS</Texture>
+    <Texture Slot="1">/unitychan/body_01_NRM.DDS</Texture>
+    <Texture Slot="2">/unitychan/body_01_SPEC.DDS</Texture>
+</Material>

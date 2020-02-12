@@ -107,7 +107,7 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 		DisplaySceneViewWindow();
 
 		// The asset explorer window
-		AssetsViewWindow.ShowWindow(ResourcePreviewBuilder);
+		AssetsViewWindow.ShowWindow(ResourcePreviewBuilder, AssetEditorWindow.bShowWindow);
 
 		AssetEditorWindow.SetEditingResource(AssetsViewWindow.GetEditingResource());
 		AssetEditorWindow.ShowWindow(ResourcePreviewBuilder, AssetsViewWindow.GetSelectedResource());
