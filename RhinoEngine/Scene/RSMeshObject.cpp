@@ -150,6 +150,10 @@ void RSMeshObject::SerializeXmlMaterials_Load(tinyxml2::XMLElement* XmlElemMater
 				if (MaterialPath)
 				{
 					Material = RResourceManager::Instance().FindResource<RMaterial>(MaterialPath);
+					if (Material == nullptr)
+					{
+						Material = RResourceManager::Instance().LoadResource<RMaterial>(MaterialPath, EResourceLoadMode::Immediate);
+					}
 				}
 
 				if (Material == nullptr)
