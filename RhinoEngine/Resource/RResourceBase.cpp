@@ -44,8 +44,11 @@ void RResourceBase::Reload()
 
 bool RResourceBase::SaveToDisk()
 {
-	std::string MetaFileName = m_FileSystemPath + ".meta";
-	MetaData->SaveToFile(MetaFileName);
+	if (MetaData)
+	{
+		std::string MetaFileName = m_FileSystemPath + ".meta";
+		MetaData->SaveToFile(MetaFileName);
+	}
 
 	return SaveResourceImpl();
 }
