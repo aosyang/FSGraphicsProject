@@ -73,7 +73,7 @@ RTexture* RResourcePreviewBuilder::GeneratePreviewTexture(RResourceBase* Resourc
 		renderTargetTextureDesc.Height = Height;
 		renderTargetTextureDesc.MipLevels = 1;
 		renderTargetTextureDesc.ArraySize = 1;
-		renderTargetTextureDesc.Format = GRenderer.UsingGammaCorrection() ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
+		renderTargetTextureDesc.Format = GRenderer.UsingGammaCorrection() ? DXGI_FORMAT_B8G8R8X8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
 		renderTargetTextureDesc.SampleDesc.Count = 1;
 		renderTargetTextureDesc.SampleDesc.Quality = 0;
 		renderTargetTextureDesc.Usage = D3D11_USAGE_DEFAULT;

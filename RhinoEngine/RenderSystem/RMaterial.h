@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Resource/RResourceBase.h"
+#include "BlendState.h"
 
 struct RShader;
 class RTexture;
@@ -68,6 +69,9 @@ public:
 	RTexture* GetTextureBySlot(int SlotId) const;
 	void RemoveTextureSlot(int SlotId);
 
+	BlendState GetBlendMode() const;
+	void SetBlendMode(BlendState InBlendMode);
+
 	/// Get a default material
 	static RMaterial* GetDefault();
 
@@ -78,6 +82,7 @@ protected:
 private:
 	RShader* Shader;
 	std::vector<RTextureSlotData> TextureSlots;
+	BlendState BlendMode;
 };
 
 FORCEINLINE void RMaterial::SetShader(RShader* InShader)
@@ -125,3 +130,12 @@ FORCEINLINE void RMaterial::RemoveTextureSlot(int SlotId)
 	}
 }
 
+FORCEINLINE BlendState RMaterial::GetBlendMode() const
+{
+	return BlendMode;
+}
+
+FORCEINLINE void RMaterial::SetBlendMode(BlendState InBlendMode)
+{
+	BlendMode = InBlendMode;
+}

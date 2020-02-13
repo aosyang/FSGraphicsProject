@@ -1,4 +1,4 @@
 <!--Material path: /unitychan/eye_iris_L_00.material-->
-<Material Shader="Lighting">
+<Material Shader="Lighting" BlendMode="AlphaBlending">
     <Texture Slot="0">/unitychan/eye_iris_L_00.DDS</Texture>
 </Material>

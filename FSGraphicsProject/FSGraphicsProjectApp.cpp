@@ -973,7 +973,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	cbMaterial.GlobalOpacity = 1.0f;
 	UpdateAndBindMaterialConstBuffer();
 
-	GRenderer.SetBlendState(Blend_Opaque);
+	GRenderer.SetBlendState(BlendState::Opaque);
 
 	// Set up object world matrix
 	SetPerObjectConstBuffer(RMatrix4::IDENTITY);
@@ -1041,11 +1041,11 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 					{
 						cbMaterial.GlobalOpacity = opacity;
 						UpdateAndBindMaterialConstBuffer();
-						GRenderer.SetBlendState(Blend_AlphaToCoverage);
+						GRenderer.SetBlendState(BlendState::AlphaToCoverage);
 					}
 					else
 					{
-						GRenderer.SetBlendState(Blend_Opaque);
+						GRenderer.SetBlendState(BlendState::Opaque);
 					}
 
 					m_FbxMeshObj->Draw(true, instanceCount);
@@ -1089,11 +1089,11 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		{
 			cbMaterial.GlobalOpacity = opacity;
 			UpdateAndBindMaterialConstBuffer();
-			GRenderer.SetBlendState(Blend_AlphaToCoverage);
+			GRenderer.SetBlendState(BlendState::AlphaToCoverage);
 		}
 		else
 		{
-			GRenderer.SetBlendState(Blend_Opaque);
+			GRenderer.SetBlendState(BlendState::Opaque);
 		}
 		m_IslandMeshObj->Draw(true, islandInstanceCount);
 	}
@@ -1110,12 +1110,12 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		{
 			cbMaterial.GlobalOpacity = opacity;
 			UpdateAndBindMaterialConstBuffer();
-			GRenderer.SetBlendState(Blend_AlphaToCoverage);
+			GRenderer.SetBlendState(BlendState::AlphaToCoverage);
 			m_AOSceneObj->Draw();
 		}
 		else
 		{
-			GRenderer.SetBlendState(Blend_Opaque);
+			GRenderer.SetBlendState(BlendState::Opaque);
 			m_AOSceneObj->Draw();
 		}
 	}
@@ -1132,7 +1132,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	{
 		cbMaterial.GlobalOpacity = 1.0f;
 		UpdateAndBindMaterialConstBuffer();
-		GRenderer.SetBlendState(Blend_AlphaToCoverage);
+		GRenderer.SetBlendState(BlendState::AlphaToCoverage);
 		m_BumpLightingShader->Bind();
 		GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_BumpBaseTexture->GetPtrSRV());
 		GRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, m_BumpNormalTexture->GetPtrSRV());
@@ -1153,14 +1153,14 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			{
 				cbMaterial.GlobalOpacity = opacity;
 				UpdateAndBindMaterialConstBuffer();
-				GRenderer.SetBlendState(Blend_AlphaToCoverage);
+				GRenderer.SetBlendState(BlendState::AlphaToCoverage);
 				m_CharacterObj->Draw();
 			}
 			else
 			{
 				cbMaterial.GlobalOpacity = 1.0f;
 				UpdateAndBindMaterialConstBuffer();
-				GRenderer.SetBlendState(Blend_AlphaBlending);
+				GRenderer.SetBlendState(BlendState::AlphaBlending);
 				m_CharacterObj->Draw();
 			}
 		}
@@ -1179,14 +1179,14 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		{
 			cbMaterial.GlobalOpacity = opacity * 0.25f;
 			UpdateAndBindMaterialConstBuffer();
-			GRenderer.SetBlendState(Blend_AlphaToCoverage);
+			GRenderer.SetBlendState(BlendState::AlphaToCoverage);
 			m_TransparentMesh->Draw(true, 125);
 		}
 		else
 		{
 			cbMaterial.GlobalOpacity = 0.25f;
 			UpdateAndBindMaterialConstBuffer();
-			GRenderer.SetBlendState(Blend_AlphaBlending);
+			GRenderer.SetBlendState(BlendState::AlphaBlending);
 			m_TransparentMesh->Draw(true, 125);
 		}
 	}
@@ -1205,12 +1205,12 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			{
 				cbMaterial.GlobalOpacity = opacity;
 				UpdateAndBindMaterialConstBuffer();
-				GRenderer.SetBlendState(Blend_AlphaToCoverage);
+				GRenderer.SetBlendState(BlendState::AlphaToCoverage);
 				m_TachikomaObj->Draw();
 			}
 			else
 			{
-				GRenderer.SetBlendState(Blend_Opaque);
+				GRenderer.SetBlendState(BlendState::Opaque);
 				m_TachikomaObj->Draw();
 			}
 		}
@@ -1223,7 +1223,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		if (RCollision::TestAabbInsideFrustum(cameraFrustum, m_ParticleAabb))
 		{
 			// Draw particles
-			GRenderer.SetBlendState(Blend_AlphaBlending);
+			GRenderer.SetBlendState(BlendState::AlphaBlending);
 			GRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[1], 0);
 
 			SetPerObjectConstBuffer(RMatrix4::CreateTranslation(0.0f, 150.0f, 150.0f));
@@ -1237,7 +1237,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		}
 #endif
 		// Draw debug lines
-		GRenderer.SetBlendState(Blend_Opaque);
+		GRenderer.SetBlendState(BlendState::Opaque);
 		GDebugRenderer.Render();
 	}
 

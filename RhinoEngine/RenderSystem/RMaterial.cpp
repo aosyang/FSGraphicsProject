@@ -115,6 +115,7 @@ std::string RTextureSlotData::GetTextureAssetPath() const
 RMaterial::RMaterial(const std::string& Path)
 	: RResourceBase(Path)
 	, Shader(nullptr)
+	, BlendMode(BlendState::Opaque)
 {
 
 }
@@ -136,7 +137,6 @@ void RMaterial::Serialize(RSerializer& serializer)
 		{
 			Shader = RShaderManager::Instance().GetDefaultShader();
 		}
-		serializer.SerializeVector(TextureSlots, &RSerializer::SerializeObject);
 	}
 	else
 	{
@@ -152,8 +152,10 @@ void RMaterial::Serialize(RSerializer& serializer)
 		}
 
 		serializer.SerializeData(shaderName);
-		serializer.SerializeVector(TextureSlots, &RSerializer::SerializeObject);
 	}
+
+	serializer.SerializeVector(TextureSlots, &RSerializer::SerializeObject);
+	serializer.SerializeData(BlendMode);
 }
 
 void RMaterial::SetTextureSlot(int Slot, RTexture* Texture)
@@ -201,6 +203,12 @@ bool RMaterial::LoadResourceImpl()
 		const char* ShaderName = RootElem->Attribute("Shader");
 		Shader = ShaderName ? RShaderManager::Instance().GetShaderResource(ShaderName) : nullptr;
 
+		const char* BlendModeName = RootElem->Attribute("BlendMode");
+		if (BlendModeName)
+		{
+			BlendStateNameToEnum(BlendModeName, BlendMode);
+		}
+
 		// <Texture Slot="0">Path/To/Texture</Texture>
 		tinyxml2::XMLElement* TextureElem = RootElem->FirstChildElement("Texture");
 		while (TextureElem)
@@ -242,6 +250,11 @@ bool RMaterial::SaveResourceImpl()
 	else
 	{
 		XmlElemMaterial->SetAttribute("Shader", "Default");
+	}
+
+	if (BlendMode != BlendState::Opaque)
+	{
+		XmlElemMaterial->SetAttribute("BlendMode", BlendStateNames[(int)BlendMode]);
 	}
 
 	struct TextureSlotSorter

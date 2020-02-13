@@ -187,10 +187,10 @@ void RDebugRenderer::DrawTriangle(const RVec3& v0, const RVec3& v1, const RVec3&
 
 void RDebugRenderer::Render()
 {
-	GRenderer.SetBlendState(Blend_AlphaBlending);
+	GRenderer.SetBlendState(BlendState::AlphaBlending);
 	LineBuffer.Render();
 	TriangleBuffer.Render();
-	GRenderer.SetBlendState(Blend_Opaque);
+	GRenderer.SetBlendState(BlendState::Opaque);
 }
 
 void RDebugRenderer::Reset()

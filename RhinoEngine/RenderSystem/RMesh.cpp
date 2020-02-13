@@ -356,10 +356,9 @@ bool RMesh::TryLoadAsFbxMesh()
 
 bool RMesh::TryLoadAsRmesh()
 {
+	RLog("Loading mesh %s\n", GetAssetPath().c_str());
+
 	std::vector<RMeshElement> meshElements;
-
-	RLog("Loading mesh [%s]...\n", GetFileSystemPath().data());
-
 	const std::string BinaryMeshPath = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmesh");
 
 	// Binary mesh file doesn't exist, load fbx instead

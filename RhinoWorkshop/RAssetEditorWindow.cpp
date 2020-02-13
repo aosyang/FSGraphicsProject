@@ -109,11 +109,17 @@ void RAssetEditorWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, RRe
 							CurrentShader = i;
 						}
 					}
-					
 
 					if (ImGui::Combo("Shader", &CurrentShader, ShaderNameStrings.data(), (int)ShaderNameStrings.size()))
 					{
 						Material->SetShader(RShaderManager::Instance().GetShaderResource(ShaderNameStrings[CurrentShader]));
+						bUpdatePreview = true;
+					}
+
+					int CurrentBlendMode = (int)Material->GetBlendMode();
+					if (ImGui::Combo("BlendMode", &CurrentBlendMode, BlendStateNames, ARRAYSIZE(BlendStateNames)))
+					{
+						Material->SetBlendMode((BlendState)CurrentBlendMode);
 						bUpdatePreview = true;
 					}
 

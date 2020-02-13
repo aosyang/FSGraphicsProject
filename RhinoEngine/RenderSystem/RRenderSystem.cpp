@@ -212,7 +212,7 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 	D3D11_BLEND_DESC blendDesc;
 	ZeroMemory(&blendDesc, sizeof(blendDesc));
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	m_BlendState[Blend_Opaque] = CreateD3DBlendState(&blendDesc, "Opaque");
+	m_BlendState[(int)BlendState::Opaque] = CreateD3DBlendState(&blendDesc, "Opaque");
 
 	blendDesc.RenderTarget[0].BlendEnable = true;
 	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
@@ -222,17 +222,17 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	m_BlendState[Blend_AlphaBlending] = CreateD3DBlendState(&blendDesc, "Alpha Blending");
+	m_BlendState[(int)BlendState::AlphaBlending] = CreateD3DBlendState(&blendDesc, "Alpha Blending");
 
 	blendDesc.AlphaToCoverageEnable = true;
-	m_BlendState[Blend_AlphaToCoverage] = CreateD3DBlendState(&blendDesc, "Alpha To Coverage Blending");
+	m_BlendState[(int)BlendState::AlphaToCoverage] = CreateD3DBlendState(&blendDesc, "Alpha To Coverage Blending");
 
 	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
 	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
 	blendDesc.AlphaToCoverageEnable = false;
-	m_BlendState[Blend_Additive] = CreateD3DBlendState(&blendDesc, "Additive Blending");
+	m_BlendState[(int)BlendState::Additive] = CreateD3DBlendState(&blendDesc, "Additive Blending");
 
-	m_CurrBlendState = Blend_Opaque;
+	m_CurrBlendState = BlendState::Opaque;
 
 	// Create sampler states
 	D3D11_SAMPLER_DESC samplerDesc;
@@ -284,7 +284,7 @@ void RRenderSystem::Shutdown()
 		SAFE_RELEASE(m_SamplerState[i]);
 	}
 
-	for (int i = 0; i < BlendStateCount; i++)
+	for (int i = 0; i < (int)BlendState::Count; i++)
 	{
 		SAFE_RELEASE(m_BlendState[i]);
 	}
@@ -403,7 +403,7 @@ void RRenderSystem::SetBlendState(BlendState state)
 	if (m_CurrBlendState != state)
 	{
 		float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-		GRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[state], blendFactor, 0xFFFFFFFF);
+		GRenderer.D3DImmediateContext()->OMSetBlendState(m_BlendState[(int)state], blendFactor, 0xFFFFFFFF);
 		m_CurrBlendState = state;
 	}
 }
@@ -439,6 +439,8 @@ void RRenderSystem::BindMaterial(RMaterial* Material, bool bSkinned /*= false*/,
 	Shader->Bind(ShaderFeatureMask);
 
 	RMaterial* RenderMaterial = Material ? Material : RMaterial::GetDefault();
+	SetBlendState(RenderMaterial->GetBlendMode());
+
 	int NumTextureSlots = (int)RenderMaterial->GetTextureSlots().size();
 
 	// Note: Increase this number if we need to support more texture slots.

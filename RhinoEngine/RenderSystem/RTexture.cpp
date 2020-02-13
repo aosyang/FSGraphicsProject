@@ -65,25 +65,16 @@ std::vector<std::string> RTexture::GetSupportedExtensions()
 
 bool RTexture::LoadResourceImpl()
 {
-	ID3D11ShaderResourceView* ShaderResourceView;
 	size_t char_len;
 	wchar_t wszName[1024];
 	mbstowcs_s(&char_len, wszName, 1024, GetFileSystemPath().data(), GetFileSystemPath().size());
 
-	RLog("Loading texture [%s]...\n", GetFileSystemPath().data());
+	RLog("Loading texture %s\n", GetAssetPath().c_str());
 
 	bool bIsSRGBTexture = (GetMetaData()["SRGB"] == "true");
-
 	HRESULT hr;
-
-	if (bIsSRGBTexture)
-	{
-		hr = DirectX::CreateDDSTextureFromFileEx(GRenderer.D3DDevice(), wszName, 0, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, true, nullptr, &ShaderResourceView);
-	}
-	else
-	{
-		hr = DirectX::CreateDDSTextureFromFile(GRenderer.D3DDevice(), wszName, nullptr, &ShaderResourceView);
-	}
+	ID3D11ShaderResourceView* ShaderResourceView;
+	hr = DirectX::CreateDDSTextureFromFileEx(GRenderer.D3DDevice(), wszName, 0, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, bIsSRGBTexture, nullptr, &ShaderResourceView);
 
 	if (FAILED(hr))
 	{
@@ -96,8 +87,6 @@ bool RTexture::LoadResourceImpl()
 	}
 
 	m_SRV = ShaderResourceView;
-	//OnLoadingFinished(bIsAsyncLoading);
-
 	return true;
 }
 

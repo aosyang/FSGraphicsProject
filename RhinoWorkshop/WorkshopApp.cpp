@@ -20,6 +20,8 @@ WorkshopApp::WorkshopApp()
 
 bool WorkshopApp::Initialize()
 {
+	GEngine.SetEditorMode(true);
+
 	RResourceManager::Instance().LoadAllResources(EResourceLoadMode::Immediate);
 	ResourcePreviewBuilder.BuildPreviewForAllResources();
 

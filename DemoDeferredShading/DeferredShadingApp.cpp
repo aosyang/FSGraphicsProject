@@ -262,7 +262,7 @@ void DeferredShadingApp::RenderScene()
 
 	RFrustum frustum = m_Camera->GetFrustum();
 
-	GRenderer.SetBlendState(Blend_Opaque);
+	GRenderer.SetBlendState(BlendState::Opaque);
 	GRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
 
 	if (m_EnableDeferredShading)
@@ -290,7 +290,7 @@ void DeferredShadingApp::RenderScene()
 		GPostProcessorManager.Draw(m_PostProcessingEffects[PPE_DeferredComposition]);
 
 		// Render lighting pass
-		GRenderer.SetBlendState(Blend_Additive);
+		GRenderer.SetBlendState(BlendState::Additive);
 
 		const RMatrix4& viewProjMatrix = m_Camera->GetViewMatrix() * m_Camera->GetProjectionMatrix();
 
@@ -425,7 +425,7 @@ void DeferredShadingApp::RenderScene()
 			//RRenderer.D3DImmediateContext()->GenerateMips(m_ScenePassBuffer.SRV);
 
 			GRenderer.SetRenderTargets();
-			GRenderer.SetBlendState(Blend_Opaque);
+			GRenderer.SetBlendState(BlendState::Opaque);
 
 			GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_ScenePassBuffer.SRV);
 			GRenderer.D3DImmediateContext()->PSSetShaderResources(4, 1, m_EnvCube->GetPtrSRV());
@@ -444,7 +444,7 @@ void DeferredShadingApp::RenderScene()
 
 	GRenderer.Clear(false, RColor(0, 0, 0));
 
-	GRenderer.SetBlendState(Blend_Opaque);
+	GRenderer.SetBlendState(BlendState::Opaque);
 	GRenderer.D3DImmediateContext()->RSSetState(m_RasterizerStates[RS_Default]);
 
 	GDebugRenderer.Render();

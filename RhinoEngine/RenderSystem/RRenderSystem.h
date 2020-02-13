@@ -8,6 +8,7 @@
 #include "Core/RSingleton.h"
 #include "RRenderMeshComponent.h"
 #include "ILight.h"
+#include "BlendState.h"
 
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")
@@ -15,16 +16,6 @@
 struct RShader;
 class RCamera;
 class RScene;
-
-enum BlendState
-{
-	Blend_Opaque,
-	Blend_AlphaBlending,
-	Blend_AlphaToCoverage,
-	Blend_Additive,
-
-	BlendStateCount,
-};
 
 enum SamplerState
 {
@@ -140,7 +131,7 @@ protected:
 	ID3D11RenderTargetView*	m_CurrentRenderTargetViews[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT];
 	ID3D11DepthStencilView*	m_CurrentDepthStencilView;
 
-	ID3D11BlendState*		m_BlendState[BlendStateCount];
+	ID3D11BlendState*		m_BlendState[BlendState::Count];
 	BlendState				m_CurrBlendState;
 
 	ID3D11SamplerState*		m_SamplerState[SamplerStateCount];
