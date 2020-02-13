@@ -10,9 +10,9 @@
 static const float PI = 3.14159265f;
 static const float EPSILON = 1e-6f;
 
-// Shlick's approximation of Fresnel
+// Schlick's approximation of Fresnel
 // https://en.wikipedia.org/wiki/Schlick%27s_approximation
-float3 Fresnel_Shlick(float3 f0, float3 f90, float x)
+float3 Fresnel_Schlick(float3 f0, float3 f90, float x)
 {
 	return f0 + (f90 - f0) * pow(1.0f - x, 5.0f);
 }
@@ -22,7 +22,7 @@ float3 Fresnel_Shlick(float3 f0, float3 f90, float x)
 float Diffuse_Burley(float NdotL, float NdotV, float LdotH, float roughness)
 {
 	float fd90 = 0.5f + 2.0f * roughness * LdotH * LdotH;
-	return Fresnel_Shlick(1, fd90, NdotL).x * Fresnel_Shlick(1, fd90, NdotV).x;
+	return Fresnel_Schlick(1, fd90, NdotL).x * Fresnel_Schlick(1, fd90, NdotV).x;
 }
 
 // GGX specular D (normal distribution)
@@ -37,7 +37,7 @@ float Specular_D_GGX(float alpha, float NdotH)
 // Schlick-Smith specular G (visibility) with Hable's LdotH optimization
 // http://www.cs.virginia.edu/~jdl/bib/appearance/analytic%20models/schlick94b.pdf
 // http://graphicrants.blogspot.se/2013/08/specular-brdf-reference.html
-float G_Shlick_Smith_Hable(float alpha, float LdotH)
+float G_Schlick_Smith_Hable(float alpha, float LdotH)
 {
 	return rcp(lerp(LdotH * LdotH, 1, alpha * alpha * 0.25f));
 }
@@ -60,10 +60,10 @@ float3 Specular_BRDF(float alpha, float3 specularColor, float NdotV, float NdotL
 	float specular_D = Specular_D_GGX(alpha, NdotH);
 
 	// Specular Fresnel
-	float3 specular_F = Fresnel_Shlick(specularColor, 1, LdotH);
+	float3 specular_F = Fresnel_Schlick(specularColor, 1, LdotH);
 
 	// Specular G (visibility) component
-	float specular_G = G_Shlick_Smith_Hable(alpha, LdotH);
+	float specular_G = G_Schlick_Smith_Hable(alpha, LdotH);
 
 	return specular_D * specular_F * specular_G;
 }

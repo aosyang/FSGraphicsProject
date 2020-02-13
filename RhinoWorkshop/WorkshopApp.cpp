@@ -25,6 +25,9 @@ bool WorkshopApp::Initialize()
 
 	GSceneManager.DefaultScene()->Initialize();
 
+	// Create default camera and light on editor start
+	PostMapLoaded();
+
 	return true;
 }
 
@@ -82,6 +85,27 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 				if (ImGui::MenuItem("Exit"))
 				{
 					PostQuitMessage(0);
+				}
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Create"))
+			{
+				if (ImGui::MenuItem("Mesh Object"))
+				{
+					RScene* DefaultScene = GSceneManager.DefaultScene();
+					RSMeshObject* NewObject = DefaultScene->CreateSceneObjectOfType<RSMeshObject>("New Object");
+
+					RVec3 CreatePosition = DefaultScene->GetRenderCamera() ? DefaultScene->GetRenderCamera()->GetPosition() : RVec3::Zero();
+					NewObject->SetPosition(CreatePosition);
+
+					RMesh* SelectedMesh = AssetsViewWindow.GetSelectedResource() ? AssetsViewWindow.GetSelectedResource()->CastTo<RMesh>() : nullptr;
+					if (SelectedMesh)
+					{
+						NewObject->SetMesh(SelectedMesh);
+					}
+
+					SetSelectedObject(NewObject);
 				}
 				ImGui::EndMenu();
 			}
@@ -194,36 +218,39 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 					//const auto& Materials = MeshObject->GetMaterials();
 					RMesh* Mesh = MeshObject->GetMesh();
 
-					for (int i = 0; i < Mesh->GetMeshElementCount(); i++)
+					if (Mesh)
 					{
-						std::string AssignButtonText("->##" + std::to_string(i));
-						if (ImGui::Button(AssignButtonText.c_str()))
+						for (int i = 0; i < Mesh->GetMeshElementCount(); i++)
 						{
-							if (auto Resource = AssetsViewWindow.GetSelectedResource())
+							std::string AssignButtonText("->##" + std::to_string(i));
+							if (ImGui::Button(AssignButtonText.c_str()))
 							{
-								if (RMaterial* MaterialAsset = Resource->CastTo<RMaterial>())
+								if (auto Resource = AssetsViewWindow.GetSelectedResource())
 								{
-									MeshObject->SetMaterialSlot(i, MaterialAsset);
+									if (RMaterial* MaterialAsset = Resource->CastTo<RMaterial>())
+									{
+										MeshObject->SetMaterialSlot(i, MaterialAsset);
+									}
 								}
 							}
-						}
 
-						ImGui::SameLine();
+							ImGui::SameLine();
 
-						std::string MaterialAssetPath;
-						std::string Label = "Slot " + std::to_string(i) + ": " + Mesh->GetMeshElements()[i].GetName();
+							std::string MaterialAssetPath;
+							std::string Label = "Slot " + std::to_string(i) + ": " + Mesh->GetMeshElements()[i].GetName();
 
-						if (i < MeshObject->GetNumMaterials())
-						{
-							RMaterial* Material = MeshObject->GetMaterial(i);
-							MaterialAssetPath = Material ? Material->GetAssetPath() : "";
-						}
+							if (i < MeshObject->GetNumMaterials())
+							{
+								RMaterial* Material = MeshObject->GetMaterial(i);
+								MaterialAssetPath = Material ? Material->GetAssetPath() : "";
+							}
 
-						char MaterialAssetName[256];
-						strcpy_s(MaterialAssetName, MaterialAssetPath.c_str());
-						if (ImGui::InputText(Label.c_str(), MaterialAssetName, sizeof(MaterialAssetName)))
-						{
+							char MaterialAssetName[256];
+							strcpy_s(MaterialAssetName, MaterialAssetPath.c_str());
+							if (ImGui::InputText(Label.c_str(), MaterialAssetName, sizeof(MaterialAssetName)))
+							{
 
+							}
 						}
 					}
 				}

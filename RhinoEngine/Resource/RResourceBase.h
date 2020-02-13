@@ -25,9 +25,13 @@ public:
 	RResourceBase(const std::string& path);
 	virtual ~RResourceBase() = 0 {}
 
+	/// Release any loaded content of this resource
+	virtual void Reset() {};
+
 	ResourceState GetResourceState() const	{ return m_State; }
 
 	const RResourceMetaData& GetMetaData() const;
+	RResourceMetaData& GetMetaData();
 
 	/// Set the asset path of resource
 	void SetAssetPath(const std::string& InAssetPath);
@@ -42,6 +46,9 @@ public:
 	bool IsLoaded() const					{ return m_State == RS_Loaded; }
 
 	bool LoadResourceData(bool bIsAsyncLoading);
+
+	/// Release the resource then load it from the original asset again
+	void Reload();
 
 	/// Save any changes made to this asset
 	bool SaveToDisk();
@@ -79,6 +86,11 @@ private:
 };
 
 FORCEINLINE const RResourceMetaData& RResourceBase::GetMetaData() const
+{
+	return *MetaData;
+}
+
+FORCEINLINE RResourceMetaData& RResourceBase::GetMetaData()
 {
 	return *MetaData;
 }

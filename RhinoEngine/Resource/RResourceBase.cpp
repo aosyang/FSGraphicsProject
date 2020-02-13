@@ -31,8 +31,22 @@ bool RResourceBase::LoadResourceData(bool bIsAsyncLoading)
 	return false;
 }
 
+void RResourceBase::Reload()
+{
+	if (m_State == RS_Loaded)
+	{
+		Reset();
+		m_State = RS_Empty;
+
+		LoadResourceData(false);
+	}
+}
+
 bool RResourceBase::SaveToDisk()
 {
+	std::string MetaFileName = m_FileSystemPath + ".meta";
+	MetaData->SaveToFile(MetaFileName);
+
 	return SaveResourceImpl();
 }
 

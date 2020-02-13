@@ -15,12 +15,14 @@ public:
 
 	/// Create texture from existing shader resource view
 	RTexture(ID3D11ShaderResourceView* ShaderResourceView, bool bTakeResourceOwnership);
-	~RTexture();
+	virtual ~RTexture();
+
+	virtual void Reset() override;
 
 	/// Required by RResourceManager::RegisterResourceType
 	static std::vector<std::string> GetSupportedExtensions();
 
-	ID3D11ShaderResourceView* GetSRV() { return m_SRV; }
+	ID3D11ShaderResourceView* GetSRV() { assert(m_SRV); return m_SRV; }
 	ID3D11ShaderResourceView** GetPtrSRV() { return &m_SRV; }
 	UINT GetWidth() const { return m_Width; }
 	UINT GetHeight() const { return m_Height; }

@@ -162,6 +162,12 @@ private:
 template<typename T>
 T* RResourceManager::LoadResource(const std::string& AssetPath, EResourceLoadMode mode)
 {
+	// Check for invalid path
+	if (AssetPath.find('/') == std::string::npos && AssetPath.find('\\') == std::string::npos)
+	{
+		return nullptr;
+	}
+
 	// Find resource in resource container
 	RResourceContainer<T>& ResourceContainer = GetResourceContainer<T>();
 	T* Resource = ResourceContainer.Find(AssetPath);

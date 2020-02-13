@@ -37,10 +37,24 @@ RTexture::RTexture(ID3D11ShaderResourceView* ShaderResourceView, bool bTakeResou
 
 RTexture::~RTexture()
 {
+	Reset();
+}
+
+void RTexture::Reset()
+{
 	if (bHasOwnershipOfResource)
 	{
 		SAFE_RELEASE(m_SRV);
 	}
+	else
+	{
+		m_SRV = nullptr;
+	}
+
+	m_Width = 0;
+	m_Height = 0;
+	bIsCubeMap = false;
+	bHasOwnershipOfResource = false;
 }
 
 std::vector<std::string> RTexture::GetSupportedExtensions()

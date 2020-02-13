@@ -183,9 +183,28 @@ void RAssetEditorWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, RRe
 						PreviewBuilder.BuildPreviewForResource(Material);
 					}
 				}
+				else if (RTexture* Texture = EditingResource->CastTo<RTexture>())
+				{
+					bool bIsSRGB = Texture->GetMetaData()["SRGB"] == "true";
+					if (ImGui::Checkbox("sRGB", &bIsSRGB))
+					{
+						if (bIsSRGB)
+						{
+							Texture->GetMetaData().AddAttribute("SRGB", "true");
+						}
+						else
+						{
+							Texture->GetMetaData().RemoveAttribute("SRGB");
+						}
+
+						// Reload the texture to reflect the change
+						Texture->SaveToDisk();
+						Texture->Reload();
+					}
+				}
 
 				// Draw the preview
-				RTexture* PreviewTexture = PreviewBuilder.FindPreviewTexture(EditingResource);
+				RTexture* PreviewTexture = EditingResource->CanCastTo<RTexture>() ? EditingResource->CastTo<RTexture>() : PreviewBuilder.FindPreviewTexture(EditingResource);
 				if (PreviewTexture)
 				{
 					ImGui::Text("Preview");
