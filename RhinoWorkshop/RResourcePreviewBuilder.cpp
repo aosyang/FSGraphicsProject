@@ -129,7 +129,10 @@ RTexture* RResourcePreviewBuilder::GeneratePreviewTexture(RResourceBase* Resourc
 
 		// Fit the object's aabb into vertical FOV of the camera
 		float HalfFov = Camera->GetFOV() * 0.5f;
-		float Distance = radius / tanf(RMath::DegreeToRadian(HalfFov * 0.8f));
+
+		// Make material meshes bigger
+		float FovFactor = Resource->CanCastTo<RMaterial>() ? 1.4f : 0.8f;
+		float Distance = radius / tanf(RMath::DegreeToRadian(HalfFov * FovFactor));
 
 		RVec3 CameraDir = RVec3(1, 1, -2).GetNormalized();
 
