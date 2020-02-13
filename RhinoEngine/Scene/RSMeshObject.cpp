@@ -85,6 +85,11 @@ RMaterial* RSMeshObject::GetMaterial(int index)
 {
 	SetupMaterialsFromMeshResource();
 
+	if (index >= (int)m_Materials.size())
+	{
+		return RMaterial::GetDefault();
+	}
+
 	return m_Materials[index];
 }
 
