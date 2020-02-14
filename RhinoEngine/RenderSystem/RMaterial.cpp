@@ -116,6 +116,7 @@ RMaterial::RMaterial(const std::string& Path)
 	: RResourceBase(Path)
 	, Shader(nullptr)
 	, BlendMode(BlendState::Opaque)
+	, bDoubleSided(false)
 {
 
 }
@@ -209,6 +210,13 @@ bool RMaterial::LoadResourceImpl()
 			BlendStateNameToEnum(BlendModeName, BlendMode);
 		}
 
+		bool bDoubleSidedValue = false;
+		RootElem->QueryBoolAttribute("DoubleSided", &bDoubleSidedValue);
+		if (bDoubleSidedValue)
+		{
+			SetDoubleSided(true);
+		}
+
 		// <Texture Slot="0">Path/To/Texture</Texture>
 		tinyxml2::XMLElement* TextureElem = RootElem->FirstChildElement("Texture");
 		while (TextureElem)
@@ -255,6 +263,11 @@ bool RMaterial::SaveResourceImpl()
 	if (BlendMode != BlendState::Opaque)
 	{
 		XmlElemMaterial->SetAttribute("BlendMode", BlendStateNames[(int)BlendMode]);
+	}
+
+	if (bDoubleSided)
+	{
+		XmlElemMaterial->SetAttribute("DoubleSided", true);
 	}
 
 	struct TextureSlotSorter

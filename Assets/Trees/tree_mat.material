@@ -1,4 +1,4 @@
 <!--Material path: /Trees/tree_mat.material-->
-<Material Shader="Lighting">
+<Material Shader="Lighting" DoubleSided="1">
     <Texture Slot="0">/Trees/tree_diffuse.dds</Texture>
 </Material>

@@ -72,6 +72,9 @@ public:
 	BlendState GetBlendMode() const;
 	void SetBlendMode(BlendState InBlendMode);
 
+	bool GetDoubleSided() const;
+	void SetDoubleSided(bool InDoubleSided);
+
 	/// Get a default material
 	static RMaterial* GetDefault();
 
@@ -83,6 +86,7 @@ private:
 	RShader* Shader;
 	std::vector<RTextureSlotData> TextureSlots;
 	BlendState BlendMode;
+	bool bDoubleSided;
 };
 
 FORCEINLINE void RMaterial::SetShader(RShader* InShader)
@@ -138,4 +142,14 @@ FORCEINLINE BlendState RMaterial::GetBlendMode() const
 FORCEINLINE void RMaterial::SetBlendMode(BlendState InBlendMode)
 {
 	BlendMode = InBlendMode;
+}
+
+FORCEINLINE bool RMaterial::GetDoubleSided() const
+{
+	return bDoubleSided;
+}
+
+FORCEINLINE void RMaterial::SetDoubleSided(bool InDoubleSided)
+{
+	bDoubleSided = InDoubleSided;
 }

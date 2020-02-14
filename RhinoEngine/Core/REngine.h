@@ -5,6 +5,8 @@
 //=============================================================================
 #pragma once
 
+class IApp;
+
 class REngine : public RSingleton<REngine>
 {
 	friend class RSingleton<REngine>;

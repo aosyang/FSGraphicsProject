@@ -117,9 +117,16 @@ void RAssetEditorWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, RRe
 					}
 
 					int CurrentBlendMode = (int)Material->GetBlendMode();
-					if (ImGui::Combo("BlendMode", &CurrentBlendMode, BlendStateNames, ARRAYSIZE(BlendStateNames)))
+					if (ImGui::Combo("Blend Mode", &CurrentBlendMode, BlendStateNames, ARRAYSIZE(BlendStateNames)))
 					{
 						Material->SetBlendMode((BlendState)CurrentBlendMode);
+						bUpdatePreview = true;
+					}
+
+					bool bDoubleSided = Material->GetDoubleSided();
+					if (ImGui::Checkbox("Double Sided", &bDoubleSided))
+					{
+						Material->SetDoubleSided(bDoubleSided);
 						bUpdatePreview = true;
 					}
 

@@ -16,6 +16,7 @@
 struct RShader;
 class RCamera;
 class RScene;
+class RRasterizerState;
 
 enum SamplerState
 {
@@ -131,7 +132,9 @@ protected:
 	ID3D11RenderTargetView*	m_CurrentRenderTargetViews[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT];
 	ID3D11DepthStencilView*	m_CurrentDepthStencilView;
 
-	ID3D11BlendState*		m_BlendState[BlendState::Count];
+	std::unique_ptr<RRasterizerState>	RasterizerState;
+
+	ID3D11BlendState*		m_BlendState[(int)BlendState::Count];
 	BlendState				m_CurrBlendState;
 
 	ID3D11SamplerState*		m_SamplerState[SamplerStateCount];

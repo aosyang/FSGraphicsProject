@@ -10,6 +10,7 @@
 #include "D3DCommonPrivate.h"
 #include "RDirectionalLightComponent.h"
 
+#include "RRasterizerState.h"
 
 ID3D11DepthStencilView* RRenderSystem::DefaultDepthStencilView = nullptr;
 ID3D11RenderTargetView* RRenderSystem::DefaultRenderTargetView = nullptr;
@@ -17,6 +18,7 @@ ID3D11RenderTargetView* RRenderSystem::DefaultRenderTargetView = nullptr;
 RRenderSystem::RRenderSystem()
 	: m_AdapterName(nullptr)
 	, m_RenderTargetViewNum(0)
+	, RasterizerState(std::make_unique<RRasterizerState>())
 	, m_bIsUsingDeferredShading(false)
 	, m_ActiveScene(nullptr)
 {
@@ -258,17 +260,8 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 
 	GRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState[SamplerState_ShadowDepthComparison]);
 
-	// Enable antialiasing for line rendering
-	D3D11_RASTERIZER_DESC RasterizerDesc;
-	ZeroMemory(&RasterizerDesc, sizeof(RasterizerDesc));
-	RasterizerDesc.FillMode = D3D11_FILL_SOLID;
-	RasterizerDesc.CullMode = D3D11_CULL_BACK;
-	RasterizerDesc.DepthClipEnable = TRUE;
-	RasterizerDesc.AntialiasedLineEnable = TRUE;
-
-	ComPtr<ID3D11RasterizerState> RasterizerState;
-	GRenderer.D3DDevice()->CreateRasterizerState(&RasterizerDesc, RasterizerState.GetAddressOf());
-	GRenderer.D3DImmediateContext()->RSSetState(RasterizerState.Get());
+	// Apply the default rasterizer state to the pipeline
+	RasterizerState->Apply();
 
 	RConstantBuffers::Initialize();
 
@@ -440,6 +433,9 @@ void RRenderSystem::BindMaterial(RMaterial* Material, bool bSkinned /*= false*/,
 
 	RMaterial* RenderMaterial = Material ? Material : RMaterial::GetDefault();
 	SetBlendState(RenderMaterial->GetBlendMode());
+
+	RasterizerState->SetDoubleSided(RenderMaterial->GetDoubleSided());
+	RasterizerState->Apply();
 
 	int NumTextureSlots = (int)RenderMaterial->GetTextureSlots().size();
 
