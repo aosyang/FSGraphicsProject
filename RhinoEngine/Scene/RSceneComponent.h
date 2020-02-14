@@ -31,10 +31,14 @@ public:
 	/// Get the scene object which is owning this component
 	RSceneObject* GetOwner() const;
 
+	const RAabb& GetLocalAabb() const;
+
 	virtual void Update(float DeltaTime) {}
 protected:
 	/// Callback when component is added to a scene object
 	virtual void OnComponentAdded() {}
+
+	RAabb LocalBounds;
 
 private:
 	/// The scene object owning this component

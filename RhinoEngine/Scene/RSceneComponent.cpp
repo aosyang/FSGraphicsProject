@@ -18,3 +18,8 @@ void RSceneComponent::NotifyComponentAdded()
 {
 	OnComponentAdded();
 }
+
+const RAabb& RSceneComponent::GetLocalAabb() const
+{
+	return LocalBounds;
+}

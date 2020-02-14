@@ -15,6 +15,7 @@
 class RSceneObject;
 class RResourceBase;
 class RFreeFlyCameraControl;
+class REditorAxis;
 
 class WorkshopApp : public IApp
 {
@@ -32,6 +33,8 @@ private:
 
 	void PostMapLoaded();
 
+	void UpdateWidgetValuesFromObjectTransform();
+
 	RFreeFlyCameraControl* GetFreeFlyCamera() const;
 	float GetCameraSpeed() const;
 	void SetCameraSpeed(float InSpeed);
@@ -42,8 +45,6 @@ private:
 
 	std::vector<RSceneObject*> GetAllSceneObjects() const;
 
-	RVec2 GetMousePositionInViewport() const;
-	RRay MakeRayFromViewportPoint(const RVec2& Point)const;
 	void SelectSceneObjectAtCursor(const RVec2& Point);
 
 private:
@@ -70,4 +71,6 @@ private:
 	float PosValueArray[3];
 	float RotValueArray[3];
 	float ScaleValueArray[3];
+
+	REditorAxis* EditorAxis;
 };

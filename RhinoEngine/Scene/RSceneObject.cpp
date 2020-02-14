@@ -23,6 +23,21 @@ RSceneObject::~RSceneObject()
 	GScriptSystem.UnregisterScriptableObject(this);
 }
 
+void RSceneObject::CalculateBounds()
+{
+	const static RAabb UnitBounds(RVec3(-.5f, -.5f, -.5f), RVec3(.5f, .5f, .5f));
+	Bounds = UnitBounds.GetTransformedAabb(GetTransformMatrix());
+
+	for (auto& Component : SceneComponents)
+	{
+		const RAabb& ComponentBounds = Component->GetLocalAabb();
+		if (ComponentBounds.IsValid())
+		{
+			Bounds.Expand(ComponentBounds.GetTransformedAabb(GetTransformMatrix()));
+		}
+	}
+}
+
 void RSceneObject::Release()
 {
 	SceneComponents.clear();
@@ -146,6 +161,11 @@ void RSceneObject::DecreaseInternalTransformUpdateCounter()
 	assert(InternalTransformUpdateCounter >= 0);
 }
 
+const RAabb& RSceneObject::GetAabb() const
+{
+	return Bounds;
+}
+
 void RSceneObject::Update(float DeltaTime)
 {
 	if (m_NodeTransform.IsCacheDirty())
@@ -160,6 +180,7 @@ void RSceneObject::Update(float DeltaTime)
 	}
 
 	UpdateComponents(DeltaTime);
+	CalculateBounds();
 }
 
 const std::vector<std::string>& RSceneObject::GetParsedScript()

@@ -121,7 +121,7 @@ public:
 	void DecreaseInternalTransformUpdateCounter();
 
 	/// Get world space AABB for scene object
-	virtual const RAabb& GetAabb() { return RAabb::Default; }
+	const RAabb& GetAabb() const;
 	virtual void Draw() {}
 	virtual void DrawDepthPass() {}
 
@@ -162,6 +162,9 @@ protected:
 	RSceneObject(const RConstructingParams& Params);
 	virtual ~RSceneObject();
 
+	/// Calculate bounds of the object
+	virtual void CalculateBounds();
+
 	/// Update all components on this scene object
 	void UpdateComponents(float DeltaTime);
 
@@ -181,6 +184,7 @@ protected:
 	bool			bTransformModified;
 
 	int				m_Flags;
+	RAabb			Bounds;
 
 	/// If > 0, changing transform will not result in calling OnTransformModified
 	int				InternalTransformUpdateCounter;

@@ -39,6 +39,9 @@ public:
 
 	void SetMaterial(UINT Index, RMaterial* Material);
 
+protected:
+	void OnMeshLoaded();
+
 private:
 	RRenderMeshComponent(RSceneObject* InOwner);
 

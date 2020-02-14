@@ -9,11 +9,14 @@
 #include "WorkshopApp.h"
 
 #include "../RhinoGameUtils/RFreeFlyCameraControl.h"
+#include "REditorAxis.h"
+#include "EditorCommon.h"
 
 WorkshopApp::WorkshopApp()
 	: bShowOpenDialog(false)
 	, bShowAssetEditor(true)
 	, SelectedObject(nullptr)
+	, EditorAxis(nullptr)
 {
 
 }
@@ -320,27 +323,23 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 	}
 	ImGui::End();
 
+	bool bUpdateTransformInWidgets = false;
+
 	if (RInput.GetBufferedKeyState(VK_LBUTTON) == EBufferedKeyState::Pressed)
 	{
 		RVec2 CursorPoint = GetMousePositionInViewport();
 		SelectSceneObjectAtCursor(CursorPoint);
-		if (SelectedObject)
-		{
-			RVec3 Position = SelectedObject->GetPosition();
-			PosValueArray[0] = Position.X();
-			PosValueArray[1] = Position.Y();
-			PosValueArray[2] = Position.Z();
+		bUpdateTransformInWidgets = true;
+	}
 
-			RVec3 Rotation = SelectedObject->GetRotation().ToEuler();
-			RotValueArray[0] = RMath::RadianToDegree(Rotation.X());
-			RotValueArray[1] = RMath::RadianToDegree(Rotation.Y());
-			RotValueArray[2] = RMath::RadianToDegree(Rotation.Z());
+	if (EditorAxis->GetMouseControlMode() != EMouseControlMode::None)
+	{
+		bUpdateTransformInWidgets = true;
+	}
 
-			RVec3 Scale = SelectedObject->GetScale();
-			ScaleValueArray[0] = Scale.X();
-			ScaleValueArray[1] = Scale.Y();
-			ScaleValueArray[2] = Scale.Z();
-		}
+	if (bUpdateTransformInWidgets)
+	{
+		UpdateWidgetValuesFromObjectTransform();
 	}
 
 	if (RInput.GetBufferedKeyState('F') == EBufferedKeyState::KeyDown)
@@ -388,6 +387,29 @@ void WorkshopApp::PostMapLoaded()
 	RSceneObject* GlobalLightInfo = DefaultScene->CreateSceneObjectOfType<RSceneObject>("DirectionalLight", CF_NoSerialization);
 	RDirectionalLightComponent* DirLightComponent = GlobalLightInfo->AddNewComponent<RDirectionalLightComponent>();
 	DirLightComponent->SetParameters({ RVec3(sinf(1.0f) * 0.5f, 0.25f, cosf(1.0) * 0.5f), RColor(1.0f, 1.0f, 0.8f, 1.0f) });
+
+	EditorAxis = DefaultScene->CreateSceneObjectOfType<REditorAxis>("EditorAxis", CF_NoSerialization);
+}
+
+void WorkshopApp::UpdateWidgetValuesFromObjectTransform()
+{
+	if (SelectedObject)
+	{
+		RVec3 Position = SelectedObject->GetPosition();
+		PosValueArray[0] = Position.X();
+		PosValueArray[1] = Position.Y();
+		PosValueArray[2] = Position.Z();
+
+		RVec3 Rotation = SelectedObject->GetRotation().ToEuler();
+		RotValueArray[0] = RMath::RadianToDegree(Rotation.X());
+		RotValueArray[1] = RMath::RadianToDegree(Rotation.Y());
+		RotValueArray[2] = RMath::RadianToDegree(Rotation.Z());
+
+		RVec3 Scale = SelectedObject->GetScale();
+		ScaleValueArray[0] = Scale.X();
+		ScaleValueArray[1] = Scale.Y();
+		ScaleValueArray[2] = Scale.Z();
+	}
 }
 
 RFreeFlyCameraControl* WorkshopApp::GetFreeFlyCamera() const
@@ -454,6 +476,8 @@ void WorkshopApp::SetSelectedObject(RSceneObject* InSelected)
 		ScaleValueArray[1] = Scale.Y();
 		ScaleValueArray[2] = Scale.Z();
 	}
+
+	EditorAxis->SetSelectedObject(SelectedObject);
 }
 
 std::vector<RSceneObject*> WorkshopApp::GetAllSceneObjects() const
@@ -467,98 +491,24 @@ std::vector<RSceneObject*> WorkshopApp::GetAllSceneObjects() const
 	return std::vector<RSceneObject*>();
 }
 
-RVec2 WorkshopApp::GetMousePositionInViewport() const
-{
-	RECT ClientRect = GEngine.GetClientRectInfo();
-
-	int CurX, CurY;
-	RInput.GetCursorClientPosition(CurX, CurY);
-
-	// Mouse cursor relative position in viewport
-	return RVec2(
-		float(CurX - ClientRect.left) / float(ClientRect.right - ClientRect.left),
-		float(CurY - ClientRect.top) / float(ClientRect.bottom - ClientRect.top));
-}
-
-RRay WorkshopApp::MakeRayFromViewportPoint(const RVec2& Point) const
-{
-	auto Cameras = GSceneManager.DefaultScene()->FindAllObjectsOfType<RCamera>();
-
-	if (Cameras.size() > 0)
-	{
-		RVec4 FarPoint = RVec4(2.0f * Point.x - 1.0f, -2.0f * Point.y + 1.0f, 1.0f, 1.0f);
-		FarPoint = FarPoint * Cameras[0]->GetViewProjMatrix().Inverse();
-		RVec3 FarPointWorld = FarPoint.ToVec3() / FarPoint.w;
-		RVec3 CameraPosition = Cameras[0]->GetPosition();
-
-		return RRay(CameraPosition, FarPointWorld);
-	}
-	
-	return RRay();
-}
-
 void WorkshopApp::SelectSceneObjectAtCursor(const RVec2& Point)
 {
-	RRay CameraRay = MakeRayFromViewportPoint(Point);
+	auto Cameras = GSceneManager.DefaultScene()->FindAllObjectsOfType<RCamera>();
+	if (Cameras.size() == 0)
+	{
+		return;
+	}
 
-	//if (m_SelectedObject)
-	//{
-	//	// Transform camera ray to axis local space
-	//	RRay axis_ray = CameraRay.Transform(m_AxisMatrix.FastInverse());
+	RRay CameraRay = MakeRayFromViewportPoint(Cameras[0], Point);
+	EMouseControlMode MouseControlMode = EMouseControlMode::None;
 
-	//	if (axis_ray.TestIntersectionWithAabb(m_EditorAxis->GetLocalAabb(AXIS_X)))
-	//	{
-	//		m_MouseControlMode = MouseControlMode::MoveX;
-	//	}
-	//	else if (axis_ray.TestIntersectionWithAabb(m_EditorAxis->GetLocalAabb(AXIS_Y)))
-	//	{
-	//		m_MouseControlMode = MouseControlMode::MoveY;
-	//	}
-	//	else if (axis_ray.TestIntersectionWithAabb(m_EditorAxis->GetLocalAabb(AXIS_Z)))
-	//	{
-	//		m_MouseControlMode = MouseControlMode::MoveZ;
-	//	}
+	if (SelectedObject)
+	{
+		assert(EditorAxis);
+		MouseControlMode = EditorAxis->ProcessMouseActions(CameraRay, SelectedObject);
+	}
 
-	//	if (m_MouseControlMode != MouseControlMode::None)
-	//	{
-	//		// Since the axis may move along camera direction for scaling, the hit point is not always what we're looking for.
-	//		// We'll check ray intersection with axis planes for the actual start position.
-
-	//		RVec3 ObjectPosition = m_SelectedObject->GetWorldPosition();
-	//		RPlane AxisPlane;
-
-	//		switch (m_MouseControlMode)
-	//		{
-	//		case MouseControlMode::MoveX:
-	//			AxisPlane = GetAxisPlane(ObjectPosition, RVec3(1, 0, 0));
-	//			break;
-
-	//		case MouseControlMode::MoveY:
-	//			AxisPlane = GetAxisPlane(ObjectPosition, RVec3(0, 1, 0));
-	//			break;
-
-	//		case MouseControlMode::MoveZ:
-	//			AxisPlane = GetAxisPlane(ObjectPosition, RVec3(0, 0, 1));
-	//			break;
-
-	//		default:
-	//			break;
-	//		}
-
-	//		if (AxisPlane.IsValid())
-	//		{
-	//			float Dist;
-	//			if (CameraRay.TestIntersectionWithPlane(AxisPlane, &Dist))
-	//			{
-	//				m_CursorStartPosition = CameraRay.GetPointAtDistance(Dist);
-	//			}
-	//		}
-
-	//		m_ObjectStartPosition = ObjectPosition;
-	//	}
-	//}
-
-	//if (m_MouseControlMode == MouseControlMode::None)
+	if (MouseControlMode == EMouseControlMode::None && !RInput.IsKeyDown(VK_LMENU))
 	{
 		struct RayPickingResult
 		{
@@ -575,20 +525,27 @@ void WorkshopApp::SelectSceneObjectAtCursor(const RVec2& Point)
 			}
 		};
 
+		// A set of objects hit by the picking ray
 		std::vector<RayPickingResult> rayPickingList;
 		float tmin = FLT_MAX;
 
-		for (auto SceneObject : GSceneManager.DefaultScene()->EnumerateSceneObjects())
+		for (auto SceneObject : GetAllSceneObjects())
 		{
 			float t;
 			if (CameraRay.TestIntersectionWithAabb(SceneObject->GetAabb(), &t))
 			{
+				// Don't allow picking up a camera or an axis object by click in the scene
+				if (SceneObject->CanCastTo<RCamera>() || SceneObject->CanCastTo<REditorAxis>())
+				{
+					continue;
+				}
+
 				if (SceneObject->CanCastTo<RSMeshObject>())
 				{
-					RSMeshObject* meshObj = static_cast<RSMeshObject*>(SceneObject);
-					for (int i = 0; i < meshObj->GetMeshElementCount(); i++)
+					RSMeshObject* MeshObj = static_cast<RSMeshObject*>(SceneObject);
+					for (int i = 0; i < MeshObj->GetMeshElementCount(); i++)
 					{
-						if (CameraRay.TestIntersectionWithAabb(meshObj->GetMeshElementAabb(i).GetTransformedAabb(meshObj->GetTransformMatrix()), &t))
+						if (CameraRay.TestIntersectionWithAabb(MeshObj->GetMeshElementAabb(i).GetTransformedAabb(MeshObj->GetTransformMatrix()), &t))
 						{
 							rayPickingList.push_back(RayPickingResult(t, SceneObject));
 							break;
@@ -604,20 +561,25 @@ void WorkshopApp::SelectSceneObjectAtCursor(const RVec2& Point)
 
 		if (!rayPickingList.size())
 		{
-			//m_SelectedObject = nullptr;
+			// Unselect any objects
+			SetSelectedObject(nullptr);
 		}
 		else
 		{
+			// When clicking on a same object more than once, loop through objects in the picking list so objects can be selected even if obstructed
 			sort(rayPickingList.begin(), rayPickingList.end(), [](RayPickingResult a, RayPickingResult b) { return a.t < b.t; });
-			//auto iter = find(rayPickingList.begin(), rayPickingList.end(), m_SelectedObject);
-			//if (iter != rayPickingList.end())
-			//{
-			//	iter++;
-			//	if (iter == rayPickingList.end())
-			//		iter = rayPickingList.begin();
-			//	m_SelectedObject = iter->obj;
-			//}
-			//else
+			auto Iter = find(rayPickingList.begin(), rayPickingList.end(), SelectedObject);
+			if (Iter != rayPickingList.end())
+			{
+				Iter++;
+				if (Iter == rayPickingList.end())
+				{
+					Iter = rayPickingList.begin();
+				}
+
+				SetSelectedObject(Iter->obj);
+			}
+			else
 			{
 				SetSelectedObject(rayPickingList[0].obj);
 			}

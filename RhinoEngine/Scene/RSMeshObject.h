@@ -40,7 +40,6 @@ public:
 	/// Save current materials to an XML document
 	void SerializeXmlMaterials_Save(tinyxml2::XMLDocument* XmlDoc, tinyxml2::XMLElement* XmlElemMaterial);
 
-	const RAabb& GetAabb() override;
 	const RAabb& GetMeshElementAabb(int index) const;
 
 	// Overrides RSceneObject render methods
@@ -55,6 +54,8 @@ public:
 protected:
 	RSMeshObject(const RConstructingParams& Params);
 	~RSMeshObject();
+
+	virtual void CalculateBounds() override;
 
 	/// Use default materials defined in mesh resource
 	void SetupMaterialsFromMeshResource();

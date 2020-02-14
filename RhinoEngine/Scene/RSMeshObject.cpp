@@ -184,18 +184,6 @@ void RSMeshObject::SerializeXmlMaterials_Save(tinyxml2::XMLDocument* XmlDoc, tin
 	::SerializeXmlMaterials_Save(m_Materials, XmlDoc, XmlElemMaterial);
 }
 
-const RAabb& RSMeshObject::GetAabb()
-{
-	// Update aabb for mesh with current transform
-	if (m_Mesh)
-	{
-		m_MeshAABB = m_Mesh->GetLocalSpaceAabb().GetTransformedAabb(m_NodeTransform.GetMatrix());
-		return m_MeshAABB;
-	}
-
-	return RAabb::Default;
-}
-
 const RAabb& RSMeshObject::GetMeshElementAabb(int index) const
 {
 	if (m_Mesh)
@@ -306,6 +294,17 @@ float RSMeshObject::GetResourceTimestamp()
 		return m_Mesh->GetResourceTimestamp();
 
 	return 0.0f;
+}
+
+void RSMeshObject::CalculateBounds()
+{
+	Base::CalculateBounds();
+
+	if (m_Mesh)
+	{
+		RAabb MeshBounds = m_Mesh->GetLocalSpaceAabb().GetTransformedAabb(m_NodeTransform.GetMatrix());
+		Bounds.Expand(MeshBounds);
+	}
 }
 
 void RSMeshObject::SetupMaterialsFromMeshResource()

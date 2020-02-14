@@ -120,6 +120,8 @@ RTexture* RResourcePreviewBuilder::GeneratePreviewTexture(RResourceBase* Resourc
 		float AspectRatio = (float)Width / (float)Height;
 		Camera->SetupView(45.0f, AspectRatio, 1.0f, 10000.0f);
 
+		PreviewScene.UpdateScene(0.0f);
+
 		RAabb aabb = MeshObject->GetAabb();
 		RVec3 center = (aabb.pMin + aabb.pMax) * 0.5f;
 		float radius = (aabb.pMax - center).Magnitude();
@@ -189,7 +191,6 @@ RTexture* RResourcePreviewBuilder::GeneratePreviewTexture(RResourceBase* Resourc
 			RConstantBuffers::cbBoneMatrices.UpdateBufferData();
 			RConstantBuffers::cbBoneMatrices.BindBuffer();
 		}
-
 
 		PreviewScene.Render();
 		GRenderer.Present(false);

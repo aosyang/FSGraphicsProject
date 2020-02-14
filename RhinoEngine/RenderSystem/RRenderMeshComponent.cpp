@@ -26,7 +26,7 @@ void RRenderMeshComponent::Update(float DeltaTime)
 	{
 		if (m_Mesh && m_Mesh->IsLoaded())
 		{
-			LoadMaterialsFromMeshResource();
+			OnMeshLoaded();
 			m_PostponeLoadMaterials = false;
 		}
 	}
@@ -36,6 +36,11 @@ void RRenderMeshComponent::Render(const RenderViewInfo& View) const
 {
 	if (m_Mesh && m_Mesh->IsLoaded() && !m_PostponeLoadMaterials)
 	{
+		if (GetOwner() && !GetOwner()->IsVisible())
+		{
+			return;
+		}
+
 		const RMatrix4& Matrix = GetOwner()->GetTransformMatrix();
 		RAabb MeshAabb = m_Mesh->GetLocalSpaceAabb().GetTransformedAabb(Matrix);
 		if (RCollision::TestAabbInsideFrustum(*View.Frustum, MeshAabb))
@@ -68,6 +73,11 @@ void RRenderMeshComponent::RenderDepthPass(const RenderViewInfo& View) const
 	{
 		if (m_Mesh->IsLoaded())
 		{
+			if (GetOwner() && !GetOwner()->IsVisible())
+			{
+				return;
+			}
+
 			const RMatrix4& Matrix = GetOwner()->GetTransformMatrix();
 			RAabb MeshAabb = m_Mesh->GetLocalSpaceAabb().GetTransformedAabb(Matrix);
 			if (RCollision::TestAabbInsideFrustum(*View.Frustum, MeshAabb))
@@ -102,7 +112,7 @@ void RRenderMeshComponent::SetMesh(const RMesh* Mesh)
 	{
 		if (m_Mesh->IsLoaded())
 		{
-			LoadMaterialsFromMeshResource();
+			OnMeshLoaded();
 		}
 		else
 		{
@@ -126,6 +136,16 @@ void RRenderMeshComponent::SetMaterial(UINT Index, RMaterial* Material)
 		}
 
 		m_Materials[Index] = Material;
+	}
+}
+
+void RRenderMeshComponent::OnMeshLoaded()
+{
+	LoadMaterialsFromMeshResource();
+
+	if (m_Mesh)
+	{
+		LocalBounds = m_Mesh->GetLocalSpaceAabb();
 	}
 }
 
