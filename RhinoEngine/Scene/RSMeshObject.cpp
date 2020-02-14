@@ -244,23 +244,14 @@ void RSMeshObject::DrawDepthPass(bool instanced, int instanceCount)
 	if (!m_Mesh || !m_Mesh->IsLoaded())
 		return;
 
-	static RShader* DefaultShader = RShaderManager::Instance().GetShaderResource("Depth");
 	const auto& MeshElements = m_Mesh->GetMeshElements();
 
 	for (UINT32 i = 0; i < MeshElements.size(); i++)
 	{
-		RShader* shader = DefaultShader;
 		const RMeshElement& MeshElement = MeshElements[i];
-
-		int flag = MeshElement.GetFlag();
-		int shaderFeatureMask = 0;
-
-		if ((flag & MEF_Skinned) && !GEngine.IsEditor())
-			shaderFeatureMask |= SFM_Skinned;
-		else if (instanced)
-			shaderFeatureMask |= SFM_Instanced;
-
-		shader->Bind(shaderFeatureMask);
+		bool bSkinned = MeshElement.GetFlag() & MEF_Skinned;
+		RMaterial* Material = RMaterial::GetDepthOnly();
+		GRenderer.BindMaterial(Material, bSkinned, instanced);
 
 		if (instanced)
 		{

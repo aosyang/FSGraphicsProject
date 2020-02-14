@@ -191,6 +191,25 @@ RMaterial* RMaterial::GetDefault()
 	return DefaultMaterial;
 }
 
+RMaterial* RMaterial::GetDepthOnly()
+{
+	static RMaterial* DepthMaterial = nullptr;
+	if (DepthMaterial == nullptr)
+	{
+		RShader* DepthShader = RShaderManager::Instance().GetShaderResource("Depth");
+
+		// Make sure we're not getting the default material before the default shader is loaded
+		assert(DepthShader);
+
+		DepthMaterial = RResourceManager::Instance().CreateNewResource<RMaterial>("DepthMaterial");
+		DepthMaterial->SetAssetPath("DepthMaterial");
+		DepthMaterial->Shader = DepthShader;
+		DepthMaterial->SetDoubleSided(true);
+	}
+
+	return DepthMaterial;
+}
+
 bool RMaterial::LoadResourceImpl()
 {
 	std::unique_ptr<tinyxml2::XMLDocument> XmlDoc = std::make_unique<tinyxml2::XMLDocument>();

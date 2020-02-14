@@ -78,6 +78,9 @@ public:
 	/// Get a default material
 	static RMaterial* GetDefault();
 
+	/// Get a depth-only material for rendering shadow passes
+	static RMaterial* GetDepthOnly();
+
 protected:
 	virtual bool LoadResourceImpl() override;
 	virtual bool SaveResourceImpl() override;

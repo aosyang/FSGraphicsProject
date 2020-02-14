@@ -280,17 +280,12 @@ void PlayerControllerBase::PostUpdate(float DeltaTime)
 
 void PlayerControllerBase::Draw()
 {
-	// TODO: blend state should be set by material
-	GRenderer.SetBlendState(BlendState::AlphaBlending);
-
 	// Copy bone transforms to constant buffer
 	memcpy(&RConstantBuffers::cbBoneMatrices.Data.boneMatrix, m_BoneMatrices, sizeof(RMatrix4) * MAX_BONE_COUNT);
 	RConstantBuffers::cbBoneMatrices.UpdateBufferData();
 	RConstantBuffers::cbBoneMatrices.BindBuffer();
 
 	RSMeshObject::Draw();
-
-	GRenderer.SetBlendState(BlendState::Opaque);
 }
 
 void PlayerControllerBase::DrawDepthPass()

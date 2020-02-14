@@ -55,6 +55,7 @@ void RRenderMeshComponent::Render(const RenderViewInfo& View) const
 				bool bSkinned = MeshElement.GetFlag() & MEF_Skinned;
 				RMaterial* Material = (i < (int)m_Materials.size()) ? m_Materials[i] : nullptr;
 				GRenderer.BindMaterial(Material, bSkinned);
+
 				m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			}
 		}
@@ -82,24 +83,10 @@ void RRenderMeshComponent::RenderDepthPass(const RenderViewInfo& View) const
 
 				for (UINT32 i = 0; i < NumMeshElements; i++)
 				{
-					static RShader* DepthShader = RShaderManager::Instance().GetShaderResource("Depth");
-					assert(DepthShader);
-
 					const RMeshElement& MeshElement = m_Mesh->GetMeshElements()[i];
-					int flag = MeshElement.GetFlag();
+					bool bSkinned = MeshElement.GetFlag() & MEF_Skinned;
+					GRenderer.BindMaterial(RMaterial::GetDepthOnly(), bSkinned);
 
-					int shaderFeatureMask = 0;
-					if ((flag & MEF_Skinned) && !GEngine.IsEditor())
-					{
-						shaderFeatureMask |= SFM_Skinned;
-					}
-
-					if (GRenderer.IsUsingDeferredShading())
-					{
-						shaderFeatureMask |= SFM_Deferred;
-					}
-
-					DepthShader->Bind(shaderFeatureMask);
 					m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 				}
 			}
