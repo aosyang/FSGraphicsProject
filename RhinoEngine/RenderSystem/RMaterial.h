@@ -81,6 +81,11 @@ public:
 	/// Get a depth-only material for rendering shadow passes
 	static RMaterial* GetDepthOnly();
 
+	/// Rasterizer state hash functions
+	bool IsRasterizerStateHashOutOfDate() const;
+	void SetRasterizerStateHash(size_t NewHash);
+	size_t GetRasterizerStateHash() const;
+
 protected:
 	virtual bool LoadResourceImpl() override;
 	virtual bool SaveResourceImpl() override;
@@ -90,6 +95,9 @@ private:
 	std::vector<RTextureSlotData> TextureSlots;
 	BlendState BlendMode;
 	bool bDoubleSided;
+
+	bool bRasterizerStateHashOutOfDate;
+	size_t RasterizerStateHash;
 };
 
 FORCEINLINE void RMaterial::SetShader(RShader* InShader)
@@ -155,4 +163,20 @@ FORCEINLINE bool RMaterial::GetDoubleSided() const
 FORCEINLINE void RMaterial::SetDoubleSided(bool InDoubleSided)
 {
 	bDoubleSided = InDoubleSided;
+	bRasterizerStateHashOutOfDate = true;
+}
+
+FORCEINLINE bool RMaterial::IsRasterizerStateHashOutOfDate() const
+{
+	return bRasterizerStateHashOutOfDate;
+}
+
+FORCEINLINE void RMaterial::SetRasterizerStateHash(size_t NewHash)
+{
+	RasterizerStateHash = NewHash;
+}
+
+FORCEINLINE size_t RMaterial::GetRasterizerStateHash() const
+{
+	return RasterizerStateHash;
 }

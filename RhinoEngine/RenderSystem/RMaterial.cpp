@@ -117,6 +117,7 @@ RMaterial::RMaterial(const std::string& Path)
 	, Shader(nullptr)
 	, BlendMode(BlendState::Opaque)
 	, bDoubleSided(false)
+	, bRasterizerStateHashOutOfDate(true)
 {
 
 }

@@ -6,14 +6,7 @@
 
 #pragma once
 
-#include <functional>
-
-template<class T>
-inline void HashCombine(size_t& HashValue, const T& Element)
-{
-	std::hash<T> Hash;
-	HashValue ^= Hash(Element) + 0x9e3779b9 + (HashValue << 6) + (HashValue >> 2);
-}
+#include "Core/CoreTypes.h"
 
 /// Key for a traversable span. Used for searching a span at a given location
 class OpenSpanKey

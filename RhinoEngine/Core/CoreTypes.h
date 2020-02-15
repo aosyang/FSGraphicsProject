@@ -41,3 +41,12 @@
 #include "Core/RColor.h"
 #include "Core/RAabb.h"
 #include "Core/RRay.h"
+
+
+template<class T>
+inline void HashCombine(size_t& HashValue, const T& Element)
+{
+	std::hash<T> Hash;
+	HashValue ^= Hash(Element) + 0x9e3779b9 + (HashValue << 6) + (HashValue >> 2);
+}
+

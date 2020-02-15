@@ -14,14 +14,36 @@ class RRasterizerState
 public:
 	RRasterizerState();
 
-	void SetDoubleSided(bool bDoubleSided);
+	/// Create a default rasterizer descriptor
+	D3D11_RASTERIZER_DESC MakeDefaultDescriptor();
 
 	/// Apply current rasterizer state to the render pipeline
-	void Apply();
+	void Apply(size_t RasterizerStateHash);
+	
+	/// Find an existing hash value for the rasterizer descriptor. If it doesn't exist, then create a new one.
+	size_t FindOrAddRasterizerStateHash(const D3D11_RASTERIZER_DESC& Desc);
 
 private:
-	D3D11_RASTERIZER_DESC CurrentRasterizerDesc;
+	struct RasterizerStateData
+	{
+		RasterizerStateData() = default;
+		RasterizerStateData(ComPtr<ID3D11RasterizerState> InRasterizerStateObject, const D3D11_RASTERIZER_DESC& InDesc)
+			: RasterizerStateObject(InRasterizerStateObject)
+			, Desc(InDesc)
+		{
+		}
 
-	/// Mapping rasterizer descriptions to their objects
-	std::map<D3D11_RASTERIZER_DESC, ComPtr<ID3D11RasterizerState>> RasterizerStateMap;
+		RasterizerStateData& operator=(const RasterizerStateData& Other)
+		{
+			RasterizerStateObject = Other.RasterizerStateObject;
+			Desc = Other.Desc;
+			return *this;
+		}
+
+		ComPtr<ID3D11RasterizerState> RasterizerStateObject;
+		D3D11_RASTERIZER_DESC Desc;
+	};
+
+	/// Mapping rasterizer state hashes to rasterizer state objects
+	std::map<size_t, RasterizerStateData> RasterizerStateMap;
 };

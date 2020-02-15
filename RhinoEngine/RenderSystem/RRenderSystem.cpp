@@ -260,9 +260,6 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 
 	GRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState[SamplerState_ShadowDepthComparison]);
 
-	// Apply the default rasterizer state to the pipeline
-	RasterizerState->Apply();
-
 	RConstantBuffers::Initialize();
 
 	return true;
@@ -434,8 +431,20 @@ void RRenderSystem::BindMaterial(RMaterial* Material, bool bSkinned /*= false*/,
 	RMaterial* RenderMaterial = Material ? Material : RMaterial::GetDefault();
 	SetBlendState(RenderMaterial->GetBlendMode());
 
-	RasterizerState->SetDoubleSided(RenderMaterial->GetDoubleSided());
-	RasterizerState->Apply();
+	size_t RasterizerStateHash = 0;
+	if (RenderMaterial->IsRasterizerStateHashOutOfDate())
+	{
+		D3D11_RASTERIZER_DESC RasterizerDesc = RasterizerState->MakeDefaultDescriptor();
+		RasterizerDesc.CullMode = RenderMaterial->GetDoubleSided() ? D3D11_CULL_NONE : D3D11_CULL_BACK;
+		RasterizerStateHash = RasterizerState->FindOrAddRasterizerStateHash(RasterizerDesc);
+		RenderMaterial->SetRasterizerStateHash(RasterizerStateHash);
+	}
+	else
+	{
+		RasterizerStateHash = RenderMaterial->GetRasterizerStateHash();
+	}
+
+	RasterizerState->Apply(RasterizerStateHash);
 
 	int NumTextureSlots = (int)RenderMaterial->GetTextureSlots().size();
 
