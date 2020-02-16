@@ -32,6 +32,9 @@ public:
 	RECT GetClientRectInfo() const;
 	RTimer& GetTimer() { return m_Timer; }
 
+	/// Get number of frames since engine started. The first frame starts from 1.
+	UINT64 GetFrameCounter() const { return FrameCounter; }
+
 	/// Has engine been initialized
 	bool IsInitialized() const { return m_bIsInitialized; }
 
@@ -66,6 +69,7 @@ private:
 	bool				m_UseEngineRenderWindow;
 	IApp*				m_Application;
 	RTimer				m_Timer;
+	UINT64				FrameCounter;
 
 	/// Whether engine should call IApp::RenderScene
 	bool				m_UseCustomRenderingPipeline;

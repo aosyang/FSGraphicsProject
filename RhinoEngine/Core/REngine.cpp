@@ -26,7 +26,8 @@ REngine::REngine()
 	  m_bFullScreen					(false),
 	  m_UseEngineRenderWindow		(false),
 	  m_Application					(nullptr),
-	  m_UseCustomRenderingPipeline	(true)
+	  m_UseCustomRenderingPipeline	(true),
+	  FrameCounter(1)
 {
 	SetProcessDPIAware();
 }
@@ -184,6 +185,8 @@ void REngine::Run()
 		// Press ESC to quit loop
 		if (RInput.IsKeyDown(VK_ESCAPE))
 			bRunLoop = false;
+
+		FrameCounter++;
 	}
 }
 

@@ -13,6 +13,7 @@ RSceneObject::RSceneObject(const RConstructingParams& Params)
 	, m_bVisible(true)
 	, bTransformModified(true)
 	, m_Flags(Params.Flags)
+	, BoundsUpdateFrame(0)
 	, InternalTransformUpdateCounter(0)
 {
 	GScriptSystem.RegisterScriptableObject(this);
@@ -25,6 +26,8 @@ RSceneObject::~RSceneObject()
 
 void RSceneObject::CalculateBounds()
 {
+	BoundsUpdateFrame = GEngine.GetFrameCounter();
+
 	const static RAabb UnitBounds(RVec3(-.5f, -.5f, -.5f), RVec3(.5f, .5f, .5f));
 	Bounds = UnitBounds.GetTransformedAabb(GetTransformMatrix());
 
@@ -161,8 +164,14 @@ void RSceneObject::DecreaseInternalTransformUpdateCounter()
 	assert(InternalTransformUpdateCounter >= 0);
 }
 
-const RAabb& RSceneObject::GetAabb() const
+const RAabb& RSceneObject::GetAabb()
 {
+	// If the bounding box has not been updated this frame, do it now.
+	if (GEngine.GetFrameCounter() > BoundsUpdateFrame)
+	{
+		CalculateBounds();
+	}
+
 	return Bounds;
 }
 

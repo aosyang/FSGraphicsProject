@@ -121,7 +121,7 @@ public:
 	void DecreaseInternalTransformUpdateCounter();
 
 	/// Get world space AABB for scene object
-	const RAabb& GetAabb() const;
+	const RAabb& GetAabb();
 	virtual void Draw() {}
 	virtual void DrawDepthPass() {}
 
@@ -185,6 +185,9 @@ protected:
 
 	int				m_Flags;
 	RAabb			Bounds;
+
+	/// Number of frame in which the bounding box get updated
+	UINT64			BoundsUpdateFrame;
 
 	/// If > 0, changing transform will not result in calling OnTransformModified
 	int				InternalTransformUpdateCounter;
