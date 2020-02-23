@@ -158,7 +158,52 @@ void RAnimationBlender::ProceedAnimation(float deltaTime)
 	}
 }
 
-bool RAnimationBlender::GetCurrentBlendedNodePose(int SourceNodeId, int TargetNodeId, RMatrix4* OutMatrix)
+bool RAnimationBlender::EvaluatePose(RMesh* SkinnedMesh, const RMatrix4& LocalToWorld, RMatrix4* OutBoneMatrices) const
+{
+	if (!SkinnedMesh)
+	{
+		return false;
+	}
+
+	RAnimation* const SourceAnim = GetSourceAnimation();
+	RAnimation* const TargetAnim = GetTargetAnimation();
+
+	for (int i = 0; i < SkinnedMesh->GetBoneCount(); i++)
+	{
+		RMatrix4 BoneMatrix;
+
+		int SourceBoneId = SkinnedMesh->GetCachedAnimationNodeId(SourceAnim, i);
+		int TargetBondId = SkinnedMesh->GetCachedAnimationNodeId(TargetAnim, i);
+
+		bool Result = GetCurrentBlendedNodePose(SourceBoneId, TargetBondId, &BoneMatrix);
+		if (!Result)
+		{
+			BoneMatrix = RMatrix4::Zero;
+		}
+
+		OutBoneMatrices[i] = SkinnedMesh->GetBoneInitInvMatrices(i) * BoneMatrix * LocalToWorld;
+
+#if 0	// Debug rendering bones
+		{
+			int ParentId = SourceAnim->GetParentId(i);
+			if (ParentId != -1)
+			{
+				RMatrix4 ParentMatrix;
+				if (!GetCurrentBlendedNodePose(ParentId, ParentId, &ParentMatrix))
+				{
+					ParentMatrix = RMatrix4::Zero;
+				}
+
+				GDebugRenderer.DrawLine(BoneMatrix.GetTranslation(), ParentMatrix.GetTranslation());
+			}
+		}
+#endif
+	}
+
+	return true;
+}
+
+bool RAnimationBlender::GetCurrentBlendedNodePose(int SourceNodeId, int TargetNodeId, RMatrix4* OutMatrix) const
 {
 	if (m_SourceAnimation.Animation && m_TargetAnimation.Animation)
 	{

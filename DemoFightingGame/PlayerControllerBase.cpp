@@ -242,40 +242,8 @@ void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 MoveVec)
 
 void PlayerControllerBase::PostUpdate(float DeltaTime)
 {
-	RAnimation* const SourceAnim = GetAnimBlender().GetSourceAnimation();
-	RAnimation* const TargetAnim = GetAnimBlender().GetTargetAnimation();
-
-	for (int i = 0; i < m_Mesh->GetBoneCount(); i++)
-	{
-		RMatrix4 BoneMatrix;
-
-		int SourceBoneId = m_Mesh->GetCachedAnimationNodeId(SourceAnim, i);
-		int TargetBondId = m_Mesh->GetCachedAnimationNodeId(TargetAnim, i);
-
-		bool Result = GetAnimBlender().GetCurrentBlendedNodePose(SourceBoneId, TargetBondId, &BoneMatrix);
-		if (!Result)
-		{
-			BoneMatrix = RMatrix4::Zero;
-		}
-
-		m_BoneMatrices[i] = m_Mesh->GetBoneInitInvMatrices(i) * BoneMatrix * GetTransformMatrix();
-
-#if 0	// Debug rendering bones
-		{
-			int ParentId = SourceAnim->GetParentId(i);
-			if (ParentId != -1)
-			{
-				RMatrix4 ParentMatrix;
-				if (!GetAnimBlender().GetCurrentBlendedNodePose(ParentId, ParentId, &ParentMatrix))
-				{
-					ParentMatrix = RMatrix4::Zero;
-				}
-
-				GDebugRenderer.DrawLine(BoneMatrix.GetTranslation(), ParentMatrix.GetTranslation());
-			}
-		}
-#endif
-	}
+	// Evaluate the skeletal pose at current time
+	GetAnimBlender().EvaluatePose(m_Mesh, GetTransformMatrix(), m_BoneMatrices);
 }
 
 void PlayerControllerBase::Draw()

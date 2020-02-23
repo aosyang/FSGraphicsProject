@@ -29,6 +29,7 @@ public:
 	void Reset();
 };
 
+/// An animation evaluator that does the two-way blending
 class RAnimationBlender
 {
 public:
@@ -46,7 +47,11 @@ public:
 
 	/// Update the animation blender for the frame
 	void ProceedAnimation(float deltaTime);
-	bool GetCurrentBlendedNodePose(int SourceNodeId, int TargetNodeId, RMatrix4* OutMatrix);
+
+	/// Evaluate the pose for a skinned mesh at current state
+	bool EvaluatePose(RMesh* SkinnedMesh, const RMatrix4& LocalToWorld, RMatrix4* OutBoneMatrices) const;
+
+	/// Get the root offset at current state
 	RVec3 GetCurrentRootOffset();
 
 	/// Check if animation has finished playing.
@@ -57,6 +62,10 @@ public:
 	RAnimation* GetTargetAnimation() const;
 	float GetTargetPlaybackTime() const;
 	float GetElapsedBlendTime() const;
+
+private:
+	bool GetCurrentBlendedNodePose(int SourceNodeId, int TargetNodeId, RMatrix4* OutMatrix) const;
+
 private:
 	RAnimationPlayer	m_SourceAnimation;
 	RAnimationPlayer	m_TargetAnimation;
