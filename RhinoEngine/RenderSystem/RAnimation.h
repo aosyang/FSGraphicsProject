@@ -5,6 +5,8 @@
 //=============================================================================
 #pragma once
 
+#include "Core/CoreTypes.h"
+
 enum AnimationBitFlag
 {
 	AnimBitFlag_Loop			= 1 << 0,
@@ -73,7 +75,34 @@ private:
 	float				m_ElapsedBlendTime;
 };
 
+/// The animation node data
+struct RAnimNodeData
+{
+	RAnimNodeData()
+		: ParentId(-1)
+	{
+	}
 
+	void Serialize(RSerializer& Serializer)
+	{
+		Serializer.SerializeData(BoneName);
+		Serializer.SerializeData(ParentId);
+		Serializer.SerializeVector(FrameMatrices);
+	}
+
+	/// Name of the bone node
+	std::string				BoneName;
+
+	/// Parent bone node id
+	int						ParentId;
+
+	/// Poses of each frame
+	std::vector<RMatrix4>	FrameMatrices;
+};
+
+
+/// The animation class.
+/// Contains a set of frames with each frame made up by the matrices of each bone node from the skeletal.
 class RAnimation
 {
 public:
@@ -84,19 +113,31 @@ public:
 	void SetName(const std::string& name) { m_Name = name; }
 	const std::string& GetName() const { return m_Name; }
 
+	/// Set flags for animation
+	/// TODO: Flags should be loaded with the animation in the future. Remove this function later
 	void SetBitFlags(int flags) { m_Flags = flags; }
-	int GetBitFlags() const { return m_Flags; }
 
+	/// Does animation use any root motion?
 	bool HasRootMotion() const;
+
+	/// Is animation looping?
 	bool IsLooping() const;
 
 	void Serialize(RSerializer& serializer);
 
-	void AddNodePose(int nodeId, int frameId, const RMatrix4* matrix);
-	void GetNodePose(int NodeId, float Time, RMatrix4* OutMatrix) const;
-	int GetNodeCount() const { return (int)m_NodeKeyFrames.size(); }
+	/// Add a pose matrix for a bone node at given frame
+	void AddNodePoseAtFrame(int nodeId, int frameId, const RMatrix4* matrix);
 
+	/// Get the pose matrix of a bone node at given time
+	void GetNodePoseAtTime(int NodeId, float Time, RMatrix4* OutMatrix) const;
+
+	/// Get total number of bone nodes
+	int GetNodeCount() const { return (int)BoneNodeData.size(); }
+
+	/// Get the root displacement at the initial frame
 	RVec3 GetInitRootPosition() const;
+
+	/// Get the root displacement at given time
 	RVec3 GetRootPosition(float time) const;
 
 	void SetParentId(int nodeId, int parentId);
@@ -107,25 +148,46 @@ public:
 
 	void SetRootNode(int nodeId) { m_RootNode = nodeId; }
 	int GetRootNode() const { return m_RootNode; }
-	void BuildRootDisplacementArray();
+
+	/// Build root displacements for each frame
+	void BuildRootDisplacements();
 
 	float GetStartTime() const { return m_StartTime; }
 	float GetEndTime() const { return m_EndTime; }
 
 	/// Get frame rate in frames per second
 	float GetFrameRate() const { return m_FrameRate; }
+
 private:
-	std::string					m_Name;
+	int GetBitFlags() const;
+
+private:
+	/// Name of the animation
+	std::string				m_Name;
+
+	/// Animation flags. See definition of AnimationBitFlag
 	int						m_Flags;
+
+	/// Total number of frames
 	int						m_FrameCount;
-	float					m_StartTime, m_EndTime, m_FrameRate;
 
-	std::vector<std::string>			m_NodeNames;
-	std::vector<int>				m_NodeParents;
-	std::vector<RMatrix4*>		m_NodeKeyFrames;
+	/// Time at the beginning frame
+	float					m_StartTime;
 
+	/// Time at the last frame
+	float					m_EndTime;
+
+	/// The playback rate
+	float					m_FrameRate;
+
+	/// Frame data of each bone node
+	std::vector<RAnimNodeData>	BoneNodeData;
+
+	/// Root displacements of each frame
 	std::vector<RVec3>			m_RootDisplacement;
-	int						m_RootNode;
+
+	/// Index of the root node
+	int							m_RootNode;
 };
 
 
@@ -164,5 +226,10 @@ FORCEINLINE bool RAnimation::HasRootMotion() const
 FORCEINLINE bool RAnimation::IsLooping() const
 {
 	return (GetBitFlags() & AnimBitFlag_Loop) != 0;
+}
+
+FORCEINLINE int RAnimation::GetBitFlags() const
+{
+	return m_Flags;
 }
 

@@ -59,7 +59,7 @@ void RAnimationPlayer::Proceed(float deltaTime)
 			}
 		}
 
-		if (Animation->GetBitFlags() & AnimBitFlag_HasRootMotion)
+		if (Animation->HasRootMotion())
 		{
 			RootOffset = Animation->GetRootPosition(CurrentPlaybackTime) - PrevRootOffset;
 			if (startOver)
@@ -208,8 +208,8 @@ bool RAnimationBlender::GetCurrentBlendedNodePose(int SourceNodeId, int TargetNo
 	if (m_SourceAnimation.Animation && m_TargetAnimation.Animation)
 	{
 		RMatrix4 mat1, mat2;
-		m_SourceAnimation.Animation->GetNodePose(SourceNodeId, m_SourceAnimation.CurrentPlaybackTime, &mat1);
-		m_TargetAnimation.Animation->GetNodePose(TargetNodeId, m_TargetAnimation.CurrentPlaybackTime, &mat2);
+		m_SourceAnimation.Animation->GetNodePoseAtTime(SourceNodeId, m_SourceAnimation.CurrentPlaybackTime, &mat1);
+		m_TargetAnimation.Animation->GetNodePoseAtTime(TargetNodeId, m_TargetAnimation.CurrentPlaybackTime, &mat2);
 
 		float t = min(1.0f, m_ElapsedBlendTime / m_BlendTime);
 		*OutMatrix = RMatrix4::Slerp(mat1, mat2, t);
@@ -218,7 +218,7 @@ bool RAnimationBlender::GetCurrentBlendedNodePose(int SourceNodeId, int TargetNo
 	}
 	else if (m_SourceAnimation.Animation)
 	{
-		m_SourceAnimation.Animation->GetNodePose(SourceNodeId, m_SourceAnimation.CurrentPlaybackTime, OutMatrix);
+		m_SourceAnimation.Animation->GetNodePoseAtTime(SourceNodeId, m_SourceAnimation.CurrentPlaybackTime, OutMatrix);
 		return true;
 	}
 
@@ -258,23 +258,23 @@ RAnimation::RAnimation()
 }
 
 RAnimation::RAnimation(int nodeCount, int frameCount, float startTime, float endTime, float frameRate)
-	: m_Flags(0), m_FrameCount(frameCount), m_StartTime(startTime), m_EndTime(endTime), m_FrameRate(frameRate), m_RootNode(-1)
+	: m_Flags(0)
+	, m_FrameCount(frameCount)
+	, m_StartTime(startTime)
+	, m_EndTime(endTime)
+	, m_FrameRate(frameRate)
+	, m_RootNode(-1)
 {
-	m_NodeKeyFrames = std::vector<RMatrix4*>(nodeCount, nullptr);
-	m_NodeParents = std::vector<int>(nodeCount, -1);
-	m_NodeNames = std::vector<std::string>(nodeCount, "");
+	BoneNodeData.resize(nodeCount, RAnimNodeData());
+	for (int i = 0; i < nodeCount; i++)
+	{
+		BoneNodeData[i].FrameMatrices.resize(frameCount);
+	}
 }
 
 
 RAnimation::~RAnimation()
 {
-	for (unsigned int i = 0; i < m_NodeKeyFrames.size(); i++)
-	{
-		if (m_NodeKeyFrames[i])
-		{
-			delete [] m_NodeKeyFrames[i];
-		}
-	}
 }
 
 void RAnimation::Serialize(RSerializer& serializer)
@@ -289,37 +289,25 @@ void RAnimation::Serialize(RSerializer& serializer)
 	serializer.SerializeData(m_EndTime);
 	serializer.SerializeData(m_FrameRate);
 	serializer.SerializeData(m_RootNode);
-	serializer.SerializeVector(m_NodeNames, &RSerializer::SerializeData);
-	serializer.SerializeVector(m_NodeParents);
 
-	if (serializer.IsReading())
-		m_NodeKeyFrames.resize(m_NodeNames.size());
-
-	for (size_t i = 0; i < m_NodeKeyFrames.size(); i++)
-	{
-		serializer.SerializeArray(&m_NodeKeyFrames[i], m_FrameCount);
-	}
+	serializer.SerializeVector(BoneNodeData, &RSerializer::SerializeObject);
 }
 
-void RAnimation::AddNodePose(int nodeId, int frameId, const RMatrix4* matrix)
+void RAnimation::AddNodePoseAtFrame(int nodeId, int frameId, const RMatrix4* matrix)
 {
-	assert(nodeId >= 0 && nodeId < (int)m_NodeKeyFrames.size());
+	assert(nodeId >= 0 && nodeId < GetNodeCount());
 	assert(frameId >= 0 && frameId < m_FrameCount);
+	assert(frameId < BoneNodeData[nodeId].FrameMatrices.size());
 
-	if (!m_NodeKeyFrames[nodeId])
-	{
-		m_NodeKeyFrames[nodeId] = new RMatrix4[m_FrameCount];
-	}
-
-	memcpy(&m_NodeKeyFrames[nodeId][frameId], matrix, sizeof(RMatrix4));
+	BoneNodeData[nodeId].FrameMatrices[frameId] = *matrix;
 }
 
-void RAnimation::GetNodePose(int NodeId, float Time, RMatrix4* OutMatrix) const
+void RAnimation::GetNodePoseAtTime(int NodeId, float Time, RMatrix4* OutMatrix) const
 {
 	// Make zero based time
 	Time -= m_StartTime;
 
-	assert(NodeId >= 0 && NodeId < (int)m_NodeKeyFrames.size());
+	assert(NodeId >= 0 && NodeId < GetNodeCount());
 	assert(Time >= 0 && Time < m_FrameCount);
 
 	int frame1 = (int)Time;
@@ -337,8 +325,8 @@ void RAnimation::GetNodePose(int NodeId, float Time, RMatrix4* OutMatrix) const
 
 	float t = Time - frame1;
 
-	const RMatrix4& Transform1 = m_NodeKeyFrames[NodeId][frame1];
-	const RMatrix4& Transform2 = m_NodeKeyFrames[NodeId][frame2];
+	const RMatrix4& Transform1 = BoneNodeData[NodeId].FrameMatrices[frame1];
+	const RMatrix4& Transform2 = BoneNodeData[NodeId].FrameMatrices[frame2];
 
 	RVec3 Position1, Position2;
 	RQuat Rotation1, Rotation2;
@@ -402,31 +390,33 @@ RVec3 RAnimation::GetRootPosition(float time) const
 
 void RAnimation::SetParentId(int nodeId, int parentId)
 {
-	m_NodeParents[nodeId] = parentId;
+	BoneNodeData[nodeId].ParentId = parentId;
 }
 
 int RAnimation::GetParentId(int nodeId) const
 {
-	return m_NodeParents[nodeId];
+	return BoneNodeData[nodeId].ParentId;
 }
 
 void RAnimation::AddNodeNameToId(const char* nodeName, int nodeId)
 {
-	m_NodeNames[nodeId] = nodeName;
+	BoneNodeData[nodeId].BoneName = nodeName;
 }
 
 int RAnimation::GetNodeIdByName(const char* nodeName) const
 {
-	for (std::vector<std::string>::const_iterator iter = m_NodeNames.begin(); iter != m_NodeNames.end(); iter++)
+	for (auto iter = BoneNodeData.begin(); iter != BoneNodeData.end(); iter++)
 	{
-		if (strcmp(iter->c_str(), nodeName) == 0)
-			return (int)(iter - m_NodeNames.begin());
+		if (strcmp(iter->BoneName.c_str(), nodeName) == 0)
+		{
+			return (int)(iter - BoneNodeData.begin());
+		}
 	}
 
 	return -1;
 }
 
-void RAnimation::BuildRootDisplacementArray()
+void RAnimation::BuildRootDisplacements()
 {
 	if (m_RootNode == -1)
 		return;
@@ -435,7 +425,7 @@ void RAnimation::BuildRootDisplacementArray()
 
 	for (int i = 0; i < m_FrameCount; i++)
 	{
-		m_RootDisplacement[i] = m_NodeKeyFrames[m_RootNode][i].GetTranslation();
+		m_RootDisplacement[i] = BoneNodeData[m_RootNode].FrameMatrices[i].GetTranslation();
 		m_RootDisplacement[i].SetY(0.0f);
 	}
 }

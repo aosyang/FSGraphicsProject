@@ -781,7 +781,7 @@ namespace
 					float NumFramesAtStartTime = (float)animStartTime.GetFrameCountPrecise(animTimeMode);
 
 					int FrameIndex = (int)(NumFramesAtCurrentTime - NumFramesAtStartTime);
-					animation->AddNodePose(FbxSceneNodeIndex, FrameIndex, &BoneTransform);
+					animation->AddNodePoseAtFrame(FbxSceneNodeIndex, FrameIndex, &BoneTransform);
 					animation->AddNodeNameToId(BoneName, FbxSceneNodeIndex);
 
 					nodeNameToId[BoneName] = FbxSceneNodeIndex;

@@ -15,7 +15,7 @@ RSerializer::~RSerializer()
 
 void RSerializer::Open(const std::string& filename, ESerializeMode mode)
 {
-	m_Mode = mode;
+	OperationMode = mode;
 
 	m_FileStream.open(filename, (mode == ESerializeMode::Read ? std::ios::in : std::ios::out) | std::ios::binary);
 
@@ -25,7 +25,7 @@ void RSerializer::Open(const std::string& filename, ESerializeMode mode)
 
 bool RSerializer::EnsureHeader(const char* header, UINT size)
 {
-	if (m_Mode == ESerializeMode::Write)
+	if (OperationMode == ESerializeMode::Write)
 	{
 		m_FileStream.write(header, size);
 	}

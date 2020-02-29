@@ -36,7 +36,7 @@ public:
 	/// Check if serializer is in reading mode
 	FORCEINLINE bool IsReading() const
 	{
-		return m_Mode == ESerializeMode::Read;
+		return OperationMode == ESerializeMode::Read;
 	}
 
 	/// Serialize a string file header
@@ -51,7 +51,7 @@ public:
 	template<typename T>
 	void SerializeVector(std::vector<T>& vec)
 	{
-		if (m_Mode == ESerializeMode::Write)
+		if (OperationMode == ESerializeMode::Write)
 		{
 			UINT size = (UINT)vec.size();
 			m_FileStream.write((char*)&size, sizeof(size));
@@ -74,7 +74,7 @@ public:
 	void SerializeVector(std::vector<T>& vec, void (RSerializer::*func)(T&))
 	{
 		UINT size;
-		if (m_Mode == ESerializeMode::Write)
+		if (OperationMode == ESerializeMode::Write)
 		{
 			size = (UINT)vec.size();
 			m_FileStream.write((char*)&size, sizeof(size));
@@ -96,7 +96,7 @@ public:
 	template<typename T>
 	void SerializeData(T& data)
 	{
-		if (m_Mode == ESerializeMode::Write)
+		if (OperationMode == ESerializeMode::Write)
 		{
 			m_FileStream.write((char*)&data, sizeof(T));
 		}
@@ -111,7 +111,7 @@ public:
 	template<>
 	void SerializeData<std::string>(std::string& str)
 	{
-		if (m_Mode == ESerializeMode::Write)
+		if (OperationMode == ESerializeMode::Write)
 		{
 			UINT size = (UINT)str.size();
 			m_FileStream.write((char*)&size, sizeof(size));
@@ -135,7 +135,7 @@ public:
 	{
 		if (size)
 		{
-			if (m_Mode == ESerializeMode::Write)
+			if (OperationMode == ESerializeMode::Write)
 				m_FileStream.write((char*)*arr, sizeof(T) * size);
 			else
 			{
@@ -162,7 +162,7 @@ public:
 		SerializeData(flag);
 		if (flag)
 		{
-			if (m_Mode == ESerializeMode::Read)
+			if (OperationMode == ESerializeMode::Read)
 			{
 				assert(!m_FileStream.eof());
 				*pObj = new T();
@@ -172,7 +172,8 @@ public:
 	}
 
 private:
+	/// Current operation mode (read or write)
+	ESerializeMode	OperationMode;
 	std::fstream	m_FileStream;
-	ESerializeMode	m_Mode;
 };
 

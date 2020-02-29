@@ -736,7 +736,7 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 				RMatrix4 matrix;
 
 				int boneId = m_CharacterObj->GetMesh()->GetCachedAnimationNodeId(animation, i);
-				animation->GetNodePose(boneId, currTime, &matrix);
+				animation->GetNodePoseAtTime(boneId, currTime, &matrix);
 
 				cbSkinned.boneMatrix[i] = m_CharacterObj->GetMesh()->GetBoneInitInvMatrices(i) * matrix * rootInversedTranslation * m_CharacterObj->GetTransformMatrix();
 			}

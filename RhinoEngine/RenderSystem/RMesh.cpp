@@ -265,7 +265,7 @@ void RMesh::CacheAnimation(RAnimation* Animation)
 
 	const char* rootNodeName = m_BoneIdToName[0].data();
 	Animation->SetRootNode(Animation->GetNodeIdByName(rootNodeName));
-	Animation->BuildRootDisplacementArray();
+	Animation->BuildRootDisplacements();
 
 	std::vector<int> nodeIdMap;
 	nodeIdMap.resize(m_BoneIdToName.size());
