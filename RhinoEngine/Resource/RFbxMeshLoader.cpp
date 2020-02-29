@@ -782,7 +782,7 @@ namespace
 
 					int FrameIndex = (int)(NumFramesAtCurrentTime - NumFramesAtStartTime);
 					animation->AddNodePoseAtFrame(FbxSceneNodeIndex, FrameIndex, &BoneTransform);
-					animation->AddNodeNameToId(BoneName, FbxSceneNodeIndex);
+					animation->SetNodeName(FbxSceneNodeIndex, BoneName);
 
 					nodeNameToId[BoneName] = FbxSceneNodeIndex;
 				}
@@ -794,11 +794,11 @@ namespace
 				FbxNode* parent = node->GetParent();
 				if (parent && nodeNameToId.find(parent->GetName()) != nodeNameToId.end())
 				{
-					animation->SetParentId(FbxSceneNodeIndex, nodeNameToId[parent->GetName()]);
+					animation->SetNodeParentId(FbxSceneNodeIndex, nodeNameToId[parent->GetName()]);
 				}
 				else
 				{
-					animation->SetParentId(FbxSceneNodeIndex, -1);
+					animation->SetNodeParentId(FbxSceneNodeIndex, -1);
 				}
 			}
 		}

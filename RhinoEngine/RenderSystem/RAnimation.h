@@ -140,13 +140,22 @@ public:
 	/// Get the root displacement at given time
 	RVec3 GetRootPosition(float time) const;
 
-	void SetParentId(int nodeId, int parentId);
-	int GetParentId(int nodeId) const;
+	/// Set the parent id for a node
+	void SetNodeParentId(int NodeId, int ParentId);
 
-	void AddNodeNameToId(const char* nodeName, int nodeId);
+	/// Get the parent id for a node
+	int GetNodeParentId(int NodeId) const;
+
+	/// Set name for node
+	void SetNodeName(int NodeId, const char* NodeName);
+
+	/// Get id of node with given name
 	int GetNodeIdByName(const char* nodeName) const;
 
+	/// Set the id of root node
 	void SetRootNode(int nodeId) { m_RootNode = nodeId; }
+
+	/// Get the id of root node
 	int GetRootNode() const { return m_RootNode; }
 
 	/// Build root displacements for each frame

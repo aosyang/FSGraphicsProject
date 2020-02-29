@@ -76,6 +76,7 @@ public:
 	const std::string& GetBoneName(int boneId) const;
 	int GetBoneCount() const;
 
+	/// TODO: Remove CacheAnimation and use a skeletal data class for the functionality of GetCachedAnimationNodeId
 	void CacheAnimation(RAnimation* Animation);
 	bool HasCachedAnimation(RAnimation* anim) const;
 	int GetCachedAnimationNodeId(RAnimation* Animation, int BoneId) const;
@@ -98,6 +99,8 @@ private:
 	RAnimation*						m_Animation;
 	std::vector<RMatrix4>				m_BoneInitInvMatrices;
 	std::vector<std::string>					m_BoneIdToName;
+
+	/// TODO: Store the node cache in a shared skeletal data
 	std::map<RAnimation*, std::vector<int>>	m_AnimationNodeCache;
 };
 

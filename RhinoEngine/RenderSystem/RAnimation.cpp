@@ -388,19 +388,19 @@ RVec3 RAnimation::GetRootPosition(float time) const
 	return RVec3::Lerp(va, vb, t);
 }
 
-void RAnimation::SetParentId(int nodeId, int parentId)
+void RAnimation::SetNodeParentId(int NodeId, int ParentId)
 {
-	BoneNodeData[nodeId].ParentId = parentId;
+	BoneNodeData[NodeId].ParentId = ParentId;
 }
 
-int RAnimation::GetParentId(int nodeId) const
+int RAnimation::GetNodeParentId(int NodeId) const
 {
-	return BoneNodeData[nodeId].ParentId;
+	return BoneNodeData[NodeId].ParentId;
 }
 
-void RAnimation::AddNodeNameToId(const char* nodeName, int nodeId)
+void RAnimation::SetNodeName(int NodeId, const char* NodeName)
 {
-	BoneNodeData[nodeId].BoneName = nodeName;
+	BoneNodeData[NodeId].BoneName = NodeName;
 }
 
 int RAnimation::GetNodeIdByName(const char* nodeName) const

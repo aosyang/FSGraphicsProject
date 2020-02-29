@@ -250,6 +250,12 @@ void RMesh::CacheAnimation(RAnimation* Animation)
 		RLogWarning("Failed to cache animation for mesh \'%s\': Input animation is null!\n", GetAssetPath().c_str());
 		return;
 	}
+
+	if (GetResourceState() != RS_Loaded)
+	{
+		// The resource has not finished loading, skip caching the animation
+		return;
+	}
 		
 	if (!m_BoneIdToName.size())
 	{
