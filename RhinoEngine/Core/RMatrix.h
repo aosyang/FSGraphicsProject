@@ -36,7 +36,8 @@ public:
 	RMatrix3 operator*(const RMatrix3& rhs) const;
 	RMatrix3& operator*=(const RMatrix3& rhs);
 
-	bool Decompose(RQuat& Rotation, RVec3& Scale);
+	/// Extract rotation and scale from matrix
+	bool Decompose(RQuat& Rotation, RVec3& Scale) const;
 
 	static RMatrix3 CreateScale(const RVec3& scale);
 	static RMatrix3 CreateScale(float sx, float sy, float sz);
@@ -95,6 +96,7 @@ public:
 	void SetRotation(const RMatrix3& rot);
 	RMatrix3 GetRotationMatrix() const;
 
+	/// Extract position, rotation and scale from matrix
 	bool Decompose(RVec3& Position, RQuat& Rotaion, RVec3& Scale) const;
 
 	void Translate(const RVec3& vec);

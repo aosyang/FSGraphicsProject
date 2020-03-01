@@ -68,7 +68,7 @@ RMatrix3& RMatrix3::operator*=(const RMatrix3& rhs)
 	return *this;
 }
 
-bool RMatrix3::Decompose(RQuat& Rotation, RVec3& Scale)
+bool RMatrix3::Decompose(RQuat& Rotation, RVec3& Scale) const
 {
 	RVec3 v0(m[0][0], m[1][0], m[2][0]);
 	RVec3 v1(m[0][1], m[1][1], m[2][1]);
@@ -83,36 +83,51 @@ bool RMatrix3::Decompose(RQuat& Rotation, RVec3& Scale)
 		return false;
 	}
 
-	v0 /= sx;
-	v1 /= sy;
-	v2 /= sz;
+	float inv_sx = 1.0f / sx;
+	float inv_sy = 1.0f / sy;
+	float inv_sz = 1.0f / sz;
+
+	v0 *= inv_sx;
+	v1 *= inv_sy;
+	v2 *= inv_sz;
+
+	// Divide all components by scale
+	const float n_m11 = _m11 * inv_sx;
+	const float n_m21 = _m21 * inv_sx;
+	const float n_m31 = _m31 * inv_sx;
+	const float n_m12 = _m12 * inv_sy;
+	const float n_m22 = _m22 * inv_sy;
+	const float n_m32 = _m32 * inv_sy;
+	const float n_m13 = _m13 * inv_sz;
+	const float n_m23 = _m23 * inv_sz;
+	const float n_m33 = _m33 * inv_sz;
 
 	float t;
 
-	if (_m33 < 0)
+	if (n_m33 < 0)
 	{
-		if (_m11 > _m22)
+		if (n_m11 > n_m22)
 		{
-			t = 1 + _m11 - _m22 - _m33;
-			Rotation = RQuat(_m23 - _m32, t, _m12 + _m21, _m31 + _m13);
+			t = 1 + n_m11 - n_m22 - n_m33;
+			Rotation = RQuat(n_m23 - n_m32, t, n_m12 + n_m21, n_m31 + n_m13);
 		}
 		else
 		{
-			t = 1 - _m11 + _m22 - _m33;
-			Rotation = RQuat(_m31 - _m13, _m12 + _m21, t, _m23 + _m32);
+			t = 1 - n_m11 + n_m22 - n_m33;
+			Rotation = RQuat(n_m31 - n_m13, n_m12 + n_m21, t, n_m23 + n_m32);
 		}
 	}
 	else
 	{
-		if (_m11 < -_m22)
+		if (n_m11 < -n_m22)
 		{
-			t = 1 - _m11 - _m22 + _m33;
-			Rotation = RQuat(_m12 - _m21, _m31 + _m13, _m23 + _m32, t);
+			t = 1 - n_m11 - n_m22 + n_m33;
+			Rotation = RQuat(n_m12 - n_m21, n_m31 + n_m13, n_m23 + n_m32, t);
 		}
 		else
 		{
-			t = 1 + _m11 + _m22 + _m33;
-			Rotation = RQuat(t, _m23 - _m32, _m31 - _m13, _m12 - _m21);
+			t = 1 + n_m11 + n_m22 + n_m33;
+			Rotation = RQuat(t, n_m23 - n_m32, n_m31 - n_m13, n_m12 - n_m21);
 		}
 	}
 
