@@ -69,18 +69,18 @@ void FTGPlayerBehaviorBase::LoadAnimationAsset(const std::string& AssetPath, int
 		{
 			m_Animation->SetBitFlags(flags);
 
-			std::string strResPath = std::string(AssetPath);
+			std::string strResPath = AssetPath;
 			std::string filename = RFileUtil::GetFileNameInPath(strResPath);
 			m_Animation->SetName(filename);
 		}
 		else
 		{
-			RLogWarning("Unable to find animation data in mesh resource \'%s\'\n", AssetPath);
+			RLogWarning("Unable to find animation data in mesh resource \'%s\'\n", AssetPath.c_str());
 		}
 	}
 	else
 	{
-		RLogWarning("Failed to load mesh resource \'%s\'\n", AssetPath);
+		RLogWarning("Failed to load mesh resource \'%s\'\n", AssetPath.c_str());
 	}
 }
 
