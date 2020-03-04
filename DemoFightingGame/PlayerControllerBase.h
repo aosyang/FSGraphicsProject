@@ -45,8 +45,13 @@ public:
 	/// Set the player's rotation by a direction vector
 	void SetPlayerFacing(const RVec3& Direction, bool bCheckMoveAllowed = true);
 
+	/// Set the next behavior 
 	void SetBehavior(EPlayerBehavior behavior);
+
 	EPlayerBehavior GetBehavior() const;
+
+	/// Get the id of current behavior
+	size_t GetBehaviorId() const;
 	float GetBehaviorTime();
 
 	RAabb GetMovementCollisionShape() const;
@@ -54,9 +59,7 @@ public:
 
 	void SetAnimationDeviation(float Deviation);
 
-	/// Get the animation blender used for this player controller
-	RAnimationBlender& GetAnimBlender() { return m_StateMachine.GetAnimBlender(); }
-
+	/// Get the animation state machine used for this player controller
 	FTGPlayerStateMachine& GetStateMachine() { return m_StateMachine; }
 
 	/// Active player controller list
@@ -81,6 +84,7 @@ private:
 	const RVec3				StairOffset;
 
 	RVec3					m_MovementInput;
+	float MaxMovementSpeed;
 
 	float	CapsuleRadius;
 	float	CapsuleHeight;
@@ -104,5 +108,12 @@ FORCEINLINE const RVec3& PlayerControllerBase::GetRootOffset() const
 
 FORCEINLINE EPlayerBehavior PlayerControllerBase::GetBehavior() const
 {
-	return m_StateMachine.GetCurrentBehavior();
+	auto CurrentBehavior = m_StateMachine.GetCurrentBehavior();
+	return CurrentBehavior ? CurrentBehavior->GetBehaviorEnum() : BHV_None;
+}
+
+FORCEINLINE size_t PlayerControllerBase::GetBehaviorId() const
+{
+	auto CurrentBehavior = m_StateMachine.GetCurrentBehavior();
+	return CurrentBehavior ? CurrentBehavior->GetBehaviorId() : 0;
 }

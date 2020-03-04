@@ -21,7 +21,8 @@ FTGPlayerController::~FTGPlayerController()
 
 void FTGPlayerController::PerformPunch()
 {
-	if (GetBehavior() == BHV_Idle || GetBehavior() == BHV_Run)
+	if (GetBehaviorId() == PlayerBehavior_Idle::StaticClassId() ||
+		GetBehaviorId() == PlayerBehavior_Run::StaticClassId())
 	{
 		SetBehavior(BHV_Punch);
 	}

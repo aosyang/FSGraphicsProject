@@ -27,14 +27,33 @@ enum EPlayerBehavior
 class FTGPlayerController;
 class FTGPlayerStateMachine;
 
+
+/// Declares the static GetBehaviorId method. Usage: PlayerBehavior::GetBehaviorId()
+#define DECLARE_PLAYER_BEHAVIOR(Behavior) \
+	public: \
+		static size_t StaticClassId() { \
+			static size_t BehaviorId = std::hash<std::string>{}(std::string(#Behavior)); \
+			return BehaviorId; \
+		} \
+		virtual size_t GetBehaviorId() const { \
+			return StaticClassId(); \
+		} \
+	private:
+
+
 class FTGPlayerBehaviorBase
 {
 public:
 	FTGPlayerBehaviorBase();
 	FTGPlayerBehaviorBase(const std::string& AnimResourcePath, int AnimFlags = 0);
 
+	virtual size_t GetBehaviorId() const;
+
+	/// Evaluate if a behavior can be executed
 	virtual bool EvaluateForExecution(FTGPlayerStateMachine* StateMachine);
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime);
+
+	virtual bool EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices);
 
 	EPlayerBehavior GetBehaviorEnum() const;
 	RAnimation* GetAnimation() const;
@@ -52,16 +71,18 @@ protected:
 	EPlayerBehavior m_BehaviorEnum;
 
 	RAnimation*		m_Animation;
+	RAnimationPlayer AnimPlayer;
 
 	float	m_BlendTime;
 
 	bool	m_bAllowRerunSelf;
 };
 
-class FTGPlayerBehavior_Idle : public FTGPlayerBehaviorBase
+class PlayerBehavior_Idle : public FTGPlayerBehaviorBase
 {
+	DECLARE_PLAYER_BEHAVIOR(PlayerBehavior_Idle)
 public:
-	FTGPlayerBehavior_Idle(const std::string& AnimResourcePath, int AnimFlags)
+	PlayerBehavior_Idle(const std::string& AnimResourcePath, int AnimFlags)
 		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_Idle;
@@ -69,10 +90,11 @@ public:
 	}
 };
 
-class FTGPlayerBehavior_Walk : public FTGPlayerBehaviorBase
+class PlayerBehavior_Walk : public FTGPlayerBehaviorBase
 {
+	DECLARE_PLAYER_BEHAVIOR(PlayerBehavior_Walk)
 public:
-	FTGPlayerBehavior_Walk(const std::string& AnimResourcePath, int AnimFlags)
+	PlayerBehavior_Walk(const std::string& AnimResourcePath, int AnimFlags)
 		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_Walk;
@@ -80,10 +102,11 @@ public:
 	}
 };
 
-class FTGPlayerBehavior_Run : public FTGPlayerBehaviorBase
+class PlayerBehavior_Run : public FTGPlayerBehaviorBase
 {
+	DECLARE_PLAYER_BEHAVIOR(PlayerBehavior_Run)
 public:
-	FTGPlayerBehavior_Run(const std::string& AnimResourcePath, int AnimFlags)
+	PlayerBehavior_Run(const std::string& AnimResourcePath, int AnimFlags)
 		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_Run;
@@ -91,10 +114,11 @@ public:
 	}
 };
 
-class FTGPlayerBehavior_Punch : public FTGPlayerBehaviorBase
+class PlayerBehavior_Punch : public FTGPlayerBehaviorBase
 {
+	DECLARE_PLAYER_BEHAVIOR(PlayerBehavior_Punch)
 public:
-	FTGPlayerBehavior_Punch(const std::string& AnimResourcePath, int AnimFlags)
+	PlayerBehavior_Punch(const std::string& AnimResourcePath, int AnimFlags)
 		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_Punch;
@@ -104,10 +128,11 @@ public:
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
 };
 
-class FTGPlayerBehavior_Kick : public FTGPlayerBehaviorBase
+class PlayerBehavior_Kick : public FTGPlayerBehaviorBase
 {
+	DECLARE_PLAYER_BEHAVIOR(PlayerBehavior_Kick)
 public:
-	FTGPlayerBehavior_Kick(const std::string& AnimResourcePath, int AnimFlags)
+	PlayerBehavior_Kick(const std::string& AnimResourcePath, int AnimFlags)
 		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_Kick;
@@ -117,10 +142,11 @@ public:
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
 };
 
-class FTGPlayerBehavior_BackKick : public FTGPlayerBehaviorBase
+class PlayerBehavior_BackKick : public FTGPlayerBehaviorBase
 {
+	DECLARE_PLAYER_BEHAVIOR(PlayerBehavior_BackKick)
 public:
-	FTGPlayerBehavior_BackKick(const std::string& AnimResourcePath, int AnimFlags)
+	PlayerBehavior_BackKick(const std::string& AnimResourcePath, int AnimFlags)
 		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_BackKick;
@@ -131,10 +157,11 @@ public:
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
 };
 
-class FTGPlayerBehavior_SpinAttack : public FTGPlayerBehaviorBase
+class PlayerBehavior_SpinAttack : public FTGPlayerBehaviorBase
 {
+	DECLARE_PLAYER_BEHAVIOR(PlayerBehavior_SpinAttack)
 public:
-	FTGPlayerBehavior_SpinAttack(const std::string& AnimResourcePath, int AnimFlags)
+	PlayerBehavior_SpinAttack(const std::string& AnimResourcePath, int AnimFlags)
 		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_SpinAttack;
@@ -144,10 +171,11 @@ public:
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
 };
 
-class FTGPlayerBehavior_Hit : public FTGPlayerBehaviorBase
+class PlayerBehavior_Hit : public FTGPlayerBehaviorBase
 {
+	DECLARE_PLAYER_BEHAVIOR(PlayerBehavior_Hit)
 public:
-	FTGPlayerBehavior_Hit(const std::string& AnimResourcePath, int AnimFlags)
+	PlayerBehavior_Hit(const std::string& AnimResourcePath, int AnimFlags)
 		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_Hit;
@@ -156,10 +184,11 @@ public:
 	}
 };
 
-class FTGPlayerBehavior_KnockedDown : public FTGPlayerBehaviorBase
+class PlayerBehavior_KnockedDown : public FTGPlayerBehaviorBase
 {
+	DECLARE_PLAYER_BEHAVIOR(PlayerBehavior_KnockedDown)
 public:
-	FTGPlayerBehavior_KnockedDown(const std::string& AnimResourcePath, int AnimFlags)
+	PlayerBehavior_KnockedDown(const std::string& AnimResourcePath, int AnimFlags)
 		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_KnockedDown;
@@ -170,10 +199,11 @@ protected:
 	virtual void OnBehaviorFinished(FTGPlayerStateMachine* StateMachine) override;
 };
 
-class FTGPlayerBehavior_GetUp : public FTGPlayerBehaviorBase
+class PlayerBehavior_GetUp : public FTGPlayerBehaviorBase
 {
+	DECLARE_PLAYER_BEHAVIOR(PlayerBehavior_GetUp)
 public:
-	FTGPlayerBehavior_GetUp(const std::string& AnimResourcePath, int AnimFlags)
+	PlayerBehavior_GetUp(const std::string& AnimResourcePath, int AnimFlags)
 		: FTGPlayerBehaviorBase(AnimResourcePath, AnimFlags)
 	{
 		m_BehaviorEnum = BHV_GetUp;

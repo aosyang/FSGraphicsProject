@@ -9,7 +9,7 @@
 
 FTGPlayerStateMachine::FTGPlayerStateMachine(PlayerControllerBase* InPlayerOwner)
 	: m_PlayerOwner(InPlayerOwner)
-	, m_NextBehavior(BHV_None)
+	, m_NextBehavior(nullptr)
 	, m_CurrentBehaviorInstance(nullptr)
 	, m_AnimSpeedDeviation(1.0f)
 {
@@ -17,7 +17,6 @@ FTGPlayerStateMachine::FTGPlayerStateMachine(PlayerControllerBase* InPlayerOwner
 
 FTGPlayerStateMachine::~FTGPlayerStateMachine()
 {
-	ReleaseAssets();
 }
 
 void FTGPlayerStateMachine::InitAssets()
@@ -26,6 +25,9 @@ void FTGPlayerStateMachine::InitAssets()
 	if (m_CurrentBehaviorInstance)
 	{
 		m_AnimBlender.Play(m_CurrentBehaviorInstance->GetAnimation());
+
+		// Set initial behavior for the blend queue
+		BlendQueue.AddBlendTarget(m_CurrentBehaviorInstance, 0.0f);
 	}
 
 	if (m_PlayerOwner)
@@ -47,33 +49,70 @@ void FTGPlayerStateMachine::Update(float DeltaTime)
 		NotifyAnimationFinished();
 	}
 
-	for (auto BehaviorInstance : m_BehaviorInstances)
+	BlendQueue.Proceed(DeltaTime);
+
+	for (auto& BehaviorInstance : m_BehaviorInstances)
 	{
+		// Advance the behavior animation
+		if (BlendQueue.IsBehaviorRelevant(BehaviorInstance.get()))
+		{
+			BehaviorInstance->Update(this, DeltaTime);
+		}
+
 		// Do not re-run current behavior instance
-		if (m_CurrentBehaviorInstance == BehaviorInstance && !m_CurrentBehaviorInstance->DoesAllowRerunSelf())
+		if (m_CurrentBehaviorInstance == BehaviorInstance.get() && !m_CurrentBehaviorInstance->DoesAllowRerunSelf())
 		{
 			continue;
 		}
 
 		if (BehaviorInstance->EvaluateForExecution(this))
 		{
-			m_CurrentBehaviorInstance = BehaviorInstance;
+			m_CurrentBehaviorInstance = BehaviorInstance.get();
 			m_CurrentBehaviorInstance->NotifyBegin(this);
 
 			// Clear next behavior enum since we're already there
-			m_NextBehavior = BHV_None;
+			m_NextBehavior = nullptr;
 
 			float BlendTime = BehaviorInstance->GetBlendInTime();
-			m_AnimBlender.BlendOutTo(BehaviorInstance->GetAnimation(),
-									 BehaviorInstance->GetAnimation()->GetStartTime(), m_AnimSpeedDeviation,
-									 BlendTime);
+			//m_AnimBlender.BlendOutTo(BehaviorInstance->GetAnimation(),
+			//						 BehaviorInstance->GetAnimation()->GetStartTime(), m_AnimSpeedDeviation,
+			//						 BlendTime);
+
+			BlendQueue.AddBlendTarget(BehaviorInstance.get(), BehaviorInstance->GetBlendInTime());
 		}
 	}
+}
 
-	if (m_CurrentBehaviorInstance)
+bool FTGPlayerStateMachine::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices)
+{
+	return BlendQueue.EvaluatePose(SkinnedMesh, OutBoneMatrices);
+}
+
+RVec3 FTGPlayerStateMachine::GetCurrentRootOffset() const
+{
+	return m_AnimBlender.GetCurrentRootOffset();
+}
+
+std::string FTGPlayerStateMachine::GetDebugString() const
+{
+	std::stringstream DebugStream;
+	DebugStream << "Source animation : ";
+	if (m_AnimBlender.GetSourceAnimation())
 	{
-		m_CurrentBehaviorInstance->Update(this, DeltaTime);
+		DebugStream << m_AnimBlender.GetSourceAnimation()->GetName();
 	}
+	DebugStream << std::endl;
+
+	DebugStream << "Source start time : " << m_AnimBlender.GetSourceAnimation()->GetStartTime() << std::endl;
+	DebugStream << "Source end time   : " << m_AnimBlender.GetSourceAnimation()->GetEndTime() << std::endl;
+	DebugStream << "Source playback time : " << m_AnimBlender.GetSourcePlaybackTime() << std::endl;
+	DebugStream << "Current root motion : " << m_AnimBlender.GetCurrentRootOffset().ToString() << std::endl;
+
+	DebugStream << "Blend from : " << (m_AnimBlender.GetSourceAnimation() ? m_AnimBlender.GetSourceAnimation()->GetName() : "") << std::endl;
+	DebugStream << "Blend to   : " << (m_AnimBlender.GetTargetAnimation() ? m_AnimBlender.GetTargetAnimation()->GetName() : "") << std::endl;
+	DebugStream << "Blend time : " << m_AnimBlender.GetElapsedBlendTime() << std::endl;
+
+	return DebugStream.str();
 }
 
 float FTGPlayerStateMachine::GetCurrentBehaviorTime() const
@@ -95,7 +134,7 @@ float FTGPlayerStateMachine::GetCurrentBehaviorTime() const
 
 void FTGPlayerStateMachine::SetNextBehavior(EPlayerBehavior NextBehavior)
 {
-	m_NextBehavior = NextBehavior;
+	m_NextBehavior = FindBehaviorInstance(NextBehavior);
 }
 
 void FTGPlayerStateMachine::NotifyAnimationFinished()
@@ -118,29 +157,19 @@ float FTGPlayerStateMachine::GetAnimationDeviation() const
 
 void FTGPlayerStateMachine::CacheAnimations(RMesh* Mesh)
 {
-	for (auto BehaviorInstance : m_BehaviorInstances)
+	for (auto& BehaviorInstance : m_BehaviorInstances)
 	{
 		Mesh->CacheAnimation(BehaviorInstance->GetAnimation());
 	}
 }
 
-void FTGPlayerStateMachine::ReleaseAssets()
-{
-	for (auto BehaviorInstance : m_BehaviorInstances)
-	{
-		delete BehaviorInstance;
-	}
-
-	m_BehaviorInstances.clear();
-}
-
 FTGPlayerBehaviorBase* FTGPlayerStateMachine::FindBehaviorInstance(EPlayerBehavior Behavior) const
 {
-	for (auto BehaviorInstance : m_BehaviorInstances)
+	for (auto& BehaviorInstance : m_BehaviorInstances)
 	{
 		if (BehaviorInstance->GetBehaviorEnum() == Behavior)
 		{
-			return BehaviorInstance;
+			return BehaviorInstance.get();
 		}
 	}
 

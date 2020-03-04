@@ -10,6 +10,8 @@
 #include "AIBehavior_Roamer.h"
 #include "Navigation/RNavigationSystem.h"
 
+#include "PlayerAssets.h"
+
 FightingGameApp::FightingGameApp()
 	: CurrentPlayerIndex(0)
 	, m_Camera(nullptr)
@@ -97,11 +99,7 @@ bool FightingGameApp::Initialize()
 		if (m_Player[i])
 		{
 			FTGPlayerStateMachine& StateMachine = m_Player[i]->GetStateMachine();
-			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Idle>("/HumanBody/Animations/Idle.fbx", AnimBitFlag_Loop);
-			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Walk>("/HumanBody/Animations/Walking.fbx", AnimBitFlag_Loop);
-			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Run>("/HumanBody/Animations/Running.fbx", AnimBitFlag_Loop);
-
-			m_Player[i]->InitAssets("/HumanBody/HumanBody_DefaultPose.fbx");
+			InitializePlayerAsset_HumanBody(m_Player[i]);
 
 			// Hacked start points for players
 			{
@@ -125,23 +123,11 @@ bool FightingGameApp::Initialize()
 		if (m_AIPlayers[i])
 		{
 			m_AIPlayers[i]->SetPosition(RVec3(RMath::RandRangedF(-800, 800), 50, RMath::RandRangedF(-800, 800)));
-
-			FTGPlayerStateMachine& StateMachine = m_AIPlayers[i]->GetStateMachine();
-			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Idle>("/unitychan/FUCM05_0000_Idle.fbx", AnimBitFlag_Loop);
-			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Run>("/unitychan/FUCM_0012b_EH_RUN_LP_NoZ.fbx", AnimBitFlag_Loop);
-			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Punch>("/unitychan/FUCM05_0001_M_CMN_LJAB.fbx", AnimBitFlag_HasRootMotion);
-			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Kick>("/unitychan/FUCM_04_0001_RHiKick.fbx", AnimBitFlag_HasRootMotion);
-			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_BackKick>("/unitychan/FUCM02_0004_CH01_AS_MAWAK.fbx", AnimBitFlag_HasRootMotion);
-			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_SpinAttack>("/unitychan/FUCM02_0029_Cha01_STL01_ScrewK01.fbx", AnimBitFlag_HasRootMotion);
-			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_Hit>("/unitychan/unitychan_DAMAGED00.fbx", AnimBitFlag_HasRootMotion);
-			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_KnockedDown>("/unitychan/FUCM02_0025_MYA_TF_DOWN.fbx", AnimBitFlag_HasRootMotion);
-			StateMachine.AllocateBehaviorInstance<FTGPlayerBehavior_GetUp>("/unitychan/FUCM03_0019_HeadSpring.fbx", AnimBitFlag_HasRootMotion);
-
-			m_AIPlayers[i]->InitAssets("/unitychan/unitychan.fbx");
+			InitializePlayerAsset_Maid(m_AIPlayers[i]);
 
 			// Make each AI play animation at a slightly different speed
 			//m_AIPlayers[i]->SetAnimationDeviation(RMath::RandRangedF(0.8f, 1.2f));
-			m_AIPlayers[i]->SetAnimationDeviation(0.8f);
+			//m_AIPlayers[i]->SetAnimationDeviation(0.8f);
 
 			// Create AI combat logic component
 			m_AIPlayers[i]->AddNewComponent<AIBehavior_Roamer>();
@@ -233,8 +219,6 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 
 		RVec3 playerPos = CurrentPlayer->GetPosition();
 		float playerRot = CurrentPlayer->GetPlayerRotation();
-		RAnimationBlender& blender = CurrentPlayer->GetAnimBlender();
-		float SourcePlayback = blender.GetSourcePlaybackTime();
 
 		std::stringstream DebugMsg;
 		DebugMsg << "Player: ("
@@ -243,21 +227,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 				 << playerPos.Z() << "), rot: "
 				 << playerRot << std::endl;
 
-		DebugMsg << "Source animation : ";
-		if (blender.GetSourceAnimation())
-		{
-			DebugMsg << blender.GetSourceAnimation()->GetName();
-		}
-		DebugMsg << std::endl;
-
-		DebugMsg << "Source start time : " << blender.GetSourceAnimation()->GetStartTime() << std::endl;
-		DebugMsg << "Source end time   : " << blender.GetSourceAnimation()->GetEndTime() << std::endl;
-		DebugMsg << "Source playback time : " << SourcePlayback << std::endl;
-		DebugMsg << "Current root motion : " << blender.GetCurrentRootOffset().ToString() << std::endl;
-
-		DebugMsg << "Blend from : " << (blender.GetSourceAnimation() ? blender.GetSourceAnimation()->GetName() : "") << std::endl;
-		DebugMsg << "Blend to   : " << (blender.GetTargetAnimation() ? blender.GetTargetAnimation()->GetName() : "") << std::endl;
-		DebugMsg << "Blend time : " << blender.GetElapsedBlendTime() << std::endl;
+		DebugMsg << CurrentPlayer->GetStateMachine().GetDebugString();
 
 		if (FTGPlayerController::DrawDebugHitShape)
 		{

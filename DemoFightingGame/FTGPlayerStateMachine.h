@@ -7,8 +7,10 @@
 #pragma once
 
 #include "FTGPlayerBehaviors.h"
+#include "RAnimBlendQueue.h"
 
 class PlayerControllerBase;
+
 
 /// The behavior state machine of player
 class FTGPlayerStateMachine
@@ -27,11 +29,21 @@ public:
 	/// Update the state machine
 	void Update(float DeltaTime);
 
+	/// Evaluate pose for skeletal mesh at current state
+	bool EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices);
+
+	RVec3 GetCurrentRootOffset() const;
+
+	/// Get debug string for the state machine
+	std::string GetDebugString() const;
+
 	/// Get the owner of this state machine
 	PlayerControllerBase* GetOwner() const;
 
 	/// Get enum of current behavior
-	EPlayerBehavior GetCurrentBehavior() const;
+	FTGPlayerBehaviorBase* GetCurrentBehavior() const;
+
+	size_t GetCurrentBehaviorId() const;
 
 	/// Get time elapsed on current behavior
 	float GetCurrentBehaviorTime() const;
@@ -40,10 +52,7 @@ public:
 	void SetNextBehavior(EPlayerBehavior NextBehavior);
 
 	/// Get enum of next behavior
-	EPlayerBehavior GetNextBehavior() const;
-
-	/// Get animation blender
-	RAnimationBlender& GetAnimBlender();
+	FTGPlayerBehaviorBase* GetNextBehavior() const;
 
 	/// Notify the state machine about completion of current animation
 	void NotifyAnimationFinished();
@@ -58,9 +67,6 @@ private:
 	/// Cache all animation assets for a mesh
 	void CacheAnimations(RMesh* Mesh);
 
-	/// Release behavior assets
-	void ReleaseAssets();
-
 	/// Find the behavior instance with behavior enum
 	FTGPlayerBehaviorBase* FindBehaviorInstance(EPlayerBehavior Behavior) const;
 
@@ -71,17 +77,19 @@ private:
 	/// Current behavior instance
 	FTGPlayerBehaviorBase*			m_CurrentBehaviorInstance;
 
-	/// Next behavior enum
-	EPlayerBehavior					m_NextBehavior;
+	/// Next behavior
+	FTGPlayerBehaviorBase*			m_NextBehavior;
 
 	/// All behavior instances
-	std::vector<FTGPlayerBehaviorBase*>	m_BehaviorInstances;
+	std::vector<std::unique_ptr<FTGPlayerBehaviorBase>>	m_BehaviorInstances;
 
 	/// The deviation of animation playback
 	float							m_AnimSpeedDeviation;
 
 	/// Animation blender
 	RAnimationBlender				m_AnimBlender;
+
+	RAnimBlendQueue					BlendQueue;
 };
 
 
@@ -90,23 +98,28 @@ FORCEINLINE PlayerControllerBase* FTGPlayerStateMachine::GetOwner() const
 	return m_PlayerOwner;
 }
 
-FORCEINLINE EPlayerBehavior FTGPlayerStateMachine::GetCurrentBehavior() const
+FORCEINLINE FTGPlayerBehaviorBase* FTGPlayerStateMachine::GetCurrentBehavior() const
 {
-	return m_CurrentBehaviorInstance ? m_CurrentBehaviorInstance->GetBehaviorEnum() : BHV_None;
+	return m_CurrentBehaviorInstance;
 }
 
-FORCEINLINE EPlayerBehavior FTGPlayerStateMachine::GetNextBehavior() const
+FORCEINLINE size_t FTGPlayerStateMachine::GetCurrentBehaviorId() const
+{
+	if (m_CurrentBehaviorInstance)
+	{
+		return m_CurrentBehaviorInstance->GetBehaviorId();
+	}
+
+	return 0;
+}
+
+FORCEINLINE FTGPlayerBehaviorBase* FTGPlayerStateMachine::GetNextBehavior() const
 {
 	return m_NextBehavior;
-}
-
-FORCEINLINE RAnimationBlender& FTGPlayerStateMachine::GetAnimBlender()
-{
-	return m_AnimBlender;
 }
 
 template<typename T>
 void FTGPlayerStateMachine::AllocateBehaviorInstance(const std::string& AnimResourcePath, int AnimFlags /*= 0*/)
 {
-	m_BehaviorInstances.push_back(new T(AnimResourcePath, AnimFlags));
+	m_BehaviorInstances.push_back(std::make_unique<T>(AnimResourcePath, AnimFlags));
 }

@@ -9,12 +9,20 @@
 
 
 RAnimationPlayer::RAnimationPlayer()
-	: Animation(nullptr)
-	, IsAnimDone(false)
 {
+	Reset();
 }
 
-void RAnimationPlayer::Proceed(float deltaTime)
+void RAnimationPlayer::Reset()
+{
+	Animation = nullptr;
+	CurrentPlaybackTime = 0.0f;
+	TimeScale = 1.0f;
+	RootOffset = RVec3::Zero();
+	IsAnimDone = false;
+}
+
+void RAnimationPlayer::Proceed(float DeltaTime)
 {
 	if (Animation && !IsAnimDone)
 	{
@@ -27,7 +35,7 @@ void RAnimationPlayer::Proceed(float deltaTime)
 		// Root motion offset at the beginning of this frame
 		RVec3 PrevRootOffset = Animation->GetRootPosition(CurrentPlaybackTime);
 
-		CurrentPlaybackTime += deltaTime * Animation->GetFrameRate() * TimeScale;
+		CurrentPlaybackTime += DeltaTime * Animation->GetFrameRate() * TimeScale;
 		bool startOver = false;
 
 		// The playback time has passed the end time of the animation
@@ -75,10 +83,25 @@ void RAnimationPlayer::Proceed(float deltaTime)
 	}
 }
 
-void RAnimationPlayer::Reset()
+void RAnimationPlayer::Rewind()
 {
 	IsAnimDone = false;
 	CurrentPlaybackTime = Animation ? Animation->GetStartTime() : 0.0f;
+}
+
+bool RAnimationPlayer::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutMatrices) const
+{
+	for (int i = 0; i < SkinnedMesh.GetBoneCount(); i++)
+	{
+		RMatrix4 BoneMatrix;
+		int BoneId = SkinnedMesh.GetCachedAnimationNodeId(Animation, i);
+		Animation->GetNodePoseAtTime(BoneId, CurrentPlaybackTime, &BoneMatrix);
+
+		// Output poses in object space
+		OutMatrices[i] = BoneMatrix;
+	}
+
+	return true;
 }
 
 RAnimationBlender::RAnimationBlender()
@@ -158,22 +181,17 @@ void RAnimationBlender::ProceedAnimation(float deltaTime)
 	}
 }
 
-bool RAnimationBlender::EvaluatePose(RMesh* SkinnedMesh, const RMatrix4& LocalToWorld, RMatrix4* OutBoneMatrices) const
+bool RAnimationBlender::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices) const
 {
-	if (!SkinnedMesh)
-	{
-		return false;
-	}
-
 	RAnimation* const SourceAnim = GetSourceAnimation();
 	RAnimation* const TargetAnim = GetTargetAnimation();
 
-	for (int i = 0; i < SkinnedMesh->GetBoneCount(); i++)
+	for (int i = 0; i < SkinnedMesh.GetBoneCount(); i++)
 	{
 		RMatrix4 BoneMatrix;
 
-		int SourceBoneId = SkinnedMesh->GetCachedAnimationNodeId(SourceAnim, i);
-		int TargetBondId = SkinnedMesh->GetCachedAnimationNodeId(TargetAnim, i);
+		int SourceBoneId = SkinnedMesh.GetCachedAnimationNodeId(SourceAnim, i);
+		int TargetBondId = SkinnedMesh.GetCachedAnimationNodeId(TargetAnim, i);
 
 		bool Result = GetCurrentBlendedNodePose(SourceBoneId, TargetBondId, &BoneMatrix);
 		if (!Result)
@@ -181,7 +199,8 @@ bool RAnimationBlender::EvaluatePose(RMesh* SkinnedMesh, const RMatrix4& LocalTo
 			BoneMatrix = RMatrix4::Zero;
 		}
 
-		OutBoneMatrices[i] = SkinnedMesh->GetBoneInitInvMatrices(i) * BoneMatrix * LocalToWorld;
+		// Output poses in object space
+		OutBoneMatrices[i] = BoneMatrix;
 
 #if 0	// Debug rendering bones
 		{
@@ -211,7 +230,7 @@ bool RAnimationBlender::GetCurrentBlendedNodePose(int SourceNodeId, int TargetNo
 		m_SourceAnimation.Animation->GetNodePoseAtTime(SourceNodeId, m_SourceAnimation.CurrentPlaybackTime, &mat1);
 		m_TargetAnimation.Animation->GetNodePoseAtTime(TargetNodeId, m_TargetAnimation.CurrentPlaybackTime, &mat2);
 
-		float t = min(1.0f, m_ElapsedBlendTime / m_BlendTime);
+		float t = RMath::Clamp(m_ElapsedBlendTime / m_BlendTime, 0.0f, 1.0f);
 		*OutMatrix = RMatrix4::Slerp(mat1, mat2, t);
 
 		return true;
@@ -225,11 +244,11 @@ bool RAnimationBlender::GetCurrentBlendedNodePose(int SourceNodeId, int TargetNo
 	return false;
 }
 
-RVec3 RAnimationBlender::GetCurrentRootOffset()
+RVec3 RAnimationBlender::GetCurrentRootOffset() const
 {
 	if (m_SourceAnimation.Animation && m_TargetAnimation.Animation)
 	{
-		float t = min(1.0f, m_ElapsedBlendTime / m_BlendTime);
+		float t = RMath::Clamp(m_ElapsedBlendTime / m_BlendTime, 0.0f, 1.0f);
 
 		return RVec3::Lerp(m_SourceAnimation.RootOffset, m_TargetAnimation.RootOffset, t);
 	}

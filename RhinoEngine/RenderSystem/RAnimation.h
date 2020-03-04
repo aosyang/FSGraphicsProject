@@ -15,6 +15,7 @@ enum AnimationBitFlag
 
 class RAnimation;
 
+/// Plays a single animation
 class RAnimationPlayer
 {
 public:
@@ -27,8 +28,15 @@ public:
 	RVec3			RootOffset;
 	bool			IsAnimDone;
 
-	void Proceed(float deltaTime);
 	void Reset();
+
+	/// Proceed the animation playback
+	void Proceed(float DeltaTime);
+
+	/// Start the animation from beginning
+	void Rewind();
+
+	bool EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutMatrices) const;
 };
 
 /// An animation evaluator that does the two-way blending
@@ -51,10 +59,10 @@ public:
 	void ProceedAnimation(float deltaTime);
 
 	/// Evaluate the pose for a skinned mesh at current state
-	bool EvaluatePose(RMesh* SkinnedMesh, const RMatrix4& LocalToWorld, RMatrix4* OutBoneMatrices) const;
+	bool EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices) const;
 
 	/// Get the root offset at current state
-	RVec3 GetCurrentRootOffset();
+	RVec3 GetCurrentRootOffset() const;
 
 	/// Check if animation has finished playing.
 	bool HasFinishedPlaying() const;

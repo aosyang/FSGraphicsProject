@@ -91,6 +91,7 @@ PlayerControllerBase::PlayerControllerBase(const RConstructingParams& Params)
 	: Base(Params)
 	, StairOffset(0.0f, 20.0f, 0.0f)
 	, m_MovementInput(0.0f, 0.0f, 0.0f)
+	, MaxMovementSpeed(1.0f)
 	, CapsuleRadius(40.0f)
 	, CapsuleHeight(70.0f)
 	, m_Rotation(0.0f)
@@ -158,7 +159,7 @@ void PlayerControllerBase::PreUpdate(float DeltaTime)
 {
 	m_StateMachine.Update(DeltaTime);
 
-	m_RootOffset = GetAnimBlender().GetCurrentRootOffset();
+	m_RootOffset = GetStateMachine().GetCurrentRootOffset();
 
 	//if (m_Behavior == BHV_Idle || m_Behavior == BHV_Run)
 	//	m_RootOffset = RVec3(0, 0, 0);
@@ -243,7 +244,14 @@ void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 MoveVec)
 void PlayerControllerBase::PostUpdate(float DeltaTime)
 {
 	// Evaluate the skeletal pose at current time
-	GetAnimBlender().EvaluatePose(m_Mesh, GetTransformMatrix(), m_BoneMatrices);
+	GetStateMachine().EvaluatePose(*m_Mesh, m_BoneMatrices);
+
+	// Transform all bones to world space
+	const RMatrix4& Transform = GetTransformMatrix();
+	for (int i = 0; i < m_Mesh->GetBoneCount(); i++)
+	{
+		m_BoneMatrices[i] = m_Mesh->GetBoneInitInvMatrices(i) * m_BoneMatrices[i] * Transform;
+	}
 }
 
 void PlayerControllerBase::Draw()
@@ -273,7 +281,7 @@ void PlayerControllerBase::SetMovementInput(const RVec3& Input)
 		DebugBreak();
 	}
 
-	m_MovementInput = Input * m_StateMachine.GetAnimationDeviation();
+	m_MovementInput = Input * MaxMovementSpeed * m_StateMachine.GetAnimationDeviation();
 }
 
 void PlayerControllerBase::SetPlayerFacing(const RVec3& Direction, bool bCheckMoveAllowed /*= true*/)
@@ -349,5 +357,7 @@ RVec3 PlayerControllerBase::GetHalfCapsuleOffset() const
 
 bool PlayerControllerBase::CanMovePlayerWithInput() const
 {
-	return m_StateMachine.GetCurrentBehavior() == BHV_Run || m_StateMachine.GetCurrentBehavior() == BHV_Walk || m_StateMachine.GetCurrentBehavior() == BHV_Idle;
+	return m_StateMachine.GetCurrentBehaviorId() == PlayerBehavior_Run::StaticClassId() ||
+		   m_StateMachine.GetCurrentBehaviorId() == PlayerBehavior_Walk::StaticClassId() ||
+		   m_StateMachine.GetCurrentBehaviorId() == PlayerBehavior_Idle::StaticClassId();
 }

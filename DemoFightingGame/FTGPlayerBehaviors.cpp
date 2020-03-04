@@ -23,14 +23,29 @@ FTGPlayerBehaviorBase::FTGPlayerBehaviorBase(const std::string& AnimResourcePath
 	LoadAnimationAsset(AnimResourcePath, AnimFlags);
 }
 
+size_t FTGPlayerBehaviorBase::GetBehaviorId() const
+{
+	return 0;
+}
+
 bool FTGPlayerBehaviorBase::EvaluateForExecution(FTGPlayerStateMachine* StateMachine)
 {
-	return StateMachine->GetNextBehavior() == GetBehaviorEnum();
+	return StateMachine->GetNextBehavior() == this;
 }
 
 void FTGPlayerBehaviorBase::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
 {
+	AnimPlayer.Proceed(DeltaTime);
+}
 
+bool FTGPlayerBehaviorBase::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices)
+{
+	if (AnimPlayer.Animation)
+	{
+		return AnimPlayer.EvaluatePose(SkinnedMesh, OutBoneMatrices);
+	}
+
+	return false;
 }
 
 void FTGPlayerBehaviorBase::NotifyBegin(FTGPlayerStateMachine* StateMachine)
@@ -69,9 +84,13 @@ void FTGPlayerBehaviorBase::LoadAnimationAsset(const std::string& AssetPath, int
 		{
 			m_Animation->SetBitFlags(flags);
 
-			std::string strResPath = AssetPath;
-			std::string filename = RFileUtil::GetFileNameInPath(strResPath);
+			std::string filename = RFileUtil::GetFileNameInPath(AssetPath);
 			m_Animation->SetName(filename);
+
+			// Initialize the animation player
+			AnimPlayer.Animation = m_Animation;
+			AnimPlayer.CurrentPlaybackTime = m_Animation->GetStartTime();
+			AnimPlayer.TimeScale = 1.0f;
 		}
 		else
 		{
@@ -84,20 +103,22 @@ void FTGPlayerBehaviorBase::LoadAnimationAsset(const std::string& AssetPath, int
 	}
 }
 
-bool FTGPlayerBehavior_BackKick::EvaluateForExecution(FTGPlayerStateMachine* StateMachine)
+bool PlayerBehavior_BackKick::EvaluateForExecution(FTGPlayerStateMachine* StateMachine)
 {
-	return StateMachine->GetCurrentBehavior() == BHV_Kick &&
-		   StateMachine->GetNextBehavior() == GetBehaviorEnum() &&
+	return StateMachine->GetCurrentBehaviorId() == PlayerBehavior_Kick::StaticClassId() &&	// Back kick can only be triggered during a regular kick behavior
+		   StateMachine->GetNextBehavior() == this &&
 		   StateMachine->GetCurrentBehaviorTime() >= 0.3f;
 }
 
-void FTGPlayerBehavior_KnockedDown::OnBehaviorFinished(FTGPlayerStateMachine* StateMachine)
+void PlayerBehavior_KnockedDown::OnBehaviorFinished(FTGPlayerStateMachine* StateMachine)
 {
 	StateMachine->SetNextBehavior(BHV_GetUp);
 }
 
-void FTGPlayerBehavior_Kick::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
+void PlayerBehavior_Kick::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
 {
+	FTGPlayerBehaviorBase::Update(StateMachine, DeltaTime);
+
 	float BehaviorTime = StateMachine->GetCurrentBehaviorTime();
 	if (BehaviorTime > 0.1f && BehaviorTime < 0.3f)
 	{
@@ -132,8 +153,10 @@ void FTGPlayerBehavior_Kick::Update(FTGPlayerStateMachine* StateMachine, float D
 	}
 }
 
-void FTGPlayerBehavior_Punch::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
+void PlayerBehavior_Punch::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
 {
+	FTGPlayerBehaviorBase::Update(StateMachine, DeltaTime);
+
 	float BehaviorTime = StateMachine->GetCurrentBehaviorTime();
 	if (BehaviorTime > 0.1f && BehaviorTime < 0.3f)
 	{
@@ -168,8 +191,10 @@ void FTGPlayerBehavior_Punch::Update(FTGPlayerStateMachine* StateMachine, float 
 	}
 }
 
-void FTGPlayerBehavior_BackKick::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
+void PlayerBehavior_BackKick::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
 {
+	FTGPlayerBehaviorBase::Update(StateMachine, DeltaTime);
+
 	float BehaviorTime = StateMachine->GetCurrentBehaviorTime();
 	if (BehaviorTime > 0.1f && BehaviorTime < 0.3f)
 	{
@@ -214,8 +239,10 @@ void FTGPlayerBehavior_BackKick::Update(FTGPlayerStateMachine* StateMachine, flo
 	}
 }
 
-void FTGPlayerBehavior_SpinAttack::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
+void PlayerBehavior_SpinAttack::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
 {
+	FTGPlayerBehaviorBase::Update(StateMachine, DeltaTime);
+
 	float BehaviorTime = StateMachine->GetCurrentBehaviorTime();
 	if (BehaviorTime > 0.3f && BehaviorTime < 0.6f)
 	{
