@@ -12,6 +12,7 @@ enum EPlayerBehavior
 {
 	BHV_None,
 
+	BHV_Navigation,
 	BHV_Idle,
 	BHV_Walk,
 	BHV_Run,
@@ -46,6 +47,7 @@ class FTGPlayerBehaviorBase
 public:
 	FTGPlayerBehaviorBase();
 	FTGPlayerBehaviorBase(const std::string& AnimResourcePath, int AnimFlags = 0);
+	virtual ~FTGPlayerBehaviorBase() = default;
 
 	virtual size_t GetBehaviorId() const;
 
@@ -54,6 +56,8 @@ public:
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime);
 
 	virtual bool EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices);
+
+	void CacheAssets(RMesh& SkinnedMesh);
 
 	EPlayerBehavior GetBehaviorEnum() const;
 	RAnimation* GetAnimation() const;
@@ -64,6 +68,8 @@ public:
 	void NotifyEnd(FTGPlayerStateMachine* StateMachine);
 
 protected:
+	virtual void OnCacheAnimations(RMesh& SkinnedMesh);
+
 	virtual void OnBehaviorFinished(FTGPlayerStateMachine* StateMachine);
 
 	void LoadAnimationAsset(const std::string& AssetPath, int flags = 0);

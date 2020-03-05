@@ -1,0 +1,11 @@
+<!--Mesh path: /Maid/Maid.fbx-->
+<Material>
+    <MeshElement Index="0">/Maid/Skin.material</MeshElement>
+    <MeshElement Index="1">/Maid/Cloth_Black.material</MeshElement>
+    <MeshElement Index="2">/Maid/Cloth_Black.material</MeshElement>
+    <MeshElement Index="3">/Maid/Cloth_White.material</MeshElement>
+    <MeshElement Index="4">/Maid/ShoeLether.material</MeshElement>
+    <MeshElement Index="5">/Maid/Hair.material</MeshElement>
+    <MeshElement Index="6">/Maid/Hair.material</MeshElement>
+    <MeshElement Index="7">/Maid/Hair.material</MeshElement>
+</Material>

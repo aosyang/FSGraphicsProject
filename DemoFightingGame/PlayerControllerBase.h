@@ -36,7 +36,14 @@ public:
 	virtual void Draw() override;
 	virtual void DrawDepthPass() override;
 
+	/// Set controller input for moving the character
 	void SetMovementInput(const RVec3& Input);
+
+	/// Get the movement input vector
+	RVec3 GetPlannarMovementVector() const;
+
+	/// Get the velocity of controller
+	RVec3 GetVelocity() const;
 
 	/// Set the player's rotation in yaw angles
 	void SetPlayerRotation(float rot) { m_Rotation = rot; }
@@ -84,6 +91,7 @@ private:
 	const RVec3				StairOffset;
 
 	RVec3					m_MovementInput;
+	RVec3 PlannarMoveVector;
 	float MaxMovementSpeed;
 
 	float	CapsuleRadius;

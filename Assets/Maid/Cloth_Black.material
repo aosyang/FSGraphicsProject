@@ -1,0 +1,4 @@
+<!--Material path: /Maid/Cloth_Black.material-->
+<Material Shader="Lighting" DoubleSided="1">
+    <Texture Slot="0">/Maid/Cloth_Black.dds</Texture>
+</Material>

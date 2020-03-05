@@ -21,11 +21,9 @@ FTGPlayerStateMachine::~FTGPlayerStateMachine()
 
 void FTGPlayerStateMachine::InitAssets()
 {
-	m_CurrentBehaviorInstance = FindBehaviorInstance(BHV_Idle);
+	m_CurrentBehaviorInstance = FindBehaviorInstance(BHV_Navigation);
 	if (m_CurrentBehaviorInstance)
 	{
-		m_AnimBlender.Play(m_CurrentBehaviorInstance->GetAnimation());
-
 		// Set initial behavior for the blend queue
 		BlendQueue.AddBlendTarget(m_CurrentBehaviorInstance, 0.0f);
 	}
@@ -74,10 +72,6 @@ void FTGPlayerStateMachine::Update(float DeltaTime)
 			m_NextBehavior = nullptr;
 
 			float BlendTime = BehaviorInstance->GetBlendInTime();
-			//m_AnimBlender.BlendOutTo(BehaviorInstance->GetAnimation(),
-			//						 BehaviorInstance->GetAnimation()->GetStartTime(), m_AnimSpeedDeviation,
-			//						 BlendTime);
-
 			BlendQueue.AddBlendTarget(BehaviorInstance.get(), BehaviorInstance->GetBlendInTime());
 		}
 	}
@@ -97,6 +91,8 @@ std::string FTGPlayerStateMachine::GetDebugString() const
 {
 	std::stringstream DebugStream;
 	DebugStream << "Source animation : ";
+
+	/*
 	if (m_AnimBlender.GetSourceAnimation())
 	{
 		DebugStream << m_AnimBlender.GetSourceAnimation()->GetName();
@@ -111,6 +107,7 @@ std::string FTGPlayerStateMachine::GetDebugString() const
 	DebugStream << "Blend from : " << (m_AnimBlender.GetSourceAnimation() ? m_AnimBlender.GetSourceAnimation()->GetName() : "") << std::endl;
 	DebugStream << "Blend to   : " << (m_AnimBlender.GetTargetAnimation() ? m_AnimBlender.GetTargetAnimation()->GetName() : "") << std::endl;
 	DebugStream << "Blend time : " << m_AnimBlender.GetElapsedBlendTime() << std::endl;
+	*/
 
 	return DebugStream.str();
 }
@@ -159,7 +156,7 @@ void FTGPlayerStateMachine::CacheAnimations(RMesh* Mesh)
 {
 	for (auto& BehaviorInstance : m_BehaviorInstances)
 	{
-		Mesh->CacheAnimation(BehaviorInstance->GetAnimation());
+		BehaviorInstance->CacheAssets(*Mesh);
 	}
 }
 

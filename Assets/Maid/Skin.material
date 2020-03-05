@@ -1,0 +1,4 @@
+<!--Material path: /Maid/Skin.material-->
+<Material Shader="Lighting">
+    <Texture Slot="0">/Maid/Skin.dds</Texture>
+</Material>

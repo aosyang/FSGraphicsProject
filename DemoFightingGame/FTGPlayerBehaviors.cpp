@@ -48,6 +48,11 @@ bool FTGPlayerBehaviorBase::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* Out
 	return false;
 }
 
+void FTGPlayerBehaviorBase::CacheAssets(RMesh& SkinnedMesh)
+{
+	OnCacheAnimations(SkinnedMesh);
+}
+
 void FTGPlayerBehaviorBase::NotifyBegin(FTGPlayerStateMachine* StateMachine)
 {
 	PlayerControllerBase* OwnerPlayer = StateMachine->GetOwner();
@@ -66,10 +71,15 @@ void FTGPlayerBehaviorBase::NotifyEnd(FTGPlayerStateMachine* StateMachine)
 	OnBehaviorFinished(StateMachine);
 }
 
+void FTGPlayerBehaviorBase::OnCacheAnimations(RMesh& SkinnedMesh)
+{
+	SkinnedMesh.CacheAnimation(m_Animation);
+}
+
 void FTGPlayerBehaviorBase::OnBehaviorFinished(FTGPlayerStateMachine* StateMachine)
 {
 	// By default, all behaviors return to idle pose when animation finishes
-	StateMachine->SetNextBehavior(BHV_Idle);
+	StateMachine->SetNextBehavior(BHV_Navigation);
 }
 
 void FTGPlayerBehaviorBase::LoadAnimationAsset(const std::string& AssetPath, int flags /*= 0*/)

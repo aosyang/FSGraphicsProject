@@ -13,6 +13,7 @@
 #include "Physics/RPhysicsPrivate.h"
 
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
+#include "PlayerBehavior_Navigation.h"
 
 namespace
 {
@@ -91,7 +92,8 @@ PlayerControllerBase::PlayerControllerBase(const RConstructingParams& Params)
 	: Base(Params)
 	, StairOffset(0.0f, 20.0f, 0.0f)
 	, m_MovementInput(0.0f, 0.0f, 0.0f)
-	, MaxMovementSpeed(1.0f)
+	, PlannarMoveVector(0.0f, 0.0f, 0.0f)
+	, MaxMovementSpeed(0.5f)
 	, CapsuleRadius(40.0f)
 	, CapsuleHeight(70.0f)
 	, m_Rotation(0.0f)
@@ -187,31 +189,19 @@ void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 MoveVec)
 	{
 		KinematicCharacterController->setWalkDirection(RVec3TobtVec3(MoveVec));
 
-		RVec3 PlannarMoveVector = MoveVec;
+		PlannarMoveVector = MoveVec;
 		PlannarMoveVector.SetY(0.0f);
 		float SqrMagnitude = PlannarMoveVector.SquaredMagitude();
 
 		if (SqrMagnitude > 0.0f)
 		{
-			PlannarMoveVector = PlannarMoveVector.GetNormalized();
-			m_Rotation = LerpDegreeAngle(m_Rotation, RAD_TO_DEG(atan2f(-PlannarMoveVector.X(), -PlannarMoveVector.Z())), 10.0f * DeltaTime);
-
-			if (SqrMagnitude > RMath::Square(5.0f))
-			{
-				SetBehavior(BHV_Run);
-			}
-			else
-			{
-				SetBehavior(BHV_Walk);
-			}
-		}
-		else
-		{
-			SetBehavior(BHV_Idle);
+			RVec3 MoveDirection = PlannarMoveVector.GetNormalized();
+			m_Rotation = LerpDegreeAngle(m_Rotation, RAD_TO_DEG(atan2f(-MoveDirection.X(), -MoveDirection.Z())), 10.0f * DeltaTime);
 		}
 	}
 	else
 	{
+		PlannarMoveVector = RVec3::Zero();
 		KinematicCharacterController->setWalkDirection(btVector3(0, 0, 0));
 	}
 
@@ -282,6 +272,16 @@ void PlayerControllerBase::SetMovementInput(const RVec3& Input)
 	}
 
 	m_MovementInput = Input * MaxMovementSpeed * m_StateMachine.GetAnimationDeviation();
+}
+
+RVec3 PlayerControllerBase::GetPlannarMovementVector() const
+{
+	return PlannarMoveVector;
+}
+
+RVec3 PlayerControllerBase::GetVelocity() const
+{
+	return btVec3ToRVec3(KinematicCharacterController->getLinearVelocity());
 }
 
 void PlayerControllerBase::SetPlayerFacing(const RVec3& Direction, bool bCheckMoveAllowed /*= true*/)
@@ -359,5 +359,6 @@ bool PlayerControllerBase::CanMovePlayerWithInput() const
 {
 	return m_StateMachine.GetCurrentBehaviorId() == PlayerBehavior_Run::StaticClassId() ||
 		   m_StateMachine.GetCurrentBehaviorId() == PlayerBehavior_Walk::StaticClassId() ||
-		   m_StateMachine.GetCurrentBehaviorId() == PlayerBehavior_Idle::StaticClassId();
+		   m_StateMachine.GetCurrentBehaviorId() == PlayerBehavior_Idle::StaticClassId() ||
+		   m_StateMachine.GetCurrentBehaviorId() == PlayerBehavior_Navigation::StaticClassId();
 }

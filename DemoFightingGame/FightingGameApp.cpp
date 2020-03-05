@@ -99,7 +99,7 @@ bool FightingGameApp::Initialize()
 		if (m_Player[i])
 		{
 			FTGPlayerStateMachine& StateMachine = m_Player[i]->GetStateMachine();
-			InitializePlayerAsset_HumanBody(m_Player[i]);
+			InitializePlayerAsset_Maid(m_Player[i]);
 
 			// Hacked start points for players
 			{

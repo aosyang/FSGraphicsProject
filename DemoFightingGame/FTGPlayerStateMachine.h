@@ -20,8 +20,8 @@ public:
 	~FTGPlayerStateMachine();
 
 	/// Allocate behavior instance asset
-	template<typename T>
-	void AllocateBehaviorInstance(const std::string& AnimResourcePath, int AnimFlags = 0);
+	template<typename T, typename ...Args>
+	T* AllocateBehaviorInstance(Args&& ...args);
 
 	/// Initialize behavior assets
 	void InitAssets();
@@ -118,8 +118,9 @@ FORCEINLINE FTGPlayerBehaviorBase* FTGPlayerStateMachine::GetNextBehavior() cons
 	return m_NextBehavior;
 }
 
-template<typename T>
-void FTGPlayerStateMachine::AllocateBehaviorInstance(const std::string& AnimResourcePath, int AnimFlags /*= 0*/)
+template<typename T, typename ...Args>
+T* FTGPlayerStateMachine::AllocateBehaviorInstance(Args&& ...args)
 {
-	m_BehaviorInstances.push_back(std::make_unique<T>(AnimResourcePath, AnimFlags));
+	m_BehaviorInstances.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+	return static_cast<T*>(m_BehaviorInstances.back().get());
 }
