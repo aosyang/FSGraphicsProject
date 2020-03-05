@@ -258,7 +258,9 @@ void RFunnelPathProcessor::GenerateImmediateLeftAndRightForEdgePoints()
 			}
 			else
 			{
-				assert(false);
+				// TODO: A crash is happening here. Add more information to debug the funnel algorithm.
+				//assert(false);
+				RLogWarning("An error occurred in the funnel path processor!\n");
 			}
 
 		}
