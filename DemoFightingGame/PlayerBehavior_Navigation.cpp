@@ -12,7 +12,7 @@ PlayerBehavior_Navigation::PlayerBehavior_Navigation()
 	: CurrentSpeed(0.0f)
 	, TargetSpeed(CurrentSpeed)
 	, NormalizedPlaybackProgress(0.0f)
-	, IndexAndBlendFactor(0.0f)
+	, AnimRelevancyFactor(0.0f)
 {
 	m_BehaviorEnum = BHV_Navigation;
 }
@@ -68,11 +68,11 @@ void PlayerBehavior_Navigation::Update(FTGPlayerStateMachine* StateMachine, floa
 	
 	//RLog("Navigation speed: %f\n", CurrentSpeed);
 
-	IndexAndBlendFactor = EvaluateIndexAndBlendFactor();
+	AnimRelevancyFactor = EvaluateAnimRelevancyFactor();
 
 	RAnimation* Anim0;
 	RAnimation* Anim1;
-	float Factor = GetRelevantAnimations(IndexAndBlendFactor, &Anim0, &Anim1);
+	float BlendFactor = GetRelevantAnimations(AnimRelevancyFactor, &Anim0, &Anim1);
 
 	float StartTime, EndTime, FrameRate;
 	if (Anim1 == nullptr)
@@ -83,9 +83,9 @@ void PlayerBehavior_Navigation::Update(FTGPlayerStateMachine* StateMachine, floa
 	}
 	else
 	{
-		StartTime = RMath::Lerp(Anim0->GetStartTime(), Anim1->GetStartTime(), Factor);
-		EndTime = RMath::Lerp(Anim0->GetEndTime(), Anim1->GetEndTime(), Factor);
-		FrameRate = RMath::Lerp(Anim0->GetFrameRate(), Anim1->GetFrameRate(), Factor);
+		StartTime = RMath::Lerp(Anim0->GetStartTime(), Anim1->GetStartTime(), BlendFactor);
+		EndTime = RMath::Lerp(Anim0->GetEndTime(), Anim1->GetEndTime(), BlendFactor);
+		FrameRate = RMath::Lerp(Anim0->GetFrameRate(), Anim1->GetFrameRate(), BlendFactor);
 	}
 	float Duration = EndTime - StartTime;
 
@@ -105,7 +105,7 @@ bool PlayerBehavior_Navigation::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4*
 {
 	RAnimation* Anim0;
 	RAnimation* Anim1;
-	float Factor = GetRelevantAnimations(IndexAndBlendFactor, &Anim0, &Anim1);
+	float BlendFactor = GetRelevantAnimations(AnimRelevancyFactor, &Anim0, &Anim1);
 	assert(Anim0);
 
 	float PlaybackTime0 = RMath::Lerp(Anim0->GetStartTime(), Anim0->GetEndTime(), NormalizedPlaybackProgress);
@@ -136,7 +136,7 @@ bool PlayerBehavior_Navigation::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4*
 		{
 			for (int i = 0; i < SkinnedMesh.GetBoneCount(); i++)
 			{
-				OutBoneMatrices[i] = RMatrix4::Slerp(Pose0[i], Pose1[i], Factor);
+				OutBoneMatrices[i] = RMatrix4::Slerp(Pose0[i], Pose1[i], BlendFactor);
 			}
 		}
 		
@@ -161,7 +161,7 @@ void PlayerBehavior_Navigation::OnCacheAnimations(RMesh& SkinnedMesh)
 	}
 }
 
-float PlayerBehavior_Navigation::EvaluateIndexAndBlendFactor() const
+float PlayerBehavior_Navigation::EvaluateAnimRelevancyFactor() const
 {
 	if (AnimData.size() == 0)
 	{
@@ -184,22 +184,13 @@ float PlayerBehavior_Navigation::EvaluateIndexAndBlendFactor() const
 	return (float)(AnimData.size() - 1);
 }
 
-float PlayerBehavior_Navigation::GetRelevantAnimations(float IndexAndBlendFactor, RAnimation** OutAnim0, RAnimation** OutAnim1) const
+float PlayerBehavior_Navigation::GetRelevantAnimations(float InRelevancyFactor, RAnimation** OutAnim0, RAnimation** OutAnim1) const
 {
-	int Index = (int)IndexAndBlendFactor;
-	float BlendFactor = IndexAndBlendFactor - Index;
+	int Index = (int)InRelevancyFactor;
+	float BlendFactor = InRelevancyFactor - Index;
 
 	*OutAnim0 = AnimData[Index].Animation;
 	*OutAnim1 = (Index < (AnimData).size() - 1) ? AnimData[Index + 1].Animation : nullptr;
 
 	return BlendFactor;
-}
-
-float PlayerBehavior_Navigation::GetAnimStartTime(float IndexAndBlendFactor) const
-{
-	RAnimation* Anim0;
-	RAnimation* Anim1;
-	float Factor = GetRelevantAnimations(IndexAndBlendFactor, &Anim0, &Anim1);
-
-	return Anim1 == nullptr ? Anim0->GetStartTime() : RMath::Lerp(Anim0->GetStartTime(), Anim1->GetStartTime(), Factor);
 }

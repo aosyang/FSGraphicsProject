@@ -41,7 +41,7 @@ void InitializePlayerAsset_Maid(PlayerControllerBase* PlayerController)
 	FTGPlayerStateMachine& StateMachine = PlayerController->GetStateMachine();
 	PlayerBehavior_Navigation* NavigationBehavior = StateMachine.AllocateBehaviorInstance<PlayerBehavior_Navigation>();
 	NavigationBehavior->AddAnimation("/Maid/Maid_Idle.fbx", 0.0f);
-	NavigationBehavior->AddAnimation("/Maid/Maid_Walk.fbx", 1.84f);
+	NavigationBehavior->AddAnimation("/Maid/Maid_Walk.fbx", 1.7f);
 	NavigationBehavior->AddAnimation("/Maid/Maid_Run.fbx", 5.0f);
 
 	// Initialize the skinning mesh

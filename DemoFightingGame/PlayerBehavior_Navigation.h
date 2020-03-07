@@ -27,13 +27,11 @@ protected:
 
 private:
 	/// Get a float number representing the index (decimal part) and the blend factor (fraction part) of current animation selection
-	float EvaluateIndexAndBlendFactor() const;
+	float EvaluateAnimRelevancyFactor() const;
 
 	/// Get relevant animations from index and blend factor.
 	/// Returns the fraction of blend factor.
-	float GetRelevantAnimations(float IndexAndBlendFactor, RAnimation** OutAnim0, RAnimation** OutAnim1) const;
-
-	float GetAnimStartTime(float IndexAndBlendFactor) const;
+	float GetRelevantAnimations(float InRelevancyFactor, RAnimation** OutAnim0, RAnimation** OutAnim1) const;
 
 	struct NavigationAnimData
 	{
@@ -53,5 +51,5 @@ private:
 	float TargetSpeed;
 
 	float NormalizedPlaybackProgress;
-	float IndexAndBlendFactor;
+	float AnimRelevancyFactor;
 };

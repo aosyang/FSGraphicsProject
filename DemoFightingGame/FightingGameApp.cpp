@@ -284,7 +284,7 @@ void FightingGameApp::UpdateUserInput()
 			if (moveVec.SquaredMagitude() > 0.0f)
 			{
 				moveVec.Normalize();
-				moveVec *= bNavSlowly ? 1.84f : 5.0f;
+				moveVec *= bNavSlowly ? 1.7f : 5.0f;
 			}
 
 			CurrentPlayer->SetMovementInput(moveVec);
