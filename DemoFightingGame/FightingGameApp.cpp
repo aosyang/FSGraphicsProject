@@ -153,6 +153,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 			if (m_Player[i])
 			{
 				m_Player[i]->SetPosition(RVec3(0, 100.0f, 0));
+				m_Player[i]->Reset();
 			}
 		}
 
@@ -283,7 +284,7 @@ void FightingGameApp::UpdateUserInput()
 			if (moveVec.SquaredMagitude() > 0.0f)
 			{
 				moveVec.Normalize();
-				moveVec *= bNavSlowly ? 300.0f : 600.0f;
+				moveVec *= bNavSlowly ? 1.84f : 5.0f;
 			}
 
 			CurrentPlayer->SetMovementInput(moveVec);

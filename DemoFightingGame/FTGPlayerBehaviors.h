@@ -59,6 +59,8 @@ public:
 
 	void CacheAssets(RMesh& SkinnedMesh);
 
+	virtual std::string GetDebugString() const;
+
 	EPlayerBehavior GetBehaviorEnum() const;
 	RAnimation* GetAnimation() const;
 	float GetBlendInTime() const;

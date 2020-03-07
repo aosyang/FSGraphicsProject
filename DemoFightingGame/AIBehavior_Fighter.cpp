@@ -51,7 +51,7 @@ void AIBehavior_Fighter::Update(float DeltaTime)
 
 		if (VecToTarget.SquaredMagitude() > RMath::Square(100.0f))
 		{
-			ControlledPlayer->SetMovementInput(MoveVector.GetNormalized() * 600.0f);
+			ControlledPlayer->SetMovementInput(MoveVector.GetNormalized() * 5.0f);
 		}
 		else
 		{

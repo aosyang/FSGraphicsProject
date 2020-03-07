@@ -10,6 +10,7 @@
 
 PlayerBehavior_Navigation::PlayerBehavior_Navigation()
 	: CurrentSpeed(0.0f)
+	, TargetSpeed(CurrentSpeed)
 	, NormalizedPlaybackProgress(0.0f)
 	, IndexAndBlendFactor(0.0f)
 {
@@ -45,7 +46,26 @@ void PlayerBehavior_Navigation::AddAnimation(const std::string& AnimationAsset, 
 void PlayerBehavior_Navigation::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
 {
 	RVec3 Velocity = StateMachine->GetOwner()->GetVelocity();
-	CurrentSpeed = Velocity.Magnitude2D();
+	TargetSpeed = Velocity.Magnitude2D();
+
+	// Blend towards target speed
+	const float BlendSpeed = 20.0f * DeltaTime;
+	if (fabs(TargetSpeed - CurrentSpeed) < BlendSpeed)
+	{
+		CurrentSpeed = TargetSpeed;
+	}
+	else
+	{
+		if (TargetSpeed - CurrentSpeed > 0.0f)
+		{
+			CurrentSpeed += BlendSpeed;
+		}
+		else
+		{
+			CurrentSpeed -= BlendSpeed;
+		}
+	}
+	
 	//RLog("Navigation speed: %f\n", CurrentSpeed);
 
 	IndexAndBlendFactor = EvaluateIndexAndBlendFactor();
@@ -122,6 +142,15 @@ bool PlayerBehavior_Navigation::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4*
 		
 		return false;
 	}
+}
+
+std::string PlayerBehavior_Navigation::GetDebugString() const
+{
+	std::stringstream DebugStream;
+	DebugStream << "Current speed: " << CurrentSpeed << std::endl;
+	DebugStream << "Target speed: " << TargetSpeed << std::endl;
+
+	return DebugStream.str();
 }
 
 void PlayerBehavior_Navigation::OnCacheAnimations(RMesh& SkinnedMesh)

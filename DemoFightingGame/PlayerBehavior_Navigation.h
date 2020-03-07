@@ -20,6 +20,8 @@ public:
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
 	virtual bool EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices) override;
 
+	virtual std::string GetDebugString() const override;
+
 protected:
 	virtual void OnCacheAnimations(RMesh& SkinnedMesh) override;
 
@@ -48,6 +50,7 @@ private:
 	std::vector<NavigationAnimData> AnimData;
 
 	float CurrentSpeed;
+	float TargetSpeed;
 
 	float NormalizedPlaybackProgress;
 	float IndexAndBlendFactor;

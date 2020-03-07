@@ -81,7 +81,7 @@ void AIBehavior_Roamer::Update(float DeltaTime)
 
 	if (AINavigationComponent->GetNavState() == EAINavState::Moving)
 	{
-		ControlledPlayer->SetMovementInput(AINavigationComponent->GetDesiredMoveDirection() * 600.0f);
+		ControlledPlayer->SetMovementInput(AINavigationComponent->GetDesiredMoveDirection() * 5.0f);
 		AINavigationComponent->DebugDrawPath();
 	}
 }

@@ -90,24 +90,15 @@ RVec3 FTGPlayerStateMachine::GetCurrentRootOffset() const
 std::string FTGPlayerStateMachine::GetDebugString() const
 {
 	std::stringstream DebugStream;
-	DebugStream << "Source animation : ";
 
-	/*
-	if (m_AnimBlender.GetSourceAnimation())
+	for (auto& BehaviorInstance : m_BehaviorInstances)
 	{
-		DebugStream << m_AnimBlender.GetSourceAnimation()->GetName();
+		// Advance the behavior animation
+		if (BlendQueue.IsBehaviorRelevant(BehaviorInstance.get()))
+		{
+			DebugStream << BehaviorInstance->GetDebugString();
+		}
 	}
-	DebugStream << std::endl;
-
-	DebugStream << "Source start time : " << m_AnimBlender.GetSourceAnimation()->GetStartTime() << std::endl;
-	DebugStream << "Source end time   : " << m_AnimBlender.GetSourceAnimation()->GetEndTime() << std::endl;
-	DebugStream << "Source playback time : " << m_AnimBlender.GetSourcePlaybackTime() << std::endl;
-	DebugStream << "Current root motion : " << m_AnimBlender.GetCurrentRootOffset().ToString() << std::endl;
-
-	DebugStream << "Blend from : " << (m_AnimBlender.GetSourceAnimation() ? m_AnimBlender.GetSourceAnimation()->GetName() : "") << std::endl;
-	DebugStream << "Blend to   : " << (m_AnimBlender.GetTargetAnimation() ? m_AnimBlender.GetTargetAnimation()->GetName() : "") << std::endl;
-	DebugStream << "Blend time : " << m_AnimBlender.GetElapsedBlendTime() << std::endl;
-	*/
 
 	return DebugStream.str();
 }

@@ -53,6 +53,11 @@ void FTGPlayerBehaviorBase::CacheAssets(RMesh& SkinnedMesh)
 	OnCacheAnimations(SkinnedMesh);
 }
 
+std::string FTGPlayerBehaviorBase::GetDebugString() const
+{
+	return std::string("");
+}
+
 void FTGPlayerBehaviorBase::NotifyBegin(FTGPlayerStateMachine* StateMachine)
 {
 	PlayerControllerBase* OwnerPlayer = StateMachine->GetOwner();

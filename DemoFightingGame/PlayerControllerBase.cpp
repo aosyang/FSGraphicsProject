@@ -29,12 +29,7 @@ public:
 		, NumSimulationSubSteps(0)
 		, CurrentFrame(0)
 	{
-		const btTransform& PhysicsTransform = ghostObject->getWorldTransform();
-		for (int i = 0; i < 2; i++)
-		{
-			ControllerPosition[i] = btVec3ToRVec3(PhysicsTransform.getOrigin());
-			ControllerRotation[i] = btQuatToRQuat(PhysicsTransform.getRotation());
-		}
+		ResetTransformInterpolation();
 	}
 
 	// Override the update function from btKinematicCharacterController so it can handle transform interpolation
@@ -77,6 +72,16 @@ public:
 		return RQuat::Slerp(ControllerRotation[1 - CurrentFrame], ControllerRotation[CurrentFrame], t);
 	}
 
+	void ResetTransformInterpolation()
+	{
+		const btTransform& PhysicsTransform = getGhostObject()->getWorldTransform();
+		for (int i = 0; i < 2; i++)
+		{
+			ControllerPosition[i] = btVec3ToRVec3(PhysicsTransform.getOrigin());
+			ControllerRotation[i] = btQuatToRQuat(PhysicsTransform.getRotation());
+		}
+	}
+
 private:
 	float LocalTime;
 	int NumSimulationSubSteps;
@@ -93,7 +98,7 @@ PlayerControllerBase::PlayerControllerBase(const RConstructingParams& Params)
 	, StairOffset(0.0f, 20.0f, 0.0f)
 	, m_MovementInput(0.0f, 0.0f, 0.0f)
 	, PlannarMoveVector(0.0f, 0.0f, 0.0f)
-	, MaxMovementSpeed(0.5f)
+	, MaxMovementSpeed(1.0f)
 	, CapsuleRadius(40.0f)
 	, CapsuleHeight(70.0f)
 	, m_Rotation(0.0f)
@@ -153,7 +158,7 @@ void PlayerControllerBase::UpdateController(float DeltaTime)
 	PreUpdate(DeltaTime);
 
 	// Note: Bullet physics requires a fixed input vector for character movements
-	UpdateMovement(DeltaTime, m_MovementInput / 60.0f);
+	UpdateMovement(DeltaTime, m_MovementInput);
 	PostUpdate(DeltaTime);
 }
 
@@ -335,6 +340,8 @@ void PlayerControllerBase::Reset()
 	{
 		AINavigationComponent->StopMovement();
 	}
+
+	KinematicCharacterController->ResetTransformInterpolation();
 
 	OnPlayerReset.Execute();
 }
