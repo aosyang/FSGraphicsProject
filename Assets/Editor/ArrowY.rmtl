@@ -1,0 +1,4 @@
+<!--Mesh path: /Editor/ArrowY.fbx-->
+<Material>
+    <MeshElement Index="0">/RubikCube/Green.material</MeshElement>
+</Material>
