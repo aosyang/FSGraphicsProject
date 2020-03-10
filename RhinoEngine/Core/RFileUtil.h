@@ -20,6 +20,12 @@ public:
 	/// Get file name part of a path
 	static std::string GetFileNameInPath(const std::string& path);
 
+	/// Get the extension of a file name
+	static std::string GetExtension(const std::string& filename, bool bHasDot = false);
+
+	/// Get the extension of a file name in lower case
+	static std::string GetExtensionInLowerCase(const std::string& filename, bool bHasDot = false);
+
 	/// Replace extension in filename
 	static std::string ReplaceExtension(const std::string& filename, const std::string& ext);
 

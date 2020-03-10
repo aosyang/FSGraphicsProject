@@ -34,6 +34,12 @@ public:
 protected:
 
 	virtual bool LoadResourceImpl() override;
+
+	/// Load a DDS texture
+	bool LoadTextureDDS(bool bSRGB);
+
+	/// Load a HDR texture
+	bool LoadTextureHDR(bool bSRGB);
 	
 private:
 	void QueryTextureDesc(ID3D11ShaderResourceView& ShaderResourceView);

@@ -22,6 +22,28 @@ std::string RFileUtil::GetFileNameInPath(const std::string& path)
 	}
 }
 
+std::string RFileUtil::GetExtension(const std::string& filename, bool bHasDot /*= false*/)
+{
+	size_t dot_pos = filename.find_last_of('.');
+	if (dot_pos != std::string::npos)
+	{
+		return bHasDot ? filename.substr(dot_pos) : filename.substr(dot_pos + 1);
+	}
+
+	return "";
+}
+
+std::string RFileUtil::GetExtensionInLowerCase(const std::string& filename, bool bHasDot /*= false*/)
+{
+	std::string FileExt = GetExtension(filename, bHasDot);
+	for (UINT i = 0; i < FileExt.size(); i++)
+	{
+		FileExt[i] = tolower(FileExt[i]);
+	}
+
+	return FileExt;
+}
+
 std::string RFileUtil::ReplaceExtension(const std::string& filename, const std::string& ext)
 {
 	// Empty filename
