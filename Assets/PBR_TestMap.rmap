@@ -1,23 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scene>
-    <SceneObject Name="cube_0" Type="MeshObject" Mesh="/cube.FBX">
+    <SceneObject Name="ground" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Index="0">/PBR_mat.material</MeshElement>
+            <MeshElement Index="0">/DefaultGrid.material</MeshElement>
         </Material>
         <Transform>
-            <Position>0.000000, 0.000000, -800.000000</Position>
+            <Position>0.000000, 0.000000, 0.000000</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>
-            <Scale>20.000000, 1.000000, 20.000000</Scale>
+            <Scale>20.000000, 0.100000, 20.000000</Scale>
         </Transform>
     </SceneObject>
     <SceneObject Name="cube_1" Type="MeshObject" Mesh="/cube.FBX">
         <Material Index="0">
-            <MeshElement Index="0">/PBR_Test_mat.material</MeshElement>
+            <MeshElement Index="0">/PBR_mat.material</MeshElement>
         </Material>
         <Transform>
-            <Position>0.000000, 0.000000, 800.000000</Position>
+            <Position>0.000000, 250.000000, 0.000000</Position>
             <Rotation>0.000000, 0.000000, 0.000000</Rotation>
-            <Scale>20.000000, 1.000000, 20.000000</Scale>
+            <Scale>1.000000, 1.000000, 1.000000</Scale>
+        </Transform>
+    </SceneObject>
+    <SceneObject Name="New Object" Type="MeshObject" Mesh="/Sphere.FBX">
+        <Material Index="0">
+            <MeshElement Index="0">/PBR_mat.material</MeshElement>
+        </Material>
+        <Transform>
+            <Position>0.000000, 150.000000, 0.000000</Position>
+            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
+            <Scale>1.000000, 1.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
 </Scene>

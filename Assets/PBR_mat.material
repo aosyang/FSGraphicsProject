@@ -3,6 +3,6 @@
     <Texture Slot="0">/rustediron-streaks_basecolor.dds</Texture>
     <Texture Slot="1">/rustediron-streaks_normal.dds</Texture>
     <Texture Slot="2">/rustediron-streaks_RMA.dds</Texture>
-    <Texture Slot="3">/powderpeak.dds</Texture>
-    <Texture Slot="4">/powderpeak_irradiance.dds</Texture>
+    <Texture Slot="3">/EnvCubemaps/Lake_Radiance.dds</Texture>
+    <Texture Slot="4">/EnvCubemaps/Lake_Irradiance.dds</Texture>
 </Material>
