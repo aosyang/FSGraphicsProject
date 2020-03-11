@@ -59,8 +59,8 @@ void REditorAxis::Update(float DeltaTime)
 
 			RVec3 pos = SelectedObject->GetPosition();
 
-			// Hold alt key to rotate objects
-			if (RInput.IsKeyDown(VK_LMENU))
+			// Hold ctrl key to rotate objects
+			if (RInput.IsKeyDown(VK_LCONTROL))
 			{
 				RQuat Rotation = SelectedObject->GetRotation();
 				RQuat DeltaRotation;
