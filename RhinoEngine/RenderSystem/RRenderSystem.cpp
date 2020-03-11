@@ -468,7 +468,7 @@ void RRenderSystem::BindMaterial(RMaterial* Material, bool bSkinned /*= false*/,
 	if (Shader->bUsePBR)
 	{
 		static const int RadianceMapSlot = 3;
-		if (NumTextureSlots >= RadianceMapSlot)
+		if (RadianceMapSlot < NumTextureSlots)
 		{
 			RTexture* Texture = RenderMaterial->GetTextureSlots()[RadianceMapSlot].Texture;
 			if (Texture)
