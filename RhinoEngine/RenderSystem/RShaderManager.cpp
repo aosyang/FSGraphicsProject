@@ -291,6 +291,11 @@ void RShaderManager::CompileShader(const std::string& SourceName, const std::str
 	// Remove the engine header file
 	StdRemove(IncludeFiles, "Rhino.h");
 
+	if (StdContains(IncludeFiles, "BRDF.hlsli"))
+	{
+		Shader->bUsePBR = true;
+	}
+
 	for (int Index = 0; Index < ARRAYSIZE(ShaderCompileOptions); Index++)
 	{
 		const RShaderCompileOption& CompileOption = ShaderCompileOptions[Index];

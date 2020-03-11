@@ -464,6 +464,22 @@ void RRenderSystem::BindMaterial(RMaterial* Material, bool bSkinned /*= false*/,
 		ShaderResourceViewSlots[SlotId] = Texture ? Texture->GetSRV() : nullptr;
 	}
 
+	// Bind radiance map mip levels used by PBR materials
+	if (Shader->bUsePBR)
+	{
+		static const int RadianceMapSlot = 3;
+		if (NumTextureSlots >= RadianceMapSlot)
+		{
+			RTexture* Texture = RenderMaterial->GetTextureSlots()[RadianceMapSlot].Texture;
+			if (Texture)
+			{
+				RConstantBuffers::cbMaterial.Data.NumRadianceMipLevels = Texture->GetMipLevels();
+				RConstantBuffers::cbMaterial.UpdateBufferData();
+				RConstantBuffers::cbMaterial.BindBuffer();
+			}
+		}
+	}
+
 	GRenderer.D3DImmediateContext()->PSSetShaderResources(0, NumShaderResourceViews, ShaderResourceViewSlots);
 }
 

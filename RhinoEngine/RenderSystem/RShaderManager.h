@@ -22,14 +22,16 @@ enum class EShaderType : UINT8
 
 struct RShader
 {
-	ID3D11VertexShader*		VertexShader;
-	ID3D11PixelShader*		PixelShader;
-	ID3D11GeometryShader*	GeometryShader;
+	ID3D11VertexShader*		VertexShader = nullptr;
+	ID3D11PixelShader*		PixelShader = nullptr;
+	ID3D11GeometryShader*	GeometryShader = nullptr;
 
-	ID3D11VertexShader*		VertexShader_Skinned;
-	ID3D11VertexShader*		VertexShader_Instanced;
+	ID3D11VertexShader*		VertexShader_Skinned = nullptr;
+	ID3D11VertexShader*		VertexShader_Instanced = nullptr;
 
-	ID3D11PixelShader*		PixelShader_Deferred;
+	ID3D11PixelShader*		PixelShader_Deferred = nullptr;
+
+	bool bUsePBR = false;
 
 	bool operator==(const RShader& rhs) const;
 

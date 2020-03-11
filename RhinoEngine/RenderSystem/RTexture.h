@@ -26,6 +26,7 @@ public:
 	ID3D11ShaderResourceView** GetPtrSRV() { return &m_SRV; }
 	UINT GetWidth() const { return m_Width; }
 	UINT GetHeight() const { return m_Height; }
+	UINT GetMipLevels() const { return MipLevels; }
 	bool IsCubeMap() const { return bIsCubeMap; }
 
 	/// Check if RTexture owns its hardware texture
@@ -47,6 +48,7 @@ private:
 private:
 	ID3D11ShaderResourceView*	m_SRV;
 	UINT						m_Width, m_Height;
+	UINT	MipLevels;
 	bool	bIsCubeMap;
 
 	/// If a RTexture has ownership of a hardware resource, the RTexture is responsible for releasing the hardware resource on destruction

@@ -18,6 +18,7 @@ RTexture::RTexture(const std::string& Path)
 	, m_SRV(nullptr)
 	, m_Width(0)
 	, m_Height(0)
+	, MipLevels(0)
 	, bIsCubeMap(false)
 	, bHasOwnershipOfResource(true)
 {
@@ -28,6 +29,7 @@ RTexture::RTexture(ID3D11ShaderResourceView* ShaderResourceView, bool bTakeResou
 	, m_SRV(ShaderResourceView)
 	, m_Width(0)
 	, m_Height(0)
+	, MipLevels(0)
 	, bIsCubeMap(false)
 	, bHasOwnershipOfResource(bTakeResourceOwnership)
 {
@@ -199,6 +201,7 @@ void RTexture::QueryTextureDesc(ID3D11ShaderResourceView& ShaderResourceView)
 
 			m_Width = Desc.Width;
 			m_Height = Desc.Height;
+			MipLevels = Desc.MipLevels;
 			bIsCubeMap = Desc.MiscFlags & D3D11_RESOURCE_MISC_TEXTURECUBE;
 
 			pTexture->Release();
