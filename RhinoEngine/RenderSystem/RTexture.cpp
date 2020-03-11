@@ -73,16 +73,23 @@ bool RTexture::LoadResourceImpl()
 	bool bIsSRGBTexture = (GetMetaData()["SRGB"] == "true");
 
 	std::string Ext = RFileUtil::GetExtensionInLowerCase(GetAssetPath());
+	bool Result = false;
+
 	if (Ext == "dds")
 	{
-		return LoadTextureDDS(bIsSRGBTexture);
+		Result = LoadTextureDDS(bIsSRGBTexture);
 	}
 	else if (Ext == "hdr")
 	{
-		return LoadTextureHDR(bIsSRGBTexture);
+		Result = LoadTextureHDR(bIsSRGBTexture);
 	}
 
-	return false;
+	if (Result && m_SRV)
+	{
+		QueryTextureDesc(*m_SRV);
+	}
+
+	return Result;
 }
 
 bool RTexture::LoadTextureDDS(bool bSRGB)
@@ -99,11 +106,6 @@ bool RTexture::LoadTextureDDS(bool bSRGB)
 	{
 		RLog("*** Failed to load texture [%s] ***\n", GetFileSystemPath().data());
 		return false;
-	}
-
-	if (ShaderResourceView)
-	{
-		QueryTextureDesc(*ShaderResourceView);
 	}
 
 	m_SRV = ShaderResourceView;

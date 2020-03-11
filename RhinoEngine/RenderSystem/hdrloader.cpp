@@ -9,9 +9,14 @@
 
 #include "hdrloader.h"
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <math.h>
 #include <memory.h>
 #include <stdio.h>
+
+#include "Core/RLog.h"
+#include <string.h>
 
 typedef unsigned char RGBE[4];
 #define R			0
@@ -48,7 +53,10 @@ bool HDRLoader::load(const char *fileName, HDRLoaderResult &res)
 
 	file = fopen(fileName, "rb");
 	if (!file)
+	{
+		RLogError("Error: %d (%s)\n", errno, strerror(errno));
 		return false;
+	}
 
 	fread(str, 10, 1, file);
 	if (memcmp(str, "#?RADIANCE", 10)) {
@@ -203,3 +211,5 @@ bool oldDecrunch(RGBE *scanline, int len, FILE *file)
 	}
 	return true;
 }
+
+#undef _CRT_SECURE_NO_WARNINGS
