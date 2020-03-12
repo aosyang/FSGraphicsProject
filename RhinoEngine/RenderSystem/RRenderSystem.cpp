@@ -474,11 +474,13 @@ void RRenderSystem::BindMaterial(RMaterial* Material, bool bSkinned /*= false*/,
 			if (Texture)
 			{
 				RConstantBuffers::cbMaterial.Data.NumRadianceMipLevels = Texture->GetMipLevels();
-				RConstantBuffers::cbMaterial.UpdateBufferData();
-				RConstantBuffers::cbMaterial.BindBuffer();
 			}
 		}
 	}
+
+	RConstantBuffers::cbMaterial.Data.UVTiling = Material->GetUVTiling();
+	RConstantBuffers::cbMaterial.UpdateBufferData();
+	RConstantBuffers::cbMaterial.BindBuffer();
 
 	GRenderer.D3DImmediateContext()->PSSetShaderResources(0, NumShaderResourceViews, ShaderResourceViewSlots);
 }

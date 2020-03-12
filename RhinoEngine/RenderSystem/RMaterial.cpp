@@ -8,8 +8,12 @@
 
 #include "RMaterial.h"
 
-
 #include "tinyxml2/tinyxml2.h"
+
+
+const char* RMaterial::KeyName_BlendMode = "BlendMode";
+const char* RMaterial::KeyName_UVTiling = "UVTiling";
+
 
 void RMeshMaterialData::Serialize(RSerializer& serializer)
 {
@@ -116,6 +120,7 @@ RMaterial::RMaterial(const std::string& Path)
 	: RResourceBase(Path)
 	, Shader(nullptr)
 	, BlendMode(BlendState::Opaque)
+	, UVTiling(1.0f)
 	, bDoubleSided(false)
 	, bRasterizerStateHashOutOfDate(true)
 {
@@ -224,10 +229,15 @@ bool RMaterial::LoadResourceImpl()
 		const char* ShaderName = RootElem->Attribute("Shader");
 		Shader = ShaderName ? RShaderManager::Instance().GetShaderResource(ShaderName) : nullptr;
 
-		const char* BlendModeName = RootElem->Attribute("BlendMode");
+		const char* BlendModeName = RootElem->Attribute(KeyName_BlendMode);
 		if (BlendModeName)
 		{
 			BlendStateNameToEnum(BlendModeName, BlendMode);
+		}
+
+		if (RootElem->QueryFloatAttribute(KeyName_UVTiling, &UVTiling) != tinyxml2::XML_SUCCESS)
+		{
+			UVTiling = 1.0f;
 		}
 
 		bool bDoubleSidedValue = false;
@@ -282,7 +292,12 @@ bool RMaterial::SaveResourceImpl()
 
 	if (BlendMode != BlendState::Opaque)
 	{
-		XmlElemMaterial->SetAttribute("BlendMode", BlendStateNames[(int)BlendMode]);
+		XmlElemMaterial->SetAttribute(KeyName_BlendMode, BlendStateNames[(int)BlendMode]);
+	}
+
+	if (UVTiling != 1.0f)
+	{
+		XmlElemMaterial->SetAttribute(KeyName_UVTiling, UVTiling);
 	}
 
 	if (bDoubleSided)

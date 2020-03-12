@@ -53,6 +53,7 @@ CONSTANT_BUFFER_END
 CONSTANT_BUFFER_BEGIN(SHADER_MATERIAL_BUFFER, b3)
 float4				SpecularColorAndPower;
 float				GlobalOpacity;
+float				UVTiling;
 int					NumRadianceMipLevels;
 CONSTANT_BUFFER_END
 

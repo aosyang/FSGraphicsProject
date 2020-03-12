@@ -72,6 +72,9 @@ public:
 	BlendState GetBlendMode() const;
 	void SetBlendMode(BlendState InBlendMode);
 
+	/// Number of times texture will be repeated when applying to a surface
+	float GetUVTiling() const;
+
 	bool GetDoubleSided() const;
 	void SetDoubleSided(bool InDoubleSided);
 
@@ -95,9 +98,13 @@ private:
 	std::vector<RTextureSlotData> TextureSlots;
 	BlendState BlendMode;
 	bool bDoubleSided;
+	float UVTiling;
 
 	bool bRasterizerStateHashOutOfDate;
 	size_t RasterizerStateHash;
+
+	static const char* KeyName_BlendMode;
+	static const char* KeyName_UVTiling;
 };
 
 FORCEINLINE void RMaterial::SetShader(RShader* InShader)
@@ -153,6 +160,11 @@ FORCEINLINE BlendState RMaterial::GetBlendMode() const
 FORCEINLINE void RMaterial::SetBlendMode(BlendState InBlendMode)
 {
 	BlendMode = InBlendMode;
+}
+
+FORCEINLINE float RMaterial::GetUVTiling() const
+{
+	return UVTiling;
 }
 
 FORCEINLINE bool RMaterial::GetDoubleSided() const

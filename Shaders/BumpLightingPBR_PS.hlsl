@@ -39,11 +39,11 @@ struct OUTPUT_PIXEL
 OUTPUT_PIXEL main(OUTPUT_VERTEX Input) : SV_TARGET
 {
 	OUTPUT_PIXEL Out = (OUTPUT_PIXEL)0;
-	Out.Albedo = DiffuseTexture.Sample(Sampler, Input.UV);
+	Out.Albedo = DiffuseTexture.Sample(Sampler, Input.UV * UVTiling);
 	Out.WorldPos = float4(Input.PosW, Input.PosH.z);
 
 	float3x3 TBN = CalculateTBNSpace(Input.NormalW, Input.TangentW);
-	float3 normal = normalize((NormalTexture.Sample(Sampler, Input.UV) * 2.0f - 1.0f).xyz);
+	float3 normal = normalize((NormalTexture.Sample(Sampler, Input.UV * UVTiling) * 2.0f - 1.0f).xyz);
 	float3 worldNormal = mul(normal, TBN);
 
 	Out.NormalW = float4(worldNormal, 1);
@@ -74,12 +74,12 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	float4 Final = 0;
 
 	// Sample roughtness, metallic and AO from rgb channels
-	float3 RMA = RoughnessMetallicAO.Sample(Sampler, Input.UV).rgb;
+	float3 RMA = RoughnessMetallicAO.Sample(Sampler, Input.UV * UVTiling).rgb;
 	float roughness = RMA.r;
 	float metallic = RMA.g;
 	float ambientOcclusion = RMA.b;
 
-	float3 albedo = DiffuseTexture.Sample(Sampler, Input.UV).rgb;
+	float3 albedo = DiffuseTexture.Sample(Sampler, Input.UV * UVTiling).rgb;
 
 	static const float kSpecularCoefficient = 0.04;
 
@@ -90,7 +90,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 	float3x3 TBN = CalculateTBNSpace(Input.NormalW, Input.TangentW);
 
-	float3 normal = (NormalTexture.Sample(Sampler, Input.UV) * 2.0f - 1.0f).xyz;
+	float3 normal = (NormalTexture.Sample(Sampler, Input.UV * UVTiling) * 2.0f - 1.0f).xyz;
 	normal = mul(normal, TBN);
 
 	float3 viewDir = normalize(CameraPos.xyz - Input.PosW);
