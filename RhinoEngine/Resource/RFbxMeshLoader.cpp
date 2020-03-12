@@ -415,6 +415,9 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 
 						int index = cluster->GetControlPointIndices()[idxCpIndex];
 						float weight = (float)cluster->GetControlPointWeights()[idxCpIndex];
+						bool bBoneDataUpdated = false;
+						float MinWeight = 0.0f;
+						int MinIndex = -1;
 
 						// Store bone id and weight in an empty slot of vertex skinning attributes
 						for (int i = 0; i < 4; i++)
@@ -427,7 +430,24 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 								VertexComponentMask |= VCM_BoneId;
 								VertexComponentMask |= VCM_BoneWeights;
 
+								bBoneDataUpdated = true;
 								break;
+							}
+
+							if (MinIndex == -1 || vertData[index].weight[i] < MinWeight)
+							{
+								MinIndex = i;
+								MinWeight = vertData[index].weight[i];
+							}
+						}
+
+						// If a vertex is affected by more than 4 bones, replace a minimal weighted bone with the new one
+						if (!bBoneDataUpdated)
+						{
+							if (MinIndex != -1 && weight > MinWeight)
+							{
+								vertData[index].boneId[MinIndex] = boneId;
+								vertData[index].weight[MinIndex] = weight;
 							}
 						}
 					}
@@ -439,10 +459,19 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 		// Set bone id in unused slot to 0 so shader won't mess up
 		for (UINT32 n = 0; n < vertData.size(); n++)
 		{
+			float TotalBoneWeight = vertData[n].weight[0] + vertData[n].weight[1] + vertData[n].weight[2] + vertData[n].weight[3];
+			float InvTotalWeight = FLT_EQUAL_ZERO(TotalBoneWeight) ? 1.0f : 1.0f / TotalBoneWeight;
+
 			for (int i = 0; i < 4; i++)
 			{
 				if (vertData[n].boneId[i] == -1)
+				{
 					vertData[n].boneId[i] = 0;
+					vertData[n].weight[i] = 0.0f;
+				}
+
+				// Renormalize all weights so they add up to 1
+				vertData[n].weight[i] *= InvTotalWeight;
 			}
 		}
 
