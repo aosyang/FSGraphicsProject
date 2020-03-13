@@ -23,7 +23,7 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 	OUTPUT_VERTEX Out = (OUTPUT_VERTEX)0;
 
 	float4 pos = (float4)1;
-	pos.xyz = Input.PosL * 100.0f + cameraPos.xyz;
+	pos.xyz = Input.PosL * 200.0f + cameraPos.xyz;
 
 	Out.PosW = mul(pos, worldMatrix);
 	Out.PosH = mul(pos, viewProjMatrix);
