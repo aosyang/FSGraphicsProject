@@ -1,0 +1,4 @@
+<!--Material path: /Skybox.material-->
+<Material Shader="Skybox" DoubleSided="1">
+    <Texture Slot="0">/EnvCubemaps/Lake_Radiance.dds</Texture>
+</Material>
