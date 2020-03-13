@@ -83,14 +83,28 @@ void RAssetsViewWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bool
 				ImGui::EndPopup();
 			}
 
-			ImGui::Text("Filter:");
-			DisplayAssertFilter("All", AssetType_All); ImGui::SameLine();
-			DisplayAssertFilter("Mesh", AssetType_Mesh); ImGui::SameLine();
-			DisplayAssertFilter("Texture", AssetType_Texture); ImGui::SameLine();
-			DisplayAssertFilter("Material", AssetType_Material);
+			ImGui::Text("Show Types:");
+			DisplayAssetTypeFilter("All", AssetType_All); ImGui::SameLine();
+			DisplayAssetTypeFilter("Mesh", AssetType_Mesh); ImGui::SameLine();
+			DisplayAssetTypeFilter("Texture", AssetType_Texture); ImGui::SameLine();
+			DisplayAssetTypeFilter("Material", AssetType_Material);
 
-			// The slider for icon size
-			ImGui::SliderInt("Icon Size", &PreviewIconSize, 16, 1024);
+			// Radio buttons for sizes of icons
+			ImGui::Text("Icon Size:"); 
+			for (int i = 5; i <= 10; i++)
+			{
+				int Val = (int)powf(2.0f, (float)i);
+				ImGui::SameLine();
+				ImGui::RadioButton(std::to_string(Val).c_str(), &PreviewIconSize, Val);
+			}
+
+			// The search bar
+			AssetNameFilter.Draw("Filter");
+			ImGui::SameLine();
+			if (ImGui::Button("Clear"))
+			{
+				AssetNameFilter.Clear();
+			}
 
 			ImGui::BeginChild("AssetChild");
 			float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
@@ -102,6 +116,11 @@ void RAssetsViewWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bool
 				if ((Iter->CanCastTo<RMesh>() && !(AssetViewFilter & AssetType_Mesh)) ||
 					(Iter->CanCastTo<RTexture>() && !(AssetViewFilter & AssetType_Texture)) ||
 					(Iter->CanCastTo<RMaterial>() && !(AssetViewFilter & AssetType_Material)))
+				{
+					continue;
+				}
+
+				if (!AssetNameFilter.PassFilter(Iter->GetAssetPath().c_str()))
 				{
 					continue;
 				}
@@ -168,7 +187,7 @@ void RAssetsViewWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bool
 	}
 }
 
-void RAssetsViewWindow::DisplayAssertFilter(const char* Label, int FilterType)
+void RAssetsViewWindow::DisplayAssetTypeFilter(const char* Label, int FilterType)
 {
 	if (FilterType == AssetType_All)
 	{

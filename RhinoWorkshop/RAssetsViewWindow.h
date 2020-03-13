@@ -35,13 +35,15 @@ public:
 	/// Visibility of asset view window
 	bool bShowWindow;
 private:
-	void DisplayAssertFilter(const char* Label, int FilterType);
+	void DisplayAssetTypeFilter(const char* Label, int FilterType);
 
 	int AssetViewFilter;
 	int PreviewIconSize;
 
 	RResourceBase* SelectedResource;
 	RResourceBase* EditingResource;
+
+	ImGuiTextFilter AssetNameFilter;
 
 	bool bShowNewMaterialDialog;
 	char NewMaterialName[MAX_PATH];
