@@ -478,7 +478,7 @@ void RRenderSystem::BindMaterial(RMaterial* Material, bool bSkinned /*= false*/,
 		}
 	}
 
-	RConstantBuffers::cbMaterial.Data.UVTiling = Material->GetUVTiling();
+	RConstantBuffers::cbMaterial.Data.UVTiling = RenderMaterial->GetUVTiling();
 	RConstantBuffers::cbMaterial.UpdateBufferData();
 	RConstantBuffers::cbMaterial.BindBuffer();
 
