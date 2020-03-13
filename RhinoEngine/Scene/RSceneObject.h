@@ -49,6 +49,9 @@ class RSceneObject : public RRuntimeTypeObject
 public:
 	virtual void Release();
 
+	virtual void LoadObjectFromXmlElement(tinyxml2::XMLElement* ObjectElem);
+	virtual void SaveObjectToXmlElement(tinyxml2::XMLElement* ObjectElem);
+
 	/// Set name of scene object
 	void SetName(const std::string& name)		{ m_Name = name; }
 
@@ -133,6 +136,12 @@ public:
 	/// Get the visibility of scene object
 	bool IsVisible() const;
 
+	void SetNoCulling(bool bInNoCulling);
+	bool IsNoCulling() const;
+
+	void SetNoShadow(bool bInNoShadow);
+	bool IsNoShadow() const;
+
 	/// Check if scene object has flags
 	bool HasFlags(int FlagMasks) const;
 
@@ -185,6 +194,12 @@ protected:
 
 	int				m_Flags;
 	RAabb			Bounds;
+
+	/// Should the object bypass frustum culling
+	bool			bNoCulling : 1;
+
+	/// Object will cast no shadows
+	bool			bNoShadow : 1;
 
 	/// Number of frame in which the bounding box get updated
 	UINT64			BoundsUpdateFrame;
@@ -270,4 +285,24 @@ FORCEINLINE bool RSceneObject::IsVisible() const
 FORCEINLINE bool RSceneObject::HasFlags(int FlagMasks) const
 {
 	return (m_Flags & FlagMasks) != 0;
+}
+
+FORCEINLINE void RSceneObject::SetNoCulling(bool bInNoCulling)
+{
+	bNoCulling = bInNoCulling;
+}
+
+FORCEINLINE bool RSceneObject::IsNoCulling() const
+{
+	return bNoCulling;
+}
+
+FORCEINLINE void RSceneObject::SetNoShadow(bool bInNoShadow)
+{
+	bNoShadow = bInNoShadow;
+}
+
+FORCEINLINE bool RSceneObject::IsNoShadow() const
+{
+	return bNoShadow;
 }

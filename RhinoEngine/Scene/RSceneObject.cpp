@@ -7,12 +7,15 @@
 #include "Rhino.h"
 
 #include "RSceneObject.h"
+#include "tinyxml2/tinyxml2.h"
 
 RSceneObject::RSceneObject(const RConstructingParams& Params)
 	: m_Scene(Params.Scene)
 	, m_bVisible(true)
 	, bTransformModified(true)
 	, m_Flags(Params.Flags)
+	, bNoCulling(false)
+	, bNoShadow(false)
 	, BoundsUpdateFrame(0)
 	, InternalTransformUpdateCounter(0)
 {
@@ -44,6 +47,52 @@ void RSceneObject::CalculateBounds()
 void RSceneObject::Release()
 {
 	SceneComponents.clear();
+}
+
+void RSceneObject::LoadObjectFromXmlElement(tinyxml2::XMLElement* ObjectElem)
+{
+	const char* ObjectName = ObjectElem->Attribute("Name");
+	if (ObjectName)
+	{
+		SetName(ObjectName);
+	}
+
+	const char* ObjectScript = ObjectElem->Attribute("Script");
+	if (ObjectScript)
+	{
+		SetScript(ObjectScript);
+	}
+
+	bool NoCullingValue = false;
+	ObjectElem->QueryBoolAttribute("NoCulling", &NoCullingValue);
+	bNoCulling = NoCullingValue;
+
+	bool NoShadowValue = false;
+	ObjectElem->QueryBoolAttribute("NoShadow", &NoShadowValue);
+	bNoShadow = NoShadowValue;
+}
+
+void RSceneObject::SaveObjectToXmlElement(tinyxml2::XMLElement* ObjectElem)
+{
+	if (GetName() != "")
+	{
+		ObjectElem->SetAttribute("Name", GetName().c_str());
+	}
+
+	if (GetScript() != "")
+	{
+		ObjectElem->SetAttribute("Script", GetScript().c_str());
+	}
+
+	if (bNoCulling)
+	{
+		ObjectElem->SetAttribute("NoCulling", true);
+	}
+
+	if (bNoShadow)
+	{
+		ObjectElem->SetAttribute("NoShadow", true);
+	}
 }
 
 void RSceneObject::Destroy()

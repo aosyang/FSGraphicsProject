@@ -87,6 +87,10 @@ protected:
 
 	void AddSceneObjectInternal(RSceneObject* SceneObject);
 
+	/// Does culling get applied to a scene object?
+	/// If frustum is null, this function returns false
+	bool IsSceneObjectCulledByFrustum(RSceneObject* SceneObject, const RFrustum* Frustum) const;
+
 private:
 
 	std::vector<RSceneObject*>		m_SceneObjects;

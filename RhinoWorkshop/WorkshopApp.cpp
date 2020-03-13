@@ -154,6 +154,18 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 				SelectedObject->SetName(ObjectName);
 			}
 
+			bool bNoCulling = SelectedObject->IsNoCulling();
+			if (ImGui::Checkbox("No Culling", &bNoCulling))
+			{
+				SelectedObject->SetNoCulling(bNoCulling);
+			}
+
+			bool bNoShadow = SelectedObject->IsNoShadow();
+			if (ImGui::Checkbox("No Shadow", &bNoShadow))
+			{
+				SelectedObject->SetNoShadow(bNoShadow);
+			}
+
 			static bool TransformTreeOpen = true;
 			ImGui::SetNextTreeNodeOpen(TransformTreeOpen);
 			if (TransformTreeOpen = ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_None))

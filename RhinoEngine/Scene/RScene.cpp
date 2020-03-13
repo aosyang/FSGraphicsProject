@@ -422,19 +422,7 @@ void RScene::LoadFromFile(const std::string& MapAssetPath)
 			}
 
 			NewSceneObject->SetTransform(ObjectPosition, ObjectRotation, ObjectScale);
-
-			const char* ObjectName = elem_obj->Attribute("Name");
-			if (ObjectName)
-			{
-				NewSceneObject->SetName(ObjectName);
-			}
-
-			const char* ObjectScript = elem_obj->Attribute("Script");
-			if (ObjectScript)
-			{
-				NewSceneObject->SetScript(ObjectScript);
-			}
-
+			NewSceneObject->LoadObjectFromXmlElement(elem_obj);
 			elem_obj = elem_obj->NextSiblingElement();
 		}
 	}
@@ -454,16 +442,7 @@ void RScene::SaveToFile(const char* filename)
 		}
 
 		tinyxml2::XMLElement* elem_obj = doc->NewElement("SceneObject");
-
-		if (SceneObject->GetName() != "")
-		{
-			elem_obj->SetAttribute("Name", SceneObject->GetName().c_str());
-		}
-
-		if (SceneObject->GetScript() != "")
-		{
-			elem_obj->SetAttribute("Script", SceneObject->GetScript().c_str());
-		}
+		SceneObject->SaveObjectToXmlElement(elem_obj);
 
 		if (SceneObject->CanCastTo<RSMeshObject>())
 		{
@@ -561,7 +540,7 @@ void RScene::Render(const RFrustum* pFrustum)
 {
 	for (auto SceneObject : m_SceneObjects)
 	{
-		if (pFrustum && !RCollision::TestAabbInsideFrustum(*pFrustum, SceneObject->GetAabb()))
+		if (IsSceneObjectCulledByFrustum(SceneObject, pFrustum))
 		{
 			continue;
 		}
@@ -582,7 +561,7 @@ void RScene::RenderDepthPass(const RFrustum* pFrustum)
 {
 	for (auto SceneObject : m_SceneObjects)
 	{
-		if (pFrustum && !RCollision::TestAabbInsideFrustum(*pFrustum, SceneObject->GetAabb()))
+		if (IsSceneObjectCulledByFrustum(SceneObject, pFrustum))
 		{
 			continue;
 		}
@@ -590,6 +569,11 @@ void RScene::RenderDepthPass(const RFrustum* pFrustum)
 		if (!SceneObject->IsVisible())
 		{
 			continue;
+		}
+
+		if (SceneObject->IsNoShadow())
+		{
+			continue;;
 		}
 
 		RConstantBuffers::cbPerObject.Data.worldMatrix = SceneObject->GetTransformMatrix();
@@ -628,4 +612,25 @@ void RScene::AddSceneObjectInternal(RSceneObject* SceneObject)
 {
 	assert(!StdContains(m_SceneObjects, SceneObject));
 	m_SceneObjects.push_back(SceneObject);
+}
+
+bool RScene::IsSceneObjectCulledByFrustum(RSceneObject* SceneObject, const RFrustum* Frustum) const
+{
+	if (!Frustum)
+	{
+		// Consider object visible if no frustum is provided
+		return false;
+	}
+
+	if (SceneObject->IsNoCulling())
+	{
+		return false;
+	}
+
+	if (RCollision::TestAabbInsideFrustum(*Frustum, SceneObject->GetAabb()))
+	{
+		return false;
+	}
+
+	return true;
 }
