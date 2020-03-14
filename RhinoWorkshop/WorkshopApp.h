@@ -46,6 +46,7 @@ private:
 	std::vector<RSceneObject*> GetAllSceneObjects() const;
 
 	void SelectSceneObjectAtCursor(const RVec2& Point);
+	void DeleteSelectedObject();
 
 private:
 

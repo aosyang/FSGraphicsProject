@@ -344,6 +344,11 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 		bUpdateTransformInWidgets = true;
 	}
 
+	if (RInput.GetBufferedKeyState(VK_DELETE) == EBufferedKeyState::Pressed)
+	{
+		DeleteSelectedObject();
+	}
+
 	if (EditorAxis->GetMouseControlMode() != EMouseControlMode::None)
 	{
 		bUpdateTransformInWidgets = true;
@@ -389,18 +394,19 @@ void WorkshopApp::UpdateEngineMapList()
 
 void WorkshopApp::PostMapLoaded()
 {
-	// Add default camera to scene
 	RScene* DefaultScene = GSceneManager.DefaultScene();
-	RCamera* Camera = DefaultScene->CreateSceneObjectOfType<RCamera>("Editor Camera", CF_NoSerialization);
+
+	// Add default camera to scene
+	RCamera* Camera = DefaultScene->CreateSceneObjectOfType<RCamera>("Editor Camera", CF_InternalObject | CF_NoSerialization);
 	RFreeFlyCameraControl* CameraControl = Camera->AddNewComponent<RFreeFlyCameraControl>();
 	CameraControl->SetEnabled(true);
 
 	// Create default lighting
-	RSceneObject* GlobalLightInfo = DefaultScene->CreateSceneObjectOfType<RSceneObject>("DirectionalLight", CF_NoSerialization);
+	RSceneObject* GlobalLightInfo = DefaultScene->CreateSceneObjectOfType<RSceneObject>("DirectionalLight", CF_InternalObject | CF_NoSerialization);
 	RDirectionalLightComponent* DirLightComponent = GlobalLightInfo->AddNewComponent<RDirectionalLightComponent>();
 	DirLightComponent->SetParameters({ RVec3(sinf(1.0f) * 0.5f, 0.25f, cosf(1.0) * 0.5f), RColor(1.0f, 1.0f, 0.8f, 1.0f) });
 
-	EditorAxis = DefaultScene->CreateSceneObjectOfType<REditorAxis>("EditorAxis", CF_NoSerialization);
+	EditorAxis = DefaultScene->CreateSceneObjectOfType<REditorAxis>("EditorAxis", CF_InternalObject | CF_NoSerialization);
 }
 
 void WorkshopApp::UpdateWidgetValuesFromObjectTransform()
@@ -599,6 +605,16 @@ void WorkshopApp::SelectSceneObjectAtCursor(const RVec2& Point)
 	}
 }
 
+void WorkshopApp::DeleteSelectedObject()
+{
+	if (SelectedObject)
+	{
+		RScene* Scene = SelectedObject->GetScene();
+		Scene->DestroyObject(SelectedObject);
+		SetSelectedObject(nullptr);
+	}
+}
+
 void WorkshopApp::DisplaySceneViewWindow()
 {
 	if (ImGui::Begin("Scene View", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
@@ -609,6 +625,12 @@ void WorkshopApp::DisplaySceneViewWindow()
 		{
 			for (int i = 0; i < (int)SceneObjects.size(); i++)
 			{
+				// Do not show internal object (editor camera, axis etc)
+				if (SceneObjects[i]->HasFlags(CF_InternalObject))
+				{
+					continue;
+				}
+
 				bool bIsSelected = (SelectedObject == SceneObjects[i]);
 				std::string ObjectName = SceneObjects[i]->GetName();
 				if (ObjectName == "")
