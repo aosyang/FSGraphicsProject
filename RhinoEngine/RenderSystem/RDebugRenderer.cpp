@@ -96,6 +96,7 @@ void RDebugRenderer::DrawFrustum(const RFrustum& frustum, const RColor& color /*
 
 void RDebugRenderer::DrawSphere(const RVec3& center, float radius, const RColor& color, int segment)
 {
+	// Draw latitude lines (vertical)
 	for (int i = 0; i < segment; i++)
 	{
 		for (int j = 1; j < segment; j++)
@@ -117,6 +118,7 @@ void RDebugRenderer::DrawSphere(const RVec3& center, float radius, const RColor&
 		}
 	}
 
+	// Draw longitude lines (horizontal)
 	for (int i = 0; i < segment; i++)
 	{
 		for (int j = 0; j < segment; j++)

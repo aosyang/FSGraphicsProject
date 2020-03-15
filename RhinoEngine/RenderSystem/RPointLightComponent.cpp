@@ -58,3 +58,11 @@ void RPointLightComponent::SaveComponentToXmlElement(tinyxml2::XMLElement* Compo
 	RLight::SaveToXmlElement(ComponentElem);
 	ComponentElem->SetAttribute("Radius", Radius);
 }
+
+void RPointLightComponent::OnDrawDebugShape() const
+{
+	if (GEngine.IsEditor())
+	{
+		GDebugRenderer.DrawSphere(GetOwner()->GetWorldPosition(), Radius, RColor::Yellow);
+	}
+}

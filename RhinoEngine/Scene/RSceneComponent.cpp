@@ -33,3 +33,8 @@ const RAabb& RSceneComponent::GetLocalAabb() const
 {
 	return LocalBounds;
 }
+
+void RSceneComponent::DrawDebugShape() const
+{
+	OnDrawDebugShape();
+}

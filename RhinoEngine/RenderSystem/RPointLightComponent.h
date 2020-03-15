@@ -25,6 +25,9 @@ public:
 	void SetRadius(float InRadius);
 	float GetRadius() const;
 
+protected:
+	virtual void OnDrawDebugShape() const override;
+
 private:
 	RPointLightComponent(RSceneObject* InOwner);
 

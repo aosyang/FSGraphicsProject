@@ -247,6 +247,16 @@ const RAabb& RSceneObject::GetAabb()
 	return Bounds;
 }
 
+void RSceneObject::DrawDebugShape() const
+{
+	OnDrawDebugShape();
+
+	for (auto& Component : SceneComponents)
+	{
+		Component->DrawDebugShape();
+	}
+}
+
 void RSceneObject::Update(float DeltaTime)
 {
 	if (m_NodeTransform.IsCacheDirty())

@@ -436,6 +436,7 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 	if (SelectedObject)
 	{
 		GDebugRenderer.DrawAabb(SelectedObject->GetAabb());
+		SelectedObject->DrawDebugShape();
 	}
 }
 

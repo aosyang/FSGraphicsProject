@@ -128,6 +128,9 @@ public:
 	virtual void Draw() {}
 	virtual void DrawDepthPass() {}
 
+	/// Debug draw object for editor
+	void DrawDebugShape() const;
+
 	virtual void Update(float DeltaTime);
 
 	/// Set the visibility of scene object
@@ -184,6 +187,8 @@ protected:
 
 	/// Notify derived classes about transform being changed by setting position, rotation or scale directly
 	virtual void OnTransformModified();
+
+	virtual void OnDrawDebugShape() const {}
 
 protected:
 	std::string			m_Name;

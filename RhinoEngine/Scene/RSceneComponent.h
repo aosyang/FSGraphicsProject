@@ -48,10 +48,14 @@ public:
 
 	const RAabb& GetLocalAabb() const;
 
+	void DrawDebugShape() const;
+
 	virtual void Update(float DeltaTime) {}
 protected:
 	/// Callback when component is added to a scene object
 	virtual void OnComponentAdded() {}
+
+	virtual void OnDrawDebugShape() const {}
 
 	RAabb LocalBounds;
 
