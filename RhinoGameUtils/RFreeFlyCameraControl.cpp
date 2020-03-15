@@ -62,7 +62,15 @@ void RFreeFlyCameraControl::Update(float DeltaTime)
 
 		float SpeedBoost = 1.0f;
 		if (RInput.IsKeyDown(VK_LSHIFT))
+		{
 			SpeedBoost *= 4.0f;
+		}
+
+		if (RInput.IsKeyDown(VK_LCONTROL))
+		{
+			SpeedBoost *= 0.25f;
+		}
+
 		RVec3 moveVec(0.0f, 0.0f, 0.0f);
 		if (RInput.IsKeyDown('W'))
 			moveVec += RVec3(0.0f, 0.0f, 1.0f) * DeltaTime * NavigationSpeed * SpeedBoost;
