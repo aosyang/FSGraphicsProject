@@ -16,24 +16,6 @@ namespace tinyxml2
 	class XMLElement;
 }
 
-typedef RSceneComponent* (*ComponentFactoryCreatePtr)(RSceneObject*);
-
-/// Mapping class ids to their factory create functions
-extern std::map<std::string, ComponentFactoryCreatePtr> ClassIdToFactoryCreate;
-
-/// Helper class for statically registering scene component classes with their factory create functions
-template<typename T>
-class RSceneComponentStaticRegistrator
-{
-public:
-	RSceneComponentStaticRegistrator()
-	{
-		const std::string ClassName = T::_StaticGetClassName();
-		assert(ClassIdToFactoryCreate.find(ClassName) == ClassIdToFactoryCreate.end());
-		ClassIdToFactoryCreate[ClassName] = &T::FactoryCreate;
-	}
-};
-
 #define DECLARE_SCENE_COMPONENT(type, base) \
 		typedef base Base; \
 		friend class Base; \
@@ -45,8 +27,7 @@ public:
 
 
 #define IMPLEMENT_SCENE_COMPONENT(type) \
-	static RSceneComponentStaticRegistrator<type> _StaticRegistrator; \
-	RSceneComponent* type::FactoryCreate(RSceneObject* InOwner) { return InOwner->AddComponent(_CreateComponentUnique(InOwner)); }
+	RSceneComponent* type::FactoryCreate(RSceneObject* InOwner) { return InOwner->AddComponent(type::_CreateComponentUnique(InOwner)); }
 
 
 /// Base scene component class

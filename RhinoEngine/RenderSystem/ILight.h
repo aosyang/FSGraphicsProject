@@ -5,7 +5,10 @@
 //=============================================================================
 #pragma once
 
+#include "RRenderSystemTypes.h"
+
 class RCamera;
+struct ID3D11ShaderResourceView;
 
 enum class ELightType : UINT8
 {

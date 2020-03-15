@@ -8,6 +8,7 @@
 
 #include "RSceneObject.h"
 #include "tinyxml2/tinyxml2.h"
+#include "RSceneComponentFactory.h"
 
 RSceneObject::RSceneObject(const RConstructingParams& Params)
 	: m_Scene(Params.Scene)
@@ -74,13 +75,10 @@ void RSceneObject::LoadObjectFromXmlElement(tinyxml2::XMLElement* ObjectElem)
 		if (ClassName)
 		{
 			std::string ClassNameStr = ClassName;
-			if (ClassIdToFactoryCreate.find(ClassNameStr) != ClassIdToFactoryCreate.end())
+			RSceneComponent* Comp = FactoryCreateSceneComponent(ClassNameStr, this);
+			if (Comp)
 			{
-				RSceneComponent* Comp = (*ClassIdToFactoryCreate[ClassNameStr])(this);
-				if (Comp)
-				{
-					Comp->LoadComponentFromXmlElement(ComponentElem);
-				}
+				Comp->LoadComponentFromXmlElement(ComponentElem);
 			}
 		}
 

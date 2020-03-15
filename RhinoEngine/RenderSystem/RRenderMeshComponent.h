@@ -7,17 +7,13 @@
 
 #include "Scene/RSceneComponent.h"
 
+#include "RRenderSystemTypes.h"
 #include "RMaterial.h"
 
 struct PendingAssignedMaterial
 {
 	UINT		Index;
 	RMaterial*	Material;
-};
-
-struct RenderViewInfo
-{
-	RFrustum*	Frustum;
 };
 
 class RRenderMeshComponent : public RSceneComponent

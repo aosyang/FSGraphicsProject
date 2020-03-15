@@ -8,8 +8,6 @@
 
 #include "RSceneComponent.h"
 
-std::map<std::string, ComponentFactoryCreatePtr> ClassIdToFactoryCreate;
-
 RSceneComponent::RSceneComponent(RSceneObject* InOwner)
 	: OwnerSceneObject(InOwner)
 {

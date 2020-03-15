@@ -7,7 +7,6 @@
 
 #include "Core/RSingleton.h"
 #include "RRenderMeshComponent.h"
-#include "ILight.h"
 #include "BlendState.h"
 
 #pragma comment(lib, "dxgi.lib")
@@ -17,6 +16,9 @@ struct RShader;
 class RCamera;
 class RScene;
 class RRasterizerState;
+
+class RLight;
+class IShadowCaster;
 
 enum SamplerState
 {

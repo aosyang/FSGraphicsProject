@@ -13,6 +13,7 @@
 
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
+#include "Scene/RSceneComponentFactory.h"
 
 static TCHAR szWindowClass[] = _T("rhinoapp");
 
@@ -39,6 +40,8 @@ REngine::~REngine()
 
 bool REngine::Initialize()
 {
+	RegisterEngineComponentClasses();
+
 	m_bIsInitialized = true;
 
 	int width = 1024,
