@@ -87,8 +87,9 @@ public:
 	void RegisterRenderMeshComponent(RRenderMeshComponent* Component);
 	void UnregisterRenderMeshComponent(RRenderMeshComponent* Component);
 
-	void RegisterLight(ILight* Light);
-	void UnregisterLight(ILight* Light);
+	void RegisterLight(RLight* Light);
+	void UnregisterLight(RLight* Light);
+	const std::vector<RLight*>& GetRegisteredLights() const;
 
 	void RegisterShadowCaster(IShadowCaster* ShadowCaster);
 	void UnregisterShadowCaster(IShadowCaster* ShadowCaster);
@@ -142,7 +143,7 @@ protected:
 	bool					m_bIsUsingDeferredShading;
 
 	std::vector<RRenderMeshComponent*>	m_RegisteredRenderMeshComponents;
-	std::vector<ILight*>				m_RegisteredLights;
+	std::vector<RLight*>				m_RegisteredLights;
 	std::vector<IShadowCaster*>			m_RegisteredShadowCasters;
 	std::vector<IOverlayRenderable*>	m_OverlayRenderables;
 
@@ -150,4 +151,9 @@ protected:
 };
 
 #define GRenderer RRenderSystem::Instance()
+
+FORCEINLINE const std::vector<RLight*>& RRenderSystem::GetRegisteredLights() const
+{
+	return m_RegisteredLights;
+}
 

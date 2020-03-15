@@ -10,6 +10,7 @@ class RCamera;
 enum class ELightType : UINT8
 {
 	DirectionalLight,
+	PointLight,
 };
 
 class ILight
@@ -17,7 +18,42 @@ class ILight
 public:
 	virtual ~ILight() {}
 
-	virtual ELightType GetLightType() = 0;
+	virtual ELightType GetLightType() const = 0;
+	virtual RAabb GetEffectiveLightBounds() = 0;
+	virtual void SetupConstantBuffer(int LightIndex) const = 0;
+};
+
+class RLight : public ILight
+{
+public:
+	RLight()
+		: LightColor(1.0f, 1.0f, 1.0f, 1.0f)
+		, LightIntensity(1.0f)
+	{}
+
+	void SetLightColor(const RColor& NewColor)
+	{
+		LightColor = NewColor;
+	}
+
+	const RColor& GetLightColor() const
+	{
+		return LightColor;
+	}
+
+	void SetLightIntensity(float NewIntensity)
+	{
+		LightIntensity = NewIntensity;
+	}
+
+	float GetLightIntensity() const
+	{
+		return LightIntensity;
+	}
+
+private:
+	RColor LightColor;
+	float LightIntensity;
 };
 
 // Shadow caster interface

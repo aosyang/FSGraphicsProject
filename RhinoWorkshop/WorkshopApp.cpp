@@ -112,6 +112,19 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 
 					SetSelectedObject(NewObject);
 				}
+
+				if (ImGui::MenuItem("Point Light"))
+				{
+					RScene* DefaultScene = GSceneManager.DefaultScene();
+					RSceneObject* NewObject = DefaultScene->CreateSceneObjectOfType<RSceneObject>("PointLight");
+					RPointLightComponent* PointLightComponent = NewObject->AddNewComponent<RPointLightComponent>();
+		
+					RVec3 CreatePosition = DefaultScene->GetRenderCamera() ? DefaultScene->GetRenderCamera()->GetPosition() : RVec3::Zero();
+					NewObject->SetPosition(CreatePosition);
+
+					SetSelectedObject(NewObject);
+				}
+
 				ImGui::EndMenu();
 			}
 
@@ -193,6 +206,34 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 				if (ImGui::DragFloat3("Scale", ScaleValueArray))
 				{
 					SelectedObject->SetScale(RVec3(ScaleValueArray));
+				}
+			}
+
+			// Light property panel
+			if (RPointLightComponent* PointLightComp = SelectedObject->FindComponent<RPointLightComponent>())
+			{
+				static bool bPointLightTreeOpen = true;
+				ImGui::SetNextTreeNodeOpen(bPointLightTreeOpen);
+				if (bPointLightTreeOpen = ImGui::CollapsingHeader("Point Light", ImGuiTreeNodeFlags_None))
+				{
+					RColor LightColor = PointLightComp->GetLightColor();
+					if (ImGui::ColorEdit3("Light Color", &LightColor.r, ImGuiColorEditFlags_NoInputs))
+					{
+						PointLightComp->SetLightColor(LightColor);
+					}
+
+					float LightIntensity = PointLightComp->GetLightIntensity();
+					if (ImGui::DragFloat("Light Intensity", &LightIntensity, 0.1f, 0.0f, 10000.0f))
+					{
+						PointLightComp->SetLightIntensity(LightIntensity);
+					}
+
+					float Radius = PointLightComp->GetRadius();
+					if (ImGui::DragFloat("Radius", &Radius, 1.0f, 0.0f, FLT_MAX))
+					{
+						PointLightComp->SetRadius(Radius);
+					}
+
 				}
 			}
 

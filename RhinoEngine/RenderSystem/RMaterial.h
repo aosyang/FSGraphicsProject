@@ -73,6 +73,7 @@ public:
 	void SetBlendMode(BlendState InBlendMode);
 
 	/// Number of times texture will be repeated when applying to a surface
+	void SetUVTiling(float InUVTiling);
 	float GetUVTiling() const;
 
 	bool GetDoubleSided() const;
@@ -160,6 +161,11 @@ FORCEINLINE BlendState RMaterial::GetBlendMode() const
 FORCEINLINE void RMaterial::SetBlendMode(BlendState InBlendMode)
 {
 	BlendMode = InBlendMode;
+}
+
+FORCEINLINE void RMaterial::SetUVTiling(float InUVTiling)
+{
+	UVTiling = InUVTiling;
 }
 
 FORCEINLINE float RMaterial::GetUVTiling() const

@@ -106,7 +106,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 			lit = SampleCascadedShadowMap(Input.ShadowPosH, dot(DirectionalLight[id].Direction.xyz, normal), Input.PosH.z);
 		}
 
-		float3 lightColor = DirectionalLight[id].Color.rgb;
+		float3 lightColor = DirectionalLight[id].Color.rgb * DirectionalLight[id].Color.w;
 
 		Final.rgb += lit * CalculateLightBRDF(lightDir, lightColor, viewDir, normal, NdotV, roughness, alpha, c_diff, c_spec);
 	}
@@ -118,7 +118,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 
 		float attenuation = 1.0f - saturate(length(lightVec) / PointLight[ip].PosAndRadius.w);
 
-		float3 lightColor = PointLight[ip].Color.rgb;
+		float3 lightColor = PointLight[ip].Color.rgb * PointLight[ip].Color.w;
 
 		Final.rgb += attenuation * CalculateLightBRDF(lightDir, lightColor, viewDir, normal, NdotV, roughness, alpha, c_diff, c_spec);
 	}
@@ -133,7 +133,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 		float coneAtt = 1.0f - saturate((Spotlight[is].ConeRatio.x - surfaceRatio) / (Spotlight[is].ConeRatio.x - Spotlight[is].ConeRatio.y));
 		float attenuation = radiusAtt * coneAtt;
 
-		float3 lightColor = Spotlight[is].Color.rgb;
+		float3 lightColor = Spotlight[is].Color.rgb * Spotlight[is].Color.w;
 
 		Final.rgb += attenuation * CalculateLightBRDF(lightDir, lightColor, viewDir, normal, NdotV, roughness, alpha, c_diff, c_spec);
 	}

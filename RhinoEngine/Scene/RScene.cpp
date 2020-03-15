@@ -550,6 +550,26 @@ void RScene::Render(const RFrustum* pFrustum)
 			continue;
 		}
 
+		RConstantBuffers::cbLight.Data.PointLightCount = 0;
+		for (auto Light : GRenderer.GetRegisteredLights())
+		{
+			if (Light->GetLightType() == ELightType::DirectionalLight)
+			{
+				continue;
+			}
+
+			if (Light->GetEffectiveLightBounds().TestIntersectionWithAabb(SceneObject->GetAabb()))
+			{
+				if (Light->GetLightType() == ELightType::PointLight)
+				{
+					Light->SetupConstantBuffer(RConstantBuffers::cbLight.Data.PointLightCount);
+					RConstantBuffers::cbLight.Data.PointLightCount++;
+				}
+			}
+		}
+		RConstantBuffers::cbLight.UpdateBufferData();
+		RConstantBuffers::cbLight.BindBuffer();
+
 		RConstantBuffers::cbPerObject.Data.worldMatrix = SceneObject->GetTransformMatrix();
 		RConstantBuffers::cbPerObject.UpdateBufferData();
 		RConstantBuffers::cbPerObject.BindBuffer();

@@ -130,6 +130,13 @@ void RAssetEditorWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, RRe
 						bUpdatePreview = true;
 					}
 
+					float UVTiling = Material->GetUVTiling();
+					if (ImGui::InputFloat("UV Tiling", &UVTiling))
+					{
+						Material->SetUVTiling(UVTiling);
+						bUpdatePreview = true;
+					}
+
 					auto& Slots = Material->GetTextureSlots();
 					for (int i = 0; i < (int)Slots.size(); i++)
 					{

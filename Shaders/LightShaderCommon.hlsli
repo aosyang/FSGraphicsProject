@@ -53,7 +53,7 @@ float3 CalculateSpecularLight(float3 normal,
 	//float SpecularIntensity = max(pow(saturate(dot(normal, normalize(halfVec))), specularColor.w), 0.0f);
 	float3 lightReflect = normalize(reflect(-lightDir, normal));
 	float SpecularIntensity = max(pow(saturate(dot(viewDir, lightReflect)), specularColor.w), 0.0f);
-	return lightColor.rgb * specularColor.rgb * SpecularIntensity;
+	return lightColor.rgb * specularColor.rgb * lightColor.w * SpecularIntensity;
 }
 
 float SampleShadowMap_NearestFiltering(Texture2D shadowMap, float3 shadowPosH, float depthOffset = 0.01f)

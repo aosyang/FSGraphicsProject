@@ -528,13 +528,13 @@ void RRenderSystem::UnregisterRenderMeshComponent(RRenderMeshComponent* Componen
 	StdRemoveChecked(m_RegisteredRenderMeshComponents, Component);
 }
 
-void RRenderSystem::RegisterLight(ILight* Light)
+void RRenderSystem::RegisterLight(RLight* Light)
 {
 	assert(!StdContains(m_RegisteredLights, Light));
 	m_RegisteredLights.push_back(Light);
 }
 
-void RRenderSystem::UnregisterLight(ILight* Light)
+void RRenderSystem::UnregisterLight(RLight* Light)
 {
 	StdRemoveChecked(m_RegisteredLights, Light);
 }
