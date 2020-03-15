@@ -7,6 +7,9 @@
 #include "Rhino.h"
 
 #include "RDirectionalLightComponent.h"
+#include "tinyxml2/tinyxml2.h"
+
+IMPLEMENT_SCENE_COMPONENT(RDirectionalLightComponent);
 
 const RMatrix4 RDirectionalLightComponent::ShadowBiasTransform =
 RMatrix4(
@@ -24,9 +27,7 @@ namespace
 }
 
 RDirectionalLightComponent::RDirectionalLightComponent(RSceneObject* InOwner)
-	: Base(InOwner),
-	  m_LightDirection(0.0f, 1.0f, 0.0f),
-	  m_LightColor(1.0f, 1.0f, 1.0f)
+	: Base(InOwner)
 {
 	GRenderer.RegisterLight(this);
 	GRenderer.RegisterShadowCaster(this);
@@ -215,12 +216,22 @@ ID3D11ShaderResourceView* RDirectionalLightComponent::GetRTDepthSRV(int PassInde
 	return m_ShadowMap[PassIndex].GetRenderTargetDepthSRV();
 }
 
-void RDirectionalLightComponent::SetParameters(const DirectionalLightParam& Parameters)
+void RDirectionalLightComponent::LoadComponentFromXmlElement(tinyxml2::XMLElement* ComponentElem)
 {
-	m_LightDirection = Parameters.Direction.GetNormalized();
-	GetOwner()->GetTransform()->LookAt(GetOwner()->GetWorldPosition() + m_LightDirection);
+	Base::LoadComponentFromXmlElement(ComponentElem);
+	RLight::LoadFromXmlElement(ComponentElem);
+}
 
-	m_LightColor = Parameters.Color;
+void RDirectionalLightComponent::SaveComponentToXmlElement(tinyxml2::XMLElement* ComponentElem) const
+{
+	Base::SaveComponentToXmlElement(ComponentElem);
+	RLight::SaveToXmlElement(ComponentElem);
+}
+
+void RDirectionalLightComponent::SetLightDirection(const RVec3& Direction)
+{
+	RVec3 NewDirection = Direction.GetNormalized();
+	GetOwner()->GetTransform()->LookAt(GetOwner()->GetWorldPosition() + NewDirection);
 }
 
 RSphere RDirectionalLightComponent::CalculateBoundingSphereFromFrustum(const RFrustum& frustum, float start, float end)

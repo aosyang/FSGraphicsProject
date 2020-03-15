@@ -188,7 +188,8 @@ void SimpleGame::SetupScene()
 
 	RSceneObject* GlobalLightInfo = DefaultScene->CreateSceneObjectOfType<RSceneObject>("DirectionalLight");
 	RDirectionalLightComponent* DirLightComponent = GlobalLightInfo->AddNewComponent<RDirectionalLightComponent>();
-	DirLightComponent->SetParameters({ RVec3(-0.5f, 1, -0.3f), RColor(0.5f, 0.5f, 0.5f) });
+	DirLightComponent->SetLightDirection(RVec3(-0.5f, 1, -0.3f));
+	DirLightComponent->SetLightColor(RColor(0.5f, 0.5f, 0.5f));
 
 	m_CameraOrbiter = DefaultScene->CreateSceneObjectOfType<RSceneObject>("CameraOrbiter");
 	m_Camera->SetPosition(RVec3(0, 0, -500.0f));

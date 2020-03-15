@@ -19,6 +19,9 @@ public:
 	virtual RAabb GetEffectiveLightBounds() override;
 	virtual void SetupConstantBuffer(int LightIndex) const override;
 
+	virtual void LoadComponentFromXmlElement(tinyxml2::XMLElement* ComponentElem) override;
+	virtual void SaveComponentToXmlElement(tinyxml2::XMLElement* ComponentElem) const override;
+
 	void SetRadius(float InRadius);
 	float GetRadius() const;
 

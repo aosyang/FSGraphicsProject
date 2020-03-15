@@ -31,6 +31,16 @@ public:
 		return *this;
 	}
 
+	float operator[](int Index) const
+	{
+		return (&r)[Index];
+	}
+
+	float& operator[](int Index)
+	{
+		return (&r)[Index];
+	}
+
 	// Predefined colors
 	static RColor Red;
 	static RColor Green;

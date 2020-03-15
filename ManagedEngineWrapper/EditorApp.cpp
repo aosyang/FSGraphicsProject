@@ -613,6 +613,7 @@ namespace ManagedEngineWrapper
 
 		RSceneObject* GlobalLightInfo = m_Scene.CreateSceneObjectOfType<RSceneObject>("DirectionalLight", CF_NoSerialization);
 		RDirectionalLightComponent* DirLightComponent = GlobalLightInfo->AddNewComponent<RDirectionalLightComponent>();
-		DirLightComponent->SetParameters({ RVec3(-0.5f, 1, -0.3f), RColor(0.5f, 0.5f, 0.5f) });
+		DirLightComponent->SetLightDirection(RVec3(-0.5f, 1, -0.3f));
+		DirLightComponent->SetLightColor(RColor(0.5f, 0.5f, 0.5f));
 	}
 }

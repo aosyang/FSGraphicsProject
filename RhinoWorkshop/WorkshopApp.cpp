@@ -125,6 +125,18 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 					SetSelectedObject(NewObject);
 				}
 
+				if (ImGui::MenuItem("Directional Light"))
+				{
+					RScene* DefaultScene = GSceneManager.DefaultScene();
+					RSceneObject* NewObject = DefaultScene->CreateSceneObjectOfType<RSceneObject>("DirectionalLight");
+					RDirectionalLightComponent* PointLightComponent = NewObject->AddNewComponent<RDirectionalLightComponent>();
+
+					RVec3 CreatePosition = DefaultScene->GetRenderCamera() ? DefaultScene->GetRenderCamera()->GetPosition() : RVec3::Zero();
+					NewObject->SetPosition(CreatePosition);
+
+					SetSelectedObject(NewObject);
+				}
+
 				ImGui::EndMenu();
 			}
 
@@ -233,7 +245,27 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 					{
 						PointLightComp->SetRadius(Radius);
 					}
+				}
+			}
 
+			// Directional light property panel
+			if (RDirectionalLightComponent* DirectionalLightComp = SelectedObject->FindComponent<RDirectionalLightComponent>())
+			{
+				static bool bDirectionalLightTreeOpen = true;
+				ImGui::SetNextTreeNodeOpen(bDirectionalLightTreeOpen);
+				if (bDirectionalLightTreeOpen = ImGui::CollapsingHeader("Directional Light", ImGuiTreeNodeFlags_None))
+				{
+					RColor LightColor = DirectionalLightComp->GetLightColor();
+					if (ImGui::ColorEdit3("Light Color", &LightColor.r, ImGuiColorEditFlags_NoInputs))
+					{
+						DirectionalLightComp->SetLightColor(LightColor);
+					}
+
+					float LightIntensity = DirectionalLightComp->GetLightIntensity();
+					if (ImGui::DragFloat("Light Intensity", &LightIntensity, 0.1f, 0.0f, 10000.0f))
+					{
+						DirectionalLightComp->SetLightIntensity(LightIntensity);
+					}
 				}
 			}
 
@@ -442,11 +474,7 @@ void WorkshopApp::PostMapLoaded()
 	RFreeFlyCameraControl* CameraControl = Camera->AddNewComponent<RFreeFlyCameraControl>();
 	CameraControl->SetEnabled(true);
 
-	// Create default lighting
-	RSceneObject* GlobalLightInfo = DefaultScene->CreateSceneObjectOfType<RSceneObject>("DirectionalLight", CF_InternalObject | CF_NoSerialization);
-	RDirectionalLightComponent* DirLightComponent = GlobalLightInfo->AddNewComponent<RDirectionalLightComponent>();
-	DirLightComponent->SetParameters({ RVec3(sinf(1.0f) * 0.5f, 0.25f, cosf(1.0) * 0.5f), RColor(1.0f, 1.0f, 0.8f, 1.0f) });
-
+	// Create axis object
 	EditorAxis = DefaultScene->CreateSceneObjectOfType<REditorAxis>("EditorAxis", CF_InternalObject | CF_NoSerialization);
 }
 

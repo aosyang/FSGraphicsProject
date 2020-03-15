@@ -9,6 +9,7 @@
 #include "Core/RRuntimeTypeObject.h"
 
 class RScene;
+class RSceneComponent;
 
 #define DECLARE_SCENE_OBJECT(type, base)\
 		typedef base Base; friend class RScene;\
@@ -47,7 +48,6 @@ class RSceneObject : public RRuntimeTypeObject
 	friend class RScene;
 	DECLARE_RUNTIME_TYPE(RSceneObject, RRuntimeTypeObject);
 public:
-	virtual void Release();
 
 	virtual void LoadObjectFromXmlElement(tinyxml2::XMLElement* ObjectElem);
 	virtual void SaveObjectToXmlElement(tinyxml2::XMLElement* ObjectElem);
@@ -145,6 +145,9 @@ public:
 	/// Check if scene object has flags
 	bool HasFlags(int FlagMasks) const;
 
+	/// Add an component to this object
+	RSceneComponent* AddComponent(std::unique_ptr<RSceneComponent>&& Component);
+
 	/// Create a new component and add to this scene object
 	template<typename T>
 	T* AddNewComponent();
@@ -226,12 +229,7 @@ private:
 template<typename T>
 FORCEINLINE T* RSceneObject::AddNewComponent()
 {
-	SceneComponents.push_back(move(T::_CreateComponentUnique(this)));
-
-	RSceneComponent* NewComponent = SceneComponents.back().get();
-	NewComponent->NotifyComponentAdded();
-
-	return static_cast<T*>(NewComponent);
+	return static_cast<T*>(AddComponent(T::_CreateComponentUnique(this)));
 }
 
 template<typename T>

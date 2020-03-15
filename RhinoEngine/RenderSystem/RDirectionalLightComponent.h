@@ -9,12 +9,6 @@
 #include "ILight.h"
 #include "RShadowMap.h"
 
-struct DirectionalLightParam
-{
-	RVec3	Direction;
-	RColor	Color;
-};
-
 #define MAX_CASCADED_SHADOW_SPLITS_NUM 3
 
 class RDirectionalLightComponent : public RSceneComponent, public RLight, public IShadowCaster
@@ -37,13 +31,13 @@ public:
 	virtual ID3D11ShaderResourceView* GetRTDepthSRV(int PassIndex) override;
 	// End of IShadowCaster methods
 
-	void SetParameters(const DirectionalLightParam& Parameters);
+	virtual void LoadComponentFromXmlElement(tinyxml2::XMLElement* ComponentElem) override;
+	virtual void SaveComponentToXmlElement(tinyxml2::XMLElement* ComponentElem) const override;
+
+	void SetLightDirection(const RVec3& Direction);
 
 	// Returns normalized light direction
 	RVec3 GetLightDirection() const;
-	
-	// Returns color of light
-	const RColor& GetLightColor() const;
 
 protected:
 	// Calculate the bounding sphere from a frustum
@@ -52,18 +46,7 @@ protected:
 private:
 	RDirectionalLightComponent(RSceneObject* InOwner);
 
-	// Normalized light direction
-	RVec3 m_LightDirection;
-
-	// Color of light
-	RColor m_LightColor;
-
 	RShadowMap	m_ShadowMap[MAX_CASCADED_SHADOW_SPLITS_NUM];
 
 	static const RMatrix4 ShadowBiasTransform;
 };
-
-FORCEINLINE const RColor& RDirectionalLightComponent::GetLightColor() const
-{
-	return m_LightColor;
-}

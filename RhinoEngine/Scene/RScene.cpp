@@ -354,7 +354,6 @@ void RScene::DestroyObject(RSceneObject* obj)
 	auto iter = find(m_SceneObjects.begin(), m_SceneObjects.end(), obj);
 	if (iter != m_SceneObjects.end())
 	{
-		(*iter)->Release();
 		m_SceneObjects.erase(iter);
 		delete obj;
 	}
@@ -364,7 +363,6 @@ void RScene::DestroyAllObjects()
 {
 	for (UINT i = 0; i < m_SceneObjects.size(); i++)
 	{
-		m_SceneObjects[i]->Release();
 		delete m_SceneObjects[i];
 	}
 
@@ -384,7 +382,8 @@ void RScene::LoadFromFile(const std::string& MapAssetPath)
 		{
 			RSceneObject* NewSceneObject = nullptr;
 
-			std::string obj_type = elem_obj->Attribute("Type");
+			const char* AttributeType = elem_obj->Attribute("Type");
+			std::string obj_type = AttributeType ? AttributeType : "";
 			if (obj_type == "MeshObject")
 			{
 				const char* ResourceFilePath = elem_obj->Attribute("Mesh");
@@ -400,6 +399,16 @@ void RScene::LoadFromFile(const std::string& MapAssetPath)
 
 				tinyxml2::XMLElement* elem_mat = elem_obj->FirstChildElement("Material");
 				MeshObject->SerializeXmlMaterials_Load(elem_mat);
+			}
+			else
+			{
+				NewSceneObject = CreateSceneObject();
+			}
+
+			const char* AttributeName = elem_obj->Attribute("Name");
+			if (AttributeName)
+			{
+				NewSceneObject->SetName(std::string(AttributeName));
 			}
 
 			RVec3 ObjectPosition;

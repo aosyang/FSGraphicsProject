@@ -31,6 +31,7 @@ struct RRuntimeTypeInfoData
 	public:\
 		/* Get runtime type id for a class or a template type */\
 		static size_t _StaticGetRuntimeTypeId()				{ return _StaticGetRuntimeTypeInfo().TypeId; }\
+		static const char* _StaticGetClassName()			{ return _StaticGetRuntimeTypeInfo().ClassName; }\
 		virtual const char* GetClassName() const override	{ return _StaticGetRuntimeTypeInfo().ClassName; }\
 	private:
 

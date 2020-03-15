@@ -31,25 +31,15 @@ public:
 		, LightIntensity(1.0f)
 	{}
 
-	void SetLightColor(const RColor& NewColor)
-	{
-		LightColor = NewColor;
-	}
+	void SetLightColor(const RColor& NewColor);
+	const RColor& GetLightColor() const;
 
-	const RColor& GetLightColor() const
-	{
-		return LightColor;
-	}
+	void SetLightIntensity(float NewIntensity);
+	float GetLightIntensity() const;
 
-	void SetLightIntensity(float NewIntensity)
-	{
-		LightIntensity = NewIntensity;
-	}
-
-	float GetLightIntensity() const
-	{
-		return LightIntensity;
-	}
+protected:
+	void LoadFromXmlElement(tinyxml2::XMLElement* ComponentElem);
+	void SaveToXmlElement(tinyxml2::XMLElement* ComponentElem) const;
 
 private:
 	RColor LightColor;

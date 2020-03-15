@@ -249,6 +249,11 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 
 	GRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState[SamplerState_Texture]);
 
+#if _DEBUG
+	const char* TextureSamplerName = "Texture2DSampler";
+	m_SamplerState[SamplerState_Texture]->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen(TextureSamplerName), TextureSamplerName);
+#endif	// _DEBUG
+
 	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
 	samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -259,6 +264,11 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 	GRenderer.D3DDevice()->CreateSamplerState(&samplerDesc, &m_SamplerState[SamplerState_ShadowDepthComparison]);
+
+#if _DEBUG
+	const char* ShadowDepthSamplerName = "ShadowDepthSampler";
+	m_SamplerState[SamplerState_ShadowDepthComparison]->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen(ShadowDepthSamplerName), ShadowDepthSamplerName);
+#endif	// _DEBUG
 
 	RConstantBuffers::Initialize();
 
@@ -726,7 +736,7 @@ void RRenderSystem::RenderFrame()
 					cbLight.DirectionalLightCount++;
 
 					RDirectionalLightComponent* DirLight = static_cast<RDirectionalLightComponent*>(Light);
-					cbLight.DirectionalLight[Index].Color = RVec4(&DirLight->GetLightColor().r);
+					cbLight.DirectionalLight[Index].Color = RVec4(RVec3(&DirLight->GetLightColor().r), DirLight->GetLightIntensity());
 
 					RVec3 Dir = DirLight->GetLightDirection();
 					cbLight.DirectionalLight[Index].Direction = Dir.GetNormalized();

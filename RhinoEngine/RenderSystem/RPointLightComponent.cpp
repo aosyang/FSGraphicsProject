@@ -7,6 +7,9 @@
 #include "Rhino.h"
 
 #include "RPointLightComponent.h"
+#include "tinyxml2/tinyxml2.h"
+
+IMPLEMENT_SCENE_COMPONENT(RPointLightComponent);
 
 RPointLightComponent::RPointLightComponent(RSceneObject* InOwner)
 	: Base(InOwner)
@@ -40,4 +43,18 @@ void RPointLightComponent::SetupConstantBuffer(int LightIndex) const
 
 	const RColor& LightColor = GetLightColor();
 	PointLightData.Color = RVec4(LightColor.r, LightColor.g, LightColor.b, GetLightIntensity());
+}
+
+void RPointLightComponent::LoadComponentFromXmlElement(tinyxml2::XMLElement* ComponentElem)
+{
+	Base::LoadComponentFromXmlElement(ComponentElem);
+	RLight::LoadFromXmlElement(ComponentElem);
+	ComponentElem->QueryFloatAttribute("Radius", &Radius);
+}
+
+void RPointLightComponent::SaveComponentToXmlElement(tinyxml2::XMLElement* ComponentElem) const
+{
+	Base::SaveComponentToXmlElement(ComponentElem);
+	RLight::SaveToXmlElement(ComponentElem);
+	ComponentElem->SetAttribute("Radius", Radius);
 }

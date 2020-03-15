@@ -8,6 +8,8 @@
 
 #include "RSceneComponent.h"
 
+std::map<std::string, ComponentFactoryCreatePtr> ClassIdToFactoryCreate;
+
 RSceneComponent::RSceneComponent(RSceneObject* InOwner)
 	: OwnerSceneObject(InOwner)
 {
@@ -17,6 +19,16 @@ RSceneComponent::RSceneComponent(RSceneObject* InOwner)
 void RSceneComponent::NotifyComponentAdded()
 {
 	OnComponentAdded();
+}
+
+void RSceneComponent::LoadComponentFromXmlElement(tinyxml2::XMLElement* ComponentElem)
+{
+
+}
+
+void RSceneComponent::SaveComponentToXmlElement(tinyxml2::XMLElement* ComponentElem) const
+{
+
 }
 
 const RAabb& RSceneComponent::GetLocalAabb() const

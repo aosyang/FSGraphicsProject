@@ -44,11 +44,6 @@ void RSceneObject::CalculateBounds()
 	}
 }
 
-void RSceneObject::Release()
-{
-	SceneComponents.clear();
-}
-
 void RSceneObject::LoadObjectFromXmlElement(tinyxml2::XMLElement* ObjectElem)
 {
 	const char* ObjectName = ObjectElem->Attribute("Name");
@@ -70,6 +65,27 @@ void RSceneObject::LoadObjectFromXmlElement(tinyxml2::XMLElement* ObjectElem)
 	bool NoShadowValue = false;
 	ObjectElem->QueryBoolAttribute("NoShadow", &NoShadowValue);
 	bNoShadow = NoShadowValue;
+
+	// Load components for object
+	tinyxml2::XMLElement* ComponentElem = ObjectElem->FirstChildElement("Component");
+	while (ComponentElem)
+	{
+		const char* ClassName = ComponentElem->Attribute("Class");
+		if (ClassName)
+		{
+			std::string ClassNameStr = ClassName;
+			if (ClassIdToFactoryCreate.find(ClassNameStr) != ClassIdToFactoryCreate.end())
+			{
+				RSceneComponent* Comp = (*ClassIdToFactoryCreate[ClassNameStr])(this);
+				if (Comp)
+				{
+					Comp->LoadComponentFromXmlElement(ComponentElem);
+				}
+			}
+		}
+
+		ComponentElem = ComponentElem->NextSiblingElement("Component");
+	}
 }
 
 void RSceneObject::SaveObjectToXmlElement(tinyxml2::XMLElement* ObjectElem)
@@ -92,6 +108,15 @@ void RSceneObject::SaveObjectToXmlElement(tinyxml2::XMLElement* ObjectElem)
 	if (bNoShadow)
 	{
 		ObjectElem->SetAttribute("NoShadow", true);
+	}
+
+	// Save components to xml
+	for (auto& Comp : SceneComponents)
+	{
+		tinyxml2::XMLElement* ComponentElem = ObjectElem->GetDocument()->NewElement("Component");
+		ComponentElem->SetAttribute("Class", Comp->GetClassName());
+		Comp->SaveComponentToXmlElement(ComponentElem);
+		ObjectElem->InsertEndChild(ComponentElem);
 	}
 }
 
@@ -239,6 +264,16 @@ void RSceneObject::Update(float DeltaTime)
 
 	UpdateComponents(DeltaTime);
 	CalculateBounds();
+}
+
+RSceneComponent* RSceneObject::AddComponent(std::unique_ptr<RSceneComponent>&& Component)
+{
+	SceneComponents.push_back(std::move(Component));
+
+	RSceneComponent* NewComponent = SceneComponents.back().get();
+	NewComponent->NotifyComponentAdded();
+
+	return NewComponent;
 }
 
 const std::vector<std::string>& RSceneObject::GetParsedScript()
