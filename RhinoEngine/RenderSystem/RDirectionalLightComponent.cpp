@@ -49,11 +49,6 @@ ELightType RDirectionalLightComponent::GetLightType() const
 	return ELightType::DirectionalLight;
 }
 
-RAabb RDirectionalLightComponent::GetEffectiveLightBounds()
-{
-	return RAabb::Default;
-}
-
 void RDirectionalLightComponent::SetupConstantBuffer(int LightIndex) const
 {
 	// Constant buffer for directional lights is set in RRenderSystem::RenderFrame()

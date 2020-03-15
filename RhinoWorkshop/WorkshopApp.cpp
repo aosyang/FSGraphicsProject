@@ -222,49 +222,45 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 			}
 
 			// Light property panel
-			if (RPointLightComponent* PointLightComp = SelectedObject->FindComponent<RPointLightComponent>())
+			if (RLight* LightComp = SelectedObject->FindComponent<RLight>())
 			{
-				static bool bPointLightTreeOpen = true;
-				ImGui::SetNextTreeNodeOpen(bPointLightTreeOpen);
-				if (bPointLightTreeOpen = ImGui::CollapsingHeader("Point Light", ImGuiTreeNodeFlags_None))
+				const char* HeaderText;
+				if (LightComp->GetLightType() == ELightType::DirectionalLight)
 				{
-					RColor LightColor = PointLightComp->GetLightColor();
-					if (ImGui::ColorEdit3("Light Color", &LightColor.r, ImGuiColorEditFlags_NoInputs))
-					{
-						PointLightComp->SetLightColor(LightColor);
-					}
-
-					float LightIntensity = PointLightComp->GetLightIntensity();
-					if (ImGui::DragFloat("Light Intensity", &LightIntensity, 0.1f, 0.0f, 10000.0f))
-					{
-						PointLightComp->SetLightIntensity(LightIntensity);
-					}
-
-					float Radius = PointLightComp->GetRadius();
-					if (ImGui::DragFloat("Radius", &Radius, 1.0f, 0.0f, FLT_MAX))
-					{
-						PointLightComp->SetRadius(Radius);
-					}
+					HeaderText = "Directional Light";
 				}
-			}
-
-			// Directional light property panel
-			if (RDirectionalLightComponent* DirectionalLightComp = SelectedObject->FindComponent<RDirectionalLightComponent>())
-			{
-				static bool bDirectionalLightTreeOpen = true;
-				ImGui::SetNextTreeNodeOpen(bDirectionalLightTreeOpen);
-				if (bDirectionalLightTreeOpen = ImGui::CollapsingHeader("Directional Light", ImGuiTreeNodeFlags_None))
+				else if (LightComp->GetLightType() == ELightType::PointLight)
 				{
-					RColor LightColor = DirectionalLightComp->GetLightColor();
-					if (ImGui::ColorEdit3("Light Color", &LightColor.r, ImGuiColorEditFlags_NoInputs))
+					HeaderText = "Point Light";
+				}
+				else
+				{
+					HeaderText = "Unspecific Light";
+				}
+
+				static bool bLightTreeOpen = true;
+				ImGui::SetNextTreeNodeOpen(bLightTreeOpen);
+				if (bLightTreeOpen = ImGui::CollapsingHeader(HeaderText, ImGuiTreeNodeFlags_None))
+				{
+					RColor LightColor = LightComp->GetLightColor();
+					if (ImGui::ColorEdit3("Light Color", &LightColor.r, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float))
 					{
-						DirectionalLightComp->SetLightColor(LightColor);
+						LightComp->SetLightColor(LightColor);
 					}
 
-					float LightIntensity = DirectionalLightComp->GetLightIntensity();
+					float LightIntensity = LightComp->GetLightIntensity();
 					if (ImGui::DragFloat("Light Intensity", &LightIntensity, 0.1f, 0.0f, 10000.0f))
 					{
-						DirectionalLightComp->SetLightIntensity(LightIntensity);
+						LightComp->SetLightIntensity(LightIntensity);
+					}
+
+					if (RPointLightComponent* PointLightComp = LightComp->CastTo<RPointLightComponent>())
+					{
+						float Radius = PointLightComp->GetRadius();
+						if (ImGui::DragFloat("Radius", &Radius, 1.0f, 0.0f, FLT_MAX))
+						{
+							PointLightComp->SetRadius(Radius);
+						}
 					}
 				}
 			}

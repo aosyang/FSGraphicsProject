@@ -9,6 +9,28 @@
 #include "ILight.h"
 #include "tinyxml2/tinyxml2.h"
 
+RLight::RLight(RSceneObject* InOwner) 
+	: Base(InOwner)
+	, LightColor(1.0f, 1.0f, 1.0f, 1.0f)
+	, LightIntensity(1.0f)
+{
+}
+
+ELightType RLight::GetLightType() const
+{
+	return ELightType::Unspecific;
+}
+
+RAabb RLight::GetEffectiveLightBounds()
+{
+	return RAabb::Default;
+}
+
+void RLight::SetupConstantBuffer(int LightIndex) const
+{
+
+}
+
 void RLight::SetLightColor(const RColor& NewColor)
 {
 	LightColor = NewColor;

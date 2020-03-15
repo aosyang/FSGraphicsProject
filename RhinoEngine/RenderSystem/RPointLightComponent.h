@@ -9,9 +9,9 @@
 #include "Scene/RSceneComponent.h"
 #include "ILight.h"
 
-class RPointLightComponent : public RSceneComponent, public RLight
+class RPointLightComponent : public RLight
 {
-	DECLARE_SCENE_COMPONENT(RPointLightComponent, RSceneComponent)
+	DECLARE_SCENE_COMPONENT(RPointLightComponent, RLight)
 public:
 	virtual ~RPointLightComponent();
 

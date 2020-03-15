@@ -9,6 +9,8 @@ class RCamera;
 
 enum class ELightType : UINT8
 {
+	Unspecific,
+
 	DirectionalLight,
 	PointLight,
 };
@@ -23,13 +25,15 @@ public:
 	virtual void SetupConstantBuffer(int LightIndex) const = 0;
 };
 
-class RLight : public ILight
+class RLight : public RSceneComponent, public ILight
 {
+	DECLARE_SCENE_COMPONENT(RLight, RSceneComponent)
 public:
-	RLight()
-		: LightColor(1.0f, 1.0f, 1.0f, 1.0f)
-		, LightIntensity(1.0f)
-	{}
+	virtual ~RLight() = default;
+
+	virtual ELightType GetLightType() const;
+	virtual RAabb GetEffectiveLightBounds();
+	virtual void SetupConstantBuffer(int LightIndex) const;
 
 	void SetLightColor(const RColor& NewColor);
 	const RColor& GetLightColor() const;
@@ -40,6 +44,9 @@ public:
 protected:
 	void LoadFromXmlElement(tinyxml2::XMLElement* ComponentElem);
 	void SaveToXmlElement(tinyxml2::XMLElement* ComponentElem) const;
+
+protected:
+	RLight(RSceneObject* InOwner);
 
 private:
 	RColor LightColor;

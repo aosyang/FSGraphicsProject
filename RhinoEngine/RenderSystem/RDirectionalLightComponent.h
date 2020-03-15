@@ -11,14 +11,13 @@
 
 #define MAX_CASCADED_SHADOW_SPLITS_NUM 3
 
-class RDirectionalLightComponent : public RSceneComponent, public RLight, public IShadowCaster
+class RDirectionalLightComponent : public RLight, public IShadowCaster
 {
-	DECLARE_SCENE_COMPONENT(RDirectionalLightComponent, RSceneComponent);
+	DECLARE_SCENE_COMPONENT(RDirectionalLightComponent, RLight);
 public:
 	virtual ~RDirectionalLightComponent() override;
 
 	virtual ELightType GetLightType() const override;
-	virtual RAabb GetEffectiveLightBounds() override;
 	virtual void SetupConstantBuffer(int LightIndex) const override;
 
 	// Override IShadowCaster methods
