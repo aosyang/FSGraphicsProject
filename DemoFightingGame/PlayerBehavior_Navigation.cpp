@@ -41,6 +41,10 @@ void PlayerBehavior_Navigation::AddAnimation(const std::string& AnimationAsset, 
 
 		AnimData.insert(AnimData.end(), NavigationAnimData(NewAnimation, Speed));
 	}
+	else
+	{
+		RLogWarning("Failed to add animtion %s to navigation behavior. Unable to get animation from mesh asset!\n", AnimationAsset.c_str());
+	}
 }
 
 void PlayerBehavior_Navigation::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
@@ -88,16 +92,22 @@ void PlayerBehavior_Navigation::Update(FTGPlayerStateMachine* StateMachine, floa
 		FrameRate = RMath::Lerp(Anim0->GetFrameRate(), Anim1->GetFrameRate(), BlendFactor);
 	}
 	float Duration = EndTime - StartTime;
-
-	float PlaybackProgress = RMath::Lerp(StartTime, EndTime, NormalizedPlaybackProgress);
-	PlaybackProgress += DeltaTime * FrameRate;
-
-	while (PlaybackProgress > EndTime)
+	if (Duration > 0.0f)
 	{
-		PlaybackProgress -= Duration;
-	}
+		float PlaybackProgress = RMath::Lerp(StartTime, EndTime, NormalizedPlaybackProgress);
+		PlaybackProgress += DeltaTime * FrameRate;
 
-	NormalizedPlaybackProgress = (PlaybackProgress - StartTime) / Duration;
+		while (PlaybackProgress > EndTime)
+		{
+			PlaybackProgress -= Duration;
+		}
+
+		NormalizedPlaybackProgress = (PlaybackProgress - StartTime) / Duration;
+	}
+	else
+	{
+		NormalizedPlaybackProgress = 0.0f;
+	}
 	assert(NormalizedPlaybackProgress >= 0.0f && NormalizedPlaybackProgress <= 1.0f);
 }
 
