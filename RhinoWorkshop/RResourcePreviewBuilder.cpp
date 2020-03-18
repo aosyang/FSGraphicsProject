@@ -192,7 +192,7 @@ RTexture* RResourcePreviewBuilder::GeneratePreviewTexture(RResourceBase* Resourc
 			RConstantBuffers::cbBoneMatrices.BindBuffer();
 		}
 
-		PreviewScene.Render();
+		PreviewScene.Render(RenderViewInfo(nullptr));
 		GRenderer.Present(false);
 
 		GRenderer.SetActiveScene(LastActiveScene);

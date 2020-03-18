@@ -179,6 +179,12 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 				SelectedObject->SetName(ObjectName);
 			}
 
+			bool bBackgroundPass = SelectedObject->GetRenderPass() == ERenderPass::Background;
+			if (ImGui::Checkbox("Background Pass", &bBackgroundPass))
+			{
+				SelectedObject->SetRenderPass(bBackgroundPass ? ERenderPass::Background : ERenderPass::SceneObject);
+			}
+
 			bool bNoCulling = SelectedObject->IsNoCulling();
 			if (ImGui::Checkbox("No Culling", &bNoCulling))
 			{

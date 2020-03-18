@@ -41,6 +41,11 @@ void RRenderMeshComponent::Render(const RenderViewInfo& View) const
 			return;
 		}
 
+		if (GetOwner()->GetRenderPass() != View.RenderPass)
+		{
+			return;
+		}
+
 		const RMatrix4& Matrix = GetOwner()->GetTransformMatrix();
 		RAabb MeshAabb = m_Mesh->GetLocalSpaceAabb().GetTransformedAabb(Matrix);
 		if (RCollision::TestAabbInsideFrustum(*View.Frustum, MeshAabb))

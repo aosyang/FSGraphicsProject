@@ -79,7 +79,7 @@ void RAssetEditorWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, RRe
 						std::string MaterialAssetPath;
 						std::string Label = "Slot " + std::to_string(i) + ": " + Mesh->GetMeshElements()[i].GetName();
 
-						if (i < (int)Materials.size())
+						if (i < (int)Materials.size() && Materials[i])
 						{
 							MaterialAssetPath = Materials[i]->GetAssetPath();
 						}

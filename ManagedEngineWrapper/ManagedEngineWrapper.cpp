@@ -414,7 +414,7 @@ namespace ManagedEngineWrapper
 			RConstantBuffers::cbMaterial.UpdateBufferData();
 			RConstantBuffers::cbMaterial.BindBuffer();
 
-			PreviewScene.Render();
+			PreviewScene.Render(RenderViewInfo(nullptr));
 
 			GRenderer.Present();
 

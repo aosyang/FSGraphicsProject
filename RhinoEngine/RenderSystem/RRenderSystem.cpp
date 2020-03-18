@@ -467,11 +467,12 @@ void RRenderSystem::BindMaterial(RMaterial* Material, bool bSkinned /*= false*/,
 
 	for (int t = 0; t < NumTextureSlots; t++)
 	{
-		RTexture* Texture = RenderMaterial->GetTextureSlots()[t].Texture;
 		int SlotId = RenderMaterial->GetTextureSlots()[t].SlotId;
-
-		assert(SlotId < NumShaderResourceViews);
-		ShaderResourceViewSlots[SlotId] = Texture ? Texture->GetSRV() : nullptr;
+		if (SlotId < NumShaderResourceViews)
+		{
+			RTexture* Texture = RenderMaterial->GetTextureSlots()[t].Texture;
+			ShaderResourceViewSlots[SlotId] = Texture ? Texture->GetSRV() : nullptr;
+		}
 	}
 
 	// Bind radiance map mip levels used by PBR materials
@@ -755,19 +756,27 @@ void RRenderSystem::RenderFrame()
 		RConstantBuffers::cbMaterial.BindBuffer();
 
 		RFrustum Frustum = RenderCamera->GetFrustum();
-		RenderViewInfo View
-		{
-			&Frustum
-		};
 
-		for (auto MeshComponent : m_RegisteredRenderMeshComponents)
+		for (int PassIdx = 0; PassIdx < (int)ERenderPass::NumPasses; PassIdx++)
 		{
-			MeshComponent->Render(View);
-		}
+			// Clear depth buffer before next pass
+			GRenderer.Clear(false, RColor::White);
 
-		if (m_ActiveScene)
-		{
-			m_ActiveScene->Render(&Frustum);
+			RenderViewInfo View
+			{
+				&Frustum,
+				(ERenderPass)PassIdx,
+			};
+
+			for (auto MeshComponent : m_RegisteredRenderMeshComponents)
+			{
+				MeshComponent->Render(View);
+			}
+
+			if (m_ActiveScene)
+			{
+				m_ActiveScene->Render(View);
+			}
 		}
 	}
 

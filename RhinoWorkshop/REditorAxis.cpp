@@ -14,6 +14,8 @@ REditorAxis::REditorAxis(const RConstructingParams& Params)
 	, MouseControlMode(EMouseControlMode::None)
 	, SelectedObject(nullptr)
 {
+	SetRenderPass(ERenderPass::Foreground);
+
 	EditorCamera = Params.Scene->GetRenderCamera();
 	assert(EditorCamera);
 

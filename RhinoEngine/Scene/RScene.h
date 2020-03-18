@@ -77,7 +77,7 @@ public:
 	/// Resolve collisions for a moving bounding box in the scene
 	RVec3 TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec, std::list<RSceneObject*> IgnoredObjects = std::list<RSceneObject*>());
 
-	void Render(const RFrustum* pFrustum = nullptr);
+	void Render(const RenderViewInfo& View);
 	void RenderDepthPass(const RFrustum* pFrustum = nullptr);
 
 	void UpdateScene(float DeltaTime);

@@ -252,18 +252,24 @@ bool RMaterial::LoadResourceImpl()
 		while (TextureElem)
 		{
 			int SlotId = -1;
-			TextureElem->QueryIntAttribute("Slot", &SlotId);
-
-			std::string textureName = TextureElem->GetText();
-			RTexture* texture = RResourceManager::Instance().FindResource<RTexture>(textureName);
-
-			// Load the texture immediately if haven't done so
-			if (!texture)
+			if (TextureElem->QueryIntAttribute("Slot", &SlotId) == tinyxml2::XML_SUCCESS)
 			{
-				texture = RResourceManager::Instance().LoadResource<RTexture>(textureName, EResourceLoadMode::Immediate);
-			}
+				RTexture* texture = nullptr;
+				const char* TextureName = TextureElem->GetText();
+				if (TextureName)
+				{
+					std::string TextureNameStr(TextureName);
+					texture = RResourceManager::Instance().FindResource<RTexture>(TextureNameStr);
 
-			TextureSlots.push_back(RTextureSlotData(texture, SlotId));
+					// Load the texture immediately if haven't done so
+					if (!texture)
+					{
+						texture = RResourceManager::Instance().LoadResource<RTexture>(TextureNameStr, EResourceLoadMode::Immediate);
+					}
+				}
+
+				TextureSlots.push_back(RTextureSlotData(texture, SlotId));
+			}
 			TextureElem = TextureElem->NextSiblingElement();
 		}
 

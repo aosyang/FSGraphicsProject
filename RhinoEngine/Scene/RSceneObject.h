@@ -128,6 +128,9 @@ public:
 	virtual void Draw() {}
 	virtual void DrawDepthPass() {}
 
+	void SetRenderPass(ERenderPass NewPass);
+	ERenderPass GetRenderPass() const;
+
 	/// Debug draw object for editor
 	void DrawDebugShape() const;
 
@@ -202,6 +205,9 @@ protected:
 
 	int				m_Flags;
 	RAabb			Bounds;
+
+	/// The pass in which object should be rendered
+	ERenderPass		RenderPass;
 
 	/// Should the object bypass frustum culling
 	bool			bNoCulling : 1;

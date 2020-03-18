@@ -15,6 +15,7 @@ RSceneObject::RSceneObject(const RConstructingParams& Params)
 	, m_bVisible(true)
 	, bTransformModified(true)
 	, m_Flags(Params.Flags)
+	, RenderPass(ERenderPass::SceneObject)
 	, bNoCulling(false)
 	, bNoShadow(false)
 	, BoundsUpdateFrame(0)
@@ -59,6 +60,10 @@ void RSceneObject::LoadObjectFromXmlElement(tinyxml2::XMLElement* ObjectElem)
 		SetScript(ObjectScript);
 	}
 
+	int RenderPass = (int)ERenderPass::SceneObject;
+	ObjectElem->QueryIntAttribute("RenderPass", &RenderPass);
+	SetRenderPass((ERenderPass)RenderPass);
+
 	bool NoCullingValue = false;
 	ObjectElem->QueryBoolAttribute("NoCulling", &NoCullingValue);
 	bNoCulling = NoCullingValue;
@@ -96,6 +101,12 @@ void RSceneObject::SaveObjectToXmlElement(tinyxml2::XMLElement* ObjectElem)
 	if (GetScript() != "")
 	{
 		ObjectElem->SetAttribute("Script", GetScript().c_str());
+	}
+
+	ERenderPass RenderPass = GetRenderPass();
+	if (RenderPass != ERenderPass::SceneObject)
+	{
+		ObjectElem->SetAttribute("RenderPass", (int)RenderPass);
 	}
 
 	if (bNoCulling)
@@ -245,6 +256,16 @@ const RAabb& RSceneObject::GetAabb()
 	}
 
 	return Bounds;
+}
+
+void RSceneObject::SetRenderPass(ERenderPass NewPass)
+{
+	RenderPass = NewPass;
+}
+
+ERenderPass RSceneObject::GetRenderPass() const
+{
+	return RenderPass;
 }
 
 void RSceneObject::DrawDebugShape() const

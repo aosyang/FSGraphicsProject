@@ -545,11 +545,16 @@ RVec3 RScene::TestMovingAabbWithScene(const RAabb& aabb, const RVec3& moveVec, s
 	return v;
 }
 
-void RScene::Render(const RFrustum* pFrustum)
+void RScene::Render(const RenderViewInfo& View)
 {
 	for (auto SceneObject : m_SceneObjects)
 	{
-		if (IsSceneObjectCulledByFrustum(SceneObject, pFrustum))
+		if (SceneObject->GetRenderPass() != View.RenderPass)
+		{
+			continue;
+		}
+
+		if (IsSceneObjectCulledByFrustum(SceneObject, View.Frustum))
 		{
 			continue;
 		}
@@ -564,6 +569,7 @@ void RScene::Render(const RFrustum* pFrustum)
 		{
 			if (Light->GetLightType() == ELightType::DirectionalLight)
 			{
+				// Note: Directional lights are handled in RRenderSystem::RenderFrame()
 				continue;
 			}
 
@@ -576,6 +582,7 @@ void RScene::Render(const RFrustum* pFrustum)
 				}
 			}
 		}
+
 		RConstantBuffers::cbLight.UpdateBufferData();
 		RConstantBuffers::cbLight.BindBuffer();
 
