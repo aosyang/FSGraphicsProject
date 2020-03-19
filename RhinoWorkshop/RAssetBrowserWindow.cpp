@@ -6,11 +6,11 @@
 
 #include "Rhino.h"
 
-#include "RAssetsViewWindow.h"
+#include "RAssetBrowserWindow.h"
 
 #include "RResourcePreviewBuilder.h"
 
-RAssetsViewWindow::RAssetsViewWindow()
+RAssetBrowserWindow::RAssetBrowserWindow()
 	: bShowWindow(false)
 	, AssetViewFilter(AssetType_All)
 	, PreviewIconSize(256)
@@ -21,11 +21,11 @@ RAssetsViewWindow::RAssetsViewWindow()
 	strcpy_s(NewMaterialPath, "/");
 }
 
-void RAssetsViewWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bool& ShowAssetEditor)
+void RAssetBrowserWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bool& ShowAssetEditor)
 {
 	if (bShowWindow)
 	{
-		if (ImGui::Begin("Assets View", nullptr, ImGuiWindowFlags_MenuBar))
+		if (ImGui::Begin("Asset Browser", &bShowWindow, ImGuiWindowFlags_MenuBar))
 		{
 			if (ImGui::BeginMenuBar())
 			{
@@ -187,7 +187,7 @@ void RAssetsViewWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bool
 	}
 }
 
-void RAssetsViewWindow::DisplayAssetTypeFilter(const char* Label, int FilterType)
+void RAssetBrowserWindow::DisplayAssetTypeFilter(const char* Label, int FilterType)
 {
 	if (FilterType == AssetType_All)
 	{

@@ -26,7 +26,7 @@ void RAssetEditorWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, RRe
 {
 	if (bShowWindow)
 	{
-		if (ImGui::Begin("Asset Editor", nullptr, ImGuiWindowFlags_MenuBar))
+		if (ImGui::Begin("Asset Editor", &bShowWindow, ImGuiWindowFlags_MenuBar))
 		{
 			if (EditingResource)
 			{
@@ -153,7 +153,7 @@ void RAssetEditorWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, RRe
 							}
 						}
 						ImGui::SameLine();
-				
+
 						std::string TextureAssetLabel = std::string("Texture##") + std::to_string(i);
 						std::string TextureAssetPath = Slots[i].GetTextureAssetPath();
 						char TextureAssetName[256];

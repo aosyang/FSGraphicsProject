@@ -777,14 +777,17 @@ void RRenderSystem::RenderFrame()
 			{
 				m_ActiveScene->Render(View);
 			}
+
+			if ((ERenderPass)PassIdx == ERenderPass::SceneObject)
+			{
+				GDebugRenderer.Render();
+				GDebugRenderer.Reset();
+			}
 		}
 	}
 
 	// Unbind all shadow map SRVs for depth rendering in the next frame (or D3D11 would complain about it)
 	UnbindShadowMapShaderResourceViews();
-
-	GDebugRenderer.Render();
-	GDebugRenderer.Reset();
 
 	// Clear the depth buffer while keeping the color buffer and render overlays on top of the screen
 	GRenderer.Clear(false);

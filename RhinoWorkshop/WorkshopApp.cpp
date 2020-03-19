@@ -104,7 +104,7 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 					RVec3 CreatePosition = DefaultScene->GetRenderCamera() ? DefaultScene->GetRenderCamera()->GetPosition() : RVec3::Zero();
 					NewObject->SetPosition(CreatePosition);
 
-					RMesh* SelectedMesh = AssetsViewWindow.GetSelectedResource() ? AssetsViewWindow.GetSelectedResource()->CastTo<RMesh>() : nullptr;
+					RMesh* SelectedMesh = AssetBrowserWindow.GetSelectedResource() ? AssetBrowserWindow.GetSelectedResource()->CastTo<RMesh>() : nullptr;
 					if (SelectedMesh)
 					{
 						NewObject->SetMesh(SelectedMesh);
@@ -142,7 +142,7 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 
 			if (ImGui::BeginMenu("View"))
 			{
-				ImGui::MenuItem("Show Assets View", nullptr, &AssetsViewWindow.bShowWindow);
+				ImGui::MenuItem("Show Asset Browser", nullptr, &AssetBrowserWindow.bShowWindow);
 				ImGui::MenuItem("Show Asset Editor", nullptr, &AssetEditorWindow.bShowWindow);
 				ImGui::EndMenu();
 			}
@@ -161,10 +161,10 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 		DisplaySceneViewWindow();
 
 		// The asset explorer window
-		AssetsViewWindow.ShowWindow(ResourcePreviewBuilder, AssetEditorWindow.bShowWindow);
+		AssetBrowserWindow.ShowWindow(ResourcePreviewBuilder, AssetEditorWindow.bShowWindow);
 
-		AssetEditorWindow.SetEditingResource(AssetsViewWindow.GetEditingResource());
-		AssetEditorWindow.ShowWindow(ResourcePreviewBuilder, AssetsViewWindow.GetSelectedResource());
+		AssetEditorWindow.SetEditingResource(AssetBrowserWindow.GetEditingResource());
+		AssetEditorWindow.ShowWindow(ResourcePreviewBuilder, AssetBrowserWindow.GetSelectedResource());
 
 		if (SelectedObject)
 		{
@@ -281,7 +281,7 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 					ImGui::Button(".."); ImGui::SameLine();
 					if (ImGui::Button("->"))
 					{
-						if (auto Resource = AssetsViewWindow.GetSelectedResource())
+						if (auto Resource = AssetBrowserWindow.GetSelectedResource())
 						{
 							if (RMesh* MeshAsset = Resource->CastTo<RMesh>())
 							{
@@ -317,7 +317,7 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 							std::string AssignButtonText("->##" + std::to_string(i));
 							if (ImGui::Button(AssignButtonText.c_str()))
 							{
-								if (auto Resource = AssetsViewWindow.GetSelectedResource())
+								if (auto Resource = AssetBrowserWindow.GetSelectedResource())
 								{
 									if (RMaterial* MaterialAsset = Resource->CastTo<RMaterial>())
 									{

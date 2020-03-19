@@ -19,10 +19,10 @@ enum RAssetType
 
 class RResourcePreviewBuilder;
 
-class RAssetsViewWindow
+class RAssetBrowserWindow
 {
 public:
-	RAssetsViewWindow();
+	RAssetBrowserWindow();
 
 	/// Draw the window
 	void ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bool& ShowAssetEditor);
@@ -50,12 +50,12 @@ private:
 	char NewMaterialPath[MAX_PATH];
 };
 
-FORCEINLINE RResourceBase* RAssetsViewWindow::GetSelectedResource() const
+FORCEINLINE RResourceBase* RAssetBrowserWindow::GetSelectedResource() const
 {
 	return SelectedResource;
 }
 
-FORCEINLINE RResourceBase* RAssetsViewWindow::GetEditingResource() const
+FORCEINLINE RResourceBase* RAssetBrowserWindow::GetEditingResource() const
 {
 	return EditingResource;
 }

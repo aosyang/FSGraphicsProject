@@ -8,7 +8,7 @@
 
 #include "Core/CoreTypes.h"
 #include "Core/IApp.h"
-#include "RAssetsViewWindow.h"
+#include "RAssetBrowserWindow.h"
 #include "RAssetEditorWindow.h"
 #include "RResourcePreviewBuilder.h"
 
@@ -60,7 +60,7 @@ private:
 
 	RResourcePreviewBuilder ResourcePreviewBuilder;
 
-	RAssetsViewWindow AssetsViewWindow;
+	RAssetBrowserWindow AssetBrowserWindow;
 	RAssetEditorWindow AssetEditorWindow;
 
 	// A list of paths to all maps in the asset folder
