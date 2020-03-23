@@ -5,6 +5,7 @@
 //=============================================================================
 
 #pragma once
+#include "IAssetEditor.h"
 
 class RResourceBase;
 class RResourcePreviewBuilder;
@@ -23,4 +24,6 @@ public:
 private:
 
 	RResourceBase* EditingResource;
+
+	std::vector<std::unique_ptr<IAssetEditor>> AssetTypeEditors;
 };

@@ -62,6 +62,25 @@ void RShader::Bind(int featureMasks)
 	GRenderer.SetGeometryShader(GeometryShader);
 }
 
+bool RShader::QueryTexutreSlotName(int SlotId, std::string& OutSlotName) const
+{
+	for (const auto& MetaData : TextureSlotMetaData)
+	{ 
+		if (MetaData.SlotId == (UINT)SlotId)
+		{
+			OutSlotName = MetaData.Name;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void RShader::AddTextureSlotMetaData(const std::string& TextureObjectName, UINT SlotId, EShaderTextureDimension Dimension)
+{
+	TextureSlotMetaData.emplace(TextureSlotMetaData.end(), TextureObjectName, SlotId, Dimension);
+}
+
 RShaderManager::RShaderManager()
 {
 
@@ -396,6 +415,33 @@ void RShaderManager::CompileShader(const std::string& SourceName, const std::str
 			case EShaderType::GeometryShader:
 				CreateGeometryShader(SourceNameWithFeaturePrefix, ShaderCodeBuffer, ShaderCodeSize, (ID3D11GeometryShader**)((char*)Shader + CompileOption.MemberOffset));
 				break;
+			}
+
+			// Get texture names through shader reflection
+			if (ShaderType == EShaderType::PixelShader && bOriginalShader)
+			{
+				ID3D11ShaderReflection* pReflector = NULL;
+				D3DReflect(ShaderCodeBuffer, ShaderCodeSize, IID_ID3D11ShaderReflection, (void**)&pReflector);
+
+				D3D11_SHADER_DESC ShaderDesc;
+				pReflector->GetDesc(&ShaderDesc);
+
+				for (UINT i = 0; i < ShaderDesc.BoundResources; i++)
+				{
+					D3D11_SHADER_INPUT_BIND_DESC ShaderInputBindDesc;
+					pReflector->GetResourceBindingDesc(i, &ShaderInputBindDesc);
+
+					if (ShaderInputBindDesc.Type == D3D_SIT_TEXTURE)
+					{
+						if (ShaderInputBindDesc.Dimension == D3D_SRV_DIMENSION_TEXTURE2D || ShaderInputBindDesc.Dimension == D3D_SRV_DIMENSION_TEXTURECUBE)
+						{
+							EShaderTextureDimension TextureDimension = ShaderInputBindDesc.Dimension == D3D_SRV_DIMENSION_TEXTURE2D ? EShaderTextureDimension::Texture2D : EShaderTextureDimension::CubeTexture;
+							const std::string TextureObjectName = ShaderInputBindDesc.Name;
+
+							Shader->AddTextureSlotMetaData(TextureObjectName, ShaderInputBindDesc.BindPoint, TextureDimension);
+						}
+					}
+				}
 			}
 
 			if (!bHasCacheFile)

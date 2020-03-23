@@ -5,6 +5,8 @@
 //=============================================================================
 #pragma once
 
+class RShaderManager;
+
 enum EShaderFeatureMask
 {
 	SFM_Skinned		= 1 << 0,
@@ -20,8 +22,16 @@ enum class EShaderType : UINT8
 	GeometryShader,
 };
 
+enum class EShaderTextureDimension : UINT8
+{
+	Texture2D,
+	CubeTexture,
+};
+
 struct RShader
 {
+	friend class RShaderManager;
+
 	ID3D11VertexShader*		VertexShader = nullptr;
 	ID3D11PixelShader*		PixelShader = nullptr;
 	ID3D11GeometryShader*	GeometryShader = nullptr;
@@ -37,6 +47,28 @@ struct RShader
 
 	void Bind(int featureMasks = 0);
 	const std::string& GetName() const;
+
+	/// Get name for the texture slot by id
+	bool QueryTexutreSlotName(int SlotId, std::string& OutSlotName) const;
+
+private:
+	void AddTextureSlotMetaData(const std::string& TextureObjectName, UINT SlotId, EShaderTextureDimension Dimension);
+
+	// Meta-data of shader texture slots
+	struct RTextureSlotMetaData
+	{
+		RTextureSlotMetaData(const std::string& InTextureObjectName, UINT InSlotId, EShaderTextureDimension InDimension)
+			: Name(InTextureObjectName)
+			, SlotId(InSlotId)
+			, Dimension(InDimension)
+		{}
+
+		std::string Name;
+		UINT SlotId;
+		EShaderTextureDimension Dimension;
+	};
+
+	std::vector<RTextureSlotMetaData> TextureSlotMetaData;
 };
 
 class RShaderManager : public RSingleton<RShaderManager>
