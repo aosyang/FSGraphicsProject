@@ -1,11 +1,11 @@
 //=============================================================================
-// LightingModel_Phong.hlsli by Shiyang Ao, 2016 All Rights Reserved.
+// LightingModel_Phong.hlsli by Shiyang Ao, 2020 All Rights Reserved.
 //
 // Phong lighting model
 //=============================================================================
 
-#ifndef _LIGHTING_PHONE_HLSLI
-#define	_LIGHTING_PHONE_HLSLI
+#ifndef _LIGHTING_PHONG_HLSLI
+#define	_LIGHTING_PHONG_HLSLI
 
 #include "LightShaderCommon.hlsli"
 
@@ -16,14 +16,11 @@
 struct PhongLightingData
 {
 	float3 Diffuse;
-
-#if PHONG_NO_SPECULAR == 0
 	float3 Specular;
-#endif	// PHONG_NO_SPECULAR == 0
 };
 
 //////////////////////////////////////////////////////////////////////////
-// Calculates lighting with Phone model
+// Calculates light color with Phong lighting model
 //
 // PositionW:				Position in world space
 // NormalW:					Normal vector in world space
@@ -100,4 +97,4 @@ PhongLightingData CalculatePhongLighting(float3 PositionW, float3 NormalW, float
 	return Out;
 }
 
-#endif	// _LIGHTING_PHONE_HLSLI
+#endif	// _LIGHTING_PHONG_HLSLI

@@ -31,4 +31,10 @@ float LinearizeDepth(float near, float far, float z)
 	return 1.0 / (c0 * z + c1);
 }
 
+// Returns uv with global tiling factor applied
+float2 GetTiledUV(float2 InUV)
+{
+	return InUV * UVTiling;
+}
+
 #endif
