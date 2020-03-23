@@ -25,7 +25,7 @@ struct OUTPUT_PIXEL
 	float4 NormalV		: SV_Target3;
 };
 
-OUTPUT_PIXEL main(OUTPUT_VERTEX Input) : SV_TARGET
+OUTPUT_PIXEL main(OUTPUT_VERTEX Input)
 {
 	OUTPUT_PIXEL Out = (OUTPUT_PIXEL)0;
 	Out.Albedo = float4(1, 1, 1, 1);

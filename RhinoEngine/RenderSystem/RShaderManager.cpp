@@ -313,29 +313,72 @@ void RShaderManager::CompileShader(const std::string& SourceName, const std::str
 
 		if (bOriginalShader || bIsFeatureUsed)
 		{
-			std::string ActualSourceName = CompileOption.Prefix + SourceName;
+			const std::string SourceNameWithFeaturePrefix = CompileOption.Prefix + SourceName;
 			std::vector<char> ShaderCache;
 
 			void* ShaderCodeBuffer = nullptr;
 			SIZE_T ShaderCodeSize;
 			bool bHasCacheFile = false;
 
-			if (!CheckShaderCacheOutdated(ActualSourceName, IncludeFiles) &&
-				(bHasCacheFile = TryLoadShaderFromCache(ActualSourceName, SourceName, ShaderCache)))
+			if (!CheckShaderCacheOutdated(SourceNameWithFeaturePrefix, IncludeFiles) &&
+				(bHasCacheFile = TryLoadShaderFromCache(SourceNameWithFeaturePrefix, SourceName, ShaderCache)))
 			{
 				ShaderCodeBuffer = ShaderCache.data();
 				ShaderCodeSize = ShaderCache.size();
 			}
 			else
 			{
-				if (SUCCEEDED(hr = D3DCompile(ShaderBuffer.c_str(), ShaderBuffer.size(), ActualSourceName.c_str(), CompileOption.ShaderMacros, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", CompileOption.ShaderTarget, GetShaderCompileFlag(), 0, &pShaderCode, &pErrorMsg)))
+				if (SUCCEEDED(hr = D3DCompile(ShaderBuffer.c_str(), ShaderBuffer.size(), SourceName.c_str(), CompileOption.ShaderMacros, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", CompileOption.ShaderTarget, GetShaderCompileFlag(), 0, &pShaderCode, &pErrorMsg)))
 				{
 					ShaderCodeBuffer = pShaderCode->GetBufferPointer();
 					ShaderCodeSize = pShaderCode->GetBufferSize();
 				}
+
+				std::string OutputMsgString;
+				if (pErrorMsg)
+				{
+					OutputMsgString = ((char*)pErrorMsg->GetBufferPointer());
+				}
+
+				// Replace relative path to absolute path for going to error lines by double-clicking in the output log
+				{
+					std::stringstream StringStream(OutputMsgString);
+					std::string Line;
+					std::string Output;
+
+					while (std::getline(StringStream, Line, '\n'))
+					{
+						size_t pos = Line.find_first_of('(');
+						if (pos != std::string::npos)
+						{
+							std::string ErrorFileName = Line.substr(0, pos);
+							ErrorFileName = RFileUtil::GetFullPath(ErrorFileName);
+							Output += ErrorFileName + Line.substr(pos) + '\n';
+						}
+						else
+						{
+							Output += Line + '\n';
+						}
+					}
+
+					if (Output.size() > 0)
+					{
+						OutputMsgString = Output;
+					}
+				}
+
+				if (SUCCEEDED(hr))
+				{
+					if (OutputMsgString.size() > 0)
+					{
+						// Output any warnings for a successful compile
+						RLog("%s\n", OutputMsgString.c_str());
+					}
+				}
 				else
 				{
-					RLog("%s\n", (char*)pErrorMsg->GetBufferPointer());
+					RLogError("RShaderManager::CompileShader - Failed to compile shader \'%s\'\n", SourceName.c_str());
+					RLog("%s\n", OutputMsgString.c_str());
 					continue;
 				}
 			}
@@ -343,22 +386,22 @@ void RShaderManager::CompileShader(const std::string& SourceName, const std::str
 			switch (ShaderType)
 			{
 			case EShaderType::VertexShader:
-				CreateVertexShader(ActualSourceName, ShaderCodeBuffer, ShaderCodeSize, (ID3D11VertexShader**)((char*)Shader + CompileOption.MemberOffset));
+				CreateVertexShader(SourceNameWithFeaturePrefix, ShaderCodeBuffer, ShaderCodeSize, (ID3D11VertexShader**)((char*)Shader + CompileOption.MemberOffset));
 				break;
 
 			case EShaderType::PixelShader:
-				CreatePixelShader(ActualSourceName, ShaderCodeBuffer, ShaderCodeSize, (ID3D11PixelShader**)((char*)Shader + CompileOption.MemberOffset));
+				CreatePixelShader(SourceNameWithFeaturePrefix, ShaderCodeBuffer, ShaderCodeSize, (ID3D11PixelShader**)((char*)Shader + CompileOption.MemberOffset));
 				break;
 
 			case EShaderType::GeometryShader:
-				CreateGeometryShader(ActualSourceName, ShaderCodeBuffer, ShaderCodeSize, (ID3D11GeometryShader**)((char*)Shader + CompileOption.MemberOffset));
+				CreateGeometryShader(SourceNameWithFeaturePrefix, ShaderCodeBuffer, ShaderCodeSize, (ID3D11GeometryShader**)((char*)Shader + CompileOption.MemberOffset));
 				break;
 			}
 
 			if (!bHasCacheFile)
 			{
 				// Create a new cache for shader
-				SaveShaderCache(ActualSourceName, ShaderCodeBuffer, ShaderCodeSize);
+				SaveShaderCache(SourceNameWithFeaturePrefix, ShaderCodeBuffer, ShaderCodeSize);
 			}
 		}
 	}

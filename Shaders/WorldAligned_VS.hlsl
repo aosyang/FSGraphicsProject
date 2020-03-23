@@ -65,7 +65,7 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input
 
 	Out.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	Out.NormalW = Normal;
-	Out.NormalV = mul(Normal, viewMatrix);
+	Out.NormalV = mul(float4(Normal, 0.0f), viewMatrix).xyz;
 
 	Out.UV = Input.UV;
 

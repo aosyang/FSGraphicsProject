@@ -27,7 +27,7 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 		float3 viewDir = normalize(CameraPos.xyz - Input.PosW.xyz);
 		float3 lightDir = -DirectionalLight[0].Direction.xyz;
 		float SpecularIntensity = max(pow(saturate(dot(viewDir, lightDir)), 128), 0.0f);
-		sunColor.rgb = saturate(DirectionalLight[0].Color * SpecularIntensity);
+		sunColor.rgb = saturate(DirectionalLight[0].Color.rgb * SpecularIntensity);
 	}
 #endif
 

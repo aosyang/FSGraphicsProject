@@ -46,7 +46,7 @@ OUTPUT_VERTEX main(INPUT_VERTEX Input)
 
 	Out.PosH = mul(Out.PosW, viewProjMatrix);
 	Out.NormalW = Normal;
-	Out.NormalV = mul(Normal, viewMatrix);
+	Out.NormalV = mul(float4(Normal, 0), viewMatrix).xyz;
 
 	Out.Color.rgb = saturate(dot(Normal, float3(0, 1, 0)) / 2 + 0.5f);
 	Out.Color.a = 1.0f;

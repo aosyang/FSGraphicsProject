@@ -6,7 +6,7 @@
 
 #include "ConstBufferPS.h"
 #include "PixelShaderCommon.hlsli"
-#include "LightShaderCommon.hlsli"
+#include "LightingModel_Phong.hlsli"
 
 Texture2D ScreenTexture	: register(t0);
 
@@ -22,8 +22,6 @@ struct OUTPUT_VERTEX
 
 float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 {
-	float4 Specular = (float4)0;
-	float4 Ambient = (float4)0;
 	float3 normal = normalize(Input.NormalW);
 	float3 viewDir = normalize(CameraPos.xyz - Input.PosW);
 
@@ -31,52 +29,19 @@ float4 main(OUTPUT_VERTEX Input) : SV_TARGET
 	Input.ShadowPosH[1].xyz /= Input.ShadowPosH[1].w;
 	Input.ShadowPosH[2].xyz /= Input.ShadowPosH[2].w;
 
-	for (int id = 0; id < DirectionalLightCount; id++)
-	{
-		float lit = 1.0f;
+	PhongLightingData LightColor = CalculatePhongLighting(Input.PosW, normal, Input.ShadowPosH, Input.PosH.z, viewDir);
 
-		if (id == 0)
-		{
-			lit = SampleCascadedShadowMap(Input.ShadowPosH, dot(DirectionalLight[id].Direction.xyz, normal), Input.PosH.z);
-		}
-
-		// Specular lighting
-		Specular.rgb += lit * CalculateSpecularLight(normal, DirectionalLight[id].Direction.xyz, viewDir, DirectionalLight[id].Color, SpecularColorAndPower);
-	}
-
-	for (int ip = 0; ip < PointLightCount; ip++)
-	{
-		float3 lightVec = PointLight[ip].PosAndRadius.xyz - Input.PosW;
-		float3 lightDir = normalize(lightVec);
-
-		float attenuation = 1.0f - saturate(length(lightVec) / PointLight[ip].PosAndRadius.w);
-
-		// Specular lighting
-		Specular.rgb += attenuation * CalculateSpecularLight(normal, lightDir, viewDir, PointLight[ip].Color, SpecularColorAndPower);
-	}
-
-	for (int is = 0; is < SpotlightCount; is++)
-	{
-		float3 lightVec = Spotlight[is].PosAndRadius.xyz - Input.PosW;
-		float3 lightDir = normalize(lightVec);
-
-		float surfaceRatio = saturate(dot(-lightDir, Spotlight[is].Direction.xyz));
-		float radiusAtt = 1.0f - saturate(length(lightVec) / Spotlight[is].PosAndRadius.w);
-		float coneAtt = 1.0f - saturate((Spotlight[is].ConeRatio.x - surfaceRatio) / (Spotlight[is].ConeRatio.x - Spotlight[is].ConeRatio.y));
-		float attenuation = radiusAtt * coneAtt;
-
-		// Specular lighting
-		Specular.rgb += attenuation * CalculateSpecularLight(normal, lightDir, viewDir, Spotlight[is].Color, SpecularColorAndPower);
-	}
+	// Hemisphere ambient color
+	float3 Ambient = CalculateAmbientLight(normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor);
 
 	float2 uvOffset = float2(Input.NormalH.x / ScreenSize.x, Input.NormalH.y / ScreenSize.y) * 64.0f;
-	float4 distortion = ScreenTexture.Sample(Sampler, Input.UV.xy / Input.UV.z * 0.5f + 0.5f + uvOffset);
-	float4 color = float4(0.75f, 1.0f, 0.8f, 1.0f);
+	float3 distortion = ScreenTexture.Sample(Sampler, Input.UV.xy / Input.UV.z * 0.5f + 0.5f + uvOffset).rgb;
+	float3 BaseColor = float3(0.75f, 1.0f, 0.8f);
 	float ambientRim = 1.0f - saturate(dot(Input.NormalH, float3(0, 0, -1)));
-	Ambient.rgb = CalculateAmbientLight(normal, HighHemisphereAmbientColor, LowHemisphereAmbientColor);
-	Ambient.a = 1.0f;
 
-	float4 Final = lerp(distortion, Ambient, ambientRim)* color + Specular;
-	Final.a *= GlobalOpacity;
+	// Compose the final color
+	float4 Final;
+	Final.rgb = lerp(distortion, Ambient, ambientRim)* BaseColor + LightColor.Specular;
+	Final.a = GlobalOpacity;
 	return Final;
 }
