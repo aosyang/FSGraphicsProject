@@ -10,3 +10,10 @@ RVec2 GetMousePositionInViewport();
 
 RRay MakeRayFromViewportPoint(RCamera* Camera, const RVec2& Point);
 
+// Context object for accessing editor windows from other windows
+struct REditorContext
+{
+	class RAssetEditorWindow& AssetEditorWindow;
+	class RAssetBrowserWindow& AssetBrowserWindow;
+	class RResourcePreviewBuilder& PreviewBuilder;
+};

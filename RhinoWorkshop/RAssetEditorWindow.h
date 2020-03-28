@@ -5,7 +5,9 @@
 //=============================================================================
 
 #pragma once
+
 #include "IAssetEditor.h"
+#include "EditorCommon.h"
 
 class RResourceBase;
 class RResourcePreviewBuilder;
@@ -17,7 +19,7 @@ public:
 
 	void SetEditingResource(RResourceBase* NewEditingResource);
 
-	void ShowWindow(RResourcePreviewBuilder& PreviewBuilder, RResourceBase* AssetsViewResource);
+	void ShowWindow(REditorContext& EditorContext);
 
 	/// Visibility of asset editor window
 	bool bShowWindow;

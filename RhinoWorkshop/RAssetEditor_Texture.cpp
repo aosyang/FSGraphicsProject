@@ -8,15 +8,17 @@
 
 #include "RAssetEditor_Texture.h"
 #include "RResourcePreviewBuilder.h"
+#include "RAssetBrowserWindow.h"
+#include "EditorCommon.h"
 
 bool RAssetEditor_Texture::IsMatchedAssetType(RResourceBase* Resource) const
 {
 	return Resource->CastTo<RTexture>() != nullptr;
 }
 
-void RAssetEditor_Texture::ShowWindow(RResourceBase* Resource, RResourcePreviewBuilder& PreviewBuilder, RResourceBase* AssetsViewResource)
+void RAssetEditor_Texture::ShowWindow(REditorContext& EditorContext)
 {
-	RTexture* Texture = Resource->CastTo<RTexture>();
+	RTexture* Texture = EditorContext.AssetBrowserWindow.GetEditingResource()->CastTo<RTexture>();
 	assert(Texture);
 
 	bool bIsSRGB = Texture->GetMetaData()["SRGB"] == "true";

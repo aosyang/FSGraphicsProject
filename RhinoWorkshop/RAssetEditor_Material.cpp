@@ -8,15 +8,17 @@
 
 #include "RAssetEditor_Material.h"
 #include "RResourcePreviewBuilder.h"
+#include "RAssetBrowserWindow.h"
+#include "EditorCommon.h"
 
 bool RAssetEditor_Material::IsMatchedAssetType(RResourceBase* Resource) const
 {
 	return Resource->CastTo<RMaterial>() != nullptr;
 }
 
-void RAssetEditor_Material::ShowWindow(RResourceBase* Resource, RResourcePreviewBuilder& PreviewBuilder, RResourceBase* AssetsViewResource)
+void RAssetEditor_Material::ShowWindow(REditorContext& EditorContext)
 {
-	RMaterial* Material = Resource->CastTo<RMaterial>();
+	RMaterial* Material = EditorContext.AssetBrowserWindow.GetEditingResource()->CastTo<RMaterial>();
 	assert(Material);
 
 	bool bUpdatePreview = false;
@@ -71,13 +73,14 @@ void RAssetEditor_Material::ShowWindow(RResourceBase* Resource, RResourcePreview
 	{
 		auto& Slots = Material->GetTextureSlots();
 
+		// Button for assert assigning '->'
 		ImGui::BeginGroup();
 		for (int i = 0; i < (int)Slots.size(); i++)
 		{
 			const std::string AssignButtonText("->##" + std::to_string(i));
 			if (ImGui::Button(AssignButtonText.c_str()))
 			{
-				if (auto Resource = AssetsViewResource)
+				if (auto Resource = EditorContext.AssetBrowserWindow.GetSelectedResource())
 				{
 					if (RTexture* TextureAsset = Resource->CastTo<RTexture>())
 					{
@@ -86,10 +89,41 @@ void RAssetEditor_Material::ShowWindow(RResourceBase* Resource, RResourcePreview
 					}
 				}
 			}
+
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::BeginTooltip();
+				ImGui::Text("Insert selected texture asset in the browser to this slot.");
+				ImGui::EndTooltip();
+			}
 		}
 		ImGui::EndGroup();
-
 		ImGui::SameLine();
+
+		ImGui::BeginGroup();
+		for (int i = 0; i < (int)Slots.size(); i++)
+		{
+			const std::string AssignButtonText("B##" + std::to_string(i));
+			if (ImGui::Button(AssignButtonText.c_str()))
+			{
+				RTexture* SlotTexture = Slots[i].Texture;
+				if (SlotTexture)
+				{
+					EditorContext.AssetBrowserWindow.SetSelectedResource(SlotTexture);
+				}
+			}
+
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::BeginTooltip();
+				ImGui::Text("Find the texture in asset browser.");
+				ImGui::EndTooltip();
+			}
+		}
+		ImGui::EndGroup();
+		ImGui::SameLine();
+
+		// Texture path
 		ImGui::BeginGroup();
 		for (int i = 0; i < (int)Slots.size(); i++)
 		{
@@ -118,8 +152,9 @@ void RAssetEditor_Material::ShowWindow(RResourceBase* Resource, RResourcePreview
 			}
 		}
 		ImGui::EndGroup();
-
 		ImGui::SameLine();
+
+		// Slot id
 		ImGui::BeginGroup();
 		for (int i = 0; i < (int)Slots.size(); i++)
 		{
@@ -135,8 +170,9 @@ void RAssetEditor_Material::ShowWindow(RResourceBase* Resource, RResourcePreview
 			}
 		}
 		ImGui::EndGroup();
-
 		ImGui::SameLine();
+
+		// Remove texture slot button "x"
 		ImGui::BeginGroup();
 		for (int i = 0; i < (int)Slots.size(); i++)
 		{
@@ -144,6 +180,13 @@ void RAssetEditor_Material::ShowWindow(RResourceBase* Resource, RResourcePreview
 			if (ImGui::Button(RemoveButtonText.c_str()))
 			{
 				Material->RemoveTextureSlot(Slots[i].SlotId);
+			}
+
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::BeginTooltip();
+				ImGui::Text("Remove this texture slot from material.");
+				ImGui::EndTooltip();
 			}
 		}
 		ImGui::EndGroup();
@@ -167,6 +210,6 @@ void RAssetEditor_Material::ShowWindow(RResourceBase* Resource, RResourcePreview
 
 	if (bUpdatePreview)
 	{
-		PreviewBuilder.BuildPreviewForResource(Material);
+		EditorContext.PreviewBuilder.BuildPreviewForResource(Material);
 	}
 }

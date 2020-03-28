@@ -12,5 +12,5 @@ class RAssetEditor_Mesh : public IAssetEditor
 {
 public:
 	virtual bool IsMatchedAssetType(RResourceBase* Resource) const override;
-	virtual void ShowWindow(RResourceBase* Resource, RResourcePreviewBuilder& PreviewBuilder, RResourceBase* AssetsViewResource) override;
+	virtual void ShowWindow(REditorContext& EditorContext) override;
 };

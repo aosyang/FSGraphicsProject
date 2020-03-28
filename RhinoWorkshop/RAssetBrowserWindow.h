@@ -18,6 +18,7 @@ enum RAssetType
 };
 
 class RResourcePreviewBuilder;
+struct REditorContext;
 
 class RAssetBrowserWindow
 {
@@ -25,12 +26,14 @@ public:
 	RAssetBrowserWindow();
 
 	/// Draw the window
-	void ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bool& ShowAssetEditor);
+	void ShowWindow(REditorContext& EditorContext);
 
 	/// Get the selected resource in assets view
 	RResourceBase* GetSelectedResource() const;
 
 	RResourceBase* GetEditingResource() const;
+
+	void SetSelectedResource(RResourceBase* Selection);
 
 	/// Visibility of asset view window
 	bool bShowWindow;
@@ -48,6 +51,8 @@ private:
 	bool bShowNewMaterialDialog;
 	char NewMaterialName[MAX_PATH];
 	char NewMaterialPath[MAX_PATH];
+
+	bool bScrollToSelection;
 };
 
 FORCEINLINE RResourceBase* RAssetBrowserWindow::GetSelectedResource() const

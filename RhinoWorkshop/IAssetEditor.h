@@ -9,9 +9,11 @@
 class RResourceBase;
 class RResourcePreviewBuilder;
 
+struct REditorContext;
+
 class IAssetEditor
 {
 public:
 	virtual bool IsMatchedAssetType(RResourceBase* Resource) const = 0;
-	virtual void ShowWindow(RResourceBase* Resource, RResourcePreviewBuilder& PreviewBuilder, RResourceBase* AssetsViewResource) = 0;
+	virtual void ShowWindow(REditorContext& EditorContext) = 0;
 };

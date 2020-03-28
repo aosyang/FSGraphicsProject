@@ -8,6 +8,7 @@
 
 #include "RAssetEditorWindow.h"
 
+#include "RAssetBrowserWindow.h"
 #include "RResourcePreviewBuilder.h"
 #include "RAssetEditor_Mesh.h"
 #include "RAssetEditor_Texture.h"
@@ -27,7 +28,7 @@ void RAssetEditorWindow::SetEditingResource(RResourceBase* NewEditingResource)
 	EditingResource = NewEditingResource;
 }
 
-void RAssetEditorWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, RResourceBase* AssetsViewResource)
+void RAssetEditorWindow::ShowWindow(REditorContext& EditorContext)
 {
 	if (bShowWindow)
 	{
@@ -65,13 +66,13 @@ void RAssetEditorWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, RRe
 				{
 					if (Editor->IsMatchedAssetType(EditingResource))
 					{
-						Editor->ShowWindow(EditingResource, PreviewBuilder, AssetsViewResource);
+						Editor->ShowWindow(EditorContext);
 						break;
 					}
 				}
 
 				// Draw the preview
-				RTexture* PreviewTexture = EditingResource->CanCastTo<RTexture>() ? EditingResource->CastTo<RTexture>() : PreviewBuilder.FindPreviewTexture(EditingResource);
+				RTexture* PreviewTexture = EditingResource->CanCastTo<RTexture>() ? EditingResource->CastTo<RTexture>() : EditorContext.PreviewBuilder.FindPreviewTexture(EditingResource);
 				if (PreviewTexture)
 				{
 					ImGui::Text("Preview");

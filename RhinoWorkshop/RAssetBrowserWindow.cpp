@@ -9,6 +9,8 @@
 #include "RAssetBrowserWindow.h"
 
 #include "RResourcePreviewBuilder.h"
+#include "RAssetEditorWindow.h"
+#include "EditorCommon.h"
 
 RAssetBrowserWindow::RAssetBrowserWindow()
 	: bShowWindow(false)
@@ -17,11 +19,12 @@ RAssetBrowserWindow::RAssetBrowserWindow()
 	, SelectedResource(nullptr)
 	, EditingResource(nullptr)
 	, bShowNewMaterialDialog(false)
+	, bScrollToSelection(false)
 {
 	strcpy_s(NewMaterialPath, "/");
 }
 
-void RAssetBrowserWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bool& ShowAssetEditor)
+void RAssetBrowserWindow::ShowWindow(REditorContext& EditorContext)
 {
 	if (bShowWindow)
 	{
@@ -67,7 +70,7 @@ void RAssetBrowserWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bo
 					}
 
 					RMaterial* NewMaterial = RResourceManager::Instance().CreateNewResource<RMaterial>(AssetPath + MaterialName);
-					PreviewBuilder.BuildPreviewForResource(NewMaterial);
+					EditorContext.PreviewBuilder.BuildPreviewForResource(NewMaterial);
 
 					ImGui::CloseCurrentPopup();
 					bShowNewMaterialDialog = false;
@@ -110,9 +113,14 @@ void RAssetBrowserWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bo
 			float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
 			ImGuiStyle& style = ImGui::GetStyle();
 
+			int NumTotalItemLines = 0;
+			int SelectedLineIdx = -1;
+			ImVec2 SelectedItemCursorPos;
+
 			auto& ResourceList = RResourceManager::Instance().EnumerateAllResources();
 			for (auto Iter : ResourceList)
 			{
+				// Asset type filtering
 				if ((Iter->CanCastTo<RMesh>() && !(AssetViewFilter & AssetType_Mesh)) ||
 					(Iter->CanCastTo<RTexture>() && !(AssetViewFilter & AssetType_Texture)) ||
 					(Iter->CanCastTo<RMaterial>() && !(AssetViewFilter & AssetType_Material)))
@@ -120,6 +128,7 @@ void RAssetBrowserWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bo
 					continue;
 				}
 
+				// Search bar filtering
 				if (!AssetNameFilter.PassFilter(Iter->GetAssetPath().c_str()))
 				{
 					continue;
@@ -128,7 +137,8 @@ void RAssetBrowserWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bo
 				ImVec2 ItemSize((float)PreviewIconSize, (float)PreviewIconSize);
 
 				// Position of selectable widget
-				ImVec2 p = ImGui::GetCursorScreenPos();
+				ImVec2 ItemScreenPos = ImGui::GetCursorScreenPos();
+				ImVec2 ItemWindowPos = ImGui::GetCursorPos();
 
 				// Hide label text from selectable
 				std::string HiddenLabel = "##" + Iter->GetAssetPath();
@@ -146,33 +156,41 @@ void RAssetBrowserWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bo
 				}
 				else
 				{
-					RTexture* PreviewTexture = PreviewBuilder.FindPreviewTexture(Iter);
+					RTexture* PreviewTexture = EditorContext.PreviewBuilder.FindPreviewTexture(Iter);
 					if (PreviewTexture)
 					{
 						GuiTexture = PreviewTexture->GetSRV();
 					}
 				}
-
+				
+				// Click an asset item to select it
 				if (ImGui::Selectable(HiddenLabel.c_str(), SelectedResource == Iter, 0, ImVec2(ItemSize.x, ItemSize.y + LabelSize.y + 2)))
 				{
 					SelectedResource = Iter;
 				}
 
+				// Double-click an asset item to open its editor window
 				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 				{
 					// Request open asset editor
-					ShowAssetEditor = true;
+					EditorContext.AssetEditorWindow.bShowWindow = true;
 					EditingResource = SelectedResource;
 				}
 
 				float last_button_x2 = ImGui::GetItemRectMax().x;
 
 				// Draw custom texture and text for the selectable
-				ImGui::GetWindowDrawList()->AddImage(GuiTexture, ImVec2(p.x + 2, p.y + 2), ImVec2(p.x + ItemSize.x + 2, p.y + ItemSize.y + 2));
-				ImGui::GetWindowDrawList()->AddText(ImVec2(p.x, p.y + ItemSize.y + 2), ImGui::GetColorU32(ImGuiCol_Text), Label);
+				ImGui::GetWindowDrawList()->AddImage(GuiTexture, ImVec2(ItemScreenPos.x + 2, ItemScreenPos.y + 2), ImVec2(ItemScreenPos.x + ItemSize.x + 2, ItemScreenPos.y + ItemSize.y + 2));
+				ImGui::GetWindowDrawList()->AddText(ImVec2(ItemScreenPos.x, ItemScreenPos.y + ItemSize.y + 2), ImGui::GetColorU32(ImGuiCol_Text), Label);
 
 				// Position of next widget
-				p = ImGui::GetCursorScreenPos();
+				ItemScreenPos = ImGui::GetCursorScreenPos();
+
+				if (SelectedResource == Iter)
+				{
+					SelectedLineIdx = NumTotalItemLines;
+					SelectedItemCursorPos = ItemWindowPos;
+				}
 
 				// If there is room for another icon then draw it in the same line
 				float next_button_x2 = last_button_x2 + style.ItemSpacing.x + ItemSize.x;
@@ -180,11 +198,40 @@ void RAssetBrowserWindow::ShowWindow(RResourcePreviewBuilder& PreviewBuilder, bo
 				{
 					ImGui::SameLine();
 				}
+				else
+				{
+					NumTotalItemLines++;
+				}
+			}
+
+			// Scroll the browser to show the selected asset
+			if (bScrollToSelection)
+			{
+				if (SelectedLineIdx != -1)
+				{
+					const float ScrollRatio = (float)SelectedLineIdx / (float)NumTotalItemLines;
+
+					ImVec2 RectSize = ImGui::GetItemRectSize();
+					float CursorY = ImGui::GetContentRegionMax().y;
+
+					// Note: SetScrollHereY is not working
+					//ImGui::SetScrollHereY(ScrollRatio);
+					float ScrollMaxY = ImGui::GetScrollMaxY();
+					ImGui::SetScrollY(ScrollMaxY * ScrollRatio);
+				}
+
+				bScrollToSelection = false;
 			}
 			ImGui::EndChild();
 		}
 		ImGui::End();
 	}
+}
+
+void RAssetBrowserWindow::SetSelectedResource(RResourceBase* Selection)
+{
+	SelectedResource = Selection;
+	bScrollToSelection = true;
 }
 
 void RAssetBrowserWindow::DisplayAssetTypeFilter(const char* Label, int FilterType)

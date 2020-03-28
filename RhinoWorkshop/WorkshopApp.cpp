@@ -160,11 +160,13 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 		// The tree view window of the scene
 		DisplaySceneViewWindow();
 
+		REditorContext EditorContext = { AssetEditorWindow, AssetBrowserWindow, ResourcePreviewBuilder };
+
 		// The asset explorer window
-		AssetBrowserWindow.ShowWindow(ResourcePreviewBuilder, AssetEditorWindow.bShowWindow);
+		AssetBrowserWindow.ShowWindow(EditorContext);
 
 		AssetEditorWindow.SetEditingResource(AssetBrowserWindow.GetEditingResource());
-		AssetEditorWindow.ShowWindow(ResourcePreviewBuilder, AssetBrowserWindow.GetSelectedResource());
+		AssetEditorWindow.ShowWindow(EditorContext);
 
 		if (SelectedObject)
 		{

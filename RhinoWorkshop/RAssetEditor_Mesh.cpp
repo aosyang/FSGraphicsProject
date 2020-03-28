@@ -8,15 +8,17 @@
 
 #include "RAssetEditor_Mesh.h"
 #include "RResourcePreviewBuilder.h"
+#include "RAssetBrowserWindow.h"
+#include "EditorCommon.h"
 
 bool RAssetEditor_Mesh::IsMatchedAssetType(RResourceBase* Resource) const
 {
 	return Resource->CastTo<RMesh>() != nullptr;
 }
 
-void RAssetEditor_Mesh::ShowWindow(RResourceBase* Resource, RResourcePreviewBuilder& PreviewBuilder, RResourceBase* AssetsViewResource)
+void RAssetEditor_Mesh::ShowWindow(REditorContext& EditorContext)
 {
-	RMesh* Mesh = Resource->CastTo<RMesh>();
+	RMesh* Mesh = EditorContext.AssetBrowserWindow.GetEditingResource()->CastTo<RMesh>();
 	assert(Mesh != nullptr);
 
 	const auto& Materials = Mesh->GetMaterials();
@@ -26,12 +28,12 @@ void RAssetEditor_Mesh::ShowWindow(RResourceBase* Resource, RResourcePreviewBuil
 		std::string AssignButtonText("->##" + std::to_string(i));
 		if (ImGui::Button(AssignButtonText.c_str()))
 		{
-			if (auto Resource = AssetsViewResource)
+			if (auto Resource = EditorContext.AssetBrowserWindow.GetSelectedResource())
 			{
 				if (RMaterial* MaterialAsset = Resource->CastTo<RMaterial>())
 				{
 					Mesh->SetMaterialSlot(i, MaterialAsset);
-					PreviewBuilder.BuildPreviewForResource(Mesh);
+					EditorContext.PreviewBuilder.BuildPreviewForResource(Mesh);
 				}
 			}
 		}
