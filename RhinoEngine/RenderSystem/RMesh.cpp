@@ -393,7 +393,7 @@ bool RMesh::TryLoadAsRmesh()
 	// Load material from file
 	{
 		std::string mtlFilename = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmtl");
-		std::vector<std::string> MaterialPaths = RMeshMaterialData::LoadFromXmlFile(mtlFilename);
+		std::vector<std::string> MaterialPaths = RMaterial::LoadNameListFromXml(mtlFilename);
 		std::vector<RMaterial*> Materials;
 
 		for (auto Iter : MaterialPaths)

@@ -697,7 +697,7 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 
 	// If a material file .rmtl for the mesh exists, override materials from fbx
 	std::string mtlFilename = RFileUtil::ReplaceExtension(FileName, "rmtl");
-	std::vector<std::string> MaterialNames = RMeshMaterialData::LoadFromXmlFile(mtlFilename);
+	std::vector<std::string> MaterialNames = RMaterial::LoadNameListFromXml(mtlFilename);
 	if (MaterialNames.size() > 0)
 	{
 		if (MaterialNames.size() >= materials.size())

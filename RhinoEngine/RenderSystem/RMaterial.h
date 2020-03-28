@@ -12,20 +12,6 @@ struct RShader;
 class RTexture;
 class RSerializer;
 
-// Material data used by each mesh element (obsoleted, replace this by RMaterial)
-struct RMeshMaterialData
-{
-	RShader*					Shader;
-	int							TextureNum;		/// Texture numbers, max 8
-	RTexture*					Textures[8];
-
-	/// Binary serialization operation
-	void Serialize(RSerializer& serializer);
-
-	/// Load an array of materials from xml file
-	static std::vector<std::string> LoadFromXmlFile(const std::string& Filename);
-};
-
 struct RTextureSlotData
 {
 	RTextureSlotData()
@@ -89,6 +75,9 @@ public:
 	bool IsRasterizerStateHashOutOfDate() const;
 	void SetRasterizerStateHash(size_t NewHash);
 	size_t GetRasterizerStateHash() const;
+
+	/// Load an list of material names from xml (.rmtl)
+	static std::vector<std::string> LoadNameListFromXml(const std::string& Filename);
 
 protected:
 	virtual bool LoadResourceImpl() override;
