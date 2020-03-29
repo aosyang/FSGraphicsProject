@@ -169,4 +169,20 @@
             <Scale>2.000000, 2.000000, 1.000000</Scale>
         </Transform>
     </SceneObject>
+    <SceneObject Name="PointLight">
+        <Component Class="RPointLightComponent" Color="1, 0.445609, 0.387255" Intensity="2.5" Radius="1088"/>
+        <Transform>
+            <Position>-2.515888, 400.600952, -696.194458</Position>
+            <Rotation>0.000000, 0.000000, 0.000000</Rotation>
+            <Scale>1.000000, 1.000000, 1.000000</Scale>
+        </Transform>
+    </SceneObject>
+    <SceneObject Name="DirectionalLight">
+        <Component Class="RDirectionalLightComponent" Color="0.877451, 0.981387, 1" Intensity="1.5"/>
+        <Transform>
+            <Position>0.000000, 200.000000, 0.000000</Position>
+            <Rotation>-0.855211, 0.488692, 0.000000</Rotation>
+            <Scale>1.000000, 1.000000, 1.000000</Scale>
+        </Transform>
+    </SceneObject>
 </Scene>
