@@ -9,8 +9,9 @@
 
 enum AnimationBitFlag
 {
-	AnimBitFlag_Loop			= 1 << 0,
-	AnimBitFlag_HasRootMotion	= 1 << 1,
+	AnimBitFlag_Loop			= 1 << 0,		// Should animation loop
+	AnimBitFlag_HasRootMotion	= 1 << 1,		// Extract root translation and keep root bone at the origin
+	AnimBitFlag_LockRootBone	= 1 << 2,		// Keep root bone at the origin
 };
 
 class RAnimation;
@@ -123,13 +124,20 @@ public:
 
 	/// Set flags for animation
 	/// TODO: Flags should be loaded with the animation in the future. Remove this function later
-	void SetBitFlags(int flags) { m_Flags = flags; }
+	void SetBitFlags(int flags)		{ m_Flags = flags; }
+	void EnableBitFlags(int Flags)	{ m_Flags |= Flags; }
 
 	/// Does animation use any root motion?
 	bool HasRootMotion() const;
 
 	/// Is animation looping?
 	bool IsLooping() const;
+
+	/// Should keep root bone at the origin
+	bool IsRootLocked() const;
+
+	/// Get speed of root bone in unit/sec
+	float GetRootSpeed() const;
 
 	void Serialize(RSerializer& serializer);
 
@@ -147,6 +155,8 @@ public:
 
 	/// Get the root displacement at given time
 	RVec3 GetRootPosition(float time) const;
+
+	RVec3 GetRootPositionAtFrame(int FrameId) const;
 
 	/// Set the parent id for a node
 	void SetNodeParentId(int NodeId, int ParentId);
@@ -203,6 +213,8 @@ private:
 	/// Root displacements of each frame
 	std::vector<RVec3>			m_RootDisplacement;
 
+	float					RootSpeed;
+
 	/// Index of the root node
 	int							m_RootNode;
 };
@@ -243,6 +255,16 @@ FORCEINLINE bool RAnimation::HasRootMotion() const
 FORCEINLINE bool RAnimation::IsLooping() const
 {
 	return (GetBitFlags() & AnimBitFlag_Loop) != 0;
+}
+
+FORCEINLINE bool RAnimation::IsRootLocked() const
+{
+	return (GetBitFlags() & AnimBitFlag_LockRootBone) != 0;
+}
+
+FORCEINLINE float RAnimation::GetRootSpeed() const
+{
+	return RootSpeed;
 }
 
 FORCEINLINE int RAnimation::GetBitFlags() const

@@ -114,6 +114,11 @@ void RMesh::Serialize(RSerializer& serializer)
 	}
 
 	serializer.SerializeObjectPtr(&m_Animation);
+	if (serializer.IsReading() && m_Animation)
+	{
+		m_Animation->SetName(GetAssetPath());
+	}
+
 	serializer.SerializeVector(m_BoneInitInvMatrices);
 	serializer.SerializeVector(m_BoneIdToName, &RSerializer::SerializeData);
 

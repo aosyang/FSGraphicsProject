@@ -23,6 +23,9 @@ void PlayerBehavior_Navigation::AddAnimation(const std::string& AnimationAsset, 
 	RAnimation* NewAnimation = Mesh ? Mesh->GetAnimation() : nullptr;
 	if (NewAnimation)
 	{
+		// Force in-place animations for navigation
+		NewAnimation->EnableBitFlags(AnimBitFlag_LockRootBone);
+
 		// If speed is smaller than the first data, insert as head
 		if (AnimData.size() > 0 && Speed <= AnimData[0].Speed)
 		{
@@ -49,11 +52,11 @@ void PlayerBehavior_Navigation::AddAnimation(const std::string& AnimationAsset, 
 
 void PlayerBehavior_Navigation::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
 {
-	RVec3 Velocity = StateMachine->GetOwner()->GetVelocity();
+	const RVec3 Velocity = StateMachine->GetOwner()->GetVelocity();
 	TargetSpeed = Velocity.Magnitude2D();
 
 	// Blend towards target speed
-	const float BlendSpeed = 20.0f * DeltaTime;
+	const float BlendSpeed = 1000.0f * DeltaTime;
 	if (fabs(TargetSpeed - CurrentSpeed) < BlendSpeed)
 	{
 		CurrentSpeed = TargetSpeed;
@@ -157,6 +160,11 @@ bool PlayerBehavior_Navigation::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4*
 std::string PlayerBehavior_Navigation::GetDebugString() const
 {
 	std::stringstream DebugStream;
+	DebugStream << "Animations:" << std::endl;
+	for (const auto& Data : AnimData)
+	{
+		DebugStream << Data.Speed << " : " << Data.Animation->GetName() << std::endl;
+	}
 	DebugStream << "Current speed: " << CurrentSpeed << std::endl;
 	DebugStream << "Target speed: " << TargetSpeed << std::endl;
 

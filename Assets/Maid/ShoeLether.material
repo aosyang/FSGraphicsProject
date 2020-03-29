@@ -1,4 +1,0 @@
-<!--Material path: /Maid/ShoeLether.material-->
-<Material Shader="Lighting">
-    <Texture Slot="0">/Maid/ShoeLether.dds</Texture>
-</Material>

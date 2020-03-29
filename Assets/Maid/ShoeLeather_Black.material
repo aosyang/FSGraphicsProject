@@ -1,0 +1,8 @@
+<!--Material path: /Maid/ShoeLeather_Black.material-->
+<Material Shader="BumpLightingPBR">
+    <Texture Slot="0">/RubikCube/Black2x2.dds</Texture>
+    <Texture Slot="1">/Maid/NormalMap_Flat.dds</Texture>
+    <Texture Slot="2">/Maid/Leather_RMA_Rough75.dds</Texture>
+    <Texture Slot="3">/EnvCubemaps/Lake_Radiance.dds</Texture>
+    <Texture Slot="4">/EnvCubemaps/Lake_Irradiance.dds</Texture>
+</Material>

@@ -43,6 +43,9 @@ public:
 	RVec3 GetPlannarMovementVector() const;
 
 	/// Get the velocity of controller
+	RVec3 GetPhysicsVelocity() const;
+
+	/// Get the velocity of controller in unit/sec
 	RVec3 GetVelocity() const;
 
 	/// Set the player's rotation in yaw angles

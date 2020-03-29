@@ -1,0 +1,8 @@
+<!--Material path: /PBRMaterials/FabricPolyester/Fabric_Polyester_002.material-->
+<Material Shader="BumpLightingPBR" UVTiling="10" DoubleSided="1">
+    <Texture Slot="0">/PBRMaterials/FabricPolyester/Fabric_Polyester_002_basecolor.DDS</Texture>
+    <Texture Slot="1">/PBRMaterials/FabricPolyester/Fabric_Polyester_002_normal.DDS</Texture>
+    <Texture Slot="2">/PBRMaterials/FabricPolyester/Fabric_Polyester_002_RMA.DDS</Texture>
+    <Texture Slot="3">/EnvCubemaps/Lake_Radiance.dds</Texture>
+    <Texture Slot="4">/EnvCubemaps/Lake_Irradiance.dds</Texture>
+</Material>

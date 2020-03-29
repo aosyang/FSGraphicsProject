@@ -271,7 +271,7 @@ bool RAnimationBlender::HasFinishedPlaying() const
 }
 
 RAnimation::RAnimation()
-	: m_Flags(0)
+	: RAnimation(0, 0, 0.0f, 0.0f, 0.0f)
 {
 
 }
@@ -282,6 +282,7 @@ RAnimation::RAnimation(int nodeCount, int frameCount, float startTime, float end
 	, m_StartTime(startTime)
 	, m_EndTime(endTime)
 	, m_FrameRate(frameRate)
+	, RootSpeed(0.0f)
 	, m_RootNode(-1)
 {
 	BoneNodeData.resize(nodeCount, RAnimNodeData());
@@ -354,10 +355,10 @@ void RAnimation::GetNodePoseAtTime(int NodeId, float Time, RMatrix4* OutMatrix) 
 	Transform1.Decompose(Position1, Rotation1, Scale1);
 	Transform2.Decompose(Position2, Rotation2, Scale2);
 
-	if (HasRootMotion())
+	if (HasRootMotion() || IsRootLocked())
 	{
-		Position1 -= GetRootPosition((float)frame1);
-		Position2 -= GetRootPosition((float)frame2);
+		Position1 -= GetRootPositionAtFrame(frame1);
+		Position2 -= GetRootPositionAtFrame(frame2);
 	}
 
 	RTransform ResultTransform(
@@ -407,6 +408,16 @@ RVec3 RAnimation::GetRootPosition(float time) const
 	return RVec3::Lerp(va, vb, t);
 }
 
+RVec3 RAnimation::GetRootPositionAtFrame(int FrameId) const
+{
+	if (m_RootDisplacement.size() == 0)
+	{
+		return RVec3::Zero();
+	}
+
+	return m_RootDisplacement[FrameId];
+}
+
 void RAnimation::SetNodeParentId(int NodeId, int ParentId)
 {
 	BoneNodeData[NodeId].ParentId = ParentId;
@@ -446,5 +457,15 @@ void RAnimation::BuildRootDisplacements()
 	{
 		m_RootDisplacement[i] = BoneNodeData[m_RootNode].FrameMatrices[i].GetTranslation();
 		m_RootDisplacement[i].SetY(0.0f);
+	}
+
+	// Calculate root speed by position difference between the first and the last frame
+	if (m_FrameCount > 0)
+	{
+		RootSpeed = (m_RootDisplacement[m_FrameCount - 1] - m_RootDisplacement[0]).Magnitude() / (m_FrameCount / m_FrameRate);
+	}
+	else
+	{
+		RootSpeed = 0.0f;
 	}
 }

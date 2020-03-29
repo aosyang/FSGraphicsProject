@@ -40,9 +40,29 @@ void InitializePlayerAsset_Maid(PlayerControllerBase* PlayerController)
 {
 	FTGPlayerStateMachine& StateMachine = PlayerController->GetStateMachine();
 	PlayerBehavior_Navigation* NavigationBehavior = StateMachine.AllocateBehaviorInstance<PlayerBehavior_Navigation>();
-	NavigationBehavior->AddAnimation("/Maid/Maid_Idle.fbx", 0.0f);
-	NavigationBehavior->AddAnimation("/Maid/Maid_Walk.fbx", 1.7f);
-	NavigationBehavior->AddAnimation("/Maid/Maid_Run.fbx", 5.0f);
+
+	static char* NavAnimNames[] = {
+		"/Maid/Maid_Idle.fbx",
+		"/Maid/Maid_Walk.fbx",
+		"/Maid/Maid_Run.fbx",
+	};
+
+	// Cache animation by the mesh. 
+	// TODO: Make this process less redundant
+	RMesh* PlayerMesh = RResourceManager::Instance().LoadResource<RMesh>("/Maid/Maid.fbx", EResourceLoadMode::Immediate);
+	if (PlayerMesh)
+	{
+		for (int i = 0; i < ARRAYSIZE(NavAnimNames); i++)
+		{
+			RMesh* AnimMesh = RResourceManager::Instance().LoadResource<RMesh>(NavAnimNames[i], EResourceLoadMode::Immediate);
+			RAnimation* Animation = AnimMesh ? AnimMesh->GetAnimation() : nullptr;
+			if (Animation)
+			{
+				PlayerMesh->CacheAnimation(Animation);
+				NavigationBehavior->AddAnimation(NavAnimNames[i], Animation->GetRootSpeed());
+			}
+		}
+	}
 
 	// Initialize the skinning mesh
 	PlayerController->InitAssets("/Maid/Maid.fbx");

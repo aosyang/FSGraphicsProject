@@ -1,0 +1,4 @@
+<!--Material path: /Maid/CatEar.material-->
+<Material Shader="Lighting">
+    <Texture Slot="0">/Maid/CatEar.dds</Texture>
+</Material>

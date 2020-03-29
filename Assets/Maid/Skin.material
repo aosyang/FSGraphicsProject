@@ -1,4 +1,6 @@
 <!--Material path: /Maid/Skin.material-->
-<Material Shader="Lighting">
+<Material Shader="BumpSpecularLighting">
     <Texture Slot="0">/Maid/Skin.dds</Texture>
+    <Texture Slot="1">/Maid/NormalMap_Flat.dds</Texture>
+    <Texture Slot="2">/RubikCube/Black2x2.dds</Texture>
 </Material>

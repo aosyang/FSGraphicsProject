@@ -1,0 +1,4 @@
+<!--Material path: /Maid/eyeball.material-->
+<Material Shader="Lighting">
+    <Texture Slot="0">/Maid/eye_emerald.dds</Texture>
+</Material>

@@ -31,5 +31,9 @@ private:
 	FTGPlayerController* ControlledPlayer;
 	RVec3 MoveTarget;
 
+	/// Speed for current move
+	float MoveSpeed;
+
+	/// Remaining wait time before making another path-finding decision
 	float WaitDuration;
 };

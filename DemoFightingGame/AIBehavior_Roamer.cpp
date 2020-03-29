@@ -34,6 +34,7 @@ namespace
 
 AIBehavior_Roamer::AIBehavior_Roamer(RSceneObject* InOwner)
 	: Base(InOwner)
+	, MoveSpeed(0.0f)
 	, WaitDuration(0.0f)
 {
 	AINavigationComponent = InOwner->FindOrAddComponent<RAINavigationComponent>();
@@ -72,16 +73,22 @@ void AIBehavior_Roamer::Update(float DeltaTime)
 				break;
 			}
 		}
-
-		if (!bStartedMove)
+		
+		if (bStartedMove)
 		{
+			// Random speed for moving to each new target
+			MoveSpeed = RMath::RandF() < 0.25f ? 1.7f : 4.0f;
+		}
+		else
+		{
+			// Target is not reachable? Delay couple frames before finding a new target
 			Wait(0.2f);
 		}
 	}
 
 	if (AINavigationComponent->GetNavState() == EAINavState::Moving)
 	{
-		ControlledPlayer->SetMovementInput(AINavigationComponent->GetDesiredMoveDirection() * 5.0f);
+		ControlledPlayer->SetMovementInput(AINavigationComponent->GetDesiredMoveDirection() * MoveSpeed);
 		AINavigationComponent->DebugDrawPath();
 	}
 }

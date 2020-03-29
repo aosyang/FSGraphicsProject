@@ -17,6 +17,7 @@
 
 namespace
 {
+	static const float FixedFrameRate = 60.0f;
 	static const float FixedTimestamp = 1.0f / 60.0f;
 }
 
@@ -284,9 +285,14 @@ RVec3 PlayerControllerBase::GetPlannarMovementVector() const
 	return PlannarMoveVector;
 }
 
-RVec3 PlayerControllerBase::GetVelocity() const
+RVec3 PlayerControllerBase::GetPhysicsVelocity() const
 {
 	return btVec3ToRVec3(KinematicCharacterController->getLinearVelocity());
+}
+
+RVec3 PlayerControllerBase::GetVelocity() const
+{
+	return GetPhysicsVelocity() * FixedFrameRate;
 }
 
 void PlayerControllerBase::SetPlayerFacing(const RVec3& Direction, bool bCheckMoveAllowed /*= true*/)
