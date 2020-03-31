@@ -52,3 +52,12 @@ void RSceneManager::Update(float DeltaTime)
 		Scene->UpdateScene(DeltaTime);
 	}
 }
+
+void RSceneManager::Update_PostPhysics(float DeltaTime)
+{
+	// Update all registered scenes
+	for (auto Scene : RegisteredScenes)
+	{
+		Scene->UpdateScene_PostPhysics(DeltaTime);
+	}
+}

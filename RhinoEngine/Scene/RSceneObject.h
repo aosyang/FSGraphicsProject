@@ -135,7 +135,7 @@ public:
 	void DrawDebugShape() const;
 
 	virtual void Update(float DeltaTime);
-
+	virtual void Update_PostPhysics(float DeltaTime);
 	/// Set the visibility of scene object
 	void SetVisible(bool bVisible);
 

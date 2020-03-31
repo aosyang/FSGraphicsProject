@@ -295,6 +295,11 @@ void RSceneObject::Update(float DeltaTime)
 	CalculateBounds();
 }
 
+void RSceneObject::Update_PostPhysics(float DeltaTime)
+{
+
+}
+
 RSceneComponent* RSceneObject::AddComponent(std::unique_ptr<RSceneComponent>&& Component)
 {
 	SceneComponents.push_back(std::move(Component));

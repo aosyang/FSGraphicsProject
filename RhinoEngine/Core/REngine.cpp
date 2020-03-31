@@ -211,10 +211,12 @@ void REngine::RunOneFrame(bool update_input)
 
 	m_Application->UpdateScene(m_Timer);
 
-	// Update all registered scenes with their objects
-	GSceneManager.Update(m_Timer.DeltaTime());
+	const float DeltaTime = m_Timer.DeltaTime();
 
-	GPhysicsEngine.Simulate(m_Timer.DeltaTime());
+	// Update all registered scenes with their objects
+	GSceneManager.Update(DeltaTime);
+	GPhysicsEngine.Simulate(DeltaTime);
+	GSceneManager.Update_PostPhysics(DeltaTime);
 
 	if (!m_bIsEditor)
 	{

@@ -40,5 +40,16 @@ void RPhysicsEngine::Shutdown()
 
 void RPhysicsEngine::Simulate(float DeltaTime)
 {
-	Context->DynamicWorld->stepSimulation(DeltaTime, 10);
+	Context->DynamicWorld->stepSimulation(DeltaTime, 10, GetFixedTimeStep());
+}
+
+float RPhysicsEngine::GetFixedFrameRate()
+{
+	return 30.0f;
+}
+
+float RPhysicsEngine::GetFixedTimeStep()
+{
+	const float FixedTimeStep = 1.0f / GetFixedFrameRate();
+	return FixedTimeStep;
 }

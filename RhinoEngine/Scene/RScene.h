@@ -81,6 +81,7 @@ public:
 	void RenderDepthPass(const RFrustum* pFrustum = nullptr);
 
 	void UpdateScene(float DeltaTime);
+	void UpdateScene_PostPhysics(float DeltaTime);
 
 	std::vector<RSceneObject*> EnumerateSceneObjects() const;
 protected:

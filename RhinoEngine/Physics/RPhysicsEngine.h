@@ -27,6 +27,9 @@ public:
 	/// Get context for physics engine
 	RPhysicsEngineContext* GetContext() const;
 
+	static float GetFixedFrameRate();
+	static float GetFixedTimeStep();
+
 private:
 	std::unique_ptr<RPhysicsEngineContext>	Context;
 };

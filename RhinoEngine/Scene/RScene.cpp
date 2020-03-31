@@ -627,6 +627,14 @@ void RScene::UpdateScene(float DeltaTime)
 	}
 }
 
+void RScene::UpdateScene_PostPhysics(float DeltaTime)
+{
+	for (RSceneObject* SceneObject : m_SceneObjects)
+	{
+		SceneObject->Update_PostPhysics(DeltaTime);
+	}
+}
+
 std::vector<RSceneObject*> RScene::EnumerateSceneObjects() const
 {
 	std::vector<RSceneObject*> OutputObjects;

@@ -31,6 +31,7 @@ public:
 
 	/// Update the scene manager
 	void Update(float DeltaTime);
+	void Update_PostPhysics(float DeltaTime);
 
 protected:
 	RSceneManager() {}
