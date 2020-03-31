@@ -19,6 +19,7 @@
 #include <d3dcompiler.h>
 #include "RenderSystem/D3DUtil.h"
 #pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxguid.lib")			// For D3D11 shader reflection
 
 #include "../lua5.3/lua.hpp"
 
