@@ -395,13 +395,19 @@ bool RMesh::TryLoadAsRmesh()
 		return false;
 	}
 
-	// Fbx is newer than binary mesh file, load fbx and regenerate binaries
+	// Compare timestamps of .fbx and .rmesh
 	ETimestampComparison Result = RFileUtil::CompareFileTimestamp(GetFileSystemPath(), BinaryMeshPath);
-	if (Result == ETimestampComparison::EarlierSecond && Result != ETimestampComparison::InvalidFile)
+
+	// Both files should be valid
+	assert(Result != ETimestampComparison::InvalidFile);
+
+	// If .fbx is newer than binary mesh, stop here. We will load the fbx and regenerate the binary mesh.
+	if (Result == ETimestampComparison::EarlierSecond)
 	{
 		return false;
 	}
 
+	// The binary mesh is up-to-date, load it now
 	RSerializer serializer;
 	serializer.Open(BinaryMeshPath, ESerializeMode::Read);
 	if (!serializer.IsOpen())
