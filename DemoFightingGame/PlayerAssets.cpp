@@ -44,23 +44,16 @@ void InitializePlayerAsset_Maid(PlayerControllerBase* PlayerController)
 	static char* NavAnimNames[] = {
 		"/Maid/Maid_Idle.fbx",
 		"/Maid/Maid_Walk.fbx",
-		"/Maid/Maid_Run.fbx",
+		"/Maid/Maid_Run_Fast.fbx",
 	};
 
-	// Cache animation by the mesh. 
-	// TODO: Make this process less redundant
-	RMesh* PlayerMesh = RResourceManager::Instance().LoadResource<RMesh>("/Maid/Maid.fbx", EResourceLoadMode::Immediate);
-	if (PlayerMesh)
+	for (int i = 0; i < ARRAYSIZE(NavAnimNames); i++)
 	{
-		for (int i = 0; i < ARRAYSIZE(NavAnimNames); i++)
+		RMesh* AnimMesh = RResourceManager::Instance().LoadResource<RMesh>(NavAnimNames[i], EResourceLoadMode::Immediate);
+		RAnimation* Animation = AnimMesh ? AnimMesh->GetAnimation() : nullptr;
+		if (Animation)
 		{
-			RMesh* AnimMesh = RResourceManager::Instance().LoadResource<RMesh>(NavAnimNames[i], EResourceLoadMode::Immediate);
-			RAnimation* Animation = AnimMesh ? AnimMesh->GetAnimation() : nullptr;
-			if (Animation)
-			{
-				PlayerMesh->CacheAnimation(Animation);
-				NavigationBehavior->AddAnimation(NavAnimNames[i], Animation->GetRootSpeed());
-			}
+			NavigationBehavior->AddAnimation(NavAnimNames[i], Animation->GetRootSpeed());
 		}
 	}
 

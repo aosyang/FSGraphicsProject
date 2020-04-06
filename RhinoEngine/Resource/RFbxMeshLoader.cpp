@@ -137,6 +137,19 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 
 	// Load scene animation
 	RAnimation* animation = LoadFbxSceneAnimation(lFbxScene);
+	if (animation)
+	{
+		animation->SetName(MeshResource->GetAssetPath());
+		std::string SkeletalMeshName = MeshResource->GetMetaData()["SkeletalMesh"];
+		if (SkeletalMeshName != "")
+		{
+			RMesh* SkeletalMesh = RResourceManager::Instance().LoadResource<RMesh>(SkeletalMeshName, EResourceLoadMode::Immediate);
+			if (SkeletalMesh)
+			{
+				SkeletalMesh->CacheAnimation(animation);
+			}
+		}
+	}
 
 	std::vector<RMatrix4> boneInitInvPose;
 
@@ -714,6 +727,8 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 				RMaterial* Material = RResourceManager::Instance().FindResource<RMaterial>(MaterialNames[i]);
 				if (!Material)
 				{
+					// Request a referenced material for the mesh. If loading is happening in a loader thread, loading resource
+					// with immediate mode will also happen there.
 					Material = RResourceManager::Instance().LoadResource<RMaterial>(MaterialNames[i], EResourceLoadMode::Immediate);
 				}
 

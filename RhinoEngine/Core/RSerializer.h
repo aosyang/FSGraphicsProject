@@ -41,6 +41,12 @@ public:
 		return OperationMode == ESerializeMode::Read;
 	}
 
+	/// Check if serializer is in writing mode
+	FORCEINLINE bool IsWriting() const
+	{
+		return OperationMode == ESerializeMode::Write;
+	}
+
 	/// Serialize a string file header
 	///   Write mode : Write header string to file stream.
 	///                Always returns true

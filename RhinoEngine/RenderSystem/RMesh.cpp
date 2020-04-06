@@ -124,6 +124,16 @@ void RMesh::Serialize(RSerializer& serializer)
 	if (serializer.IsReading() && m_Animation)
 	{
 		m_Animation->SetName(GetAssetPath());
+
+		std::string SkeletalMeshName = GetMetaData()["SkeletalMesh"];
+		if (SkeletalMeshName != "")
+		{
+			RMesh* SkeletalMesh = RResourceManager::Instance().LoadResource<RMesh>(SkeletalMeshName, EResourceLoadMode::Immediate);
+			if (SkeletalMesh)
+			{
+				SkeletalMesh->CacheAnimation(m_Animation);
+			}
+		}
 	}
 
 	serializer.SerializeVector(m_BoneInitInvMatrices);
