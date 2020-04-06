@@ -189,11 +189,11 @@ bool RTexture::LoadTextureHDR(bool bSRGB)
 
 void RTexture::QueryTextureDesc(ID3D11ShaderResourceView& ShaderResourceView)
 {
-	ID3D11Resource* TextureResource;
+	ComPtr<ID3D11Resource> TextureResource;
 	ShaderResourceView.GetResource(&TextureResource);
 	if (TextureResource)
 	{
-		ID3D11Texture2D* pTexture;
+		ComPtr<ID3D11Texture2D> pTexture;
 		TextureResource->QueryInterface(__uuidof(ID3D11Texture2D), (void**)&pTexture);
 
 		if (pTexture)
@@ -205,10 +205,6 @@ void RTexture::QueryTextureDesc(ID3D11ShaderResourceView& ShaderResourceView)
 			m_Height = Desc.Height;
 			MipLevels = Desc.MipLevels;
 			bIsCubeMap = Desc.MiscFlags & D3D11_RESOURCE_MISC_TEXTURECUBE;
-
-			pTexture->Release();
 		}
-
-		TextureResource->Release();
 	}
 }

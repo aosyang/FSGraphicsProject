@@ -5,11 +5,12 @@
 //=============================================================================
 #pragma once
 
+// Win32 memory leak detection (works in debug builds only)
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
 
-#include <Shlwapi.h>
+// Win32 file system APIs
 #pragma comment(lib, "Shlwapi.lib")
 
 #include "Core/CoreTypes.h"

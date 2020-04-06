@@ -6,6 +6,9 @@
 
 #include "Rhino.h"
 
+// Win32 file system APIs
+#include <Shlwapi.h>
+
 std::vector<std::string> RFileUtil::WorkingPathStack;
 const std::string RFileUtil::InvalidPath("<InvalidPath>");
 

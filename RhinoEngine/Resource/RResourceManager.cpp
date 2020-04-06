@@ -15,6 +15,9 @@
 
 #include "tinyxml2/tinyxml2.h"
 
+// Win32 file system APIs
+#include <Shlwapi.h>
+
 static std::mutex								m_TaskQueueMutex;
 static std::condition_variable					m_TaskQueueCondition;
 static std::mutex								m_PendingNotifyResourceMutex;
