@@ -6,8 +6,6 @@
 
 #include "PlayerControllerBase.h"
 
-#include "Navigation/RAINavigationComponent.h"
-
 // For definition of RPhysicsEngineContext
 // TODO: Should keep this header private. Maybe move implementation to the engine
 #include "Physics/RPhysicsPrivate.h"

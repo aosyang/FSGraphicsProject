@@ -6,7 +6,7 @@
 
 #include "RAINavigationComponent.h"
 
-#include "RNavigationSystem.h"
+#include "NavigationSystem/RNavigationSystem.h"
 #include "Scene/RSceneObject.h"
 
 #include "RenderSystem/RDebugRenderer.h"
@@ -17,7 +17,7 @@ RAINavigationComponent::RAINavigationComponent(RSceneObject* InOwner)
 	, ReachRadius(10.0f)
 	, LastAgentPosition(RNavigationSystem::InvalidPosition)
 	, TimeStuck(0.0f)
-	, StuckCheckRadius(50.0f)
+	, StuckCheckRadius(10.0f)
 	, MaxTimeAllowedInStuck(1.0f)
 {
 

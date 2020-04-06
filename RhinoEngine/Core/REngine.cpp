@@ -8,7 +8,7 @@
 #include "Scene/RSceneManager.h"
 #include "Scene/RSceneComponentFactory.h"
 
-#include "Navigation/RNavigationSystem.h"
+#include "AI/NavigationSystem/RNavigationSystem.h"
 #include "Physics/RPhysicsEngine.h"
 
 #include "imgui/imgui.h"

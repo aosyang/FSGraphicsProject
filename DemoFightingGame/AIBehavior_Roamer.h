@@ -7,7 +7,6 @@
 #pragma once
 
 #include "FTGPlayerController.h"
-#include "Navigation/RAINavigationComponent.h"
 
 class RAINavigationComponent;
 

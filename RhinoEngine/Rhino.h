@@ -57,8 +57,8 @@
 #include "Physics/RPhysicsEngine.h"
 #include "Physics/RRigidBodyComponent.h"
 
-#include "Navigation/RNavigationSystem.h"
-#include "Navigation/RAINavigationComponent.h"
+#include "AI/NavigationSystem/RNavigationSystem.h"
+#include "AI/RAINavigationComponent.h"
 
 #include "Core/RDebugMenu.h"
 #include "Core/REngine.h"
