@@ -20,6 +20,7 @@ public:
 	~PlayerControllerBase();
 
 	virtual void Update(float DeltaTime) override;
+	virtual void Update_PostPhysics(float DeltaTime) override;
 
 	/// Initialize assets used by the player controller
 	void InitAssets(const std::string& MeshResourcePath);

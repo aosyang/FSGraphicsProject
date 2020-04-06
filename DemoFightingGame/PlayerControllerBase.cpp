@@ -15,18 +15,13 @@
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
 #include "PlayerBehavior_Navigation.h"
 
-namespace
-{
-	static const float FixedFrameRate = 60.0f;
-	static const float FixedTimestamp = 1.0f / 60.0f;
-}
-
 class RKinematicCharacterController : public btKinematicCharacterController
 {
 public:
 	RKinematicCharacterController(btPairCachingGhostObject* ghostObject, btConvexShape* convexShape, btScalar stepHeight, const btVector3& up = btVector3(1.0, 0.0, 0.0))
 		: btKinematicCharacterController(ghostObject, convexShape, stepHeight, up)
-		, LocalTime(0.0f)
+		, PhysicsLocalTime(0.0f)
+		, EngineLocalTime(0.0f)
 		, NumSimulationSubSteps(0)
 		, CurrentFrame(0)
 	{
@@ -34,32 +29,33 @@ public:
 	}
 
 	// Override the update function from btKinematicCharacterController so it can handle transform interpolation
-	virtual void updateAction(btCollisionWorld * collisionWorld, btScalar deltaTime) override
+	virtual void updateAction(btCollisionWorld * collisionWorld, btScalar FixedDeltaTime) override
 	{
-		preStep(collisionWorld);
-		playerStep(collisionWorld, deltaTime);
+		btKinematicCharacterController::updateAction(collisionWorld, FixedDeltaTime);
+
+		PhysicsLocalTime += FixedDeltaTime;
+		CurrentFrame = 1 - CurrentFrame;
 
 		const btTransform& PhysicsTransform = getGhostObject()->getWorldTransform();
 		ControllerPosition[CurrentFrame] = btVec3ToRVec3(PhysicsTransform.getOrigin());
 		ControllerRotation[CurrentFrame] = btQuatToRQuat(PhysicsTransform.getRotation());
-
-		CurrentFrame = 1 - CurrentFrame;
 	}
 
-	void Update(float DeltaTime)
+	void Update_PostPhysics(float DeltaTime)
 	{
-		LocalTime += DeltaTime;
-
-		if (LocalTime > FixedTimestamp)
+		if (PhysicsLocalTime > EngineLocalTime)
 		{
-			NumSimulationSubSteps = int(LocalTime / FixedTimestamp);
-			LocalTime -= NumSimulationSubSteps * FixedTimestamp;
+			PhysicsLocalTime -= EngineLocalTime;
+			EngineLocalTime = 0.0f;
 		}
+
+		EngineLocalTime += DeltaTime;
 	}
 
 	RVec3 GetInterpolatedPosition() const
 	{
-		float t = LocalTime / FixedTimestamp;
+		float t = (EngineLocalTime - PhysicsLocalTime) / RPhysicsEngine::GetFixedTimeStep();
+		t = RMath::Clamp(t, 0.0f, 1.0f);
 		assert(t >= 0.0f && t <= 1.0f);
 
 		return RVec3::Lerp(ControllerPosition[1 - CurrentFrame], ControllerPosition[CurrentFrame], t);
@@ -67,7 +63,8 @@ public:
 
 	RQuat GetInterpolatedRotation() const
 	{
-		float t = LocalTime / FixedTimestamp;
+		float t = (EngineLocalTime - PhysicsLocalTime) / RPhysicsEngine::GetFixedTimeStep();
+		t = RMath::Clamp(t, 0.0f, 1.0f);
 		assert(t >= 0.0f && t <= 1.0f);
 
 		return RQuat::Slerp(ControllerRotation[1 - CurrentFrame], ControllerRotation[CurrentFrame], t);
@@ -84,7 +81,8 @@ public:
 	}
 
 private:
-	float LocalTime;
+	float PhysicsLocalTime;
+	float EngineLocalTime;
 	int NumSimulationSubSteps;
 
 	int CurrentFrame;
@@ -132,7 +130,12 @@ void PlayerControllerBase::Update(float DeltaTime)
 {
 	Base::Update(DeltaTime);
 
-	KinematicCharacterController->Update(DeltaTime);
+}
+
+void PlayerControllerBase::Update_PostPhysics(float DeltaTime)
+{
+	Base::Update_PostPhysics(DeltaTime);
+	KinematicCharacterController->Update_PostPhysics(DeltaTime);
 
 	RVec3 Position = KinematicCharacterController->GetInterpolatedPosition();
 	RQuat Rotation = KinematicCharacterController->GetInterpolatedRotation();
@@ -193,7 +196,7 @@ void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 MoveVec)
 	bool bCanMovePlayer = CanMovePlayerWithInput();
 	if (bCanMovePlayer)
 	{
-		KinematicCharacterController->setWalkDirection(RVec3TobtVec3(MoveVec));
+		KinematicCharacterController->setWalkDirection(RVec3TobtVec3(MoveVec) * RPhysicsEngine::GetFixedTimeStep());
 
 		PlannarMoveVector = MoveVec;
 		PlannarMoveVector.SetY(0.0f);
@@ -292,7 +295,7 @@ RVec3 PlayerControllerBase::GetPhysicsVelocity() const
 
 RVec3 PlayerControllerBase::GetVelocity() const
 {
-	return GetPhysicsVelocity() * FixedFrameRate;
+	return GetPhysicsVelocity() * RPhysicsEngine::GetFixedFrameRate();
 }
 
 void PlayerControllerBase::SetPlayerFacing(const RVec3& Direction, bool bCheckMoveAllowed /*= true*/)
