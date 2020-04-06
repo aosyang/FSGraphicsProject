@@ -77,7 +77,7 @@ void AIBehavior_Roamer::Update(float DeltaTime)
 		if (bStartedMove)
 		{
 			// Random speed for moving to each new target
-			MoveSpeed = RMath::RandF() < 0.25f ? 1.7f : 4.0f;
+			MoveSpeed = RMath::RandF() < 0.85f ? 100.f : 285.f;
 		}
 		else
 		{

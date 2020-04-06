@@ -12,14 +12,15 @@
 
 #include "PlayerAssets.h"
 
+const static int MaxNumAIs = 10;
+const static int MaxNumPlayers = 1;
+
 FightingGameApp::FightingGameApp()
 	: CurrentPlayerIndex(0)
 	, m_Camera(nullptr)
 	, m_FreeFlyMode(false)
 	, m_FreeFlyCameraControl(nullptr)
 {
-	m_Player[0] = nullptr;
-	m_Player[1] = nullptr;
 }
 
 FightingGameApp::~FightingGameApp()
@@ -82,37 +83,31 @@ bool FightingGameApp::Initialize()
 	m_FreeFlyCameraControl = m_Camera->AddNewComponent<RFreeFlyCameraControl>();
 	m_FreeFlyCameraControl->SetEnabled(false);
 
-	//RSceneObject* player = DefaultScene->FindObject("Player");
-	//for (UINT i = 0; i < DefaultScene->GetSceneObjects().size(); i++)
-	//{
-	//	RSceneObject* obj = DefaultScene->GetSceneObjects()[i];
-	//	obj->SetScript("UpdateObject");
-	//}
-
+	m_Players.resize(MaxNumPlayers, nullptr);
 	for (int i = 0; i < MaxNumPlayers; i++)
 	{
-		m_Player[i] = DefaultScene->CreateSceneObjectOfType<PlayerControllerBase>();
-		if (m_Player[i])
+		m_Players[i] = DefaultScene->CreateSceneObjectOfType<PlayerControllerBase>();
+		if (m_Players[i])
 		{
-			FTGPlayerStateMachine& StateMachine = m_Player[i]->GetStateMachine();
-			InitializePlayerAsset_Maid(m_Player[i]);
+			FTGPlayerStateMachine& StateMachine = m_Players[i]->GetStateMachine();
+			InitializePlayerAsset_Maid(m_Players[i]);
 
 			// Hacked start points for players
 			{
 				if (i == 0)
 				{
-					m_Player[i]->SetPosition(RVec3(-1795, 200, -200));
+					m_Players[i]->SetPosition(RVec3(-1795, 200, -200));
 				}
 
 				if (i == 1)
 				{
-					m_Player[i]->SetPosition(RVec3(1835, 40, -853));
+					m_Players[i]->SetPosition(RVec3(1835, 40, -853));
 				}
 			}
 		}
 	}
 
-	m_AIPlayers.resize(MaxNumAIs);
+	m_AIPlayers.resize(MaxNumAIs, nullptr);
 	for (int i = 0; i < MaxNumAIs; i++)
 	{
 		m_AIPlayers[i] = DefaultScene->CreateSceneObjectOfType<FTGPlayerController>();
@@ -146,10 +141,10 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		// Reset all characters' position
 		for (int i = 0; i < MaxNumPlayers; i++)
 		{
-			if (m_Player[i])
+			if (m_Players[i])
 			{
-				m_Player[i]->SetPosition(RVec3(0, 100.0f, 0));
-				m_Player[i]->Reset();
+				m_Players[i]->SetPosition(RVec3(0, 100.0f, 0));
+				m_Players[i]->Reset();
 			}
 		}
 
@@ -239,7 +234,7 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 	//GNavigationSystem.DebugRender(NavMeshDebug_DrawNavMesh);
 	if (MaxNumPlayers >= 2)
 	{
-		GNavigationSystem.DebugSetPathQueryPoints(m_Player[0]->GetPosition(), m_Player[1]->GetPosition());
+		GNavigationSystem.DebugSetPathQueryPoints(m_Players[0]->GetPosition(), m_Players[1]->GetPosition());
 	}
 }
 
@@ -280,7 +275,7 @@ void FightingGameApp::UpdateUserInput()
 			if (moveVec.SquaredMagitude() > 0.0f)
 			{
 				moveVec.Normalize();
-				moveVec *= bNavSlowly ? 1.7f : 4.0f;
+				moveVec *= bNavSlowly ? 100.f : 285.f;
 			}
 
 			CurrentPlayer->SetMovementInput(moveVec);
@@ -325,11 +320,11 @@ void FightingGameApp::UpdateCameraPosition(float DeltaTime)
 	RMatrix4 playerTranslation = RMatrix4::CreateTranslation(PlayerPosition);
 
 	// Make camera's world transform from a local transform
-	static const RVec3 CameraOffset = RVec3(0.0f, 5.0f, 3.0f) * 175.0f;
+	static const RVec3 CameraOffset = RVec3(0.0f, 3.0f, 3.0f) * 115.0f;
 	RMatrix4 cameraTransform = RMatrix4::CreateTranslation(CameraOffset) * playerTranslation;
 
 	// Player mesh has its origin at feet. We offset the look target up by half of player's height.
-	RVec3 lookTarget = PlayerPosition + RVec3(0, 125, 0);
+	RVec3 lookTarget = PlayerPosition + RVec3(0, 100, 0);
 
 	// Camera bounding box used for level collision
 	RAabb camAabb;
@@ -393,5 +388,5 @@ void FightingGameApp::ResetPlayerPosition(FTGPlayerController* PlayerController)
 PlayerControllerBase* FightingGameApp::GetCurrentPlayer() const
 {
 	assert(CurrentPlayerIndex >= 0 && CurrentPlayerIndex < MaxNumPlayers);
-	return m_Player[CurrentPlayerIndex];
+	return m_Players[CurrentPlayerIndex];
 }

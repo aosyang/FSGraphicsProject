@@ -11,9 +11,6 @@
 
 #include "FTGPlayerController.h"
 
-const static int MaxNumAIs = 10;
-const static int MaxNumPlayers = 1;
-
 class FightingGameApp : public IApp
 {
 public:
@@ -41,7 +38,7 @@ private:
 private:
 	RCamera*				m_Camera;
 
-	PlayerControllerBase*	m_Player[MaxNumPlayers];
+	std::vector<PlayerControllerBase*>	m_Players;
 	int						CurrentPlayerIndex;
 
 	std::vector<FTGPlayerController*>	m_AIPlayers;
