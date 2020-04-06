@@ -8,6 +8,7 @@
 
 #include "RShaderManager.h"
 #include "D3DCommonPrivate.h"
+#include <d3dcompiler.h>
 
 struct RShaderCompileOption
 {
@@ -309,6 +310,7 @@ void RShaderManager::CompileShader(const std::string& SourceName, const std::str
 
 	// Remove any engine header files
 	StdRemove(IncludeFiles, "Core/RVector.h");
+	StdRemove(IncludeFiles, "Core/RMatrix.h");
 
 	if (StdContains(IncludeFiles, "BRDF.hlsli"))
 	{

@@ -6,6 +6,13 @@
 
 #pragma once
 
+#include "RMeshElement.h"
+
+namespace RVertexType
+{
+	struct PositionColor;
+}
+
 class RDebugRenderBuffer
 {
 public:

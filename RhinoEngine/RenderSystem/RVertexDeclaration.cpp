@@ -4,7 +4,6 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
 #include "RVertexDeclaration.h"
 
 #include "RMeshVertexSignature.csh"
@@ -12,6 +11,11 @@
 #include "RSkyboxVertexSignature.csh"
 #include "RParticleVertexSignature.csh"
 #include "RFontVertexSignature.csh"
+
+#include "RRenderSystem.h"
+#include <d3dcompiler.h>
+
+#include "Core/RLog.h"
 
 ShaderInputVertex VertexSemantics[] =
 {

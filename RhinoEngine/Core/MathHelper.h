@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <float.h>
 
+#include <vector>
+
 class RVec3;
 
 #define FLT_EQUAL(a,b)			(fabsf((a)-(b))<FLT_EPSILON)

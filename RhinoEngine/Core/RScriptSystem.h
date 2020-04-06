@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "../lua5.3/lua.h"
+
 class RSceneObject;
 
 enum ScriptParamType

@@ -6,6 +6,11 @@
 
 #pragma once
 
+#include "Core/CoreTypes.h"
+#include "Core/RSingleton.h"
+
+struct ID3D11InputLayout;
+
 #define VERTEX_TYPE_BEGIN(v) struct v { static const char* GetVertexTypeName() { return #v; }
 #define VERTEX_TYPE_END };
 #define VERTEX_TYPE_DECLARE_LEXICOGRAPHICAL_COMPARE(v)	\

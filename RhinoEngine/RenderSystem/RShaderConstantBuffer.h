@@ -10,6 +10,7 @@
 #include "../Shaders/ConstBufferPS.h"
 
 #include "D3DUtil.h"
+#include "RRenderSystem.h"
 
 enum EConstantBufferShaderType
 {

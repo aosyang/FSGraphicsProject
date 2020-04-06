@@ -15,6 +15,8 @@
 #include "RShaderManager.h"
 #include "RVertexDeclaration.h"
 
+#include <d3dcompiler.h>
+
 
 struct PP_QUAD
 {

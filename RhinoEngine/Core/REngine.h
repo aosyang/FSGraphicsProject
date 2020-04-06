@@ -8,6 +8,8 @@
 #include "RTimer.h"
 #include "RSingleton.h"
 
+#include <Windows.h>
+
 class IApp;
 
 class REngine : public RSingleton<REngine>

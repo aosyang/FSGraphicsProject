@@ -3,17 +3,27 @@
 //
 // 
 //=============================================================================
-#include "Rhino.h"
 
 #include "REngine.h"
 #include "Scene/RSceneManager.h"
+#include "Scene/RSceneComponentFactory.h"
 
 #include "Navigation/RNavigationSystem.h"
 #include "Physics/RPhysicsEngine.h"
 
+#include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
-#include "Scene/RSceneComponentFactory.h"
+
+#include "RenderSystem/RRenderSystem.h"
+#include "RenderSystem/RShaderManager.h"
+#include "RenderSystem/RDebugRenderer.h"
+#include "RenderSystem/RPostProcessorManager.h"
+#include "Resource/RResourceManager.h"
+#include "RScriptSystem.h"
+#include "RInput.h"
+#include "IApp.h"
+
 
 static TCHAR szWindowClass[] = _T("rhinoapp");
 

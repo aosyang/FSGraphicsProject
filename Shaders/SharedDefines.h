@@ -5,6 +5,7 @@
 #ifdef __cplusplus
 	#pragma once
 	#include "Core/RVector.h"
+	#include "Core/RMatrix.h"
 	typedef unsigned int		uint;
 	typedef RVec2				float2;
 	typedef RVec3				float3;

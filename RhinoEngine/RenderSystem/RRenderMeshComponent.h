@@ -10,6 +10,8 @@
 #include "RRenderSystemTypes.h"
 #include "RMaterial.h"
 
+class RMesh;
+
 struct PendingAssignedMaterial
 {
 	UINT		Index;
