@@ -3,9 +3,11 @@
 //
 // 
 //=============================================================================
-#include "Rhino.h"
 
 #include "RShadowMap.h"
+
+#include "D3DUtil.h"
+#include "RRenderSystem.h"
 
 RShadowMap::RShadowMap()
 	: m_RenderTargetBuffer(nullptr)

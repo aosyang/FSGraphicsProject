@@ -4,13 +4,15 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RRigidBodyComponent.h"
 
 #include "RPhysicsPrivate.h"
 #include "RPhysicsEngine.h"
+
 #include "Scene/RSceneObject.h"
+#include "Scene/RSMeshObject.h"
+
+#include "RenderSystem/RMesh.h"
 
 RRigidBodyComponent::RRigidBodyComponent(RSceneObject* InOwner)
 	: Base(InOwner)

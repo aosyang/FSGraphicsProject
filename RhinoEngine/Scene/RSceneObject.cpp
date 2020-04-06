@@ -4,11 +4,14 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RSceneObject.h"
+
 #include "tinyxml2/tinyxml2.h"
 #include "RSceneComponentFactory.h"
+
+#include "Core/RScriptSystem.h"
+#include "Core/REngine.h"
+#include "Scene/RScene.h"
 
 RSceneObject::RSceneObject(const RConstructingParams& Params)
 	: m_Scene(Params.Scene)

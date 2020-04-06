@@ -6,7 +6,10 @@
 
 #pragma once
 
-#include "../lua5.3/lua.h"
+#include "Core/CoreTypes.h"
+#include "RSingleton.h"
+
+#include "../lua5.3/lua.hpp"
 
 class RSceneObject;
 

@@ -6,7 +6,8 @@
 
 #pragma once
 
-#include "Rhino.h"
+#include "RRenderSystem.h"
+#include "RMeshElement.h"
 
 class RText : public IOverlayRenderable
 {

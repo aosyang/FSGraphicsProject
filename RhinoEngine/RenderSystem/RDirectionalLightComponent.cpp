@@ -4,9 +4,15 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RDirectionalLightComponent.h"
+
+#include "Scene/RSceneObject.h"
+#include "Scene/RCamera.h"
+
+#include "RRenderSystem.h"
+#include "RShaderConstantBuffer.h"
+#include "RDebugRenderer.h"
+
 #include "tinyxml2/tinyxml2.h"
 
 IMPLEMENT_SCENE_COMPONENT(RDirectionalLightComponent);

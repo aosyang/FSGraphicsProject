@@ -3,9 +3,14 @@
 //
 // 
 //=============================================================================
-#include "Rhino.h"
 
 #include "RScriptedBehavior.h"
+
+#include "Core/REngine.h"
+#include "Core/RScriptSystem.h"
+#include "Scene/RSceneObject.h"
+
+#include "../lua5.3/lua.hpp"
 
 
 static int ScriptFunc_MoveTo(lua_State* state)

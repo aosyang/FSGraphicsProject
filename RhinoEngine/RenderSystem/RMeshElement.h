@@ -9,6 +9,8 @@
 
 #include <d3d11.h>
 
+class RSerializer;
+
 enum MeshElementFlag
 {
 	MEF_Skinned = 1 << 0,

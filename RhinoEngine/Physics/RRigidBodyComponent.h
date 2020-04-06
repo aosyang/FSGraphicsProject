@@ -9,6 +9,7 @@
 #include "Scene/RSceneComponent.h"
 
 struct RPhysicsObjectContext;
+class RMesh;
 
 class RRigidBodyComponent : public RSceneComponent
 {

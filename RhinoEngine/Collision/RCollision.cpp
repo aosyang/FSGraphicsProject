@@ -4,8 +4,6 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RCollision.h"
 
 RPlane::RPlane(const RVec3& va, const RVec3& vb, const RVec3& vc)

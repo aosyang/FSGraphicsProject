@@ -4,8 +4,6 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RResourceContainer.h"
 
 #include <mutex>

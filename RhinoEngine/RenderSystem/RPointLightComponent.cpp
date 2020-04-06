@@ -4,9 +4,14 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RPointLightComponent.h"
+
+#include "RRenderSystem.h"
+#include "RShaderConstantBuffer.h"
+#include "RDebugRenderer.h"
+
+#include "Scene/RSceneObject.h"
+
 #include "tinyxml2/tinyxml2.h"
 
 IMPLEMENT_SCENE_COMPONENT(RPointLightComponent);

@@ -4,10 +4,7 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RColor.h"
-
 
 RColor RColor::Red(1.0f, 0.0f, 0.0f);
 RColor RColor::Green(0.0f, 1.0f, 0.0f);

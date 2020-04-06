@@ -3,7 +3,12 @@
 //
 // Quaternion class
 //=============================================================================
+
 #pragma once
+
+#include "RVector.h"
+
+#include <winerror.h>	// FORCEINLINE
 
 class RMatrix3;
 

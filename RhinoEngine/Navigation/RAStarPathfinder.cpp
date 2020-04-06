@@ -4,10 +4,11 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RAStarPathfinder.h"
+
 #include "RNavMeshData.h"
+#include "Core/RLog.h"
+#include "Core/StdHelper.h"
 
 RAStarSearchData::RAStarSearchData(const RNavMeshData* InNavMeshData)
 	: NavMeshData(InNavMeshData)

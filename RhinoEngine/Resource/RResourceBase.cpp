@@ -3,9 +3,10 @@
 //
 // Render resource interface class implementation
 //=============================================================================
-#include "Rhino.h"
 
 #include "RResourceBase.h"
+
+#include "RResourceManager.h"
 
 
 RResourceBase::RResourceBase(const std::string& path)

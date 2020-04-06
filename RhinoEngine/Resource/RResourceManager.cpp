@@ -4,10 +4,13 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RResourceManager.h"
+
 #include "RFbxMeshLoader.h"
+#include "RenderSystem/RTexture.h"
+#include "RenderSystem/RMesh.h"
+
+#include "Core/RLog.h"
 
 #include <thread>
 #include <mutex>

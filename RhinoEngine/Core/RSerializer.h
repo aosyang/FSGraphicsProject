@@ -6,7 +6,9 @@
 
 #pragma once
 
-enum class ESerializeMode : UINT8
+#include "Core/CoreTypes.h"
+
+enum class ESerializeMode : uint8_t
 {
 	Read,
 	Write,

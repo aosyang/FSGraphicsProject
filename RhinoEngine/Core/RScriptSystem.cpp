@@ -4,9 +4,15 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
 #include "RScriptSystem.h"
+
+#include "Scene/RSceneObject.h"
+
 #include "Script/RScriptedBehavior.h"
+#include "RLog.h"
+
+#include "../lua5.3/lualib.h"
+#include "../lua5.3/lauxlib.h"
 
 void print_error(lua_State* state) {
 	// The error message is on top of the stack.

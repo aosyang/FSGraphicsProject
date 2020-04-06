@@ -6,6 +6,11 @@
 
 #pragma once
 
+#include "Core/CoreTypes.h"
+#include "RenderSystem/RVertexDeclaration.h"
+
+class RMesh;
+
 class RFbxMeshLoader
 {
 public:

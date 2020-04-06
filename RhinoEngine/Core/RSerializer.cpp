@@ -4,8 +4,6 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RSerializer.h"
 
 RSerializer::~RSerializer()

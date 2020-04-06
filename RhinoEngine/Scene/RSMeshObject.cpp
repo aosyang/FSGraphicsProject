@@ -4,8 +4,14 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
 #include "RSMeshObject.h"
+
+#include "RScene.h"
+#include "RenderSystem/RMesh.h"
+#include "RenderSystem/RRenderSystem.h"
+
+#include "Resource/RResourceManager.h"
+#include "Core/RFileUtil.h"
 
 #include "tinyxml2/tinyxml2.h"
 

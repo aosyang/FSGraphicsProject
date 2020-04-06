@@ -4,9 +4,9 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RNavigationSystem.h"
+
+#include "RenderSystem/RDebugRenderer.h"
 
 
 const RVec3 RNavigationSystem::InvalidPosition(FLT_MAX, FLT_MAX, FLT_MAX);

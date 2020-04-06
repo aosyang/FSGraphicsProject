@@ -6,6 +6,9 @@
 #pragma once
 
 #include "Core/CoreTypes.h"
+#include "Core/RSerializer.h"
+
+class RMesh;
 
 enum AnimationBitFlag
 {

@@ -4,11 +4,12 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RNavMeshData.h"
 #include "RFunnelPathProcessor.h"
 #include "RNavigationSystem.h"
+
+#include "RenderSystem/RDebugRenderer.h"
+#include "Core/RLog.h"
 
 const RVec3 NavMeshPointData::InvalidPosition(FLT_MAX, FLT_MAX, FLT_MAX);
 

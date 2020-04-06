@@ -4,9 +4,14 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RSkybox.h"
+
+#include "Resource/RResourceManager.h"
+#include "RenderSystem/RShaderManager.h"
+#include "RenderSystem/RRenderSystem.h"
+#include "RenderSystem/RTexture.h"
+
+#include "Core/RLog.h"
 
 RSkybox::RSkybox()
 	: m_SkyboxTexture(nullptr), m_SkyboxIL(nullptr)

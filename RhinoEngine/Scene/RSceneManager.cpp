@@ -4,8 +4,6 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RSceneManager.h"
 
 void RSceneManager::Initialize()

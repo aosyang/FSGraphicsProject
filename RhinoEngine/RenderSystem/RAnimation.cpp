@@ -4,8 +4,9 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
 #include "RAnimation.h"
+
+#include "RMesh.h"
 
 
 RAnimationPlayer::RAnimationPlayer()

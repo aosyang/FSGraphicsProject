@@ -4,8 +4,10 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
 #include "RTransform.h"
+
+#include "Core/CoreTypes.h"
+#include "Core/StdHelper.h"
 
 RTransform RTransform::IDENTITY = RTransform();
 

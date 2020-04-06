@@ -9,6 +9,8 @@
 #include "RAabb.h"
 #include "Collision\RCollision.h"
 
+struct RPlane;
+
 class RRay
 {
 public:

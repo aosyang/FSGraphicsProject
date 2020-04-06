@@ -5,7 +5,7 @@
 //=============================================================================
 #pragma once
 
-#include "../Core/RVector.h"
+#include "Core/CoreTypes.h"
 
 /// 3D plane
 struct RPlane
@@ -55,7 +55,7 @@ struct RFrustum
 };
 
 /// Result of testing geometry against a plane
-enum class EPlaneSpace : UINT8
+enum class EPlaneSpace : uint8_t
 {
 	Front,
 	Back,

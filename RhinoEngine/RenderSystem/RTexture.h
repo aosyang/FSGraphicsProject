@@ -6,6 +6,10 @@
 
 #pragma once
 
+#include "Resource/RResourceBase.h"
+
+struct ID3D11ShaderResourceView;
+
 class RTexture : public RResourceBase
 {
 	DECLARE_RUNTIME_TYPE(RTexture, RResourceBase)

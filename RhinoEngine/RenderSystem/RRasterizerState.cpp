@@ -4,11 +4,10 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RRasterizerState.h"
 
 #include "RRenderSystem.h"
+#include "Core/RLog.h"
 
 bool operator==(const D3D11_RASTERIZER_DESC& Lhs, const D3D11_RASTERIZER_DESC& Rhs)
 {

@@ -4,18 +4,20 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RPostProcessorManager.h"
 
 #include "D3DCommonPrivate.h"
 
-#include "Core/RVector.h"
+#include "Core/CoreTypes.h"
+#include "Core/RFileUtil.h"
+
 #include "RRenderSystem.h"
 #include "RShaderManager.h"
 #include "RVertexDeclaration.h"
 
 #include <d3dcompiler.h>
+#include "D3DUtil.h"
+#include "Core/RLog.h"
 
 
 struct PP_QUAD

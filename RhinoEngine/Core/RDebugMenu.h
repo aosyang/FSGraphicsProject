@@ -6,6 +6,10 @@
 
 #pragma once
 
+#include "RenderSystem/RText.h"
+
+#include "Core/CoreTypes.h"
+
 class RDebugMenu : public RText
 {
 public:

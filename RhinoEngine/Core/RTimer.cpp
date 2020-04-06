@@ -3,9 +3,10 @@
 //
 // 
 //=============================================================================
-#include "Rhino.h"
 
 #include "RTimer.h"
+
+#include <Windows.h>	// QueryPerformanceFrequency, QueryPerformanceCounter
 
 RTimer::RTimer()
 	: m_SecondsPerCount(0.0), m_DeltaTime(-1.0), m_BaseTime(0),

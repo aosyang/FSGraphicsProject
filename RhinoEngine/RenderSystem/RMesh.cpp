@@ -4,10 +4,17 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
 #include "RMesh.h"
+
 #include "Resource/RFbxMeshLoader.h"
+#include "Resource/RResourceManager.h"
+#include "RAnimation.h"
+#include "RTexture.h"
+
+#include "Core/RLog.h"
+
 #include "tinyxml2/tinyxml2.h"
+#include "D3DUtil.h"
 
 // Whether to export .fbx as .rmesh after loading
 #define EXPORT_FBX_AS_BINARY_MESH 1

@@ -4,9 +4,10 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RDebugRenderBuffer.h"
+
+#include "RShaderManager.h"
+#include "RShaderConstantBuffer.h"
 
 RDebugRenderBuffer::RDebugRenderBuffer()
 {

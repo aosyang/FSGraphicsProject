@@ -4,9 +4,15 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RFbxMeshLoader.h"
+
+#include "RenderSystem/RAnimation.h"
+#include "RenderSystem/RMaterial.h"
+#include "RenderSystem/RMeshElement.h"
+
+#include "Core/RLog.h"
+#include "RResourceManager.h"
+#include "RenderSystem/RMesh.h"
 
 #include <fbxsdk.h>
 

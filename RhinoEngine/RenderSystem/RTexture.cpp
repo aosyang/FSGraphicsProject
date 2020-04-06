@@ -4,12 +4,19 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RTexture.h"
+
+#include "RRenderSystem.h"
+
+#include "Core/RFileUtil.h"
+#include "Core/RLog.h"
+
 #include "D3DCommonPrivate.h"
+#include "D3DUtil.h"
+
 #include "tinyxml2/tinyxml2.h"
 #include "hdrloader.h"
+#include "DDSTextureLoader.h"
 
 const std::string RTexture::InternalTextureName("[Internal]");
 

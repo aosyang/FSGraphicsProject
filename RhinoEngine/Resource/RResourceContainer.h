@@ -6,7 +6,10 @@
 
 #pragma once
 
+#include "Core/CoreTypes.h"
 #include "Core/StdHelper.h"
+
+class RResourceBase;
 
 // Case-insensitive string comparison
 // Returns: 0 if both strings are equal;

@@ -4,9 +4,12 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RText.h"
+
+#include "Resource/RResourceManager.h"
+#include "RVertexDeclaration.h"
+#include "RShaderManager.h"
+#include "RTexture.h"
 
 
 RText::RText()

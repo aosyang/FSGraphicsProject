@@ -4,11 +4,12 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RFunnelPathProcessor.h"
 
 #include "RNavigationSystem.h"
+
+#include "RenderSystem/RDebugRenderer.h"
+#include "Core/RLog.h"
 
 namespace
 {

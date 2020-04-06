@@ -4,16 +4,21 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RNavMeshGenerator.h"
+
 #include "Core/RAabb.h"
 #include "RenderSystem/RDebugRenderer.h"
 
 #include "Scene/RScene.h"
+#include "Scene/RSceneObject.h"
+#include "Scene/RSMeshObject.h"
+
 #include "RRegionData.h"
 #include "RNavigationSystem.h"
 #include "RNavMeshRegionSimplifier.h"
+
+#include "Core/RInput.h"
+#include "Core/RLog.h"
 
 
 namespace

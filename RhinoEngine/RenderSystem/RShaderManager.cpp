@@ -4,10 +4,16 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RShaderManager.h"
+
+#include "RRenderSystem.h"
+
+#include "Core/RFileUtil.h"
+#include "Core/RLog.h"
+#include "Core/StdHelper.h"
+
 #include "D3DCommonPrivate.h"
+#include "D3DUtil.h"
 #include <d3dcompiler.h>
 
 struct RShaderCompileOption

@@ -4,8 +4,9 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
 #include "RDebugMenu.h"
+
+#include "RInput.h"
 
 RDebugMenu::RDebugMenu()
 	: m_SelMenu(0), m_bEnabled(true)

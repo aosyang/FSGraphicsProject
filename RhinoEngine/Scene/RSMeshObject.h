@@ -7,6 +7,10 @@
 
 #include "RSceneObject.h"
 
+class RMesh;
+class RMaterial;
+struct RShader;
+
 namespace tinyxml2
 {
 	class XMLDocument;

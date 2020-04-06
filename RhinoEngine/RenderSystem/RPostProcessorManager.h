@@ -6,6 +6,11 @@
 
 #pragma once
 
+#include "Core/RSingleton.h"
+#include "RMeshElement.h"
+
+struct ID3D11PixelShader;
+
 struct RPostProcessingEffect
 {
 	RPostProcessingEffect(ID3D11PixelShader* InShader)

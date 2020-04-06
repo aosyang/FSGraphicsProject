@@ -4,8 +4,6 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RSceneComponent.h"
 
 RSceneComponent::RSceneComponent(RSceneObject* InOwner)

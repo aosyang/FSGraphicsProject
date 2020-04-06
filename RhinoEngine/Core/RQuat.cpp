@@ -4,9 +4,8 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RQuat.h"
+
 #include "RMatrix.h"
 
 RQuat RQuat::IDENTITY(1.0f, 0.0f, 0.0f, 0.0f);

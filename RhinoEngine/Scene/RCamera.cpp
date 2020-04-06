@@ -4,8 +4,10 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
 #include "RCamera.h"
+
+#include "RScene.h"
+#include "RenderSystem/RRenderSystem.h"
 
 IMPLEMENT_SCENE_OBJECT(RCamera);
 

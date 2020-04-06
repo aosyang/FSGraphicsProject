@@ -4,7 +4,6 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
 #include "RAabb.h"
 
 #include <float.h>
@@ -158,19 +157,19 @@ RVec3 RAabb::TestDynamicCollisionWithAabb(const RVec3& moveVec, const RAabb& aab
 	if (tx >= 0 && tx >= ty && tx >= tz)
 	{
 		float s = FLT_SGN(newVec.X());
-		newVec.SetX(s * max(fabs(newVec.X() * tx) - tolerance, 0.0f));
+		newVec.SetX(s * RMath::Max(fabs(newVec.X() * tx) - tolerance, 0.0f));
 		return newVec;
 	}
 	else if (ty >= 0 && ty >= tx && ty >= tz)
 	{
 		float s = FLT_SGN(newVec.Y());
-		newVec.SetY(s * max(fabs(newVec.Y() * ty) - tolerance, 0.0f));
+		newVec.SetY(s * RMath::Max(fabs(newVec.Y() * ty) - tolerance, 0.0f));
 		return newVec;
 	}
 	else if (tz >= 0 && tz >= tx && tz >= ty)
 	{
 		float s = FLT_SGN(newVec.Z());
-		newVec.SetZ(s * max(fabs(newVec.Z() * tz) - tolerance, 0.0f));
+		newVec.SetZ(s * RMath::Max(fabs(newVec.Z() * tz) - tolerance, 0.0f));
 		return newVec;
 	}
 

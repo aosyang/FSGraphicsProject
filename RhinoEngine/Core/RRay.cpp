@@ -4,8 +4,6 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RRay.h"
 
 RRay::RRay()
@@ -44,8 +42,8 @@ bool RRay::TestIntersectionWithAabb(const RAabb& aabb, float* t/*=nullptr*/) con
 		float tx1 = (aabb.pMin.X() - Origin.X()) / Direction.X();
 		float tx2 = (aabb.pMax.X() - Origin.X()) / Direction.X();
 
-		tmin = max(tmin, min(tx1, tx2));
-		tmax = min(tmax, max(tx1, tx2));
+		tmin = RMath::Max(tmin, RMath::Min(tx1, tx2));
+		tmax = RMath::Min(tmax, RMath::Max(tx1, tx2));
 	}
 
 	if (!FLT_EQUAL_ZERO(Direction.Y()))
@@ -53,8 +51,8 @@ bool RRay::TestIntersectionWithAabb(const RAabb& aabb, float* t/*=nullptr*/) con
 		float ty1 = (aabb.pMin.Y() - Origin.Y()) / Direction.Y();
 		float ty2 = (aabb.pMax.Y() - Origin.Y()) / Direction.Y();
 
-		tmin = max(tmin, min(ty1, ty2));
-		tmax = min(tmax, max(ty1, ty2));
+		tmin = RMath::Max(tmin, RMath::Min(ty1, ty2));
+		tmax = RMath::Min(tmax, RMath::Max(ty1, ty2));
 	}
 
 	if (!FLT_EQUAL_ZERO(Direction.Z()))
@@ -62,8 +60,8 @@ bool RRay::TestIntersectionWithAabb(const RAabb& aabb, float* t/*=nullptr*/) con
 		float tz1 = (aabb.pMin.Z() - Origin.Z()) / Direction.Z();
 		float tz2 = (aabb.pMax.Z() - Origin.Z()) / Direction.Z();
 
-		tmin = max(tmin, min(tz1, tz2));
-		tmax = min(tmax, max(tz1, tz2));
+		tmin = RMath::Max(tmin, RMath::Min(tz1, tz2));
+		tmax = RMath::Min(tmax, RMath::Max(tz1, tz2));
 	}
 
 	if (tmax > tmin)

@@ -4,10 +4,10 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RNavMeshDebugger.h"
+
 #include "RNavMeshGenerator.h"
+#include "RenderSystem/RDebugRenderer.h"
 
 RNavMeshDebugger::RNavMeshDebugger()
 	: NavMeshGen(nullptr)

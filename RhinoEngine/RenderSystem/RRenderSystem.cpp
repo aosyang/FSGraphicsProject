@@ -3,14 +3,27 @@
 //
 // 
 //=============================================================================
-#include "Rhino.h"
 
 #include "RRenderSystem.h"
 
 #include "D3DCommonPrivate.h"
 #include "RDirectionalLightComponent.h"
 
+#include "RVertexDeclaration.h"
+#include "RShaderConstantBuffer.h"
+#include "RShaderManager.h"
+#include "RDebugRenderer.h"
+
 #include "RRasterizerState.h"
+
+#include "RTexture.h"
+
+#include "Scene/RScene.h"
+#include "Scene/RCamera.h"
+
+#include "Core/CoreTypes.h"
+#include "Core/RLog.h"
+#include "Core/StdHelper.h"
 
 ID3D11DepthStencilView* RRenderSystem::DefaultDepthStencilView = nullptr;
 ID3D11RenderTargetView* RRenderSystem::DefaultRenderTargetView = nullptr;

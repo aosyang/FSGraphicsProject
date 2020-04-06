@@ -7,8 +7,9 @@
 
 #include "RVector.h"
 #include "RQuat.h"
+#include "RMatrix.h"
 
-enum class ETransformSpace : UINT8
+enum class ETransformSpace : uint8_t
 {
 	Local,
 	World,
