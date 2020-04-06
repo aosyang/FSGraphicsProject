@@ -4,10 +4,12 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RAINavigationComponent.h"
+
 #include "RNavigationSystem.h"
+#include "Scene/RSceneObject.h"
+
+#include "RenderSystem/RDebugRenderer.h"
 
 RAINavigationComponent::RAINavigationComponent(RSceneObject* InOwner)
 	: Base(InOwner)

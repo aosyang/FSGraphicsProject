@@ -8,6 +8,8 @@
 
 #include "RMeshElement.h"
 
+struct RShader;
+
 namespace RVertexType
 {
 	struct PositionColor;

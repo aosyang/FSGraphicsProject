@@ -4,9 +4,10 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "MathHelper.h"
+
+#include "Core/CoreTypes.h"
+#include "RLog.h"
 
 #define DEBUG_CHECK_NAN 1
 

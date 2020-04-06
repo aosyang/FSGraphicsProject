@@ -42,6 +42,7 @@
 #include "Core/RAabb.h"
 #include "Core/RRay.h"
 
+#include "Core/RDelegate.h"
 
 template<class T>
 inline void HashCombine(size_t& HashValue, const T& Element)

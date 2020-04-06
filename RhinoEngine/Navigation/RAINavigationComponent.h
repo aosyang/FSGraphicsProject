@@ -8,6 +8,8 @@
 
 #include "Scene/RSceneComponent.h"
 
+#include "Core/CoreTypes.h"
+
 enum class EAINavState : UINT8
 {
 	Idle,

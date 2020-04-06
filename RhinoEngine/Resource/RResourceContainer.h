@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "Core/StdHelper.h"
+
 // Case-insensitive string comparison
 // Returns: 0 if both strings are equal;
 //			-1 if string 1 is smaller;

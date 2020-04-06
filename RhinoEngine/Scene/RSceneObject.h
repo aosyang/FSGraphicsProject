@@ -7,6 +7,7 @@
 
 #include "RSceneComponent.h"
 #include "Core/RRuntimeTypeObject.h"
+#include "RenderSystem/RRenderSystemTypes.h"
 
 class RScene;
 class RSceneComponent;

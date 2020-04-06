@@ -3,9 +3,13 @@
 //
 // 
 //=============================================================================
-#include "Rhino.h"
 
 #include "RRenderMeshComponent.h"
+
+#include "RRenderSystem.h"
+#include "RMesh.h"
+#include "Scene/RSceneObject.h"
+#include "RShaderConstantBuffer.h"
 
 RRenderMeshComponent::RRenderMeshComponent(RSceneObject* InOwner)
 	: Base(InOwner),

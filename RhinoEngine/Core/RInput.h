@@ -5,6 +5,7 @@
 //=============================================================================
 #pragma once
 
+#include "Core/CoreTypes.h"
 #include "RSingleton.h"
 
 class RKeyStateModifier;

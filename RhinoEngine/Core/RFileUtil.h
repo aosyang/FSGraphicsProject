@@ -5,8 +5,10 @@
 //=============================================================================
 #pragma once
 
+#include "Core/CoreTypes.h"
+
 // Result for comparing timestamps of two files
-enum class ETimestampComparison : UINT8
+enum class ETimestampComparison : uint8_t
 {
 	InvalidFile,				// One or both files are invalid
 	EarlierFirst,				// The first file is earlier than the second

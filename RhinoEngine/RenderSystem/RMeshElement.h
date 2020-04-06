@@ -7,6 +7,8 @@
 
 #include "RVertexDeclaration.h"
 
+#include <d3d11.h>
+
 enum MeshElementFlag
 {
 	MEF_Skinned = 1 << 0,

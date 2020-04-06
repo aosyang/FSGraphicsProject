@@ -4,11 +4,13 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "RMaterial.h"
 
 #include "tinyxml2/tinyxml2.h"
+#include "Core/RSerializer.h"
+#include "Resource/RResourceManager.h"
+#include "RShaderManager.h"
+#include "RTexture.h"
 
 
 const char* RMaterial::KeyName_BlendMode = "BlendMode";

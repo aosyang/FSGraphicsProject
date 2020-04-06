@@ -4,8 +4,10 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
 #include "RLog.h"
+
+#include "Core/CoreTypes.h"
+
 
 RLogOutputTargets::RLogOutputTargets()
 {

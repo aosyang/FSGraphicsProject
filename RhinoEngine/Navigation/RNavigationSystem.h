@@ -10,6 +10,8 @@
 #include "RNavMeshData.h"
 #include "RNavMeshDebugger.h"
 
+#include "Core/RSingleton.h"
+
 enum ENavMeshDebugFlag
 {
 	NavMeshDebug_DrawNavMesh	= 1 << 0,

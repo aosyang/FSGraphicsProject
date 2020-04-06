@@ -6,6 +6,7 @@
 #pragma once
 
 #include "RRenderSystemTypes.h"
+#include "Scene/RSceneComponent.h"
 
 class RCamera;
 struct ID3D11ShaderResourceView;

@@ -4,7 +4,9 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
+#include "RFileUtil.h"
+
+#include "RLog.h"
 
 // Win32 file system APIs
 #include <Shlwapi.h>

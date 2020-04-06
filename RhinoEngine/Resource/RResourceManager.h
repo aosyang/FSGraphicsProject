@@ -9,6 +9,10 @@
 #include "RResourceContainer.h"
 
 #include "Core/RDelegate.h"
+#include "Core/RFileUtil.h"
+
+class RMesh;
+struct ID3D11ShaderResourceView;
 
 namespace std
 {

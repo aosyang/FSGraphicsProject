@@ -3,9 +3,9 @@
 //
 // 
 //=============================================================================
-#include "Rhino.h"
 
 #include "RInput.h"
+#include <Windows.h>
 
 
 RInputSystem::RInputSystem()

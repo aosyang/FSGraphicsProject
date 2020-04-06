@@ -4,10 +4,10 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
-
 #include "ILight.h"
+
 #include "tinyxml2/tinyxml2.h"
+#include "Scene/RSceneObject.h"
 
 RLight::RLight(RSceneObject* InOwner) 
 	: Base(InOwner)
