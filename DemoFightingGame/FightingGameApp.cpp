@@ -8,7 +8,6 @@
 
 #include "AIBehavior_Fighter.h"
 #include "AIBehavior_Roamer.h"
-#include "Navigation/RNavigationSystem.h"
 
 #include "PlayerAssets.h"
 

@@ -6,9 +6,6 @@
 
 #include "AIBehavior_Fighter.h"
 
-#include "Navigation/RNavigationSystem.h"
-#include "Navigation/RAINavigationComponent.h"
-
 AIBehavior_Fighter::AIBehavior_Fighter(RSceneObject* InOwner)
 	: Base(InOwner)
 	, AttackTarget(nullptr)

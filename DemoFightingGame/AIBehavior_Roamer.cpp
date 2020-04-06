@@ -6,9 +6,6 @@
 
 #include "AIBehavior_Roamer.h"
 
-#include "Navigation/RNavigationSystem.h"
-#include "Navigation/RAINavigationComponent.h"
-
 namespace
 {
 	const RAabb& GetStaticSceneBounds(RScene* Scene)

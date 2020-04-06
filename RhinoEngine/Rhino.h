@@ -16,8 +16,6 @@
 #include "Core/CoreTypes.h"
 
 // DirectX 3D
-#include <d3d11.h>
-#include "RenderSystem/D3DUtil.h"
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "dxguid.lib")			// For D3D11 shader reflection
 
@@ -25,10 +23,6 @@
 
 #include "Core/RDelegate.h"
 #include "Core/StdHelper.h"
-
-class RMesh;
-class RTexture;
-class RResourceBase;
 
 // Engine Classes
 #include "Collision/RCollision.h"
@@ -63,6 +57,9 @@ class RResourceBase;
 
 #include "Physics/RPhysicsEngine.h"
 #include "Physics/RRigidBodyComponent.h"
+
+#include "Navigation/RNavigationSystem.h"
+#include "Navigation/RAINavigationComponent.h"
 
 #include "Core/RDebugMenu.h"
 #include "Core/REngine.h"
