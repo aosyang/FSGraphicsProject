@@ -8,6 +8,8 @@
 #include "RenderSystem/RMaterial.h"
 #include "RResourceContainer.h"
 
+#include "Core/RDelegate.h"
+
 namespace std
 {
 	class mutex;

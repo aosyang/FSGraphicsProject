@@ -5,6 +5,9 @@
 //=============================================================================
 #pragma once
 
+#include "RTimer.h"
+#include "RSingleton.h"
+
 class IApp;
 
 class REngine : public RSingleton<REngine>

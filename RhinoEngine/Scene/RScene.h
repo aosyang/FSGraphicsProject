@@ -6,9 +6,13 @@
 
 #pragma once
 
+#include "Core/CoreTypes.h"
+
 class RSceneObject;
 class RSMeshObject;
 class RMesh;
+class RCamera;
+struct RenderViewInfo;
 
 class RScene
 {

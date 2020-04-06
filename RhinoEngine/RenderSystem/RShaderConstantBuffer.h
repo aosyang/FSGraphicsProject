@@ -6,6 +6,11 @@
 
 #pragma once
 
+#include "../Shaders/ConstBufferVS.h"
+#include "../Shaders/ConstBufferPS.h"
+
+#include "D3DUtil.h"
+
 enum EConstantBufferShaderType
 {
 	CBST_VS	= 1 << 0,

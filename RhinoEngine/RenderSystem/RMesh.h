@@ -7,8 +7,12 @@
 
 #include "RShaderManager.h"
 #include "Resource/RResourceBase.h"
-#include "../../Shaders/ConstBufferVS.h"	// MAX_BONE_COUNT
+#include "../Shaders/ConstBufferVS.h"	// MAX_BONE_COUNT
+
 #include "RMaterial.h"
+#include "RMeshElement.h"
+
+class RAnimation;
 
 struct BoneMatrices
 {

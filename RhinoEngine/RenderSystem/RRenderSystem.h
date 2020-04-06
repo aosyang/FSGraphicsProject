@@ -9,6 +9,8 @@
 #include "RRenderMeshComponent.h"
 #include "BlendState.h"
 
+#include <d3d11.h>
+
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")
 
@@ -19,6 +21,8 @@ class RRasterizerState;
 
 class RLight;
 class IShadowCaster;
+
+struct ID3D11RenderTargetView;
 
 enum SamplerState
 {

@@ -307,8 +307,8 @@ void RShaderManager::CompileShader(const std::string& SourceName, const std::str
 	FindShaderIncludedFiles(ShaderBuffer, IncludeFiles);
 	IncludeFiles.push_back(SourceName);
 
-	// Remove the engine header file
-	StdRemove(IncludeFiles, "Rhino.h");
+	// Remove any engine header files
+	StdRemove(IncludeFiles, "Core/RVector.h");
 
 	if (StdContains(IncludeFiles, "BRDF.hlsli"))
 	{

@@ -4,10 +4,20 @@
 // 
 //=============================================================================
 
-#include "Rhino.h"
 #include "RScene.h"
 
+#include "RenderSystem/RRenderSystem.h"
+#include "RenderSystem/RShaderConstantBuffer.h"
+#include "RenderSystem/RMesh.h"
+#include "RenderSystem/ILight.h"
+
+#include "RSMeshObject.h"
+
+#include "Resource/RResourceManager.h"
+
 #include "../tinyxml2/tinyxml2.h"
+#include "Core/StdHelper.h"
+#include "Core/RFileUtil.h"
 
 // If set to 1, rotations saved in local files are in degrees instead of radians
 #define SAVE_ROTATION_IN_DEGREES 0

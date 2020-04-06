@@ -4,7 +4,7 @@
 
 #ifdef __cplusplus
 	#pragma once
-	#include "Rhino.h"
+	#include "Core/RVector.h"
 	typedef unsigned int		uint;
 	typedef RVec2				float2;
 	typedef RVec3				float3;

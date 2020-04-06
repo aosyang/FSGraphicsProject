@@ -43,9 +43,6 @@ class RResourceBase;
 #include "Core/RScriptSystem.h"
 #include "Core/RFileUtil.h"
 
-#include "../Shaders/ConstBufferVS.h"
-#include "../Shaders/ConstBufferPS.h"
-
 #include "Resource/RResourceManager.h"
 
 #include "RenderSystem/RVertexDeclaration.h"

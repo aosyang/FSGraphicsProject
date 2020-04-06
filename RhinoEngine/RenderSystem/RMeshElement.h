@@ -5,6 +5,8 @@
 //=============================================================================
 #pragma once
 
+#include "RVertexDeclaration.h"
+
 enum MeshElementFlag
 {
 	MEF_Skinned = 1 << 0,
