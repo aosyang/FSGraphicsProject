@@ -57,6 +57,8 @@ private:
 	float				TimeStuck;
 	float				StuckCheckRadius;
 	float				MaxTimeAllowedInStuck;
+
+	bool bApproachingGoal;
 };
 
 FORCEINLINE const RVec3& RAINavigationComponent::GetDesiredMoveDirection() const

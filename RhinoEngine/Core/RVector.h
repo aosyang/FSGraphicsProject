@@ -188,6 +188,12 @@ public:
 		return isnan(x) || isnan(y) || isnan(z);
 	}
 
+	// All components of vector are zero?
+	FORCEINLINE bool IsZero(float Tolerance = FLT_EPSILON) const
+	{
+		return fabs(x) < Tolerance && fabs(y) < Tolerance && fabs(z) < Tolerance;
+	}
+
 	FORCEINLINE std::string ToString() const
 	{
 		std::ostringstream StringStream;

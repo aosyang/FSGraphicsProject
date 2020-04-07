@@ -121,6 +121,12 @@ public:
 	/// Detach from parent object
 	void DetachFromParent();
 
+	/// Get the velocity of this object
+	virtual RVec3 GetVelocity() const;
+
+	/// Get the acceleration of motor. 0 = maximum acceleration applied
+	virtual float GetMotorAcceleration() const;
+
 	void IncreaseInternalTransformUpdateCounter();
 	void DecreaseInternalTransformUpdateCounter();
 

@@ -47,7 +47,10 @@ public:
 	RVec3 GetPhysicsVelocity() const;
 
 	/// Get the velocity of controller in unit/sec
-	RVec3 GetVelocity() const;
+	virtual RVec3 GetVelocity() const;
+
+	virtual float GetMotorAcceleration() const override;
+	void SetMotorAcceleration(float Acceleration);
 
 	/// Set the player's rotation in yaw angles
 	void SetPlayerRotation(float rot) { m_Rotation = rot; }
@@ -95,8 +98,15 @@ private:
 	const RVec3				StairOffset;
 
 	RVec3					m_MovementInput;
+	RVec3					m_DampedMovementInput;
+
+	// Direction the character is moving in from last non-zero input
+	RVec3					m_LastInputUnitDirection;
+	float					DampedYaw;
+
 	RVec3 PlannarMoveVector;
 	float MaxMovementSpeed;
+	float MotorAcceleration;
 
 	float	CapsuleRadius;
 	float	CapsuleHeight;

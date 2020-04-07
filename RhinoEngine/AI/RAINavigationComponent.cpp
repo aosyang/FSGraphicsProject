@@ -19,6 +19,7 @@ RAINavigationComponent::RAINavigationComponent(RSceneObject* InOwner)
 	, TimeStuck(0.0f)
 	, StuckCheckRadius(10.0f)
 	, MaxTimeAllowedInStuck(1.0f)
+	, bApproachingGoal(false)
 {
 
 }
@@ -37,8 +38,36 @@ void RAINavigationComponent::Update(float DeltaTime)
 
 		if (NavPath.size() > 0)
 		{
-			RVec3 MoveVector = NavPath[0] - AIPosition;
-			DesiredMoveDirection = MoveVector.GetNormalized2D();
+			const RVec3 VectorToGoal = NavPath[0] - AIPosition;
+			DesiredMoveDirection = VectorToGoal.GetNormalized2D();
+			float MotorAcceleration = GetOwner()->GetMotorAcceleration();
+
+			if (NavPath.size() == 1 && MotorAcceleration > 0.0f)
+			{
+				if (!bApproachingGoal)
+				{
+					// If we're moving toward the final point, slow down to approach the point
+					const float DistanceToGoal = VectorToGoal.Magnitude2D();
+
+					// Vt = V0 + at			: Vt = 0
+					// t = (Vt - V0) / a
+					float CurrentSpeed = GetOwner()->GetVelocity().Magnitude2D();
+					float TimeToGoal = CurrentSpeed / MotorAcceleration;
+
+					// S = V0 * t + 1/2 * a * t^2
+					float DecelerationDistance = CurrentSpeed * TimeToGoal + 0.5f * -MotorAcceleration * TimeToGoal * TimeToGoal;
+
+					if (DistanceToGoal <= DecelerationDistance)
+					{
+						bApproachingGoal = true;
+					}
+				}
+
+				if (bApproachingGoal)
+				{
+					DesiredMoveDirection = RVec3::Zero();
+				}
+			}
 
 			if (RVec3::SquaredDistance(LastAgentPosition, AIPosition) > RMath::Square(StuckCheckRadius))
 			{
@@ -51,7 +80,7 @@ void RAINavigationComponent::Update(float DeltaTime)
 				if (TimeStuck > MaxTimeAllowedInStuck)
 				{
 					// Agent is stuck. Invalidate the path and finish current path-finding
-					NavPath.clear();
+					StopMovement();
 					OnFinishedNavigation.Execute(EAINavResult::Failed);
 					TimeStuck = 0.0f;
 				}
@@ -59,6 +88,7 @@ void RAINavigationComponent::Update(float DeltaTime)
 		}
 		else
 		{
+			// No more path, stop now
 			OnFinishedNavigation.Execute(EAINavResult::Succeeded);
 			DesiredMoveDirection = RVec3::Zero();
 		}
@@ -67,6 +97,7 @@ void RAINavigationComponent::Update(float DeltaTime)
 
 bool RAINavigationComponent::RequestMoveTo(const RVec3& MoveTarget)
 {
+	bApproachingGoal = false;
 	return GNavigationSystem.QueryPath(GetOwner()->GetWorldPosition(), MoveTarget, NavPath);
 }
 

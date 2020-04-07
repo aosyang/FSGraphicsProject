@@ -55,6 +55,9 @@ namespace RMath
 	template<typename T>
 	const T& Min(const T& a, const T& b)						{ return (a < b) ? a : b; }
 
+	template<typename T>
+	T Sign(const T& val)										{ return val > T(0) ? T(1) : val < T(0) ? T(-1) : T(0); } 
+
 	FORCEINLINE float Lerp(float a, float b, float t)			{ return a + (b - a) * t; }
 
 	// Restrict a value to a given range [min, max] 

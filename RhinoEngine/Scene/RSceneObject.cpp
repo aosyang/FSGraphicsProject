@@ -239,6 +239,16 @@ void RSceneObject::DetachFromParent()
 	m_NodeTransform.Detach();
 }
 
+RVec3 RSceneObject::GetVelocity() const
+{
+	return RVec3::Zero();
+}
+
+float RSceneObject::GetMotorAcceleration() const
+{
+	return 0.0f;
+}
+
 void RSceneObject::IncreaseInternalTransformUpdateCounter()
 {
 	InternalTransformUpdateCounter++;

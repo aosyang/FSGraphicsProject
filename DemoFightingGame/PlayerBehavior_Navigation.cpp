@@ -82,36 +82,42 @@ void PlayerBehavior_Navigation::Update(FTGPlayerStateMachine* StateMachine, floa
 	float BlendFactor = GetRelevantAnimations(AnimRelevancyFactor, &Anim0, &Anim1);
 
 	float StartTime, EndTime, FrameRate;
-	if (Anim1 == nullptr)
-	{
-		StartTime = Anim0->GetStartTime();
-		EndTime = Anim0->GetEndTime();
-		FrameRate = Anim0->GetFrameRate();
-	}
-	else
-	{
-		StartTime = RMath::Lerp(Anim0->GetStartTime(), Anim1->GetStartTime(), BlendFactor);
-		EndTime = RMath::Lerp(Anim0->GetEndTime(), Anim1->GetEndTime(), BlendFactor);
-		FrameRate = RMath::Lerp(Anim0->GetFrameRate(), Anim1->GetFrameRate(), BlendFactor);
-	}
-	float Duration = EndTime - StartTime;
-	if (Duration > 0.0f)
-	{
-		float PlaybackProgress = RMath::Lerp(StartTime, EndTime, NormalizedPlaybackProgress);
-		PlaybackProgress += DeltaTime * FrameRate;
 
-		while (PlaybackProgress > EndTime)
+	// Sync two animations by progress
+	{
+		// The start time, end time and frame rate are blending results of two relevant animations
+		if (Anim1 == nullptr)
 		{
-			PlaybackProgress -= Duration;
+			StartTime = Anim0->GetStartTime();
+			EndTime = Anim0->GetEndTime();
+			FrameRate = Anim0->GetFrameRate();
+		}
+		else
+		{
+			StartTime = RMath::Lerp(Anim0->GetStartTime(), Anim1->GetStartTime(), BlendFactor);
+			EndTime = RMath::Lerp(Anim0->GetEndTime(), Anim1->GetEndTime(), BlendFactor);
+			FrameRate = RMath::Lerp(Anim0->GetFrameRate(), Anim1->GetFrameRate(), BlendFactor);
 		}
 
-		NormalizedPlaybackProgress = (PlaybackProgress - StartTime) / Duration;
+		float Duration = EndTime - StartTime;
+		if (Duration > 0.0f)
+		{
+			float PlaybackProgress = RMath::Lerp(StartTime, EndTime, NormalizedPlaybackProgress);
+			PlaybackProgress += DeltaTime * FrameRate;
+
+			while (PlaybackProgress > EndTime)
+			{
+				PlaybackProgress -= Duration;
+			}
+
+			NormalizedPlaybackProgress = (PlaybackProgress - StartTime) / Duration;
+		}
+		else
+		{
+			NormalizedPlaybackProgress = 0.0f;
+		}
+		assert(NormalizedPlaybackProgress >= 0.0f && NormalizedPlaybackProgress <= 1.0f);
 	}
-	else
-	{
-		NormalizedPlaybackProgress = 0.0f;
-	}
-	assert(NormalizedPlaybackProgress >= 0.0f && NormalizedPlaybackProgress <= 1.0f);
 }
 
 bool PlayerBehavior_Navigation::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices)

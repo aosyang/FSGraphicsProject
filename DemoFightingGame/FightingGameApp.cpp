@@ -88,6 +88,9 @@ bool FightingGameApp::Initialize()
 		m_Players[i] = DefaultScene->CreateSceneObjectOfType<PlayerControllerBase>();
 		if (m_Players[i])
 		{
+			// Better responsiveness in control
+			m_Players[i]->SetMotorAcceleration(1000.0f);
+
 			FTGPlayerStateMachine& StateMachine = m_Players[i]->GetStateMachine();
 			InitializePlayerAsset_Maid(m_Players[i]);
 

@@ -13,6 +13,28 @@
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
 #include "PlayerBehavior_Navigation.h"
 
+
+float TurnTowards_Rad(float From, float To, float Delta)
+{
+	while (From - To > PI)  { From -= 2.f * PI; }
+	while (From - To < -PI) { From += 2.f * PI; }
+	float Sign = RMath::Sign(To - From);
+
+	return From + RMath::Min(fabs(To - From), fabs(Delta)) * Sign;
+}
+
+float GetYawFromDirection_Rad(const RVec3 Direction)
+{
+	return atan2f(-Direction.X(), -Direction.Z());
+}
+
+float LerpAngle_Deg(float From, float To, float t)
+{
+	while (From - To > 180.0f)  { From -= 360.0f; }
+	while (From - To < -180.0f) { From += 360.0f; }
+	return From + (To - From) * RMath::Clamp(t, 0.0f, 1.0f);
+}
+
 class RKinematicCharacterController : public btKinematicCharacterController
 {
 public:
@@ -94,8 +116,12 @@ PlayerControllerBase::PlayerControllerBase(const RConstructingParams& Params)
 	: Base(Params)
 	, StairOffset(0.0f, 20.0f, 0.0f)
 	, m_MovementInput(0.0f, 0.0f, 0.0f)
+	, m_DampedMovementInput(0.0f, 0.0f, 0.0f)
+	, m_LastInputUnitDirection(0.0f, 0.0f, 0.0f)
+	, DampedYaw(PI)	// Note: The character is facing -Forward
 	, PlannarMoveVector(0.0f, 0.0f, 0.0f)
 	, MaxMovementSpeed(1.0f)
+	, MotorAcceleration(500.0f)
 	, CapsuleRadius(40.0f)
 	, CapsuleHeight(70.0f)
 	, m_Rotation(0.0f)
@@ -159,8 +185,46 @@ void PlayerControllerBase::UpdateController(float DeltaTime)
 {
 	PreUpdate(DeltaTime);
 
+#if 1
+	// Faster damping if movement input is non-zero
+	//const float DampingSpeed = (m_MovementInput.IsZero() ? 500.f : 1000.0f) * DeltaTime;
+	const float DampingSpeed = GetMotorAcceleration() * DeltaTime;
+
+	const float Magnitude = m_MovementInput.Magnitude();
+	float DampedMagnitude = m_DampedMovementInput.Magnitude();
+	const float SignMagnitude = RMath::Sign(Magnitude - DampedMagnitude);
+	DampedMagnitude += RMath::Min(fabs(DampedMagnitude - Magnitude), DampingSpeed) * SignMagnitude;
+
+	const RVec3 MoveDirection = m_MovementInput.GetNormalized2D();
+#if 0		// Rotation damping
+	float TargetYaw = MoveDirection.IsZero() ? DampedYaw : GetYawFromDirection_Rad(MoveDirection) + PI;
+
+	//RLog("Yaw from damped dir: %f - Target yaw: %f\n", DampedYaw, TargetYaw);
+
+	DampedYaw = TurnTowards_Rad(DampedYaw, TargetYaw, 10.0f * DeltaTime);
+	//RLog("Damped yaw: %f\n", DampedYaw);
+
+	const RVec3 DampedForward = RQuat::Euler(0.0f, DampedYaw, 0.0f) * RVec3(0, 0, 1);
+#else
+	const RVec3 DampedForward = MoveDirection.IsZero() ? m_LastInputUnitDirection : MoveDirection;
+#endif
+
+	m_DampedMovementInput = DampedForward * DampedMagnitude;
+	const RVec3 WorldPosition = GetWorldPosition() + RVec3(0.0f, 75.0f, 0.0f);
+	GDebugRenderer.DrawLine(WorldPosition, WorldPosition + m_LastInputUnitDirection * 100.0f, RColor::Cyan);
+	GDebugRenderer.DrawLine(WorldPosition, WorldPosition + DampedForward * 100.0f, RColor::Green);
+#else
+	// No damping
+	m_DampedMovementInput = m_MovementInput;
+#endif
+
+	if (!m_MovementInput.IsZero())
+	{
+		m_LastInputUnitDirection = m_MovementInput.GetNormalized2D();
+	}
+
 	// Note: Bullet physics requires a fixed input vector for character movements
-	UpdateMovement(DeltaTime, m_MovementInput);
+	UpdateMovement(DeltaTime, m_DampedMovementInput);
 	PostUpdate(DeltaTime);
 }
 
@@ -172,21 +236,6 @@ void PlayerControllerBase::PreUpdate(float DeltaTime)
 
 	//if (m_Behavior == BHV_Idle || m_Behavior == BHV_Run)
 	//	m_RootOffset = RVec3(0, 0, 0);
-}
-
-float LerpDegreeAngle(float from, float to, float t)
-{
-	while (from - to > 180.0f)
-	{
-		from -= 360.0f;
-	}
-
-	while (from - to < -180.0f)
-	{
-		from += 360.0f;
-	}
-
-	return from + (to - from) * RMath::Clamp(t, 0.0f, 1.0f);
 }
 
 void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 MoveVec)
@@ -203,7 +252,7 @@ void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 MoveVec)
 		if (SqrMagnitude > 0.0f)
 		{
 			RVec3 MoveDirection = PlannarMoveVector.GetNormalized();
-			m_Rotation = LerpDegreeAngle(m_Rotation, RAD_TO_DEG(atan2f(-MoveDirection.X(), -MoveDirection.Z())), 10.0f * DeltaTime);
+			m_Rotation = LerpAngle_Deg(m_Rotation, RAD_TO_DEG(atan2f(-MoveDirection.X(), -MoveDirection.Z())), 10.0f * DeltaTime);
 		}
 	}
 	else
@@ -294,6 +343,17 @@ RVec3 PlayerControllerBase::GetPhysicsVelocity() const
 RVec3 PlayerControllerBase::GetVelocity() const
 {
 	return GetPhysicsVelocity() * RPhysicsEngine::GetFixedFrameRate();
+}
+
+float PlayerControllerBase::GetMotorAcceleration() const
+{
+	// m/s^2
+	return MotorAcceleration;
+}
+
+void PlayerControllerBase::SetMotorAcceleration(float Acceleration)
+{
+	MotorAcceleration = Acceleration;
 }
 
 void PlayerControllerBase::SetPlayerFacing(const RVec3& Direction, bool bCheckMoveAllowed /*= true*/)
