@@ -52,10 +52,10 @@ public:
 	const RMaterial* GetMaterial(int index) const;
 	const std::vector<RMaterial*>& GetMaterials() const;
 
-	const std::vector<RMeshElement>& GetMeshElements() const;
+	const RMeshElement& GetMeshElement(int i) const;
 	int GetMeshElementCount() const;
 
-	void SetMeshElements(RMeshElement* meshElements, UINT numElement);
+	void SetMeshElements(std::vector<std::unique_ptr<RMeshElement>>&& Elements);
 
 	void SetMaterialSlot(int SlotId, RMaterial* Material);
 	void SetMaterials(const std::vector<RMaterial*> NewMaterials);
@@ -95,14 +95,14 @@ protected:
 	bool TryLoadAsFbxMesh();
 	bool TryLoadAsRmesh();
 private:
-	std::vector<RMeshElement>			m_MeshElements;
+	std::vector<std::unique_ptr<RMeshElement>>	m_MeshElements;
 
-	std::vector<RMaterial*>				m_Materials;
+	std::vector<RMaterial*>			m_Materials;
 	RAabb							m_Aabb;
 
 	RAnimation*						m_Animation;
-	std::vector<RMatrix4>				m_BoneInitInvMatrices;
-	std::vector<std::string>					m_BoneIdToName;
+	std::vector<RMatrix4>			m_BoneInitInvMatrices;
+	std::vector<std::string>		m_BoneIdToName;
 
 	/// TODO: Store the node cache in a shared skeletal data
 	std::map<RAnimation*, std::vector<int>>	m_AnimationNodeCache;
@@ -113,13 +113,17 @@ FORCEINLINE const std::vector<RMaterial*>& RMesh::GetMaterials() const
 	return m_Materials;
 }
 
-FORCEINLINE const std::vector<RMeshElement>& RMesh::GetMeshElements() const
+FORCEINLINE const RMeshElement& RMesh::GetMeshElement(int i) const
 {
-	return m_MeshElements;
+	// Accessing mesh elements during loading may result in incomplete data
+	assert(IsLoaded());
+	return *m_MeshElements[i];
 }
 
 FORCEINLINE int RMesh::GetMeshElementCount() const
 {
+	// Accessing mesh elements during loading may result in incomplete data
+	assert(IsLoaded());
 	return (int)m_MeshElements.size();
 }
 

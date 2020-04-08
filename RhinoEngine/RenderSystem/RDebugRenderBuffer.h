@@ -6,9 +6,13 @@
 
 #pragma once
 
-#include "RMeshElement.h"
+#include "RRenderSystemTypes.h"
+#include "RVertexDeclaration.h"
 
 struct RShader;
+class RMeshRenderBuffer;
+
+struct ID3D11InputLayout;
 
 namespace RVertexType
 {
@@ -19,9 +23,9 @@ class RDebugRenderBuffer
 {
 public:
 	RDebugRenderBuffer();
+	~RDebugRenderBuffer();
 
 	void Initialize(EPrimitiveTopology InTopology, int InMaxVertexCount);
-	void Release();
 
 	void AppendVertex(const RVec3& Position, const RColor& Color);
 	void AppendVertex(const RVertexType::PositionColor& InVertex);
@@ -30,7 +34,7 @@ public:
 	void Reset();
 
 private:
-	RMeshRenderBuffer							m_PrimitiveMeshBuffer;
+	std::unique_ptr<RMeshRenderBuffer>			m_PrimitiveMeshBuffer;
 	ID3D11InputLayout*							m_PrimitiveInputLayout;
 	RShader*									m_ColorShader;
 

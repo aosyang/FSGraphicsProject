@@ -20,7 +20,6 @@ RText::RText()
 
 RText::~RText()
 {
-	m_VertexBuffer.Release();
 	GRenderer.UnregisterOverlayRenderable(this);
 }
 

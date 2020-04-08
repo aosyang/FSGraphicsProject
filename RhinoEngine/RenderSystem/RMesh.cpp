@@ -53,11 +53,6 @@ RMesh::RMesh(const std::string& Path)
 
 RMesh::~RMesh()
 {
-	for (UINT32 i = 0; i < m_MeshElements.size(); i++)
-	{
-		m_MeshElements[i].Release();
-	}
-
 	SAFE_DELETE(m_Animation);
 }
 
@@ -72,7 +67,26 @@ void RMesh::Serialize(RSerializer& serializer)
 	if (!serializer.EnsureHeader("RMSH", 4))
 		return;
 
-	serializer.SerializeVector(m_MeshElements, &RSerializer::SerializeObject);
+	if (serializer.IsReading())
+	{
+		UINT NumElements = 0;
+		serializer.SerializeData(NumElements);
+		m_MeshElements.resize(NumElements);
+		for (UINT i = 0; i < NumElements; i++)
+		{
+			m_MeshElements[i] = std::make_unique<RMeshElement>();
+			serializer.SerializeObject(*m_MeshElements[i]);
+		}
+	}
+	else
+	{
+		UINT NumElements = (UINT)m_MeshElements.size();
+		serializer.SerializeData(NumElements);
+		for (UINT i = 0; i < NumElements; i++)
+		{
+			serializer.SerializeObject(*m_MeshElements[i]);
+		}
+	}
 
 	if (serializer.IsReading())
 	{
@@ -165,11 +179,9 @@ const RMaterial* RMesh::GetMaterial(int index) const
 	return RMaterial::GetDefault();
 }
 
-void RMesh::SetMeshElements(RMeshElement* meshElements, UINT numElement)
+void RMesh::SetMeshElements(std::vector<std::unique_ptr<RMeshElement>>&& Elements)
 {
-	// TODO: use mutex
-	assert(meshElements && numElement);
-	m_MeshElements.assign(meshElements, meshElements + numElement);
+	m_MeshElements = std::move(Elements);
 }
 
 void RMesh::SetMaterialSlot(int SlotId, RMaterial* Material)
@@ -208,7 +220,7 @@ void RMesh::UpdateAabb()
 	m_Aabb = RAabb::Default;
 	for (UINT32 i = 0; i < m_MeshElements.size(); i++)
 	{
-		m_Aabb.Expand(m_MeshElements[i].GetAabb());
+		m_Aabb.Expand(m_MeshElements[i]->GetAabb());
 	}
 }
 
@@ -219,7 +231,7 @@ const RAabb& RMesh::GetLocalSpaceAabb() const
 
 const RAabb& RMesh::GetMeshElementAabb(int index) const
 {
-	return m_MeshElements[index].GetAabb();
+	return m_MeshElements[index]->GetAabb();
 }
 
 void RMesh::SetAnimation(RAnimation* anim)
@@ -236,7 +248,7 @@ bool RMesh::HasAnySkinnedMeshElements() const
 {
 	for (const auto& MeshElement : m_MeshElements)
 	{
-		if (MeshElement.GetFlag() & MEF_Skinned)
+		if (MeshElement->GetFlag() & MEF_Skinned)
 		{
 			return true;
 		}
@@ -459,7 +471,7 @@ void SerializeXmlMaterials_Save(const std::vector<RMaterial*>& Materials, tinyxm
 		// <MeshElement Index="0" Name="Element">/Path/To/Material</MeshElement>
 		tinyxml2::XMLElement* XmlElemSubmesh = XmlDoc->NewElement("MeshElement");
 		XmlElemSubmesh->SetAttribute("Index", i);
-		//XmlElemSubmesh->SetAttribute("Name", m_Mesh->GetMeshElements()[i].GetName().c_str());
+		//XmlElemSubmesh->SetAttribute("Name", m_Mesh->GetMeshElement(i).GetName().c_str());
 
 		RMaterial* Material = Materials[i];
 		if (Material && Material->GetAssetPath() != "")

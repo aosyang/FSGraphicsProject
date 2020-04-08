@@ -119,9 +119,6 @@ void REngine::Shutdown()
 
 	GScriptSystem.Shutdown();
 
-	// Release debug renderer
-	GDebugRenderer.Release();
-
 	// Unload shaders
 	RShaderManager::Instance().UnloadAllShaders();
 

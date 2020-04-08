@@ -25,12 +25,6 @@ void RDebugRenderer::Initialize(int maxVertexCount)
 	TriangleBuffer.Initialize(EPrimitiveTopology::TriangleList, maxVertexCount);
 }
 
-void RDebugRenderer::Release()
-{
-	LineBuffer.Release();
-	TriangleBuffer.Release();
-}
-
 void RDebugRenderer::DrawLine(const RVec3& start, const RVec3& end, const RColor& color1, const RColor& color2)
 {
 	LineBuffer.AppendVertex(start, color1);

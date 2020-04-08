@@ -72,11 +72,6 @@ void RSkybox::CreateSkybox(RTexture* skyTexture)
 	}
 }
 
-void RSkybox::Release()
-{
-	m_SkyboxMesh.Release();
-}
-
 void RSkybox::Draw()
 {
 	if (m_SkyboxShader && m_SkyboxTexture)

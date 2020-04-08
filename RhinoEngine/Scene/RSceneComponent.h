@@ -5,8 +5,6 @@
 //=============================================================================
 #pragma once
 
-#include "RSceneComponent.h"
-
 #include "Core/RRuntimeTypeObject.h"
 
 class RSceneObject;

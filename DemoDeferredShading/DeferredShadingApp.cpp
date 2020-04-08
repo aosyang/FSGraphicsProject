@@ -14,7 +14,6 @@ DeferredShadingApp::DeferredShadingApp()
 
 DeferredShadingApp::~DeferredShadingApp()
 {
-	m_Skybox.Release();
 	m_cbDeferredPointLight.Release();
 	m_cbSSR.Release();
 

@@ -15,7 +15,6 @@ class RDebugRenderer : public RSingleton<RDebugRenderer>
 	friend class RSingleton<RDebugRenderer>;
 public:
 	void Initialize(int maxVertexCount = 1048576);
-	void Release();
 
 	void DrawLine(const RVec3& start, const RVec3& end, const RColor& color = GDebugRenderer.GetPrimitiveColor());
 	void DrawLine(const RVec3& start, const RVec3& end, const RColor& color1, const RColor& color2);

@@ -41,7 +41,7 @@ void RAssetEditor_Mesh::ShowWindow(REditorContext& EditorContext)
 		ImGui::SameLine();
 
 		std::string MaterialAssetPath;
-		std::string Label = "Slot " + std::to_string(i) + ": " + Mesh->GetMeshElements()[i].GetName();
+		std::string Label = "Slot " + std::to_string(i) + ": " + Mesh->GetMeshElement(i).GetName();
 		
 		if (i < (int)Materials.size() && Materials[i])
 		{

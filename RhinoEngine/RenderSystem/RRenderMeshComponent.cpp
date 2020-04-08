@@ -60,17 +60,17 @@ void RRenderMeshComponent::Render(const RenderViewInfo& View) const
 			RConstantBuffers::cbPerObject.UpdateBufferData();
 			RConstantBuffers::cbPerObject.BindBuffer();
 
-			const UINT32 NumMeshElements = (UINT32)m_Mesh->GetMeshElements().size();
+			const UINT32 NumMeshElements = (UINT32)m_Mesh->GetMeshElementCount();
 			const UINT32 NumMaterials = (UINT32)m_Materials.size();
 
 			for (UINT32 i = 0; i < NumMeshElements; i++)
 			{
-				const RMeshElement& MeshElement = m_Mesh->GetMeshElements()[i];
+				const RMeshElement& MeshElement = m_Mesh->GetMeshElement(i);
 				bool bSkinned = MeshElement.GetFlag() & MEF_Skinned;
 				RMaterial* Material = (i < (int)m_Materials.size()) ? m_Materials[i] : nullptr;
 				GRenderer.BindMaterial(Material, bSkinned);
 
-				m_Mesh->GetMeshElements()[i].Draw();
+				m_Mesh->GetMeshElement(i).Draw();
 			}
 		}
 	}
@@ -97,16 +97,16 @@ void RRenderMeshComponent::RenderDepthPass(const RenderViewInfo& View) const
 				RConstantBuffers::cbPerObject.UpdateBufferData();
 				RConstantBuffers::cbPerObject.BindBuffer();
 
-				const UINT32 NumMeshElements = (UINT32)m_Mesh->GetMeshElements().size();
+				const UINT32 NumMeshElements = (UINT32)m_Mesh->GetMeshElementCount();
 				const UINT32 NumMaterials = (UINT32)m_Materials.size();
 
 				for (UINT32 i = 0; i < NumMeshElements; i++)
 				{
-					const RMeshElement& MeshElement = m_Mesh->GetMeshElements()[i];
+					const RMeshElement& MeshElement = m_Mesh->GetMeshElement(i);
 					bool bSkinned = MeshElement.GetFlag() & MEF_Skinned;
 					GRenderer.BindMaterial(RMaterial::GetDepthOnly(), bSkinned);
 
-					m_Mesh->GetMeshElements()[i].Draw();
+					m_Mesh->GetMeshElement(i).Draw();
 				}
 			}
 		}
@@ -162,7 +162,7 @@ void RRenderMeshComponent::LoadMaterialsFromMeshResource()
 {
 	assert(m_Mesh);
 
-	const UINT32 NumMeshElements = (UINT32)m_Mesh->GetMeshElements().size();
+	const UINT32 NumMeshElements = (UINT32)m_Mesh->GetMeshElementCount();
 	m_Materials.reserve(NumMeshElements);
 	m_Materials = m_Mesh->GetMaterials();
 

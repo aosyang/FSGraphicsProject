@@ -67,7 +67,6 @@ void RPostProcessorManager::Initialize()
 
 void RPostProcessorManager::Release()
 {
-	m_ScreenQuad.Release();
 	SAFE_RELEASE(m_RTDepthBuffer);
 	SAFE_RELEASE(m_RTDepthStencilView);
 	SAFE_RELEASE(m_RTBuffer);

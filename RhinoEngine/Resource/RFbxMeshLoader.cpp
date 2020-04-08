@@ -44,7 +44,7 @@ namespace
 
 bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* FileName)
 {
-	std::vector<RMeshElement> meshElements;
+	std::vector<std::unique_ptr<RMeshElement>> meshElements;
 	std::vector<RMaterial*> materials;
 
 	RLog("Loading mesh [%s]...\n", FileName);
@@ -140,7 +140,7 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 	if (animation)
 	{
 		animation->SetName(MeshResource->GetAssetPath());
-		std::string SkeletalMeshName = MeshResource->GetMetaData()["SkeletalMesh"];
+		const std::string& SkeletalMeshName = MeshResource->GetMetaData()["SkeletalMesh"];
 		if (SkeletalMeshName != "")
 		{
 			RMesh* SkeletalMesh = RResourceManager::Instance().LoadResource<RMesh>(SkeletalMeshName, EResourceLoadMode::Immediate);
@@ -683,19 +683,19 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 
 			if (VertexData.size() != 0 && IndexData.size() != 0)
 			{
-				RMeshElement meshElem;
+				std::unique_ptr<RMeshElement> meshElem = std::make_unique<RMeshElement>();
 
-				meshElem.SetVertices(VertexData, VertexComponentMask);
-				meshElem.SetTriangles(IndexData);
-				meshElem.UpdateRenderBuffer();
-				meshElem.SetName(SceneNode->GetName());
+				meshElem->SetVertices(VertexData, VertexComponentMask);
+				meshElem->SetTriangles(IndexData);
+				meshElem->UpdateRenderBuffer();
+				meshElem->SetName(SceneNode->GetName());
 
 				UINT flag = 0;
 				if (hasDeformer)
 					flag |= MEF_Skinned;
 
-				meshElem.SetFlag(flag);
-				meshElements.push_back(meshElem);
+				meshElem->SetFlag(flag);
+				meshElements.push_back(std::move(meshElem));
 
 				RLog("Mesh element loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
 					OptimizedNumVerts, OptimizedNumIndices, OrignialNumVerts, OriginalNumIndices);
@@ -752,7 +752,7 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 
 	if (meshElements.size() > 0)
 	{
-		MeshResource->SetMeshElements(meshElements.data(), (UINT)meshElements.size());
+		MeshResource->SetMeshElements(std::move(meshElements));
 		MeshResource->SetMaterials(materials);
 		MeshResource->UpdateAabb();
 	}

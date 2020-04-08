@@ -31,8 +31,7 @@ class RMeshRenderBuffer
 
 public:
 	RMeshRenderBuffer();
-
-	void Release();
+	~RMeshRenderBuffer();
 
 	void CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, ID3D11InputLayout* inputLayout, EPrimitiveTopology PrimitiveTopology, bool dynamic = false);
 	void CreateIndexBuffer(void* data, UINT indexTypeSize, UINT indexCount, bool dynamic = false);
@@ -46,8 +45,9 @@ public:
 	UINT GetIndexCount() const;
 
 private:
-	ID3D11Buffer*		m_VertexBuffer;
-	ID3D11Buffer*		m_IndexBuffer;
+	struct RBufferData;
+	std::unique_ptr<RBufferData> BufferData;
+
 	ID3D11InputLayout*	m_InputLayout;
 	EPrimitiveTopology	m_PrimitiveTopology;
 
@@ -79,8 +79,7 @@ class RMeshElement
 {
 public:
 	RMeshElement();
-
-	void Release();
+	~RMeshElement();
 
 	void Serialize(RSerializer& serializer);
 
@@ -94,30 +93,29 @@ public:
 	void Draw() const;
 	void DrawInstanced(int instanceCount) const;
 
+	void SetName(const char* name)		{ m_Name = name; }
+	const std::string& GetName() const	{ return m_Name; }
 
-	void SetName(const char* name) { m_Name = name; }
-	const std::string& GetName() const { return m_Name; }
+	const RAabb& GetAabb() const		{ return m_Aabb; }
 
-	const RAabb& GetAabb() const { return m_Aabb; }
+	void SetFlag(int flag)				{ m_Flag = flag; }
+	int GetFlag() const					{ return m_Flag; }
 
-	void SetFlag(int flag) { m_Flag = flag; }
-	int GetFlag() const { return m_Flag; }
-
-	std::vector<UINT>				TriangleIndices;
+	std::vector<UINT>					TriangleIndices;
 	std::vector<RVertexType::Vec3Data>	PositionArray;
 	std::vector<RVertexType::Vec2Data>	UV0Array;
 	std::vector<RVertexType::Vec3Data>	NormalArray;
 	std::vector<RVertexType::Vec3Data>	TangentArray;
 	std::vector<RVertexType::Vec2Data>	UV1Array;
-	std::vector<VBoneIds>			BoneIdArray;
+	std::vector<VBoneIds>				BoneIdArray;
 	std::vector<RVertexType::Vec4Data>	BoneWeightArray;
 
 private:
-	std::string				m_Name;
+	std::string			m_Name;
 	RAabb				m_Aabb;
 	UINT				m_Flag;
 
-	RMeshRenderBuffer	m_RenderBuffer;
+	std::unique_ptr<RMeshRenderBuffer>	m_RenderBuffer;
 
 	int					m_VertexComponentMask;
 };

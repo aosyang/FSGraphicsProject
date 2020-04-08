@@ -18,8 +18,6 @@ public:
 
 	void CreateSkybox(const std::string& skyTextureName);
 	void CreateSkybox(RTexture* skyTexture);
-	void Release();
-
 	void Draw();
 
 private:

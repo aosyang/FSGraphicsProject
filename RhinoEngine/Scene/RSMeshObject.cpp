@@ -208,11 +208,10 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 		return;
 
 	SetupMaterialsFromMeshResource();
-	const auto& MeshElements = m_Mesh->GetMeshElements();
 
-	for (UINT32 i = 0; i < MeshElements.size(); i++)
+	for (int i = 0; i < m_Mesh->GetMeshElementCount(); i++)
 	{
-		const RMeshElement& MeshElement = MeshElements[i];
+		const RMeshElement& MeshElement = m_Mesh->GetMeshElement(i);
 		bool bSkinned = MeshElement.GetFlag() & MEF_Skinned;
 		RMaterial* Material = (i < (int)m_Materials.size()) ? m_Materials[i] : nullptr;
 		GRenderer.BindMaterial(Material, bSkinned, instanced);
@@ -238,11 +237,9 @@ void RSMeshObject::DrawDepthPass(bool instanced, int instanceCount)
 	if (!m_Mesh || !m_Mesh->IsLoaded())
 		return;
 
-	const auto& MeshElements = m_Mesh->GetMeshElements();
-
-	for (UINT32 i = 0; i < MeshElements.size(); i++)
+	for (int i = 0; i < m_Mesh->GetMeshElementCount(); i++)
 	{
-		const RMeshElement& MeshElement = MeshElements[i];
+		const RMeshElement& MeshElement = m_Mesh->GetMeshElement(i);
 		bool bSkinned = MeshElement.GetFlag() & MEF_Skinned;
 		RMaterial* Material = RMaterial::GetDepthOnly();
 		GRenderer.BindMaterial(Material, bSkinned, instanced);

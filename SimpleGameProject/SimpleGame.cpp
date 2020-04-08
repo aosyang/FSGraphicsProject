@@ -16,7 +16,6 @@ SimpleGame::SimpleGame()
 
 SimpleGame::~SimpleGame()
 {
-	m_Skybox.Release();
 }
 
 bool SimpleGame::Initialize()

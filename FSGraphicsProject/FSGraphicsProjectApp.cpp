@@ -82,17 +82,10 @@ FSGraphicsProjectApp::~FSGraphicsProjectApp()
 	SAFE_RELEASE(m_DepthState[0]);
 	SAFE_RELEASE(m_DepthState[1]);
 
-	m_ParticleBuffer.Release();
-
 	m_cbInstance[0].Release();
 	m_cbInstance[1].Release();
 	m_cbInstance[2].Release();
 
-	m_BumpCubeMesh.Release();
-
-	m_StarMesh.Release();
-
-	m_Skybox.Release();
 	m_Scene.Release();
 }
 
@@ -437,13 +430,18 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 	camAabb.Expand(camPos + RVec3(5.0f, 5.0f, 5.0f));
 	camAabb.Expand(camPos - RVec3(5.0f, 5.0f, 5.0f));
 
-	const std::vector<RMeshElement>& sceneMeshElements = m_SceneMeshCity->GetMeshElements();
-	for (UINT i = 0; i < sceneMeshElements.size(); i++)
+	if (m_SceneMeshCity->IsLoaded())
 	{
-		worldMoveVec = camAabb.TestDynamicCollisionWithAabb(worldMoveVec, sceneMeshElements[i].GetAabb());
+		for (int i = 0; i < m_SceneMeshCity->GetMeshElementCount(); i++)
+		{
+			auto& MeshElement = m_SceneMeshCity->GetMeshElement(i);
+			worldMoveVec = camAabb.TestDynamicCollisionWithAabb(worldMoveVec, MeshElement.GetAabb());
 
-		if (m_RenderCollisionWireframe)
-			GDebugRenderer.DrawAabb(sceneMeshElements[i].GetAabb());
+			if (m_RenderCollisionWireframe)
+			{
+				GDebugRenderer.DrawAabb(MeshElement.GetAabb());
+			}
+		}
 	}
 	m_Camera->Translate(worldMoveVec, ETransformSpace::World);
 	m_Camera->SetRotation(RQuat::Euler(m_CamPitch, m_CamYaw, 0.0f));
@@ -715,10 +713,10 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 
 		GDebugRenderer.DrawAabb(aabb);
 
-		const std::vector<RMeshElement>& sceneMeshElements = m_SceneMeshCity->GetMeshElements();
-		for (UINT i = 0; i < sceneMeshElements.size(); i++)
+		for (int i = 0; i < m_SceneMeshCity->GetMeshElementCount(); i++)
 		{
-			worldOffset = aabb.TestDynamicCollisionWithAabb(worldOffset, sceneMeshElements[i].GetAabb());
+			auto& MeshElement = m_SceneMeshCity->GetMeshElement(i);
+			worldOffset = aabb.TestDynamicCollisionWithAabb(worldOffset, MeshElement.GetAabb());
 		}
 
 		if (fabs(worldOffset.Y()) < fabs(m_CharacterYVel))

@@ -331,7 +331,7 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 							ImGui::SameLine();
 
 							std::string MaterialAssetPath;
-							std::string Label = "Slot " + std::to_string(i) + ": " + Mesh->GetMeshElements()[i].GetName();
+							std::string Label = "Slot " + std::to_string(i) + ": " + Mesh->GetMeshElement(i).GetName();
 
 							if (i < MeshObject->GetNumMaterials())
 							{

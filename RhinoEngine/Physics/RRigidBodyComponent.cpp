@@ -157,8 +157,9 @@ void RRigidBodyComponent::BuildTriangleMeshCollision(RMesh* Mesh)
 	Context->TriangleMesh = std::make_unique<btTriangleMesh>();
 	RVec3 Scale = GetOwner()->GetScale();
 
-	for (const RMeshElement& MeshElement : Mesh->GetMeshElements())
+	for (int ElemIdx = 0; ElemIdx < Mesh->GetMeshElementCount(); ElemIdx++)
 	{
+		const RMeshElement& MeshElement = Mesh->GetMeshElement(ElemIdx);
 		for (int i = 0; i < MeshElement.TriangleIndices.size(); i += 3)
 		{
 			int idx0 = MeshElement.TriangleIndices[i];

@@ -9,7 +9,14 @@
 #include "RShaderManager.h"
 #include "RShaderConstantBuffer.h"
 
+#include "RMeshElement.h"
+
 RDebugRenderBuffer::RDebugRenderBuffer()
+	: m_PrimitiveMeshBuffer(std::make_unique<RMeshRenderBuffer>())
+{
+}
+
+RDebugRenderBuffer::~RDebugRenderBuffer()
 {
 }
 
@@ -18,12 +25,7 @@ void RDebugRenderBuffer::Initialize(EPrimitiveTopology InTopology, int InMaxVert
 	m_MaxNumVertices = InMaxVertexCount;
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 	m_PrimitiveInputLayout = RVertexDeclaration::Instance().GetInputLayout<RVertexType::PositionColor>();
-	m_PrimitiveMeshBuffer.CreateVertexBuffer(nullptr, sizeof(RVertexType::PositionColor), m_MaxNumVertices, m_PrimitiveInputLayout, InTopology, true);
-}
-
-void RDebugRenderBuffer::Release()
-{
-	m_PrimitiveMeshBuffer.Release();
+	m_PrimitiveMeshBuffer->CreateVertexBuffer(nullptr, sizeof(RVertexType::PositionColor), m_MaxNumVertices, m_PrimitiveInputLayout, InTopology, true);
 }
 
 void RDebugRenderBuffer::Render()
@@ -48,8 +50,8 @@ void RDebugRenderBuffer::Render()
 
 		while (StartIndex < NumVertices)
 		{
-			m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(&m_PrimitiveVertices[StartIndex], VertexTypeSize, RMath::Min(NumVertices - StartIndex, m_MaxNumVertices));
-			m_PrimitiveMeshBuffer.Draw();
+			m_PrimitiveMeshBuffer->UpdateDynamicVertexBuffer(&m_PrimitiveVertices[StartIndex], VertexTypeSize, RMath::Min(NumVertices - StartIndex, m_MaxNumVertices));
+			m_PrimitiveMeshBuffer->Draw();
 
 			StartIndex += m_MaxNumVertices;
 		}
@@ -58,11 +60,11 @@ void RDebugRenderBuffer::Render()
 	{
 		if (m_bDirtyBuffer)
 		{
-			m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(m_PrimitiveVertices.data(), VertexTypeSize, NumVertices);
+			m_PrimitiveMeshBuffer->UpdateDynamicVertexBuffer(m_PrimitiveVertices.data(), VertexTypeSize, NumVertices);
 			m_bDirtyBuffer = false;
 		}
 
-		if (m_PrimitiveMeshBuffer.GetVertexCount() != 0)
+		if (m_PrimitiveMeshBuffer->GetVertexCount() != 0)
 		{
 			RConstantBuffers::cbPerObject.Data.worldMatrix = RMatrix4::IDENTITY;
 
@@ -71,7 +73,7 @@ void RDebugRenderBuffer::Render()
 
 			m_ColorShader->Bind();
 			GRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);
-			m_PrimitiveMeshBuffer.Draw();
+			m_PrimitiveMeshBuffer->Draw();
 		}
 	}
 }
