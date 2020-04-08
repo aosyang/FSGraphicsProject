@@ -1033,7 +1033,9 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 				m_cbInstance[2].BindBuffer();
 
 				if (pass == ShadowPass)
-					m_FbxMeshObj->DrawWithShader(m_DepthShader, true, instanceCount);
+				{
+					m_FbxMeshObj->DrawDepthPass(true, instanceCount);
+				}
 				else
 				{
 					float opacity = (timeNow - m_FbxMeshObj->GetResourceTimestamp()) / loadingFadeInTime;
@@ -1081,7 +1083,9 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	}
 
 	if (pass == ShadowPass)
-		m_IslandMeshObj->DrawWithShader(m_DepthShader, true, islandInstanceCount);
+	{
+		m_IslandMeshObj->DrawDepthPass(true, islandInstanceCount);
+	}
 	else
 	{
 		float opacity = (timeNow - m_IslandMeshObj->GetResourceTimestamp()) / loadingFadeInTime;
@@ -1102,7 +1106,9 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	SetPerObjectConstBuffer(m_AOSceneObj->GetTransformMatrix());
 
 	if (pass == ShadowPass)
-		m_AOSceneObj->DrawWithShader(m_DepthShader);
+	{
+		m_AOSceneObj->DrawDepthPass();
+	}
 	else
 	{
 		float opacity = (timeNow - m_AOSceneObj->GetResourceTimestamp()) / loadingFadeInTime;
@@ -1145,7 +1151,9 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	if (RCollision::TestAabbInsideFrustum(cameraFrustum, m_CharacterObj->GetAabb()))
 	{
 		if (pass == ShadowPass)
+		{
 			m_CharacterObj->DrawDepthPass();
+		}
 		else
 		{
 			float opacity = (timeNow - m_CharacterObj->GetResourceTimestamp()) / loadingFadeInTime;
@@ -1197,7 +1205,9 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	if (RCollision::TestAabbInsideFrustum(cameraFrustum, m_TachikomaObj->GetAabb()))
 	{
 		if (pass == ShadowPass)
-			m_TachikomaObj->DrawWithShader(m_DepthShader);
+		{
+			m_TachikomaObj->DrawDepthPass();
+		}
 		else if (pass == NormalPass)
 		{
 			float opacity = (timeNow - m_TachikomaObj->GetResourceTimestamp()) / loadingFadeInTime;

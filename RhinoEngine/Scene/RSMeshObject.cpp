@@ -258,42 +258,6 @@ void RSMeshObject::DrawDepthPass(bool instanced, int instanceCount)
 	}
 }
 
-void RSMeshObject::DrawWithShader(RShader* shader, bool instanced, int instanceCount)
-{
-	if (!m_Mesh || !m_Mesh->IsLoaded() || !shader)
-		return;
-
-	//RRenderer.D3DImmediateContext()->IASetInputLayout(m_Mesh->GetInputLayout());
-	const auto& MeshElements = m_Mesh->GetMeshElements();
-
-	for (UINT32 i = 0; i < MeshElements.size(); i++)
-	{
-		const RMeshElement& MeshElement = MeshElements[i];
-		
-		int flag = MeshElement.GetFlag();
-		int shaderFeatureMask = 0;
-
-		if (flag & MEF_Skinned)
-			shaderFeatureMask |= SFM_Skinned;
-		else if (instanced)
-			shaderFeatureMask |= SFM_Instanced;
-
-		if (GRenderer.IsUsingDeferredShading())
-			shaderFeatureMask |= SFM_Deferred;
-
-		shader->Bind(shaderFeatureMask);
-
-		if (instanced)
-		{
-			MeshElement.DrawInstanced(instanceCount, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		}
-		else
-		{
-			MeshElement.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		}
-	}
-}
-
 float RSMeshObject::GetResourceTimestamp()
 {
 	if (m_Mesh)
