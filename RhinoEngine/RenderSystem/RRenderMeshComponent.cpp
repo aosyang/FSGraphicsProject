@@ -70,7 +70,7 @@ void RRenderMeshComponent::Render(const RenderViewInfo& View) const
 				RMaterial* Material = (i < (int)m_Materials.size()) ? m_Materials[i] : nullptr;
 				GRenderer.BindMaterial(Material, bSkinned);
 
-				m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				m_Mesh->GetMeshElements()[i].Draw();
 			}
 		}
 	}
@@ -106,7 +106,7 @@ void RRenderMeshComponent::RenderDepthPass(const RenderViewInfo& View) const
 					bool bSkinned = MeshElement.GetFlag() & MEF_Skinned;
 					GRenderer.BindMaterial(RMaterial::GetDepthOnly(), bSkinned);
 
-					m_Mesh->GetMeshElements()[i].Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+					m_Mesh->GetMeshElements()[i].Draw();
 				}
 			}
 		}

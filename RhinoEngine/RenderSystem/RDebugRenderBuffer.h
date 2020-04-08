@@ -20,7 +20,7 @@ class RDebugRenderBuffer
 public:
 	RDebugRenderBuffer();
 
-	void Initialize(D3D11_PRIMITIVE_TOPOLOGY InTopology, int InMaxVertexCount);
+	void Initialize(EPrimitiveTopology InTopology, int InMaxVertexCount);
 	void Release();
 
 	void AppendVertex(const RVec3& Position, const RColor& Color);
@@ -37,8 +37,6 @@ private:
 	std::vector<RVertexType::PositionColor>		m_PrimitiveVertices;
 	bool										m_bDirtyBuffer;
 	UINT										m_MaxNumVertices;
-
-	D3D11_PRIMITIVE_TOPOLOGY					Topology;
 };
 
 FORCEINLINE void RDebugRenderBuffer::AppendVertex(const RVec3& Position, const RColor& Color)

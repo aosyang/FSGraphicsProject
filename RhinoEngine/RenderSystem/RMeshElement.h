@@ -7,6 +7,7 @@
 
 #include "RVertexDeclaration.h"
 
+#include "RRenderSystemTypes.h"
 #include <d3d11.h>
 
 class RSerializer;
@@ -21,32 +22,48 @@ struct VBoneIds
 	int boneId[4];
 };
 
+/// Hardware vertex/index buffer for triangle mesh
 class RMeshRenderBuffer
 {
-protected:
-	ID3D11Buffer*		m_VertexBuffer;
-	ID3D11Buffer*		m_IndexBuffer;
-	ID3D11InputLayout*	m_InputLayout;
+#if _DEBUG
+	friend void SetDebuggerObjectName(RMeshRenderBuffer& RenderBuffer, const char* ObjectName);
+#endif	// _DEBUG 
 
-	UINT				m_Stride;
-	UINT				m_VertexCount;
-	UINT				m_IndexCount;
 public:
 	RMeshRenderBuffer();
 
 	void Release();
 
-	void CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, ID3D11InputLayout* inputLayout, bool dynamic = false, const char* debugResourceName = nullptr);
-	void CreateIndexBuffer(void* data, UINT indexTypeSize, UINT indexCount, bool dynamic = false, const char* debugResourceName = nullptr);
+	void CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, ID3D11InputLayout* inputLayout, EPrimitiveTopology PrimitiveTopology, bool dynamic = false);
+	void CreateIndexBuffer(void* data, UINT indexTypeSize, UINT indexCount, bool dynamic = false);
 
 	void UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount);
 
-	void Draw(D3D11_PRIMITIVE_TOPOLOGY topology) const;
-	void DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology) const;
+	void Draw() const;
+	void DrawInstanced(int instanceCount) const;
 
 	UINT GetVertexCount() const;
 	UINT GetIndexCount() const;
+
+private:
+	ID3D11Buffer*		m_VertexBuffer;
+	ID3D11Buffer*		m_IndexBuffer;
+	ID3D11InputLayout*	m_InputLayout;
+	EPrimitiveTopology	m_PrimitiveTopology;
+
+	UINT				m_Stride;
+	UINT				m_VertexCount;
+	UINT				m_IndexCount;
 };
+
+
+#if _DEBUG
+// Set object name in graphics debugger (debug builds only)
+void SetDebuggerObjectName(RMeshRenderBuffer& RenderBuffer, const char* ObjectName);
+#else
+#define SetDebuggerObjectName(RenderBuffer, Name)
+#endif	// _DEBUG
+
 
 FORCEINLINE UINT RMeshRenderBuffer::GetVertexCount() const
 {
@@ -74,8 +91,8 @@ public:
 	
 	void UpdateRenderBuffer();
 
-	void Draw(D3D11_PRIMITIVE_TOPOLOGY topology) const;
-	void DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology) const;
+	void Draw() const;
+	void DrawInstanced(int instanceCount) const;
 
 
 	void SetName(const char* name) { m_Name = name; }

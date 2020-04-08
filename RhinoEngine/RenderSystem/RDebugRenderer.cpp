@@ -21,8 +21,8 @@ RDebugRenderer::~RDebugRenderer()
 
 void RDebugRenderer::Initialize(int maxVertexCount)
 {
-	LineBuffer.Initialize(D3D11_PRIMITIVE_TOPOLOGY_LINELIST, maxVertexCount);
-	TriangleBuffer.Initialize(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, maxVertexCount);
+	LineBuffer.Initialize(EPrimitiveTopology::LineList, maxVertexCount);
+	TriangleBuffer.Initialize(EPrimitiveTopology::TriangleList, maxVertexCount);
 }
 
 void RDebugRenderer::Release()

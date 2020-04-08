@@ -61,7 +61,7 @@ void RSkybox::CreateSkybox(RTexture* skyTexture)
 	};
 
 	m_SkyboxIL = RVertexDeclaration::Instance().GetInputLayout<RVertexType::Position>();
-	m_SkyboxMesh.CreateVertexBuffer(skyboxVertex, sizeof(RVertexType::Position), sizeof(skyboxVertex) / sizeof(RVertexType::Position), m_SkyboxIL);
+	m_SkyboxMesh.CreateVertexBuffer(skyboxVertex, sizeof(RVertexType::Position), sizeof(skyboxVertex) / sizeof(RVertexType::Position), m_SkyboxIL, EPrimitiveTopology::TriangleList);
 	m_SkyboxMesh.CreateIndexBuffer(skyboxIndex, sizeof(UINT32), sizeof(skyboxIndex) / sizeof(UINT32));
 
 	m_SkyboxShader = RShaderManager::Instance().GetShaderResource("Skybox");
@@ -83,6 +83,6 @@ void RSkybox::Draw()
 	{
 		GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_SkyboxTexture->GetPtrSRV());
 		m_SkyboxShader->Bind();
-		m_SkyboxMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_SkyboxMesh.Draw();
 	}
 }

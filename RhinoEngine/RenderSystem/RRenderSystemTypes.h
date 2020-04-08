@@ -8,13 +8,20 @@
 
 #include "Core/CoreTypes.h"
 
-enum class ERenderPass : UINT8
+enum class ERenderPass : uint8_t
 {
 	Background,		// Skybox pass
 	SceneObject,	// Scene object pass
 	Foreground,		// Objects that are not be blocked by any other objects
 
 	NumPasses,
+};
+
+enum class EPrimitiveTopology : uint8_t
+{
+	PointList,
+	LineList,
+	TriangleList,
 };
 
 struct RenderViewInfo

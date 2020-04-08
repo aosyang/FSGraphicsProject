@@ -10,8 +10,32 @@
 #include "RRenderSystem.h"
 #include "Core/RSerializer.h"
 
+namespace
+{
+	// Convert primitive topology types to D3D11 ones
+	D3D11_PRIMITIVE_TOPOLOGY GetD3D11PrimitiveTopology(EPrimitiveTopology Topology)
+	{
+		switch (Topology)
+		{
+		case EPrimitiveTopology::PointList:
+			return D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
+		case EPrimitiveTopology::LineList:
+			return D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+		case EPrimitiveTopology::TriangleList:
+			return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		default:
+			// Unimplemented conversation
+			assert(0);
+			return D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
+		}
+	}
+}
+
 RMeshRenderBuffer::RMeshRenderBuffer()
-	: m_VertexBuffer(nullptr), m_IndexBuffer(nullptr), m_InputLayout(nullptr)
+	: m_VertexBuffer(nullptr)
+	, m_IndexBuffer(nullptr)
+	, m_InputLayout(nullptr)
+	, m_PrimitiveTopology(EPrimitiveTopology::TriangleList)
 {
 
 }
@@ -22,9 +46,10 @@ void RMeshRenderBuffer::Release()
 	SAFE_RELEASE(m_IndexBuffer);
 }
 
-void RMeshRenderBuffer::CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, ID3D11InputLayout* inputLayout, bool dynamic /*= false*/, const char* debugResourceName /*= nullptr*/)
+void RMeshRenderBuffer::CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount, ID3D11InputLayout* inputLayout, EPrimitiveTopology PrimitiveTopology, bool dynamic /*= false*/)
 {
 	m_InputLayout = inputLayout;
+	m_PrimitiveTopology = PrimitiveTopology;
 
 	D3D11_BUFFER_DESC vbd;
 	ZeroMemory(&vbd, sizeof(vbd));
@@ -52,14 +77,9 @@ void RMeshRenderBuffer::CreateVertexBuffer(void* data, UINT vertexTypeSize, UINT
 
 	m_VertexCount = vertexCount;
 	m_Stride = vertexTypeSize;
-
-#if _DEBUG
-	if (debugResourceName)
-		m_VertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen(debugResourceName), debugResourceName);
-#endif
 }
 
-void RMeshRenderBuffer::CreateIndexBuffer(void* data, UINT indexTypeSize, UINT indexCount, bool dynamic /*= false*/, const char* debugResourceName/*=nullptr*/)
+void RMeshRenderBuffer::CreateIndexBuffer(void* data, UINT indexTypeSize, UINT indexCount, bool dynamic /*= false*/)
 {
 	D3D11_BUFFER_DESC ibd;
 	ZeroMemory(&ibd, sizeof(ibd));
@@ -73,11 +93,6 @@ void RMeshRenderBuffer::CreateIndexBuffer(void* data, UINT indexTypeSize, UINT i
 
 	GRenderer.D3DDevice()->CreateBuffer(&ibd, &initIndexData, &m_IndexBuffer);
 	m_IndexCount = indexCount;
-
-#if _DEBUG
-	if (debugResourceName)
-		m_IndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen(debugResourceName), debugResourceName);
-#endif
 }
 
 void RMeshRenderBuffer::UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSize, UINT vertexCount)
@@ -92,7 +107,7 @@ void RMeshRenderBuffer::UpdateDynamicVertexBuffer(void* data, UINT vertexTypeSiz
 	m_VertexCount = vertexCount;
 }
 
-void RMeshRenderBuffer::Draw(D3D11_PRIMITIVE_TOPOLOGY topology) const
+void RMeshRenderBuffer::Draw() const
 {
 	if (m_VertexBuffer)
 	{
@@ -101,7 +116,7 @@ void RMeshRenderBuffer::Draw(D3D11_PRIMITIVE_TOPOLOGY topology) const
 
 		GRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
 		GRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
-		GRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
+		GRenderer.D3DImmediateContext()->IASetPrimitiveTopology(GetD3D11PrimitiveTopology(m_PrimitiveTopology));
 		
 		if (m_IndexBuffer)
 		{
@@ -117,7 +132,7 @@ void RMeshRenderBuffer::Draw(D3D11_PRIMITIVE_TOPOLOGY topology) const
 	}
 }
 
-void RMeshRenderBuffer::DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology) const
+void RMeshRenderBuffer::DrawInstanced(int instanceCount) const
 {
 	UINT offset = 0;
 
@@ -128,7 +143,7 @@ void RMeshRenderBuffer::DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOG
 		
 		GRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
 		GRenderer.D3DImmediateContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &m_Stride, &offset);
-		GRenderer.D3DImmediateContext()->IASetPrimitiveTopology(topology);
+		GRenderer.D3DImmediateContext()->IASetPrimitiveTopology(GetD3D11PrimitiveTopology(m_PrimitiveTopology));
 
 		if (m_IndexBuffer)
 		{
@@ -143,6 +158,22 @@ void RMeshRenderBuffer::DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOG
 		GRenderer.Stats.DrawCalls++;
 	}
 }
+
+#if _DEBUG
+void SetDebuggerObjectName(RMeshRenderBuffer& RenderBuffer, const char* ObjectName)
+{
+	if (RenderBuffer.m_VertexBuffer)
+	{
+		RenderBuffer.m_VertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen(ObjectName), ObjectName);
+	}
+
+	if (RenderBuffer.m_IndexBuffer)
+	{
+		RenderBuffer.m_IndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen(ObjectName), ObjectName);
+	}
+}
+#endif	// _DEBUG
+
 
 RMeshElement::RMeshElement()
 	: m_Flag(0), m_VertexComponentMask(0)
@@ -249,8 +280,9 @@ void RMeshElement::UpdateRenderBuffer()
 	}
 #undef COPY_VERTEX_COMPONENT
 
-	m_RenderBuffer.CreateVertexBuffer(compactVertexData, stride, (UINT)PositionArray.size(), inputLayout, false, m_Name.c_str());
-	m_RenderBuffer.CreateIndexBuffer(TriangleIndices.data(), sizeof(UINT), (UINT)TriangleIndices.size(), false, m_Name.c_str());
+	m_RenderBuffer.CreateVertexBuffer(compactVertexData, stride, (UINT)PositionArray.size(), inputLayout, EPrimitiveTopology::TriangleList, false);
+	m_RenderBuffer.CreateIndexBuffer(TriangleIndices.data(), sizeof(UINT), (UINT)TriangleIndices.size(), false);
+	SetDebuggerObjectName(m_RenderBuffer, m_Name.c_str());
 
 	delete[] compactVertexData;
 
@@ -262,13 +294,13 @@ void RMeshElement::UpdateRenderBuffer()
 	}
 }
 
-void RMeshElement::Draw(D3D11_PRIMITIVE_TOPOLOGY topology) const
+void RMeshElement::Draw() const
 {
-	m_RenderBuffer.Draw(topology);
+	m_RenderBuffer.Draw();
 }
 
-void RMeshElement::DrawInstanced(int instanceCount, D3D11_PRIMITIVE_TOPOLOGY topology) const
+void RMeshElement::DrawInstanced(int instanceCount) const
 {
-	m_RenderBuffer.DrawInstanced(instanceCount, topology);
+	m_RenderBuffer.DrawInstanced(instanceCount);
 }
 

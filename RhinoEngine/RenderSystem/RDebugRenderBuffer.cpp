@@ -13,13 +13,12 @@ RDebugRenderBuffer::RDebugRenderBuffer()
 {
 }
 
-void RDebugRenderBuffer::Initialize(D3D11_PRIMITIVE_TOPOLOGY InTopology, int InMaxVertexCount)
+void RDebugRenderBuffer::Initialize(EPrimitiveTopology InTopology, int InMaxVertexCount)
 {
-	Topology = InTopology;
 	m_MaxNumVertices = InMaxVertexCount;
 	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
 	m_PrimitiveInputLayout = RVertexDeclaration::Instance().GetInputLayout<RVertexType::PositionColor>();
-	m_PrimitiveMeshBuffer.CreateVertexBuffer(nullptr, sizeof(RVertexType::PositionColor), m_MaxNumVertices, m_PrimitiveInputLayout, true);
+	m_PrimitiveMeshBuffer.CreateVertexBuffer(nullptr, sizeof(RVertexType::PositionColor), m_MaxNumVertices, m_PrimitiveInputLayout, InTopology, true);
 }
 
 void RDebugRenderBuffer::Release()
@@ -50,7 +49,7 @@ void RDebugRenderBuffer::Render()
 		while (StartIndex < NumVertices)
 		{
 			m_PrimitiveMeshBuffer.UpdateDynamicVertexBuffer(&m_PrimitiveVertices[StartIndex], VertexTypeSize, RMath::Min(NumVertices - StartIndex, m_MaxNumVertices));
-			m_PrimitiveMeshBuffer.Draw(Topology);
+			m_PrimitiveMeshBuffer.Draw();
 
 			StartIndex += m_MaxNumVertices;
 		}
@@ -72,7 +71,7 @@ void RDebugRenderBuffer::Render()
 
 			m_ColorShader->Bind();
 			GRenderer.D3DImmediateContext()->IASetInputLayout(m_PrimitiveInputLayout);
-			m_PrimitiveMeshBuffer.Draw(Topology);
+			m_PrimitiveMeshBuffer.Draw();
 		}
 	}
 }

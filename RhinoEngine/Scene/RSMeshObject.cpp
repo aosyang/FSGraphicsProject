@@ -219,11 +219,11 @@ void RSMeshObject::Draw(bool instanced, int instanceCount)
 
 		if (instanced)
 		{
-			MeshElement.DrawInstanced(instanceCount, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			MeshElement.DrawInstanced(instanceCount);
 		}
 		else
 		{
-			MeshElement.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			MeshElement.Draw();
 		}
 	}
 }
@@ -249,11 +249,11 @@ void RSMeshObject::DrawDepthPass(bool instanced, int instanceCount)
 
 		if (instanced)
 		{
-			MeshElement.DrawInstanced(instanceCount, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			MeshElement.DrawInstanced(instanceCount);
 		}
 		else
 		{
-			MeshElement.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			MeshElement.Draw();
 		}
 	}
 }

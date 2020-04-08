@@ -59,7 +59,7 @@ void RPostProcessorManager::Initialize()
 			RVec3(1.0f,  1.0f, 1.0f),
 			RVec3(1.0f, -1.0f, 1.0f),
 		};
-		m_ScreenQuad.CreateVertexBuffer(quad, sizeof(PP_QUAD), 6, m_InputLayout);
+		m_ScreenQuad.CreateVertexBuffer(quad, sizeof(PP_QUAD), 6, m_InputLayout, EPrimitiveTopology::TriangleList);
 	}
 
 	CreateRenderTargetResources();
@@ -184,7 +184,7 @@ void RPostProcessorManager::Draw(RPostProcessingEffect* Effect)
 		//GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, &m_RTSRV);
 
 		GRenderer.D3DImmediateContext()->IASetInputLayout(m_InputLayout);
-		m_ScreenQuad.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_ScreenQuad.Draw();
 	}
 }
 

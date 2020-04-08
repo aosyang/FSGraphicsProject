@@ -39,7 +39,7 @@ void RText::Initialize(RTexture* fontTexture, UINT rows, UINT columns)
 	}
 
 	ID3D11InputLayout* pInputLayout = RVertexDeclaration::Instance().GetInputLayout<RVertexType::Font>();
-	m_VertexBuffer.CreateVertexBuffer(nullptr, sizeof(RVertexType::Font), 65536, pInputLayout, true);
+	m_VertexBuffer.CreateVertexBuffer(nullptr, sizeof(RVertexType::Font), 65536, pInputLayout, EPrimitiveTopology::TriangleList, true);
 
 	m_FontShader = RShaderManager::Instance().GetShaderResource("Font");
 }
@@ -130,5 +130,5 @@ void RText::Render()
 	GRenderer.SetBlendState(BlendState::AlphaBlending);
 	m_FontShader->Bind();
 	GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_FontTexture->GetPtrSRV());
-	m_VertexBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_VertexBuffer.Draw();
 }

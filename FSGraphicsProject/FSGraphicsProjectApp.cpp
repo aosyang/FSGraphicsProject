@@ -135,7 +135,7 @@ bool FSGraphicsProjectApp::Initialize()
 		1, 0, 11, 2, 1, 11, 3, 2, 11, 4, 3, 11, 5, 4, 11, 6, 5, 11, 7, 6, 11, 8, 7, 11, 9, 8, 11, 0, 9, 11, };
 
 	m_ColorPrimitiveIL = RVertexDeclaration::Instance().GetInputLayout<RVertexType::PositionColor>();
-	m_StarMesh.CreateVertexBuffer(starVertex, sizeof(RVertexType::PositionColor), 12, m_ColorPrimitiveIL);
+	m_StarMesh.CreateVertexBuffer(starVertex, sizeof(RVertexType::PositionColor), 12, m_ColorPrimitiveIL, EPrimitiveTopology::TriangleList);
 	m_StarMesh.CreateIndexBuffer(starIndex, sizeof(UINT32), sizeof(starIndex) / sizeof(UINT32));
 
 	// Create buffer for bump cube
@@ -186,7 +186,7 @@ bool FSGraphicsProjectApp::Initialize()
 	};
 
 	m_BumpLightingIL = RVertexDeclaration::Instance().GetInputLayout<RVertexType::Mesh>();
-	m_BumpCubeMesh.CreateVertexBuffer(boxVertex, sizeof(RVertexType::Mesh), 24, m_BumpLightingIL);
+	m_BumpCubeMesh.CreateVertexBuffer(boxVertex, sizeof(RVertexType::Mesh), 24, m_BumpLightingIL, EPrimitiveTopology::TriangleList);
 	m_BumpCubeMesh.CreateIndexBuffer(boxIndex, sizeof(UINT32), 36);
 
 	m_cbInstance[0].Initialize();
@@ -278,7 +278,7 @@ bool FSGraphicsProjectApp::Initialize()
 	}
 
 	m_ParticleIL = RVertexDeclaration::Instance().GetInputLayout<RVertexType::Particle>();
-	m_ParticleBuffer.CreateVertexBuffer(nullptr, sizeof(RVertexType::Particle), PARTICLE_COUNT, m_ParticleIL, true);
+	m_ParticleBuffer.CreateVertexBuffer(nullptr, sizeof(RVertexType::Particle), PARTICLE_COUNT, m_ParticleIL, EPrimitiveTopology::PointList, true);
 
 	for (int i = 0; i < PARTICLE_COUNT; i++)
 	{
@@ -1002,7 +1002,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	else
 		m_ColorShader->Bind();
 
-	m_StarMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_StarMesh.Draw();
 
 	// Draw meshes
 
@@ -1132,7 +1132,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 	if (pass == ShadowPass)
 	{
 		m_DepthShader->Bind();
-		m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_BumpCubeMesh.Draw();
 	}
 	else
 	{
@@ -1142,7 +1142,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 		m_BumpLightingShader->Bind();
 		GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_BumpBaseTexture->GetPtrSRV());
 		GRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, m_BumpNormalTexture->GetPtrSRV());
-		m_BumpCubeMesh.Draw(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_BumpCubeMesh.Draw();
 	}
 #endif
 
@@ -1240,7 +1240,7 @@ void FSGraphicsProjectApp::RenderSinglePass(RenderPass pass)
 			GRenderer.D3DImmediateContext()->PSSetShaderResources(0, 1, m_ParticleDiffuseTexture->GetPtrSRV());
 			GRenderer.D3DImmediateContext()->PSSetShaderResources(1, 1, m_ParticleNormalTexture->GetPtrSRV());
 			m_ParticleShader->Bind();
-			m_ParticleBuffer.Draw(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+			m_ParticleBuffer.Draw();
 
 			// Restore depth writing
 			GRenderer.D3DImmediateContext()->OMSetDepthStencilState(m_DepthState[0], 0);
