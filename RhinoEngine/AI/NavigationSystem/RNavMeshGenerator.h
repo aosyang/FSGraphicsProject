@@ -42,7 +42,7 @@ public:
 	~RNavMeshGenerator();
 
 	// Build the navmesh for a scene
-	void Build(const RScene* Scene, RNavMeshData& OutNavMeshData, INavMeshCellDetector& CellDetector);
+	void Build(const RScene* Scene, RNavMeshData& OutNavMeshData, const INavMeshCellDetector& CellDetector);
 
 	// Draw debug geometries for the navmesh generator
 	void DebugRender(int DebugFlags) const;
@@ -56,7 +56,7 @@ public:
 	static const GridCoord	NeighborOffset[];
 
 private:
-	void GenerateHeightfieldColumns(INavMeshCellDetector& CellDetector);
+	void GenerateHeightfieldColumns(const INavMeshCellDetector& CellDetector);
 
 	// Test if a cell is colliding with any objects in the scene
 	bool TestCellOverlappingWithScene(const RAabb& CellBounds, const std::vector<RSceneObject*>& SceneObjects);

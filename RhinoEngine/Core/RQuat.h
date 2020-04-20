@@ -8,7 +8,7 @@
 
 #include "RVector.h"
 
-#include <winerror.h>	// FORCEINLINE
+#include "Platform.h"
 
 class RMatrix3;
 

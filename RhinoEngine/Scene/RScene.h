@@ -8,7 +8,8 @@
 
 #include "Core/CoreTypes.h"
 
-class RSceneObject;
+#include "RSceneObject.h"
+
 class RSMeshObject;
 class RMesh;
 class RCamera;

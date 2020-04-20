@@ -29,7 +29,7 @@ public:
 	bool Initialize();
 
 	// Build navmesh data from a scene
-	void BuildNavMesh(const RScene* Scene, INavMeshCellDetector& CellDetector = RDefaultNavMeshCellDetector());
+	void BuildNavMesh(const RScene* Scene, const INavMeshCellDetector& CellDetector = RDefaultNavMeshCellDetector());
 
 	bool SerializeNavMesh(RSerializer& Serializer);
 

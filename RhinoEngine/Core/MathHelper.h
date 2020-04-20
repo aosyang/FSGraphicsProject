@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <winerror.h>	// FORCEINLINE
+#include "Platform.h"
 
 #include <stdlib.h>
 #include <float.h>

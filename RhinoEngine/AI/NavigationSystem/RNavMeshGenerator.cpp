@@ -121,7 +121,7 @@ RNavMeshGenerator::~RNavMeshGenerator()
 	RInput.UnbindKeyStateEvents(VK_OEM_6, EBufferedKeyState::Pressed);
 }
 
-void RNavMeshGenerator::Build(const RScene* Scene, RNavMeshData& OutNavMeshData, INavMeshCellDetector& CellDetector)
+void RNavMeshGenerator::Build(const RScene* Scene, RNavMeshData& OutNavMeshData, const INavMeshCellDetector& CellDetector)
 {
 	RLog("Initalizing navmesh generator from static level meshes.\n");
 
@@ -225,7 +225,7 @@ void RNavMeshGenerator::DebugRender(int DebugFlags) const
 	}
 }
 
-void RNavMeshGenerator::GenerateHeightfieldColumns(INavMeshCellDetector& CellDetector)
+void RNavMeshGenerator::GenerateHeightfieldColumns(const INavMeshCellDetector& CellDetector)
 {
 	for (int x = 0; x < CellNumX; x++)
 	{

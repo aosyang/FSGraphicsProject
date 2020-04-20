@@ -19,7 +19,7 @@ RDefaultNavMeshCellDetector::RDefaultNavMeshCellDetector(int InNumSubdivides /*=
 	SceneObjects = GSceneManager.DefaultScene()->EnumerateSceneObjects();
 }
 
-bool RDefaultNavMeshCellDetector::IsCellOccupied(const RAabb& CellBounds)
+bool RDefaultNavMeshCellDetector::IsCellOccupied(const RAabb& CellBounds) const
 {
 	for (auto& SceneObj : SceneObjects)
 	{
@@ -46,7 +46,7 @@ bool RDefaultNavMeshCellDetector::IsCellOccupied(const RAabb& CellBounds)
 	return false;
 }
 
-bool RDefaultNavMeshCellDetector::IsCellTraversable(const RAabb& CellBounds)
+bool RDefaultNavMeshCellDetector::IsCellTraversable(const RAabb& CellBounds) const
 {
 	float StepX = (CellBounds.pMax.X() - CellBounds.pMin.X()) / NumSubdivides;
 	float StepZ = (CellBounds.pMax.Z() - CellBounds.pMin.Z()) / NumSubdivides;
@@ -100,7 +100,7 @@ RPhysicsNavMeshCellDetector::RPhysicsNavMeshCellDetector()
 	GhostObject->setCollisionShape(BoxShape.get());
 }
 
-bool RPhysicsNavMeshCellDetector::IsCellOccupied(const RAabb& CellBounds)
+bool RPhysicsNavMeshCellDetector::IsCellOccupied(const RAabb& CellBounds) const
 {
 	if (GhostObject->getCollisionShape())
 	{
@@ -121,7 +121,7 @@ bool RPhysicsNavMeshCellDetector::IsCellOccupied(const RAabb& CellBounds)
 	return ContactResult.bHasContacts;
 }
 
-bool RPhysicsNavMeshCellDetector::IsCellTraversable(const RAabb& CellBounds)
+bool RPhysicsNavMeshCellDetector::IsCellTraversable(const RAabb& CellBounds) const
 {
 	return RDefaultNavMeshCellDetector::IsCellTraversable(CellBounds);
 }

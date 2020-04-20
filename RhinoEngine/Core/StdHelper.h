@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <winerror.h>	// FORCEINLINE
+#include "Platform.h"
 
 /// Check whether a given value exists in a container.
 /// Note: Requires operator '==' to be overloaded for the value type.

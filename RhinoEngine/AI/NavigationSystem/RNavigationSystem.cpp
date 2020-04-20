@@ -18,7 +18,7 @@ bool RNavigationSystem::Initialize()
 	return true;
 }
 
-void RNavigationSystem::BuildNavMesh(const RScene* Scene, INavMeshCellDetector& CellDetector /*= RDefaultNavMeshCellDetector()*/)
+void RNavigationSystem::BuildNavMesh(const RScene* Scene, const INavMeshCellDetector& CellDetector /*= RDefaultNavMeshCellDetector()*/)
 {
 	NavMeshGenerator.Build(Scene, NavMeshData, CellDetector);
 
