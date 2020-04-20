@@ -5,6 +5,9 @@
 //=============================================================================
 #pragma once
 
+#include "Core/Platform.h"
+
+#if PLATFORM_WINDOWS
 // Win32 memory leak detection (works in debug builds only)
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
@@ -12,6 +15,7 @@
 
 // Win32 file system APIs
 #pragma comment(lib, "Shlwapi.lib")
+#endif	// PLATFORM_WINDOWS
 
 #include "Core/CoreTypes.h"
 

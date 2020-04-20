@@ -25,6 +25,9 @@
 #include "Core/RLog.h"
 #include "Core/StdHelper.h"
 
+#include <tchar.h>	// _tcslen, _tcscpy_s
+
+
 ID3D11DepthStencilView* RRenderSystem::DefaultDepthStencilView = nullptr;
 ID3D11RenderTargetView* RRenderSystem::DefaultRenderTargetView = nullptr;
 
