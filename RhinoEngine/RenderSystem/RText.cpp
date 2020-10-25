@@ -40,7 +40,7 @@ void RText::Initialize(RTexture* fontTexture, UINT rows, UINT columns)
 	ID3D11InputLayout* pInputLayout = RVertexDeclaration::Instance().GetInputLayout<RVertexType::Font>();
 	m_VertexBuffer.CreateVertexBuffer(nullptr, sizeof(RVertexType::Font), 65536, pInputLayout, EPrimitiveTopology::TriangleList, true);
 
-	m_FontShader = RShaderManager::Instance().GetShaderResource("Font");
+	m_FontShader = GShaderManager.FindShaderByName("Font");
 }
 
 void RText::AddText(const char* text, UINT start_x, UINT start_y, const RColor& fg, const RColor& bg)

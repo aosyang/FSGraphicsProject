@@ -93,11 +93,11 @@ bool FSGraphicsProjectApp::Initialize()
 {
 	CreateSceneRenderTargetView();
 
-	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
-	m_BumpLightingShader = RShaderManager::Instance().GetShaderResource("BumpLighting");
-	m_DepthShader = RShaderManager::Instance().GetShaderResource("Depth");
-	m_ParticleShader = RShaderManager::Instance().GetShaderResource("Particle");
-	m_RefractionShader = RShaderManager::Instance().GetShaderResource("Refraction");
+	m_ColorShader = GShaderManager.FindShaderByName("Color");
+	m_BumpLightingShader = GShaderManager.FindShaderByName("BumpLighting");
+	m_DepthShader = GShaderManager.FindShaderByName("Depth");
+	m_ParticleShader = GShaderManager.FindShaderByName("Particle");
+	m_RefractionShader = GShaderManager.FindShaderByName("Refraction");
 
 	m_PostProcessingEffects[PPE_GammaCorrection] = GPostProcessorManager.CreateEffectFromFile("GammaCorrection", "PostProcessor_GammaCorrection.hlsl");
 	m_PostProcessingEffects[PPE_ColorEdgeDetection] = GPostProcessorManager.CreateEffectFromFile("ColorEdgeDetection", "PostProcessor_ColorEdgeDetection.hlsl");

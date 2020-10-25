@@ -50,7 +50,7 @@ struct RShader
 
 	bool operator==(const RShader& rhs) const;
 
-	void Bind(int featureMasks = 0);
+	void Bind(int featureMasks = 0) const;
 	const std::string& GetName() const;
 
 	/// Get name for the texture slot by id
@@ -90,16 +90,11 @@ public:
 	/// Unload all loaded shaders
 	void UnloadAllShaders();
 
-	bool AddShader(const char* shaderName,
-				   const void* pixelShaderBytecode,
-				   SIZE_T pixelBytecodeLength,
-				   const void* vertexShaderBytecode,
-				   SIZE_T vertexBytecodeLength,
-				   const void* geometryShaderBytecode = nullptr,
-				   SIZE_T geometryBytecodeLength = 0);
+	/// Find a shader by its name
+	const RShader* FindShaderByName(const std::string& ShaderName) const;
+	RShader* FindShaderByName(const std::string& ShaderName);
 
-	RShader* GetShaderResource(const char* shaderName);
-
+	/// Get the default shader for any fallback use cases
 	RShader* GetDefaultShader();
 
 	/// Get a list of all shader names
@@ -151,10 +146,12 @@ private:
 	static const std::string EmptyShaderName;
 };
 
+// The shader manager singleton
+#define GShaderManager RShaderManager::Instance()
 
 FORCEINLINE const std::string& RShader::GetName() const
 {
-	return RShaderManager::Instance().GetShaderName(this);
+	return GShaderManager.GetShaderName(this);
 }
 
 

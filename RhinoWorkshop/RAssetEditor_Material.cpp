@@ -28,7 +28,7 @@ void RAssetEditor_Material::ShowWindow(REditorContext& EditorContext)
 		const std::string MaterialShaderName = Material->GetShader()->GetName();
 		int CurrentShader = 0;
 
-		auto ShaderNames = RShaderManager::Instance().EnumerateAllShaderNames();
+		auto ShaderNames = GShaderManager.EnumerateAllShaderNames();
 		std::vector<const char*> ShaderNameStrings;
 		for (int i = 0; i < (int)ShaderNames.size(); i++)
 		{
@@ -41,7 +41,7 @@ void RAssetEditor_Material::ShowWindow(REditorContext& EditorContext)
 
 		if (ImGui::Combo("Shader", &CurrentShader, ShaderNameStrings.data(), (int)ShaderNameStrings.size()))
 		{
-			Material->SetShader(RShaderManager::Instance().GetShaderResource(ShaderNameStrings[CurrentShader]));
+			Material->SetShader(GShaderManager.FindShaderByName(ShaderNameStrings[CurrentShader]));
 			bUpdatePreview = true;
 		}
 	}

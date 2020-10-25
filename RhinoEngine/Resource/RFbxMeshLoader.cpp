@@ -1002,21 +1002,21 @@ namespace
 				{
 					if (bHasMaps[SpecularMap])
 					{
-						Shader = RShaderManager::Instance().GetShaderResource("BumpSpecularLighting");
+						Shader = GShaderManager.FindShaderByName("BumpSpecularLighting");
 					}
 					else
 					{
-						Shader = RShaderManager::Instance().GetShaderResource("BumpLighting");
+						Shader = GShaderManager.FindShaderByName("BumpLighting");
 					}
 				}
 				else
 				{
-					Shader = RShaderManager::Instance().GetShaderResource("Lighting");
+					Shader = GShaderManager.FindShaderByName("Lighting");
 				}
 			}
 			else
 			{
-				Shader = RShaderManager::Instance().GetDefaultShader();
+				Shader = GShaderManager.GetDefaultShader();
 			}
 
 			assert(Shader != nullptr);

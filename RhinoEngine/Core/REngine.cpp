@@ -93,7 +93,7 @@ bool REngine::InitializeSubsystems(HWND hWnd, int width, int height)
 	RResourceManager::Instance().Initialize();
 
 	// Initialize shaders
-	RShaderManager::Instance().LoadShaders(RShaderManager::GetShaderRootPath());
+	GShaderManager.LoadShaders(RShaderManager::GetShaderRootPath());
 
 	// Initialize debug renderer
 	GDebugRenderer.Initialize();
@@ -120,7 +120,7 @@ void REngine::Shutdown()
 	GScriptSystem.Shutdown();
 
 	// Unload shaders
-	RShaderManager::Instance().UnloadAllShaders();
+	GShaderManager.UnloadAllShaders();
 
 	// Destroy resource manager
 	RResourceManager::Instance().Destroy();

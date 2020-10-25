@@ -52,7 +52,7 @@ bool RShader::operator==(const RShader& rhs) const
 		GeometryShader == rhs.GeometryShader;
 }
 
-void RShader::Bind(int featureMasks)
+void RShader::Bind(int featureMasks /*= 0*/) const
 {
 	if ((featureMasks & SFM_Skinned) && VertexShader_Skinned)
 		GRenderer.SetVertexShader(VertexShader_Skinned);
@@ -203,45 +203,17 @@ void RShaderManager::UnloadAllShaders()
 	m_Shaders.clear();
 }
 
-bool RShaderManager::AddShader(const char* shaderName,
-							   const void* pixelShaderBytecode,
-							   SIZE_T pixelBytecodeLength,
-							   const void* vertexShaderBytecode,
-							   SIZE_T vertexBytecodeLength,
-							   const void* geometryShaderBytecode,
-							   SIZE_T geometryBytecodeLength)
+const RShader* RShaderManager::FindShaderByName(const std::string& ShaderName) const
 {
-	if (m_Shaders.find(shaderName) != m_Shaders.end())
-		return false;
-
-	RShader shader = RShader();
-
-	if (pixelShaderBytecode && pixelBytecodeLength)
-	{
-		GRenderer.D3DDevice()->CreatePixelShader(pixelShaderBytecode, pixelBytecodeLength, NULL, &shader.PixelShader);
-	}
-
-	if (vertexShaderBytecode && vertexBytecodeLength)
-	{
-		GRenderer.D3DDevice()->CreateVertexShader(vertexShaderBytecode, vertexBytecodeLength, NULL, &shader.VertexShader);
-	}
-
-	if (geometryShaderBytecode && geometryBytecodeLength)
-	{
-		GRenderer.D3DDevice()->CreateGeometryShader(geometryShaderBytecode, geometryBytecodeLength, NULL, &shader.GeometryShader);
-	}
-
-	m_Shaders[shaderName] = shader;
-
-	return true;
-}
-
-RShader* RShaderManager::GetShaderResource(const char* shaderName)
-{
-	auto iter = m_Shaders.find(shaderName);
+	auto iter = m_Shaders.find(ShaderName);
 	if (iter != m_Shaders.end())
 		return &iter->second;
 	return nullptr;
+}
+
+RShader* RShaderManager::FindShaderByName(const std::string& ShaderName)
+{
+	return const_cast<RShader*>(const_cast<const RShaderManager*>(this)->FindShaderByName(ShaderName));
 }
 
 RShader* RShaderManager::GetDefaultShader()
@@ -249,7 +221,7 @@ RShader* RShaderManager::GetDefaultShader()
 	static RShader* DefaultShader = nullptr;
 	if (DefaultShader == nullptr)
 	{
-		DefaultShader = GetShaderResource("Default");
+		DefaultShader = FindShaderByName("Default");
 		assert(DefaultShader);
 	}
 

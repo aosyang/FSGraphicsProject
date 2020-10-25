@@ -23,7 +23,7 @@ RDebugRenderBuffer::~RDebugRenderBuffer()
 void RDebugRenderBuffer::Initialize(EPrimitiveTopology InTopology, int InMaxVertexCount)
 {
 	m_MaxNumVertices = InMaxVertexCount;
-	m_ColorShader = RShaderManager::Instance().GetShaderResource("Color");
+	m_ColorShader = GShaderManager.FindShaderByName("Color");
 	m_PrimitiveInputLayout = RVertexDeclaration::Instance().GetInputLayout<RVertexType::PositionColor>();
 	m_PrimitiveMeshBuffer->CreateVertexBuffer(nullptr, sizeof(RVertexType::PositionColor), m_MaxNumVertices, m_PrimitiveInputLayout, InTopology, true);
 }

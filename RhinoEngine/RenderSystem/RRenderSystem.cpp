@@ -434,7 +434,7 @@ void RRenderSystem::BindMaterial(RMaterial* Material, bool bSkinned /*= false*/,
 	RShader* Shader = Material ? Material->GetShader() : nullptr;
 	if (Shader == nullptr)
 	{
-		Shader = RShaderManager::Instance().GetDefaultShader();
+		Shader = GShaderManager.GetDefaultShader();
 	}
 
 	int ShaderFeatureMask = 0;

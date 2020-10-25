@@ -64,7 +64,7 @@ void RSkybox::CreateSkybox(RTexture* skyTexture)
 	m_SkyboxMesh.CreateVertexBuffer(skyboxVertex, sizeof(RVertexType::Position), sizeof(skyboxVertex) / sizeof(RVertexType::Position), m_SkyboxIL, EPrimitiveTopology::TriangleList);
 	m_SkyboxMesh.CreateIndexBuffer(skyboxIndex, sizeof(UINT32), sizeof(skyboxIndex) / sizeof(UINT32));
 
-	m_SkyboxShader = RShaderManager::Instance().GetShaderResource("Skybox");
+	m_SkyboxShader = GShaderManager.FindShaderByName("Skybox");
 
 	if (!m_SkyboxShader)
 	{

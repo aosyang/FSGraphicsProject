@@ -39,7 +39,7 @@ RPostProcessorManager::RPostProcessorManager()
 void RPostProcessorManager::Initialize()
 {
 	// Create vertex shader for post processing
-	RShader* PostProcessorShader = RShaderManager::Instance().GetShaderResource("PostProcessor");
+	RShader* PostProcessorShader = GShaderManager.FindShaderByName("PostProcessor");
 	assert(PostProcessorShader);
 
 	m_PPVertexShader = PostProcessorShader->VertexShader;
@@ -149,7 +149,7 @@ RPostProcessingEffect* RPostProcessorManager::CreateEffectFromBytecode(const std
 	// Assume we don't have a post processing effect with the same name
 	assert(PostProcessingEffectList.find(Name) == PostProcessingEffectList.end());
 
-	ID3D11PixelShader* PixelShader = RShaderManager::Instance().CreatePixelShaderFromBytecode(pBytecode, BytecodeSize);
+	ID3D11PixelShader* PixelShader = GShaderManager.CreatePixelShaderFromBytecode(pBytecode, BytecodeSize);
 	if (PixelShader)
 	{
 		RPostProcessingEffect* Effect = new RPostProcessingEffect(PixelShader);

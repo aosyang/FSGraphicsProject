@@ -71,10 +71,10 @@ void RMaterial::Serialize(RSerializer& serializer)
 	{
 		std::string shaderName;
 		serializer.SerializeData(shaderName);
-		Shader = RShaderManager::Instance().GetShaderResource(shaderName.c_str());
+		Shader = GShaderManager.FindShaderByName(shaderName);
 		if (Shader == nullptr)
 		{
-			Shader = RShaderManager::Instance().GetDefaultShader();
+			Shader = GShaderManager.GetDefaultShader();
 		}
 	}
 	else
@@ -142,7 +142,7 @@ RMaterial* RMaterial::GetDefault()
 	static RMaterial* DefaultMaterial = nullptr;
 	if (DefaultMaterial == nullptr)
 	{
-		RShader* DefaultShader = RShaderManager::Instance().GetDefaultShader();
+		RShader* DefaultShader = GShaderManager.GetDefaultShader();
 
 		// Make sure we're not getting the default material before the default shader is loaded
 		assert(DefaultShader);
@@ -160,7 +160,7 @@ RMaterial* RMaterial::GetDepthOnly()
 	static RMaterial* DepthMaterial = nullptr;
 	if (DepthMaterial == nullptr)
 	{
-		RShader* DepthShader = RShaderManager::Instance().GetShaderResource("Depth");
+		RShader* DepthShader = GShaderManager.FindShaderByName("Depth");
 
 		// Make sure we're not getting the default material before the default shader is loaded
 		assert(DepthShader);
@@ -183,7 +183,7 @@ bool RMaterial::LoadResourceImpl()
 		tinyxml2::XMLElement* RootElem = XmlDoc->RootElement();
 
 		const char* ShaderName = RootElem->Attribute("Shader");
-		Shader = ShaderName ? RShaderManager::Instance().GetShaderResource(ShaderName) : nullptr;
+		Shader = ShaderName ? GShaderManager.FindShaderByName(ShaderName) : nullptr;
 
 		const char* BlendModeName = RootElem->Attribute(KeyName_BlendMode);
 		if (BlendModeName)
