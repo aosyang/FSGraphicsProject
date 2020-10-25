@@ -26,7 +26,7 @@ RRuntimeTypeInfoData::RRuntimeTypeInfoData(const char* InClassName, size_t InPar
 #endif	// _DEBUG
 
 	RuntimeTypeParents.insert({ TypeId, InParentTypeId });
-	RLog("Class \'%s\' has type id %zu\n", ClassName, TypeId);
+	RLogDebug("Class \'%s\' has type id %zu\n", ClassName, TypeId);
 }
 
 bool RRuntimeTypeObject::IsTypeOrChildTypeOf(size_t OtherTypeId) const

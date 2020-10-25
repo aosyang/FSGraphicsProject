@@ -23,6 +23,11 @@ WorkshopApp::WorkshopApp()
 
 bool WorkshopApp::Initialize()
 {
+#if defined(DEBUG) || defined(_DEBUG)
+	// More logs in debug mode
+	GLogOutputTargets.SetVerbosity(ELogVerbosity::Debug);
+#endif	// defined(DEBUG) || defined(_DEBUG)
+
 	GEngine.SetEditorMode(true);
 
 	RResourceManager::Instance().LoadAllResources(EResourceLoadMode::Immediate);

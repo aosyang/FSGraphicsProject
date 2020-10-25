@@ -129,7 +129,7 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 					fbxBoneNodes.push_back(SkeletonNode);
 					meshBoneIdToName.push_back(SkeletonNode->GetName());
 
-					RLog("  FBX bone node: %s\n", SkeletonNode->GetName());
+					RLogVerbose("  FBX bone node: %s\n", SkeletonNode->GetName());
 				}
 			}
 		}
@@ -158,7 +158,7 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 	{
 		FbxNode* SceneNode = lFbxScene->GetNode(IdxNode);
 		const char* NodeName = SceneNode->GetName();
-		RLog("  FBX node [%d/%d]: %s\n", IdxNode + 1, NumFbxNodes, NodeName);
+		RLogVerbose("  FBX node [%d/%d]: %s\n", IdxNode + 1, NumFbxNodes, NodeName);
 
 		FbxMesh* MeshNode = SceneNode->GetMesh();
 
@@ -168,7 +168,7 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 		}
 
 		//mesh->SplitPoints();
-		RLog("    Found mesh element! [%s]\n", NodeName);
+		RLogVerbose("    Found mesh element! [%s]\n", NodeName);
 
 		FbxVector4* controlPointArray;
 		std::vector<RVertexType::MeshLoader> vertData;
@@ -409,7 +409,7 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 					{
 						RMatrix4 OriginalTransform;
 						MatrixTransfer(OriginalTransform, clusterInitTransform);
-						RLog("Cluster link \'%s\', initial transform:\n%s", LinkNode->GetName(), GetDisplayStringForMatrix(OriginalTransform).c_str());
+						RLogVerbose("Cluster link \'%s\', initial transform:\n%s", LinkNode->GetName(), GetDisplayStringForMatrix(OriginalTransform).c_str());
 					}
 #endif	// DEBUG_LOG_MATRICES == 1
 
@@ -697,7 +697,7 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 				meshElem->SetFlag(flag);
 				meshElements.push_back(std::move(meshElem));
 
-				RLog("Mesh element loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
+				RLogVerbose("Mesh element loaded with %d vertices and %d triangles (unoptimized: vert %d, triangle %d).\n",
 					OptimizedNumVerts, OptimizedNumIndices, OrignialNumVerts, OriginalNumIndices);
 			}
 			else
@@ -772,7 +772,7 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const std::str
 void RFbxMeshLoader::OptimizeMesh(std::vector<UINT>& IndexData, std::vector<RVertexType::MeshLoader>& VertexData) const
 {
 	// Optimize mesh
-	RLog("Optimizing mesh...\n");
+	RLogVerbose("Optimizing mesh...\n");
 
 	std::map<RVertexType::MeshLoader, int> meshVertIndexTable;
 	std::vector<RVertexType::MeshLoader> optimizedVertData;
@@ -865,7 +865,7 @@ namespace
 						{
 							RMatrix4 OriginalTransform;
 							MatrixTransfer(OriginalTransform, FbxBoneTransform);
-							RLog("Bone \'%s\', pose at first frame:\n%s", BoneName, GetDisplayStringForMatrix(OriginalTransform).c_str());
+							RLogVerbose("Bone \'%s\', pose at first frame:\n%s", BoneName, GetDisplayStringForMatrix(OriginalTransform).c_str());
 						}
 #endif	// DEBUG_LOG_MATRICES == 1
 

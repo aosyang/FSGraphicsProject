@@ -10,6 +10,7 @@
 
 
 RLogOutputTargets::RLogOutputTargets()
+	: LogVerbosity(ELogVerbosity::Log)
 {
 
 }
