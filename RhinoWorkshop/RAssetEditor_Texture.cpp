@@ -16,7 +16,7 @@ bool RAssetEditor_Texture::IsMatchedAssetType(RResourceBase* Resource) const
 	return Resource->CastTo<RTexture>() != nullptr;
 }
 
-void RAssetEditor_Texture::ShowWindow(REditorContext& EditorContext)
+void RAssetEditor_Texture::OnDrawWindow(REditorContext& EditorContext)
 {
 	RTexture* Texture = EditorContext.AssetBrowserWindow.GetEditingResource()->CastTo<RTexture>();
 	assert(Texture);

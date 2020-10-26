@@ -168,10 +168,10 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 		REditorContext EditorContext = { AssetEditorWindow, AssetBrowserWindow, ResourcePreviewBuilder };
 
 		// The asset explorer window
-		AssetBrowserWindow.ShowWindow(EditorContext);
+		AssetBrowserWindow.DrawWindow(EditorContext);
 
 		AssetEditorWindow.SetEditingResource(AssetBrowserWindow.GetEditingResource());
-		AssetEditorWindow.ShowWindow(EditorContext);
+		AssetEditorWindow.DrawWindow(EditorContext);
 
 		if (SelectedObject)
 		{
@@ -285,7 +285,13 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 				if (MeshTreeOpen = ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_None))
 				{
 					// Button for mesh selection
-					ImGui::Button(".."); ImGui::SameLine();
+					if (ImGui::Button(".."))
+					{
+						AssetBrowserWindow.bShowWindow = true;
+						AssetBrowserWindow.SetFilter(AssetType_Mesh);
+					}
+
+					ImGui::SameLine();
 					if (ImGui::Button("->"))
 					{
 						if (auto Resource = AssetBrowserWindow.GetSelectedResource())

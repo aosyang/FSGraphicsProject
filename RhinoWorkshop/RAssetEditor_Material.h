@@ -6,11 +6,13 @@
 
 #pragma once
 
-#include "IAssetEditor.h"
+#include "RAssetEditor.h"
 
-class RAssetEditor_Material : public IAssetEditor
+class RAssetEditor_Material : public RAssetEditor
 {
 public:
 	virtual bool IsMatchedAssetType(RResourceBase* Resource) const override;
-	virtual void ShowWindow(REditorContext& EditorContext) override;
+
+protected:
+	virtual void OnDrawWindow(REditorContext& EditorContext) override;
 };

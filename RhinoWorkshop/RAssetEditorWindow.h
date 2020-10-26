@@ -6,26 +6,25 @@
 
 #pragma once
 
-#include "IAssetEditor.h"
+#include "RAssetEditor.h"
 #include "EditorCommon.h"
 
 class RResourceBase;
 class RResourcePreviewBuilder;
 
-class RAssetEditorWindow
+class RAssetEditorWindow : public RGuiWindow
 {
 public:
 	RAssetEditorWindow();
 
 	void SetEditingResource(RResourceBase* NewEditingResource);
 
-	void ShowWindow(REditorContext& EditorContext);
+protected:
+	virtual void OnDrawWindow(REditorContext& EditorContext) override;
 
-	/// Visibility of asset editor window
-	bool bShowWindow;
 private:
-
+	// Current resource being edited
 	RResourceBase* EditingResource;
 
-	std::vector<std::unique_ptr<IAssetEditor>> AssetTypeEditors;
+	std::vector<std::unique_ptr<RAssetEditor>> AssetTypeEditors;
 };

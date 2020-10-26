@@ -16,7 +16,7 @@ bool RAssetEditor_Material::IsMatchedAssetType(RResourceBase* Resource) const
 	return Resource->CastTo<RMaterial>() != nullptr;
 }
 
-void RAssetEditor_Material::ShowWindow(REditorContext& EditorContext)
+void RAssetEditor_Material::OnDrawWindow(REditorContext& EditorContext)
 {
 	RMaterial* Material = EditorContext.AssetBrowserWindow.GetEditingResource()->CastTo<RMaterial>();
 	assert(Material);

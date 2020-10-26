@@ -13,6 +13,7 @@ class RTexture;
 class RSceneObject;
 class RScene;
 
+// Helper class to generate preview images for resources
 class RResourcePreviewBuilder
 {
 public:

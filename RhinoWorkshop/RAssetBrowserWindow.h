@@ -6,13 +6,14 @@
 
 #pragma once
 
+#include "RGuiWindow.h"
 #include "Resource/RResourceBase.h"
 
 enum RAssetType
 {
-	AssetType_Texture = 1 << 0,
-	AssetType_Mesh = 1 << 1,
-	AssetType_Material = 1 << 2,
+	AssetType_Texture	= 1 << 0,
+	AssetType_Mesh		= 1 << 1,
+	AssetType_Material	= 1 << 2,
 
 	AssetType_All = AssetType_Texture | AssetType_Mesh | AssetType_Material,
 };
@@ -20,13 +21,10 @@ enum RAssetType
 class RResourcePreviewBuilder;
 struct REditorContext;
 
-class RAssetBrowserWindow
+class RAssetBrowserWindow : public RGuiWindow
 {
 public:
 	RAssetBrowserWindow();
-
-	/// Draw the window
-	void ShowWindow(REditorContext& EditorContext);
 
 	/// Get the selected resource in assets view
 	RResourceBase* GetSelectedResource() const;
@@ -35,12 +33,20 @@ public:
 
 	void SetSelectedResource(RResourceBase* Selection);
 
-	/// Visibility of asset view window
-	bool bShowWindow;
+	// Set filters for the browser. Will replace existing filter with the new one
+	void SetFilter(int FilterBitFlags);
+
+protected:
+	/// Draw the window
+	virtual void OnDrawWindow(REditorContext& EditorContext) override;
+
 private:
 	void DisplayAssetTypeFilter(const char* Label, int FilterType);
 
+	// Bit flags of asset types being displayed in window currently
 	int AssetViewFilter;
+
+	// Size of asset preview icons
 	int PreviewIconSize;
 
 	RResourceBase* SelectedResource;
@@ -63,4 +69,9 @@ FORCEINLINE RResourceBase* RAssetBrowserWindow::GetSelectedResource() const
 FORCEINLINE RResourceBase* RAssetBrowserWindow::GetEditingResource() const
 {
 	return EditingResource;
+}
+
+FORCEINLINE void RAssetBrowserWindow::SetFilter(int FilterBitFlags)
+{
+	AssetViewFilter = FilterBitFlags;
 }

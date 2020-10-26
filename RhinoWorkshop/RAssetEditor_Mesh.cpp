@@ -16,7 +16,7 @@ bool RAssetEditor_Mesh::IsMatchedAssetType(RResourceBase* Resource) const
 	return Resource->CastTo<RMesh>() != nullptr;
 }
 
-void RAssetEditor_Mesh::ShowWindow(REditorContext& EditorContext)
+void RAssetEditor_Mesh::OnDrawWindow(REditorContext& EditorContext)
 {
 	RMesh* Mesh = EditorContext.AssetBrowserWindow.GetEditingResource()->CastTo<RMesh>();
 	assert(Mesh != nullptr);
