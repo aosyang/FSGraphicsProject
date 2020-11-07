@@ -47,3 +47,5 @@
 *.db
 *.opendb
 *.rmesh
+
+imgui.ini
