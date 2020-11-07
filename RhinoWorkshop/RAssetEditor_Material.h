@@ -10,9 +10,9 @@
 
 class RAssetEditor_Material : public RAssetEditor
 {
-public:
-	virtual bool IsMatchedAssetType(RResourceBase* Resource) const override;
-
 protected:
+	// Begin RAssetEditor method overrides
+	virtual bool CanHandleAssetType(size_t AssetTypeId) const override;
 	virtual void OnDrawWindow(REditorContext& EditorContext) override;
+	// End RAssetEditor method overrides
 };

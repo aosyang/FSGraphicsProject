@@ -13,7 +13,7 @@ struct RRuntimeTypeInfoData
 {
 	RRuntimeTypeInfoData(const char* InClassName, size_t InParentTypeId);
 
-	/// Type id from hashed string of class name
+	/// The unique id of the class type. Generated from hashed string of class name
 	size_t TypeId;
 
 	const char* ClassName;
@@ -21,18 +21,20 @@ struct RRuntimeTypeInfoData
 
 /// Declare functions for a runtime-type object
 #define DECLARE_RUNTIME_TYPE(type, base)\
-		static RRuntimeTypeInfoData& _StaticGetRuntimeTypeInfo()\
+		static const RRuntimeTypeInfoData& _StaticGetRuntimeTypeInfo()\
 		{\
 			static RRuntimeTypeInfoData _RuntimeTypeInfo(#type, base::_StaticGetRuntimeTypeId());\
 			return _RuntimeTypeInfo;\
 		}\
-		/* Get runtime type id for an object */\
-		virtual size_t GetRuntimeTypeId() const override	{ return type::_StaticGetRuntimeTypeId(); }\
 	public:\
-		/* Get runtime type id for a class or a template type */\
-		static size_t _StaticGetRuntimeTypeId()				{ return _StaticGetRuntimeTypeInfo().TypeId; }\
-		static const char* _StaticGetClassName()			{ return _StaticGetRuntimeTypeInfo().ClassName; }\
-		virtual const char* GetClassName() const override	{ return _StaticGetRuntimeTypeInfo().ClassName; }\
+		/* Get runtime type id for a class or a template type */												\
+		static size_t _StaticGetRuntimeTypeId()				{ return _StaticGetRuntimeTypeInfo().TypeId; }		\
+																												\
+		/* Get runtime type id for an object */																	\
+		virtual size_t GetRuntimeTypeId() const override	{ return type::_StaticGetRuntimeTypeId(); }			\
+																												\
+		static const char* _StaticGetClassName()			{ return _StaticGetRuntimeTypeInfo().ClassName; }	\
+		virtual const char* GetClassName() const override	{ return _StaticGetRuntimeTypeInfo().ClassName; }	\
 	private:
 
 

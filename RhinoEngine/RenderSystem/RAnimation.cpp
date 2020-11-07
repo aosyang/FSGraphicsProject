@@ -106,6 +106,8 @@ bool RAnimationPlayer::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutMatri
 }
 
 RAnimationBlender::RAnimationBlender()
+	: m_BlendTime(0.2f)
+	, m_ElapsedBlendTime(0.0f)
 {
 
 }

@@ -12,18 +12,17 @@
 /// A unordered map that holds pairs for all runtime types and their parent types
 std::unordered_map<size_t, size_t> RuntimeTypeParents;
 
-#ifdef _DEBUG
 /// A map that converts runtime type ids to their names
 std::map<size_t, std::string> RuntimeTypeIdToName;
-#endif	// _DEBUG
 
 RRuntimeTypeInfoData::RRuntimeTypeInfoData(const char* InClassName, size_t InParentTypeId)
 	: TypeId(std::hash<std::string>{}(std::string(InClassName)))
 	, ClassName(InClassName)
 {
-#ifdef _DEBUG
+	// Check for hash collisions
+	assert(RuntimeTypeIdToName.count(TypeId) == 0);
+
 	RuntimeTypeIdToName[TypeId] = ClassName;
-#endif	// _DEBUG
 
 	RuntimeTypeParents.insert({ TypeId, InParentTypeId });
 	RLogDebug("Class \'%s\' has type id %zu\n", ClassName, TypeId);

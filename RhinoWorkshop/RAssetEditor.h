@@ -17,7 +17,9 @@ struct REditorContext;
 class RAssetEditor : public RGuiWindow
 {
 public:
-	virtual bool IsMatchedAssetType(RResourceBase* Resource) const { return false; }
+	// Is given asset type handled by this editor?
+	// Editor will be only drawn if asset type check returns true
+	virtual bool CanHandleAssetType(size_t AssetTypeId) const { return false; }
 
 protected:
 	// Asset editor should always be visible when drawn

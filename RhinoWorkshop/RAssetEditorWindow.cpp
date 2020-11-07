@@ -61,7 +61,7 @@ void RAssetEditorWindow::OnDrawWindow(REditorContext& EditorContext)
 			// Find editor for asset type and draw the interface
 			for (auto& Editor : AssetTypeEditors)
 			{
-				if (Editor->IsMatchedAssetType(EditingResource))
+				if (Editor->CanHandleAssetType(EditingResource->GetRuntimeTypeId()))
 				{
 					Editor->DrawWindow(EditorContext);
 					break;

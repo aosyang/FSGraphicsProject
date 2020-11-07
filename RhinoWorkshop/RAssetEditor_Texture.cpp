@@ -11,9 +11,9 @@
 #include "RAssetBrowserWindow.h"
 #include "EditorCommon.h"
 
-bool RAssetEditor_Texture::IsMatchedAssetType(RResourceBase* Resource) const
+bool RAssetEditor_Texture::CanHandleAssetType(size_t AssetTypeId) const
 {
-	return Resource->CastTo<RTexture>() != nullptr;
+	return AssetTypeId == RTexture::_StaticGetRuntimeTypeId();
 }
 
 void RAssetEditor_Texture::OnDrawWindow(REditorContext& EditorContext)
