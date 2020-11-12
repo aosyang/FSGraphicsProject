@@ -49,6 +49,9 @@ public:
 	void SetUseCustomRenderingPipeline(bool useCustomRendering)		{ m_UseCustomRenderingPipeline = useCustomRendering; }
 	bool IsUsingCustomRenderingPipeline() const						{ return m_UseCustomRenderingPipeline; }
 
+	void BeginImGuiFrame();
+	void EndImGuiFrame();
+
 protected:
 	REngine();
 	~REngine();
@@ -61,9 +64,6 @@ private:
 	void CreateImGuiContext();
 	void InitImGuiWindowAndDevice(HWND hWnd);
 	void ShutdownImGui();
-
-	void BeginImGuiFrame();
-	void EndImGuiFrame();
 
 	bool				m_bIsEditor;
 
