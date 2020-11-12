@@ -148,12 +148,26 @@ void RNavMeshGenerator::Build(const RScene* Scene, RNavMeshData& OutNavMeshData,
 		// Allocate heightfield cells by x-z grid
 		Heightfield.Resize(CellNumX, CellNumZ);
 
-		GenerateHeightfieldColumns(CellDetector);
+		RProgressBar ProgressBar(6, "Generating Navmesh...");
+
+		ProgressBar.Start();
+		GenerateHeightfieldColumns(CellDetector, ProgressBar);
+		ProgressBar.Increment();
+
 		GenerateOpenSpanNeighborData();
+		ProgressBar.Increment();
+
 		GenerateDistanceField();
+		ProgressBar.Increment();
+
 		GenerateRegions();
+		ProgressBar.Increment();
+
 		GenerateRegionContours();
+		ProgressBar.Increment();
+
 		TriangulateRegions(OutNavMeshData);
+		ProgressBar.Increment();
 	}
 
 	// Generate randomized color for each region
@@ -225,8 +239,9 @@ void RNavMeshGenerator::DebugRender(int DebugFlags) const
 	}
 }
 
-void RNavMeshGenerator::GenerateHeightfieldColumns(const INavMeshCellDetector& CellDetector)
+void RNavMeshGenerator::GenerateHeightfieldColumns(const INavMeshCellDetector& CellDetector, RProgressBar& ProgressBar)
 {
+	ProgressBar.StartSubTask(CellNumX * CellNumX, "Generating height field columns");
 	for (int x = 0; x < CellNumX; x++)
 	{
 		for (int z = 0; z < CellNumZ; z++)
@@ -333,8 +348,11 @@ void RNavMeshGenerator::GenerateHeightfieldColumns(const INavMeshCellDetector& C
 			{
 				IterSpan.Bounds = CalculateBoundsForSpan(IterSpan, x, z);
 			}
+
+			ProgressBar.IncrementSubTask();
 		}
 	}
+	ProgressBar.EndSubTask();
 }
 
 bool RNavMeshGenerator::TestCellOverlappingWithScene(const RAabb& CellBounds, const std::vector<RSceneObject*>& SceneObjects)

@@ -11,6 +11,8 @@
 #include "RNavMeshData.h"
 #include "RNavMeshCellDetector.h"
 
+#include "UI/RProgressBar.h"
+
 #include <vector>
 #include <set>
 
@@ -56,7 +58,7 @@ public:
 	static const GridCoord	NeighborOffset[];
 
 private:
-	void GenerateHeightfieldColumns(const INavMeshCellDetector& CellDetector);
+	void GenerateHeightfieldColumns(const INavMeshCellDetector& CellDetector, RProgressBar& ProgressBar);
 
 	// Test if a cell is colliding with any objects in the scene
 	bool TestCellOverlappingWithScene(const RAabb& CellBounds, const std::vector<RSceneObject*>& SceneObjects);

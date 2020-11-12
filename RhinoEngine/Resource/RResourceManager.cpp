@@ -7,9 +7,9 @@
 #include "RResourceManager.h"
 
 #include "RFbxMeshLoader.h"
-#include "RenderSystem/RRenderSystem.h"
 #include "RenderSystem/RTexture.h"
 #include "RenderSystem/RMesh.h"
+#include "UI/RProgressBar.h"
 
 #include "Core/RLog.h"
 
@@ -18,53 +18,9 @@
 #include <condition_variable>
 
 #include "tinyxml2/tinyxml2.h"
-#include "imgui/imgui.h"
 
 // Win32 file system APIs
 #include <Shlwapi.h>
-
-namespace
-{
-	// A progress bar indicating resource loading progress
-	class RResourceLoaderProgressBar
-	{
-	public:
-		RResourceLoaderProgressBar(int InTotalNum)
-			: CurrentNum(0)
-			, TotalNum(InTotalNum)
-		{}
-
-		void Increment()
-		{
-			CurrentNum++;
-		}
-
-		void Draw()
-		{
-			GEngine.BeginImGuiFrame();
-
-			// Draw the loading bar in the center of the screen
-			ImGuiIO& io = ImGui::GetIO();
-			ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-			ImGui::SetNextWindowSize(ImVec2(500, 60));
-
-			if (ImGui::Begin("Loading..."))
-			{
-				float Ratio = RMath::Clamp((float)CurrentNum / (float)TotalNum, 0.0f, 1.0f);
-				ImGui::ProgressBar(Ratio, ImVec2(-1, -1));
-
-				ImGui::End();
-			}
-
-			GEngine.EndImGuiFrame();
-			GRenderer.Present(false);
-		}
-
-	protected:
-		int CurrentNum;		// Current number of progress bar
-		int TotalNum;		// Max number of progress bar
-	};
-}
 
 static std::mutex								m_TaskQueueMutex;
 static std::condition_variable					m_TaskQueueCondition;
@@ -170,12 +126,14 @@ void RResourceManager::Destroy()
 void RResourceManager::LoadAllResources(EResourceLoadMode LoadMode /*= EResourceLoadMode::Threaded*/)
 {
 	std::vector<std::string> ResourcePaths = RFileUtil::GetFilesInDirectoryAndSubdirectories(GetAssetsBasePath(), "*.*");
-	RResourceLoaderProgressBar ProgressBar((int)ResourcePaths.size());
+	int NumResources = (int)ResourcePaths.size();
+	RProgressBar ProgressBar(NumResources, "Loading...");
+	ProgressBar.Start();
+
 	for (auto& Path : ResourcePaths)
 	{
 		LoadResourceAutoDetectType(Path, LoadMode);
 		ProgressBar.Increment();
-		ProgressBar.Draw();
 	}
 }
 
