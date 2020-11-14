@@ -68,8 +68,17 @@ void RAssetEditorWindow::OnDrawWindow(REditorContext& EditorContext)
 				}
 			}
 
-			// Draw the preview
-			RTexture* PreviewTexture = EditingResource->CanCastTo<RTexture>() ? EditingResource->CastTo<RTexture>() : EditorContext.PreviewBuilder.FindPreviewTexture(EditingResource);
+			// Draw preview images
+
+			// Textures can be drawn directly as previews
+			RTexture* PreviewTexture = EditingResource->CastTo<RTexture>();
+
+			// Find preview textures for non-texture type resources
+			if (PreviewTexture == nullptr)
+			{
+				PreviewTexture = EditorContext.PreviewBuilder.FindPreviewTexture(EditingResource);
+			}
+
 			if (PreviewTexture)
 			{
 				ImGui::Text("Preview");
