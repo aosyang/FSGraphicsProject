@@ -2,46 +2,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 
 PROJECT(RhinoEngine)
 
-# Recursively find all .cpp and .h files
-FILE(GLOB SRC
-	 "*.cpp"
-	 "*.h"
-)
-
-FILE(GLOB SRC_AI
-	 "AI/*.cpp"
-	 "AI/*.h"
-)
-
-FILE(GLOB_RECURSE SRC_AI_NAVIGATIONSYSTEM
-	 "AI/NavigationSystem/*.cpp"
-	 "AI/NavigationSystem/*.h"
-)
-
-FILE(GLOB_RECURSE SRC_COLLISION
-	 "Collision/*.cpp"
-	 "Collision/*.h"
-)
-
-FILE(GLOB_RECURSE SRC_CORE
-	 "Core/*.cpp"
-	 "Core/*.h"
-)
-
-FILE(GLOB_RECURSE SRC_PHYSICS
-	 "Physics/*.cpp"
-	 "Physics/*.h"
-)
-
-FILE(GLOB_RECURSE SRC_RENDERSYSTEM
-	 "RenderSystem/*.cpp"
-	 "RenderSystem/*.h"
-)
-
-FILE(GLOB_RECURSE SRC_HLSL
-	 "HLSL/*.hlsl"
-)
-
 # Shader compilation options
 FOREACH(Shader ${SRC_HLSL})
 	SET_SOURCE_FILES_PROPERTIES(${Shader} PROPERTIES
@@ -56,6 +16,7 @@ FOREACH(Shader ${SRC_HLSL})
 	)
 ENDFOREACH()
 
+# Adding shader files
 FILE(GLOB_RECURSE SRC_SHADERS
 	 "../Shaders/*.h"
 	 "../Shaders/*.hlsl"
@@ -69,36 +30,7 @@ FOREACH(Shader ${SRC_SHADERS})
 	)
 ENDFOREACH()
 
-FILE(GLOB_RECURSE SRC_IMGUI
-	 "imgui/*.cpp"
-	 "imgui/*.h"
-)
-
-FILE(GLOB_RECURSE SRC_RESOURCE
-	 "Resource/*.cpp"
-	 "Resource/*.h"
-)
-
-FILE(GLOB_RECURSE SRC_SCENE
-	 "Scene/*.cpp"
-	 "Scene/*.h"
-)
-
-FILE(GLOB_RECURSE SRC_SCRIPT
-	 "Script/*.cpp"
-	 "Script/*.h"
-)
-
-FILE(GLOB_RECURSE SRC_TINYXML2
-	 "tinyxml2/*.cpp"
-	 "tinyxml2/*.h"
-)
-
-FILE(GLOB_RECURSE SRC_UI
-	"UI/*.cpp"
-	"UI/*.h"
-)
-
+# Adding source files of lua 5.3
 SET(SRC_LUA_DIR ${CMAKE_SOURCE_DIR}/lua5.3)
 FILE(GLOB_RECURSE SRC_LUA5_3
 	 "${SRC_LUA_DIR}/*.c"
@@ -112,43 +44,37 @@ LIST(REMOVE_ITEM SRC_LUA5_3 "${SRC_LUA_DIR}/luac.c")
 
 INCLUDE_DIRECTORIES("." ${CMAKE_SOURCE_DIR}/ThirdParty/fbxsdk/include ${CMAKE_SOURCE_DIR}/ThirdParty/Bullet3/src)
 
-ADD_LIBRARY(${PROJECT_NAME} STATIC
-	${SRC}
-	${SRC_AI}
-	${SRC_AI_NAVIGATIONSYSTEM}
-	${SRC_COLLISION}
-	${SRC_CORE}
-	${SRC_PHYSICS}
-	${SRC_RENDERSYSTEM}
-	${SRC_HLSL}
-	${SRC_IMGUI}
-	${SRC_RESOURCE}
-	${SRC_SCENE}
-	${SRC_SCRIPT}
-	${SRC_TINYXML2}
-	${SRC_LUA5_3}
-	${SRC_SHADERS}
-	${SRC_UI}
+# Collection of engine source code files
+SET(SRC_ROOT_PATH "${CMAKE_SOURCE_DIR}/RhinoEngine")
+FILE(
+    GLOB_RECURSE SOURCE_LIST 
+    LIST_DIRECTORIES FALSE
+    "${SRC_ROOT_PATH}/*.c"
+    "${SRC_ROOT_PATH}/*.cpp"
+    "${SRC_ROOT_PATH}/*.h"
+    "${SRC_ROOT_PATH}/*.hpp"
+	"${SRC_ROOT_PATH}/*.hlsl"
 )
 
+ADD_LIBRARY(${PROJECT_NAME} STATIC
+	${SOURCE_LIST}
+	${SRC_LUA5_3}
+	${SRC_SHADERS}
+)
+
+# Put source files into filters base on their paths
+FOREACH(SOURCE IN ITEMS ${SOURCE_LIST})
+    GET_FILENAME_COMPONENT(SRC_PATH "${SOURCE}" PATH)
+    FILE(RELATIVE_PATH SRC_REL_PATH "${SRC_ROOT_PATH}" "${SRC_PATH}")
+    STRING(REPLACE "/" "\\" _GROUP_PATH "${SRC_REL_PATH}")
+    SOURCE_GROUP("${_GROUP_PATH}" FILES "${SOURCE}")
+ENDFOREACH()
+
+# Linking fbx sdk
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} libfbxsdk.lib)
 
-# Generate filters for the project file
-SOURCE_GROUP("" FILES ${SRC})
-SOURCE_GROUP("Collision" FILES ${SRC_COLLISION})
-SOURCE_GROUP("Core" FILES ${SRC_CORE})
-SOURCE_GROUP("AI" FILES ${SRC_AI})
-SOURCE_GROUP("AI\\NavigationSystem" FILES ${SRC_AI_NAVIGATIONSYSTEM})
-SOURCE_GROUP("Physics" FILES ${SRC_PHYSICS})
-SOURCE_GROUP("RenderSystem" FILES ${SRC_RENDERSYSTEM})
-SOURCE_GROUP("RenderSystem\\HLSL" FILES ${SRC_HLSL})
-SOURCE_GROUP("imgui" FILES ${SRC_IMGUI})
-SOURCE_GROUP("Resource" FILES ${SRC_RESOURCE})
-SOURCE_GROUP("Scene" FILES ${SRC_SCENE})
-SOURCE_GROUP("Script" FILES ${SRC_SCRIPT})
-SOURCE_GROUP("tinyxml2" FILES ${SRC_TINYXML2})
+# Generate filters for external source files and shaders
 SOURCE_GROUP("lua5.3" FILES ${SRC_LUA5_3})
 SOURCE_GROUP("Shaders" FILES ${SRC_SHADERS})
-SOURCE_GROUP("UI" FILES ${SRC_UI})
 
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES FOLDER Engine)
