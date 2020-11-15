@@ -459,11 +459,6 @@ void WorkshopApp::UpdateScene(const RTimer& timer)
 	}
 }
 
-void WorkshopApp::RenderScene()
-{
-	GRenderer.Clear();
-}
-
 void WorkshopApp::OnResize(int width, int height)
 {
 	WindowWidth = width;

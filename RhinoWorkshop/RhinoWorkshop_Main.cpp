@@ -17,10 +17,12 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
 	WorkshopApp app;
 
-	GEngine.BindApp(&app);
-	GEngine.SetUseCustomRenderingPipeline(false);
+	REngineInitParam InitParam =
+	{
+		&app,
+	};
 
-	if (GEngine.Initialize())
+	if (GEngine.Initialize(InitParam))
 	{
 		GEngine.Run();
 		GEngine.Shutdown();

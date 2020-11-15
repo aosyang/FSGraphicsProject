@@ -12,17 +12,23 @@
 
 class IApp;
 
+struct REngineInitParam
+{
+	//REngineInitParam()
+	//	: Application(nullptr)
+	//{}
+
+	IApp* Application;
+};
+
 class REngine : public RSingleton<REngine>
 {
 	friend class RSingleton<REngine>;
 public:
 	// Initialize all engine components
-	bool Initialize();
+	bool Initialize(const REngineInitParam& InitParam);
 
 	bool InitializeSubsystems(HWND hWnd, int width, int height);
-
-	// Specify the application for the engine to run
-	inline void BindApp(IApp* app) { m_Application = app; }
 
 	// Shutdown the engine and destroy all engine components
 	void Shutdown();
@@ -45,9 +51,6 @@ public:
 
 	void SetEditorMode(bool editor) { m_bIsEditor = editor; }
 	bool IsEditor() const { return m_bIsEditor; }
-
-	void SetUseCustomRenderingPipeline(bool useCustomRendering)		{ m_UseCustomRenderingPipeline = useCustomRendering; }
-	bool IsUsingCustomRenderingPipeline() const						{ return m_UseCustomRenderingPipeline; }
 
 	void BeginImGuiFrame();
 	void EndImGuiFrame();
@@ -75,9 +78,6 @@ private:
 	IApp*				m_Application;
 	RTimer				m_Timer;
 	UINT64				FrameCounter;
-
-	/// Whether engine should call IApp::RenderScene
-	bool				m_UseCustomRenderingPipeline;
 };
 
 #define GEngine REngine::Instance()

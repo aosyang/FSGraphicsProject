@@ -37,7 +37,6 @@ REngine::REngine()
 	  m_bFullScreen					(false),
 	  m_UseEngineRenderWindow		(false),
 	  m_Application					(nullptr),
-	  m_UseCustomRenderingPipeline	(true),
 	  FrameCounter(1)
 {
 	SetProcessDPIAware();
@@ -48,8 +47,10 @@ REngine::~REngine()
 {
 }
 
-bool REngine::Initialize()
+bool REngine::Initialize(const REngineInitParam& InitParam /*= REngineInitParam()*/)
 {
+	m_Application = InitParam.Application;
+
 	RegisterEngineComponentClasses();
 
 	m_bIsInitialized = true;
@@ -231,7 +232,7 @@ void REngine::RunOneFrame(bool update_input)
 	}
 
 	GRenderer.Stats.Reset();
-	if (m_UseCustomRenderingPipeline)
+	if (m_Application->UsingCustomRenderPipeline())
 	{
 		m_Application->RenderScene();
 	}

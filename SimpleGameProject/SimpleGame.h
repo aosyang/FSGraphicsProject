@@ -17,7 +17,6 @@ public:
 
 	virtual bool Initialize() override;
 	virtual void UpdateScene(const RTimer& timer) override;
-	virtual void RenderScene() override;
 
 	virtual void OnResize(int width, int height) override;
 	virtual TCHAR* WindowTitle() override;

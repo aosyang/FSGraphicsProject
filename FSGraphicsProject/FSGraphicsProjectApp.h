@@ -33,6 +33,9 @@ public:
 
 	virtual bool Initialize() override;
 	virtual void UpdateScene(const RTimer& timer) override;
+
+	// Implements a custom render pipeline
+	virtual bool UsingCustomRenderPipeline() override { return true; }
 	virtual void RenderScene() override;
 
 	virtual void OnResize(int width, int height) override;

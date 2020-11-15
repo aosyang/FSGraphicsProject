@@ -16,9 +16,12 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
 	DeferredShadingApp app;
 
-	GEngine.BindApp(&app);
+	REngineInitParam InitParam =
+	{
+		&app,
+	};
 
-	if (GEngine.Initialize())
+	if (GEngine.Initialize(InitParam))
 	{
 		GEngine.Run();
 		GEngine.Shutdown();

@@ -161,11 +161,6 @@ void SimpleGame::UpdateScene(const RTimer& timer)
 	}
 }
 
-void SimpleGame::RenderScene()
-{
-	// Implemented in engine now
-}
-
 void SimpleGame::OnResize(int width, int height)
 {
 	if (m_Camera)
