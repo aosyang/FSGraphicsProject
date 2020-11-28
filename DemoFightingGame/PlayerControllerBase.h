@@ -116,6 +116,7 @@ private:
 	std::unique_ptr<class RKinematicCharacterController> KinematicCharacterController;
 	std::unique_ptr<btGhostPairCallback> GhostPairCallback;
 
+	// Player facing in degrees
 	float					m_Rotation;
 	RVec3					m_RootOffset;
 	RMatrix4				m_BoneMatrices[MAX_BONE_COUNT];

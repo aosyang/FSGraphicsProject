@@ -9,6 +9,7 @@
 #include "RFbxMeshLoader.h"
 #include "RenderSystem/RTexture.h"
 #include "RenderSystem/RMesh.h"
+#include "Animation/RAnimGraph.h"
 #include "UI/RProgressBar.h"
 
 #include "Core/RLog.h"
@@ -190,6 +191,7 @@ void RResourceManager::RegisterResourceTypes()
 	RegisterResourceType<RMesh>();
 	RegisterResourceType<RTexture>();
 	RegisterResourceType<RMaterial>();
+	RegisterResourceType<RAnimGraph>();
 }
 
 RResourceBase* RResourceManager::LoadResourceAutoDetectType(const std::string& Path, EResourceLoadMode mode)

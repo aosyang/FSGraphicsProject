@@ -6,7 +6,7 @@
 
 #include "RFbxMeshLoader.h"
 
-#include "RenderSystem/RAnimation.h"
+#include "Animation/RAnimation.h"
 #include "RenderSystem/RMaterial.h"
 #include "RenderSystem/RMeshElement.h"
 

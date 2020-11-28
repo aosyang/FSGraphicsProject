@@ -6,7 +6,8 @@
 
 #include "RAnimation.h"
 
-#include "RMesh.h"
+#include "RenderSystem/RMesh.h"
+#include "RAnimNode.h"
 
 
 RAnimationPlayer::RAnimationPlayer()
@@ -90,19 +91,9 @@ void RAnimationPlayer::Rewind()
 	CurrentPlaybackTime = Animation ? Animation->GetStartTime() : 0.0f;
 }
 
-bool RAnimationPlayer::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutMatrices) const
+void RAnimationPlayer::EvaluatePose(RAnimPoseData& PoseData)
 {
-	for (int i = 0; i < SkinnedMesh.GetBoneCount(); i++)
-	{
-		RMatrix4 BoneMatrix;
-		int BoneId = SkinnedMesh.GetCachedAnimationNodeId(Animation, i);
-		Animation->GetNodePoseAtTime(BoneId, CurrentPlaybackTime, &BoneMatrix);
-
-		// Output poses in object space
-		OutMatrices[i] = BoneMatrix;
-	}
-
-	return true;
+	Animation->EvaluatePoseAtTime(PoseData, CurrentPlaybackTime);
 }
 
 RAnimationBlender::RAnimationBlender()
@@ -184,17 +175,17 @@ void RAnimationBlender::ProceedAnimation(float deltaTime)
 	}
 }
 
-bool RAnimationBlender::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices) const
+void RAnimationBlender::EvaluatePose(RAnimPoseData& PoseData) const
 {
 	RAnimation* const SourceAnim = GetSourceAnimation();
 	RAnimation* const TargetAnim = GetTargetAnimation();
 
-	for (int i = 0; i < SkinnedMesh.GetBoneCount(); i++)
+	for (int i = 0; i < PoseData.SkinnedMesh->GetBoneCount(); i++)
 	{
 		RMatrix4 BoneMatrix;
 
-		int SourceBoneId = SkinnedMesh.GetCachedAnimationNodeId(SourceAnim, i);
-		int TargetBondId = SkinnedMesh.GetCachedAnimationNodeId(TargetAnim, i);
+		int SourceBoneId = PoseData.SkinnedMesh->GetCachedAnimationNodeId(SourceAnim, i);
+		int TargetBondId = PoseData.SkinnedMesh->GetCachedAnimationNodeId(TargetAnim, i);
 
 		bool Result = GetCurrentBlendedNodePose(SourceBoneId, TargetBondId, &BoneMatrix);
 		if (!Result)
@@ -203,7 +194,7 @@ bool RAnimationBlender::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBone
 		}
 
 		// Output poses in object space
-		OutBoneMatrices[i] = BoneMatrix;
+		PoseData.BoneMatrices[i] = BoneMatrix;
 
 #if 0	// Debug rendering bones
 		{
@@ -221,8 +212,6 @@ bool RAnimationBlender::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBone
 		}
 #endif
 	}
-
-	return true;
 }
 
 bool RAnimationBlender::GetCurrentBlendedNodePose(int SourceNodeId, int TargetNodeId, RMatrix4* OutMatrix) const
@@ -381,6 +370,19 @@ void RAnimation::GetNodePoseAtTime(int NodeId, float Time, RMatrix4* OutMatrix) 
 		((float*)OutMatrix)[i] = va + (vb - va) * t;
 	}
 #endif
+}
+
+void RAnimation::EvaluatePoseAtTime(RAnimPoseData& PoseData, float Time)
+{
+	for (int i = 0; i < PoseData.SkinnedMesh->GetBoneCount(); i++)
+	{
+		RMatrix4 BoneMatrix;
+		int BoneId = PoseData.SkinnedMesh->GetCachedAnimationNodeId(this, i);
+		GetNodePoseAtTime(BoneId, Time, &BoneMatrix);
+
+		// Output poses in object space
+		PoseData.BoneMatrices[i] = BoneMatrix;
+	}
 }
 
 RVec3 RAnimation::GetInitRootPosition() const

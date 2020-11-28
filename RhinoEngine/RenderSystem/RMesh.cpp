@@ -8,7 +8,7 @@
 
 #include "Resource/RFbxMeshLoader.h"
 #include "Resource/RResourceManager.h"
-#include "RAnimation.h"
+#include "Animation/RAnimation.h"
 #include "RTexture.h"
 
 #include "Core/RLog.h"
@@ -327,7 +327,7 @@ bool RMesh::HasCachedAnimation(RAnimation* anim) const
 	return false;
 }
 
-int RMesh::GetCachedAnimationNodeId(RAnimation* Animation, int BoneId) const
+int RMesh::GetCachedAnimationNodeId(const RAnimation* Animation, int BoneId) const
 {
 	if (!Animation || !m_BoneIdToName.size())
 		return -1;

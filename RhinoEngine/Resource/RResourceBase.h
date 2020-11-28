@@ -69,7 +69,10 @@ protected:
 	/// Enumerate all resources been referenced directly by this resource
 	virtual std::vector<RResourceBase*> EnumerateReferencedResources() const;
 
+	// Override this method in a derived class for loading a resource from file
 	virtual bool LoadResourceImpl();
+
+	// Override this method in a derived class for saving a resource to file
 	virtual bool SaveResourceImpl();
 
 private:

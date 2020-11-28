@@ -49,7 +49,6 @@
 #include "RenderSystem/RMeshElement.h"
 #include "RenderSystem/RDebugRenderer.h"
 #include "RenderSystem/RText.h"
-#include "RenderSystem/RAnimation.h"
 #include "RenderSystem/RShaderManager.h"
 #include "RenderSystem/RShaderConstantBuffer.h"
 #include "RenderSystem/RMesh.h"
@@ -57,6 +56,9 @@
 #include "RenderSystem/RShadowMap.h"
 #include "RenderSystem/RRenderMeshComponent.h"
 #include "RenderSystem/RPostProcessorManager.h"
+
+#include "Animation/RAnimNode.h"
+#include "Animation/RAnimation.h"
 
 #include "Physics/RPhysicsEngine.h"
 #include "Physics/RRigidBodyComponent.h"

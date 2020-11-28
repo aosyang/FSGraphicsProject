@@ -33,7 +33,7 @@ void RAnimBlendQueue::Proceed(float DeltaTime)
 	{
 		Iter->Progress += DeltaTime;
 
-		// Has finished blending? Discard any following member in queue as they are no longer relevant
+		// Has any animation finished blending? Discard any following member in queue as they are no longer relevant
 		if (Iter->Progress >= Iter->TotalBlendTime)
 		{
 			Iter->Progress = Iter->TotalBlendTime;
@@ -46,31 +46,23 @@ void RAnimBlendQueue::Proceed(float DeltaTime)
 	}
 }
 
-bool RAnimBlendQueue::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutMatrices) const
+void RAnimBlendQueue::EvaluatePose(RAnimPoseData& PoseData) const
 {
-	const int NumBones = SkinnedMesh.GetBoneCount();
+	const int NumBones = PoseData.SkinnedMesh->GetBoneCount();
 
-	std::vector<RMatrix4> SourcePose;
-	SourcePose.resize(NumBones, RMatrix4::IDENTITY);
-
-	std::vector<RMatrix4> TargetPose;
-	TargetPose.resize(NumBones, RMatrix4::IDENTITY);
+	RAnimPoseData TargetPose(*PoseData.SkinnedMesh);
 
 	/// Resolve the blend queue bottom-up
 	for (auto Iter = BlendQueueData.rbegin(); Iter != BlendQueueData.rend(); Iter++)
 	{
 		float BlendFactor = Iter->TotalBlendTime == 0.0f ? 1.0f : Iter->Progress / Iter->TotalBlendTime;
 		assert(BlendFactor >= 0.0f && BlendFactor <= 1.0f);
-		Iter->Target->EvaluatePose(SkinnedMesh, TargetPose.data());
 
-		for (int i = 0; i < NumBones; i++)
-		{
-			SourcePose[i] = RMatrix4::Slerp(SourcePose[i], TargetPose[i], BlendFactor);
-		}
+		// Evaluate pose for the blend-to target
+		Iter->Target->EvaluatePose(TargetPose);
+
+		PoseData = RAnimPoseData::BlendTwoPoses(PoseData, TargetPose, BlendFactor);
 	}
-
-	memcpy(OutMatrices, SourcePose.data(), sizeof(RMatrix4) * NumBones);
-	return true;
 }
 
 bool RAnimBlendQueue::IsBehaviorRelevant(FTGPlayerBehaviorBase* Behavior) const

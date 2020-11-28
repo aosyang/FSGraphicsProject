@@ -83,7 +83,7 @@ public:
 	/// TODO: Remove CacheAnimation and use a skeletal data class for the functionality of GetCachedAnimationNodeId
 	void CacheAnimation(RAnimation* Animation);
 	bool HasCachedAnimation(RAnimation* anim) const;
-	int GetCachedAnimationNodeId(RAnimation* Animation, int BoneId) const;
+	int GetCachedAnimationNodeId(const RAnimation* Animation, int BoneId) const;
 
 	EMeshCollisionType GetCollisionType() const;
 
@@ -105,7 +105,7 @@ private:
 	std::vector<std::string>		m_BoneIdToName;
 
 	/// TODO: Store the node cache in a shared skeletal data
-	std::map<RAnimation*, std::vector<int>>	m_AnimationNodeCache;
+	std::map<const RAnimation*, std::vector<int>>	m_AnimationNodeCache;
 };
 
 FORCEINLINE const std::vector<RMaterial*>& RMesh::GetMaterials() const

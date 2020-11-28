@@ -18,7 +18,7 @@ public:
 	void AddAnimation(const std::string& AnimationAsset, float Speed);
 
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime) override;
-	virtual bool EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices) override;
+	virtual void EvaluatePose(RAnimPoseData& PoseData) override;
 
 	virtual std::string GetDebugString() const override;
 

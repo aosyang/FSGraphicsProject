@@ -289,15 +289,13 @@ void PlayerControllerBase::UpdateMovement(float DeltaTime, const RVec3 MoveVec)
 
 void PlayerControllerBase::PostUpdate(float DeltaTime)
 {
-	// Evaluate the skeletal pose at current time
-	GetStateMachine().EvaluatePose(*m_Mesh, m_BoneMatrices);
+	RAnimPoseData PoseData(*m_Mesh);
 
-	// Transform all bones to world space
-	const RMatrix4& Transform = GetTransformMatrix();
-	for (int i = 0; i < m_Mesh->GetBoneCount(); i++)
-	{
-		m_BoneMatrices[i] = m_Mesh->GetBoneInitInvMatrices(i) * m_BoneMatrices[i] * Transform;
-	}
+	// Evaluate the skeletal pose at current time
+	GetStateMachine().EvaluatePose(PoseData);
+
+	// Transform all bones from object space to world space
+	PoseData.CopyFinalPose(GetTransformMatrix(), m_BoneMatrices);
 }
 
 void PlayerControllerBase::Draw()

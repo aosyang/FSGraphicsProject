@@ -38,14 +38,12 @@ void FTGPlayerBehaviorBase::Update(FTGPlayerStateMachine* StateMachine, float De
 	AnimPlayer.Proceed(DeltaTime);
 }
 
-bool FTGPlayerBehaviorBase::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices)
+void FTGPlayerBehaviorBase::EvaluatePose(RAnimPoseData& PoseData)
 {
 	if (AnimPlayer.Animation)
 	{
-		return AnimPlayer.EvaluatePose(SkinnedMesh, OutBoneMatrices);
+		AnimPlayer.EvaluatePose(PoseData);
 	}
-
-	return false;
 }
 
 void FTGPlayerBehaviorBase::CacheAssets(RMesh& SkinnedMesh)

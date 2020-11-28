@@ -120,46 +120,30 @@ void PlayerBehavior_Navigation::Update(FTGPlayerStateMachine* StateMachine, floa
 	}
 }
 
-bool PlayerBehavior_Navigation::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices)
+void PlayerBehavior_Navigation::EvaluatePose(RAnimPoseData& PoseData)
 {
-	RAnimation* Anim0;
-	RAnimation* Anim1;
+	RAnimation* Anim0 = nullptr, * Anim1 = nullptr;
 	float BlendFactor = GetRelevantAnimations(AnimRelevancyFactor, &Anim0, &Anim1);
 	assert(Anim0);
 
 	float PlaybackTime0 = RMath::Lerp(Anim0->GetStartTime(), Anim0->GetEndTime(), NormalizedPlaybackProgress);
-	if (Anim1 == nullptr)
+	if (Anim1)
 	{
-		RAnimationPlayer Player;
+		// Find playback time on animation1 by the playback progression
+		float PlaybackTime1 = RMath::Lerp(Anim1->GetStartTime(), Anim1->GetEndTime(), NormalizedPlaybackProgress);
 
-		Player.Animation = Anim0;
-		Player.CurrentPlaybackTime = PlaybackTime0;
+		// Evaluate poses for both animations and then blend them together
+		RAnimPoseData Pose0(*PoseData.SkinnedMesh),
+					  Pose1(*PoseData.SkinnedMesh);
 
-		return Player.EvaluatePose(SkinnedMesh, OutBoneMatrices);
+		Anim0->EvaluatePoseAtTime(Pose0, PlaybackTime0);
+		Anim1->EvaluatePoseAtTime(Pose1, PlaybackTime1);
+
+		PoseData = RAnimPoseData::BlendTwoPoses(Pose0, Pose1, BlendFactor);
 	}
 	else
 	{
-		float PlaybackTime1 = RMath::Lerp(Anim1->GetStartTime(), Anim1->GetEndTime(), NormalizedPlaybackProgress);
-		RAnimationPlayer Player0, Player1;
-
-		Player0.Animation = Anim0;
-		Player0.CurrentPlaybackTime = PlaybackTime0;
-		Player1.Animation = Anim1;
-		Player1.CurrentPlaybackTime = PlaybackTime1;
-
-		std::vector<RMatrix4> Pose0, Pose1;
-		Pose0.resize(SkinnedMesh.GetBoneCount());
-		Pose1.resize(SkinnedMesh.GetBoneCount());
-
-		if (Player0.EvaluatePose(SkinnedMesh, Pose0.data()) && Player1.EvaluatePose(SkinnedMesh, Pose1.data()))
-		{
-			for (int i = 0; i < SkinnedMesh.GetBoneCount(); i++)
-			{
-				OutBoneMatrices[i] = RMatrix4::Slerp(Pose0[i], Pose1[i], BlendFactor);
-			}
-		}
-		
-		return false;
+		Anim0->EvaluatePoseAtTime(PoseData, PlaybackTime0);
 	}
 }
 

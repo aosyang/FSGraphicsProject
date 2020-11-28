@@ -13,7 +13,7 @@ class PlayerControllerBase;
 
 
 /// The behavior state machine of player
-class FTGPlayerStateMachine
+class FTGPlayerStateMachine : public RAnimNode
 {
 public:
 	FTGPlayerStateMachine(PlayerControllerBase* InPlayerOwner);
@@ -29,8 +29,8 @@ public:
 	/// Update the state machine
 	void Update(float DeltaTime);
 
-	/// Evaluate pose for skeletal mesh at current state
-	bool EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices);
+	/// Override RAnimNode::EvaluatePose
+	virtual void EvaluatePose(RAnimPoseData& PoseData) override;
 
 	RVec3 GetCurrentRootOffset() const;
 

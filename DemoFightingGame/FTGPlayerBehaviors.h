@@ -42,7 +42,7 @@ class FTGPlayerStateMachine;
 	private:
 
 
-class FTGPlayerBehaviorBase
+class FTGPlayerBehaviorBase : public RAnimNode
 {
 public:
 	FTGPlayerBehaviorBase();
@@ -55,7 +55,8 @@ public:
 	virtual bool EvaluateForExecution(FTGPlayerStateMachine* StateMachine);
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime);
 
-	virtual bool EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices);
+	// Override RAnimNode methods
+	virtual void EvaluatePose(RAnimPoseData& PoseData) override;
 
 	void CacheAssets(RMesh& SkinnedMesh);
 

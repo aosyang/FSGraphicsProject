@@ -9,6 +9,7 @@
 #include "Core/CoreTypes.h"
 
 class FTGPlayerBehaviorBase;
+struct RAnimPoseData;
 
 class RAnimBlendQueue
 {
@@ -19,7 +20,7 @@ public:
 	/// Proceed queue in time
 	void Proceed(float DeltaTime);
 
-	bool EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutMatrices) const;
+	void EvaluatePose(RAnimPoseData& PoseData) const;
 
 	/// Check if behavior is in blend queue
 	bool IsBehaviorRelevant(FTGPlayerBehaviorBase* Behavior) const;

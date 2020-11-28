@@ -77,9 +77,9 @@ void FTGPlayerStateMachine::Update(float DeltaTime)
 	}
 }
 
-bool FTGPlayerStateMachine::EvaluatePose(const RMesh& SkinnedMesh, RMatrix4* OutBoneMatrices)
+void FTGPlayerStateMachine::EvaluatePose(RAnimPoseData& PoseData)
 {
-	return BlendQueue.EvaluatePose(SkinnedMesh, OutBoneMatrices);
+	BlendQueue.EvaluatePose(PoseData);
 }
 
 RVec3 FTGPlayerStateMachine::GetCurrentRootOffset() const
