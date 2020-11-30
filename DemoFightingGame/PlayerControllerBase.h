@@ -122,6 +122,10 @@ private:
 	RMatrix4				m_BoneMatrices[MAX_BONE_COUNT];
 
 	FTGPlayerStateMachine	m_StateMachine;
+
+	// Current horizontal speed
+	float MoveSpeed;
+	std::shared_ptr<RAnimGraphInstance> AnimGraphInstance;
 };
 
 FORCEINLINE const RVec3& PlayerControllerBase::GetRootOffset() const

@@ -102,7 +102,8 @@ public:
 class RVec3
 {
 public:
-	FORCEINLINE RVec3() {}
+	FORCEINLINE RVec3()
+		: x(0.0f), y(0.0f), z(0.0f) {}
 
 	FORCEINLINE RVec3(float _x, float _y, float _z)
 		: x(_x), y(_y), z(_z) {}
@@ -186,6 +187,16 @@ public:
 	FORCEINLINE bool HasNan() const
 	{
 		return isnan(x) || isnan(y) || isnan(z);
+	}
+
+	FORCEINLINE bool HasFloatMax() const
+	{
+		return fabs(x) == FLT_MAX || fabs(y) == FLT_MAX || fabs(z) == FLT_MAX;
+	}
+
+	FORCEINLINE bool IsValid() const
+	{
+		return !HasNan() && !HasFloatMax();
 	}
 
 	// All components of vector are zero?

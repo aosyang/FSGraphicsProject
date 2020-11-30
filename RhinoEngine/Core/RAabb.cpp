@@ -36,7 +36,10 @@ void RAabb::Reset()
 
 bool RAabb::IsValid() const
 {
-	return pMax.X() >= pMin.X() && pMax.Y() >= pMin.Y() && pMax.Z() >= pMin.Z();
+	return pMax.IsValid() && pMin.IsValid() &&
+		   pMax.X() >= pMin.X() &&
+		   pMax.Y() >= pMin.Y() &&
+		   pMax.Z() >= pMin.Z();
 }
 
 RAabb RAabb::GetTransformedAabb(const RMatrix4& m) const

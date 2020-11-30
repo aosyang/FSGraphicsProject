@@ -57,8 +57,10 @@
 #include "RenderSystem/RRenderMeshComponent.h"
 #include "RenderSystem/RPostProcessorManager.h"
 
-#include "Animation/RAnimNode.h"
 #include "Animation/RAnimation.h"
+#include "Animation/RAnimGraph.h"
+#include "Animation/RAnimNode_Base.h"
+#include "Animation/RAnimNode_AnimationPlayer.h"
 
 #include "Physics/RPhysicsEngine.h"
 #include "Physics/RRigidBodyComponent.h"

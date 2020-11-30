@@ -7,9 +7,14 @@
 
 #include "Core/CoreTypes.h"
 #include "Core/RSerializer.h"
-#include "RAnimNode.h"
+
+#include "RAnimNode_Base.h"
+#include "RAnimNode_AnimationPlayer.h"
+
 
 class RMesh;
+class RAnimation;
+
 
 enum AnimationBitFlag
 {
@@ -18,32 +23,6 @@ enum AnimationBitFlag
 	AnimBitFlag_LockRootBone	= 1 << 2,		// Keep root bone at the origin
 };
 
-class RAnimation;
-
-/// Plays a single animation
-class RAnimationPlayer : public RAnimNode
-{
-public:
-	RAnimationPlayer();
-
-	RAnimation*		Animation;
-	float			CurrentPlaybackTime;
-	float			TimeScale;
-	
-	RVec3			RootOffset;
-	bool			IsAnimDone;
-
-	void Reset();
-
-	/// Proceed the animation playback
-	void Proceed(float DeltaTime);
-
-	/// Start the animation from beginning
-	void Rewind();
-
-	// Override RAnimNode methods
-	virtual void EvaluatePose(RAnimPoseData& PoseData) override;
-};
 
 /// An animation evaluator that does the two-way blending
 class RAnimationBlender
@@ -83,16 +62,16 @@ private:
 	bool GetCurrentBlendedNodePose(int SourceNodeId, int TargetNodeId, RMatrix4* OutMatrix) const;
 
 private:
-	RAnimationPlayer	m_SourceAnimation;
-	RAnimationPlayer	m_TargetAnimation;
+	RAnimNode_AnimationPlayer	m_SourceAnimation;
+	RAnimNode_AnimationPlayer	m_TargetAnimation;
 	float				m_BlendTime;
 	float				m_ElapsedBlendTime;
 };
 
-/// The animation node data
-struct RAnimNodeData
+/// Data for a single bone from an animation. Stores a list of matrices for each frame
+struct RAnimBoneData
 {
-	RAnimNodeData()
+	RAnimBoneData()
 		: ParentId(-1)
 	{
 	}
@@ -156,7 +135,7 @@ public:
 	int GetNodeCount() const { return (int)BoneNodeData.size(); }
 
 	/// Evaluate pose for animation at given time
-	void EvaluatePoseAtTime(RAnimPoseData& PoseData, float Time);
+	void EvaluatePoseAtTime(RAnimPoseData& PoseData, float Time) const;
 
 	/// Get the root displacement at the initial frame
 	RVec3 GetInitRootPosition() const;
@@ -216,7 +195,7 @@ private:
 	float					m_FrameRate;
 
 	/// Frame data of each bone node
-	std::vector<RAnimNodeData>	BoneNodeData;
+	std::vector<RAnimBoneData>	BoneNodeData;
 
 	/// Root displacements of each frame
 	std::vector<RVec3>			m_RootDisplacement;

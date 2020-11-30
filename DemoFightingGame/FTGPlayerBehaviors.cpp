@@ -35,7 +35,7 @@ bool FTGPlayerBehaviorBase::EvaluateForExecution(FTGPlayerStateMachine* StateMac
 
 void FTGPlayerBehaviorBase::Update(FTGPlayerStateMachine* StateMachine, float DeltaTime)
 {
-	AnimPlayer.Proceed(DeltaTime);
+	AnimPlayer.UpdateNode(DeltaTime);
 }
 
 void FTGPlayerBehaviorBase::EvaluatePose(RAnimPoseData& PoseData)

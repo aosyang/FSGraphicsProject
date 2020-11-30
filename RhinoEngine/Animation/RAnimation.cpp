@@ -7,94 +7,8 @@
 #include "RAnimation.h"
 
 #include "RenderSystem/RMesh.h"
-#include "RAnimNode.h"
-
-
-RAnimationPlayer::RAnimationPlayer()
-{
-	Reset();
-}
-
-void RAnimationPlayer::Reset()
-{
-	Animation = nullptr;
-	CurrentPlaybackTime = 0.0f;
-	TimeScale = 1.0f;
-	RootOffset = RVec3::Zero();
-	IsAnimDone = false;
-}
-
-void RAnimationPlayer::Proceed(float DeltaTime)
-{
-	if (Animation && !IsAnimDone)
-	{
-		// Changing time may cause start time greater than end time
-		if (CurrentPlaybackTime >= Animation->GetEndTime())
-		{
-			CurrentPlaybackTime = Animation->GetStartTime();
-		}
-
-		// Root motion offset at the beginning of this frame
-		RVec3 PrevRootOffset = Animation->GetRootPosition(CurrentPlaybackTime);
-
-		CurrentPlaybackTime += DeltaTime * Animation->GetFrameRate() * TimeScale;
-		bool startOver = false;
-
-		// The playback time has passed the end time of the animation
-		if (CurrentPlaybackTime >= Animation->GetEndTime())
-		{
-			if (Animation->IsLooping())
-			{
-				float AnimDuration = Animation->GetEndTime() - Animation->GetStartTime();
-
-				if (AnimDuration == 0.0f)
-				{
-					// If the animation has only one frame, always loop the first frame
-					CurrentPlaybackTime = Animation->GetStartTime();
-					startOver = true;
-				}
-				else
-				{
-					while (CurrentPlaybackTime >= Animation->GetEndTime())
-					{
-						CurrentPlaybackTime -= AnimDuration;
-						startOver = true;
-					}
-				}
-			}
-			else
-			{
-				CurrentPlaybackTime = Animation->GetEndTime() - 0.01f;
-				IsAnimDone = true;
-			}
-		}
-
-		if (Animation->HasRootMotion())
-		{
-			RootOffset = Animation->GetRootPosition(CurrentPlaybackTime) - PrevRootOffset;
-			if (startOver)
-			{
-				RootOffset = Animation->GetRootPosition(Animation->GetEndTime() - 1) - PrevRootOffset +
-							 Animation->GetRootPosition(CurrentPlaybackTime) - Animation->GetInitRootPosition();
-			}
-		}
-		else
-		{
-			RootOffset = RVec3(0, 0, 0);
-		}
-	}
-}
-
-void RAnimationPlayer::Rewind()
-{
-	IsAnimDone = false;
-	CurrentPlaybackTime = Animation ? Animation->GetStartTime() : 0.0f;
-}
-
-void RAnimationPlayer::EvaluatePose(RAnimPoseData& PoseData)
-{
-	Animation->EvaluatePoseAtTime(PoseData, CurrentPlaybackTime);
-}
+#include "RAnimNode_Base.h"
+#include "Resource/RResourceManager.h"
 
 RAnimationBlender::RAnimationBlender()
 	: m_BlendTime(0.2f)
@@ -161,11 +75,11 @@ void RAnimationBlender::BlendOutTo(RAnimation* TargetAnimation, float TargetStar
 
 void RAnimationBlender::ProceedAnimation(float deltaTime)
 {
-	m_SourceAnimation.Proceed(deltaTime);
+	m_SourceAnimation.UpdateNode(deltaTime);
 
 	if (m_TargetAnimation.Animation)
 	{
-		m_TargetAnimation.Proceed(deltaTime);
+		m_TargetAnimation.UpdateNode(deltaTime);
 		m_ElapsedBlendTime += deltaTime;
 		if (m_ElapsedBlendTime >= m_BlendTime)
 		{
@@ -277,7 +191,7 @@ RAnimation::RAnimation(int nodeCount, int frameCount, float startTime, float end
 	, RootSpeed(0.0f)
 	, m_RootNode(-1)
 {
-	BoneNodeData.resize(nodeCount, RAnimNodeData());
+	BoneNodeData.resize(nodeCount, RAnimBoneData());
 	for (int i = 0; i < nodeCount; i++)
 	{
 		BoneNodeData[i].FrameMatrices.resize(frameCount);
@@ -317,7 +231,7 @@ void RAnimation::AddNodePoseAtFrame(int nodeId, int frameId, const RMatrix4* mat
 void RAnimation::GetNodePoseAtTime(int NodeId, float Time, RMatrix4* OutMatrix) const
 {
 	// Make zero based time
-	Time -= m_StartTime;
+	Time = RMath::Max(Time - m_StartTime, 0.0f);
 
 	assert(NodeId >= 0 && NodeId < GetNodeCount());
 	assert(Time >= 0 && Time < m_FrameCount);
@@ -372,7 +286,7 @@ void RAnimation::GetNodePoseAtTime(int NodeId, float Time, RMatrix4* OutMatrix) 
 #endif
 }
 
-void RAnimation::EvaluatePoseAtTime(RAnimPoseData& PoseData, float Time)
+void RAnimation::EvaluatePoseAtTime(RAnimPoseData& PoseData, float Time) const
 {
 	for (int i = 0; i < PoseData.SkinnedMesh->GetBoneCount(); i++)
 	{
@@ -399,7 +313,7 @@ RVec3 RAnimation::GetRootPosition(float time) const
 		return RVec3::Zero();
 
 	// Make zero based time
-	time -= m_StartTime;
+	time = RMath::Max(time - m_StartTime, 0.0f);
 
 	int frame1 = (int)time;
 

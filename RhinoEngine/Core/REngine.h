@@ -60,6 +60,8 @@ protected:
 	~REngine();
 
 private:
+	void RegisterEngineTypes();
+
 	bool CreateRenderWindow(int width, int height, bool fullscreen = false, int bpp = 32);
 	void DestroyRenderWindow();
 	void CalculateFrameStats();

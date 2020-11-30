@@ -15,6 +15,8 @@
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
 
+#include "Animation/RAnimGraph.h"
+
 #include "RenderSystem/RRenderSystem.h"
 #include "RenderSystem/RShaderManager.h"
 #include "RenderSystem/RDebugRenderer.h"
@@ -51,7 +53,7 @@ bool REngine::Initialize(const REngineInitParam& InitParam /*= REngineInitParam(
 {
 	m_Application = InitParam.Application;
 
-	RegisterEngineComponentClasses();
+	RegisterEngineTypes();
 
 	m_bIsInitialized = true;
 
@@ -270,6 +272,13 @@ RECT REngine::GetClientRectInfo() const
 	GetClientRect(m_hWnd, &rect);
 
 	return rect;
+}
+
+void REngine::RegisterEngineTypes()
+{
+	RegisterEngineComponentClasses();
+
+	RAnimGraph::RegisterAnimNodeTypes();
 }
 
 bool REngine::CreateRenderWindow(int width, int height, bool fullscreen, int bpp)

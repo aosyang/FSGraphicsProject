@@ -42,7 +42,7 @@ class FTGPlayerStateMachine;
 	private:
 
 
-class FTGPlayerBehaviorBase : public RAnimNode
+class FTGPlayerBehaviorBase : public RAnimNode_Base
 {
 public:
 	FTGPlayerBehaviorBase();
@@ -55,7 +55,7 @@ public:
 	virtual bool EvaluateForExecution(FTGPlayerStateMachine* StateMachine);
 	virtual void Update(FTGPlayerStateMachine* StateMachine, float DeltaTime);
 
-	// Override RAnimNode methods
+	// Override RAnimNode_Base methods
 	virtual void EvaluatePose(RAnimPoseData& PoseData) override;
 
 	void CacheAssets(RMesh& SkinnedMesh);
@@ -80,7 +80,7 @@ protected:
 	EPlayerBehavior m_BehaviorEnum;
 
 	RAnimation*		m_Animation;
-	RAnimationPlayer AnimPlayer;
+	RAnimNode_AnimationPlayer AnimPlayer;
 
 	float	m_BlendTime;
 

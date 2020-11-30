@@ -1,0 +1,11 @@
+<!--AnimGraph path: /Maid/Maid_Navigation.ranimgraph-->
+<AnimGraph>
+    <Nodes>
+        <Node Name="BlendPlayer_0" Type="BlendPlayer" Loop="True">
+            <BlendEntry Animation="/Maid/Maid_Idle.fbx" SampleValue="0"/>
+            <BlendEntry Animation="/Maid/Maid_Walk.fbx" SampleValue="100.644279"/>
+            <BlendEntry Animation="/Maid/Maid_Run_Fast.fbx" SampleValue="285.711761"/>
+        </Node>
+    </Nodes>
+    <RootNode Name="BlendPlayer_0"/>
+</AnimGraph>

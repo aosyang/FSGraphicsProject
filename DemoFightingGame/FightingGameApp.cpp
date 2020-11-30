@@ -49,6 +49,29 @@ bool FightingGameApp::Initialize()
 		}
 	}
 
+#if 0
+	{
+		// Create a new animation graph resource
+		RAnimGraph* AnimGraph = RResourceManager::Instance().CreateNewResource<RAnimGraph>("/Maid/Maid_Navigation.ranimgraph");
+
+		// Bind an animation player node as root node
+		RAnimGraphNode* AnimPlayerNode = AnimGraph->AddInputAnimNode("BlendPlayer");
+
+		// Set animation resource for the animation player node
+		//AnimPlayerNode->Attributes["Animation"] = "/Maid/Maid_Walk.fbx";
+		AnimPlayerNode->Attributes["Loop"] = "True";
+
+		AnimNodeAttributeMap::ChildEntry Entry;
+		Entry.EntryName = std::string("BlendEntry");
+		Entry["Animation"] = "/Maid/Maid_Walk.fbx";
+		Entry["SampleValue"] = "1.0";
+		AnimPlayerNode->Attributes.ChildEntries.push_back(std::move(Entry));
+
+		// Save the animation graph to file
+		AnimGraph->SaveToDisk();
+	}
+#endif	// if 0
+
 	bool bNavMeshLoaded = false;
 	std::string NavMeshDataPath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), MapPath);
 	NavMeshDataPath = RFileUtil::ReplaceExtension(NavMeshDataPath, "navmesh");

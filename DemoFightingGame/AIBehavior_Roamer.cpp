@@ -18,10 +18,8 @@ namespace
 			for (auto& SceneObj : SceneObjects)
 			{
 				const RAabb& ObjectBounds = SceneObj->GetAabb();
-				if (ObjectBounds.IsValid())
-				{
-					SceneBounds.Expand(ObjectBounds);
-				}
+				assert(ObjectBounds.IsValid());
+				SceneBounds.Expand(ObjectBounds);
 			}
 		}
 

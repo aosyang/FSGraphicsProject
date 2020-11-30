@@ -126,6 +126,7 @@ PlayerControllerBase::PlayerControllerBase(const RConstructingParams& Params)
 	, CapsuleHeight(70.0f)
 	, m_Rotation(0.0f)
 	, m_StateMachine(this)
+	, MoveSpeed(0.0f)
 {
 	ActivePlayerControllers.push_back(this);
 
@@ -140,6 +141,14 @@ PlayerControllerBase::PlayerControllerBase(const RConstructingParams& Params)
 
 	GPhysicsEngine.GetContext()->DynamicWorld->addCollisionObject(GhostObject.get(), btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
 	GPhysicsEngine.GetContext()->DynamicWorld->addAction(KinematicCharacterController.get());
+
+	if (RAnimGraph* AnimGraph = RResourceManager::Instance().LoadResource<RAnimGraph>("/Maid/Maid_Navigation.ranimgraph", EResourceLoadMode::Immediate))
+	{
+		AnimGraphInstance = AnimGraph->CreateInstance();
+
+		// Bind horizontal speed as the blend input of anim node
+		AnimGraphInstance->BindAnimVariable("BlendInput", &MoveSpeed);
+	}
 }
 
 PlayerControllerBase::~PlayerControllerBase()
@@ -154,6 +163,12 @@ void PlayerControllerBase::Update(float DeltaTime)
 {
 	Base::Update(DeltaTime);
 
+	if (RAnimGraphInstance* RawAnimGraphInstance = AnimGraphInstance.get())
+	{
+		// Calculate horizontal speed for the character
+		MoveSpeed = GetVelocity().Magnitude2D();
+		RawAnimGraphInstance->Update(DeltaTime);
+	}
 }
 
 void PlayerControllerBase::Update_PostPhysics(float DeltaTime)
@@ -292,7 +307,12 @@ void PlayerControllerBase::PostUpdate(float DeltaTime)
 	RAnimPoseData PoseData(*m_Mesh);
 
 	// Evaluate the skeletal pose at current time
-	GetStateMachine().EvaluatePose(PoseData);
+	//GetStateMachine().EvaluatePose(PoseData);
+
+	if (RAnimGraphInstance* RawAnimGraphInstance = AnimGraphInstance.get())
+	{
+		RawAnimGraphInstance->EvaluatePose(PoseData);
+	}
 
 	// Transform all bones from object space to world space
 	PoseData.CopyFinalPose(GetTransformMatrix(), m_BoneMatrices);

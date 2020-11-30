@@ -161,6 +161,7 @@ void RMesh::Serialize(RSerializer& serializer)
 
 bool RMesh::LoadResourceImpl()
 {
+	// Load binary data if a binary version of mesh exists, otherwise import mesh from fbx.
 	if (TryLoadAsRmesh())
 	{
 		return true;
