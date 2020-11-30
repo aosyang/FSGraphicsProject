@@ -87,7 +87,9 @@ public:
 	void Update(float DeltaTime);
 	void EvaluatePose(RAnimPoseData& PoseData);
 
-	void BindAnimVariable(const std::string& VariableName, float* ValPtr);
+	// Bind a pointer to an animation variable.
+	// The variable name is in the format "NodeName:VariableName" in order to locate an input variable from any node in the graph.
+	void BindAnimVariable(const std::string& NodeAndVariableName, float* ValuePtr);
 
 private:
 	std::unique_ptr<RAnimNode_Base> RootNode;

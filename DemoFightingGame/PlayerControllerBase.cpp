@@ -147,7 +147,7 @@ PlayerControllerBase::PlayerControllerBase(const RConstructingParams& Params)
 		AnimGraphInstance = AnimGraph->CreateInstance();
 
 		// Bind horizontal speed as the blend input of anim node
-		AnimGraphInstance->BindAnimVariable("BlendInput", &MoveSpeed);
+		AnimGraphInstance->BindAnimVariable("BlendPlayer_0:BlendInput", &MoveSpeed);
 	}
 }
 

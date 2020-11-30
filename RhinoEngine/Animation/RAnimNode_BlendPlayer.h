@@ -35,7 +35,7 @@ public:
 	virtual void UpdateNode(float DeltaTime) override;
 	virtual void EvaluatePose(RAnimPoseData& PoseData) override;
 
-	virtual bool BindAnimVariable(const std::string& VariableName, float* ValPtr) override;
+	virtual bool BindAnimVariable(const std::string& VariableName, float* ValuePtr) override;
 
 private:
 	/// Get a float number representing the index (decimal part) and the blend factor (fraction part) of current animation selection

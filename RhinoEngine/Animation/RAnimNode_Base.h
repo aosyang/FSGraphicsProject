@@ -128,14 +128,24 @@ public:
 	RAnimNode_Base(const std::string& InNodeName, const AnimNodeAttributeMap& Attributes);
 	virtual ~RAnimNode_Base();
 
+	// Returns name of this node
+	const std::string& GetName() const;
+
+	// Function is called each frame and handles any node update logics
 	virtual void UpdateNode(float DeltaTime);
 
 	// Evaluate pose for this node and any ancestor nodes
 	virtual void EvaluatePose(RAnimPoseData& PoseData);
 
-	virtual bool BindAnimVariable(const std::string& VariableName, float* ValPtr);
+	// Bind a pointer of a value to an animation variable so node update will reflect any changes made to the value.
+	// Derived class should override this function to handle any interested variables.
+	virtual bool BindAnimVariable(const std::string& VariableName, float* ValuePtr);
 
 private:
 	std::string NodeName;
 };
 
+FORCEINLINE const std::string& RAnimNode_Base::GetName() const
+{
+	return NodeName;
+}

@@ -95,7 +95,7 @@ void RAnimNode_Base::EvaluatePose(RAnimPoseData& PoseData)
 {
 }
 
-bool RAnimNode_Base::BindAnimVariable(const std::string& VariableName, float* ValPtr)
+bool RAnimNode_Base::BindAnimVariable(const std::string& VariableName, float* ValuePtr)
 {
 	return false;
 }

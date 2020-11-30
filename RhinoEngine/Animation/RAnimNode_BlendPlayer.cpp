@@ -119,11 +119,11 @@ void RAnimNode_BlendPlayer::EvaluatePose(RAnimPoseData& PoseData)
 	}
 }
 
-bool RAnimNode_BlendPlayer::BindAnimVariable(const std::string& VariableName, float* ValPtr)
+bool RAnimNode_BlendPlayer::BindAnimVariable(const std::string& VariableName, float* ValuePtr)
 {
 	if (VariableName == "BlendInput")
 	{
-		BlendInput.SourcePtr = ValPtr;
+		BlendInput.SourcePtr = ValuePtr;
 		return true;
 	}
 

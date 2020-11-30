@@ -13,6 +13,28 @@
 #include "RAnimNode_AnimationPlayer.h"
 #include "RAnimNode_BlendPlayer.h"
 
+
+namespace
+{
+	// Split a string by a delimiter and store the result in a vector
+	std::vector<std::string> SplitString(const std::string& Input, const std::string& Delimiter)
+	{
+		std::vector<std::string> Outputs;
+		size_t Start = 0;
+		size_t End = Input.find(Delimiter);
+		while (End != std::string::npos)
+		{
+			Outputs.push_back(Input.substr(Start, End - Start));
+			Start = End + Delimiter.length();
+			End = Input.find(Delimiter, Start);
+		}
+		Outputs.push_back(Input.substr(Start));
+
+		return Outputs;
+	}
+}
+
+
 std::map<const std::string, AnimNodeFactoryMethod> RAnimGraph::AnimNodeFactoryMethods;
 
 
@@ -305,12 +327,30 @@ void RAnimGraphInstance::EvaluatePose(RAnimPoseData& PoseData)
 	}
 }
 
-void RAnimGraphInstance::BindAnimVariable(const std::string& VariableName, float* ValPtr)
+void RAnimGraphInstance::BindAnimVariable(const std::string& NodeAndVariableName, float* ValuePtr)
 {
-	// TODO: Support format like "NodeName:VariableName"
-	//		 Search anim node by name and locate a unique variable in the graph
-	if (RAnimNode_Base* RawRootNode = RootNode.get())
+	auto Tokens = SplitString(NodeAndVariableName, ":");
+	if (Tokens.size() == 2)
 	{
-		RawRootNode->BindAnimVariable(VariableName, ValPtr);
+		const std::string& NodeName = Tokens[0];
+		const std::string& VariableName = Tokens[1];
+
+		for (auto Node : Nodes)
+		{
+			if (Node->GetName() == NodeName)
+			{
+				if (!Node->BindAnimVariable(VariableName, ValuePtr))
+				{
+					RLogWarning("Binding of anim variable '%s' has unrecognized anim variable name \'%s\'.\n", NodeAndVariableName.c_str(), VariableName.c_str());
+				}
+				return;
+			}
+		}
+
+		RLogWarning("Binding of anim variable '%s' didn't match any node with name \'%s\' in the graph.\n", NodeAndVariableName.c_str(), NodeName.c_str());
+	}
+	else
+	{
+		RLogWarning("Binding of anim variable '%s' has wrong number of tokens. The expected format is \'NodeName:VariableName\'.\n", NodeAndVariableName.c_str());
 	}
 }
