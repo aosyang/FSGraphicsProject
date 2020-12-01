@@ -243,6 +243,15 @@ RScene::RScene()
 
 }
 
+RScene::~RScene()
+{
+	// Avoid dangling pointers
+	if (GRenderer.GetActiveScene() == this)
+	{
+		GRenderer.SetActiveScene(nullptr);
+	}
+}
+
 void RScene::Initialize()
 {
 	if (GRenderer.GetActiveScene() == nullptr)

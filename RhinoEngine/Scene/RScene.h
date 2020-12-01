@@ -19,6 +19,7 @@ class RScene
 {
 public:
 	RScene();
+	~RScene();
 
 	void Initialize();
 	void Release();
