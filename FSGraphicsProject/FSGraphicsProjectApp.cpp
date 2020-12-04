@@ -727,21 +727,24 @@ void FSGraphicsProjectApp::UpdateScene(const RTimer& timer)
 		RMatrix4 rootInversedTranslation = RMatrix4::CreateTranslation(invOffset);
 
 		auto cbSkinned = RConstantBuffers::cbBoneMatrices.Data;
-		if (m_CharacterObj->GetMesh()->IsLoaded())
+		if (RMesh* Mesh = m_CharacterObj->GetMesh())
 		{
-			for (int i = 0; i < m_CharacterObj->GetMesh()->GetBoneCount(); i++)
+			if (Mesh->IsLoaded())
 			{
-				RMatrix4 matrix;
+				for (int i = 0; i < m_CharacterObj->GetMesh()->GetBoneCount(); i++)
+				{
+					RMatrix4 matrix;
 
-				int boneId = m_CharacterObj->GetMesh()->GetCachedAnimationNodeId(animation, i);
-				animation->GetNodePoseAtTime(boneId, currTime, &matrix);
+					int boneId = Mesh->ConvertBoneIndex_MeshToAnimation(animation, i);
+					animation->GetMeshSpaceBoneMatrixAtTime(boneId, currTime, &matrix);
 
-				cbSkinned.boneMatrix[i] = m_CharacterObj->GetMesh()->GetBoneInitInvMatrices(i) * matrix * rootInversedTranslation * m_CharacterObj->GetTransformMatrix();
+					cbSkinned.boneMatrix[i] = Mesh->GetBoneInitInvMatrices(i) * matrix * rootInversedTranslation * m_CharacterObj->GetTransformMatrix();
+				}
 			}
-		}
-		else
-		{
-			ZeroMemory(&cbSkinned, sizeof(cbSkinned));
+			else
+			{
+				ZeroMemory(&cbSkinned, sizeof(cbSkinned));
+			}
 		}
 
 		GDebugRenderer.DrawLine(nodePos, nodePos + worldOffset * 10, RColor(1.0f, 0.0f, 0.0f));

@@ -179,13 +179,19 @@ bool RAnimationBlender::HasFinishedPlaying() const
 }
 
 RAnimation::RAnimation()
-	: RAnimation("", 0, 0, 0.0f, 0.0f, 0.0f)
+	: SkeletalMesh(nullptr)
+	, m_Flags(0)
+	, m_FrameCount(0)
+	, m_StartTime(0.0f)
+	, m_EndTime(0.0f)
+	, m_FrameRate(0.0f)
+	, RootSpeed(0.0f)
 {
-
 }
 
 RAnimation::RAnimation(const std::string& InName, int nodeCount, int frameCount, float startTime, float endTime, float frameRate)
 	: m_Name(InName)
+	, SkeletalMesh(nullptr)
 	, m_Flags(0)
 	, m_FrameCount(frameCount)
 	, m_StartTime(startTime)

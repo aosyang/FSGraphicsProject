@@ -155,6 +155,7 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 	}
 
 	std::vector<RMatrix4> boneInitInvPose;
+	SkeletalData MeshSkelData((int)fbxBoneNodes.size());
 
 	// Load meshes
 	for (int IdxNode = 0; IdxNode < NumFbxNodes; IdxNode++)
@@ -383,7 +384,6 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 		bool hasDeformer = (MeshNode->GetDeformer(0, FbxDeformer::eSkin) != NULL);
 		if (hasDeformer)
 		{
-			SkeletalData MeshSkelData((int)fbxBoneNodes.size());
 			int deformerCount = MeshNode->GetDeformerCount();
 
 			for (int idxSkinDeformer = 0; idxSkinDeformer < deformerCount; idxSkinDeformer++)
@@ -405,10 +405,13 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 					int boneId = (int)(std::find(fbxBoneNodes.begin(), fbxBoneNodes.end(), LinkNode) - fbxBoneNodes.begin());
 					assert(boneId < MAX_BONE_COUNT);
 
-					MeshSkelData.SetBoneName(boneId, std::string(LinkNode->GetName()));
-					if (FbxNode* LinkNodeParent = LinkNode->GetParent())
+					if (boneId < (int)fbxBoneNodes.size())
 					{
-						MeshSkelData.SetBoneParent(std::string(LinkNode->GetName()), std::string(LinkNodeParent->GetName()));
+						MeshSkelData.SetBoneName(boneId, std::string(LinkNode->GetName()));
+						if (FbxNode* LinkNodeParent = LinkNode->GetParent())
+						{
+							MeshSkelData.SetBoneParent(std::string(LinkNode->GetName()), std::string(LinkNodeParent->GetName()));
+						}
 					}
 
 					// Store inversed initial transform for each bone to apply skinning with correct binding pose
@@ -479,17 +482,6 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 					}
 				}
 			}
-
-			// Find root bone for skeletal data
-			for (int i = 0; i < (int)MeshSkelData.SkeletalBones.size(); i++)
-			{
-				if (MeshSkelData.SkeletalBones[i].ParentId == -1)
-				{
-					MeshSkelData.SetRootBone(i);
-				}
-			}
-
-			MeshResource->SetSkeletalData(MeshSkelData);
 		}
 
 		// Set bone id in unused slot to 0 so shader won't mess up
@@ -727,6 +719,17 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 		// Load materials from fbx node
 		LoadFbxMaterials(SceneNode, materials);
 	}
+
+	// Find root bone for skeletal data
+	for (int i = 0; i < (int)MeshSkelData.SkeletalBones.size(); i++)
+	{
+		if (MeshSkelData.SkeletalBones[i].ParentId == -1)
+		{
+			MeshSkelData.SetRootBone(i);
+		}
+	}
+
+	MeshResource->SetSkeletalData(MeshSkelData);
 
 	lFbxScene->Destroy();
 	lFbxSdkManager->Destroy();
