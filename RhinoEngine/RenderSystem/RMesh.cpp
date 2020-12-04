@@ -339,13 +339,20 @@ void RMesh::CacheAnimation(RAnimation* Animation)
 	MeshSkeletalData.SetRootBone(RootBoneId);
 
 	// Build a map that converts mesh bone ids to animation ones.
-	std::vector<int> BoneIdMap_MeshToAnim;
-	BoneIdMap_MeshToAnim.resize(m_BoneIdToName.size());
+	RBoneIdMap BoneIdMap;
+	BoneIdMap.MeshToAnim.resize(m_BoneIdToName.size());
 	for (int i = 0; i < (int)m_BoneIdToName.size(); i++)
 	{
-		BoneIdMap_MeshToAnim[i] = Animation->FindAnimBoneIndexByName(m_BoneIdToName[i]);
+		int AnimBoneId = Animation->FindAnimBoneIndexByName(m_BoneIdToName[i]);
+		BoneIdMap.MeshToAnim[i] = AnimBoneId;
+
+		if (AnimBoneId >= (int)BoneIdMap.AnimToMesh.size())
+		{
+			BoneIdMap.AnimToMesh.resize(AnimBoneId + 1, -1);
+		}
+		BoneIdMap.AnimToMesh[AnimBoneId] = i;
 	}
-	m_AnimationNodeCache[Animation] = std::move(BoneIdMap_MeshToAnim);
+	m_AnimationNodeCache[Animation] = std::move(BoneIdMap);
 
 	// Must do this last after setting root bone and building the bone id map
 	Animation->BuildRootDisplacements();
@@ -368,7 +375,7 @@ int RMesh::ConvertBoneIndex_MeshToAnimation(const RAnimation* Animation, int Mes
 		auto Iter = m_AnimationNodeCache.find(Animation);
 		if (Iter != m_AnimationNodeCache.end())
 		{
-			return Iter->second[MeshBoneId];
+			return Iter->second.MeshToAnim[MeshBoneId];
 		}
 	}
 
@@ -382,17 +389,25 @@ int RMesh::ConvertBoneIndex_AnimationToMesh(const RAnimation* Animation, int Ani
 		auto Iter = m_AnimationNodeCache.find(Animation);
 		if (Iter != m_AnimationNodeCache.end())
 		{
-			for (int i = 0; i < (int)Iter->second.size(); i++)
-			{
-				if (Iter->second[i] == AnimBoneId)
-				{
-					return i;
-				}
-			}
+			return Iter->second.AnimToMesh[AnimBoneId];
 		}
 	}
 
 	return -1;
+}
+
+const RBoneIdMap* RMesh::GetBoneIdMapForAnimation(const RAnimation* Animation) const
+{
+	if (Animation && m_BoneIdToName.size())
+	{
+		auto Iter = m_AnimationNodeCache.find(Animation);
+		if (Iter != m_AnimationNodeCache.end())
+		{
+			return &Iter->second;
+		}
+	}
+
+	return nullptr;
 }
 
 EMeshCollisionType RMesh::GetCollisionType() const

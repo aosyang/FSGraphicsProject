@@ -289,15 +289,6 @@ void RAnimation::GetLocalSpaceBoneMatrixAtTime(int BoneId, float Time, RMatrix4*
 	Transform1.Decompose(Position1, Rotation1, Scale1);
 	Transform2.Decompose(Position2, Rotation2, Scale2);
 
-	if (IsRootBone(BoneId))
-	{
-		if (HasRootMotion() || IsRootLocked())
-		{
-			Position1 -= GetRootPositionAtFrame(frame1);
-			Position2 -= GetRootPositionAtFrame(frame2);
-		}
-	}
-
 	RTransform ResultTransform(
 		RVec3::Lerp(Position1, Position2, t),
 		RQuat::Slerp(Rotation1, Rotation2, t),
@@ -309,13 +300,15 @@ void RAnimation::GetLocalSpaceBoneMatrixAtTime(int BoneId, float Time, RMatrix4*
 
 void RAnimation::EvaluatePoseAtTime(RAnimPoseData& PoseData, float Time) const
 {
+	const RBoneIdMap* BoneIdMap = PoseData.SkinnedMesh->GetBoneIdMapForAnimation(this);
+
 	for (int i = 0; i < PoseData.SkinnedMesh->GetBoneCount(); i++)
 	{
 		RMatrix4 BoneMatrix;
 
 		// Note: A skinned mesh may have different bone indices than an animation
 		// Map animation bone index to skinned mesh bone index
-		int BoneId = PoseData.SkinnedMesh->ConvertBoneIndex_MeshToAnimation(this, i);
+		int BoneId = BoneIdMap ? BoneIdMap->MeshToAnim[i] : -1;
 
 #if 0
 		// All bones are evaluated in mesh space

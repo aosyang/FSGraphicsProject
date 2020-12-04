@@ -135,6 +135,14 @@ struct SkeletalData
 };
 
 
+// A two-way bone id map (mesh bone id <-> animation bone id)
+struct RBoneIdMap
+{
+	std::vector<int> MeshToAnim;
+	std::vector<int> AnimToMesh;
+};
+
+
 class RMesh : public RResourceBase
 {
 	DECLARE_RUNTIME_TYPE(RMesh, RResourceBase)
@@ -191,6 +199,7 @@ public:
 	/// Map a bone index from animation to skinned mesh
 	int ConvertBoneIndex_MeshToAnimation(const RAnimation* Animation, int MeshBoneId) const;
 	int ConvertBoneIndex_AnimationToMesh(const RAnimation* Animation, int AnimBoneId) const;
+	const RBoneIdMap* GetBoneIdMapForAnimation(const RAnimation* Animation) const;
 
 	EMeshCollisionType GetCollisionType() const;
 
@@ -218,7 +227,7 @@ private:
 	SkeletalData					MeshSkeletalData;
 
 	/// TODO: Store the node cache in a shared skeletal data
-	std::map<const RAnimation*, std::vector<int>>	m_AnimationNodeCache;
+	std::map<const RAnimation*, RBoneIdMap>	m_AnimationNodeCache;
 };
 
 FORCEINLINE const std::vector<RMaterial*>& RMesh::GetMaterials() const
