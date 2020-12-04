@@ -98,8 +98,8 @@ void RAnimationBlender::EvaluatePose(RAnimPoseData& PoseData) const
 	{
 		RMatrix4 BoneMatrix;
 
-		int SourceBoneId = PoseData.SkinnedMesh->GetCachedAnimationNodeId(SourceAnim, i);
-		int TargetBondId = PoseData.SkinnedMesh->GetCachedAnimationNodeId(TargetAnim, i);
+		int SourceBoneId = PoseData.SkinnedMesh->ConvertBoneIndex_MeshToAnimation(SourceAnim, i);
+		int TargetBondId = PoseData.SkinnedMesh->ConvertBoneIndex_MeshToAnimation(TargetAnim, i);
 
 		bool Result = GetCurrentBlendedNodePose(SourceBoneId, TargetBondId, &BoneMatrix);
 		if (!Result)
@@ -133,8 +133,8 @@ bool RAnimationBlender::GetCurrentBlendedNodePose(int SourceNodeId, int TargetNo
 	if (m_SourceAnimation.Animation && m_TargetAnimation.Animation)
 	{
 		RMatrix4 mat1, mat2;
-		m_SourceAnimation.Animation->GetNodePoseAtTime(SourceNodeId, m_SourceAnimation.CurrentPlaybackTime, &mat1);
-		m_TargetAnimation.Animation->GetNodePoseAtTime(TargetNodeId, m_TargetAnimation.CurrentPlaybackTime, &mat2);
+		m_SourceAnimation.Animation->GetMeshSpaceBoneMatrixAtTime(SourceNodeId, m_SourceAnimation.CurrentPlaybackTime, &mat1);
+		m_TargetAnimation.Animation->GetMeshSpaceBoneMatrixAtTime(TargetNodeId, m_TargetAnimation.CurrentPlaybackTime, &mat2);
 
 		float t = RMath::Clamp(m_ElapsedBlendTime / m_BlendTime, 0.0f, 1.0f);
 		*OutMatrix = RMatrix4::Slerp(mat1, mat2, t);
@@ -143,7 +143,7 @@ bool RAnimationBlender::GetCurrentBlendedNodePose(int SourceNodeId, int TargetNo
 	}
 	else if (m_SourceAnimation.Animation)
 	{
-		m_SourceAnimation.Animation->GetNodePoseAtTime(SourceNodeId, m_SourceAnimation.CurrentPlaybackTime, OutMatrix);
+		m_SourceAnimation.Animation->GetMeshSpaceBoneMatrixAtTime(SourceNodeId, m_SourceAnimation.CurrentPlaybackTime, OutMatrix);
 		return true;
 	}
 
@@ -177,24 +177,26 @@ bool RAnimationBlender::HasFinishedPlaying() const
 }
 
 RAnimation::RAnimation()
-	: RAnimation(0, 0, 0.0f, 0.0f, 0.0f)
+	: RAnimation("", nullptr, 0, 0, 0.0f, 0.0f, 0.0f)
 {
 
 }
 
-RAnimation::RAnimation(int nodeCount, int frameCount, float startTime, float endTime, float frameRate)
-	: m_Flags(0)
+RAnimation::RAnimation(const std::string& InName, RMesh* InSkeletalMesh, int nodeCount, int frameCount, float startTime, float endTime, float frameRate)
+	: m_Name(InName)
+	, SkeletalMesh(InSkeletalMesh)
+	, m_Flags(0)
 	, m_FrameCount(frameCount)
 	, m_StartTime(startTime)
 	, m_EndTime(endTime)
 	, m_FrameRate(frameRate)
 	, RootSpeed(0.0f)
-	, m_RootNode(-1)
 {
 	BoneNodeData.resize(nodeCount, RAnimBoneData());
 	for (int i = 0; i < nodeCount; i++)
 	{
-		BoneNodeData[i].FrameMatrices.resize(frameCount);
+		BoneNodeData[i].FrameMatrices_MeshSpace.resize(frameCount);
+		BoneNodeData[i].FrameMatrices_LocalSpace.resize(frameCount);
 	}
 }
 
@@ -214,45 +216,38 @@ void RAnimation::Serialize(RSerializer& serializer)
 	serializer.SerializeData(m_StartTime);
 	serializer.SerializeData(m_EndTime);
 	serializer.SerializeData(m_FrameRate);
-	serializer.SerializeData(m_RootNode);
 
 	serializer.SerializeVector(BoneNodeData, &RSerializer::SerializeObject);
 }
 
-void RAnimation::AddNodePoseAtFrame(int nodeId, int frameId, const RMatrix4* matrix)
+void RAnimation::SetMeshSpaceBoneMatrixAtFrame(int BoneId, int FrameId, const RMatrix4& InMatrix)
 {
-	assert(nodeId >= 0 && nodeId < GetNodeCount());
-	assert(frameId >= 0 && frameId < m_FrameCount);
-	assert(frameId < BoneNodeData[nodeId].FrameMatrices.size());
+	assert(BoneId >= 0 && BoneId < GetNodeCount());
+	assert(FrameId >= 0 && FrameId < m_FrameCount);
+	assert(FrameId < BoneNodeData[BoneId].FrameMatrices_MeshSpace.size());
 
-	BoneNodeData[nodeId].FrameMatrices[frameId] = *matrix;
+	BoneNodeData[BoneId].FrameMatrices_MeshSpace[FrameId] = InMatrix;
 }
 
-void RAnimation::GetNodePoseAtTime(int NodeId, float Time, RMatrix4* OutMatrix) const
+void RAnimation::SetLocalSpaceBoneMatrixAtFrame(int BoneId, int FrameId, const RMatrix4& InMatrix)
 {
-	// Make zero based time
-	Time = RMath::Max(Time - m_StartTime, 0.0f);
+	assert(BoneId >= 0 && BoneId < GetNodeCount());
+	assert(FrameId >= 0 && FrameId < m_FrameCount);
+	assert(FrameId < BoneNodeData[BoneId].FrameMatrices_LocalSpace.size());
 
-	assert(NodeId >= 0 && NodeId < GetNodeCount());
-	assert(Time >= 0 && Time < m_FrameCount);
+	BoneNodeData[BoneId].FrameMatrices_LocalSpace[FrameId] = InMatrix;
+}
 
-	int frame1 = (int)Time;
-	int frame2;
-	
-	if (IsLooping())
-	{
-		frame2 = ((int)Time + 1) % m_FrameCount;
-	}
-	else
-	{
-		// Non-looping animations should stay at the last frame when finish playing
-		frame2 = RMath::Min((int)Time + 1, m_FrameCount - 1);
-	}
+void RAnimation::GetMeshSpaceBoneMatrixAtTime(int BoneId, float Time, RMatrix4* OutMatrix) const
+{
+	assert(BoneId >= 0 && BoneId < GetNodeCount());
 
-	float t = Time - frame1;
+	int frame1, frame2;
+	float t;
+	GetNeighborFramesAtTime(Time, frame1, frame2, t);
 
-	const RMatrix4& Transform1 = BoneNodeData[NodeId].FrameMatrices[frame1];
-	const RMatrix4& Transform2 = BoneNodeData[NodeId].FrameMatrices[frame2];
+	const RMatrix4& Transform1 = BoneNodeData[BoneId].FrameMatrices_MeshSpace[frame1];
+	const RMatrix4& Transform2 = BoneNodeData[BoneId].FrameMatrices_MeshSpace[frame2];
 
 	RVec3 Position1, Position2;
 	RQuat Rotation1, Rotation2;
@@ -274,16 +269,42 @@ void RAnimation::GetNodePoseAtTime(int NodeId, float Time, RMatrix4* OutMatrix) 
 	);
 
 	*OutMatrix = ResultTransform.GetMatrix();
+}
 
-#if 0
-	// Linear interpolate two matrices
-	for (int i = 0; i < 16; i++)
+void RAnimation::GetLocalSpaceBoneMatrixAtTime(int BoneId, float Time, RMatrix4* OutMatrix) const
+{
+	assert(BoneId >= 0 && BoneId < GetNodeCount());
+
+	int frame1, frame2;
+	float t;
+	GetNeighborFramesAtTime(Time, frame1, frame2, t);
+
+	const RMatrix4& Transform1 = BoneNodeData[BoneId].FrameMatrices_LocalSpace[frame1];
+	const RMatrix4& Transform2 = BoneNodeData[BoneId].FrameMatrices_LocalSpace[frame2];
+
+	RVec3 Position1, Position2;
+	RQuat Rotation1, Rotation2;
+	RVec3 Scale1, Scale2;
+
+	Transform1.Decompose(Position1, Rotation1, Scale1);
+	Transform2.Decompose(Position2, Rotation2, Scale2);
+
+	if (IsRootBone(BoneId))
 	{
-		float va = ((float*)&m_NodeKeyFrames[NodeId][frame1])[i];
-		float vb = ((float*)&m_NodeKeyFrames[NodeId][frame2])[i];
-		((float*)OutMatrix)[i] = va + (vb - va) * t;
+		if (HasRootMotion() || IsRootLocked())
+		{
+			Position1 -= GetRootPositionAtFrame(frame1);
+			Position2 -= GetRootPositionAtFrame(frame2);
+		}
 	}
-#endif
+
+	RTransform ResultTransform(
+		RVec3::Lerp(Position1, Position2, t),
+		RQuat::Slerp(Rotation1, Rotation2, t),
+		RVec3::Lerp(Scale1, Scale2, t)
+	);
+
+	*OutMatrix = ResultTransform.GetMatrix();
 }
 
 void RAnimation::EvaluatePoseAtTime(RAnimPoseData& PoseData, float Time) const
@@ -291,10 +312,30 @@ void RAnimation::EvaluatePoseAtTime(RAnimPoseData& PoseData, float Time) const
 	for (int i = 0; i < PoseData.SkinnedMesh->GetBoneCount(); i++)
 	{
 		RMatrix4 BoneMatrix;
-		int BoneId = PoseData.SkinnedMesh->GetCachedAnimationNodeId(this, i);
-		GetNodePoseAtTime(BoneId, Time, &BoneMatrix);
+
+		// Note: A skinned mesh may have different bone indices than an animation
+		// Map animation bone index to skinned mesh bone index
+		int BoneId = PoseData.SkinnedMesh->ConvertBoneIndex_MeshToAnimation(this, i);
+
+#if 0
+		// All bones are evaluated in mesh space
+		// (This is deprecated as local space bone matrices support per bone modification)
+		GetMeshSpaceBoneMatrixAtTime(BoneId, Time, &BoneMatrix);
+#else
+		// Note: Assuming the first bone is the root bone for now.
+		//		 Maybe this code need change in the future
+		if (i == 0)
+		{
+			GetMeshSpaceBoneMatrixAtTime(BoneId, Time, &BoneMatrix);
+		}
+		else
+		{
+			GetLocalSpaceBoneMatrixAtTime(BoneId, Time, &BoneMatrix);
+		}
+#endif
 
 		// Output poses in object space
+		// Array index is in skinned mesh bone index
 		PoseData.BoneMatrices[i] = BoneMatrix;
 	}
 }
@@ -337,44 +378,25 @@ RVec3 RAnimation::GetRootPositionAtFrame(int FrameId) const
 	return m_RootDisplacement[FrameId];
 }
 
-void RAnimation::SetNodeParentId(int NodeId, int ParentId)
-{
-	BoneNodeData[NodeId].ParentId = ParentId;
-}
-
-int RAnimation::GetNodeParentId(int NodeId) const
-{
-	return BoneNodeData[NodeId].ParentId;
-}
-
-void RAnimation::SetNodeName(int NodeId, const char* NodeName)
-{
-	BoneNodeData[NodeId].BoneName = NodeName;
-}
-
-int RAnimation::GetNodeIdByName(const char* nodeName) const
-{
-	for (auto iter = BoneNodeData.begin(); iter != BoneNodeData.end(); iter++)
-	{
-		if (strcmp(iter->BoneName.c_str(), nodeName) == 0)
-		{
-			return (int)(iter - BoneNodeData.begin());
-		}
-	}
-
-	return -1;
-}
-
 void RAnimation::BuildRootDisplacements()
 {
-	if (m_RootNode == -1)
+	if (SkeletalMesh == nullptr)
+	{
 		return;
+	}
+
+	int MeshRootNode = SkeletalMesh->GetSkeletalData().GetRootBone();
+	int AnimRootNode = SkeletalMesh->ConvertBoneIndex_MeshToAnimation(this, MeshRootNode);
+	if (AnimRootNode == -1)
+	{
+		return;
+	}
 
 	m_RootDisplacement.resize(m_FrameCount);
 
 	for (int i = 0; i < m_FrameCount; i++)
 	{
-		m_RootDisplacement[i] = BoneNodeData[m_RootNode].FrameMatrices[i].GetTranslation();
+		m_RootDisplacement[i] = BoneNodeData[AnimRootNode].FrameMatrices_MeshSpace[i].GetTranslation();
 		m_RootDisplacement[i].SetY(0.0f);
 	}
 
@@ -387,4 +409,55 @@ void RAnimation::BuildRootDisplacements()
 	{
 		RootSpeed = 0.0f;
 	}
+}
+
+int RAnimation::FindAnimBoneIndexByName(const std::string& BoneName) const
+{
+	for (int i = 0; i < (int)BoneNodeData.size(); i++)
+	{
+		if (BoneNodeData[i].BoneName == BoneName)
+		{
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+void RAnimation::SetAnimBoneName(int AnimBoneId, const std::string& BoneName)
+{
+	BoneNodeData[AnimBoneId].BoneName = BoneName;
+}
+
+bool RAnimation::IsRootBone(int BoneId) const
+{
+	assert(SkeletalMesh);
+	int MeshBoneId = SkeletalMesh->ConvertBoneIndex_AnimationToMesh(this, BoneId);
+	return SkeletalMesh->GetSkeletalData().FindParentForBone(MeshBoneId) == -1;
+}
+
+void RAnimation::SetSkeletalMesh(RMesh* InSkelMesh)
+{
+	SkeletalMesh = InSkelMesh;
+}
+
+void RAnimation::GetNeighborFramesAtTime(float Time, int& OutFrame1, int& OutFrame2, float& OutFactor) const
+{
+	// Make zero based time
+	Time = RMath::Max(Time - m_StartTime, 0.0f);
+	assert(Time >= 0 && Time < m_FrameCount);
+
+	OutFrame1 = (int)Time;
+	if (IsLooping())
+	{
+		OutFrame2 = ((int)Time + 1) % m_FrameCount;
+	}
+	else
+	{
+		// Non-looping animations should stay at the last frame when finish playing
+		OutFrame2 = RMath::Min((int)Time + 1, m_FrameCount - 1);
+	}
+
+	// Factor between two frames
+	OutFactor = Time - OutFrame1;
 }

@@ -5,6 +5,7 @@
 //=============================================================================
 
 #include "RMatrix.h"
+#include <iomanip>
 
 RMatrix4 RMatrix4::IDENTITY = RMatrix4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
@@ -142,6 +143,7 @@ bool RMatrix3::Decompose(RQuat& Rotation, RVec3& Scale) const
 //////////////////////////////////////////////////////////////////////////
 
 RMatrix4::RMatrix4()
+	: RMatrix4(RMatrix4::IDENTITY)
 {
 }
 
@@ -303,6 +305,23 @@ RMatrix4 RMatrix4::Inverse() const
 	return r;
 }
 
+
+std::string RMatrix4::ToDisplayString() const
+{
+	std::ostringstream StringStream;
+	StringStream.precision(2);			// "%.2f"
+	StringStream << std::fixed;			// No scientific notations
+	for (int x = 0; x < 4; x++)
+	{
+		StringStream << "[";
+		for (int y = 0; y < 4; y++)
+		{
+			StringStream << std::setw(10) << m[x][y];
+		}
+		StringStream << "]" << std::endl;
+	}
+	return StringStream.str();
+}
 
 RMatrix4 RMatrix4::CreateXAxisRotation(float degree)
 {

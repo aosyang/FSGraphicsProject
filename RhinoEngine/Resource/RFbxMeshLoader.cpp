@@ -26,7 +26,7 @@
 namespace
 {
 	/// Load animation of the scene
-	RAnimation* LoadFbxSceneAnimation(FbxScene* Scene);
+	RAnimation* LoadFbxSceneAnimation(RMesh* SkeletalMesh, const std::string& AssetPath, FbxScene* Scene);
 
 	/// Load materials from fbx node
 	void LoadFbxMaterials(FbxNode* SceneNode, std::vector<RMaterial*>& OutMaterials);
@@ -37,8 +37,17 @@ namespace
 	/// Get the matrix of fbx scene node
 	RMatrix4 GetFbxNodeTransform(FbxNode* SceneNode);
 
-	/// Get readable string format for matrix
-	std::string GetDisplayStringForMatrix(const RMatrix4& Matrix);
+	/// Fbx matrix conversion
+	FbxAMatrix ConvertToLeftHandedMatrix(const FbxAMatrix& InMatrix)
+	{
+		FbxAMatrix ResultMatrix = InMatrix;
+		FbxVector4 FbxBoneRotation = ResultMatrix.GetR();
+		ResultMatrix[3][2] = -ResultMatrix[3][2];
+		FbxBoneRotation.Set(-FbxBoneRotation[0], -FbxBoneRotation[1], FbxBoneRotation[2]);
+		ResultMatrix.SetR(FbxBoneRotation);
+
+		return ResultMatrix;
+	}
 }
 
 
@@ -136,19 +145,20 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 	}
 
 	// Load scene animation
-	RAnimation* animation = LoadFbxSceneAnimation(lFbxScene);
-	if (animation)
+
+	// The skeletal mesh used by the animation of this mesh.
+	// Note: Some fbx meshes only have animation information and their skeletal meshes are specified by meta data.
+	RMesh* SkeletalMesh = nullptr;
+	const std::string& SkeletalMeshName = MeshResource->GetMetaData()["SkeletalMesh"];
+	if (SkeletalMeshName != "")
 	{
-		animation->SetName(MeshResource->GetAssetPath());
-		const std::string& SkeletalMeshName = MeshResource->GetMetaData()["SkeletalMesh"];
-		if (SkeletalMeshName != "")
-		{
-			RMesh* SkeletalMesh = RResourceManager::Instance().LoadResource<RMesh>(SkeletalMeshName, EResourceLoadMode::Immediate);
-			if (SkeletalMesh)
-			{
-				SkeletalMesh->CacheAnimation(animation);
-			}
-		}
+		SkeletalMesh = RResourceManager::Instance().LoadResource<RMesh>(SkeletalMeshName, EResourceLoadMode::Immediate);
+	}
+
+	RAnimation* animation = LoadFbxSceneAnimation(SkeletalMesh, MeshResource->GetAssetPath(), lFbxScene);
+	if (animation && SkeletalMesh)
+	{
+		SkeletalMesh->CacheAnimation(animation);
 	}
 
 	std::vector<RMatrix4> boneInitInvPose;
@@ -380,6 +390,7 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 		bool hasDeformer = (MeshNode->GetDeformer(0, FbxDeformer::eSkin) != NULL);
 		if (hasDeformer)
 		{
+			SkeletalData MeshSkelData((int)fbxBoneNodes.size());
 			int deformerCount = MeshNode->GetDeformerCount();
 
 			for (int idxSkinDeformer = 0; idxSkinDeformer < deformerCount; idxSkinDeformer++)
@@ -401,6 +412,12 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 					int boneId = (int)(std::find(fbxBoneNodes.begin(), fbxBoneNodes.end(), LinkNode) - fbxBoneNodes.begin());
 					assert(boneId < MAX_BONE_COUNT);
 
+					MeshSkelData.SetBoneName(boneId, std::string(LinkNode->GetName()));
+					if (FbxNode* LinkNodeParent = LinkNode->GetParent())
+					{
+						MeshSkelData.SetBoneParent(std::string(LinkNode->GetName()), std::string(LinkNodeParent->GetName()));
+					}
+
 					// Store inversed initial transform for each bone to apply skinning with correct binding pose
 					FbxAMatrix clusterInitTransform;
 					cluster->GetTransformLinkMatrix(clusterInitTransform);
@@ -409,15 +426,12 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 					{
 						RMatrix4 OriginalTransform;
 						MatrixTransfer(OriginalTransform, clusterInitTransform);
-						RLogVerbose("Cluster link \'%s\', initial transform:\n%s", LinkNode->GetName(), GetDisplayStringForMatrix(OriginalTransform).c_str());
+						RLogVerbose("Cluster link \'%s\', initial transform:\n%s", LinkNode->GetName(), OriginalTransform.ToDisplayString().c_str());
 					}
 #endif	// DEBUG_LOG_MATRICES == 1
 
 #if CONVERT_TO_LEFT_HANDED_MESH == 1
-					FbxVector4 rotation = clusterInitTransform.GetR();
-					clusterInitTransform[3][2] = -clusterInitTransform[3][2];
-					rotation.Set(-rotation[0], -rotation[1], rotation[2]);
-					clusterInitTransform.SetR(rotation);
+					clusterInitTransform = ConvertToLeftHandedMatrix(clusterInitTransform);
 #endif
 					clusterInitTransform = clusterInitTransform.Inverse();
 
@@ -470,9 +484,19 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 							}
 						}
 					}
-
 				}
 			}
+
+			// Find root bone for skeletal data
+			for (int i = 0; i < (int)MeshSkelData.SkeletalBones.size(); i++)
+			{
+				if (MeshSkelData.SkeletalBones[i].ParentId == -1)
+				{
+					MeshSkelData.SetRootBone(i);
+				}
+			}
+
+			MeshResource->SetSkeletalData(MeshSkelData);
 		}
 
 		// Set bone id in unused slot to 0 so shader won't mess up
@@ -804,7 +828,7 @@ void RFbxMeshLoader::OptimizeMesh(std::vector<UINT>& IndexData, std::vector<RVer
 
 namespace
 {
-	RAnimation* LoadFbxSceneAnimation(FbxScene* Scene)
+	RAnimation* LoadFbxSceneAnimation(RMesh* SkeletalMesh, const std::string& AssetPath, FbxScene* Scene)
 	{
 		RAnimation* animation = nullptr;
 
@@ -833,6 +857,8 @@ namespace
 
 			int totalFrameCount = (int)(animEndTime.GetFrameCount(animTimeMode) - animStartTime.GetFrameCount(animTimeMode)) + 1;
 			animation = new RAnimation(
+				AssetPath,
+				SkeletalMesh,
 				NumFbxNodes,
 				totalFrameCount,
 				(float)animStartTime.GetFrameCountPrecise(animTimeMode),
@@ -840,73 +866,89 @@ namespace
 				animFrameRate);
 
 			std::map<std::string, int> nodeNameToId;
+			bool bIsFirstNode = true;
 
-			for (int FbxSceneNodeIndex = 0; FbxSceneNodeIndex < NumFbxNodes; FbxSceneNodeIndex++)
+			for (FbxTime CurrentFrameTime = animStartTime; CurrentFrameTime <= animEndTime; CurrentFrameTime += TimePerFrame)
 			{
-				FbxNode* SceneNode = Scene->GetNode(FbxSceneNodeIndex);
+				// Array that holds matrices of each node
+				std::vector<RMatrix4> NodeMatrices(NumFbxNodes, RMatrix4::IDENTITY);
 
-				// Note: We can't skip non-skeletal nodes as some animations rely on them for animations.
-				//FbxNodeAttribute* NodeAttribute = SceneNode->GetNodeAttribute();
-				//if (NodeAttribute && NodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+				for (int FbxSceneNodeIndex = 0; FbxSceneNodeIndex < NumFbxNodes; FbxSceneNodeIndex++)
 				{
-					const char* BoneName = SceneNode->GetName();
-
-					for (FbxTime CurrentFrameTime = animStartTime;
-						 CurrentFrameTime <= animEndTime;
-						 CurrentFrameTime += TimePerFrame)
+					FbxNode* SceneNode = Scene->GetNode(FbxSceneNodeIndex);
+					if (SceneNode == nullptr)
 					{
-						RMatrix4 BoneTransform;
+						continue;
+					}
 
-						// Evaluate bone transform in model space
-						FbxAMatrix FbxBoneTransform = SceneNode->EvaluateGlobalTransform(CurrentFrameTime);
+					// Find index for parent node
+					int ParentId = -1;
+					if (FbxNode* ParentNode = SceneNode->GetParent())
+					{
+						for (ParentId = 0; ParentId < NumFbxNodes; ParentId++)
+						{
+							if (Scene->GetNode(ParentId) == ParentNode)
+							{
+								break;
+							}
+						}
+
+						if (ParentId == NumFbxNodes)
+						{
+							ParentId = -1;
+						}
+					}
+
+					// Note: We can't skip non-skeletal nodes because some animations have keyframe information that depends on them.
+					//FbxNodeAttribute* NodeAttribute = SceneNode->GetNodeAttribute();
+					//if (NodeAttribute && NodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+					{
+						const char* BoneName = SceneNode->GetName();
+						animation->SetAnimBoneName(FbxSceneNodeIndex, BoneName);
+
+						// Evaluate bone transform in world space of fbx scene, which becomes the mesh space
+						// when playing this animation on a skinned mesh.
+						FbxAMatrix FbxBoneTransformMeshSpace = SceneNode->EvaluateGlobalTransform(CurrentFrameTime);
 
 #if DEBUG_LOG_MATRICES == 1
 						if (CurrentFrameTime == animStartTime)
 						{
 							RMatrix4 OriginalTransform;
-							MatrixTransfer(OriginalTransform, FbxBoneTransform);
-							RLogVerbose("Bone \'%s\', pose at first frame:\n%s", BoneName, GetDisplayStringForMatrix(OriginalTransform).c_str());
+							MatrixTransfer(OriginalTransform, FbxBoneTransformMeshSpace);
+							RLogVerbose("Bone \'%s\', pose at first frame:\n%s", BoneName, OriginalTransform.ToDisplayString().c_str());
 						}
 #endif	// DEBUG_LOG_MATRICES == 1
 
 #if CONVERT_TO_LEFT_HANDED_MESH == 1
-						FbxVector4 FbxBoneRotation = FbxBoneTransform.GetR();
-						FbxBoneTransform[3][2] = -FbxBoneTransform[3][2];
-						FbxBoneRotation.Set(-FbxBoneRotation[0], -FbxBoneRotation[1], FbxBoneRotation[2]);
-						FbxBoneTransform.SetR(FbxBoneRotation);
+						FbxBoneTransformMeshSpace = ConvertToLeftHandedMatrix(FbxBoneTransformMeshSpace);
 #endif
-						MatrixTransfer(BoneTransform, FbxBoneTransform);
+						RMatrix4 BoneTransformMeshSpace;
+						MatrixTransfer(BoneTransformMeshSpace, FbxBoneTransformMeshSpace);
+
+						NodeMatrices[FbxSceneNodeIndex] = BoneTransformMeshSpace;
+
+						// Calculate bone transform in parent bone space
+						RMatrix4 LocalTransform = ParentId == -1 ? BoneTransformMeshSpace : BoneTransformMeshSpace * NodeMatrices[ParentId].Inverse();
 
 						// Precise frames number in fractions
 						float NumFramesAtCurrentTime = (float)CurrentFrameTime.GetFrameCountPrecise(animTimeMode);
 						float NumFramesAtStartTime = (float)animStartTime.GetFrameCountPrecise(animTimeMode);
 
 						int FrameIndex = (int)(NumFramesAtCurrentTime - NumFramesAtStartTime);
-						animation->AddNodePoseAtFrame(FbxSceneNodeIndex, FrameIndex, &BoneTransform);
-						animation->SetNodeName(FbxSceneNodeIndex, BoneName);
+						animation->SetMeshSpaceBoneMatrixAtFrame(FbxSceneNodeIndex, FrameIndex, BoneTransformMeshSpace);
+						animation->SetLocalSpaceBoneMatrixAtFrame(FbxSceneNodeIndex, FrameIndex, LocalTransform);
+
+#if 1	// Debug output matrices
+						RLog("Bone name: %s, frame: %d\n", BoneName, FrameIndex);
+						RLog("Bone world matrix:\n");
+						RLog("%s", BoneTransformMeshSpace.ToDisplayString().c_str());
+						RLog("Bone local matrix:\n");
+						RLog("%s", LocalTransform.ToDisplayString().c_str());
+#endif
 
 						nodeNameToId[BoneName] = FbxSceneNodeIndex;
 					}
 				}
-			}
-
-			// Determine parent nodes
-			for (int FbxSceneNodeIndex = 0; FbxSceneNodeIndex < NumFbxNodes; FbxSceneNodeIndex++)
-			{
-				FbxNode* SceneNode = Scene->GetNode(FbxSceneNodeIndex);
-				FbxNode* ParentNode = SceneNode->GetParent();
-				int ParentId = -1;
-
-				if (ParentNode)
-				{
-					auto Iter = nodeNameToId.find(ParentNode->GetName());
-					if (Iter != nodeNameToId.end())
-					{
-						ParentId = Iter->second;
-					}
-				}
-
-				animation->SetNodeParentId(FbxSceneNodeIndex, ParentId);
 			}
 		}
 
@@ -1057,20 +1099,5 @@ namespace
 
 		// TODO: Handle rotation in the future
 		return RTransform(Translation, RQuat::IDENTITY, Scale).GetMatrix();
-	}
-
-
-	std::string GetDisplayStringForMatrix(const RMatrix4& Matrix)
-	{
-		std::ostringstream StringStream;
-		for (int i = 0; i < 4; i++)
-		{
-			StringStream << "[" << std::fixed
-						 << std::setw(10) << Matrix.m[i][0] << ", "
-						 << std::setw(10) << Matrix.m[i][1] << ", "
-						 << std::setw(10) << Matrix.m[i][2] << ", "
-						 << std::setw(10) << Matrix.m[i][3] << "]" << std::endl;
-		}
-		return StringStream.str();
 	}
 }

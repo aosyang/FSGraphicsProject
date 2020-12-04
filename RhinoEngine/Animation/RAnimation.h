@@ -72,25 +72,24 @@ private:
 struct RAnimBoneData
 {
 	RAnimBoneData()
-		: ParentId(-1)
 	{
 	}
 
 	void Serialize(RSerializer& Serializer)
 	{
 		Serializer.SerializeData(BoneName);
-		Serializer.SerializeData(ParentId);
-		Serializer.SerializeVector(FrameMatrices);
+		Serializer.SerializeVector(FrameMatrices_MeshSpace);
+		Serializer.SerializeVector(FrameMatrices_LocalSpace);
 	}
 
 	/// Name of the bone node
 	std::string				BoneName;
 
-	/// Parent bone node id
-	int						ParentId;
+	/// Poses of each frame in mesh space
+	std::vector<RMatrix4>	FrameMatrices_MeshSpace;
 
-	/// Poses of each frame
-	std::vector<RMatrix4>	FrameMatrices;
+	/// Poses of each frame in local space
+	std::vector<RMatrix4>	FrameMatrices_LocalSpace;
 };
 
 
@@ -100,11 +99,11 @@ class RAnimation
 {
 public:
 	RAnimation();
-	RAnimation(int nodeCount, int frameCount, float startTime, float endTime, float frameRate);
+	RAnimation(const std::string& InName, RMesh* InSkeletalMesh, int nodeCount, int frameCount, float startTime, float endTime, float frameRate);
 	~RAnimation();
 
-	void SetName(const std::string& name) { m_Name = name; }
-	const std::string& GetName() const { return m_Name; }
+	void SetName(const std::string& name)	{ m_Name = name; }
+	const std::string& GetName() const		{ return m_Name; }
 
 	/// Set flags for animation
 	/// TODO: Flags should be loaded with the animation in the future. Remove this function later
@@ -125,11 +124,17 @@ public:
 
 	void Serialize(RSerializer& serializer);
 
-	/// Add a pose matrix for a bone node at given frame
-	void AddNodePoseAtFrame(int nodeId, int frameId, const RMatrix4* matrix);
+	/// Set a mesh space matrix for a bone node at given frame
+	void SetMeshSpaceBoneMatrixAtFrame(int BoneId, int FrameId, const RMatrix4& InMatrix);
 
-	/// Get the pose matrix of a bone node at given time
-	void GetNodePoseAtTime(int NodeId, float Time, RMatrix4* OutMatrix) const;
+	/// Set a local space (parent bone space) matrix for a bone node at given frame
+	void SetLocalSpaceBoneMatrixAtFrame(int BoneId, int FrameId, const RMatrix4& InMatrix);
+
+	/// Get the mesh space matrix of a bone node at given time
+	void GetMeshSpaceBoneMatrixAtTime(int BoneId, float Time, RMatrix4* OutMatrix) const;
+
+	/// Get the local space (parent bone space) matrix of a bone node at given time
+	void GetLocalSpaceBoneMatrixAtTime(int BoneId, float Time, RMatrix4* OutMatrix) const;
 
 	/// Get total number of bone nodes
 	int GetNodeCount() const { return (int)BoneNodeData.size(); }
@@ -145,24 +150,6 @@ public:
 
 	RVec3 GetRootPositionAtFrame(int FrameId) const;
 
-	/// Set the parent id for a node
-	void SetNodeParentId(int NodeId, int ParentId);
-
-	/// Get the parent id for a node
-	int GetNodeParentId(int NodeId) const;
-
-	/// Set name for node
-	void SetNodeName(int NodeId, const char* NodeName);
-
-	/// Get id of node with given name
-	int GetNodeIdByName(const char* nodeName) const;
-
-	/// Set the id of root node
-	void SetRootNode(int nodeId) { m_RootNode = nodeId; }
-
-	/// Get the id of root node
-	int GetRootNode() const { return m_RootNode; }
-
 	/// Build root displacements for each frame
 	void BuildRootDisplacements();
 
@@ -172,8 +159,24 @@ public:
 	/// Get frame rate in frames per second
 	float GetFrameRate() const { return m_FrameRate; }
 
+	/// Get bone index in the animation.
+	/// Note: This index might be different than the result of finding bone index on a skinned mesh
+	int FindAnimBoneIndexByName(const std::string& BoneName) const;
+
+	/// Assign a name to a bone in the animation
+	void SetAnimBoneName(int AnimBoneId, const std::string& BoneName);
+
+	/// Checks if a bone is a root bone
+	bool IsRootBone(int BoneId) const;
+
+	void SetSkeletalMesh(RMesh* InSkelMesh);
+
 private:
 	int GetBitFlags() const;
+
+	/// Get index of closest left and right frames at given time
+	/// OutFactor: The lerp factor between two frames
+	void GetNeighborFramesAtTime(float Time, int& OutFrame1, int& OutFrame2, float& OutFactor) const;
 
 private:
 	/// Name of the animation
@@ -202,8 +205,8 @@ private:
 
 	float					RootSpeed;
 
-	/// Index of the root node
-	int							m_RootNode;
+	/// The skeletal mesh to play this animation
+	RMesh* SkeletalMesh;
 };
 
 

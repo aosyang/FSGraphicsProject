@@ -114,6 +114,9 @@ public:
 
 	RMatrix4 Inverse() const;
 
+	// Convert the matrix to a string for display
+	std::string ToDisplayString() const;
+
 	// Identity matrix variable
 	static RMatrix4 IDENTITY;
 	static RMatrix4 Zero;

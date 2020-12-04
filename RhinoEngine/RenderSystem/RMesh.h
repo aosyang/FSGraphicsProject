@@ -35,6 +35,106 @@ namespace tinyxml2
 void SerializeXmlMaterials_Save(const std::vector<RMaterial*>& Materials, tinyxml2::XMLDocument* XmlDoc, tinyxml2::XMLElement* XmlElemMaterial);
 
 
+struct SkeletalData
+{
+	struct BoneData
+	{
+		BoneData()
+			: ParentId(-1)
+		{}
+
+		bool operator==(const BoneData& Other) const
+		{
+			return BoneName == Other.BoneName && ParentId == Other.ParentId;
+		}
+
+		bool operator!=(const BoneData& Other) const
+		{
+			return !operator==(Other);
+		}
+
+		void Serialize(RSerializer& Serializer);
+
+		std::string BoneName;
+		int ParentId;
+	};
+
+	SkeletalData()
+		: RootBone(-1)
+	{
+	}
+
+	SkeletalData(int InBoneCount)
+	{
+		SkeletalBones.resize(InBoneCount);
+	}
+
+	bool operator==(const SkeletalData& Other) const
+	{
+		return SkeletalBones == Other.SkeletalBones;
+	}
+
+	bool operator!=(const SkeletalData& Other) const
+	{
+		return !operator==(Other);
+	}
+
+	void Serialize(RSerializer& Serializer);
+
+	void SetBoneName(int BoneId, std::string& BoneName)
+	{
+		SkeletalBones[BoneId].BoneName = BoneName;
+	}
+
+	/// Find index of bone by its name
+	int FindBoneByName(const std::string& BoneName) const
+	{
+		for (int i = 0; i < (int)SkeletalBones.size(); i++)
+		{
+			if (SkeletalBones[i].BoneName == BoneName)
+			{
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
+	// Find a parent id for a bone.
+	// The index here represents the order of bones used in the skinned mesh.
+	int FindParentForBone(int BoneId) const
+	{
+		return SkeletalBones[BoneId].ParentId;
+	}
+
+	// Assign a parent id to a bone.
+	// The index here represents the order of bones used in the skinned mesh.
+	void SetBoneParent(const std::string& BoneName, const std::string& ParentName)
+	{
+		int BoneId = FindBoneByName(BoneName);
+		int ParentId = FindBoneByName(ParentName);
+
+		if (BoneId != -1)
+		{
+			SkeletalBones[BoneId].ParentId = ParentId;
+		}
+	}
+
+	void SetRootBone(int BoneId)
+	{
+		RootBone = BoneId;
+	}
+
+	int GetRootBone() const
+	{
+		return RootBone;
+	}
+
+	int RootBone;
+	std::vector<BoneData> SkeletalBones;
+};
+
+
 class RMesh : public RResourceBase
 {
 	DECLARE_RUNTIME_TYPE(RMesh, RResourceBase)
@@ -73,17 +173,24 @@ public:
 	// Check if any mesh elements uses skinning
 	bool HasAnySkinnedMeshElements() const;
 
+	void SetSkeletalData(const SkeletalData& InMeshSkeletalData);
+	const SkeletalData& GetSkeletalData() const;
+
 	void SetBoneInitInvMatrices(std::vector<RMatrix4>& bonePoses);
 	const RMatrix4& GetBoneInitInvMatrices(int index) const { return m_BoneInitInvMatrices[index]; }
 
 	void SetBoneNameList(const std::vector<std::string>& boneNameList);
 	const std::string& GetBoneName(int boneId) const;
+	int FindBoneByName(const std::string& BoneName) const;
 	int GetBoneCount() const;
 
 	/// TODO: Remove CacheAnimation and use a skeletal data class for the functionality of GetCachedAnimationNodeId
 	void CacheAnimation(RAnimation* Animation);
 	bool HasCachedAnimation(RAnimation* anim) const;
-	int GetCachedAnimationNodeId(const RAnimation* Animation, int BoneId) const;
+
+	/// Map a bone index from animation to skinned mesh
+	int ConvertBoneIndex_MeshToAnimation(const RAnimation* Animation, int MeshBoneId) const;
+	int ConvertBoneIndex_AnimationToMesh(const RAnimation* Animation, int AnimBoneId) const;
 
 	EMeshCollisionType GetCollisionType() const;
 
@@ -94,6 +201,10 @@ protected:
 
 	bool TryLoadAsFbxMesh();
 	bool TryLoadAsRmesh();
+
+	// Save mesh data as binary rmesh format
+	void SaveBinaryMesh();
+
 private:
 	std::vector<std::unique_ptr<RMeshElement>>	m_MeshElements;
 
@@ -103,6 +214,8 @@ private:
 	RAnimation*						m_Animation;
 	std::vector<RMatrix4>			m_BoneInitInvMatrices;
 	std::vector<std::string>		m_BoneIdToName;
+
+	SkeletalData					MeshSkeletalData;
 
 	/// TODO: Store the node cache in a shared skeletal data
 	std::map<const RAnimation*, std::vector<int>>	m_AnimationNodeCache;

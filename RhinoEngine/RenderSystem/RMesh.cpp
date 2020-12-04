@@ -145,6 +145,7 @@ void RMesh::Serialize(RSerializer& serializer)
 			RMesh* SkeletalMesh = RResourceManager::Instance().LoadResource<RMesh>(SkeletalMeshName, EResourceLoadMode::Immediate);
 			if (SkeletalMesh)
 			{
+				m_Animation->SetSkeletalMesh(SkeletalMesh);
 				SkeletalMesh->CacheAnimation(m_Animation);
 			}
 		}
@@ -152,6 +153,7 @@ void RMesh::Serialize(RSerializer& serializer)
 
 	serializer.SerializeVector(m_BoneInitInvMatrices);
 	serializer.SerializeVector(m_BoneIdToName, &RSerializer::SerializeData);
+	serializer.SerializeObject(MeshSkeletalData);
 
 	if (serializer.IsReading())
 	{
@@ -258,6 +260,23 @@ bool RMesh::HasAnySkinnedMeshElements() const
 	return false;
 }
 
+void RMesh::SetSkeletalData(const SkeletalData& InMeshSkeletalData)
+{
+	if (MeshSkeletalData.SkeletalBones.size() == 0)
+	{
+		MeshSkeletalData = InMeshSkeletalData;
+	}
+	else
+	{
+		assert(MeshSkeletalData == InMeshSkeletalData);
+	}
+}
+
+const SkeletalData& RMesh::GetSkeletalData() const
+{
+	return MeshSkeletalData;
+}
+
 void RMesh::SetBoneInitInvMatrices(std::vector<RMatrix4>& bonePoses)
 {
 	m_BoneInitInvMatrices = move(bonePoses);
@@ -271,6 +290,17 @@ void RMesh::SetBoneNameList(const std::vector<std::string>& boneNameList)
 const std::string& RMesh::GetBoneName(int boneId) const
 {
 	return m_BoneIdToName[boneId];
+}
+
+int RMesh::FindBoneByName(const std::string& BoneName) const
+{
+	auto Iter = std::find(m_BoneIdToName.begin(), m_BoneIdToName.end(), BoneName);
+	if (Iter == m_BoneIdToName.end())
+	{
+		return -1;
+	}
+
+	return int(Iter - m_BoneIdToName.begin());
 }
 
 int RMesh::GetBoneCount() const
@@ -304,18 +334,21 @@ void RMesh::CacheAnimation(RAnimation* Animation)
 		return;
 	}
 
-	const char* rootNodeName = m_BoneIdToName[0].data();
-	Animation->SetRootNode(Animation->GetNodeIdByName(rootNodeName));
-	Animation->BuildRootDisplacements();
+	const auto& RootNodeName = m_BoneIdToName[0];
+	int RootBoneId = MeshSkeletalData.FindBoneByName(RootNodeName);
+	MeshSkeletalData.SetRootBone(RootBoneId);
 
-	std::vector<int> nodeIdMap;
-	nodeIdMap.resize(m_BoneIdToName.size());
+	// Build a map that converts mesh bone ids to animation ones.
+	std::vector<int> BoneIdMap_MeshToAnim;
+	BoneIdMap_MeshToAnim.resize(m_BoneIdToName.size());
 	for (int i = 0; i < (int)m_BoneIdToName.size(); i++)
 	{
-		nodeIdMap[i] = Animation->GetNodeIdByName(m_BoneIdToName[i].data());
+		BoneIdMap_MeshToAnim[i] = Animation->FindAnimBoneIndexByName(m_BoneIdToName[i]);
 	}
+	m_AnimationNodeCache[Animation] = std::move(BoneIdMap_MeshToAnim);
 
-	m_AnimationNodeCache[Animation] = nodeIdMap;
+	// Must do this last after setting root bone and building the bone id map
+	Animation->BuildRootDisplacements();
 }
 
 bool RMesh::HasCachedAnimation(RAnimation* anim) const
@@ -328,16 +361,38 @@ bool RMesh::HasCachedAnimation(RAnimation* anim) const
 	return false;
 }
 
-int RMesh::GetCachedAnimationNodeId(const RAnimation* Animation, int BoneId) const
+int RMesh::ConvertBoneIndex_MeshToAnimation(const RAnimation* Animation, int MeshBoneId) const
 {
-	if (!Animation || !m_BoneIdToName.size())
-		return -1;
+	if (Animation && m_BoneIdToName.size())
+	{
+		auto Iter = m_AnimationNodeCache.find(Animation);
+		if (Iter != m_AnimationNodeCache.end())
+		{
+			return Iter->second[MeshBoneId];
+		}
+	}
 
-	auto Iter = m_AnimationNodeCache.find(Animation);
-	if (Iter == m_AnimationNodeCache.end())
-		return -1;
+	return -1;
+}
 
-	return Iter->second[BoneId];
+int RMesh::ConvertBoneIndex_AnimationToMesh(const RAnimation* Animation, int AnimBoneId) const
+{
+	if (Animation && m_BoneIdToName.size())
+	{
+		auto Iter = m_AnimationNodeCache.find(Animation);
+		if (Iter != m_AnimationNodeCache.end())
+		{
+			for (int i = 0; i < (int)Iter->second.size(); i++)
+			{
+				if (Iter->second[i] == AnimBoneId)
+				{
+					return i;
+				}
+			}
+		}
+	}
+
+	return -1;
 }
 
 EMeshCollisionType RMesh::GetCollisionType() const
@@ -381,14 +436,7 @@ bool RMesh::TryLoadAsFbxMesh()
 	if (FbxMeshLoader->LoadDataForMeshResource(this, GetFileSystemPath()))
 	{
 #if EXPORT_FBX_AS_BINARY_MESH == 1
-		std::string rmeshName = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmesh");
-		RSerializer serializer;
-		serializer.Open(rmeshName, ESerializeMode::Write);
-		if (serializer.IsOpen())
-		{
-			Serialize(serializer);
-			serializer.Close();
-		}
+		SaveBinaryMesh();
 #endif
 	}
 
@@ -428,6 +476,16 @@ bool RMesh::TryLoadAsRmesh()
 	Serialize(serializer);
 	serializer.Close();
 
+	if (m_Animation)
+	{
+		std::string SkelMeshName = GetMetaData()["SkeletalMesh"];
+		if (SkelMeshName.size())
+		{
+			RMesh* SkelMesh = RResourceManager::Instance().LoadResource<RMesh>(SkelMeshName, EResourceLoadMode::Immediate);
+			m_Animation->SetSkeletalMesh(SkelMesh);
+		}
+	}
+
 	//RAnimation* animation = new RAnimation();
 	//std::string animFilename = RFileUtil::ReplaceExt(task->Filename.size(), "ranim");
 
@@ -464,6 +522,18 @@ bool RMesh::TryLoadAsRmesh()
 	return true;
 }
 
+void RMesh::SaveBinaryMesh()
+{
+	std::string rmeshName = RFileUtil::ReplaceExtension(GetFileSystemPath(), "rmesh");
+	RSerializer serializer;
+	serializer.Open(rmeshName, ESerializeMode::Write);
+	if (serializer.IsOpen())
+	{
+		Serialize(serializer);
+		serializer.Close();
+	}
+}
+
 void SerializeXmlMaterials_Save(const std::vector<RMaterial*>& Materials, tinyxml2::XMLDocument* XmlDoc, tinyxml2::XMLElement* XmlElemMaterial)
 {
 	// <Material>
@@ -481,4 +551,16 @@ void SerializeXmlMaterials_Save(const std::vector<RMaterial*>& Materials, tinyxm
 		}
 		XmlElemMaterial->InsertEndChild(XmlElemSubmesh);
 	}
+}
+
+void SkeletalData::BoneData::Serialize(RSerializer& Serializer)
+{
+	Serializer.SerializeData(BoneName);
+	Serializer.SerializeData(ParentId);
+}
+
+void SkeletalData::Serialize(RSerializer& Serializer)
+{
+	Serializer.SerializeData(RootBone);
+	Serializer.SerializeVector(SkeletalBones, &RSerializer::SerializeObject);
 }
