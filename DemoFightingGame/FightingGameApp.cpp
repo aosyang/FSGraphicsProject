@@ -238,6 +238,8 @@ void FightingGameApp::UpdateScene(const RTimer& timer)
 		float playerRot = CurrentPlayer->GetPlayerRotation();
 
 		std::stringstream DebugMsg;
+		DebugMsg << std::fixed;
+		DebugMsg.precision(2);
 		DebugMsg << "Player: ("
 				 << playerPos.X() << ", "
 				 << playerPos.Y() << ", "

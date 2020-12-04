@@ -26,7 +26,7 @@
 namespace
 {
 	/// Load animation of the scene
-	RAnimation* LoadFbxSceneAnimation(RMesh* SkeletalMesh, const std::string& AssetPath, FbxScene* Scene);
+	RAnimation* LoadFbxSceneAnimation(const std::string& AssetPath, FbxScene* Scene);
 
 	/// Load materials from fbx node
 	void LoadFbxMaterials(FbxNode* SceneNode, std::vector<RMaterial*>& OutMaterials);
@@ -148,17 +148,10 @@ bool RFbxMeshLoader::LoadDataForMeshResource(RMesh* MeshResource, const char* Fi
 
 	// The skeletal mesh used by the animation of this mesh.
 	// Note: Some fbx meshes only have animation information and their skeletal meshes are specified by meta data.
-	RMesh* SkeletalMesh = nullptr;
-	const std::string& SkeletalMeshName = MeshResource->GetMetaData()["SkeletalMesh"];
-	if (SkeletalMeshName != "")
+	RAnimation* animation = LoadFbxSceneAnimation(MeshResource->GetAssetPath(), lFbxScene);
+	if (animation)
 	{
-		SkeletalMesh = RResourceManager::Instance().LoadResource<RMesh>(SkeletalMeshName, EResourceLoadMode::Immediate);
-	}
-
-	RAnimation* animation = LoadFbxSceneAnimation(SkeletalMesh, MeshResource->GetAssetPath(), lFbxScene);
-	if (animation && SkeletalMesh)
-	{
-		SkeletalMesh->CacheAnimation(animation);
+		animation->InitFromMetaData(MeshResource->GetMetaData());
 	}
 
 	std::vector<RMatrix4> boneInitInvPose;
@@ -828,7 +821,7 @@ void RFbxMeshLoader::OptimizeMesh(std::vector<UINT>& IndexData, std::vector<RVer
 
 namespace
 {
-	RAnimation* LoadFbxSceneAnimation(RMesh* SkeletalMesh, const std::string& AssetPath, FbxScene* Scene)
+	RAnimation* LoadFbxSceneAnimation(const std::string& AssetPath, FbxScene* Scene)
 	{
 		RAnimation* animation = nullptr;
 
@@ -858,7 +851,6 @@ namespace
 			int totalFrameCount = (int)(animEndTime.GetFrameCount(animTimeMode) - animStartTime.GetFrameCount(animTimeMode)) + 1;
 			animation = new RAnimation(
 				AssetPath,
-				SkeletalMesh,
 				NumFbxNodes,
 				totalFrameCount,
 				(float)animStartTime.GetFrameCountPrecise(animTimeMode),
@@ -938,7 +930,7 @@ namespace
 						animation->SetMeshSpaceBoneMatrixAtFrame(FbxSceneNodeIndex, FrameIndex, BoneTransformMeshSpace);
 						animation->SetLocalSpaceBoneMatrixAtFrame(FbxSceneNodeIndex, FrameIndex, LocalTransform);
 
-#if 1	// Debug output matrices
+#if 0	// Debug output matrices
 						RLog("Bone name: %s, frame: %d\n", BoneName, FrameIndex);
 						RLog("Bone world matrix:\n");
 						RLog("%s", BoneTransformMeshSpace.ToDisplayString().c_str());

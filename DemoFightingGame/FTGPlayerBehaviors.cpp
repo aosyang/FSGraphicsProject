@@ -46,11 +46,6 @@ void FTGPlayerBehaviorBase::EvaluatePose(RAnimPoseData& PoseData)
 	}
 }
 
-void FTGPlayerBehaviorBase::CacheAssets(RMesh& SkinnedMesh)
-{
-	OnCacheAnimations(SkinnedMesh);
-}
-
 std::string FTGPlayerBehaviorBase::GetDebugString() const
 {
 	return std::string("");
@@ -72,11 +67,6 @@ void FTGPlayerBehaviorBase::NotifyBegin(FTGPlayerStateMachine* StateMachine)
 void FTGPlayerBehaviorBase::NotifyEnd(FTGPlayerStateMachine* StateMachine)
 {
 	OnBehaviorFinished(StateMachine);
-}
-
-void FTGPlayerBehaviorBase::OnCacheAnimations(RMesh& SkinnedMesh)
-{
-	SkinnedMesh.CacheAnimation(m_Animation);
 }
 
 void FTGPlayerBehaviorBase::OnBehaviorFinished(FTGPlayerStateMachine* StateMachine)

@@ -58,8 +58,6 @@ public:
 	// Override RAnimNode_Base methods
 	virtual void EvaluatePose(RAnimPoseData& PoseData) override;
 
-	void CacheAssets(RMesh& SkinnedMesh);
-
 	virtual std::string GetDebugString() const;
 
 	EPlayerBehavior GetBehaviorEnum() const;
@@ -71,8 +69,6 @@ public:
 	void NotifyEnd(FTGPlayerStateMachine* StateMachine);
 
 protected:
-	virtual void OnCacheAnimations(RMesh& SkinnedMesh);
-
 	virtual void OnBehaviorFinished(FTGPlayerStateMachine* StateMachine);
 
 	void LoadAnimationAsset(const std::string& AssetPath, int flags = 0);

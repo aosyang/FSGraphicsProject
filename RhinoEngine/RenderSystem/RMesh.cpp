@@ -138,17 +138,7 @@ void RMesh::Serialize(RSerializer& serializer)
 	if (serializer.IsReading() && m_Animation)
 	{
 		m_Animation->SetName(GetAssetPath());
-
-		std::string SkeletalMeshName = GetMetaData()["SkeletalMesh"];
-		if (SkeletalMeshName != "")
-		{
-			RMesh* SkeletalMesh = RResourceManager::Instance().LoadResource<RMesh>(SkeletalMeshName, EResourceLoadMode::Immediate);
-			if (SkeletalMesh)
-			{
-				m_Animation->SetSkeletalMesh(SkeletalMesh);
-				SkeletalMesh->CacheAnimation(m_Animation);
-			}
-		}
+		m_Animation->InitFromMetaData(GetMetaData());
 	}
 
 	serializer.SerializeVector(m_BoneInitInvMatrices);
@@ -493,12 +483,7 @@ bool RMesh::TryLoadAsRmesh()
 
 	if (m_Animation)
 	{
-		std::string SkelMeshName = GetMetaData()["SkeletalMesh"];
-		if (SkelMeshName.size())
-		{
-			RMesh* SkelMesh = RResourceManager::Instance().LoadResource<RMesh>(SkelMeshName, EResourceLoadMode::Immediate);
-			m_Animation->SetSkeletalMesh(SkelMesh);
-		}
+		m_Animation->InitFromMetaData(GetMetaData());
 	}
 
 	//RAnimation* animation = new RAnimation();

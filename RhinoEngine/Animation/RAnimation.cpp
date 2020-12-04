@@ -9,6 +9,8 @@
 #include "RenderSystem/RMesh.h"
 #include "RAnimNode_Base.h"
 #include "Resource/RResourceManager.h"
+#include "Resource/RResourceMetaData.h"
+#include "Core/StringUtils.h"
 
 RAnimationBlender::RAnimationBlender()
 	: m_BlendTime(0.2f)
@@ -177,14 +179,13 @@ bool RAnimationBlender::HasFinishedPlaying() const
 }
 
 RAnimation::RAnimation()
-	: RAnimation("", nullptr, 0, 0, 0.0f, 0.0f, 0.0f)
+	: RAnimation("", 0, 0, 0.0f, 0.0f, 0.0f)
 {
 
 }
 
-RAnimation::RAnimation(const std::string& InName, RMesh* InSkeletalMesh, int nodeCount, int frameCount, float startTime, float endTime, float frameRate)
+RAnimation::RAnimation(const std::string& InName, int nodeCount, int frameCount, float startTime, float endTime, float frameRate)
 	: m_Name(InName)
-	, SkeletalMesh(InSkeletalMesh)
 	, m_Flags(0)
 	, m_FrameCount(frameCount)
 	, m_StartTime(startTime)
@@ -203,6 +204,30 @@ RAnimation::RAnimation(const std::string& InName, RMesh* InSkeletalMesh, int nod
 
 RAnimation::~RAnimation()
 {
+}
+
+void RAnimation::InitFromMetaData(const RResourceMetaData& MetaData)
+{
+	// If any skeletal is specified in metadata, use it for the animation
+	const std::string& SkeletalMeshName = MetaData["SkeletalMesh"];
+	if (SkeletalMeshName.length() > 0)
+	{
+		SkeletalMesh = RResourceManager::Instance().LoadResource<RMesh>(SkeletalMeshName, EResourceLoadMode::Immediate);
+	}
+
+	if (SkeletalMesh)
+	{
+		SkeletalMesh->CacheAnimation(this);
+	}
+
+	const std::string& LockRootBoneValue = MetaData["LockRootBone"];
+	if (LockRootBoneValue.length() > 0)
+	{
+		if (StringUtils::ToBool(LockRootBoneValue))
+		{
+			SetBitFlags(AnimBitFlag_LockRootBone);
+		}
+	}
 }
 
 void RAnimation::Serialize(RSerializer& serializer)
@@ -427,11 +452,6 @@ bool RAnimation::IsRootBone(int BoneId) const
 	assert(SkeletalMesh);
 	int MeshBoneId = SkeletalMesh->ConvertBoneIndex_AnimationToMesh(this, BoneId);
 	return SkeletalMesh->GetSkeletalData().FindParentForBone(MeshBoneId) == -1;
-}
-
-void RAnimation::SetSkeletalMesh(RMesh* InSkelMesh)
-{
-	SkeletalMesh = InSkelMesh;
 }
 
 void RAnimation::GetNeighborFramesAtTime(float Time, int& OutFrame1, int& OutFrame2, float& OutFactor) const

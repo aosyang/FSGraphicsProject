@@ -14,6 +14,7 @@
 
 class RMesh;
 class RAnimation;
+class RResourceMetaData;
 
 
 enum AnimationBitFlag
@@ -99,8 +100,10 @@ class RAnimation
 {
 public:
 	RAnimation();
-	RAnimation(const std::string& InName, RMesh* InSkeletalMesh, int nodeCount, int frameCount, float startTime, float endTime, float frameRate);
+	RAnimation(const std::string& InName, int nodeCount, int frameCount, float startTime, float endTime, float frameRate);
 	~RAnimation();
+
+	void InitFromMetaData(const RResourceMetaData& MetaData);
 
 	void SetName(const std::string& name)	{ m_Name = name; }
 	const std::string& GetName() const		{ return m_Name; }
@@ -168,8 +171,6 @@ public:
 
 	/// Checks if a bone is a root bone
 	bool IsRootBone(int BoneId) const;
-
-	void SetSkeletalMesh(RMesh* InSkelMesh);
 
 private:
 	int GetBitFlags() const;

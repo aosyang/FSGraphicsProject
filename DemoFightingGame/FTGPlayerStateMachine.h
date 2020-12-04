@@ -64,9 +64,6 @@ public:
 	float GetAnimationDeviation() const;
 
 private:
-	/// Cache all animation assets for a mesh
-	void CacheAnimations(RMesh* Mesh);
-
 	/// Find the behavior instance with behavior enum
 	FTGPlayerBehaviorBase* FindBehaviorInstance(EPlayerBehavior Behavior) const;
 

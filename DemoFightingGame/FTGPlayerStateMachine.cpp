@@ -27,15 +27,6 @@ void FTGPlayerStateMachine::InitAssets()
 		// Set initial behavior for the blend queue
 		BlendQueue.AddBlendTarget(m_CurrentBehaviorInstance, 0.0f);
 	}
-
-	if (m_PlayerOwner)
-	{
-		RMesh* Mesh = m_PlayerOwner->GetMesh();
-		if (Mesh)
-		{
-			CacheAnimations(Mesh);
-		}
-	}
 }
 
 void FTGPlayerStateMachine::Update(float DeltaTime)
@@ -141,14 +132,6 @@ void FTGPlayerStateMachine::SetAnimationDeviation(float Deviation)
 float FTGPlayerStateMachine::GetAnimationDeviation() const
 {
 	return m_AnimSpeedDeviation;
-}
-
-void FTGPlayerStateMachine::CacheAnimations(RMesh* Mesh)
-{
-	for (auto& BehaviorInstance : m_BehaviorInstances)
-	{
-		BehaviorInstance->CacheAssets(*Mesh);
-	}
 }
 
 FTGPlayerBehaviorBase* FTGPlayerStateMachine::FindBehaviorInstance(EPlayerBehavior Behavior) const

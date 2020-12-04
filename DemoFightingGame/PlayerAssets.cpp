@@ -41,22 +41,6 @@ void InitializePlayerAsset_Maid(PlayerControllerBase* PlayerController)
 	FTGPlayerStateMachine& StateMachine = PlayerController->GetStateMachine();
 	PlayerBehavior_Navigation* NavigationBehavior = StateMachine.AllocateBehaviorInstance<PlayerBehavior_Navigation>();
 
-	static char* NavAnimNames[] = {
-		"/Maid/Maid_Idle.fbx",
-		"/Maid/Maid_Walk.fbx",
-		"/Maid/Maid_Run_Fast.fbx",
-	};
-
-	for (int i = 0; i < ARRAYSIZE(NavAnimNames); i++)
-	{
-		RMesh* AnimMesh = RResourceManager::Instance().LoadResource<RMesh>(NavAnimNames[i], EResourceLoadMode::Immediate);
-		RAnimation* Animation = AnimMesh ? AnimMesh->GetAnimation() : nullptr;
-		if (Animation)
-		{
-			NavigationBehavior->AddAnimation(NavAnimNames[i], Animation->GetRootSpeed());
-		}
-	}
-
 	// Initialize the skinning mesh
 	PlayerController->InitAssets("/Maid/Maid.fbx");
 }
