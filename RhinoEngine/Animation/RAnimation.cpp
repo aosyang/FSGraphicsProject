@@ -332,6 +332,7 @@ void RAnimation::GetLocalSpaceBoneMatrixAtTime(int BoneId, float Time, RMatrix4*
 void RAnimation::EvaluatePoseAtTime(RAnimPoseData& PoseData, float Time) const
 {
 	const RBoneIdMap* BoneIdMap = PoseData.SkinnedMesh->GetBoneIdMapForAnimation(this);
+	const SkeletalData& MeshSkelData = PoseData.SkinnedMesh->GetSkeletalData();
 
 	for (int i = 0; i < PoseData.SkinnedMesh->GetBoneCount(); i++)
 	{
@@ -346,9 +347,8 @@ void RAnimation::EvaluatePoseAtTime(RAnimPoseData& PoseData, float Time) const
 		// (This is deprecated as local space bone matrices support per bone modification)
 		GetMeshSpaceBoneMatrixAtTime(BoneId, Time, &BoneMatrix);
 #else
-		// Note: Assuming the first bone is the root bone for now.
-		//		 Maybe this code need change in the future
-		if (i == 0)
+		// Note: If a skeletal mesh has multiple bone hierarchies, we should use mesh-space bone matrices for all root bones
+		if (MeshSkelData.FindParentForBone(i) == -1)
 		{
 			GetMeshSpaceBoneMatrixAtTime(BoneId, Time, &BoneMatrix);
 		}
