@@ -34,7 +34,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 REngine::REngine()
 	: m_bIsEditor					(false),
 	  m_bIsInitialized				(false),
-	  m_hInst						(nullptr),
+	  m_hInstance					(nullptr),
 	  m_hWnd						(nullptr),
 	  m_bFullScreen					(false),
 	  m_UseEngineRenderWindow		(false),
@@ -54,27 +54,28 @@ bool REngine::Initialize(const REngineInitParam& InitParam /*= REngineInitParam(
 	m_Application = InitParam.Application;
 
 	RegisterEngineTypes();
-
-	m_bIsInitialized = true;
-
-	int width = 1024,
-		height = 768;
-
 	CreateImGuiContext();
 
-	if (!CreateRenderWindow(width, height))
-		return false;
+	int width = InitParam.WindowWidth;
+	int height = InitParam.WindowHeight;
 
-	return InitializeSubsystems(m_hWnd, width, height);
+	if (width == -1 || height == -1)
+	{
+		width = GetSystemMetrics(SM_CXSCREEN);
+		height = GetSystemMetrics(SM_CYSCREEN);
+	}
+
+	if (!CreateRenderWindow(width, height, InitParam.bFullScreen))
+	{
+		return false;
+	}
+
+	m_bIsInitialized = InitializeSubsystems(width, height);
+	return m_bIsInitialized;
 }
 
-bool REngine::InitializeSubsystems(HWND hWnd, int width, int height)
+bool REngine::InitializeSubsystems(int width, int height)
 {
-	m_bIsInitialized = true;
-
-	if (!m_hWnd)
-		m_hWnd = hWnd;
-
 	if (!RInput.Initialize())
 	{
 		return false;
@@ -109,8 +110,13 @@ bool REngine::InitializeSubsystems(HWND hWnd, int width, int height)
 
 	GNavigationSystem.Initialize();
 
-	if (!m_Application->Initialize())
-		return false;
+	if (m_Application)
+	{
+		if (!m_Application->Initialize())
+		{
+			return false;
+		}
+	}
 
 	return true;
 }
@@ -219,7 +225,10 @@ void REngine::RunOneFrame(bool update_input)
 
 	BeginImGuiFrame();
 
-	m_Application->UpdateScene(m_Timer);
+	if (m_Application)
+	{
+		m_Application->UpdateScene(m_Timer);
+	}
 
 	const float DeltaTime = m_Timer.DeltaTime();
 
@@ -234,7 +243,7 @@ void REngine::RunOneFrame(bool update_input)
 	}
 
 	GRenderer.Stats.Reset();
-	if (m_Application->UsingCustomRenderPipeline())
+	if (m_Application && m_Application->UsingCustomRenderPipeline())
 	{
 		m_Application->RenderScene();
 	}
@@ -255,7 +264,11 @@ void REngine::ResizeClientWindow(int width, int height)
 
 	GRenderer.ResizeClient(width, height);
 	GPostProcessorManager.RecreateLostResources();
-	m_Application->OnResize(width, height);
+
+	if (m_Application)
+	{
+		m_Application->OnResize(width, height);
+	}
 }
 
 RECT REngine::GetWindowRectInfo() const
@@ -281,9 +294,19 @@ void REngine::RegisterEngineTypes()
 	RAnimGraph::RegisterAnimNodeTypes();
 }
 
+const TCHAR* REngine::GetWindowTitle() const
+{
+	if (m_Application)
+	{
+		return m_Application->WindowTitle();
+	}
+
+	return L"Rhino Engine";
+}
+
 bool REngine::CreateRenderWindow(int width, int height, bool fullscreen, int bpp)
 {
-	m_hInst = GetModuleHandle(NULL);
+	m_hInstance = GetModuleHandle(NULL);
 	m_bFullScreen = fullscreen;
 
 	WNDCLASSEX wcex;
@@ -294,8 +317,8 @@ bool REngine::CreateRenderWindow(int width, int height, bool fullscreen, int bpp
 	wcex.lpfnWndProc = WndProc;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
-	wcex.hInstance = m_hInst;
-	wcex.hIcon = LoadIcon(m_hInst, IDI_APPLICATION);
+	wcex.hInstance = m_hInstance;
+	wcex.hIcon = LoadIcon(m_hInstance, IDI_APPLICATION);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = NULL;
@@ -311,7 +334,7 @@ bool REngine::CreateRenderWindow(int width, int height, bool fullscreen, int bpp
 		return false;
 	}
 
-	// Window style: WS_POPUP				- No caption, no maximize/minumize buttons
+	// Window style: WS_POPUP				- No caption, no maximize/minimize buttons
 	//				 WS_OVERLAPPEDWINDOW	- Normal window
 	DWORD dwStyle = m_bFullScreen ? WS_POPUP : WS_OVERLAPPEDWINDOW;
 
@@ -346,14 +369,14 @@ bool REngine::CreateRenderWindow(int width, int height, bool fullscreen, int bpp
 	// Create window and validate
 	m_hWnd = CreateWindow(
 		szWindowClass,
-		m_Application->WindowTitle(),
+		GetWindowTitle(),
 		dwStyle,
 		pos_x, pos_y,
 		win_rect.right - win_rect.left,
 		win_rect.bottom - win_rect.top,
 		NULL,
 		NULL,
-		m_hInst,
+		m_hInstance,
 		NULL);
 
 	if (!m_hWnd)
@@ -384,8 +407,8 @@ void REngine::DestroyRenderWindow()
 
 	DestroyWindow(m_hWnd);
 	m_hWnd = NULL;
-	UnregisterClass(szWindowClass, m_hInst);
-	m_hInst = NULL;
+	UnregisterClass(szWindowClass, m_hInstance);
+	m_hInstance = NULL;
 }
 
 void REngine::CalculateFrameStats()
@@ -407,7 +430,7 @@ void REngine::CalculateFrameStats()
 
 		std::wostringstream outs;
 		outs.precision(6);
-		outs << m_Application->WindowTitle()
+		outs << GetWindowTitle()
 			<< L" - " << GRenderer.GetAdapterName() << L"    "
 			<< L"FPS: " << fps << L"    "
 			<< L"Frame Time: " << mspf << L" (ms)";

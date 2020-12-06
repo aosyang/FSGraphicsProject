@@ -61,6 +61,7 @@ class RMatrix4
 public:
 	union
 	{
+		float arr[16];
 		float m[4][4];
 		struct {
 			float _m11, _m12, _m13, _m14,

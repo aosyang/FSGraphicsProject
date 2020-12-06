@@ -188,7 +188,7 @@ public:
 	const RMatrix4& GetBoneInitInvMatrices(int index) const { return m_BoneInitInvMatrices[index]; }
 
 	void SetBoneNameList(const std::vector<std::string>& boneNameList);
-	const std::string& GetBoneName(int boneId) const;
+	const std::string& GetBoneName(int BoneId) const;
 	int FindBoneByName(const std::string& BoneName) const;
 	int GetBoneCount() const;
 

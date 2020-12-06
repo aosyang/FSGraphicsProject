@@ -14,11 +14,23 @@ class IApp;
 
 struct REngineInitParam
 {
-	//REngineInitParam()
-	//	: Application(nullptr)
-	//{}
+	REngineInitParam()
+	{
+	}
 
-	IApp* Application;
+	REngineInitParam(IApp* InApp)
+		: Application(InApp)
+	{
+	}
+
+	IApp* Application = nullptr;
+
+	// Width and height of render window. If either one is -1, the render window will be created at the resolution of screen.
+	int WindowWidth = 1024;
+	int WindowHeight = 768;
+
+	// If true, the render window will be created in full screen mode
+	bool bFullScreen = false;
 };
 
 class REngine : public RSingleton<REngine>
@@ -27,8 +39,6 @@ class REngine : public RSingleton<REngine>
 public:
 	// Initialize all engine components
 	bool Initialize(const REngineInitParam& InitParam);
-
-	bool InitializeSubsystems(HWND hWnd, int width, int height);
 
 	// Shutdown the engine and destroy all engine components
 	void Shutdown();
@@ -60,7 +70,12 @@ protected:
 	~REngine();
 
 private:
+	// Initialize all subsystems of engine
+	bool InitializeSubsystems(int width, int height);
+
 	void RegisterEngineTypes();
+
+	const TCHAR* GetWindowTitle() const;
 
 	bool CreateRenderWindow(int width, int height, bool fullscreen = false, int bpp = 32);
 	void DestroyRenderWindow();
@@ -73,8 +88,8 @@ private:
 	bool				m_bIsEditor;
 
 	bool				m_bIsInitialized;
-	HINSTANCE			m_hInst;
-	HWND				m_hWnd;
+	HINSTANCE			m_hInstance;				// Program instance handle
+	HWND				m_hWnd;						// Window handle
 	bool				m_bFullScreen;
 	bool				m_UseEngineRenderWindow;
 	IApp*				m_Application;

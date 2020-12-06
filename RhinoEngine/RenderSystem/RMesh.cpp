@@ -277,9 +277,9 @@ void RMesh::SetBoneNameList(const std::vector<std::string>& boneNameList)
 	m_BoneIdToName = boneNameList;
 }
 
-const std::string& RMesh::GetBoneName(int boneId) const
+const std::string& RMesh::GetBoneName(int BoneId) const
 {
-	return m_BoneIdToName[boneId];
+	return m_BoneIdToName[BoneId];
 }
 
 int RMesh::FindBoneByName(const std::string& BoneName) const
@@ -321,6 +321,7 @@ void RMesh::CacheAnimation(RAnimation* Animation)
 	// Animation is already cached for this mesh, skip.
 	if (m_AnimationNodeCache.find(Animation) != m_AnimationNodeCache.end())
 	{
+		RLogWarning("Animation \'%s\' is already cached for mesh \'%s\'.\n", Animation->GetName().c_str(), GetAssetPath().c_str());
 		return;
 	}
 
@@ -395,8 +396,9 @@ const RBoneIdMap* RMesh::GetBoneIdMapForAnimation(const RAnimation* Animation) c
 		{
 			return &Iter->second;
 		}
-	}
 
+		RLogError("Animation '%s' is not cached for mesh '%s'. Did you forget to add metadata for the animation?\n", Animation->GetName().c_str(), GetAssetPath().c_str());
+	}
 	return nullptr;
 }
 

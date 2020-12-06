@@ -15,11 +15,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 	FightingGameApp app;
-
-	REngineInitParam InitParam =
-	{
-		&app,
-	};
+	REngineInitParam InitParam(&app);
+	//InitParam.WindowWidth = InitParam.WindowHeight = -1;
+	//InitParam.bFullScreen = true;
 
 	if (GEngine.Initialize(InitParam))
 	{

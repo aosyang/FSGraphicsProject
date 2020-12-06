@@ -16,11 +16,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 	WorkshopApp app;
-
-	REngineInitParam InitParam =
-	{
-		&app,
-	};
+	REngineInitParam InitParam(&app);
 
 	if (GEngine.Initialize(InitParam))
 	{
