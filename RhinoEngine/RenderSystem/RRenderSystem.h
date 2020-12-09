@@ -54,6 +54,8 @@ public:
 	bool Initialize(HWND hWnd, int client_width, int client_height, bool enable4xMsaa, bool enableGammaCorrection = true);
 	void Shutdown();
 
+	bool HasInitialized() const;
+
 	float AspectRatio() const;
 	void ResizeClient(int width, int height);
 
@@ -122,6 +124,7 @@ protected:
 
 	void UnbindShadowMapShaderResourceViews();
 
+	bool					bInitialized;
 	int						m_ClientWidth, m_ClientHeight;
 	bool					m_Enable4xMsaa;
 	bool					m_UseGammaCorrection;

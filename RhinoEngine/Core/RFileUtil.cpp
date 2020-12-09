@@ -218,6 +218,28 @@ std::vector<std::string> RFileUtil::GetFilesInDirectoryAndSubdirectories(const s
 	return SearchResult;
 }
 
+std::string RFileUtil::UnifyPathSeperators(const std::string& Path)
+{
+	std::string Result = Path;
+	for (int i = 0; i < (int)Result.length(); i++)
+	{
+		if (Result[i] == '\\')
+		{
+			Result[i] = '/';
+		}
+	}
+
+	// Remove redundant separators
+	size_t pos = Result.find("//");
+	while (pos != std::string::npos)
+	{
+		Result.replace(pos, 2, "/");
+		pos = Result.find("//");
+	}
+
+	return Result;
+}
+
 std::string RFileUtil::GetFullPath(const std::string& Path)
 {
 	char FullPath[MAX_PATH + 1];

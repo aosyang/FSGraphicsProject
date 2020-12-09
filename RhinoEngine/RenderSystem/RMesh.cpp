@@ -483,11 +483,6 @@ bool RMesh::TryLoadAsRmesh()
 	Serialize(serializer);
 	serializer.Close();
 
-	if (m_Animation)
-	{
-		m_Animation->InitFromMetaData(GetMetaData());
-	}
-
 	//RAnimation* animation = new RAnimation();
 	//std::string animFilename = RFileUtil::ReplaceExt(task->Filename.size(), "ranim");
 

@@ -168,29 +168,37 @@ private:
 template<typename T>
 T* RResourceManager::LoadResource(const std::string& AssetPath, EResourceLoadMode mode)
 {
-	// Check for invalid path
-	if (AssetPath.find('/') == std::string::npos && AssetPath.find('\\') == std::string::npos)
+	std::string ActualPath = RFileUtil::UnifyPathSeperators(AssetPath);
+
+	// Append leading slash
+	if (ActualPath.length() > 0 && ActualPath[0] != '/')
+	{
+		ActualPath = "/" + ActualPath;
+	}
+
+	// Path is invalid if it doesn't contain any '\' or '/'
+	if (ActualPath.find('/') == std::string::npos)
 	{
 		return nullptr;
 	}
 
 	// Find resource in resource container
 	RResourceContainer<T>& ResourceContainer = GetResourceContainer<T>();
-	T* Resource = ResourceContainer.Find(AssetPath);
+	T* Resource = ResourceContainer.Find(ActualPath);
 	if (Resource != nullptr)
 	{
 		// The resource has been already loaded. Return it now.
 		return Resource;
 	}
 
-	std::string RelativePath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), AssetPath);
+	std::string RelativePath = RFileUtil::CombinePath(RResourceManager::GetAssetsBasePath(), ActualPath);
 	Resource = new T(RelativePath);
 	Resource->OnEnqueuedForLoading();
 
 	ResourceContainer.Add(Resource);
 
 	// Assign to asset path
-	Resource->SetAssetPath(AssetPath);
+	Resource->SetAssetPath(ActualPath);
 
 #if (ENABLE_THREADED_LOADING == 0)
 	mode = EResourceLoadMode::Immediate;

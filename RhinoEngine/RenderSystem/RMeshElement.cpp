@@ -251,6 +251,11 @@ void RMeshElement::SetVertices(const std::vector<RVertexType::MeshLoader>& verti
 
 void RMeshElement::UpdateRenderBuffer()
 {
+	if (!GRenderer.HasInitialized())
+	{
+		return;
+	}
+
 	m_RenderBuffer = std::make_unique<RMeshRenderBuffer>();
 
 	int VertexComponentMask = m_VertexComponentMask;

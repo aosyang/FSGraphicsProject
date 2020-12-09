@@ -32,7 +32,8 @@ ID3D11DepthStencilView* RRenderSystem::DefaultDepthStencilView = nullptr;
 ID3D11RenderTargetView* RRenderSystem::DefaultRenderTargetView = nullptr;
 
 RRenderSystem::RRenderSystem()
-	: m_AdapterName(nullptr)
+	: bInitialized(false)
+	, m_AdapterName(nullptr)
 	, m_RenderTargetViewNum(0)
 	, RasterizerState(std::make_unique<RRasterizerState>())
 	, m_bIsUsingDeferredShading(false)
@@ -288,6 +289,7 @@ bool RRenderSystem::Initialize(HWND hWnd, int client_width, int client_height, b
 
 	RConstantBuffers::Initialize();
 
+	bInitialized = true;
 	return true;
 }
 
@@ -315,6 +317,11 @@ void RRenderSystem::Shutdown()
 	m_pD3DDevice->Release();
 
 	delete[] m_AdapterName;
+}
+
+bool RRenderSystem::HasInitialized() const
+{
+	return bInitialized;
 }
 
 float RRenderSystem::AspectRatio() const

@@ -55,6 +55,8 @@ public:
 	/// Search a directory and its subdirectories and fine all files matching a given pattern
 	static std::vector<std::string> GetFilesInDirectoryAndSubdirectories(const std::string& SearchPath, const std::string& FilePattern);
 
+	static std::string UnifyPathSeperators(const std::string& Path);
+
 	/// Get full path of a relative path
 	static std::string GetFullPath(const std::string& Path);
 
