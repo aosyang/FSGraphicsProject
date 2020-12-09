@@ -7,6 +7,7 @@
 #include "RAnimNode_Base.h"
 #include "RenderSystem/RMesh.h"
 #include "RenderSystem/RDebugRenderer.h"
+#include "AnimCommon.h"
 
 bool AnimNodeAttributeMap::Query(const AttributeMap& Map, const std::string& KeyName, std::string& OutValue)
 {
@@ -58,7 +59,7 @@ void RAnimPoseData::CopyFinalPose(const RMatrix4& ObjectToWorld, RMatrix4* OutMe
 {
 #define DEBUG_DRAW_BONES 0
 
-#if 0
+#if USE_LOCAL_SPACE_BONE_POSE_EVALUTION == 0
 	// -- Evaluate bone poses in mesh space --
 
 	// The method is deprecated as it doesn't allow per bone based transform tweaking.
@@ -128,7 +129,11 @@ RAnimPoseData RAnimPoseData::BlendTwoPoses(const RAnimPoseData& Pose1, const RAn
 	RAnimPoseData OutPose(*Pose1.SkinnedMesh);
 	for (int i = 0; i < Pose1.SkinnedMesh->GetBoneCount(); i++)
 	{
+#if USE_MATRIX_DECOMPOSITION_IN_POSE_BLENDING == 1
 		OutPose.BoneMatrices[i] = RMatrix4::Slerp(Pose1.BoneMatrices[i], Pose2.BoneMatrices[i], BlendFactor);
+#else
+		OutPose.BoneMatrices[i] = RMatrix4::Lerp(Pose1.BoneMatrices[i], Pose2.BoneMatrices[i], BlendFactor);
+#endif	// USE_MATRIX_DECOMPOSITION_IN_POSE_BLENDING
 	}
 	return OutPose;
 }

@@ -866,7 +866,7 @@ namespace
 			for (FbxTime CurrentFrameTime = animStartTime; CurrentFrameTime <= animEndTime; CurrentFrameTime += TimePerFrame)
 			{
 				// Array that holds matrices of each node
-				std::vector<RMatrix4> NodeMatrices(NumFbxNodes, RMatrix4::IDENTITY);
+				std::vector<FbxAMatrix> FbxNodeMatrices(NumFbxNodes);
 
 				for (int FbxSceneNodeIndex = 0; FbxSceneNodeIndex < NumFbxNodes; FbxSceneNodeIndex++)
 				{
@@ -920,10 +920,12 @@ namespace
 						RMatrix4 BoneTransformMeshSpace;
 						MatrixTransfer(BoneTransformMeshSpace, FbxBoneTransformMeshSpace);
 
-						NodeMatrices[FbxSceneNodeIndex] = BoneTransformMeshSpace;
+						FbxNodeMatrices[FbxSceneNodeIndex] = FbxBoneTransformMeshSpace;
 
 						// Calculate bone transform in parent bone space
-						RMatrix4 LocalTransform = ParentId == -1 ? BoneTransformMeshSpace : BoneTransformMeshSpace * NodeMatrices[ParentId].Inverse();
+						FbxAMatrix FbxLocalTransform = ParentId == -1 ? FbxBoneTransformMeshSpace : FbxNodeMatrices[ParentId].Inverse() * FbxBoneTransformMeshSpace;
+						RMatrix4 LocalTransform;
+						MatrixTransfer(LocalTransform, FbxLocalTransform);
 
 						// Precise frames number in fractions
 						float NumFramesAtCurrentTime = (float)CurrentFrameTime.GetFrameCountPrecise(animTimeMode);

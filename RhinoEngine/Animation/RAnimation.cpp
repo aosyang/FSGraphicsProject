@@ -11,6 +11,7 @@
 #include "Resource/RResourceManager.h"
 #include "Resource/RResourceMetaData.h"
 #include "Core/StringUtils.h"
+#include "AnimCommon.h"
 
 RAnimationBlender::RAnimationBlender()
 	: m_BlendTime(0.2f)
@@ -280,6 +281,7 @@ void RAnimation::GetMeshSpaceBoneMatrixAtTime(int BoneId, float Time, RMatrix4* 
 	const RMatrix4& Transform1 = BoneNodeData[BoneId].FrameMatrices_MeshSpace[frame1];
 	const RMatrix4& Transform2 = BoneNodeData[BoneId].FrameMatrices_MeshSpace[frame2];
 
+#if USE_MATRIX_DECOMPOSITION_IN_POSE_BLENDING == 1
 	RVec3 Position1, Position2;
 	RQuat Rotation1, Rotation2;
 	RVec3 Scale1, Scale2;
@@ -300,6 +302,15 @@ void RAnimation::GetMeshSpaceBoneMatrixAtTime(int BoneId, float Time, RMatrix4* 
 	);
 
 	*OutMatrix = ResultTransform.GetMatrix();
+#else
+	RMatrix4 Result = RMatrix4::Lerp(Transform1, Transform2, t);
+	if (HasRootMotion() || IsRootLocked())
+	{
+		RVec3 RootTranslation = -RVec3::Lerp(GetRootPositionAtFrame(frame1), GetRootPositionAtFrame(frame2), t);
+		Result.Translate(RootTranslation);
+	}
+	*OutMatrix = Result;
+#endif
 }
 
 void RAnimation::GetLocalSpaceBoneMatrixAtTime(int BoneId, float Time, RMatrix4* OutMatrix) const
@@ -313,6 +324,7 @@ void RAnimation::GetLocalSpaceBoneMatrixAtTime(int BoneId, float Time, RMatrix4*
 	const RMatrix4& Transform1 = BoneNodeData[BoneId].FrameMatrices_LocalSpace[frame1];
 	const RMatrix4& Transform2 = BoneNodeData[BoneId].FrameMatrices_LocalSpace[frame2];
 
+#if USE_MATRIX_DECOMPOSITION_IN_POSE_BLENDING == 1
 	RVec3 Position1, Position2;
 	RQuat Rotation1, Rotation2;
 	RVec3 Scale1, Scale2;
@@ -327,6 +339,9 @@ void RAnimation::GetLocalSpaceBoneMatrixAtTime(int BoneId, float Time, RMatrix4*
 	);
 
 	*OutMatrix = ResultTransform.GetMatrix();
+#else
+	*OutMatrix = RMatrix4::Lerp(Transform1, Transform2, t);
+#endif
 }
 
 void RAnimation::EvaluatePoseAtTime(RAnimPoseData& PoseData, float Time) const
@@ -342,7 +357,7 @@ void RAnimation::EvaluatePoseAtTime(RAnimPoseData& PoseData, float Time) const
 		// Map animation bone index to skinned mesh bone index
 		int BoneId = BoneIdMap ? BoneIdMap->MeshToAnim[i] : -1;
 
-#if 0
+#if USE_LOCAL_SPACE_BONE_POSE_EVALUTION == 0
 		// All bones are evaluated in mesh space
 		// (This is deprecated as local space bone matrices support per bone modification)
 		GetMeshSpaceBoneMatrixAtTime(BoneId, Time, &BoneMatrix);
