@@ -16,7 +16,7 @@
 #include "Core/StringUtils.h"
 
 
-std::map<const std::string, AnimNodeFactoryMethod> RAnimGraph::AnimNodeFactoryMethods;
+std::map<const std::string, RAnimGraph::AnimNodeFactoryData> RAnimGraph::AnimNodeFactoryMethods;
 
 
 RAnimGraph::RAnimGraph(const std::string& path)
@@ -96,12 +96,12 @@ void RAnimGraph::RegisterAnimNodeTypes()
 {
 	RAnimGraph::RegisterAnimNodeType("AnimationPlayer", &RAnimNode_AnimationPlayer::FactoryCreate);
 	RAnimGraph::RegisterAnimNodeType("BlendPlayer", &RAnimNode_BlendPlayer::FactoryCreate);
-	RAnimGraph::RegisterAnimNodeType("ModifyBoneTransform", &RAnimNode_ModifyBoneTransform::FactoryCreate);
+	RAnimGraph::RegisterAnimNodeType("ModifyBoneTransform", &RAnimNode_ModifyBoneTransform::FactoryCreate, 1);
 }
 
-void RAnimGraph::RegisterAnimNodeType(const std::string& TypeName, AnimNodeFactoryMethod FactoryMethod)
+void RAnimGraph::RegisterAnimNodeType(const std::string& TypeName, AnimNodeFactoryMethod FactoryMethod, int NumInputPoses)
 {
-	AnimNodeFactoryMethods[TypeName] = FactoryMethod;
+	AnimNodeFactoryMethods[TypeName] = AnimNodeFactoryData{ FactoryMethod, NumInputPoses };
 }
 
 bool RAnimGraph::LoadResourceImpl()
@@ -301,7 +301,7 @@ std::unique_ptr<RAnimNode_Base> RAnimGraph::CreateAnimNode(const std::string& No
 	auto Iter = AnimNodeFactoryMethods.find(TypeName);
 	if (Iter != AnimNodeFactoryMethods.end())
 	{
-		return (*Iter->second)(NodeName, Attributes);
+		return (*Iter->second.Method)(NodeName, Attributes);
 	}
 
 	RLogWarning("RAnimGraph::CreateAnimNode - Cannot create node for type '%s'. Type is not registered.\n", TypeName.c_str());
@@ -311,6 +311,17 @@ std::unique_ptr<RAnimNode_Base> RAnimGraph::CreateAnimNode(const std::string& No
 std::unique_ptr<RAnimNode_Base> RAnimGraph::CreateAnimNode(const RAnimGraphNode& AnimGraphNode)
 {
 	return CreateAnimNode(AnimGraphNode.NodeName, AnimGraphNode.NodeTypeName, AnimGraphNode.Attributes);
+}
+
+int RAnimGraph::GetNumInputPosesOfNodeType(const std::string& TypeName)
+{
+	auto Iter = AnimNodeFactoryMethods.find(TypeName);
+	if (Iter != AnimNodeFactoryMethods.end())
+	{
+		return Iter->second.NumInputPoses;
+	}
+
+	return -1;
 }
 
 std::string RAnimGraph::MakeUniqueNodeName(const std::string& BaseName) const

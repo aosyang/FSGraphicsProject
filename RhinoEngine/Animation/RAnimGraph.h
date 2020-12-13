@@ -24,7 +24,11 @@ public:
 	{}
 
 	std::string NodeName;
+
+	// Type of node, in string
 	std::string NodeTypeName;
+
+	// Names of other nodes that output to this node. Note: Size of this array may differ from size of input poses
 	std::vector<std::string> Inputs;
 	AnimNodeAttributeMap Attributes;
 };
@@ -54,7 +58,10 @@ public:
 	static void RegisterAnimNodeTypes();
 
 	// Register a type of anim node by its factory method to the anim node graph
-	static void RegisterAnimNodeType(const std::string& TypeName, AnimNodeFactoryMethod FactoryMethod);
+	static void RegisterAnimNodeType(const std::string& TypeName, AnimNodeFactoryMethod FactoryMethod, int NumInputPoses = 0);
+
+	// Get how many input poses are accepted for given type name
+	static int GetNumInputPosesOfNodeType(const std::string& TypeName);
 
 protected:
 	// Override RResourceBase methods
@@ -62,8 +69,14 @@ protected:
 	virtual bool SaveResourceImpl() override;
 
 private:
+	struct AnimNodeFactoryData
+	{
+		AnimNodeFactoryMethod Method;
+		int NumInputPoses;
+	};
+
 	// Type name to factory method map for anim nodes
-	static std::map<const std::string, AnimNodeFactoryMethod> AnimNodeFactoryMethods;
+	static std::map<const std::string, AnimNodeFactoryData> AnimNodeFactoryMethods;
 
 	static std::unique_ptr<RAnimNode_Base> CreateAnimNode(const std::string& NodeName, const std::string& TypeName, const AnimNodeAttributeMap& Attributes);
 	static std::unique_ptr<RAnimNode_Base> CreateAnimNode(const RAnimGraphNode& AnimGraphNode);
