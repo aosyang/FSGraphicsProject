@@ -14,6 +14,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
+#include "imnodes/imnodes.h"
 
 #include "Animation/RAnimGraph.h"
 
@@ -445,6 +446,7 @@ void REngine::CalculateFrameStats()
 void REngine::CreateImGuiContext()
 {
 	ImGui::CreateContext();
+	imnodes::Initialize();
 	ImGuiIO& io = ImGui::GetIO();
 
 	unsigned char* tex_pixels = NULL;
@@ -462,6 +464,7 @@ void REngine::ShutdownImGui()
 {
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
+	imnodes::Shutdown();
 	ImGui::DestroyContext();
 }
 

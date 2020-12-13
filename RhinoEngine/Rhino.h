@@ -61,6 +61,7 @@
 #include "Animation/RAnimGraph.h"
 #include "Animation/RAnimNode_Base.h"
 #include "Animation/RAnimNode_AnimationPlayer.h"
+#include "Animation/RAnimGraphEditor.h"
 
 #include "Physics/RPhysicsEngine.h"
 #include "Physics/RRigidBodyComponent.h"
@@ -79,4 +80,5 @@
 #include "Scene/RScene.h"
 
 #include "imgui/imgui.h"
+#include "imnodes/imnodes.h"
 #include "UI/RProgressBar.h"

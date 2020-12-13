@@ -76,6 +76,8 @@ private:
 	// Returns all nodes connected to the root node in an array (root node is included)
 	std::vector<RAnimGraphNode*> CollectAllNodes() const;
 
+	// Hack: Temporarily make members public to use them in anim graph editor
+public:
 	// List of all template nodes to be created from this graph
 	std::vector<std::unique_ptr<RAnimGraphNode>> AnimGraphNodes;
 
