@@ -181,6 +181,11 @@ bool RAnimNode_Base::BindAnimVariable(const std::string& VariableName, float* Va
 	return false;
 }
 
+bool RAnimNode_Base::BindAnimVariable(const std::string& VariableName, bool* ValuePtr)
+{
+	return false;
+}
+
 bool RAnimNode_Base::BindAnimVariable(const std::string& VariableName, RMatrix4* ValuePtr)
 {
 	return false;

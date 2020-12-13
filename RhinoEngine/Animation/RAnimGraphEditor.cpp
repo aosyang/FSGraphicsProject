@@ -222,8 +222,11 @@ void RAnimGraphEditor::BuildLinkGraph(const RAnimGraph& AnimGraph)
 	}
 
 	// Finally, connect output pose to the root node
-	AnimGraphEditorNode* OutputNode = GetEditorNodeByName(AnimGraph.RootGraphNode->NodeName);
-	GraphLinks.push_back(std::make_pair(EditorNodes[0].InputIds[0], OutputNode->OutputId));
+	if (AnimGraph.RootGraphNode)
+	{
+		AnimGraphEditorNode* OutputNode = GetEditorNodeByName(AnimGraph.RootGraphNode->NodeName);
+		GraphLinks.push_back(std::make_pair(EditorNodes[0].InputIds[0], OutputNode->OutputId));
+	}
 }
 
 void RAnimGraphEditor::DisconnectIfInputLink(int id)

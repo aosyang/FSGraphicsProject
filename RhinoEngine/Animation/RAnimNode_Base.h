@@ -148,6 +148,7 @@ public:
 	// Bind a pointer of a value to an animation variable so node update will reflect any changes made to the value.
 	// Derived class should override this function to handle any interested variables.
 	virtual bool BindAnimVariable(const std::string& VariableName, float* ValuePtr);
+	virtual bool BindAnimVariable(const std::string& VariableName, bool* ValuePtr);
 	virtual bool BindAnimVariable(const std::string& VariableName, RMatrix4* ValuePtr);
 
 protected:

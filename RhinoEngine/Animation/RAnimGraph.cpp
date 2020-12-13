@@ -9,11 +9,12 @@
 #include "tinyxml2/tinyxml2.h"
 #include "Core/StdHelper.h"
 #include "Core/RLog.h"
+#include "Core/StringUtils.h"
 
 #include "RAnimNode_AnimationPlayer.h"
 #include "RAnimNode_BlendPlayer.h"
 #include "RAnimNode_ModifyBoneTransform.h"
-#include "Core/StringUtils.h"
+#include "RAnimNode_BlendByCondition.h"
 
 
 std::map<const std::string, RAnimGraph::AnimNodeFactoryData> RAnimGraph::AnimNodeFactoryMethods;
@@ -97,6 +98,7 @@ void RAnimGraph::RegisterAnimNodeTypes()
 	RAnimGraph::RegisterAnimNodeType("AnimationPlayer", &RAnimNode_AnimationPlayer::FactoryCreate);
 	RAnimGraph::RegisterAnimNodeType("BlendPlayer", &RAnimNode_BlendPlayer::FactoryCreate);
 	RAnimGraph::RegisterAnimNodeType("ModifyBoneTransform", &RAnimNode_ModifyBoneTransform::FactoryCreate, 1);
+	RAnimGraph::RegisterAnimNodeType("BlendByCondition", &RAnimNode_BlendByCondition::FactoryCreate, 2);
 }
 
 void RAnimGraph::RegisterAnimNodeType(const std::string& TypeName, AnimNodeFactoryMethod FactoryMethod, int NumInputPoses)
@@ -198,7 +200,8 @@ bool RAnimGraph::LoadResourceImpl()
 				else if (!strcmp(XmlElemAnimGraphChild->Name(), "RootNode"))
 				{
 					// Search all graph nodes and find one that matches the name from 'RootNode'
-					std::string RootNodeName = XmlElemAnimGraphChild->Attribute("Name");
+					const char* RootNodeNameChar = XmlElemAnimGraphChild->Attribute("Name");
+					std::string RootNodeName = RootNodeNameChar ? RootNodeNameChar : "";
 					for (auto& Iter : AnimGraphNodes)
 					{
 						if (Iter.get()->NodeName == RootNodeName)
@@ -382,10 +385,10 @@ std::vector<RAnimGraphNode*> RAnimGraph::CollectAllNodes() const
 					Results.push_back(ChildNode);
 					NodeNames.insert(NodeNames.end(), ChildNode->Inputs.begin(), ChildNode->Inputs.end());
 				}
-
-				// Remove the head element
-				NodeNames.erase(NodeNames.begin());
 			}
+		
+			// Remove the head element
+			NodeNames.erase(NodeNames.begin());
 		}
 	}
 
