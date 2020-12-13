@@ -8,6 +8,7 @@
 #include "RenderSystem/RMesh.h"
 #include "RenderSystem/RDebugRenderer.h"
 #include "AnimCommon.h"
+#include "Core/StringUtils.h"
 
 bool AnimNodeAttributeMap::Query(const AttributeMap& Map, const std::string& KeyName, std::string& OutValue)
 {
@@ -53,6 +54,14 @@ bool AnimNodeAttributeMap::QueryFloat(const AttributeMap& Map, const std::string
 RAnimPoseData::RAnimPoseData(const RMesh& InSkinnedMesh) : SkinnedMesh(&InSkinnedMesh)
 {
 	BoneMatrices.resize(SkinnedMesh->GetBoneCount(), RMatrix4::IDENTITY);
+}
+
+void RAnimPoseData::ResetPose()
+{
+	for (int i = 0; i < (int)BoneMatrices.size(); i++)
+	{
+		BoneMatrices[i] = RMatrix4::IDENTITY;
+	}
 }
 
 void RAnimPoseData::CopyFinalPose(const RMatrix4& ObjectToWorld, RMatrix4* OutMetrics)
@@ -153,6 +162,14 @@ RAnimNode_Base::~RAnimNode_Base()
 
 void RAnimNode_Base::UpdateNode(float DeltaTime)
 {
+	// TODO: This will cause multiple update if a node is connected to multiple others
+	for (int i = 0; i < (int)InputPoses.size(); i++)
+	{
+		if (InputPoses[i])
+		{
+			InputPoses[i]->UpdateNode(DeltaTime);
+		}
+	}
 }
 
 void RAnimNode_Base::EvaluatePose(RAnimPoseData& PoseData)
@@ -162,4 +179,19 @@ void RAnimNode_Base::EvaluatePose(RAnimPoseData& PoseData)
 bool RAnimNode_Base::BindAnimVariable(const std::string& VariableName, float* ValuePtr)
 {
 	return false;
+}
+
+bool RAnimNode_Base::BindAnimVariable(const std::string& VariableName, RMatrix4* ValuePtr)
+{
+	return false;
+}
+
+RAnimNode_Base* RAnimNode_Base::GetInputNodeAtIndex(int Index) const
+{
+	if (Index >= 0 && Index < (int)InputPoses.size())
+	{
+		return InputPoses[Index];
+	}
+
+	return nullptr;
 }

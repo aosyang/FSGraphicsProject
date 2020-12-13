@@ -115,6 +115,8 @@ public:
 
 	RMatrix4 Inverse() const;
 
+	bool HasNan() const;
+
 	// Convert the matrix to a string for display
 	std::string ToDisplayString() const;
 

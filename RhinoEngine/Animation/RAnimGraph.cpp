@@ -12,27 +12,8 @@
 
 #include "RAnimNode_AnimationPlayer.h"
 #include "RAnimNode_BlendPlayer.h"
-
-
-namespace
-{
-	// Split a string by a delimiter and store the result in a vector
-	std::vector<std::string> SplitString(const std::string& Input, const std::string& Delimiter)
-	{
-		std::vector<std::string> Outputs;
-		size_t Start = 0;
-		size_t End = Input.find(Delimiter);
-		while (End != std::string::npos)
-		{
-			Outputs.push_back(Input.substr(Start, End - Start));
-			Start = End + Delimiter.length();
-			End = Input.find(Delimiter, Start);
-		}
-		Outputs.push_back(Input.substr(Start));
-
-		return Outputs;
-	}
-}
+#include "RAnimNode_ModifyBoneTransform.h"
+#include "Core/StringUtils.h"
 
 
 std::map<const std::string, AnimNodeFactoryMethod> RAnimGraph::AnimNodeFactoryMethods;
@@ -54,13 +35,31 @@ const std::vector<std::string>& RAnimGraph::GetSupportedExtensions()
 std::shared_ptr<RAnimGraphInstance> RAnimGraph::CreateInstance()
 {
 	std::shared_ptr<RAnimGraphInstance> AnimGraphInstance = std::make_shared<RAnimGraphInstance>();
-
 	RAnimGraphInstance* RawAnimGraphInstance = AnimGraphInstance.get();
-	if (RootGraphNode)
+
+	// 1. Create all nodes for this anim graph instance
+	// 2. Connect nodes
+
+	std::vector<RAnimGraphNode*> GraphNodes = CollectAllNodes();
+	for (auto GraphNode : GraphNodes)
 	{
-		std::unique_ptr<RAnimNode_Base> RootNode = CreateAnimNode(*RootGraphNode);
-		RawAnimGraphInstance->Nodes.push_back(RootNode.get());
-		RawAnimGraphInstance->RootNode = std::move(RootNode);
+		std::unique_ptr<RAnimNode_Base> NewNode = CreateAnimNode(*GraphNode);
+		if (GraphNode == RootGraphNode)
+		{
+			RawAnimGraphInstance->RootNode = NewNode.get();
+		}
+		RawAnimGraphInstance->Nodes.push_back(std::move(NewNode));
+	}
+
+	for (int i = 0; i < (int)GraphNodes.size(); i++)
+	{
+		int NumInputs = (int)GraphNodes[i]->Inputs.size();
+		RawAnimGraphInstance->Nodes[i]->InputPoses.resize(NumInputs);
+
+		for (int j = 0; j < NumInputs; j++)
+		{
+			RawAnimGraphInstance->Nodes[i]->InputPoses[j] = RawAnimGraphInstance->FindNodeByName(GraphNodes[i]->Inputs[j]);
+		}
 	}
 
 	return AnimGraphInstance;
@@ -78,9 +77,9 @@ RAnimGraphNode* RAnimGraph::AddInputAnimNode(const std::string& NodeTypeName, co
 		// Resize node inputs if necessary
 		if (InputIndex >= BaseNode->Inputs.size())
 		{
-			BaseNode->Inputs.resize(InputIndex + 1, nullptr);
+			BaseNode->Inputs.resize(InputIndex + 1);
 		}
-		BaseNode->Inputs[InputIndex] = NewNode.get();
+		BaseNode->Inputs[InputIndex] = NewNode->NodeName;
 	}
 	else
 	{
@@ -97,6 +96,7 @@ void RAnimGraph::RegisterAnimNodeTypes()
 {
 	RAnimGraph::RegisterAnimNodeType("AnimationPlayer", &RAnimNode_AnimationPlayer::FactoryCreate);
 	RAnimGraph::RegisterAnimNodeType("BlendPlayer", &RAnimNode_BlendPlayer::FactoryCreate);
+	RAnimGraph::RegisterAnimNodeType("ModifyBoneTransform", &RAnimNode_ModifyBoneTransform::FactoryCreate);
 }
 
 void RAnimGraph::RegisterAnimNodeType(const std::string& TypeName, AnimNodeFactoryMethod FactoryMethod)
@@ -146,29 +146,50 @@ bool RAnimGraph::LoadResourceImpl()
 							XmlAnimNodeAttribute = XmlAnimNodeAttribute->Next();
 						}
 
+						std::vector<std::string> InputNodeNames;
+
 						// Read child entries
 						const tinyxml2::XMLElement* XmlElemChildEntry = XmlElemNode->FirstChildElement();
 						while (XmlElemChildEntry)
 						{
-							AnimNodeAttributeMap::ChildEntry Entry;
-
-							// Node name is the entry name
-							Entry.EntryName = XmlElemChildEntry->Name();
-
-							// Collect all attributes for entry
-							const tinyxml2::XMLAttribute* XmlChildEntryAttribute = XmlElemChildEntry->FirstAttribute();
-							while (XmlChildEntryAttribute)
+							if (StringUtils::EqualsIgnoreCase(XmlElemChildEntry->Name(), "Input"))
 							{
-								Entry.Map[XmlChildEntryAttribute->Name()] = XmlChildEntryAttribute->Value();
-								XmlChildEntryAttribute = XmlChildEntryAttribute->Next();
-							}
-							AttributeMap.ChildEntries.push_back(std::move(Entry));
+								std::string NodeName = XmlElemChildEntry->Attribute("NodeName");
+								int Index = -1;
+								XmlElemChildEntry->QueryIntAttribute("Index", &Index);
 
+								if (Index != -1)
+								{
+									if ((int)InputNodeNames.size() <= Index)
+									{
+										InputNodeNames.resize(Index + 1);
+									}
+
+									InputNodeNames[Index] = NodeName;
+								}
+							}
+							else
+							{
+								AnimNodeAttributeMap::ChildEntry Entry;
+
+								// Node name is the entry name
+								Entry.EntryName = XmlElemChildEntry->Name();
+
+								// Collect all attributes for entry
+								const tinyxml2::XMLAttribute* XmlChildEntryAttribute = XmlElemChildEntry->FirstAttribute();
+								while (XmlChildEntryAttribute)
+								{
+									Entry.Map[XmlChildEntryAttribute->Name()] = XmlChildEntryAttribute->Value();
+									XmlChildEntryAttribute = XmlChildEntryAttribute->Next();
+								}
+								AttributeMap.ChildEntries.push_back(std::move(Entry));
+							}
 							XmlElemChildEntry = XmlElemChildEntry->NextSiblingElement();
 						}
 
 						auto NewNode = std::make_unique<RAnimGraphNode>(NodeName, NodeTypeName);
 						NewNode->Attributes = std::move(AttributeMap);
+						NewNode->Inputs = InputNodeNames;
 
 						AnimGraphNodes.push_back(std::move(NewNode));
 						XmlElemNode = XmlElemNode->NextSiblingElement();
@@ -205,57 +226,71 @@ bool RAnimGraph::SaveResourceImpl()
 	// Save asset path in header comments
 	XmlDoc->InsertEndChild(XmlDoc->NewComment((std::string("AnimGraph path: ") + GetAssetPath()).c_str()));
 	{
+		// <AnimGraph>
 		tinyxml2::XMLElement* XmlElemAnimGraph = XmlDoc->NewElement("AnimGraph");
 		{
-			// All nodes of this anim graph
-			tinyxml2::XMLElement* XmlElemNodes = XmlDoc->NewElement("Nodes");
-
-			// Root node of this anim graph
-			tinyxml2::XMLElement* XmlElemRootNode = XmlDoc->NewElement("RootNode");
-
-			for (auto& Node : AnimGraphNodes)
+			// <Nodes>
 			{
-				tinyxml2::XMLElement* XmlElemNode = XmlDoc->NewElement("Node");
-
-				// Write name of graph node
-				XmlElemNode->SetAttribute("Name", Node->NodeName.c_str());
-
-				// Write type of graph node
-				XmlElemNode->SetAttribute("Type", Node->NodeTypeName.c_str());
-
-				// Write custom attributes
-				for (const auto& Iter : Node->Attributes.Map)
+				// All nodes of this anim graph
+				tinyxml2::XMLElement* XmlElemNodes = XmlDoc->NewElement("Nodes");
+				for (auto& Node : AnimGraphNodes)
 				{
-					XmlElemNode->SetAttribute(Iter.first.c_str(), Iter.second.c_str());
-				}
+					// <Node Name="NodeName" Type="NodeType" ...>
+					tinyxml2::XMLElement* XmlElemNode = XmlDoc->NewElement("Node");
+					XmlElemNode->SetAttribute("Name", Node->NodeName.c_str());
+					XmlElemNode->SetAttribute("Type", Node->NodeTypeName.c_str());
 
-				// Write child entries
-				for (const auto& EntryIter : Node->Attributes.ChildEntries)
-				{
-					// Child entry name
-					tinyxml2::XMLElement* XmlElemChildEntry = XmlDoc->NewElement(EntryIter.EntryName.c_str());
-
-					// Child attributes
-					for (const auto& Iter : EntryIter.Map)
+					// Write custom attributes
+					for (const auto& Iter : Node->Attributes.Map)
 					{
-						XmlElemChildEntry->SetAttribute(Iter.first.c_str(), Iter.second.c_str());
+						XmlElemNode->SetAttribute(Iter.first.c_str(), Iter.second.c_str());
 					}
 
-					XmlElemNode->InsertEndChild(XmlElemChildEntry);
+					// Write child entries
+					for (const auto& EntryIter : Node->Attributes.ChildEntries)
+					{
+						// <ChildEntry AttributeName="AttributeValue" ...>
+						tinyxml2::XMLElement* XmlElemChildEntry = XmlDoc->NewElement(EntryIter.EntryName.c_str());
+						for (const auto& Iter : EntryIter.Map)
+						{
+							XmlElemChildEntry->SetAttribute(Iter.first.c_str(), Iter.second.c_str());
+						}
+						XmlElemNode->InsertEndChild(XmlElemChildEntry);
+						// </ChildEntry>
+					}
+
+					// Write input node entires
+					for (int i = 0; i < (int)Node->Inputs.size(); i++)
+					{
+						// <Input NodeName="InputNodeName" Index="0">
+						tinyxml2::XMLElement* XmlElemNodeInput = XmlDoc->NewElement("Input");
+						XmlElemNodeInput->SetAttribute("NodeName", Node->Inputs[i].c_str());
+						XmlElemNodeInput->SetAttribute("Index", std::to_string(i).c_str());
+						XmlElemNode->InsertEndChild(XmlElemNodeInput);
+					}
+
+					XmlElemNodes->InsertEndChild(XmlElemNode);
+					// </Node>
 				}
 
-				XmlElemNodes->InsertEndChild(XmlElemNode);
-
-				if (Node.get() == RootGraphNode)
-				{
-					XmlElemRootNode->SetAttribute("Name", Node->NodeName.c_str());
-				}
+				XmlElemAnimGraph->InsertEndChild(XmlElemNodes);
 			}
+			// </Nodes>
 
-			XmlElemAnimGraph->InsertEndChild(XmlElemNodes);
-			XmlElemAnimGraph->InsertEndChild(XmlElemRootNode);
+			// <RootNode Name="RootNodeName">
+			{
+				// Root node of this anim graph
+				tinyxml2::XMLElement* XmlElemRootNode = XmlDoc->NewElement("RootNode");
+				if (RootGraphNode)
+				{
+					XmlElemRootNode->SetAttribute("Name", RootGraphNode->NodeName.c_str());
+				}
+				XmlElemAnimGraph->InsertEndChild(XmlElemRootNode);
+			}
+			// </RootNode>
 		}
 		XmlDoc->InsertEndChild(XmlElemAnimGraph);
+		// </AnimGraph>
 	}
 	return XmlDoc->SaveFile(GetFileSystemPath().c_str()) == tinyxml2::XML_NO_ERROR;
 }
@@ -305,6 +340,47 @@ std::string RAnimGraph::MakeUniqueNodeName(const std::string& BaseName) const
 	}
 }
 
+RAnimGraphNode* RAnimGraph::FindGraphNodeByName(const std::string& Name) const
+{
+	for (auto& Node : AnimGraphNodes)
+	{
+		if (StringUtils::EqualsIgnoreCase(Node->NodeName, Name))
+		{
+			return Node.get();
+		}
+	}
+
+	return nullptr;
+}
+
+std::vector<RAnimGraphNode*> RAnimGraph::CollectAllNodes() const
+{
+	std::vector<RAnimGraphNode*> Results;
+
+	if (RootGraphNode)
+	{
+		Results.push_back(RootGraphNode);
+
+		std::vector<std::string> NodeNames = RootGraphNode->Inputs;
+		while (NodeNames.size())
+		{
+			if (RAnimGraphNode* ChildNode = FindGraphNodeByName(NodeNames[0]))
+			{
+				if (!StdContains(Results, ChildNode))
+				{
+					Results.push_back(ChildNode);
+					NodeNames.insert(NodeNames.end(), ChildNode->Inputs.begin(), ChildNode->Inputs.end());
+				}
+
+				// Remove the head element
+				NodeNames.erase(NodeNames.begin());
+			}
+		}
+	}
+
+	return Results;
+}
+
 RAnimGraphInstance::RAnimGraphInstance()
 	: RootNode(nullptr)
 {
@@ -313,44 +389,29 @@ RAnimGraphInstance::RAnimGraphInstance()
 
 void RAnimGraphInstance::Update(float DeltaTime)
 {
-	if (RAnimNode_Base* RawRootNode = RootNode.get())
+	if (RootNode)
 	{
-		RawRootNode->UpdateNode(DeltaTime);
+		RootNode->UpdateNode(DeltaTime);
 	}
 }
 
 void RAnimGraphInstance::EvaluatePose(RAnimPoseData& PoseData)
 {
-	if (RAnimNode_Base* RawRootNode = RootNode.get())
+	if (RootNode)
 	{
-		RawRootNode->EvaluatePose(PoseData);
+		RootNode->EvaluatePose(PoseData);
 	}
 }
 
-void RAnimGraphInstance::BindAnimVariable(const std::string& NodeAndVariableName, float* ValuePtr)
+RAnimNode_Base* RAnimGraphInstance::FindNodeByName(const std::string& NodeName) const
 {
-	auto Tokens = SplitString(NodeAndVariableName, ":");
-	if (Tokens.size() == 2)
+	for (auto& Node : Nodes)
 	{
-		const std::string& NodeName = Tokens[0];
-		const std::string& VariableName = Tokens[1];
-
-		for (auto Node : Nodes)
+		if (StringUtils::EqualsIgnoreCase(Node->GetName(), NodeName))
 		{
-			if (Node->GetName() == NodeName)
-			{
-				if (!Node->BindAnimVariable(VariableName, ValuePtr))
-				{
-					RLogWarning("Binding of anim variable '%s' has unrecognized anim variable name \'%s\'.\n", NodeAndVariableName.c_str(), VariableName.c_str());
-				}
-				return;
-			}
+			return Node.get();
 		}
+	}
 
-		RLogWarning("Binding of anim variable '%s' didn't match any node with name \'%s\' in the graph.\n", NodeAndVariableName.c_str(), NodeName.c_str());
-	}
-	else
-	{
-		RLogWarning("Binding of anim variable '%s' has wrong number of tokens. The expected format is \'NodeName:VariableName\'.\n", NodeAndVariableName.c_str());
-	}
+	return nullptr;
 }

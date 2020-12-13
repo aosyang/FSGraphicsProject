@@ -87,6 +87,9 @@ struct RAnimPoseData
 		return *this;
 	}
 
+	// Reset to binding pose
+	void ResetPose();
+
 	// Convert all metrics into world space and output to the metrics array
 	void CopyFinalPose(const RMatrix4& ObjectToWorld, RMatrix4* OutMetrics);
 
@@ -104,6 +107,10 @@ struct RAnimPoseData
 template<typename T>
 struct AnimVariable
 {
+	AnimVariable()
+		: SourcePtr(nullptr)
+	{}
+
 	AnimVariable(T InVal)
 		: Val(InVal)
 		, SourcePtr(nullptr)
@@ -123,6 +130,7 @@ struct AnimVariable
 // The base class for all animation nodes
 class RAnimNode_Base
 {
+	friend class RAnimGraph;
 public:
 	RAnimNode_Base();
 	RAnimNode_Base(const std::string& InNodeName, const AnimNodeAttributeMap& Attributes);
@@ -140,9 +148,17 @@ public:
 	// Bind a pointer of a value to an animation variable so node update will reflect any changes made to the value.
 	// Derived class should override this function to handle any interested variables.
 	virtual bool BindAnimVariable(const std::string& VariableName, float* ValuePtr);
+	virtual bool BindAnimVariable(const std::string& VariableName, RMatrix4* ValuePtr);
+
+protected:
+	// Get another node that connected to this node at index
+	RAnimNode_Base* GetInputNodeAtIndex(int Index) const;
 
 private:
 	std::string NodeName;
+
+	// Input poses connecting to other nodes
+	std::vector<RAnimNode_Base*> InputPoses;
 };
 
 FORCEINLINE const std::string& RAnimNode_Base::GetName() const

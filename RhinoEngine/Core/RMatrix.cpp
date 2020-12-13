@@ -6,6 +6,7 @@
 
 #include "RMatrix.h"
 #include <iomanip>
+#include <assert.h>
 
 RMatrix4 RMatrix4::IDENTITY = RMatrix4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
@@ -227,6 +228,7 @@ RMatrix4 RMatrix4::FastInverse() const
 	view.m[3][1] = -vy;
 	view.m[3][2] = -vz;
 
+	assert(!HasNan());
 	return view;
 }
 
@@ -305,6 +307,19 @@ RMatrix4 RMatrix4::Inverse() const
 	return r;
 }
 
+
+bool RMatrix4::HasNan() const
+{
+	for (int i = 0; i < 16; i++)
+	{
+		if (isnan(arr[i]))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
 
 std::string RMatrix4::ToDisplayString() const
 {
