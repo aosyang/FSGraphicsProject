@@ -99,7 +99,8 @@ void RAnimGraphEditor::ShowAnimGraphEditor()
 				// Hack: Move graph output node next to the node it's connect to
 				int InputNode = GetNodeIdByPinId(GetPinConnectedTo(EditorNodes[0].InputPinIds[0]));
 				ImVec2 GridPos = imnodes::GetNodeGridSpacePos(InputNode);
-				GridPos.x += 100.0f;
+				ImVec2 NodeSize = imnodes::GetNodeDimensions(InputNode);
+				GridPos.x += NodeSize.x + 50.0f;
 				imnodes::SetNodeGridSpacePos(EditorNodes[0].NodeId, GridPos);
 
 				bSetNodeInitialPosition = false;
