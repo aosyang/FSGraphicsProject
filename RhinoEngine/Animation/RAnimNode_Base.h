@@ -25,6 +25,11 @@ struct AnimNodeAttributeMap
 		{
 			return Map[Key];
 		}
+
+		FORCEINLINE const std::string& operator[](const std::string& Key) const
+		{
+			return Map.at(Key);
+		}
 	};
 
 	AttributeMap Map;

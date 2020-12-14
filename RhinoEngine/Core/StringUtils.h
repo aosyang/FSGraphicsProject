@@ -16,6 +16,9 @@ namespace StringUtils
 	// Convert a string to bool
 	bool ToBool(const std::string& InString);
 
+	// Convert a string to float
+	float ToFloat(const std::string& InString);
+
 	// Split a string by a delimiter and store the result in a vector
 	std::vector<std::string> Split(const std::string& Str, const std::string& Delimiter);
 }

@@ -48,6 +48,16 @@ namespace StringUtils
 	}
 
 
+	float ToFloat(const std::string& InString)
+	{
+		if (InString.length() > 0)
+		{
+			return std::stof(InString);
+		}
+
+		return 0.0f;
+	}
+
 	std::vector<std::string> Split(const std::string& Str, const std::string& Delimiter)
 	{
 		std::vector<std::string> Outputs;

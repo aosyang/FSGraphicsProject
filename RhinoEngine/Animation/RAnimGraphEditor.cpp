@@ -7,6 +7,12 @@
 #include "Rhino.h"
 
 
+RAnimGraphEditor::RAnimGraphEditor()
+	: bSetNodeInitialPosition(false)
+{
+
+}
+
 void RAnimGraphEditor::ShowAnimGraphEditor()
 {
 	ImGui::Begin("AnimGraph Editor");
@@ -55,7 +61,7 @@ void RAnimGraphEditor::ShowAnimGraphEditor()
 		{
 			if (ImGui::Button("Save"))
 			{
-				SelectedAnimGraph->SaveToDisk();
+				SaveAnimGraph(*SelectedAnimGraph);
 			}
 
 			if (bSelectionChanged)
@@ -68,6 +74,35 @@ void RAnimGraphEditor::ShowAnimGraphEditor()
 			for (auto& Node : SelectedAnimGraph->AnimGraphNodes)
 			{
 				ImNodesDrawAnimGraphNode(Node.get());
+			}
+
+			// Set node positions on their initial creation
+			if (bSetNodeInitialPosition)
+			{
+				for (const auto& EditorNode : EditorNodes)
+				{
+					if (EditorNode.AnimGraphNode)
+					{
+						const auto& ChildEntries = EditorNode.AnimGraphNode->Attributes.ChildEntries;
+						for (int i = 0; i < (int)ChildEntries.size(); i++)
+						{
+							if (ChildEntries[i].EntryName == "Editor")
+							{
+								float GridX = StringUtils::ToFloat(ChildEntries[i]["GridX"]);
+								float GridY = StringUtils::ToFloat(ChildEntries[i]["GridY"]);
+								imnodes::SetNodeGridSpacePos(EditorNode.NodeId, ImVec2(GridX, GridY));
+							}
+						}
+					}
+				}
+
+				// Hack: Move graph output node next to the node it's connect to
+				int InputNode = GetNodeIdByPinId(GetPinConnectedTo(EditorNodes[0].InputPinIds[0]));
+				ImVec2 GridPos = imnodes::GetNodeGridSpacePos(InputNode);
+				GridPos.x += 100.0f;
+				imnodes::SetNodeGridSpacePos(EditorNodes[0].NodeId, GridPos);
+
+				bSetNodeInitialPosition = false;
 			}
 
 			int link_id = 1;
@@ -144,12 +179,12 @@ void RAnimGraphEditor::ImNodesDrawAnimGraphNode(RAnimGraphNode* Node)
 	{
 		char InputName[32];
 		sprintf_s(InputName, "Input %d", i);
-		imnodes::BeginInputAttribute(Iter->InputIds[i]);
+		imnodes::BeginInputAttribute(Iter->InputPinIds[i]);
 		ImGui::Text(InputName);
 		imnodes::EndInputAttribute();
 	}
 
-	imnodes::BeginOutputAttribute(Iter->OutputId);
+	imnodes::BeginOutputAttribute(Iter->OutputPinId);
 	// in between Begin|EndAttribute calls, you can call ImGui
 
 
@@ -166,10 +201,10 @@ void RAnimGraphEditor::ImNodesDrawOutputNode()
 	imnodes::BeginNode(EditorNodes[0].NodeId);
 
 	imnodes::BeginNodeTitleBar();
-	ImGui::Text("Output");
+	ImGui::Text("Graph Output");
 	imnodes::EndNodeTitleBar();
 
-	imnodes::BeginInputAttribute(EditorNodes[0].InputIds[0]);
+	imnodes::BeginInputAttribute(EditorNodes[0].InputPinIds[0]);
 	ImGui::Text("Pose");
 	imnodes::EndInputAttribute();
 
@@ -187,8 +222,8 @@ void RAnimGraphEditor::BuildLinkGraph(const RAnimGraph& AnimGraph)
 	AnimGraphEditorNode RootNode;
 	RootNode.AnimGraphNode = nullptr;
 	RootNode.NodeId = ui_id++;
-	RootNode.InputIds.push_back(ui_id++);
-	RootNode.OutputId = -1;
+	RootNode.InputPinIds.push_back(ui_id++);
+	RootNode.OutputPinId = -1;
 	EditorNodes.push_back(RootNode);
 
 	// Each node and pin need a unique ui id.
@@ -199,9 +234,9 @@ void RAnimGraphEditor::BuildLinkGraph(const RAnimGraph& AnimGraph)
 		EditorNode.NodeId = ui_id++;
 		for (int i = 0; i < RAnimGraph::GetNumInputPosesOfNodeType(Node->NodeTypeName); i++)
 		{
-			EditorNode.InputIds.push_back(ui_id++);
+			EditorNode.InputPinIds.push_back(ui_id++);
 		}
-		EditorNode.OutputId = ui_id++;
+		EditorNode.OutputPinId = ui_id++;
 		EditorNodes.push_back(EditorNode);
 	}
 
@@ -216,7 +251,7 @@ void RAnimGraphEditor::BuildLinkGraph(const RAnimGraph& AnimGraph)
 
 			if (OutputNode && ThisNode)
 			{
-				GraphLinks.push_back(std::make_pair(ThisNode->InputIds[i], OutputNode->OutputId));
+				GraphLinks.push_back(std::make_pair(ThisNode->InputPinIds[i], OutputNode->OutputPinId));
 			}
 		}
 	}
@@ -225,18 +260,53 @@ void RAnimGraphEditor::BuildLinkGraph(const RAnimGraph& AnimGraph)
 	if (AnimGraph.RootGraphNode)
 	{
 		AnimGraphEditorNode* OutputNode = GetEditorNodeByName(AnimGraph.RootGraphNode->NodeName);
-		GraphLinks.push_back(std::make_pair(EditorNodes[0].InputIds[0], OutputNode->OutputId));
+		GraphLinks.push_back(std::make_pair(EditorNodes[0].InputPinIds[0], OutputNode->OutputPinId));
 	}
+
+	bSetNodeInitialPosition = true;
+}
+
+void RAnimGraphEditor::SaveAnimGraph(RAnimGraph& SelectedAnimGraph)
+{
+	for (auto& GraphNode : SelectedAnimGraph.AnimGraphNodes)
+	{
+		AnimGraphEditorNode* EditorNode = GetEditorNodeByName(GraphNode->NodeName);
+		ImVec2 PosInGrid = imnodes::GetNodeGridSpacePos(EditorNode->NodeId);
+
+		AnimNodeAttributeMap::ChildEntry EditorEntry;
+		EditorEntry.EntryName = "Editor";
+		EditorEntry["GridX"] = std::to_string(PosInGrid.x);
+		EditorEntry["GridY"] = std::to_string(PosInGrid.y);
+
+		bool bEntryReplaced = false;
+		auto& ChildEntries = GraphNode->Attributes.ChildEntries;
+		for (int i = 0; i < (int)ChildEntries.size(); i++)
+		{
+			if (ChildEntries[i].EntryName == "Editor")
+			{
+				ChildEntries[i] = EditorEntry;
+				bEntryReplaced = true;
+				break;
+			}
+		}
+
+		if (!bEntryReplaced)
+		{
+			ChildEntries.push_back(EditorEntry);
+		}
+	}
+
+	SelectedAnimGraph.SaveToDisk();
 }
 
 void RAnimGraphEditor::DisconnectIfInputLink(int id)
 {
 	for (int i = 0; i < (int)EditorNodes.size(); i++)
 	{
-		for (int j = 0; j < (int)EditorNodes[i].InputIds.size(); j++)
+		for (int j = 0; j < (int)EditorNodes[i].InputPinIds.size(); j++)
 		{
 			// Make sure id is an input pin
-			if (EditorNodes[i].InputIds[j] == id)
+			if (EditorNodes[i].InputPinIds[j] == id)
 			{
 				RemoveLinkById(id);
 
@@ -272,6 +342,24 @@ std::string RAnimGraphEditor::GetOutputPinName(const RAnimGraphNode& Node) const
 	return Node.NodeName + ":Output";
 }
 
+int RAnimGraphEditor::GetPinConnectedTo(int id) const
+{
+	for (const auto& Link : GraphLinks)
+	{
+		if (Link.first == id)
+		{
+			return Link.second;
+		}
+
+		if (Link.second == id)
+		{
+			return Link.first;
+		}
+	}
+
+	return -1;
+}
+
 RAnimGraphEditor::AnimGraphEditorNode* RAnimGraphEditor::GetEditorNodeByName(const std::string& NodeName)
 {
 	for (int i = 0; i < (int)EditorNodes.size(); i++)
@@ -292,10 +380,10 @@ bool RAnimGraphEditor::GetInputPinById(int id, RAnimGraphNode** OutAnimGraphNode
 {
 	for (int i = 0; i < (int)EditorNodes.size(); i++)
 	{
-		for (int j = 0; j < (int)EditorNodes[i].InputIds.size(); j++)
+		for (int j = 0; j < (int)EditorNodes[i].InputPinIds.size(); j++)
 		{
 			// Make sure id is an input pin
-			if (EditorNodes[i].InputIds[j] == id)
+			if (EditorNodes[i].InputPinIds[j] == id)
 			{
 				*OutAnimGraphNode = EditorNodes[i].AnimGraphNode;
 				*OutInputIndex = j;
@@ -309,20 +397,41 @@ bool RAnimGraphEditor::GetInputPinById(int id, RAnimGraphNode** OutAnimGraphNode
 
 RAnimGraphNode* RAnimGraphEditor::GetNodeByPinId(int id) const
 {
+	if (auto EditorNode = GetEditorNodeByPinId(id))
+	{
+		return EditorNode->AnimGraphNode;
+	}
+
+	return nullptr;
+}
+
+int RAnimGraphEditor::GetNodeIdByPinId(int id) const
+{
+	if (auto EditorNode = GetEditorNodeByPinId(id))
+	{
+		return EditorNode->NodeId;
+	}
+
+	return -1;
+}
+
+const RAnimGraphEditor::AnimGraphEditorNode* RAnimGraphEditor::GetEditorNodeByPinId(int id) const
+{
 	for (int i = 0; i < (int)EditorNodes.size(); i++)
 	{
-		if (EditorNodes[i].OutputId == id)
+		// Match input pin with id
+		for (int j = 0; j < (int)EditorNodes[i].InputPinIds.size(); j++)
 		{
-			return EditorNodes[i].AnimGraphNode;
+			if (EditorNodes[i].InputPinIds[j] == id)
+			{
+				return &EditorNodes[i];
+			}
 		}
 
-		for (int j = 0; j < (int)EditorNodes[i].InputIds.size(); j++)
+		// Match output pin with id
+		if (EditorNodes[i].OutputPinId == id)
 		{
-			// Make sure id is an input pin
-			if (EditorNodes[i].InputIds[j] == id)
-			{
-				return EditorNodes[i].AnimGraphNode;
-			}
+			return &EditorNodes[i];
 		}
 	}
 
